@@ -57,6 +57,10 @@ exports.chooseAppId = function(req,res,next){
     req.wxApiUserObject = config.wxDeveloperConfig.ssgj;
     next();
   }
+  else if(role == 'test'){
+    req.wxApiUserObject = config.wxDeveloperConfig.test;
+    next();
+  }
   else{
     return res.status(400).send('role do not exist!'); 
   }
