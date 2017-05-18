@@ -1,0 +1,28 @@
+{
+  "name": "cdmis",
+  "version": "1.0.0",
+  "description": "chronic disease management information system for kidney",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "pm2 start server.js"
+  },
+  "author": "csq",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "crypto": "0.0.3",
+    "express": "^4.15.2",
+    "https": "^1.0.0",
+    "images": "^3.0.0",
+    "jsonwebtoken": "^7.3.0",
+    "log4js": "^1.1.1",
+    "mongoose": "^4.9.0",
+    "multer": "^1.3.0",
+    "querystring": "^0.2.0",
+    "request": "^2.81.0",
+    "socket.io": "^1.7.3",
+    "util": "^0.10.3",
+    "xml2js": "^0.4.17"
+  }
+}

@@ -1,0 +1,9 @@
+﻿[plain] view plaincopy
+#过滤配置文件  
+config.js  
+settings.js
+
+#过滤文件夹  
+uploads/
+logs/
+node_modules/  
