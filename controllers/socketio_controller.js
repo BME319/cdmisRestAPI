@@ -222,12 +222,13 @@ exports.chat = function (io, socket) {
     })
     socket.on('message',function(data){
         var contentType = data.msg.contentType;
+        var clientType = data.msg.clientType;
         var role = data.role;
         // var toUserId = data.to;
         
         var url = 'http://'+ webEntry.domain +':4050/wechat/download';
 
-        if(contentType == 'image' || contentType == 'voice'){           // image voice
+        if(clientType != 'app' &&(contentType == 'image' || contentType == 'voice')){           // image voice
             var mediaId = data.msg.content.mediaId;
             var name;
             if(contentType == 'image' ){
@@ -253,7 +254,7 @@ exports.chat = function (io, socket) {
                 }
             });
         }else{          // text custom
-            messageSaveSend(data, '');
+            messageSaveSend(data, data.msg.content.src);
         }
 
      
