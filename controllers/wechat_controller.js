@@ -317,14 +317,12 @@ exports.getuserinfo = function(req,res) {
 exports.addOrder = function(req, res, next) {
   var orderObject = req.orderObject || {};
   orderObject['attach'] = "123";        // req.state;
-  // console.log('orderObject', orderObject);
-
+  
   var currentDate = new Date();
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss');
   var out_trade_no = orderObject.orderNo; 
   var total_fee = parseInt(orderObject.money); 
   
-
   var detail = '<![CDATA[{"goods_detail":' + JSON.stringify(orderObject.goodsInfo) + '}]]>';
 
   var paramData = {
