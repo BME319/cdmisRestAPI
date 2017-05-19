@@ -340,12 +340,12 @@ exports.addOrder = function(req, res, next) {
     out_trade_no: out_trade_no + '-' + commonFunc.getRandomSn(4),   // 商户订单号
     
     total_fee: total_fee,   // 标价金额
-    spbill_create_ip: req.query.ip,   // 终端IP
+    spbill_create_ip: req.body.ip,   // 终端IP
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
     notify_url: 'http://' + webEntry.domain + ':4050/wechat/payResult',   // 通知地址
     trade_type: 'JSAPI',    // 交易类型
-    openid: req.query.openid    // 用户标识
+    openid: req.body.openid    // 用户标识
   };
 
   var signStr = commonFunc.rawSort(paramData);
