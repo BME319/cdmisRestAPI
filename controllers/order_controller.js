@@ -14,7 +14,7 @@ exports.getOrder = function(req, res) {
     });
 }
 
-exports.insertOrder = function(req, res) {
+exports.insertOrder = function(req, res, next) {
     var orderData = {
         userId: req.body.userId,
         orderNo: req.newId,//req.body.orderNo,
@@ -32,9 +32,11 @@ exports.insertOrder = function(req, res) {
     var newOrder = new Order(orderData);
     newOrder.save(function(err, item) {
         if (err) {
-      return res.status(500).send(err.errmsg);
-    }
-    res.json({results: item});
+            return res.status(500).send(err.errmsg);
+        }
+        // res.json({results: item});
+        req.orderObject = item;
+        next();
     });
 }
 

@@ -136,7 +136,7 @@ module.exports = function(app,webEntry) {
   app.post('/patient/newPatientDetail', patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
   app.post('/patient/editPatientDetail', patientCtrl.editPatientDetail);
   app.get('/patient/getCounselRecords', patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
-  // app.post('/patient/bindingMyDoctor', patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
+  // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
   app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
   app.post('/patient/changeVIP', patientCtrl.changeVIP);
 
@@ -204,7 +204,7 @@ module.exports = function(app,webEntry) {
   app.get('/user/getPhoneNoByRole', userCtrl.getPhoneNoByRole);
 
   // order
-  app.post('/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
+  // app.post('/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
   app.post('/order/updateOrder', orderCtrl.updateOrder);
   app.get('/order/getOrder',  orderCtrl.getOrder);
 
@@ -228,7 +228,8 @@ module.exports = function(app,webEntry) {
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
   // 输入：微信用户授权的code 商户系统生成的订单号 
   // app.get('/wechat/addOrder', wechatCtrl.gettokenbycode, wechatCtrl.getPaymentOrder, wechatCtrl.addOrder,wechatCtrl.getPaySign);
-  app.get('/wechat/addOrder', wechatCtrl.chooseAppId,wechatCtrl.getPaymentOrder, wechatCtrl.addOrder,wechatCtrl.getPaySign);
+  app.get('/wechat/addOrder', getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign);
+  // app.post('/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
   // 订单支付结果回调 
   app.get('/wechat/payResult', wechatCtrl.chooseAppId,wechatCtrl.payResult);
   // 查询订单   orderNo 

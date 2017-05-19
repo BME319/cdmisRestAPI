@@ -311,36 +311,12 @@ exports.getuserinfo = function(req,res) {
 
 
 // 订单相关方法
-// 获取系统订单信息
-exports.getPaymentOrder = function(req, res, next) {
-  var query = {
-    orderNo: req.query.orderNo
-  };
-
-  Order.getOne(query, function(err, item) {
-    if (err) {
-      return res.status(500).send(err.errmsg);
-    }
-    if(item){
-      var orderObject = {};
-      orderObject['orderNo'] = req.query.orderNo;
-      orderObject['goodsInfo'] = item.goodsInfo;
-      orderObject['money'] = item.money;
-      orderObject['attach'] = "123";        // req.state;
-      req.orderObject = orderObject;
-      next();
-    }
-    else{
-      return res.status(422).send('订单不存在');
-    }
-    
-  });
-}
 
 
 // 统一下单   请求api获取prepay_id的值
 exports.addOrder = function(req, res, next) {
   var orderObject = req.orderObject || {};
+  orderObject['attach'] = "123";        // req.state;
   // console.log('orderObject', orderObject);
 
   var currentDate = new Date();
