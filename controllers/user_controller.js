@@ -477,7 +477,7 @@ exports.checkBinding = function(req, res,next) {
                             patientId: item.userId,
                             doctorId: item1.doctorUserId
                         };
-                        console.log(jsondata);
+                        // console.log(jsondata);
                         request({
                           url: 'http://' + webEntry.domain + ':4050/patient/bindingMyDoctor',
                           method: 'POST',
@@ -498,7 +498,7 @@ exports.checkBinding = function(req, res,next) {
                         });
                     }
                     else{
-                        console.log("No OpenIdTmp");
+                        // console.log("No OpenIdTmp");
                         next();
                     }
                 });
