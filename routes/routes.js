@@ -228,7 +228,7 @@ module.exports = function(app,webEntry) {
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
   // 输入：微信用户授权的code 商户系统生成的订单号 
   // app.get('/wechat/addOrder', wechatCtrl.gettokenbycode, wechatCtrl.getPaymentOrder, wechatCtrl.addOrder,wechatCtrl.getPaySign);
-  app.get('/wechat/addOrder', getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign);
+  app.post('/wechat/addOrder', getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign);
   // app.post('/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
   // 订单支付结果回调 
   app.get('/wechat/payResult', wechatCtrl.chooseAppId,wechatCtrl.payResult);
