@@ -36,6 +36,7 @@ var doctorCtrl = require('../controllers/doctor_controller'),
     commentCtrl = require('../controllers/comment_controller'), 
     vitalSignCtrl = require('../controllers/vitalSign_controller'), 
     accountCtrl = require('../controllers/account_controller'), 
+    expenseCtrl = require('../controllers/expense_controller'), 
     communicationCtrl = require('../controllers/communication_controller'), 
     messageCtrl = require('../controllers/message_controller'), 
     newsCtrl = require('../controllers/news_controller'), 
@@ -116,6 +117,7 @@ module.exports = function(app,webEntry) {
   app.post('/doctor/insertSuspendTime', doctorCtrl.insertSuspendTime);
   app.post('/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime);
   app.get('/doctor/getSuspendTime', doctorCtrl.getSuspendTime);
+  app.get('/doctor/getDocNum', doctorCtrl.getDocNum);
 
   //counsel
   app.get('/counsel/getCounsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
@@ -153,10 +155,13 @@ module.exports = function(app,webEntry) {
   app.get('/account/getAccountInfo', accountCtrl.getAccountInfo);
   app.get('/account/getCounts', accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts);
   app.post('/account/modifyCounts', accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts);
-  app.post('/account/rechargeDoctor', accountCtrl.rechargeDoctor);
+  // app.post('/account/rechargeDoctor', accountCtrl.rechargeDoctor);
   app.post('/account/updateFreeTime', accountCtrl.checkPatient, accountCtrl.updateFreeTime);
   app.get('/account/getCountsRespective', accountCtrl.checkPatient, accountCtrl.getCountsRespective);
   
+  app.post('/expense/rechargeDoctor', accountCtrl.checkPatient, doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor);
+  app.get('/expense/getDocRecords', doctorCtrl.checkDoctor, expenseCtrl.getDocRecords);
+
   //message
   app.get('/message/getMessages', messageCtrl.getMessages);
   app.post('/message/changeMessageStatus', messageCtrl.changeMessageStatus);

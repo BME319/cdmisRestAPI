@@ -684,6 +684,16 @@ exports.getSuspendTime = function(req, res) {
 	}
 }
 
+exports.getDocNum = function(req, res) {
+	//查询条件
+	var query = {};
+	Doctor.count(query, function(err, item) {
+		if (err) {
+			return res.status(500).send(err.errmsg);
+		}
+		res.json({results: item});
+	});
+}
 
 //根据医生ID获取医生某日新增患者列表 2017-04-18 GY
 exports.getPatientByDate = function(req, res) {
@@ -753,7 +763,31 @@ exports.getPatientByDate = function(req, res) {
 
 
 
-
+exports.checkDoctor = function(req, res, next) {
+	if (req.query.doctorId == null || req.query.doctorId == '') {
+		if (req.body.doctorId == null || req.body.doctorId == '') {
+			return res.json({result: '请填写doctorId!'});
+		}
+		else {
+			req.doctorId = req.body.doctorId;
+		}
+	}
+	else {
+		req.doctorId = req.query.doctorId;
+	}
+	var query = {userId: req.doctorId};
+	Doctor.getOne(query, function(err, item) {
+		if (err) {
+			return res.status(500).send(err.errmsg);
+		}
+		if (item == null) {
+			return res.json({result: '不存在的医生ID'});
+		}
+		else {
+			next();
+		}
+	});
+}
 
 
 
