@@ -838,6 +838,9 @@ exports.getPatientList = function(req, res) {
     	else{
 	    	var patients = [];
 	    	for(var i=0;i<item.patients.length;i++){
+	    		if(item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='' || item.patients[i].dpRelationTime == undefined) {
+	    			item.patients[i].dpRelationTime = new Date('2017-05-15');
+	    		}
 	    		if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
 	    			if(_skip>0)
 	    			{
