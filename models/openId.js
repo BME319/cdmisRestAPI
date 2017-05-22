@@ -88,13 +88,18 @@ OpenId.update = function (query, obj, callback, opts, populate) {
   });
 };
 
-OpenId.remove = function(query, callback) {
+OpenId.removeOne = function(query, callback, opts) {
+	var options = opts || {};
+
 	openIdModel
-		.remove(query)
-		.exec(function(err) {
-			callback(err);
+		.findOneAndRemove(query, options, function(err, item) {
+			if (err) {
+				return callback(err);
+			}
+			callback(null, item);
 		});
 };
+
 
 module.exports = OpenId;
 

@@ -472,7 +472,7 @@ exports.checkBinding = function(req, res,next) {
                     if (err) {
                         return res.status(500).send(err.errmsg);
                     }
-                    console.log(item1);
+                    console.log({item1:item1});
                     if(item1 != null && item1.doctorUserId != null){
 
                         // binding doctor
@@ -490,8 +490,9 @@ exports.checkBinding = function(req, res,next) {
                             if (err) {
                                 return res.status(500).send(err.errmsg);
                             }
-                            // 绑定成功后 删除OpenIdTmp表中的数据                            
-                            OpenIdTmp.remove(query,function(err,item){
+                            // 绑定成功后 删除OpenIdTmp表中的数据  
+                            console.log({query1:query});                          
+                            OpenIdTmp.removeOne(query,function(err,item){
                                 if (err) {
                                     return res.status(500).send(err.errmsg);
                                 }
