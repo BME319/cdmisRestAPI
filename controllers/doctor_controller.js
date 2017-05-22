@@ -764,8 +764,8 @@ exports.getPatientByDate = function(req, res) {
 
 
 exports.checkDoctor = function(req, res, next) {
-	if (req.query.doctorId == null || req.query.doctorId == '') {
-		if (req.body.doctorId == null || req.body.doctorId == '') {
+	if (req.query.doctorId == null || req.query.doctorId == ''|| req.query.doctorId == undefined) {
+		if (req.body.doctorId == null || req.body.doctorId == ''|| req.body.doctorId == undefined) {
 			return res.json({result: '请填写doctorId!'});
 		}
 		else {

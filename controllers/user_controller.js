@@ -295,7 +295,7 @@ exports.registerTest = function(req, res,next) {
                         if (err) {
                             return res.status(500).send(err.errmsg);
                         }
-                        res.json({results: 0,mesg:"User Register Success!"});
+                        res.json({results: 0,userNo:item.userId,mesg:"User Register Success!"});
                     });
                 }
             });
@@ -850,3 +850,139 @@ exports.setTDCticket = function(req,res){
 
 }
 
+exports.setMessageOpenId = function(req,res){
+    var _type = req.body.type;
+    var _openId =req.body.openId;
+    var userId = req.body.userId;
+    if(_type===""||_type==undefined)
+    {
+        return res.json({result:1,msg:"plz input type"});
+    }
+    var query = {userId: userId};
+    if(_type==1){
+        var upObj = {
+            $set: {
+                MessageOpenId: {
+                    doctorWechat:_openId
+                    // patientWechat:_openId
+                    // doctorApp:_openId
+                    // patientApp:_openId
+                }
+            }
+        };
+    }
+    if(_type==2){
+        var upObj = {
+            $set: {
+                MessageOpenId: {
+                    // doctorWechat:_openId
+                    patientWechat:_openId
+                    // doctorApp:_openId
+                    // patientApp:_openId
+                }
+            }
+        };
+    }
+    if(_type==3){
+        var upObj = {
+            $set: {
+                MessageOpenId: {
+                    // doctorWechat:_openId
+                    // patientWechat:_openId
+                    doctorApp:_openId
+                    // patientApp:_openId
+                }
+            }
+        };
+    }
+    if(_type==4){
+        var upObj = {
+            $set: {
+                MessageOpenId: {
+                    // doctorWechat:_openId
+                    // patientWechat:_openId
+                    // doctorApp:_openId
+                    patientApp:_openId
+                }
+            }
+        };
+    }
+    if(_type==5){
+        var upObj = {
+            $set: {
+                MessageOpenId: {
+                    // doctorWechat:_openId
+                    // patientWechat:_openId
+                    // doctorApp:_openId
+                    test:_openId
+                }
+            }
+        };
+    }
+    User.updateOne(query,upObj,function(err, item){
+        if (err) {
+            return res.status(500).send(err.errmsg);
+        }
+        res.json({results:0,resultitem: item});
+    }, {new: true});
+
+}
+exports.getMessageOpenId = function(req,res){
+    var _type = req.query.type;
+    var userId = req.query.userId;
+    if(_type===""||_type==undefined)
+    {
+        return res.json({result:1,msg:"plz input type"});
+    }
+    var query = {userId: userId};
+
+    User.getOne(query, function(err, item) {
+        if (err) {
+            return res.status(500).send(err.errmsg);
+        }
+        if(_type==1){
+            res.json({results: item.MessageOpenId.doctorWechat});
+        }
+        if(_type==2){
+            res.json({results: item.MessageOpenId.patientWechat});
+        }
+        if(_type==3){
+            res.json({results: item.MessageOpenId.doctorApp});
+        }
+        if(_type==4){
+            res.json({results: item.MessageOpenId.patientApp});
+        }
+        if(_type==5){
+            res.json({results: item.MessageOpenId.test});
+        }
+        else{
+            res.json({results: "type must be 1-4"});
+        }
+    });
+
+}
+exports.checkUser = function(req, res, next) {
+    if (req.query.userId === null || req.query.userId == ''|| req.query.userId == undefined) {
+        if (req.body.userId === null || req.body.userId == ''|| req.body.userId == undefined) {
+            return res.json({result: '请填写userId!'});
+        }
+        else {
+            req.userId = req.body.userId;
+        }
+    }
+    else {
+        req.userId = req.query.userId;
+    }
+    var query = {userId: req.userId};
+    User.getOne(query, function(err, item) {
+        if (err) {
+            return res.status(500).send(err.errmsg);
+        }
+        if (item == null) {
+            return res.json({result: '不存在的用户ID',userId:req.userId});
+        }
+        else {
+            next();
+        }
+    });
+}
