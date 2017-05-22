@@ -610,6 +610,8 @@ exports.messageTemplate = function(req, res) {
   var token = tokenObject.token;
 
   var query = {userId: req.body.userId};
+  var role = req.query.role || req.body.role;
+ 
   User.getOne(query, function(err, item) {
         if (err) {
             return res.status(500).send(err.errmsg);
@@ -618,13 +620,23 @@ exports.messageTemplate = function(req, res) {
         if(item === null ){
           return res.status(400).send('user do not exist');
         }
-        else if(item.openId === null){
+        if(item.MessageOpenId === null){
+          return res.status(400).send('openId do not exist');
+        }
+        if(role == 'doctor'){
+          messageOpenId = item.MessageOpenId.doctorWechat;
+        }
+        else if(role == 'patient'){
+          messageOpenId = item.MessageOpenId.patientWechat;
+        }
+  
+        if(messageOpenId === null){
           return res.status(400).send('openId do not exist');
         }
         else{
           var jsondata = {};
           jsondata = req.body.postdata;
-          jsondata.touser = item.openId;
+          jsondata.touser = messageOpenId;
 
           request({
             url: wxApis.messageTemplate + '?access_token=' + token,
