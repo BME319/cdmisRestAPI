@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 
 var openIdSchema = new mongoose.Schema({					
 	doctorUserId: String, 
-	patientOpenId: String, 
+	patientOpenId: {type: String}, 
 	time: Date
 
 });

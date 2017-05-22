@@ -449,7 +449,7 @@ exports.openIdLoginTest = function(req, res,next) {
 }
 exports.checkBinding = function(req, res,next) {
     var username = req.body.username;
-   console.log(username);
+    // console.log(username);
     var query = {
         $or: [
             {userId: username},
@@ -457,27 +457,30 @@ exports.checkBinding = function(req, res,next) {
             {phoneNo: username}
         ]
     };
+    // console.log(query);
 
     User.getOne(query, function(err, item) {
         if (err) {
             return res.status(500).send(err.errmsg);
         }
         if(item != null){
-            if(item.openId != null){
+            if(item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null ||item.MessageOpenId.test != null) ){
                 // openId 存在
-                var query = {patientOpenId: item.openId};
+                var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test};
+                console.log(query);
                 OpenIdTmp.getOne(query, function(err, item1) {
                     if (err) {
                         return res.status(500).send(err.errmsg);
                     }
-                    if(item1 != null){
+                    console.log(item1);
+                    if(item1 != null && item1.doctorUserId != null){
 
                         // binding doctor
                         var jsondata = {
                             patientId: item.userId,
                             doctorId: item1.doctorUserId
                         };
-                        // console.log(jsondata);
+                        console.log(jsondata);
                         request({
                           url: 'http://' + webEntry.domain + ':4050/patient/bindingMyDoctor',
                           method: 'POST',
@@ -508,7 +511,7 @@ exports.checkBinding = function(req, res,next) {
             }
         }
         else{
-            return res.status(400).send('user do not exist!');
+            res.json({results: 1,mesg:"User doesn't Exist!"});
         }
   
     });

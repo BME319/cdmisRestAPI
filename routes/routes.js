@@ -41,6 +41,7 @@ var doctorCtrl = require('../controllers/doctor_controller'),
     messageCtrl = require('../controllers/message_controller'), 
     newsCtrl = require('../controllers/news_controller'), 
     insuranceCtrl = require('../controllers/insurance_controller');
+var getQRcodeCtrl = require('../controllers/getQRcode');
 
 var wechatCtrl = require('../controllers/wechat_controller');
 
@@ -262,6 +263,13 @@ module.exports = function(app,webEntry) {
   app.post('/jm/users', jpushCtrl.register);
   app.post('/jm/groups', jpushCtrl.createGroup);
   app.post('/jm/groups/members', jpushCtrl.updateGroup);
+
+  //获取二维码相关方法
+  app.get('/getAllDoctors', getQRcodeCtrl.getAllDoctors);
+  // app.post('/saveAllTDCticket', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket);
+  app.post('/saveAllTDCticket', getQRcodeCtrl.saveAllTDCticket);
+  app.get('/downloadImages', getQRcodeCtrl.downloadImages);
+  app.get('/getAllQRcodes', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket, getQRcodeCtrl.downloadImages);
 
   //app.get('/find',function(req, res){
   //  var url_parts = url.parse(req.url, true);

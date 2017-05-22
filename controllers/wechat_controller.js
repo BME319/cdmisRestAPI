@@ -763,6 +763,7 @@ exports.receiveTextMessage = function(req, res) {
             patientOpenId: patient_openId,
             time: time
           };
+          console.log(openIdData);
           var newOpenIdTmp = new OpenIdTmp(openIdData);
           newOpenIdTmp.save(function(err, item) {
             if (err) {
