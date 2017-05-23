@@ -142,6 +142,7 @@ module.exports = function(app,webEntry) {
   app.post('/patient/editPatientDetail', patientCtrl.editPatientDetail);
   app.get('/patient/getCounselRecords', patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
   // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
+  // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
   app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
   app.post('/patient/changeVIP', patientCtrl.changeVIP);
 
@@ -268,8 +269,9 @@ module.exports = function(app,webEntry) {
   app.get('/getAllDoctors', getQRcodeCtrl.getAllDoctors);
   // app.post('/saveAllTDCticket', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket);
   app.post('/saveAllTDCticket', getQRcodeCtrl.saveAllTDCticket);
-  app.get('/downloadImages', getQRcodeCtrl.downloadImages);
-  app.get('/getAllQRcodes', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket, getQRcodeCtrl.downloadImages);
+  // app.get('/downloadImages', getQRcodeCtrl.downloadImages);
+  // app.post('/getAllQRcodes', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket, getQRcodeCtrl.downloadImages);
+  app.post('/downloadImages', getQRcodeCtrl.downloadImages);
 
   //app.get('/find',function(req, res){
   //  var url_parts = url.parse(req.url, true);
