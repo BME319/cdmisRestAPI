@@ -749,6 +749,9 @@ exports.getPatientByDate = function(req, res) {
     	}
     	else if (item.patients.length != 0) {
     		for (var i = item.patients.length - 1; i >= 0; i--) {
+    			if (item.patients[i].dpRelationTime == undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='') {
+    				item.patients[i].dpRelationTime = new Date('2017-05-15');
+    			}
     			dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime);
     			if (dpTimeFormat == date) {
     				patientsitem[j] = item.patients[i];
