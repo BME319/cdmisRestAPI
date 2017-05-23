@@ -749,6 +749,9 @@ exports.getPatientByDate = function(req, res) {
     	}
     	else if (item.patients.length != 0) {
     		for (var i = item.patients.length - 1; i >= 0; i--) {
+    			if (item.patients[i].dpRelationTime == undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='') {
+    				item.patients[i].dpRelationTime = new Date('2017-05-15');
+    			}
     			dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime);
     			if (dpTimeFormat == date) {
     				patientsitem[j] = item.patients[i];
@@ -764,8 +767,8 @@ exports.getPatientByDate = function(req, res) {
 
 
 exports.checkDoctor = function(req, res, next) {
-	if (req.query.doctorId == null || req.query.doctorId == '') {
-		if (req.body.doctorId == null || req.body.doctorId == '') {
+	if (req.query.doctorId == null || req.query.doctorId == ''|| req.query.doctorId == undefined) {
+		if (req.body.doctorId == null || req.body.doctorId == ''|| req.body.doctorId == undefined) {
 			return res.json({result: '请填写doctorId!'});
 		}
 		else {
@@ -872,6 +875,9 @@ exports.getPatientList = function(req, res) {
 	    	});
            
 	    	for(var i=0;i<item.patients.length;i++){
+	    		if(item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='' || item.patients[i].dpRelationTime == undefined) {
+	    			item.patients[i].dpRelationTime = new Date('2017-05-15');
+	    		}
 	    		if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
 	    			if(_skip>0)
 	    			{

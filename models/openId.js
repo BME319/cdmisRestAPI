@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 
 var openIdSchema = new mongoose.Schema({					
 	doctorUserId: String, 
-	patientOpenId: String, 
+	patientOpenId: {type: String}, 
 	time: Date
 
 });
@@ -88,13 +88,27 @@ OpenId.update = function (query, obj, callback, opts, populate) {
   });
 };
 
+OpenId.removeOne = function(query, callback, opts) {
+	var options = opts || {};
+
+	openIdModel
+		.findOneAndRemove(query, options, function(err, item) {
+			if (err) {
+				return callback(err);
+			}
+			callback(null, item);
+		});
+};
+
 OpenId.remove = function(query, callback) {
+	
 	openIdModel
 		.remove(query)
 		.exec(function(err) {
 			callback(err);
 		});
 };
+
 
 module.exports = OpenId;
 
