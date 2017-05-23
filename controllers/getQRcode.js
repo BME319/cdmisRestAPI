@@ -39,53 +39,86 @@ exports.saveAllTDCticket = function(req, res) {
   var TDCtickets = [];
   var count = req.body.doctorIds.length - 1;
   var endFlag = 0;
+  var index = 0;
 
-  for (let i = req.body.doctorIds.length - 1; i >= 0; i--) {
-      var jsondata = {
-        'userId':req.body.doctorIds[i], 
-        'role':'doctor', 
+  var test = function(docId){
+    var jsondata = {
+        'userId':docId, 
+        'role':'patient', 
         'postdata':{
             "action_name": "QR_LIMIT_STR_SCENE", 
             "action_info": {
                 "scene": {
-                    "scene_str": req.body.doctorIds[i]
+                    "scene_str": docId
                 }
             }
         }
-        };
-      // req.body.count = i;
-      // console.log(req.body.count)
-
+    };
     request({
         url: 'http://' + '121.196.221.44:4050/' + 'wechat/createTDCticket',
         method: 'POST',
         body: jsondata,
         json: true
     }, function(err, response, body){
-        if (!err && response.statusCode == 200) {   
-        // res.json({results:body});
-        // req.results = body;
-        // next();
-        // var TDCticket = body.results;
-        
-        // var TDCtickets = [];
-        TDCtickets[i] = body.results;
-        // console.log(body.results);
-        // console.log(TDCtickets);
-        // count -= 1;
-        // console.log(count);
-        if (i == -1) {
-            endFlag = 1;
-        }
-        console.log(endFlag)
-        // return res.json({result:body});
+        if (!err && response.statusCode == 200) {
+        test(req.body.doctorIds[++index]); 
+
         }
         else{
-        return res.status(500).send('Error');
+ 
+        console.log(body);
         }
     });
-    // TDCtickets[i] = TDCticket;
   }
+
+  test(req.body.doctorIds[index]);
+
+  // for (let i = req.body.doctorIds.length - 1; i >= 0; i--) {
+  //     var jsondata = {
+  //       'userId':req.body.doctorIds[i], 
+  //       'role':'doctor', 
+  //       'postdata':{
+  //           "action_name": "QR_LIMIT_STR_SCENE", 
+  //           "action_info": {
+  //               "scene": {
+  //                   "scene_str": req.body.doctorIds[i]
+  //               }
+  //           }
+  //       }
+  //       };
+  //     // req.body.count = i;
+  //     // console.log(req.body.count)
+
+  //   request({
+  //       url: 'http://' + '121.196.221.44:4050/' + 'wechat/createTDCticket',
+  //       method: 'POST',
+  //       body: jsondata,
+  //       json: true
+  //   }, function(err, response, body){
+  //       if (!err && response.statusCode == 200) {   
+  //       // res.json({results:body});
+  //       // req.results = body;
+  //       // next();
+  //       // var TDCticket = body.results;
+        
+  //       // var TDCtickets = [];
+  //       TDCtickets[i] = body.results;
+  //       // console.log(body.results);
+  //       // console.log(TDCtickets);
+  //       // count -= 1;
+  //       // console.log(count);
+  //       if (i == -1) {
+  //           endFlag = 1;
+  //       }
+  //       console.log(endFlag)
+  //       // return res.json({result:body});
+  //       }
+  //       else{
+  //       return res.status(500).send('Error');
+  //       }
+  //   });
+  //   // TDCtickets[i] = TDCticket;
+  // }
 
 
 return res.json({result:req.body.doctorIds.length});
@@ -142,7 +175,7 @@ exports.downloadImages = function(req, res) {
                     }
                     else {
                         console.log(doctoritem.userId);
-                        downloadImage("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + TDCtickets[i], 'e:/doctorQRcodes/'+ doctoritem.name + '_' + doctoritem.title + '_' + doctoritem.workUnit +'.jpg', function(err, data){
+                        downloadImage("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + TDCtickets[i], 'e:/doctorQRcodes_new/'+ doctoritem.name + '_' + doctoritem.title + '_' + doctoritem.workUnit +'.jpg', function(err, data){
                             if (err) {
                                 console.log(err)
                             }
