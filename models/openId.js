@@ -100,6 +100,15 @@ OpenId.removeOne = function(query, callback, opts) {
 		});
 };
 
+OpenId.remove = function(query, callback) {
+	
+	openIdModel
+		.remove(query)
+		.exec(function(err) {
+			callback(err);
+		});
+};
+
 
 module.exports = OpenId;
 

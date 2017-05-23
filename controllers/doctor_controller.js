@@ -749,6 +749,9 @@ exports.getPatientByDate = function(req, res) {
     	}
     	else if (item.patients.length != 0) {
     		for (var i = item.patients.length - 1; i >= 0; i--) {
+    			if (item.patients[i].dpRelationTime == undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='') {
+    				item.patients[i].dpRelationTime = new Date('2017-05-15');
+    			}
     			dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime);
     			if (dpTimeFormat == date) {
     				patientsitem[j] = item.patients[i];
@@ -837,6 +840,40 @@ exports.getPatientList = function(req, res) {
     	}
     	else{
 	    	var patients = [];
+	    	// console.log(item);
+	    	item.patients=item.patients.sort(function(a,b){
+	    		var flag = 0;
+	    		if(a.patientId==null){
+	    			a.patientId={
+	    				VIP:0,
+	    				name:""
+	    			}
+	    		};
+	    		if(b.patientId==null){
+	    			b.patientId={
+	    				VIP:0,
+	    				name:""
+	    			}
+	    		};
+	    		if(b.patientId.VIP-a.patientId.VIP>0){
+	    			flag=1;
+	    		}
+	    		else if(b.patientId.VIP-a.patientId.VIP<0){
+	    			flag=-1;
+	    		}
+	    		else{
+	    			if(a.patientId.name-b.patientId.name>0)
+	    			{
+	    				flag=1;
+	    			}
+	    			else if(a.patientId.name-b.patientId.name<0)
+	    			{
+	    				flag=-1;
+	    			}
+	    		}
+	    		return flag;
+	    	});
+           
 	    	for(var i=0;i<item.patients.length;i++){
 	    		if(item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='' || item.patients[i].dpRelationTime == undefined) {
 	    			item.patients[i].dpRelationTime = new Date('2017-05-15');

@@ -467,20 +467,22 @@ exports.checkBinding = function(req, res,next) {
             if(item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null ||item.MessageOpenId.test != null) ){
                 // openId 存在
                 var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test};
-                console.log(query);
+                // console.log(query);
                 OpenIdTmp.getOne(query, function(err, item1) {
                     if (err) {
                         return res.status(500).send(err.errmsg);
                     }
-                    console.log({item1:item1});
-                    if(item1 != null && item1.doctorUserId != null){
+                    // console.log({item1:item1});
+                    // if(item1 != null && item1.doctorUserId != null){
+                    if(item1 != null){
+                        // console.log(1111);
 
                         // binding doctor
                         var jsondata = {
                             patientId: item.userId,
                             doctorId: item1.doctorUserId
                         };
-                        console.log(jsondata);
+                        // console.log(jsondata);
                         request({
                           url: 'http://' + webEntry.domain + ':4050/patient/bindingMyDoctor',
                           method: 'POST',
@@ -492,11 +494,11 @@ exports.checkBinding = function(req, res,next) {
                             }
                             // 绑定成功后 删除OpenIdTmp表中的数据  
                             console.log({query1:query});                          
-                            OpenIdTmp.removeOne(query,function(err,item){
+                            OpenIdTmp.remove(query,function(err){
                                 if (err) {
                                     return res.status(500).send(err.errmsg);
                                 }
-                                console.log(item);
+
                                 next();
                             })
                                   
@@ -504,7 +506,21 @@ exports.checkBinding = function(req, res,next) {
                     }
                     else{
                         // console.log("No OpenIdTmp");
+                        // if(item1.doctorUserId == null){
+                        //     console.log(11112222);
+                        //      OpenIdTmp.remove(query,function(err){
+                        //         if (err) {
+                        //             return res.status(500).send(err.errmsg);
+                        //         }
+                            
+                        //         next();
+                        //     });
+                        // }
+                        // else{
+                        //     next();
+                        // }
                         next();
+                      
                     }
                 });
             }

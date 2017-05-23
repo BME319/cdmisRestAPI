@@ -633,7 +633,6 @@ exports.messageTemplate = function(req, res) {
           messageOpenId = item.MessageOpenId.test;
         }
   
-  
         if(messageOpenId === null){
           return res.status(400).send('openId do not exist');
         }
@@ -744,7 +743,7 @@ exports.receiveTextMessage = function(req, res) {
     // 事件推送
     if(MsgType == 'event'){
       // 扫描带参数二维码事件    用户未关注时，进行关注后的事件推送 || 用户已关注时的事件推送
-      if(jsondata.xml.Event == 'subscribe' || 'SCAN'){
+      if(jsondata.xml.Event == 'subscribe' || jsondata.xml.Event == 'SCAN'){
         
         // do something
         
