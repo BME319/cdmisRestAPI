@@ -629,6 +629,10 @@ exports.messageTemplate = function(req, res) {
         else if(role == 'patient'){
           messageOpenId = item.MessageOpenId.patientWechat;
         }
+        else if(role == 'test'){
+          messageOpenId = item.MessageOpenId.test;
+        }
+  
   
         if(messageOpenId === null){
           return res.status(400).send('openId do not exist');
@@ -763,7 +767,7 @@ exports.receiveTextMessage = function(req, res) {
             patientOpenId: patient_openId,
             time: time
           };
-          console.log(openIdData);
+          // console.log(openIdData);
           var newOpenIdTmp = new OpenIdTmp(openIdData);
           newOpenIdTmp.save(function(err, item) {
             if (err) {

@@ -2,11 +2,25 @@
 	"variables": [],
 	"info": {
 		"name": "cdmis",
-		"_postman_id": "22f54b4d-3873-6659-e0a4-cbff47cd51f8",
+		"_postman_id": "4ccb7419-23ff-1666-f347-3e1d2938cfd0",
 		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "201 Dict-001-001 获取疾病类型列表及其进程信息",
+			"request": {
+				"url": "http://121.43.107.106:4050/dict/typeTwo?category=patient_class",
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": "获取疾病类型列表及其进程信息"
+			},
+			"response": []
+		},
 		{
 			"name": "201-2 Dict-001-002 获取所有体征类型",
 			"request": {
@@ -27,10 +41,7 @@
 				"url": "http://121.43.107.106:4050/dict/typeTwo?category=types",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"description": "获取字典表中的types,前端不需要使用,帮助前端使用201-3下的子方法"
 			},
 			"response": []
@@ -41,10 +52,7 @@
 				"url": "http://121.43.107.106:4050/dict/typeTwo/codes?category=types&type=quantifierUnit",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"description": "获取常用量词单位"
 			},
 			"response": []
@@ -55,10 +63,7 @@
 				"url": "http://121.43.107.106:4050/dict/typeTwo/codes?category=types&type=TimeUnits",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"description": "获取时间单位"
 			},
 			"response": []
@@ -232,6 +237,26 @@
 			"response": []
 		},
 		{
+			"name": "214 Compliance-001-001 写入任务执行情况",
+			"request": {
+				"url": "http://121.43.107.106:4050/compliance",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"U201704050002\",\n    \"type\": \"Measure\",\n    \"code\": \"Weight\",\n    \"date\": \"2017-12-13\",\n    \"status\": 0,\n    \"description\": \"\"\n}"
+				},
+				"description": "写入任务执行情况"
+			},
+			"response": []
+		},
+		{
 			"name": "215 Compliance-002-001 获取某用户的全部任务执行记录",
 			"request": {
 				"url": "http://121.43.107.106:4050/compliance?userId=U201704050002&date",
@@ -290,7 +315,7 @@
 		{
 			"name": "101 Doctor-002 获取患者列表",
 			"request": {
-				"url": "121.43.107.106:4050/doctor/getPatientList?userId=doc01",
+				"url": "121.196.221.44:4050/doctor/getPatientList?userId=U201705140001",
 				"method": "GET",
 				"header": [
 					{
@@ -406,20 +431,6 @@
 			"response": []
 		},
 		{
-			"name": "105 Counsel-001-001 根据医生ID获取咨询信息",
-			"request": {
-				"url": "121.43.107.106:4050/counsel/getCounsels?userId=doc01",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
 			"name": "106 Counsel-001-002 根据医生ID和状态获取咨询信息",
 			"request": {
 				"url": "121.43.107.106:4050/counsel/getCounsels?userId=doc01&status=1",
@@ -434,9 +445,9 @@
 			"response": []
 		},
 		{
-			"name": "107 Counsel-001-003 根据医生ID状态类型获取咨询信息",
+			"name": "105 Counsel-001-001 根据医生ID获取咨询信息",
 			"request": {
-				"url": "121.43.107.106:4050/counsel/getCounsels?userId=doc01&status=1&type=1",
+				"url": "121.43.107.106:4050/counsel/getCounsels?userId=doc01",
 				"method": "GET",
 				"header": [],
 				"body": {
@@ -451,6 +462,20 @@
 			"name": "108 Counsel-001-004 根据医生ID类型获取咨询信息",
 			"request": {
 				"url": "121.43.107.106:4050/counsel/getCounsels?userId=doc01&type=1",
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "107 Counsel-001-003 根据医生ID状态类型获取咨询信息",
+			"request": {
+				"url": "121.43.107.106:4050/counsel/getCounsels?userId=doc01&status=1&type=1",
 				"method": "GET",
 				"header": [],
 				"body": {
@@ -506,7 +531,7 @@
 		{
 			"name": "112 Patient-004-002 根据医院和医生姓名查找医生",
 			"request": {
-				"url": "121.43.107.106:4050/patient/getDoctorLists?workUnit=浙江省人民医院&name=医生01",
+				"url": "121.43.107.106:4050/patient/getDoctorLists?province",
 				"method": "GET",
 				"header": [],
 				"body": {
@@ -593,10 +618,7 @@
 				"url": "121.43.107.106:4050/message/getMessages?userId=U201704120001&type=1",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"description": "获取某个用户某种类型的所有消息并按时间顺序排列"
 			},
 			"response": []
@@ -618,7 +640,7 @@
 		{
 			"name": "119 communication-004 获取一个组的信息",
 			"request": {
-				"url": "121.43.107.106:4050/communication/getTeam?teamId=team1",
+				"url": "121.43.107.106:4050/communication/getTeam?teamId=22871875",
 				"method": "GET",
 				"header": [],
 				"body": {
@@ -672,7 +694,7 @@
 		{
 			"name": "122 patient-003 添加诊断信息",
 			"request": {
-				"url": "121.43.107.106:4050/patient/insertDiagnosis",
+				"url": "121.196.221.44:4050/patient/insertDiagnosis",
 				"method": "POST",
 				"header": [
 					{
@@ -686,19 +708,19 @@
 					"urlencoded": [
 						{
 							"key": "patientId",
-							"value": "ppost01",
+							"value": "U201705130001",
 							"type": "text",
 							"enabled": true
 						},
 						{
 							"key": "doctorId",
-							"value": "doc01",
+							"value": "U201702150001",
 							"type": "text",
 							"enabled": true
 						},
 						{
 							"key": "diagname",
-							"value": "慢性肾炎",
+							"value": "class_5",
 							"type": "text",
 							"enabled": true
 						},
@@ -710,7 +732,7 @@
 						},
 						{
 							"key": "diagprogress",
-							"value": "吃药",
+							"value": "stage_5",
 							"type": "text",
 							"enabled": true
 						},
@@ -729,7 +751,7 @@
 		{
 			"name": "123 patient-005-001 新建患者",
 			"request": {
-				"url": "localhost:4050/patient/newPatientDetail",
+				"url": "121.43.107.106:4050/patient/newPatientDetail",
 				"method": "POST",
 				"header": [
 					{
@@ -740,7 +762,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"userId\":\"pdpost1\",\n\t\"name\":\"新建xx\",\n\t\"photoUrl\":\"http://pp.jpg\", \n\t\"birthday\":\"2017-04-04\",\n\t\"gender\":\"1\", \n\t\"IDNo\":\"123456123456781234\", \n\t\"height\":\"188\", \n\t\"occupation\":\"教师\", \n\t\"bloodType\":\"2\", \n\t\"nation\":\"中国\", \n\t\"province\":\"浙江\", \n\t\"city\":\"杭州\", \n\t\"class\":\"class1\", \n\t\"class_info\":[\"classInfo1\"], \n    \"operationTime\":\"2017-04-01\", \n    \"hypertension\":\"1\", \n    \"lastVisittime\":\"2017-04-12\", \n    \"lastVisithospital\":\"浙江省人民医院\", \n    \"lastVisitdiagnosis\":\"慢性肾炎\"\n}"
+					"raw": "{\n\t\"userId\":\"44444\",\n\t\"name\":\"新建xx\",\n\t\"photoUrl\":\"http://pp.jpg\", \n\t\"birthday\":\"2017-04-04\",\n\t\"gender\":\"1\", \n\t\"IDNo\":\"123456123456781234\", \n\t\"height\":\"188\", \n\t\"occupation\":\"教师\", \n\t\"bloodType\":\"2\", \n\t\"nation\":\"中国\", \n\t\"province\":\"浙江\", \n\t\"city\":\"杭州\", \n\t\"class\":\"class1\", \n\t\"class_info\":[\"classInfo1\"], \n    \"operationTime\":\"2017-04-01\", \n    \"hypertension\":\"1\", \n    \"lastVisit\":{\n    \t\"time\":\"2017-04-12\", \n    \t\"hospital\":\"浙江省人民医院\", \n    \t\"diagnosis\":\"慢性肾炎\"}\n}"
 				},
 				"description": ""
 			},
@@ -749,7 +771,7 @@
 		{
 			"name": "124 patient-005-002 修改患者信息",
 			"request": {
-				"url": "localhost:4050/patient/editPatientDetail",
+				"url": "121.43.107.106:4050/patient/editPatientDetail",
 				"method": "POST",
 				"header": [
 					{
@@ -760,7 +782,52 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"userId\":\"pdpost1\",\n\t\"name\":\"修改\",\n\t\"photoUrl\":\"http://pp.jpg\", \n\t\"birthday\":\"2017-04-04\",\n\t\"gender\":\"1\", \n\t\"IDNo\":\"123456123456781234\", \n\t\"height\":\"188\", \n\t\"occupation\":\"教师\", \n\t\"bloodType\":\"2\", \n\t\"nation\":\"中国\", \n\t\"province\":\"浙江\", \n\t\"city\":\"杭州\", \n\t\"class\":\"class1\", \n\t\"class_info\":[\"classInfo1\"], \n    \"operationTime\":\"2017-04-01\", \n    \"hypertension\":\"1\", \n    \"lastVisittime\":\"2017-04-12\", \n    \"lastVisithospital\":\"浙江省人民医院\", \n    \"lastVisitdiagnosis\":\"慢性肾炎\"\n}"
+					"raw": "{\n\t\"userId\":\"U201705060001\",\n\n\t\"class\":\"class_3\", \n\t\"class_info\":\"stage_6\", \n \n    \"hypertension\":\"0\"\n  \n\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "125 communication-002-001 插入组成员",
+			"request": {
+				"url": "121.43.107.106:4050/communication/insertMember",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "teamId",
+							"value": "teampost2",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "membersuserId",
+							"value": "id1",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "membersname",
+							"value": "name2",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "membersphotoUrl",
+							"value": "http://photo2.jpg",
+							"type": "text",
+							"enabled": true
+						}
+					]
 				},
 				"description": ""
 			},
@@ -1028,7 +1095,7 @@
 		{
 			"name": "002 User-003登陆",
 			"request": {
-				"url": "http://121.43.107.106:4050/user/login",
+				"url": "http://localhost:4050/user/login",
 				"method": "POST",
 				"header": [
 					{
@@ -1042,13 +1109,13 @@
 					"urlencoded": [
 						{
 							"key": "username",
-							"value": "18768113668",
+							"value": "17858610572",
 							"type": "text",
 							"enabled": true
 						},
 						{
 							"key": "password",
-							"value": "123",
+							"value": "123456",
 							"type": "text",
 							"enabled": true
 						},
@@ -1081,7 +1148,7 @@
 		{
 			"name": "004 User-005获得用户id",
 			"request": {
-				"url": "http://121.43.107.106:4050/user/getUserID?phoneNo=18768113668",
+				"url": "http://121.196.221.44:4050/user/getUserID?phoneNo=15021143080",
 				"method": "GET",
 				"header": [],
 				"body": {
@@ -1137,10 +1204,10 @@
 					"mode": "formdata",
 					"formdata": [
 						{
-							"key": "photo",
+							"key": "file",
 							"type": "file",
 							"enabled": true,
-							"value": ""
+							"src": "2017-05-03-02.jpg"
 						}
 					]
 				},
@@ -1224,10 +1291,7 @@
 				"url": "localhost:4050/doctor/getTeam?teamId=team1",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"description": "根据团队ID获取团队信息"
 			},
 			"response": []
@@ -1349,10 +1413,7 @@
 				"url": "localhost:4050/doctor/getSuspendTime?userId=doc01",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"description": ""
 			},
 			"response": []
@@ -1402,10 +1463,7 @@
 				"url": "localhost:4050/doctor/getSchedules?userId=doc01",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"description": ""
 			},
 			"response": []
@@ -1455,10 +1513,7 @@
 				"url": "localhost:4050/user/getUserAgreement?userId=U201703310032",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"description": ""
 			},
 			"response": []
@@ -1507,65 +1562,6 @@
 					"raw": ""
 				},
 				"description": "getNo\n系统ID生成方法，注册时自动调用\n外部一般不调用该方法"
-			},
-			"response": []
-		},
-		{
-			"name": "125 communication-002-001 插入组成员",
-			"request": {
-				"url": "localhost:4050/communication/insertMember",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"teamId\":\"T201704140001\", \n    \"members\":[\n    \t{\n    \t\t\"userId\":\"docpost11\", \n\t\t\t\"name\":\"name\", \n\t\t\t\"photoUrl\":\"http://photo.jpg\"\n    \t}, \n    \t{\n    \t\t\"userId\":\"docpost256\", \n\t\t\t\"name\":\"name3\", \n\t\t\t\"photoUrl\":\"http://photo.jpg\"\n    \t}\n    \t]\n\n}"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "129 communication-006 更新结论",
-			"request": {
-				"url": "localhost:4050/communication/conclusion",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/x-www-form-urlencoded",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "consultationId",
-							"value": "consultationPost03",
-							"type": "text",
-							"enabled": true
-						},
-						{
-							"key": "conclusion",
-							"value": "jj",
-							"type": "text",
-							"enabled": true
-						},
-						{
-							"key": "status",
-							"value": "",
-							"type": "text",
-							"enabled": true
-						}
-					]
-				},
-				"description": ""
 			},
 			"response": []
 		},
@@ -1766,37 +1762,20 @@
 			"response": []
 		},
 		{
-			"name": "142 获取指定日期新增的患者列表",
+			"name": "301 Weixin-001 获取微信config",
 			"request": {
-				"url": "localhost:4050/doctor/getPatientByDate?userId=doc01&date=2017-04-07",
+				"url": "121.43.107.106:4050/wechat/settingConfig?url=121.43.107.106:4050",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
+				"body": {},
+				"description": "获取微信config"
 			},
 			"response": []
 		},
 		{
-			"name": "143 获取当日新增的患者列表",
+			"name": "insertOrder",
 			"request": {
-				"url": "localhost:4050/doctor/getPatientByDate?userId=doc01",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "144 插入message",
-			"request": {
-				"url": "localhost:4050/message/insertMessage",
+				"url": "http://121.43.107.106:4050/order/insertOrder",
 				"method": "POST",
 				"header": [
 					{
@@ -1807,220 +1786,27 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"userId\":\"p02\", \n\t\"type\":1, \n\t\"time\":\"\", \n\t\"title\":\"\", \n\t\"description\":\"\", \n\t\"url\":\"\"\n}"
+					"raw": "{\n\t\"userId\":\"U2017\",\n\t\"money\":12,\n\t\"goodsInfo\":{\n\t\t\"class\":\"1\",\n\t\t\"name\":\"your\",\n\t\t\"notes\":\"aaa\"\n\t},\n\t\"paystatus\":1,\n\t\"paytime\":\"2017-05-04\"\n}"
 				},
 				"description": ""
 			},
 			"response": []
 		},
 		{
-			"name": "145 给患者发送保险推送",
+			"name": "getNews",
 			"request": {
-				"url": "localhost:4050/insurance/updateInsuranceMsg",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"doctorId\":\"doc03\", \n\t\"patientId\":\"p02\", \n\t\"insuranceId\":\"ins01\", \n\t\"time\":\"\", \n\t\"insDescription\":\"\", \n\t\n\t\"type\":1, \n\t\"title\":\"\", \n\t\"description\":\"\", \n\t\"url\":\"\"\n}"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "146 获取保险推送信息",
-			"request": {
-				"url": "localhost:4050/insurance/getInsMsg?doctorId=doc01&patientId=p01",
+				"url": "localhost:4050/new/getNewsByReadOrNot?userId=U123&type=4&readOrNot=0",
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
+				"body": {},
 				"description": ""
 			},
 			"response": []
 		},
 		{
-			"name": "147 获取consultation信息",
+			"name": "insertNews",
 			"request": {
-				"url": "localhost:4050/communication/getConsultation?consultationId=consultationPost02",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "148 获取咨询次数",
-			"request": {
-				"url": "localhost:4050/account/getCounts?patientId=ppost01&doctorId=doc01",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "149 增加或减少咨询次数",
-			"request": {
-				"url": "localhost:4050/account/modifyCounts",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"patientId\":\"p01\", \n\t\"doctorId\":\"doc02\", \n\t\"modify\":\"-1\"\n}"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "150 根据医患ID和类型获取咨询或问诊状态",
-			"request": {
-				"url": "localhost:4050/counsel/getStatus?doctorId=doc01&patientId=p01&type=1",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "151 根据医患ID和类型修改咨询或问诊状态",
-			"request": {
-				"url": "localhost:4050/counsel/changeStatus",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"doctorId\":\"doc01\", \n\t\"patientId\":\"p01\", \n\t\"type\":1, \n\t\"status\":0\n}"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "152 根据ID及type存储交流记录（群聊）",
-			"request": {
-				"url": "localhost:4050/communication/postCommunication",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"messageType\": 2, \n\t\"sendBy\": \"sender\", \n\t\"receiver\": \"teamOrConsultation\", \n\t\n\t\"content\": {\n\t\t\"a\" : \"\",\n\t\t\"b\" : 0,\n\t\t\"_id\" : 1,\n\t\t\"content\" : {\n\t\t\t\"text\" : \"Much\",\n\t\t\t\"booleanExtras\" : {},\n\t\t\t\"contentType\" : \"text\",\n\t\t\t\"extras\" : {\n\t\t\t\t\"members\" : {\n\t\t\t\t\t\"teamId\" : {\n\t\t\t\t\t\t\"value\" : \"22864551\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t},\n\t\t\t\"numExtras\" : {},\n\t\t\t\"stringExtras\" : {\n\t\t\t\t\"teamId\" : \"22864551\"\n\t\t\t}\n\t\t},\n\t\t\"contentType\" : \"text\",\n\t\t\"createTimeInMillis\" : 1492758437568,\n\t\t\"createTimeInSeconds\" : 1492758437,\n\t\t\"direct\" : \"send\",\n\t\t\"fromAppkey\" : \"cf32b94444c4eaacef86903e\",\n\t\t\"fromID\" : \"U201702070041\",\n\t\t\"fromName\" : \"陈有维\",\n\t\t\"fromType\" : \"user\",\n\t\t\"from_platform\" : \"a\",\n\t\t\"msgTypeString\" : \"text\",\n\t\t\"serverMessageId\" : 304969361,\n\t\t\"status\" : \"send_success\",\n\t\t\"targetAppkey\" : \"\",\n\t\t\"targetID\" : \"22864551\",\n\t\t\"targetInfo\" : {\n\t\t\t\"a\" : [81456944, 81469294, 81635423],\n\t\t\t\"b\" : 81456944,\n\t\t\t\"_id\" : 33,\n\t\t\t\"groupDescription\" : \"经常回家哈哈哈\",\n\t\t\t\"groupFlag\" : 1,\n\t\t\t\"groupID\" : 22864551,\n\t\t\t\"groupLevel\" : 0,\n\t\t\t\"groupName\" : \"周4\",\n\t\t\t\"isGroupBlocked\" : 0,\n\t\t\t\"maxMemberCount\" : 500,\n\t\t\t\"noDisturb\" : 0\n\t\t},\n\t\t\"targetName\" : \"周4\",\n\t\t\"targetType\" : \"group\",\n\t\t\"version\" : 1\n\t}\n\n}"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "153 获取交流记录（群聊）",
-			"request": {
-				"url": "localhost:4050/communication/getCommunication?messageType=2&id2=teamOrConsultation&limit=1&skip=0",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "154 根据ID及type存储交流记录（单聊）",
-			"request": {
-				"url": "localhost:4050/communication/postCommunication",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"messageType\": 1, \n\t\"sendBy\": \"doc\", \n\t\"receiver\": \"pat\", \n\t\n\t\"content\": {\n\t\"a\" : \"\",\n\t\"b\" : 0,\n\t\"_id\" : 13,\n\t\"content\" : {\n\t\t\"text\" : \"Hdfh\",\n\t\t\"booleanExtras\" : {},\n\t\t\"contentType\" : \"text\",\n\t\t\"extras\" : {\n\t\t\t\"members\" : {}\n\t\t},\n\t\t\"numExtras\" : {},\n\t\t\"stringExtras\" : {}\n\t},\n\t\"contentType\" : \"text\",\n\t\"createTimeInMillis\" : 1492759136581,\n\t\"createTimeInSeconds\" : 1492759136,\n\t\"direct\" : \"send\",\n\t\"fromAppkey\" : \"cf32b94444c4eaacef86903e\",\n\t\"fromID\" : \"U201702070041\",\n\t\"fromName\" : \"陈有维\",\n\t\"fromType\" : \"user\",\n\t\"from_platform\" : \"a\",\n\t\"msgTypeString\" : \"text\",\n\t\"serverMessageId\" : 304976925,\n\t\"status\" : \"send_success\",\n\t\"targetAppkey\" : \"cf32b94444c4eaacef86903e\",\n\t\"targetID\" : \"U201702070048\",\n\t\"targetInfo\" : {\n\t\t\"address\" : \"\",\n\t\t\"appkey\" : \"cf32b94444c4eaacef86903e\",\n\t\t\"birthday\" : \"\",\n\t\t\"blacklist\" : 0,\n\t\t\"gender\" : \"\",\n\t\t\"isFriend\" : 0,\n\t\t\"nickname\" : \"宋树斌\",\n\t\t\"noDisturb\" : 0,\n\t\t\"noteText\" : \"\",\n\t\t\"notename\" : \"\",\n\t\t\"region\" : \"\",\n\t\t\"signature\" : \"\",\n\t\t\"star\" : -1,\n\t\t\"userID\" : 81635423,\n\t\t\"userName\" : \"U201702070048\"\n\t},\n\t\"targetName\" : \"宋树斌\",\n\t\"targetType\" : \"single\",\n\t\"version\" : 1\n}\n}"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "155 获取交流记录（单聊）",
-			"request": {
-				"url": "localhost:4050/communication/getCommunication?messageType=1&id1=doc&id2=pat&limit=1&skip=0",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "绑定医生与患者",
-			"request": {
-				"url": "localhost:4050/patient/bindingMyDoctor",
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"description": ""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"patientId\":\"p01\", \n\t\"doctorId\":\"docpost17\"\n}"
-				},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "deleteSchedule",
-			"request": {
-				"url": "localhost:4050/doctor/deleteSchedule",
+				"url": "localhost:4050/new/insertNews",
 				"method": "POST",
 				"header": [
 					{
@@ -2034,19 +1820,43 @@
 					"urlencoded": [
 						{
 							"key": "userId",
-							"value": "doc01",
+							"value": "U457",
 							"type": "text",
 							"enabled": true
 						},
 						{
-							"key": "day",
-							"value": "周五",
+							"key": "sendBy",
+							"value": "U124",
 							"type": "text",
 							"enabled": true
 						},
 						{
-							"key": "time",
-							"value": "上午",
+							"key": "type",
+							"value": "1",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "title",
+							"value": "2",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "description",
+							"value": "3",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "url",
+							"value": "3",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "messageId",
+							"value": "13",
 							"type": "text",
 							"enabled": true
 						}
@@ -2057,9 +1867,9 @@
 			"response": []
 		},
 		{
-			"name": "insertSchedule",
+			"name": "insertTeamNews",
 			"request": {
-				"url": "localhost:4050/doctor/insertSchedule",
+				"url": "localhost:4050/new/insertTeamNews",
 				"method": "POST",
 				"header": [
 					{
@@ -2073,19 +1883,43 @@
 					"urlencoded": [
 						{
 							"key": "userId",
+							"value": "Ream2",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "sendBy",
 							"value": "doc01",
 							"type": "text",
 							"enabled": true
 						},
 						{
-							"key": "day",
-							"value": "周五",
+							"key": "type",
+							"value": "141",
 							"type": "text",
 							"enabled": true
 						},
 						{
-							"key": "time",
-							"value": "上午",
+							"key": "title",
+							"value": "14",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "description",
+							"value": "124",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "url",
+							"value": "12341",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "messageId",
+							"value": "414",
 							"type": "text",
 							"enabled": true
 						}
@@ -2096,51 +1930,316 @@
 			"response": []
 		},
 		{
-			"name": "303 下载图片",
+			"name": "getNewsByReadOrNot",
 			"request": {
-				"url": "http://121.43.107.106:4050/wechat/download?serverId=SPba_8uMuNwkUa6zw6RC65LBON_fipSa8Z22-MnEmPka3Bc3Z4MRopaWYd8t6jAK&name=3322.jpg",
+				"url": "http://121.43.107.106:4050/new/getNewsByReadOrNot?userId=U123&type=4&readOrNot=0",
 				"method": "GET",
 				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "getOrder",
+			"request": {
+				"url": "http://121.43.107.106:4050/order/getOrder?orderNo=O2017050400009",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": ""
+					"raw": " {\n    \"orderNo\": \"O2017050400009\",\n    \"paystatus\": 2,\n    \"paytime\": \"2017-05-04T00:00:00.000Z\"\n }\n"
 				},
 				"description": ""
 			},
 			"response": []
 		},
 		{
-			"name": "301 wechat settingConfig",
+			"name": "updateOrder",
 			"request": {
-				"url": "http://121.43.107.106:4050/wechat/settingConfig",
-				"method": "GET",
-				"header": [],
+				"url": "http://121.43.107.106:4050/order/updateOrder",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": ""
-				},
-				"description": "301 wechat settingConfig"
-			},
-			"response": []
-		},
-		{
-			"name": "getSchedules",
-			"request": {
-				"url": "localhost:4050/doctor/getSchedules?userId=doc01",
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
+					"raw": " {\n    \"orderNo\": \"O2017050400009\",\n    \"paystatus\": 2,\n    \"paytime\": \"2017-05-04T00:00:00.000Z\"\n }"
 				},
 				"description": ""
 			},
 			"response": []
 		},
 		{
-			"name": "303 下载图片",
+			"name": "统一下单",
 			"request": {
-				"url": "http://121.43.107.106:4050/wechat/download?serverId=SPba_8uMuNwkUa6zw6RC65LBON_fipSa8Z22-MnEmPka3Bc3Z4MRopaWYd8t6jAK&name=resizedU201704130003_myAvatar.jpg",
+				"url": "http://121.196.221.44:4050/wechat/addOrder",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"userId\":\"U201703142018\",\n\t\"role\":\"patient\",\n\t\"money\":123,\n\t\"class\":\"123\",\n\t\"name\":\"counsel\",\n\t\"notes\":\"doctor\",\n\t\"paystatus\":1,\n\t\"paytime\":\"2017-05-11\",\n\t\"ip\":\"121.196.221.44\",\n\t\"openid\":\"ooxGEwX8ujQGnw1NunTsIpP48mok\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "messageTemplate",
+			"request": {
+				"url": "http://121.43.107.106:4050/wechat/messageTemplate\n",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "receiveMsg",
+			"request": {
+				"url": "http://service.haihonghospitalmanagement.com/wechat/receiveTextMessage",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\n <ToUserName>kkk</ToUserName>\n <FromUserName>kkk</FromUserName> \n <CreateTime>kkk</CreateTime>\n <MsgType>kkk</MsgType>\n <Content>kkk</Content>\n <MsgId>kkk</MsgId>\n"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "jpush users",
+			"request": {
+				"url": "121.43.107.106:4050/jm/users",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\":\"U201702130009\",\n\t\"password\":\"123456\",\n\t\"flag\":\"doctor\"\n}\n"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "jpush groups",
+			"request": {
+				"url": "121.43.107.106:4050/jm/groups",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"owner_username\": \"tom\", \n    \"name\": \"群聊天室\", \n    \"members_username\": [\"eddie\", \"annie\"], \n    \"desc\": \"运动\",\n    \"flag\":\"doctor\"\n}\n"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "jpush groups/members",
+			"request": {
+				"url": "121.43.107.106:4050/jm/groups/members",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{    \n    \"groupId\":\"12345678\",\n    \"add\":[\n        \"test1\", \"test2\"\n    ],\n    \"remove\":[\n        \"test3\", \"test4\"\n    ],\n    \"flag\":\"doctor\"\n}\n"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "kang/bloodpressure",
+			"request": {
+				"url": "121.43.107.106:4050/kang/bloodpressure",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "systolicpressure",
+							"value": "120",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "diastolicpressure",
+							"value": "80",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "pulse",
+							"value": "75",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "time",
+							"value": "20150710165100",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "level",
+							"value": "2",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "imei",
+							"value": "860000000000000",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "mode",
+							"value": "0",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "sn",
+							"value": "YMA0000000",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "key",
+							"value": "KANG",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "unique",
+							"value": "860000000000000|20150710165100",
+							"type": "text",
+							"enabled": true
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "ss",
+			"request": {
+				"url": "http://121.43.107.106:4050/patient/getDoctorLists?city=&limit=10&name=徐楠&province=&skip=0&workUnit=\n",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "setPrefer",
+			"request": {
+				"url": "http://121.196.221.44:4050/insurance/setPrefer?patientId=U201705120006&status=1&date=2017-09-12",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "getPrefer",
+			"request": {
+				"url": "http://121.196.221.44:4050/insurance/getPrefer?patientId=U201705120006",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "getUser",
+			"request": {
+				"url": "121.196.221.44:4050/user/one?username=ooxGEwayQGoyCVRR5QMal_gdkMws",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://121.196.221.44:4050/wechat/messageTemplate",
+			"request": {
+				"url": "http://121.196.221.44:4050/wechat/messageTemplate?role=patient",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"userId\":\"U201702211860\",\n\t\"postdata\":{\n        \"template_id\":\"ngqIpbwh8bUfcSsECmogfXcV14J0tQlEpBO27izEYtY\",\n        \"url\":\"http://weixin.qq.com/download\",            \n        \"data\":{\n            \"first\": {\n                \"value\":\"恭喜你购买成功！\",\n                \"color\":\"#173177\"\n                },\n                   \"keynote1\":{\n                       \"value\":\"巧克力\",\n                       \"color\":\"#173177\"\n                   },\n                   \"keynote2\": {\n                       \"value\":\"39.8元\",\n                       \"color\":\"#173177\"\n                   },\n                   \"keynote3\": {\n                       \"value\":\"2014年9月22日\",\n                       \"color\":\"#173177\"\n                   },\n                   \"remark\":{\n                       \"value\":\"欢迎再次购买！\",\n                       \"color\":\"#173177\"\n                   }\n           }\n       }\n  }"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "rechargeDoctor",
+			"request": {
+				"url": "http://121.43.107.106:4050/expense/rechargeDoctor",
 				"method": "GET",
 				"header": [],
 				"body": {},
