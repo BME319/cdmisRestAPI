@@ -1,6 +1,7 @@
 
 var	config = require('../config'),
 	webEntry = require('../settings').webEntry,
+	Patient = require('../models/patient'), 
 	Expense = require('../models/expense');
 
 exports.getDocRecords = function(req, res) {
@@ -58,24 +59,37 @@ exports.rechargeDoctor = function(req, res) {
         return res.json({result: '请输入医生收费类型-type（咨询1/问诊2/咨询转问诊3）、费用、病人id姓名-patientId、patientName、医生id姓名-doctorId、doctorName'});
     }
     else{
-        var expenseData = {
-        	patientId: _pid,
-			patientName: _pName,
-			doctorId: _did,
-			doctorName: _dName,
-			time: new Date(), 
-			money: _money,
-			type: _chargetype
-        };
-        var newExpense = new Expense(expenseData);
-        newExpense.save(function(err, expenseInfo) {
-            if (err) {
-                return res.status(500).send(err.errmsg);
-            }
-            else{
-                res.json({result:"success!"});
-            }
-        });
+    	var query = {
+    		userId: _pid
+    	};
+    	Patient.getOne(query, function (err, patient) {
+	        if (err) {
+	            return res.status(500).send('服务器错误, 用户查询失败!');
+	        }
+	        if (patient == null) {
+	        	return res.json({result:'不存在的患者ID！'});
+	        }
+	        _pName = patient.name;
+	        var expenseData = {
+	        	patientId: _pid,
+				patientName: _pName,
+				doctorId: _did,
+				doctorName: _dName,
+				time: new Date(), 
+				money: _money,
+				type: _chargetype
+	        };
+	        var newExpense = new Expense(expenseData);
+	        newExpense.save(function(err, expenseInfo) {
+	            if (err) {
+	                return res.status(500).send(err.errmsg);
+	            }
+	            else{
+	                res.json({result:"success!"});
+	            }
+	        });
+
+	    });
     }
 }
 
