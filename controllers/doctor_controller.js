@@ -8,7 +8,7 @@ var	config = require('../config'),
 	Counsel = require('../models/counsel'), 
 	Comment = require('../models/comment'), 
 	commonFunc = require('../middlewares/commonFunc');
-var pinyin = require('pinyin');
+ var pinyin = require('pinyin');
 
 // //根据userId查询医生信息 2017-03-28 GY
 // exports.getDoctor = function(req, res) {
