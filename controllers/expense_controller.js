@@ -55,8 +55,8 @@ exports.rechargeDoctor = function(req, res) {
     var _did=req.body.doctorId
     var _dName=req.body.doctorName
     var _money=Number(req.body.money)
-    if(_chargetype===""||_chargetype==undefined||_money===""||_money==undefined||_pid===""||_pid==undefined||_pName===""||_pName==undefined||_did===""||_did==undefined||_dName===""||_dName==undefined){
-        return res.json({result: '请输入医生收费类型-type（咨询1/问诊2/咨询转问诊3）、费用、病人id姓名-patientId、patientName、医生id姓名-doctorId、doctorName'});
+    if(_chargetype===""||_chargetype==undefined||_money===""||_money==undefined||_pid===""||_pid==undefined||_did===""||_did==undefined||_dName===""||_dName==undefined){
+        return res.json({result: '请输入医生收费类型-type（咨询1/问诊2/咨询转问诊3）、费用、病人id姓名-patientId、医生id姓名-doctorId、doctorName'});
     }
     else{
     	var query = {
