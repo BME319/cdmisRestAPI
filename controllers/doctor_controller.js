@@ -8,6 +8,7 @@ var	config = require('../config'),
 	Counsel = require('../models/counsel'), 
 	Comment = require('../models/comment'), 
 	commonFunc = require('../middlewares/commonFunc');
+ var pinyin = require('pinyin');
 
 // //根据userId查询医生信息 2017-03-28 GY
 // exports.getDoctor = function(req, res) {
@@ -759,12 +760,44 @@ exports.getPatientByDate = function(req, res) {
     			}
     			
     		}
+    		
+    		patientsitem = patientsitem.sort(sortVIPpinyin);
     	}
     	res.json({results2:patientsitem});
 	}, opts, fields, populate);
 }
 
-
+function sortVIPpinyin(a, b) {
+    var flag = 0;
+    if (a.patientId == null) {
+	    a.patientId = {
+	    	VIP:0,
+	    	name:''
+	    };
+	   }
+	if (b.patientId == null) {
+	    b.patientId={
+	    	VIP:0,
+	    	name:''
+	    };
+	}
+	if (a.patientId.VIP == null) {
+	    a.patientId.VIP = 0;
+	   }
+	if (b.patientId.VIP == null) {
+	    b.patientId.VIP = 0;
+	}
+	if (b.patientId.VIP - a.patientId.VIP > 0) {
+	    flag = 1;
+	}
+	else if (b.patientId.VIP - a.patientId.VIP < 0) {
+	    flag = -1;
+	}
+	else {
+	    flag = pinyin.compare(a.patientId.name, b.patientId.name);
+	}
+	   return flag;
+} 
 
 exports.checkDoctor = function(req, res, next) {
 	if (req.query.doctorId == null || req.query.doctorId == ''|| req.query.doctorId == undefined) {
@@ -806,7 +839,7 @@ exports.getPatientList = function(req, res) {
 		_skip=0;
 	}
 	var opts = '';
-	var fields = {'_id':0, 'patients.patientId':1};
+	var fields = {'_id':0, 'patients.patientId':1, 'patients.dpRelationTime':1};
 	//通过子表查询主表，定义主表查询路径及输出内容
 	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
 	if(_name!=""&&_name!=undefined){
@@ -841,41 +874,11 @@ exports.getPatientList = function(req, res) {
     	else{
 	    	var patients = [];
 	    	// console.log(item);
-	    	item.patients=item.patients.sort(function(a,b){
-	    		var flag = 0;
-	    		if(a.patientId==null){
-	    			a.patientId={
-	    				VIP:0,
-	    				name:""
-	    			}
-	    		};
-	    		if(b.patientId==null){
-	    			b.patientId={
-	    				VIP:0,
-	    				name:""
-	    			}
-	    		};
-	    		if(b.patientId.VIP-a.patientId.VIP>0){
-	    			flag=1;
-	    		}
-	    		else if(b.patientId.VIP-a.patientId.VIP<0){
-	    			flag=-1;
-	    		}
-	    		else{
-	    			if(a.patientId.name-b.patientId.name>0)
-	    			{
-	    				flag=1;
-	    			}
-	    			else if(a.patientId.name-b.patientId.name<0)
-	    			{
-	    				flag=-1;
-	    			}
-	    		}
-	    		return flag;
-	    	});
+	    	item.patients=item.patients.sort(sortVIPpinyin);
            
 	    	for(var i=0;i<item.patients.length;i++){
-	    		if(item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='' || item.patients[i].dpRelationTime == undefined) {
+	    		// console.log(item.patients[i]);
+	    		if(item.patients[i].dpRelationTime === null || item.patients[i].dpRelationTime === '' || item.patients[i].dpRelationTime === undefined) {
 	    			item.patients[i].dpRelationTime = new Date('2017-05-15');
 	    		}
 	    		if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){

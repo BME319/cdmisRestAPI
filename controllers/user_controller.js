@@ -480,7 +480,8 @@ exports.checkBinding = function(req, res,next) {
                         // binding doctor
                         var jsondata = {
                             patientId: item.userId,
-                            doctorId: item1.doctorUserId
+                            doctorId: item1.doctorUserId,
+                            dpRelationTime: Date()
                         };
                         // console.log(jsondata);
                         request({
@@ -587,7 +588,7 @@ exports.login = function(req, res) {
                     var results = {
                         status:0,
                         userId:item.userId,
-                        userName:item.userName,
+                        userName:item.userName||'',
                         lastlogin:_lastlogindate,
                         PhotoUrl:item.photoUrl,
                         mesg:"login success!",
