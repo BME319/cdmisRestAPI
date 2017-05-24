@@ -26,7 +26,7 @@ exports.getNews = function(req, res) {
     }
 
     // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
-	var opts = {'sort':'-_id'};
+	var opts = {'sort':'-time'};
 
 	News.getSome(query, function(err, items) {
 		if (err) {
@@ -52,14 +52,20 @@ exports.getNewsByReadOrNot = function(req, res) {
         return res.json({result:'请填写userId!'});
     }
 
-	var query = {userId:userId,readOrNot:_readOrNot};
+	var query = {};
 
 	if (type != '' && type != undefined) {
-        query["type"] = type
+        query["type"] = type;
+        if(type=="chat")
+        {
+        	query = {"$or":[{type:11},{type:12},{type:13}]};
+        }
     }
+    query["userId"] = userId;
+    query["readOrNot"] = _readOrNot;
 
     // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
-	var opts = {'sort':'-_id'};
+	var opts = {'sort':'-time'};
 
 	News.getSome(query, function(err, items) {
 		if (err) {
