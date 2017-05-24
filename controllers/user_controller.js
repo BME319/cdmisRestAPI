@@ -499,7 +499,7 @@ exports.checkBinding = function(req, res,next) {
                                 if (err) {
                                     return res.status(500).send(err.errmsg);
                                 }
-                      
+
                                 next();
                             })
                                   
