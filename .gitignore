@@ -3,6 +3,7 @@
 config.js  
 settings.js
 README.md
+web.config
 
 #过滤文件夹  
 uploads/

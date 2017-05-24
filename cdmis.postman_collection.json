@@ -2,7 +2,9 @@
 	"variables": [],
 	"info": {
 		"name": "cdmis",
-		"_postman_id": "4ccb7419-23ff-1666-f347-3e1d2938cfd0",
+
+		"_postman_id": "703ee5db-87ac-4456-0320-2b49cd4cc3ea",
+
 		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
@@ -2173,9 +2175,30 @@
 			"response": []
 		},
 		{
-			"name": "ss",
+
+			"name": "125 communication-002-001 插入组成员",
 			"request": {
-				"url": "http://121.43.107.106:4050/patient/getDoctorLists?city=&limit=10&name=徐楠&province=&skip=0&workUnit=\n",
+				"url": "localhost:4050/communication/insertMember",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"teamId\":\"T201704140001\", \n    \"members\":[\n    \t{\n    \t\t\"userId\":\"docpost11\", \n\t\t\t\"name\":\"name\", \n\t\t\t\"photoUrl\":\"http://photo.jpg\"\n    \t}, \n    \t{\n    \t\t\"userId\":\"docpost256\", \n\t\t\t\"name\":\"name3\", \n\t\t\t\"photoUrl\":\"http://photo.jpg\"\n    \t}\n    \t]\n\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "148 获取咨询次数",
+			"request": {
+				"url": "localhost:4050/account/getCounts?patientId=ppost01&doctorId=doc01",
 				"method": "GET",
 				"header": [],
 				"body": {},
@@ -2184,14 +2207,71 @@
 			"response": []
 		},
 		{
-			"name": "setPrefer",
+			"name": "149 增加或减少咨询次数",
 			"request": {
-				"url": "http://121.196.221.44:4050/insurance/setPrefer?patientId=U201705120006&status=1&date=2017-09-12",
+				"url": "localhost:4050/account/modifyCounts",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"patientId\":\"p01\", \n\t\"doctorId\":\"doc02\", \n\t\"modify\":\"-1\"\n}"
+
+
+			"name": "ss",
+
+			"request": {
+				"url": "http://121.43.107.106:4050/patient/getDoctorLists?city=&limit=10&name=徐楠&province=&skip=0&workUnit=\n",
+				"method": "GET",
+				"header": [],
+
+				"body": {
+					"mode": "raw",
+					"raw": ""
+
+				},
+
+				"description": ""
+			},
+			"response": []
+		},
+		{
+
+			"name": "150 根据医患ID和类型获取咨询或问诊状态",
+			"request": {
+				"url": "localhost:4050/counsel/getStatus?doctorId=doc01&patientId=p01&type=1",
 				"method": "GET",
 				"header": [],
 				"body": {},
 				"description": ""
 			},
+			"response": []
+		},
+		{
+			"name": "151 根据医患ID和类型修改咨询或问诊状态",
+			"request": {
+				"url": "localhost:4050/counsel/changeStatus",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"doctorId\":\"doc01\", \n\t\"patientId\":\"p01\", \n\t\"type\":1, \n\t\"status\":0\n}"
+				},
+				"description": ""
+
+			"name": "301 wechat settingConfig",
+
 			"response": []
 		},
 		{
@@ -2242,7 +2322,10 @@
 				"url": "http://121.43.107.106:4050/expense/rechargeDoctor",
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"description": ""
 			},
 			"response": []
