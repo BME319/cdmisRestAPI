@@ -36,10 +36,12 @@ var doctorCtrl = require('../controllers/doctor_controller'),
     commentCtrl = require('../controllers/comment_controller'), 
     vitalSignCtrl = require('../controllers/vitalSign_controller'), 
     accountCtrl = require('../controllers/account_controller'), 
+    expenseCtrl = require('../controllers/expense_controller'), 
     communicationCtrl = require('../controllers/communication_controller'), 
     messageCtrl = require('../controllers/message_controller'), 
     newsCtrl = require('../controllers/news_controller'), 
     insuranceCtrl = require('../controllers/insurance_controller');
+var getQRcodeCtrl = require('../controllers/getQRcode');
 
 var wechatCtrl = require('../controllers/wechat_controller');
 
@@ -74,7 +76,9 @@ module.exports = function(app,webEntry) {
   // wf
   app.post('/user/register',userCtrl.registerTest,getNoMid.getNo(1), userCtrl.register);
   app.post('/user/setOpenId',userCtrl.setOpenId, userCtrl.checkBinding, userCtrl.setOpenIdRes);
- 
+  app.post('/user/setMessageOpenId',userCtrl.checkUser, userCtrl.setMessageOpenId);
+  app.get('/user/getMessageOpenId',userCtrl.checkUser, userCtrl.getMessageOpenId);
+
   // app.post('/user/registerWithOpenId',userCtrl.registerWithOpenIdTest,getNoMid.getNo(1), userCtrl.registerWithOpenId);
   app.post('/user/reset', userCtrl.reset);
   app.post('/user/login', userCtrl.openIdLoginTest,userCtrl.checkBinding,userCtrl.login);
@@ -116,6 +120,7 @@ module.exports = function(app,webEntry) {
   app.post('/doctor/insertSuspendTime', doctorCtrl.insertSuspendTime);
   app.post('/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime);
   app.get('/doctor/getSuspendTime', doctorCtrl.getSuspendTime);
+  app.get('/doctor/getDocNum', doctorCtrl.getDocNum);
 
   //counsel
   app.get('/counsel/getCounsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
@@ -136,7 +141,8 @@ module.exports = function(app,webEntry) {
   app.post('/patient/newPatientDetail', patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
   app.post('/patient/editPatientDetail', patientCtrl.editPatientDetail);
   app.get('/patient/getCounselRecords', patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
-  // app.post('/patient/bindingMyDoctor', patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
+  // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
+  // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
   app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
   app.post('/patient/changeVIP', patientCtrl.changeVIP);
 
@@ -153,10 +159,13 @@ module.exports = function(app,webEntry) {
   app.get('/account/getAccountInfo', accountCtrl.getAccountInfo);
   app.get('/account/getCounts', accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts);
   app.post('/account/modifyCounts', accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts);
-  app.post('/account/rechargeDoctor', accountCtrl.rechargeDoctor);
+  // app.post('/account/rechargeDoctor', accountCtrl.rechargeDoctor);
   app.post('/account/updateFreeTime', accountCtrl.checkPatient, accountCtrl.updateFreeTime);
   app.get('/account/getCountsRespective', accountCtrl.checkPatient, accountCtrl.getCountsRespective);
   
+  app.post('/expense/rechargeDoctor', accountCtrl.checkPatient, doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor);
+  app.get('/expense/getDocRecords', doctorCtrl.checkDoctor, expenseCtrl.getDocRecords);
+
   //message
   app.get('/message/getMessages', messageCtrl.getMessages);
   app.post('/message/changeMessageStatus', messageCtrl.changeMessageStatus);
@@ -204,7 +213,7 @@ module.exports = function(app,webEntry) {
   app.get('/user/getPhoneNoByRole', userCtrl.getPhoneNoByRole);
 
   // order
-  app.post('/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
+  // app.post('/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
   app.post('/order/updateOrder', orderCtrl.updateOrder);
   app.get('/order/getOrder',  orderCtrl.getOrder);
 
@@ -228,7 +237,8 @@ module.exports = function(app,webEntry) {
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
   // 输入：微信用户授权的code 商户系统生成的订单号 
   // app.get('/wechat/addOrder', wechatCtrl.gettokenbycode, wechatCtrl.getPaymentOrder, wechatCtrl.addOrder,wechatCtrl.getPaySign);
-  app.get('/wechat/addOrder', wechatCtrl.chooseAppId,wechatCtrl.getPaymentOrder, wechatCtrl.addOrder,wechatCtrl.getPaySign);
+  app.post('/wechat/addOrder', getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign);
+  // app.post('/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
   // 订单支付结果回调 
   app.get('/wechat/payResult', wechatCtrl.chooseAppId,wechatCtrl.payResult);
   // 查询订单   orderNo 
@@ -254,6 +264,14 @@ module.exports = function(app,webEntry) {
   app.post('/jm/users', jpushCtrl.register);
   app.post('/jm/groups', jpushCtrl.createGroup);
   app.post('/jm/groups/members', jpushCtrl.updateGroup);
+
+  //获取二维码相关方法
+  app.get('/getAllDoctors', getQRcodeCtrl.getAllDoctors);
+  // app.post('/saveAllTDCticket', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket);
+  app.post('/saveAllTDCticket', getQRcodeCtrl.saveAllTDCticket);
+  // app.get('/downloadImages', getQRcodeCtrl.downloadImages);
+  // app.post('/getAllQRcodes', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket, getQRcodeCtrl.downloadImages);
+  app.post('/downloadImages', getQRcodeCtrl.downloadImages);
 
   //app.get('/find',function(req, res){
   //  var url_parts = url.parse(req.url, true);

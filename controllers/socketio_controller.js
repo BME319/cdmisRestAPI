@@ -124,7 +124,7 @@ function messageSaveSend(data, url){
                                         "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
                                         "role": "doctor",
                                         "postdata": {
-                                            "template_id": "DWrM__2UuaLxYf5da6sKOQA_hlmYhlsazsaxYX59DtE",
+                                            "template_id": "cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k",
                                             "data": {
                                                 "first": {
                                                     "value": "您的团队有一个新的咨询（问诊）消息，请及时处理",
@@ -222,12 +222,13 @@ exports.chat = function (io, socket) {
     })
     socket.on('message',function(data){
         var contentType = data.msg.contentType;
+        var clientType = data.msg.clientType;
         var role = data.role;
         // var toUserId = data.to;
         
         var url = 'http://'+ webEntry.domain +':4050/wechat/download';
 
-        if(contentType == 'image' || contentType == 'voice'){           // image voice
+        if(clientType != 'app' &&(contentType == 'image' || contentType == 'voice')){           // image voice
             var mediaId = data.msg.content.mediaId;
             var name;
             if(contentType == 'image' ){
@@ -253,7 +254,7 @@ exports.chat = function (io, socket) {
                 }
             });
         }else{          // text custom
-            messageSaveSend(data, '');
+            messageSaveSend(data, data.msg.content.src);
         }
 
      

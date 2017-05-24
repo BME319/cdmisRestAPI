@@ -684,6 +684,16 @@ exports.getSuspendTime = function(req, res) {
 	}
 }
 
+exports.getDocNum = function(req, res) {
+	//查询条件
+	var query = {};
+	Doctor.count(query, function(err, item) {
+		if (err) {
+			return res.status(500).send(err.errmsg);
+		}
+		res.json({results: item});
+	});
+}
 
 //根据医生ID获取医生某日新增患者列表 2017-04-18 GY
 exports.getPatientByDate = function(req, res) {
@@ -756,7 +766,31 @@ exports.getPatientByDate = function(req, res) {
 
 
 
-
+exports.checkDoctor = function(req, res, next) {
+	if (req.query.doctorId == null || req.query.doctorId == ''|| req.query.doctorId == undefined) {
+		if (req.body.doctorId == null || req.body.doctorId == ''|| req.body.doctorId == undefined) {
+			return res.json({result: '请填写doctorId!'});
+		}
+		else {
+			req.doctorId = req.body.doctorId;
+		}
+	}
+	else {
+		req.doctorId = req.query.doctorId;
+	}
+	var query = {userId: req.doctorId};
+	Doctor.getOne(query, function(err, item) {
+		if (err) {
+			return res.status(500).send(err.errmsg);
+		}
+		if (item == null) {
+			return res.json({result: '不存在的医生ID'});
+		}
+		else {
+			next();
+		}
+	});
+}
 
 
 
@@ -806,6 +840,40 @@ exports.getPatientList = function(req, res) {
     	}
     	else{
 	    	var patients = [];
+	    	// console.log(item);
+	    	item.patients=item.patients.sort(function(a,b){
+	    		var flag = 0;
+	    		if(a.patientId==null){
+	    			a.patientId={
+	    				VIP:0,
+	    				name:""
+	    			}
+	    		};
+	    		if(b.patientId==null){
+	    			b.patientId={
+	    				VIP:0,
+	    				name:""
+	    			}
+	    		};
+	    		if(b.patientId.VIP-a.patientId.VIP>0){
+	    			flag=1;
+	    		}
+	    		else if(b.patientId.VIP-a.patientId.VIP<0){
+	    			flag=-1;
+	    		}
+	    		else{
+	    			if(a.patientId.name-b.patientId.name>0)
+	    			{
+	    				flag=1;
+	    			}
+	    			else if(a.patientId.name-b.patientId.name<0)
+	    			{
+	    				flag=-1;
+	    			}
+	    		}
+	    		return flag;
+	    	});
+           
 	    	for(var i=0;i<item.patients.length;i++){
 	    		if(item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='' || item.patients[i].dpRelationTime == undefined) {
 	    			item.patients[i].dpRelationTime = new Date('2017-05-15');

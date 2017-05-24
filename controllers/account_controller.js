@@ -30,8 +30,8 @@ exports.getAccountInfo = function(req, res) {
 
 //通用方法：判断patientId和doctorId是否可用 2017-04-20 GY
 exports.checkPatient = function(req, res, next) {
-	if (req.query.patientId == null || req.query.patientId == '') {
-		if (req.body.patientId == null || req.body.patientId == '') {
+	if (req.query.patientId == null || req.query.patientId == ''|| req.query.patientId == undefined) {
+		if (req.body.patientId == null || req.body.patientId == ''|| req.body.patientId == undefined) {
 			return res.json({result: '请填写patientId!'});
 		}
 		else {
@@ -667,91 +667,97 @@ exports.modifyCounts = function(req, res) {
 	}
 }
 
-exports.rechargeDoctor = function(req, res) {
-    var _chargetype=Number(req.body.type)
-    var _pid=req.body.patientId
-    var _did=req.body.doctorId
-    if(_chargetype==""||_chargetype==undefined||_pid==""||_pid==undefined||_did==""||_did==undefined){
-        return res.json({result: '请输入医生收费类型-type（咨询1/问诊2/咨询转问诊3）、病人id-patientId、医生id-doctorId'});
-    }
-    else{
-        query={userId:_did};
-        Doctor.getOne(query, function(err, item) {
-            if (err) {
-                return res.status(500).send(err.errmsg);
-            }
-            if (item == null) {
-                return res.json({result: '不存在的医生ID'});
-            }
-            else {
-                var _money=0
-                if(_chargetype==1){
-                    _money=item.charge1
-                }
-                else if(_chargetype==2){
-                    _money=item.charge2
-                }
-                else{
-                	_money=item.charge2-item.charge1
-                }
-                // console.log(_money)
-                Account.getOne(query, function(err, item1) {
-                    if (err) {
-                        return res.status(500).send(err.errmsg);
-                    }
-                    if (item1 == null) {
-                        var accountData = {
-                            userId: _did, 
-                            money: _money,
-                            incomeRecords:{
-                                time: new Date(), 
-                                money: _money, 
-                                from: _pid
-                            }
-                        };
-                        var newAccount = new Account(accountData);
-                        newAccount.save(function(err, accountInfo) {
-                            if (err) {
-                                return res.status(500).send(err.errmsg);
-                            }
-                            else{
-                                res.json({result:"success!"});
-                            }
-                        });
-                    }
-                    else {
-                        var _money1=_money+item1.money
-                        var upObj = {
-                            $set:{money:_money1},
-                            $push: {
-                                incomeRecords: {
-                                    time: new Date(), 
-                                    money: _money, 
-                                    from: _pid
-                                }
-                            }
-                        };
-                        Account.update(query, upObj, function(err, upaccount) {
-                            if (err) {
-                                return res.status(500).send(err.errmsg);
-                            }
-                            if (upaccount.nModified == 0) {
-                                return res.json({result:'请获取账户信息确认是否修改成功'});
-                            }
-                            else if (upaccount.nModified != 0) {
-                                return res.json({result:'修改成功', updateResult:upaccount});
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    }
-}
+// exports.rechargeDoctor = function(req, res) {
+//     var _chargetype=Number(req.body.type)
+//     var _pid=req.body.patientId
+//     var _did=req.body.doctorId
+//     if(_chargetype==""||_chargetype==undefined||_pid==""||_pid==undefined||_did==""||_did==undefined){
+//         return res.json({result: '请输入医生收费类型-type（咨询1/问诊2/咨询转问诊3）、病人id-patientId、医生id-doctorId'});
+//     }
+//     else{
+//         query={userId:_did};
+//         Doctor.getOne(query, function(err, item) {
+//             if (err) {
+//                 return res.status(500).send(err.errmsg);
+//             }
+//             if (item == null) {
+//                 return res.json({result: '不存在的医生ID'});
+//             }
+//             else {
+//                 var _money=0
+//                 if(_chargetype==1){
+//                     _money=item.charge1
+//                 }
+//                 else if(_chargetype==2){
+//                     _money=item.charge2
+//                 }
+//                 else{
+//                 	_money=item.charge2-item.charge1
+//                 }
+//                 // console.log(_money)
+//                 Account.getOne(query, function(err, item1) {
+//                     if (err) {
+//                         return res.status(500).send(err.errmsg);
+//                     }
+//                     if (item1 == null) {
+//                         var accountData = {
+//                             userId: _did, 
+//                             money: _money,
+//                             incomeRecords:{
+//                                 time: new Date(), 
+//                                 money: _money, 
+//                                 from: _pid
+//                             }
+//                         };
+//                         var newAccount = new Account(accountData);
+//                         newAccount.save(function(err, accountInfo) {
+//                             if (err) {
+//                                 return res.status(500).send(err.errmsg);
+//                             }
+//                             else{
+//                                 res.json({result:"success!"});
+//                             }
+//                         });
+//                     }
+//                     else {
+//                         var _money1=_money+item1.money
+//                         var upObj = {
+//                             $set:{money:_money1},
+//                             $push: {
+//                                 incomeRecords: {
+//                                     time: new Date(), 
+//                                     money: _money, 
+//                                     from: _pid
+//                                 }
+//                             }
+//                         };
+//                         Account.update(query, upObj, function(err, upaccount) {
+//                             if (err) {
+//                                 return res.status(500).send(err.errmsg);
+//                             }
+//                             if (upaccount.nModified == 0) {
+//                                 return res.json({result:'请获取账户信息确认是否修改成功'});
+//                             }
+//                             else if (upaccount.nModified != 0) {
+//                                 return res.json({result:'修改成功', updateResult:upaccount});
+//                             }
+//                         });
+//                     }
+//                 });
+//             }
+//         });
+//     }
+// }
 
 //更新免费次数 GY 0511
 //以后求求各位需求明确之后再让我写好吗
 exports.updateFreeTime = function(req, res) {
+	var date = new Date();
+	var month = date.getMonth() + 1;
+	var year = date.getFullYear();
+	var activity=0;
+	if (month < 6 && year == 2017) {activity=1;}
+
 	var query = {userId:req.patientId};
 	Account.getOne(query, function(err, item) {
 		if (err) {
@@ -764,6 +770,13 @@ exports.updateFreeTime = function(req, res) {
     			freeTimes: 2, 
     			money: 0
     		};
+    		if(activity==1){
+	    		accountData = {
+	    			userId: req.patientId, 
+	    			freeTimes: 3, 
+	    			money: 0
+	    		};
+    		}
     		var newAccount = new Account(accountData);
 			newAccount.save(function(err, accountInfo) {
 				if (err) {
@@ -778,6 +791,9 @@ exports.updateFreeTime = function(req, res) {
 			}
 			else {
 				var upObj = {freeTimes:item.freeTimes - 1};
+				if(activity==1){
+		    		upObj = {freeTimes:item.freeTimes};
+	    		}
 				Account.updateOne(query, upObj, function(err, upaccount) {
 					if (err) {
 						return res.status(500).send(err.errmsg);

@@ -128,5 +128,16 @@ Doctor.update = function (query, obj, callback, opts, populate) {
 };
 
 
+Doctor.count = function(query, callback) {
+	doctorModel
+		.count(query)
+		.count(function(err, total) {
+			if(err){
+				return callback(err);
+			}
+			callback(null, total);
+		});
+};
+
 
 module.exports = Doctor;

@@ -22,7 +22,7 @@ var Base64 = {
             'I', 'J', 'K', 'L', 'M', 'N', 'O' ,'P',  
             'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',  
             'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',  
-            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',  
+            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 
             'o', 'p', 'q', 'r', 's', 't', 'u', 'v',  
             'w', 'x', 'y', 'z', '0', '1', '2', '3',  
             '4', '5', '6', '7', '8', '9', '+', '/' 
@@ -295,7 +295,7 @@ exports.registerTest = function(req, res,next) {
                         if (err) {
                             return res.status(500).send(err.errmsg);
                         }
-                        res.json({results: 0,mesg:"User Register Success!"});
+                        res.json({results: 0,userNo:item.userId,mesg:"User Register Success!"});
                     });
                 }
             });
@@ -449,7 +449,7 @@ exports.openIdLoginTest = function(req, res,next) {
 }
 exports.checkBinding = function(req, res,next) {
     var username = req.body.username;
-   console.log(username);
+    // console.log(username);
     var query = {
         $or: [
             {userId: username},
@@ -457,27 +457,32 @@ exports.checkBinding = function(req, res,next) {
             {phoneNo: username}
         ]
     };
+    // console.log(query);
 
     User.getOne(query, function(err, item) {
         if (err) {
             return res.status(500).send(err.errmsg);
         }
         if(item != null){
-            if(item.openId != null){
+            if(item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null ||item.MessageOpenId.test != null) ){
                 // openId 存在
-                var query = {patientOpenId: item.openId};
+                var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test};
+                // console.log(query);
                 OpenIdTmp.getOne(query, function(err, item1) {
                     if (err) {
                         return res.status(500).send(err.errmsg);
                     }
+                    // console.log({item1:item1});
+                    // if(item1 != null && item1.doctorUserId != null){
                     if(item1 != null){
+                        // console.log(1111);
 
                         // binding doctor
                         var jsondata = {
                             patientId: item.userId,
                             doctorId: item1.doctorUserId
                         };
-                        console.log(jsondata);
+                        // console.log(jsondata);
                         request({
                           url: 'http://' + webEntry.domain + ':4050/patient/bindingMyDoctor',
                           method: 'POST',
@@ -487,19 +492,35 @@ exports.checkBinding = function(req, res,next) {
                             if (err) {
                                 return res.status(500).send(err.errmsg);
                             }
-                            // 绑定成功后 删除OpenIdTmp表中的数据                            
-                            OpenIdTmp.remove(query,function(err,item){
+                            // 绑定成功后 删除OpenIdTmp表中的数据  
+                            console.log({query1:query});                          
+                            OpenIdTmp.remove(query,function(err){
                                 if (err) {
                                     return res.status(500).send(err.errmsg);
                                 }
+                      
                                 next();
                             })
                                   
                         });
                     }
                     else{
-                        console.log("No OpenIdTmp");
+                        // console.log("No OpenIdTmp");
+                        // if(item1.doctorUserId == null){
+                        //     console.log(11112222);
+                        //      OpenIdTmp.remove(query,function(err){
+                        //         if (err) {
+                        //             return res.status(500).send(err.errmsg);
+                        //         }
+                            
+                        //         next();
+                        //     });
+                        // }
+                        // else{
+                        //     next();
+                        // }
                         next();
+                      
                     }
                 });
             }
@@ -508,7 +529,7 @@ exports.checkBinding = function(req, res,next) {
             }
         }
         else{
-            return res.status(400).send('user do not exist!');
+            res.json({results: 1,mesg:"User doesn't Exist!"});
         }
   
     });
@@ -566,6 +587,7 @@ exports.login = function(req, res) {
                     var results = {
                         status:0,
                         userId:item.userId,
+                        userName:item.userName,
                         lastlogin:_lastlogindate,
                         PhotoUrl:item.photoUrl,
                         mesg:"login success!",
@@ -849,3 +871,139 @@ exports.setTDCticket = function(req,res){
 
 }
 
+exports.setMessageOpenId = function(req,res){
+    var _type = req.body.type;
+    var _openId =req.body.openId;
+    var userId = req.body.userId;
+    if(_type===""||_type==undefined)
+    {
+        return res.json({result:1,msg:"plz input type"});
+    }
+    var query = {userId: userId};
+    if(_type==1){
+        var upObj = {
+            $set: {
+                MessageOpenId: {
+                    doctorWechat:_openId
+                    // patientWechat:_openId
+                    // doctorApp:_openId
+                    // patientApp:_openId
+                }
+            }
+        };
+    }
+    if(_type==2){
+        var upObj = {
+            $set: {
+                MessageOpenId: {
+                    // doctorWechat:_openId
+                    patientWechat:_openId
+                    // doctorApp:_openId
+                    // patientApp:_openId
+                }
+            }
+        };
+    }
+    if(_type==3){
+        var upObj = {
+            $set: {
+                MessageOpenId: {
+                    // doctorWechat:_openId
+                    // patientWechat:_openId
+                    doctorApp:_openId
+                    // patientApp:_openId
+                }
+            }
+        };
+    }
+    if(_type==4){
+        var upObj = {
+            $set: {
+                MessageOpenId: {
+                    // doctorWechat:_openId
+                    // patientWechat:_openId
+                    // doctorApp:_openId
+                    patientApp:_openId
+                }
+            }
+        };
+    }
+    if(_type==5){
+        var upObj = {
+            $set: {
+                MessageOpenId: {
+                    // doctorWechat:_openId
+                    // patientWechat:_openId
+                    // doctorApp:_openId
+                    test:_openId
+                }
+            }
+        };
+    }
+    User.updateOne(query,upObj,function(err, item){
+        if (err) {
+            return res.status(500).send(err.errmsg);
+        }
+        res.json({results:0,resultitem: item});
+    }, {new: true});
+
+}
+exports.getMessageOpenId = function(req,res){
+    var _type = req.query.type;
+    var userId = req.query.userId;
+    if(_type===""||_type==undefined)
+    {
+        return res.json({result:1,msg:"plz input type"});
+    }
+    var query = {userId: userId};
+
+    User.getOne(query, function(err, item) {
+        if (err) {
+            return res.status(500).send(err.errmsg);
+        }
+        if(_type==1){
+            res.json({results: item.MessageOpenId.doctorWechat});
+        }
+        if(_type==2){
+            res.json({results: item.MessageOpenId.patientWechat});
+        }
+        if(_type==3){
+            res.json({results: item.MessageOpenId.doctorApp});
+        }
+        if(_type==4){
+            res.json({results: item.MessageOpenId.patientApp});
+        }
+        if(_type==5){
+            res.json({results: item.MessageOpenId.test});
+        }
+        else{
+            res.json({results: "type must be 1-4"});
+        }
+    });
+
+}
+exports.checkUser = function(req, res, next) {
+    if (req.query.userId === null || req.query.userId == ''|| req.query.userId == undefined) {
+        if (req.body.userId === null || req.body.userId == ''|| req.body.userId == undefined) {
+            return res.json({result: '请填写userId!'});
+        }
+        else {
+            req.userId = req.body.userId;
+        }
+    }
+    else {
+        req.userId = req.query.userId;
+    }
+    var query = {userId: req.userId};
+    User.getOne(query, function(err, item) {
+        if (err) {
+            return res.status(500).send(err.errmsg);
+        }
+        if (item == null) {
+            return res.json({result: '不存在的用户ID',userId:req.userId});
+        }
+        else {
+            next();
+        }
+    });
+}

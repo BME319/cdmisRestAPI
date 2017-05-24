@@ -671,7 +671,7 @@ exports.bindingPatient = function(req, res, next) {
 					else if (updpRelation.nModified == 1) {
 						// return res.json({result:'修改成功', results: updpRelation, flag:'0'});
 						req.body.userId = req.body.doctorId;
-						req.body.role = 'doctor';
+						req.body.role = 'test';
 						req.body.postdata = {
 							"template_id":"F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M",
         					"data":{
@@ -705,7 +705,7 @@ exports.bindingPatient = function(req, res, next) {
 		else if (uprelation.nModified == 1) {
 			// return res.json({result:'修改成功', results: uprelation, flag:'1'});
 			req.body.userId = req.body.doctorId;
-			req.body.role = 'doctor';
+			req.body.role = 'test';
 			req.body.postdata = {
 				"template_id":"F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M",
         		"data":{

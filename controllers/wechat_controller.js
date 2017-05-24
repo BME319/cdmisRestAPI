@@ -57,6 +57,10 @@ exports.chooseAppId = function(req,res,next){
     req.wxApiUserObject = config.wxDeveloperConfig.ssgj;
     next();
   }
+  else if(role == 'test'){
+    req.wxApiUserObject = config.wxDeveloperConfig.test;
+    next();
+  }
   else{
     return res.status(400).send('role do not exist!'); 
   }
@@ -307,44 +311,18 @@ exports.getuserinfo = function(req,res) {
 
 
 // 订单相关方法
-// 获取系统订单信息
-exports.getPaymentOrder = function(req, res, next) {
-  var query = {
-    orderNo: req.query.orderNo
-  };
-
-  Order.getOne(query, function(err, item) {
-    if (err) {
-      return res.status(500).send(err.errmsg);
-    }
-    if(item){
-      var orderObject = {};
-      orderObject['orderNo'] = req.query.orderNo;
-      orderObject['goodsInfo'] = item.goodsInfo;
-      orderObject['money'] = item.money;
-      orderObject['attach'] = "123";        // req.state;
-      req.orderObject = orderObject;
-      next();
-    }
-    else{
-      return res.status(422).send('订单不存在');
-    }
-    
-  });
-}
 
 
 // 统一下单   请求api获取prepay_id的值
 exports.addOrder = function(req, res, next) {
   var orderObject = req.orderObject || {};
-  // console.log('orderObject', orderObject);
-
+  orderObject['attach'] = "123";        // req.state;
+  
   var currentDate = new Date();
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss');
   var out_trade_no = orderObject.orderNo; 
   var total_fee = parseInt(orderObject.money); 
   
-
   var detail = '<![CDATA[{"goods_detail":' + JSON.stringify(orderObject.goodsInfo) + '}]]>';
 
   var paramData = {
@@ -360,12 +338,12 @@ exports.addOrder = function(req, res, next) {
     out_trade_no: out_trade_no + '-' + commonFunc.getRandomSn(4),   // 商户订单号
     
     total_fee: total_fee,   // 标价金额
-    spbill_create_ip: req.query.ip,   // 终端IP
+    spbill_create_ip: req.body.ip,   // 终端IP
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
     notify_url: 'http://' + webEntry.domain + ':4050/wechat/payResult',   // 通知地址
     trade_type: 'JSAPI',    // 交易类型
-    openid: req.query.openid    // 用户标识
+    openid: req.body.openid    // 用户标识
   };
 
   var signStr = commonFunc.rawSort(paramData);
@@ -632,6 +610,8 @@ exports.messageTemplate = function(req, res) {
   var token = tokenObject.token;
 
   var query = {userId: req.body.userId};
+  var role = req.query.role || req.body.role;
+ 
   User.getOne(query, function(err, item) {
         if (err) {
             return res.status(500).send(err.errmsg);
@@ -640,13 +620,26 @@ exports.messageTemplate = function(req, res) {
         if(item === null ){
           return res.status(400).send('user do not exist');
         }
-        else if(item.openId === null){
+        if(item.MessageOpenId === null){
+          return res.status(400).send('openId do not exist');
+        }
+        if(role == 'doctor'){
+          messageOpenId = item.MessageOpenId.doctorWechat;
+        }
+        else if(role == 'patient'){
+          messageOpenId = item.MessageOpenId.patientWechat;
+        }
+        else if(role == 'test'){
+          messageOpenId = item.MessageOpenId.test;
+        }
+  
+        if(messageOpenId === null){
           return res.status(400).send('openId do not exist');
         }
         else{
           var jsondata = {};
           jsondata = req.body.postdata;
-          jsondata.touser = item.openId;
+          jsondata.touser = messageOpenId;
 
           request({
             url: wxApis.messageTemplate + '?access_token=' + token,
@@ -750,7 +743,7 @@ exports.receiveTextMessage = function(req, res) {
     // 事件推送
     if(MsgType == 'event'){
       // 扫描带参数二维码事件    用户未关注时，进行关注后的事件推送 || 用户已关注时的事件推送
-      if(jsondata.xml.Event == 'subscribe' || 'SCAN'){
+      if(jsondata.xml.Event == 'subscribe' || jsondata.xml.Event == 'SCAN'){
         
         // do something
         
@@ -773,6 +766,7 @@ exports.receiveTextMessage = function(req, res) {
             patientOpenId: patient_openId,
             time: time
           };
+          console.log(openIdData);
           var newOpenIdTmp = new OpenIdTmp(openIdData);
           newOpenIdTmp.save(function(err, item) {
             if (err) {
