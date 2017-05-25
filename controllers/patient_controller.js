@@ -675,7 +675,7 @@ exports.bindingPatient = function(req, res, next) {
 						req.body.postdata = {
 
   							"template_id":"F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M",
-  							"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab9c316b3076535d&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
+  							"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
   							
         					"data":{
             					"first": {
@@ -711,7 +711,7 @@ exports.bindingPatient = function(req, res, next) {
 			req.body.role = 'test';
 			req.body.postdata = {
 				"template_id":"F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M",
-				"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab9c316b3076535d&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
+				"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
   							
         		"data":{
             		"first": {

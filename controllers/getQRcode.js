@@ -27,7 +27,7 @@ exports.getAllDoctors = function(req, res, next) {
                 userId[i] = items[i].userId;
             }
             req.body.doctorIds = userId;
-            console.log(req.body.doctorIds);
+            // console.log(req.body.doctorIds);
             return res.json({result:userId});
             // next();
         }

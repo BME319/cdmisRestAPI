@@ -119,7 +119,7 @@ function messageSaveSend(data, url){
                                 // custom card 群发
                                  if(data.msg.contentType == 'custom' && data.msg.content.type == 'card'){
                                     console.log('in');
-                                    var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab9c316b3076535d&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.targetID +'_'+data.msg.teamId + "&#wechat_redirect";
+                                    var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.targetID +'_'+data.msg.teamId + "&#wechat_redirect";
                                     var template = {
                                         "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
                                         "role": "doctor",

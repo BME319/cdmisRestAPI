@@ -494,7 +494,7 @@ exports.checkBinding = function(req, res,next) {
                                 return res.status(500).send(err.errmsg);
                             }
                             // 绑定成功后 删除OpenIdTmp表中的数据  
-                            console.log({query1:query});                          
+                            // console.log({query1:query});                          
                             OpenIdTmp.remove(query,function(err){
                                 if (err) {
                                     return res.status(500).send(err.errmsg);
