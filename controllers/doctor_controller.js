@@ -781,6 +781,7 @@ function sortVIPpinyin(a, b) {
 	    	name:''
 	    };
 	}
+	console.log(a.patientId.VIP)
 	if (a.patientId.VIP == null) {
 	    a.patientId.VIP = 0;
 	   }
