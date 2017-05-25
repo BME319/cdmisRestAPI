@@ -371,7 +371,8 @@ exports.getDoctorInfo = function(req, res) {
 }
 
 //修改医生个人信息 2017-04-12 GY
-exports.editDoctorDetail = function(req, res) {
+//如果姓名或头像字段被修改，同时修改team表中所有相应字段 2017-05-25 GY
+exports.editDoctorDetail = function(req, res, next) {
 	if (req.body.userId == null || req.body.userId == '') {
 		return res.json({result:'请填写userId!'});
 	}
@@ -380,12 +381,12 @@ exports.editDoctorDetail = function(req, res) {
 	};
 	
 	var upObj = {
-		revisionInfo:{
-			operationTime:new Date(),
-			userId:"gy",
-			userName:"gy",
-			terminalIP:"10.12.43.32"
-		}
+		// revisionInfo:{
+		// 	operationTime:new Date(),
+		// 	userId:"gy",
+		// 	userName:"gy",
+		// 	terminalIP:"10.12.43.32"
+		// }
 	};
 	if (req.body.certificatePhotoUrl != null){
 		upObj['certificatePhotoUrl'] = req.body.certificatePhotoUrl;
@@ -450,8 +451,106 @@ exports.editDoctorDetail = function(req, res) {
 		if (upDoctor == null) {
 			return res.json({result:'修改失败，不存在的医生ID！'})
 		}
-		res.json({result: '修改成功', editResults:upDoctor});
+		else {
+			if (upObj.name != null || upObj.photoUrl != null) {
+				req.body.editResults = upDoctor;
+				next();
+			}
+			else{
+				//没有修改name, photoUrl字段的情况
+				return res.json({result: '修改成功', editResults:upDoctor});
+			}
+		}
 	}, {new: true});
+}
+exports.updateTeamSponsor = function(req, res, next) {
+	// console.log('updatename')
+	var _userId = req.body.userId;
+	var upObj = {};
+	if (req.body.name != null){
+		upObj['sponsorName'] = req.body.name;
+	}
+	if (req.body.photoUrl != null){
+		upObj['sponsorPhoto'] = req.body.photoUrl;
+	}
+
+	var querys = {sponsorId:_userId};
+	var opts = {multi:true};
+	Team.update(querys, upObj, function(err, upteam1) {
+		if (err) {
+			return res.status(500).send(err);
+		}
+		else {
+			var querym = {'members.userId':_userId};
+			Team.getSome(querym, function(err, items) {
+				if (err) {
+					return res.status(500).send(err);
+				}
+				else if (items.length == 0) {
+					//sponsor包含的情况修改成功与否，并且未查询到members包含的情况，直接返回修改结果
+					return res.json({result: '修改成功', editResults:req.body.editResults});
+				}
+				else {
+					//保存members包含的所有teamId
+					req.body.teamIds = [];
+					for (var i = items.length - 1; i >= 0; i--) {
+						req.body.teamIds[i] = items[i].teamId;
+					}
+					var pullmember = {
+						$pull: {
+							members: {
+								userId:_userId
+							}
+						}
+					};
+					Team.update(querym, pullmember, function(err, upteam2) {
+						if (err) {
+							return res.status(500).send(err);
+						}
+						else {
+							//删除成功
+							req.body.pull = upteam2;
+							if (upteam2.n == upteam2.nModified) {
+								next();
+							}
+							else {
+								return res.json({removeResult: upteam2});
+							}
+						}
+					}, opts);
+				}
+			});
+		}
+	}, opts);
+}
+exports.updateTeamMember = function(req, res) {
+	// console.log(req.body.pull);
+	var index = 0;
+	var pushMembers = function(upteamId) {
+		var query = {teamId:upteamId};
+		var upObj = {
+			$push: {
+				members: {
+					userId: req.body.editResults.userId, 
+					name: req.body.editResults.name, 
+					photoUrl: req.body.editResults.photoUrl
+				}
+			}
+		};
+		Team.update(query, upObj, function(err, upteam3) {
+			if (err) {
+				return res.status(500).send(err);
+			}
+			else {
+				if (index == req.body.teamIds.length - 1) {
+					return res.json({result: '修改成功', editResults:req.body.editResults});
+				}
+				pushMembers(req.body.teamIds[++index]);
+				// console.log(index);
+			}
+		});
+	}
+	pushMembers(req.body.teamIds[index]);
 }
 
 //获取最近交流过的医生列表 2017-04-13 GY 
@@ -750,17 +849,18 @@ exports.getPatientByDate = function(req, res) {
     	}
     	else if (item.patients.length != 0) {
     		for (var i = item.patients.length - 1; i >= 0; i--) {
-    			if (item.patients[i].dpRelationTime == undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='') {
-    				item.patients[i].dpRelationTime = new Date('2017-05-15');
-    			}
-    			dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime);
-    			if (dpTimeFormat == date) {
-    				patientsitem[j] = item.patients[i];
-    				j++;
-    			}
-    			
+    			if (item.patients[i].patientId != null) {
+    				if (item.patients[i].dpRelationTime == undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='') {
+    					item.patients[i].dpRelationTime = new Date('2017-05-15');
+    				}
+    				dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime);
+    				if (dpTimeFormat == date) {
+    					patientsitem[j] = item.patients[i];
+    					j++;
+    				}
+    			}    			
     		}
-    		
+
     		patientsitem = patientsitem.sort(sortVIPpinyin);
     	}
     	res.json({results2:patientsitem});
@@ -781,11 +881,11 @@ function sortVIPpinyin(a, b) {
 	    	name:''
 	    };
 	}
-	console.log(a.patientId.VIP)
-	if (a.patientId.VIP == null) {
+	// console.log(a.patientId.VIP);
+	if (a.patientId.VIP == null || a.patientId.VIP == undefined) {
 	    a.patientId.VIP = 0;
 	   }
-	if (b.patientId.VIP == null) {
+	if (b.patientId.VIP == null || a.patientId.VIP == undefined) {
 	    b.patientId.VIP = 0;
 	}
 	if (b.patientId.VIP - a.patientId.VIP > 0) {
@@ -875,7 +975,7 @@ exports.getPatientList = function(req, res) {
     	else{
 	    	var patients = [];
 	    	// console.log(item);
-	    	item.patients=item.patients.sort(sortVIPpinyin);
+	    	// item.patients=item.patients.sort(sortVIPpinyin);
            
 	    	for(var i=0;i<item.patients.length;i++){
 	    		// console.log(item.patients[i]);
@@ -901,6 +1001,7 @@ exports.getPatientList = function(req, res) {
 	    			}
 	    		}
 	    	}
+	    	patients = patients.sort(sortVIPpinyin);
 	    	var item1={"patients":patients};
 	    	res.json({results: item1});
 	    }
