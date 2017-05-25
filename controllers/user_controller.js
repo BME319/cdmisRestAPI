@@ -499,7 +499,7 @@ exports.checkBinding = function(req, res,next) {
                                 if (err) {
                                     return res.status(500).send(err.errmsg);
                                 }
-                      
+
                                 next();
                             })
                                   
@@ -894,17 +894,18 @@ exports.setMessageOpenId = function(req,res){
             }
         };
         if(_mesgOid!=null&&_mesgOid!=undefined){
-        	var upObj = {
-	            $set: {
-	                MessageOpenId: {
-	                    doctorWechat:_openId,
-						patientWechat:_mesgOid.patientWechat,
-						doctorApp:_mesgOid.doctorApp,
-						patientApp:_mesgOid.patientApp,
-						test:_mesgOid.test
-	                }
-	            }
-	        };
+
+            var upObj = {
+                $set: {
+                    MessageOpenId: {
+                        doctorWechat:_openId,
+                        patientWechat:_mesgOid.patientWechat,
+                        doctorApp:_mesgOid.doctorApp,
+                        patientApp:_mesgOid.patientApp,
+                        test:_mesgOid.test
+                    }
+                }
+            };
         }
 
     }
@@ -918,17 +919,18 @@ exports.setMessageOpenId = function(req,res){
             }
         };
         if(_mesgOid!=null&&_mesgOid!=undefined){
-        	var upObj = {
-	            $set: {
-	                MessageOpenId: {
-	                    doctorWechat:_mesgOid.doctorWechat,
-						patientWechat:_openId,
-						doctorApp:_mesgOid.doctorApp,
-						patientApp:_mesgOid.patientApp,
-						test:_mesgOid.test
-	                }
-	            }
-	        };
+
+            var upObj = {
+                $set: {
+                    MessageOpenId: {
+                        doctorWechat:_mesgOid.doctorWechat,
+                        patientWechat:_openId,
+                        doctorApp:_mesgOid.doctorApp,
+                        patientApp:_mesgOid.patientApp,
+                        test:_mesgOid.test
+                    }
+                }
+            };
         }
 
     }
@@ -942,17 +944,17 @@ exports.setMessageOpenId = function(req,res){
             }
         };
         if(_mesgOid!=null&&_mesgOid!=undefined){
-        	var upObj = {
-	            $set: {
-	                MessageOpenId: {
-	                    doctorWechat:_mesgOid.doctorWechat,
-						patientWechat:_mesgOid.patientWechat,
-						doctorApp:_openId,
-						patientApp:_mesgOid.patientApp,
-						test:_mesgOid.test
-	                }
-	            }
-	        };
+            var upObj = {
+                $set: {
+                    MessageOpenId: {
+                        doctorWechat:_mesgOid.doctorWechat,
+                        patientWechat:_mesgOid.patientWechat,
+                        doctorApp:_openId,
+                        patientApp:_mesgOid.patientApp,
+                        test:_mesgOid.test
+                    }
+                }
+            };
         }
 
     }
@@ -960,7 +962,6 @@ exports.setMessageOpenId = function(req,res){
         var upObj = {
             $set: {
                 MessageOpenId: {
-
                     patientApp:_openId
                 }
             }
@@ -985,11 +986,11 @@ exports.setMessageOpenId = function(req,res){
         var upObj = {
             $set: {
                 MessageOpenId: {
-
                     test:_openId
                 }
             }
         };
+
 
         if(_mesgOid!=null&&_mesgOid!=undefined){
         	var upObj = {
@@ -1004,6 +1005,7 @@ exports.setMessageOpenId = function(req,res){
 	            }
 	        };
         }
+
 
     }
     User.updateOne(query,upObj,function(err, item){
@@ -1071,7 +1073,6 @@ exports.checkUser = function(req, res, next) {
         else {
 
         	req.user=item;
-
             next();
         }
     });
