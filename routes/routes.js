@@ -41,6 +41,7 @@ var doctorCtrl = require('../controllers/doctor_controller'),
     messageCtrl = require('../controllers/message_controller'), 
     newsCtrl = require('../controllers/news_controller'), 
     insuranceCtrl = require('../controllers/insurance_controller');
+var getQRcodeCtrl = require('../controllers/getQRcode');
 
 var wechatCtrl = require('../controllers/wechat_controller');
 
@@ -75,7 +76,9 @@ module.exports = function(app,webEntry) {
   // wf
   app.post('/user/register',userCtrl.registerTest,getNoMid.getNo(1), userCtrl.register);
   app.post('/user/setOpenId',userCtrl.setOpenId, userCtrl.checkBinding, userCtrl.setOpenIdRes);
- 
+  app.post('/user/setMessageOpenId',userCtrl.checkUser, userCtrl.setMessageOpenId);
+  app.get('/user/getMessageOpenId',userCtrl.checkUser, userCtrl.getMessageOpenId);
+
   // app.post('/user/registerWithOpenId',userCtrl.registerWithOpenIdTest,getNoMid.getNo(1), userCtrl.registerWithOpenId);
   app.post('/user/reset', userCtrl.reset);
   app.post('/user/login', userCtrl.openIdLoginTest,userCtrl.checkBinding,userCtrl.login);
@@ -138,6 +141,7 @@ module.exports = function(app,webEntry) {
   app.post('/patient/newPatientDetail', patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
   app.post('/patient/editPatientDetail', patientCtrl.editPatientDetail);
   app.get('/patient/getCounselRecords', patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
+  // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
   // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
   app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
   app.post('/patient/changeVIP', patientCtrl.changeVIP);
@@ -260,6 +264,14 @@ module.exports = function(app,webEntry) {
   app.post('/jm/users', jpushCtrl.register);
   app.post('/jm/groups', jpushCtrl.createGroup);
   app.post('/jm/groups/members', jpushCtrl.updateGroup);
+
+  //获取二维码相关方法
+  app.get('/getAllDoctors', getQRcodeCtrl.getAllDoctors);
+  // app.post('/saveAllTDCticket', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket);
+  app.post('/saveAllTDCticket', getQRcodeCtrl.saveAllTDCticket);
+  // app.get('/downloadImages', getQRcodeCtrl.downloadImages);
+  // app.post('/getAllQRcodes', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket, getQRcodeCtrl.downloadImages);
+  app.post('/downloadImages', getQRcodeCtrl.downloadImages);
 
   //app.get('/find',function(req, res){
   //  var url_parts = url.parse(req.url, true);

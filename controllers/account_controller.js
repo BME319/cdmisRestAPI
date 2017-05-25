@@ -30,8 +30,8 @@ exports.getAccountInfo = function(req, res) {
 
 //通用方法：判断patientId和doctorId是否可用 2017-04-20 GY
 exports.checkPatient = function(req, res, next) {
-	if (req.query.patientId == null || req.query.patientId == '') {
-		if (req.body.patientId == null || req.body.patientId == '') {
+	if (req.query.patientId == null || req.query.patientId == ''|| req.query.patientId == undefined) {
+		if (req.body.patientId == null || req.body.patientId == ''|| req.body.patientId == undefined) {
 			return res.json({result: '请填写patientId!'});
 		}
 		else {
