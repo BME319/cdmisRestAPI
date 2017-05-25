@@ -273,7 +273,7 @@ exports.insertUser = function(req, res) {
 }
 exports.registerTest = function(req, res,next) {
     var _phoneNo = req.query.phoneNo
-    // var _password = req.query.password
+    var _password = req.query.password
     var _role = req.query.role
     var query = {phoneNo:_phoneNo};
     // var _userNo = req.newId
@@ -291,7 +291,7 @@ exports.registerTest = function(req, res,next) {
                     res.json({results: 1,userNo:"",mesg:"User Already Exist!"});
                 }
                 else{
-                    User.updateOne(query,{ $push: { role: _role } },function(err, item2){
+                    User.updateOne(query,{ $push: { role: _role } ,$set:{password:_password}},function(err, item2){
                         if (err) {
                             return res.status(500).send(err.errmsg);
                         }
