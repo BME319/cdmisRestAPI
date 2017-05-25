@@ -273,7 +273,7 @@ exports.insertUser = function(req, res) {
 }
 exports.registerTest = function(req, res,next) {
     var _phoneNo = req.query.phoneNo
-    // var _password = req.query.password
+    var _password = req.query.password
     var _role = req.query.role
     var query = {phoneNo:_phoneNo};
     // var _userNo = req.newId
@@ -291,7 +291,7 @@ exports.registerTest = function(req, res,next) {
                     res.json({results: 1,userNo:"",mesg:"User Already Exist!"});
                 }
                 else{
-                    User.updateOne(query,{ $push: { role: _role } },function(err, item2){
+                    User.updateOne(query,{ $push: { role: _role } ,$set:{password:_password}},function(err, item2){
                         if (err) {
                             return res.status(500).send(err.errmsg);
                         }
@@ -881,65 +881,130 @@ exports.setMessageOpenId = function(req,res){
         return res.json({result:1,msg:"plz input type"});
     }
     var query = {userId: userId};
+
+    var _mesgOid=req.user.MessageOpenId;
+
     if(_type==1){
         var upObj = {
             $set: {
                 MessageOpenId: {
                     doctorWechat:_openId
-                    // patientWechat:_openId
-                    // doctorApp:_openId
-                    // patientApp:_openId
+
                 }
             }
         };
+        if(_mesgOid!=null&&_mesgOid!=undefined){
+        	var upObj = {
+	            $set: {
+	                MessageOpenId: {
+	                    doctorWechat:_openId,
+						patientWechat:_mesgOid.patientWechat,
+						doctorApp:_mesgOid.doctorApp,
+						patientApp:_mesgOid.patientApp,
+						test:_mesgOid.test
+	                }
+	            }
+	        };
+        }
+
     }
     if(_type==2){
         var upObj = {
             $set: {
                 MessageOpenId: {
-                    // doctorWechat:_openId
+
                     patientWechat:_openId
-                    // doctorApp:_openId
-                    // patientApp:_openId
                 }
             }
         };
+        if(_mesgOid!=null&&_mesgOid!=undefined){
+        	var upObj = {
+	            $set: {
+	                MessageOpenId: {
+	                    doctorWechat:_mesgOid.doctorWechat,
+						patientWechat:_openId,
+						doctorApp:_mesgOid.doctorApp,
+						patientApp:_mesgOid.patientApp,
+						test:_mesgOid.test
+	                }
+	            }
+	        };
+        }
+
     }
     if(_type==3){
         var upObj = {
             $set: {
                 MessageOpenId: {
-                    // doctorWechat:_openId
-                    // patientWechat:_openId
+
                     doctorApp:_openId
-                    // patientApp:_openId
                 }
             }
         };
+        if(_mesgOid!=null&&_mesgOid!=undefined){
+        	var upObj = {
+	            $set: {
+	                MessageOpenId: {
+	                    doctorWechat:_mesgOid.doctorWechat,
+						patientWechat:_mesgOid.patientWechat,
+						doctorApp:_openId,
+						patientApp:_mesgOid.patientApp,
+						test:_mesgOid.test
+	                }
+	            }
+	        };
+        }
+
     }
     if(_type==4){
         var upObj = {
             $set: {
                 MessageOpenId: {
-                    // doctorWechat:_openId
-                    // patientWechat:_openId
-                    // doctorApp:_openId
+
                     patientApp:_openId
                 }
             }
         };
+
+        if(_mesgOid!=null&&_mesgOid!=undefined){
+        	var upObj = {
+	            $set: {
+	                MessageOpenId: {
+	                    doctorWechat:_mesgOid.doctorWechat,
+						patientWechat:_mesgOid.patientWechat,
+						doctorApp:_mesgOid.doctorApp,
+						patientApp:_openId,
+						test:_mesgOid.test
+	                }
+	            }
+	        };
+        }
+
     }
     if(_type==5){
         var upObj = {
             $set: {
                 MessageOpenId: {
-                    // doctorWechat:_openId
-                    // patientWechat:_openId
-                    // doctorApp:_openId
+
                     test:_openId
                 }
             }
         };
+
+        if(_mesgOid!=null&&_mesgOid!=undefined){
+        	var upObj = {
+	            $set: {
+	                MessageOpenId: {
+	                    doctorWechat:_mesgOid.doctorWechat,
+						patientWechat:_mesgOid.patientWechat,
+						doctorApp:_mesgOid.doctorApp,
+						patientApp:_mesgOid.patientApp,
+						test:_openId
+	                }
+	            }
+	        };
+        }
+
     }
     User.updateOne(query,upObj,function(err, item){
         if (err) {
@@ -1004,6 +1069,9 @@ exports.checkUser = function(req, res, next) {
             return res.json({result: '不存在的用户ID',userId:req.userId});
         }
         else {
+
+        	req.user=item;
+
             next();
         }
     });
