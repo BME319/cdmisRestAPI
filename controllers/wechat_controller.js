@@ -48,6 +48,7 @@ var wxApis = {
 
 exports.chooseAppId = function(req,res,next){
   var role = req.query.role || req.body.role;
+  console.log("test1");
   // console.log(role);
   if(role == 'doctor'){
     req.wxApiUserObject = config.wxDeveloperConfig.sjkshz;
@@ -59,6 +60,10 @@ exports.chooseAppId = function(req,res,next){
   }
   else if(role == 'test'){
     req.wxApiUserObject = config.wxDeveloperConfig.test;
+    next();
+  }
+  else if (role == 'appPatient') {
+    req.appUserObject = config.wxDeveloperConfig.appssgj;
     next();
   }
   else{
@@ -228,6 +233,10 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
        
         
       });
+}
+
+exports.returntoken = function(req, res) {
+  return res.json({result: req.wechatData});
 }
 
 exports.refresh_token = function(req,res,next) {
