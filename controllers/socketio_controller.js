@@ -119,12 +119,13 @@ function messageSaveSend(data, url){
                                 // custom card 群发
                                  if(data.msg.contentType == 'custom' && data.msg.content.type == 'card'){
                                     console.log('in');
-                                    // var 
+                                    var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab9c316b3076535d&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.targetID +'_'+data.msg.teamId  "&#wechat_redirect"
                                     var template = {
                                         "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
                                         "role": "doctor",
                                         "postdata": {
                                             "template_id": "cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k",
+                                            "url": actionUrl,
                                             "data": {
                                                 "first": {
                                                     "value": "您的团队有一个新的咨询（问诊）消息，请及时处理",
