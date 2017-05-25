@@ -111,7 +111,7 @@ module.exports = function(app,webEntry) {
   app.get('/doctor/getMyGroupList', doctorCtrl.getTeams);
   app.get('/doctor/getGroupPatientList', doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
   // app.get('/doctor/getTeam', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
-  app.post('/doctor/editDoctorDetail', doctorCtrl.editDoctorDetail);
+  app.post('/doctor/editDoctorDetail', doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember);
   app.get('/doctor/getRecentDoctorList', doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList);
   app.get('/doctor/getPatientByDate', doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate);
   app.post('/doctor/insertSchedule', doctorCtrl.insertSchedule);
