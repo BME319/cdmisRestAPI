@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var userSchema = new mongoose.Schema({
 	userId: String,						
 	userName: String,					
-	openId: String,						
+	openId: String,//UnionId
 	phoneNo: String,					
 	password:String,
 	agreement:String,
@@ -13,6 +13,13 @@ var userSchema = new mongoose.Schema({
 	loginStatus:Number,
 	lastLogin:Date,
 	TDCticket: String,
+	MessageOpenId:{
+		doctorWechat:String,
+		patientWechat:String,
+		doctorApp:String,
+		patientApp:String,
+		test:String
+	},
 	jpush:{
 		registrationID:String,
 		alias:String,
