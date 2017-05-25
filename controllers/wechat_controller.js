@@ -210,8 +210,8 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
             expires_in: body.expires_in,
             refresh_token: body.refresh_token,
             openid: body.openid,
-            scope: body.scope//,
-            // unionid: body.unionid,
+            scope: body.scope,
+            unionid: body.unionid,
             // api_type: 1
           }
           if(wechatData.scope == 'snsapi_base')
