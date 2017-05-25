@@ -61,6 +61,10 @@ exports.chooseAppId = function(req,res,next){
     req.wxApiUserObject = config.wxDeveloperConfig.test;
     next();
   }
+  else if (role == 'appPatient') {
+    req.appUserObject = config.wxDeveloperConfig.appssgj;
+    next();
+  }
   else{
     return res.status(400).send('role do not exist!'); 
   }
@@ -228,6 +232,10 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
        
         
       });
+}
+
+exports.returntoken = function(req, res) {
+  return res.json({result: req.wechatData});
 }
 
 exports.refresh_token = function(req,res,next) {
