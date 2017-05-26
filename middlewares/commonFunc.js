@@ -55,6 +55,26 @@ var commonFunc = {
 		return formatDate;
 		// YYYYMMDD
 	},
+	getNowFormatSecond: function() {
+		//函数功能：用于将new Date()生成的0时区时间转成东八区时间字符串形式
+		var date = new Date();
+		//默认东8区时间
+		date.setHours(date.getHours() + 8);
+
+		function add0(m) {
+			return m < 10 ? '0'+m : m
+		}
+		var y = date.getFullYear();
+		var m = date.getMonth() + 1;
+		var d = date.getDate();
+		var h = date.getHours();
+		var mm = date.getMinutes();
+		var s = date.getSeconds();
+		var formatSecond = y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
+
+		//yyyy-mm-dd hh:mm:ss
+		return formatSecond;
+	}, 
 	paddNum:function(num){
 		num += "";
 		return num.replace(/^(\d)$/,"0$1");

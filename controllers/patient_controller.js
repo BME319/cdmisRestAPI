@@ -3,6 +3,7 @@ var	config = require('../config'),
 	Patient = require('../models/patient'), 
 	Doctor = require('../models/doctor'), 
 	DpRelation = require('../models/dpRelation'), 
+	commonFunc = require('../middlewares/commonFunc'), 
 	Counsel = require('../models/counsel');
 
 //根据userId查询患者详细信息 2017-03-29 GY
@@ -684,7 +685,7 @@ exports.bindingPatient = function(req, res, next) {
                        				"color":"#173177"
                    				},
                    				"keyword2": {
-                       				"value":new Date(),//添加的时间
+                       				"value":commonFunc.getNowFormatSecond(),//添加的时间
                        				"color":"#173177"
                    				},
                    				"remark":{
@@ -718,7 +719,7 @@ exports.bindingPatient = function(req, res, next) {
                        	"color":"#173177"
                    	},
                    	"keyword2": {
-                       	"value":new Date(),//添加的时间
+                       	"value":commonFunc.getNowFormatSecond(),//添加的时间
                        	"color":"#173177"
                    	},
                    	"remark":{
@@ -727,7 +728,7 @@ exports.bindingPatient = function(req, res, next) {
                    	}
            		}
 			}
-			// console.log(req.body);
+			// console.log(req.body.postdata);
 			next();
 		}
 		// res.json({results: uprelation});
