@@ -829,7 +829,7 @@ exports.receiveTextMessage = function(req, res) {
                     "url": '',
                     "data": {
                       "first": {
-                        "value": "您现在已经绑定"+name+"医生为您的主管医生。"//医生姓名
+                        "value": "您现在已经绑定" + name + "医生为您的主管医生。",//医生姓名
                         "color": "#173177"
                       },
                       "keyword1": {
