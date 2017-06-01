@@ -355,7 +355,7 @@ exports.addOrder = function(req, res, next) {
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
     notify_url: 'http://' + webEntry.domain + ':4050/wechat/payResult',   // 通知地址
-    trade_type: 'JSAPI',    // 交易类型
+    trade_type: req.body.trade_type,    // 交易类型
     openid: req.body.openid    // 用户标识
   };
 
