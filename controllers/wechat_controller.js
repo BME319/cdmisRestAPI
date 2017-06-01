@@ -63,7 +63,11 @@ exports.chooseAppId = function(req,res,next){
     next();
   }
   else if (role == 'appPatient') {
-    req.appUserObject = config.wxDeveloperConfig.appssgj;
+    req.wxApiUserObject = config.wxDeveloperConfig.appssgj;
+    next();
+  }
+  else if (role == 'appDoctor') {
+    req.wxApiUserObject = config.wxDeveloperConfig.appsjkshz;
     next();
   }
   else{
@@ -351,7 +355,7 @@ exports.addOrder = function(req, res, next) {
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
     notify_url: 'http://' + webEntry.domain + ':4050/wechat/payResult',   // 通知地址
-    trade_type: 'JSAPI',    // 交易类型
+    trade_type: req.body.trade_type,    // 交易类型
     openid: req.body.openid    // 用户标识
   };
 
@@ -618,53 +622,74 @@ exports.messageTemplate = function(req, res) {
   var tokenObject = req.wxToken || {};
   var token = tokenObject.token;
 
-  var query = {userId: req.body.userId};
-  var role = req.query.role || req.body.role;
- 
-  User.getOne(query, function(err, item) {
-        if (err) {
-            return res.status(500).send(err.errmsg);
-        }
-        // res.json({results: item});
-        if(item === null ){
-          return res.status(400).send('user do not exist');
-        }
-        if(item.MessageOpenId === null){
-          return res.status(400).send('openId do not exist');
-        }
-        if(role == 'doctor'){
-          messageOpenId = item.MessageOpenId.doctorWechat;
-        }
-        else if(role == 'patient'){
-          messageOpenId = item.MessageOpenId.patientWechat;
-        }
-        else if(role == 'test'){
-          messageOpenId = item.MessageOpenId.test;
-        }
-  
-        if(messageOpenId === null){
-          return res.status(400).send('openId do not exist');
+  if(req.body.userId != ''){
+    var query = {userId: req.body.userId};
+    var role = req.query.role || req.body.role;
+   
+    User.getOne(query, function(err, item) {
+          if (err) {
+              return res.status(500).send(err.errmsg);
+          }
+          // res.json({results: item});
+          if(item === null ){
+            return res.status(400).send('user do not exist');
+          }
+          if(item.MessageOpenId === null){
+            return res.status(400).send('openId do not exist');
+          }
+          if(role == 'doctor'){
+            messageOpenId = item.MessageOpenId.doctorWechat;
+          }
+          else if(role == 'patient'){
+            messageOpenId = item.MessageOpenId.patientWechat;
+          }
+          else if(role == 'test'){
+            messageOpenId = item.MessageOpenId.test;
+          }
+    
+          if(messageOpenId === null){
+            return res.status(400).send('openId do not exist');
+          }
+          else{
+            var jsondata = {};
+            jsondata = req.body.postdata;
+            jsondata.touser = messageOpenId;
+
+            request({
+              url: wxApis.messageTemplate + '?access_token=' + token,
+              method: 'POST',
+              body: jsondata,
+              json:true
+            }, function(err, response, body){
+              if (!err && response.statusCode == 200) {   
+                res.json({results:body});
+              }
+              else{
+                return res.status(500).send('Error');
+              }
+            });
+          }
+      });
+  }
+  else if(req.body.userId == ''){
+    if(req.body.postdata.touser != ''){
+      request({
+        url: wxApis.messageTemplate + '?access_token=' + token,
+        method: 'POST',
+        body: req.body.postdata,
+        json:true
+      }, function(err, response, body){
+        if (!err && response.statusCode == 200) {   
+          res.json({results:body});
         }
         else{
-          var jsondata = {};
-          jsondata = req.body.postdata;
-          jsondata.touser = messageOpenId;
-
-          request({
-            url: wxApis.messageTemplate + '?access_token=' + token,
-            method: 'POST',
-            body: jsondata,
-            json:true
-          }, function(err, response, body){
-            if (!err && response.statusCode == 200) {   
-              res.json({results:body});
-            }
-            else{
-              return res.status(500).send('Error');
-            }
-          });
+          return res.status(500).send('Error');
         }
-    });
+      });
+    }
+  }
+
+  
 
   // var jsondata = req.body || {};
   // var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
@@ -782,7 +807,73 @@ exports.receiveTextMessage = function(req, res) {
               results = err.errmsg;
             }
             else{
-              results = 'success';
+              // results = 'success';
+              var query = { userId: doctor_userId };
+              Doctor.getOne(query, function (err, doctor) {
+                if (err) {
+                  results = err;
+                }
+                if (doctor == null) {
+                  results = 'doctor not exist';
+                }
+                var name = doctor.name;
+                var title = doctor.title;
+                var workUnit = doctor.workUnit;
+
+                var template = {
+                  "userId": '',          // data.msg.content.doctorId, //医生的UID
+                  "role": "patient",
+                  "postdata": {
+                    "touser": patient_openId,
+                    "template_id": "43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg",
+                    "url": '',
+                    "data": {
+                      "first": {
+                        "value": "您现在已经绑定" + name + "医生为您的主管医生。",//医生姓名
+                        "color": "#173177"
+                      },
+                      "keyword1": {
+                        "value": name, //医生姓名
+                        "color": "#173177"
+                      },
+                      "keyword2": {
+                        "value": title, //医生职称
+                        "color": "#173177"
+                      },
+                      "keyword3": {
+                        "value": workUnit, //所在医院
+                        "color": "#173177"
+                      },
+
+                      "remark": {
+                        "value": "点击底栏【肾事管家】按钮进行注册，注册登录后可查看主管医生详情，并进行咨询问诊。",
+                        "color": "#173177"
+                      }
+                    }
+                  }
+                };
+
+                request({
+                  url: 'http://' + webEntry.domain + ':4050/wechat/messageTemplate',
+                  method: 'POST',
+                  body:template,
+                  json:true
+                }, function(err, response){
+                  if(err){
+                    results = err;
+                  }
+                  else{
+                    results = 'success';
+                  }
+
+                });
+
+
+              });
+
+          
+                     
+              
             }           
           });
         }
