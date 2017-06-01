@@ -63,7 +63,7 @@ exports.chooseAppId = function(req,res,next){
     next();
   }
   else if (role == 'appPatient') {
-    req.appUserObject = config.wxDeveloperConfig.appssgj;
+    req.wxApiUserObject = config.wxDeveloperConfig.appssgj;
     next();
   }
   else{
