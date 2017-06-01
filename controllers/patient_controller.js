@@ -708,7 +708,7 @@ exports.bindingPatient = function(req, res, next) {
 		else if (uprelation.nModified == 1) {
 			// return res.json({result:'修改成功', results: uprelation, flag:'1'});
 			req.body.userId = req.body.doctorId;
-			req.body.role = 'test';
+			req.body.role = 'doctor';
 			req.body.postdata = {
 				"template_id":"F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M",
 				"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
