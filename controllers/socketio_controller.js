@@ -59,6 +59,7 @@ function messageSaveSend(data, url){
             // send message
             /// send to sendBy
             if(userServer.hasOwnProperty(sendBy)){         // 用户在线
+                console.log('messageRes: ' + sendBy);
                 userServer[sendBy].emit('messageRes',{msg:data.msg});
             }
             else{           // 用户不在线
@@ -69,6 +70,7 @@ function messageSaveSend(data, url){
 
             if(messageType == 1){       // 单聊
                 if(userServer.hasOwnProperty(receiver)){         // 用户在线
+                    console.log('getMsg: ' + receiver);
                     userServer[receiver].emit('getMsg',{msg:data.msg});
                 }
                 else{           // 用户不在线
@@ -190,7 +192,6 @@ function messageSaveSend(data, url){
 exports.chat = function (io, socket) {
     count += 1;
     socket.on('newUser',function(data){
-        // console.log('newUser: ' +data.user_id);
         var nickname = data.user_name,
             user_id = data.user_id;
         socket.id = user_id;
@@ -210,9 +211,10 @@ exports.chat = function (io, socket) {
         //     Arrayremove(freeList,to)
         //     io.emit("getChat",{p1:from,p2:to},userList)
         // }
+        console.log('newUser: ' +data.user_id);
+        console.log(Object.keys(userServer));
     })
     socket.on('disconnect',function(){ //用户注销登陆执行内容
-        // console.log('disconnect');
         count -= 1; 
         var id = socket.id
         delete userServer[id]
@@ -220,6 +222,8 @@ exports.chat = function (io, socket) {
         // io.emit('onlineCount',freeList)
         // io.emit('offline',{id:id})
         // io.emit('addCount', count)
+        console.log('disconnect: ' + id);
+        console.log(Object.keys(userServer));
     })
     socket.on('message',function(data){
         var contentType = data.msg.contentType;
