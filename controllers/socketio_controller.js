@@ -59,7 +59,7 @@ function messageSaveSend(data, url){
             // send message
             /// send to sendBy
             if(userServer.hasOwnProperty(sendBy)){         // 用户在线
-                console.log('messageRes: ' + sendBy);
+                // console.log('messageRes: ' + sendBy);
                 userServer[sendBy].emit('messageRes',{msg:data.msg});
             }
             else{           // 用户不在线
@@ -70,7 +70,7 @@ function messageSaveSend(data, url){
 
             if(messageType == 1){       // 单聊
                 if(userServer.hasOwnProperty(receiver)){         // 用户在线
-                    console.log('getMsg: ' + receiver);
+                    // console.log('getMsg: ' + receiver);
                     userServer[receiver].emit('getMsg',{msg:data.msg});
                 }
                 else{           // 用户不在线
@@ -99,7 +99,7 @@ function messageSaveSend(data, url){
                     // }
                     if(err) {
                         // do-something
-                        console.log(err.errmsg);
+                        // console.log(err.errmsg);
                     }
                     else{
                         // console.log(response.body);
@@ -120,7 +120,7 @@ function messageSaveSend(data, url){
                             else{       // 用户不在线
                                 // custom card 群发
                                  if(data.msg.contentType == 'custom' && data.msg.content.type == 'card'){
-                                    console.log('in');
+                                    // console.log('in');
                                     var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab9c316b3076535d&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.targetID +'_'+data.msg.teamId + "&#wechat_redirect";
                                     var template = {
                                         "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
@@ -211,8 +211,8 @@ exports.chat = function (io, socket) {
         //     Arrayremove(freeList,to)
         //     io.emit("getChat",{p1:from,p2:to},userList)
         // }
-        console.log('newUser: ' +data.user_id);
-        console.log(Object.keys(userServer));
+        // console.log('newUser: ' +data.user_id);
+        // console.log(Object.keys(userServer));
     })
     socket.on('disconnect',function(){ //用户注销登陆执行内容
         count -= 1; 
@@ -222,8 +222,8 @@ exports.chat = function (io, socket) {
         // io.emit('onlineCount',freeList)
         // io.emit('offline',{id:id})
         // io.emit('addCount', count)
-        console.log('disconnect: ' + id);
-        console.log(Object.keys(userServer));
+        // console.log('disconnect: ' + id);
+        // console.log(Object.keys(userServer));
     })
     socket.on('message',function(data){
         var contentType = data.msg.contentType;
