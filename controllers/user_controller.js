@@ -1032,16 +1032,16 @@ exports.getMessageOpenId = function(req,res){
         if(_type==1){
             res.json({results: item.MessageOpenId.doctorWechat});
         }
-        if(_type==2){
+        else if(_type==2){
             res.json({results: item.MessageOpenId.patientWechat});
         }
-        if(_type==3){
+        else if(_type==3){
             res.json({results: item.MessageOpenId.doctorApp});
         }
-        if(_type==4){
+        else if(_type==4){
             res.json({results: item.MessageOpenId.patientApp});
         }
-        if(_type==5){
+        else if(_type==5){
             res.json({results: item.MessageOpenId.test});
         }
         else{
