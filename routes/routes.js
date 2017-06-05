@@ -36,6 +36,7 @@ var doctorCtrl = require('../controllers/doctor_controller'),
     commentCtrl = require('../controllers/comment_controller'), 
     vitalSignCtrl = require('../controllers/vitalSign_controller'), 
     accountCtrl = require('../controllers/account_controller'), 
+    adviceCtrl = require('../controllers/advice_controller'), 
     expenseCtrl = require('../controllers/expense_controller'), 
     communicationCtrl = require('../controllers/communication_controller'), 
     messageCtrl = require('../controllers/message_controller'), 
@@ -207,6 +208,10 @@ module.exports = function(app,webEntry) {
   app.get('/insurance/getInsMsg', insuranceCtrl.getInsMsg);
   app.get('/insurance/setPrefer', insuranceCtrl.setPrefer);
   app.get('/insurance/getPrefer', insuranceCtrl.getPrefer);
+
+  //advice
+  app.post('/advice/postAdvice', adviceCtrl.postAdvice);
+  app.get('/advice/getAdvice', adviceCtrl.getAdvice);
 
   
   //user

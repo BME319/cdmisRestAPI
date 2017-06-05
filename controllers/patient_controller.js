@@ -3,6 +3,7 @@ var	config = require('../config'),
 	Patient = require('../models/patient'), 
 	Doctor = require('../models/doctor'), 
 	DpRelation = require('../models/dpRelation'), 
+	commonFunc = require('../middlewares/commonFunc'), 
 	Counsel = require('../models/counsel');
 
 //根据userId查询患者详细信息 2017-03-29 GY
@@ -675,7 +676,7 @@ exports.bindingPatient = function(req, res, next) {
 						req.body.postdata = {
 
   							"template_id":"F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M",
-  							"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab9c316b3076535d&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
+  							"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
   							
         					"data":{
             					"first": {
@@ -687,7 +688,7 @@ exports.bindingPatient = function(req, res, next) {
                        				"color":"#173177"
                    				},
                    				"keyword2": {
-                       				"value":new Date(),//添加的时间
+                       				"value":commonFunc.getNowFormatSecond(),//添加的时间
                        				"color":"#173177"
                    				},
                    				"remark":{
@@ -708,10 +709,10 @@ exports.bindingPatient = function(req, res, next) {
 		else if (uprelation.nModified == 1) {
 			// return res.json({result:'修改成功', results: uprelation, flag:'1'});
 			req.body.userId = req.body.doctorId;
-			req.body.role = 'test';
+			req.body.role = 'doctor';
 			req.body.postdata = {
 				"template_id":"F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M",
-				"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab9c316b3076535d&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
+				"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
   							
         		"data":{
             		"first": {
@@ -723,7 +724,7 @@ exports.bindingPatient = function(req, res, next) {
                        	"color":"#173177"
                    	},
                    	"keyword2": {
-                       	"value":new Date(),//添加的时间
+                       	"value":commonFunc.getNowFormatSecond(),//添加的时间
                        	"color":"#173177"
                    	},
                    	"remark":{
@@ -732,7 +733,7 @@ exports.bindingPatient = function(req, res, next) {
                    	}
            		}
 			}
-			// console.log(req.body);
+			// console.log(req.body.postdata);
 			next();
 		}
 		// res.json({results: uprelation});
