@@ -355,9 +355,13 @@ exports.addOrder = function(req, res, next) {
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
     notify_url: 'http://' + webEntry.domain + ':4050/wechat/payResult',   // 通知地址
-    trade_type: req.body.trade_type,    // 交易类型
-    openid: req.body.openid    // 用户标识
+    trade_type: req.body.trade_type    // 交易类型
+    // openid: req.body.openid    // 用户标识
   };
+  if(paramData.trade_type == "JSAPI"){
+    // wechat pay
+    paramData['openid'] = req.body.openid;  
+  }
 
   var signStr = commonFunc.rawSort(paramData);
   signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
@@ -416,7 +420,8 @@ exports.getPaySign = function(req, res, next) {
     nonceStr: wcPayParams.nonceStr,
     package: wcPayParams.package,
     signType: wcPayParams.signType,
-    paySign: wcPayParams.paySign
+    paySign: wcPayParams.paySign,
+    prepay_id : req.prepay_id
   }});
 }
 
