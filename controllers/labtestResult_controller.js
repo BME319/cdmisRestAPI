@@ -103,3 +103,39 @@ exports.updateLabtestResult = function(req, res) {
 		}
 	});
 }
+
+//删除健康信息及对应的化验结果 2017-06-06 GY
+exports.deleteLabtestResult = function(req, res) {
+	if (req.body.userId == null || req.body.userId == '') {
+		return res.json({result:'请填写userId!'});
+	}
+	if (req.body.insertTime == null || req.body.insertTime == '') {
+		return res.json({result:'请填写insertTime!'});
+	}
+
+	var query = {userId:req.body.userId, insertTime: new Date(req.body.insertTime)};
+
+	HealthInfo.removeOne(query,function(err, item){
+		if (err) {
+			return res.status(500).send(err.errmsg);
+		}
+		// res.json({results: item});
+		if (item == null) {
+			return res.json({result: '删除失败，请检查是否存在健康信息'});
+		}
+		else {
+			var query2 = {_id: item.resultId};
+			LabtestResult.removeOne(query2, function(err, item2) {
+				if (err) {
+					return res.status(500).send(err.message);
+				}
+				if (item2 == null) {
+					return res.json({result: '删除失败，请检查是否存在化验结果数据'});
+				}
+				else {
+					return res.json({result: '删除成功', deleteHealthInfo: item, deleteLabtest: item2});
+				}
+			});
+		}
+	});
+}

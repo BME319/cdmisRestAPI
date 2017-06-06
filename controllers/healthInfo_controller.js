@@ -26,12 +26,14 @@ exports.getHealthDetail = function(req, res) {
 	var query = {userId:_userId,insertTime:_insertTime};
 	var opts = '';
 	var fields = {'_id':0, 'revisionInfo':0};
+	var populate = {'path':'resultId'};
+
 	HealthInfo.getOne(query, function(err, item) {
 		if (err) {
       		return res.status(500).send(err.errmsg);
     	}
     	res.json({results: item});
-	},opts,fields);
+	},opts,fields, populate);
 }
 
 exports.insertHealthInfo = function(req, res) {

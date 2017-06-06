@@ -217,6 +217,7 @@ module.exports = function(app,webEntry) {
   //labtestResult
   app.post('/labtestResult/post', labtestResultCtrl.postLabtestResult);
   app.post('/labtestResult/update', labtestResultCtrl.updateLabtestResult);
+  app.post('/labtestResult/delete', labtestResultCtrl.deleteLabtestResult);
   
   //user
   app.get('/user/getPhoneNoByRole', userCtrl.getPhoneNoByRole);
