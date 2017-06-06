@@ -10,6 +10,7 @@ var healthInfoSchema = new mongoose.Schema({
 	label: String, 
 	description: String, 
 	comments: String, 
+	resultId: {type: mongoose.Schema.Types.ObjectId, ref:'labtestResult'}, 
 	revisionInfo:{
 		operationTime:Date,
 		userId:String,
