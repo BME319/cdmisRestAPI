@@ -48,7 +48,7 @@ var wxApis = {
 
 exports.chooseAppId = function(req,res,next){
   var role = req.query.role || req.body.role;
-  console.log("test1");
+  // console.log("test1");
   // console.log(role);
   if(role == 'doctor'){
     req.wxApiUserObject = config.wxDeveloperConfig.sjkshz;
@@ -201,7 +201,7 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
 
     var code = paramObject.code;
     var state = paramObject.state;
-
+    console.log(code);
     var url = wxApis.oauth_access_token + '?appid=' + req.wxApiUserObject.appid
             + '&secret=' + req.wxApiUserObject.appsecret
             + '&code=' + code
@@ -213,7 +213,7 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
     }, function (err, response, body) {
         if (err) return res.status(401).send('换取网页授权access_token失败!');
         
-      
+    console.log(body);
           var wechatData = {
             access_token: body.access_token, //获取用户信息的access_token
             expires_in: body.expires_in,
@@ -223,6 +223,7 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
             unionid: body.unionid
             // api_type: 1
           }
+            // console.log(wechatData);
           if(wechatData.scope == 'snsapi_base')
           {
             return res.json({results:wechatData})
@@ -231,6 +232,14 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
           {
             req.wechatData = wechatData;
             req.state = state;
+
+            next();
+          }
+          else
+          {
+            req.wechatData = wechatData;
+            req.state = state;
+            // console.log('else');
 
             next();
           } 
@@ -330,7 +339,8 @@ exports.getuserinfo = function(req,res) {
 exports.addOrder = function(req, res, next) {
   var orderObject = req.orderObject || {};
   orderObject['attach'] = "123";        // req.state;
-  
+  // console.log(orderObject);
+  // console.log(req.body);
   var currentDate = new Date();
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss');
   var out_trade_no = orderObject.orderNo; 
@@ -358,6 +368,8 @@ exports.addOrder = function(req, res, next) {
     trade_type: req.body.trade_type    // 交易类型
     // openid: req.body.openid    // 用户标识
   };
+  console.log(paramData);
+  // console.log(paramData.trade_type);
   if(paramData.trade_type == "JSAPI"){
     // wechat pay
     paramData['openid'] = req.body.openid;  
@@ -376,6 +388,7 @@ exports.addOrder = function(req, res, next) {
     body: xmlString
   }, function(err, response, body){
     var prepay_id = '';
+    console.log(body);
 
     if (!err && response.statusCode == 200) {       
       var parser = new xml2js.Parser();
@@ -387,6 +400,7 @@ exports.addOrder = function(req, res, next) {
       // 微信生成的预支付会话标识，用于后续接口调用中使用，该值有效期为2小时
       prepay_id = data.xml.prepay_id;
       req.prepay_id = prepay_id;
+      // console.log(prepay_id);
       next();
 
       // res.redirect('/zbtong/?#/shopping/wxpay/'+ orderObject.oid +'/' + data.xml.prepay_id);
@@ -413,7 +427,7 @@ exports.getPaySign = function(req, res, next) {
   var signStr = commonFunc.rawSort(wcPayParams);
   signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
   wcPayParams.paySign = commonFunc.convertToMD5(signStr, true);  //微信支付签名
-
+    // console.log(wcPayParams);
   res.json({ results: {
     appId:req.wxApiUserObject.appid, 
     timestamp: wcPayParams.timeStamp,
@@ -576,8 +590,8 @@ exports.refund = function(req, res) {
   };
 
   var req = https.request(options, (res) => {
-    console.log('statusCode:', res.statusCode);
-    console.log('headers:', res.headers);
+    // console.log('statusCode:', res.statusCode);
+    // console.log('headers:', res.headers);
 
     res.on('data', (d) => {
       // process.stdout.write(d);

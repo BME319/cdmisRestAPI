@@ -228,8 +228,8 @@ exports.chat = function (io, socket) {
         var id = socket.id
         delete userServer[id]
         delete userList[id]
-        console.log(id);
-        console.log(Object.keys(userServer));
+        // console.log(id);
+        // console.log(Object.keys(userServer));
         // io.emit('onlineCount',freeList)
         // io.emit('offline',{id:id})
         // io.emit('addCount', count)
