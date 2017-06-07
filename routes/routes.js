@@ -43,6 +43,7 @@ var doctorCtrl = require('../controllers/doctor_controller'),
     newsCtrl = require('../controllers/news_controller'), 
     insuranceCtrl = require('../controllers/insurance_controller');
 var getQRcodeCtrl = require('../controllers/getQRcode');
+var labtestResultCtrl = require('../controllers/labtestResult_controller');
 
 var wechatCtrl = require('../controllers/wechat_controller');
 
@@ -213,6 +214,10 @@ module.exports = function(app,webEntry) {
   app.post('/advice/postAdvice', adviceCtrl.postAdvice);
   app.get('/advice/getAdvice', adviceCtrl.getAdvice);
 
+  //labtestResult
+  app.post('/labtestResult/post', labtestResultCtrl.postLabtestResult);
+  app.post('/labtestResult/update', labtestResultCtrl.updateLabtestResult);
+  app.post('/labtestResult/delete', labtestResultCtrl.deleteLabtestResult);
   
   //user
   app.get('/user/getPhoneNoByRole', userCtrl.getPhoneNoByRole);
