@@ -9,13 +9,14 @@ exports.getAllHealthInfo = function(req, res) {
 	var opts = {"sort":{"time":-1,"revisionInfo.operationTime":-1}};
 	var fields = {'_id':0, 'revisionInfo':0};
 	// var fields = {'_id':0};
+	var populate = {'path':'resultId'};
 
 	HealthInfo.getSome(query, function(err, healthInfolist) {
 		if (err) {
       return res.status(500).send(err.errmsg);
     }
     res.json({results: healthInfolist});
-	},opts,fields);
+	},opts,fields, populate);
 }
 
 
@@ -25,12 +26,14 @@ exports.getHealthDetail = function(req, res) {
 	var query = {userId:_userId,insertTime:_insertTime};
 	var opts = '';
 	var fields = {'_id':0, 'revisionInfo':0};
+	var populate = {'path':'resultId'};
+
 	HealthInfo.getOne(query, function(err, item) {
 		if (err) {
       		return res.status(500).send(err.errmsg);
     	}
     	res.json({results: item});
-	},opts,fields);
+	},opts,fields, populate);
 }
 
 exports.insertHealthInfo = function(req, res) {
