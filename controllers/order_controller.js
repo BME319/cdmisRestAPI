@@ -25,7 +25,8 @@ exports.insertOrder = function(req, res, next) {
             name:req.body.name,
             notes:req.body.notes
         },
-        paystatus:req.body.paystatus,
+        // paystatus:req.body.paystatus,
+        paystatus: 0,   // req.body.paystatus,
         paytime:new Date(req.body.paytime)
     };
 

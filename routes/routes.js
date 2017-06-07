@@ -249,9 +249,10 @@ module.exports = function(app,webEntry) {
   // 输入：微信用户授权的code 商户系统生成的订单号 
   // app.get('/wechat/addOrder', wechatCtrl.gettokenbycode, wechatCtrl.getPaymentOrder, wechatCtrl.addOrder,wechatCtrl.getPaySign);
   app.post('/wechat/addOrder', getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign);
+ 
   // app.post('/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
   // 订单支付结果回调 
-  app.get('/wechat/payResult', wechatCtrl.chooseAppId,wechatCtrl.payResult);
+  app.post('/wechat/payResult',wechatCtrl.payResult);
   // 查询订单   orderNo 
   app.get('/wechat/getWechatOrder', wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.getWechatOrder);
   // 关闭订单   orderNo 
