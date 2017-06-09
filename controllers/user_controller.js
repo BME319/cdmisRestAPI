@@ -427,6 +427,10 @@ exports.setOpenIdRes = function(req, res){
     res.json({results: "success!"});
 }
 exports.openIdLoginTest = function(req, res,next) {
+
+    //2017-06-07GY调试
+    // console.log('openIdLoginTest_in');
+
     var username = req.body.username;
     if (username === '' ) {
         return res.status(422).send('请输入用户名!'); 
@@ -444,10 +448,18 @@ exports.openIdLoginTest = function(req, res,next) {
             openIdFlag=1;
         }
         req.openIdFlag=openIdFlag;
+
+        //2017-06-07GY调试
+        // console.log('openIdLoginTest_out');
+
         next();
     });
 }
 exports.checkBinding = function(req, res,next) {
+
+    //2017-06-07GY调试
+    // console.log('checkBinding_in');
+
     var username = req.body.username;
     // console.log(username);
     var query = {
@@ -500,6 +512,9 @@ exports.checkBinding = function(req, res,next) {
                                     return res.status(500).send(err.errmsg);
                                 }
 
+                                //2017-06-07GY调试
+                                // console.log('checkBinding_out');
+
                                 next();
                             })
                                   
@@ -520,22 +535,38 @@ exports.checkBinding = function(req, res,next) {
                         // else{
                         //     next();
                         // }
+
+                        //2017-06-07GY调试
+                        // console.log('checkBinding_out');
+
                         next();
                       
                     }
                 });
             }
             else{
+
+                //2017-06-07GY调试
+                // console.log('checkBinding_out');
+
                 next();
             }
         }
         else{
+
+            //2017-06-07GY调试
+            // console.log('checkBinding_err_user_not_exist');
+
             res.json({results: 1,mesg:"User doesn't Exist!"});
         }
   
     });
 }
 exports.login = function(req, res) {
+
+    //2017-06-07GY调试
+    // console.log('login_in');
+
     var username = req.body.username;
     var password = req.body.password;
     var role = req.body.role;
@@ -556,15 +587,27 @@ exports.login = function(req, res) {
             return res.status(500).send(err.errmsg);
         }
         if(item==null){
+
+            //2017-06-07GY调试
+            // console.log('login_err_user_not_exist');
+
             res.json({results: 1,mesg:"User doesn't Exist!"});
         }
         else{
 
             if(password!=item.password&&openIdFlag==0){
+
+                //2017-06-07GY调试
+                // console.log('login_err_password_not_correct');
+
                 res.json({results: 1,mesg:"User password isn't correct!"});
             }
             else if(item.role.indexOf(role) == -1)
             {
+
+                //2017-06-07GY调试
+                // console.log('login_err_no_authority');
+
                 res.json({results: 1,mesg:"No authority!"});
             }
             else
@@ -594,6 +637,9 @@ exports.login = function(req, res) {
                         mesg:"login success!",
                         token:token
                     };
+
+                    //2017-06-07GY调试
+                    // console.log('login_success');
 
                     res.json({results: results});
                 });
