@@ -861,13 +861,14 @@ exports.receiveTextMessage = function(req, res) {
         if(jsondata.xml.EventKey != null ){
           var doctor_userId;
           // 
+          console.log(jsondata);
           if(jsondata.xml.Event == 'subscribe'){
-            doctor_userId =  jsondata.xml.EventKey.split('_')[1];
+            doctor_userId =  jsondata.xml.EventKey[0].split('_')[1];
           }
           if(jsondata.xml.Event == 'SCAN'){
             doctor_userId =  jsondata.xml.EventKey;
           }
-        
+        console.log(doctor_userId);
           // 暂存医生和患者的openId
           var patient_openId = jsondata.xml.FromUserName;       
           var time = Date();

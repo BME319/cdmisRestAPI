@@ -863,6 +863,10 @@ exports.getPatientByDate = function(req, res) {
 
     		patientsitem = patientsitem.sort(sortVIPpinyin);
     	}
+
+    	//2017-06-07GY调试用
+	    // console.log({method:'getPatientByDate', resultCount:patientsitem.length});
+
     	res.json({results2:patientsitem});
 	}, opts, fields, populate);
 }
@@ -1003,6 +1007,10 @@ exports.getPatientList = function(req, res) {
 	    	}
 	    	patients = patients.sort(sortVIPpinyin);
 	    	var item1={"patients":patients};
+
+	    	//2017-06-07GY调试用
+	    	// console.log({method:'getPatientList', resultCount:patients.length});
+
 	    	res.json({results: item1});
 	    }
 	}, opts, fields, populate);
