@@ -838,7 +838,7 @@ exports.getPhoneNoByRole = function(req, res) {
     }
 
     var query = {role:req.query.role};
-    var fields = {userName:1, phoneNo:1, _id:0}
+    var fields = {userId:1, userName:1, phoneNo:1, _id:0}
 
     User.getSome(query, function(err, items) {
         if (err) {
