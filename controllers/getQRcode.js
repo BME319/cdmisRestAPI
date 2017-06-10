@@ -27,7 +27,7 @@ exports.getAllDoctors = function(req, res, next) {
                 userId[i] = items[i].userId;
             }
             req.body.doctorIds = userId;
-            console.log(req.body.doctorIds);
+            // console.log(req.body.doctorIds);
             return res.json({result:userId});
             // next();
         }
@@ -36,8 +36,9 @@ exports.getAllDoctors = function(req, res, next) {
 
 exports.saveAllTDCticket = function(req, res) {
   // req.body.doctorIds = ['U201702150001', 'U201703190002', 'U201702150003', 'U201701050004'];
+  // req.body.doctorIds = ["201705220008", "U201701061455", "U201705110001"]
   var TDCtickets = [];
-  var count = req.body.doctorIds.length - 1;
+  var count = 0;
   var endFlag = 0;
   var index = 0;
 
@@ -62,6 +63,7 @@ exports.saveAllTDCticket = function(req, res) {
     }, function(err, response, body){
         if (!err && response.statusCode == 200) {
         test(req.body.doctorIds[++index]); 
+        count = index;
 
         }
         else{
@@ -121,7 +123,7 @@ exports.saveAllTDCticket = function(req, res) {
   // }
 
 
-return res.json({result:req.body.doctorIds.length});
+return res.json({result:count});
   // var callback_ready = function() {
   //   if (endFlag == 1) {
   //       return res.json({results:TDCtickets});

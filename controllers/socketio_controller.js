@@ -59,6 +59,10 @@ function messageSaveSend(data, url){
             // send message
             /// send to sendBy
             if(userServer.hasOwnProperty(sendBy)){         // 用户在线
+
+                // console.log('messageRes');
+                // console.log(sendBy);
+
                 userServer[sendBy].emit('messageRes',{msg:data.msg});
             }
             else{           // 用户不在线
@@ -69,6 +73,7 @@ function messageSaveSend(data, url){
 
             if(messageType == 1){       // 单聊
                 if(userServer.hasOwnProperty(receiver)){         // 用户在线
+                    // console.log('getMsg: ' + receiver);
                     userServer[receiver].emit('getMsg',{msg:data.msg});
                 }
                 else{           // 用户不在线
@@ -97,7 +102,7 @@ function messageSaveSend(data, url){
                     // }
                     if(err) {
                         // do-something
-                        console.log(err.errmsg);
+                        // console.log(err.errmsg);
                     }
                     else{
                         // console.log(response.body);
@@ -118,13 +123,16 @@ function messageSaveSend(data, url){
                             else{       // 用户不在线
                                 // custom card 群发
                                  if(data.msg.contentType == 'custom' && data.msg.content.type == 'card'){
-                                    console.log('in');
-                                    // var 
+
+                                    // console.log('in');
+                                    var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab9c316b3076535d&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.targetID +'_'+data.msg.teamId + "&#wechat_redirect";
+
                                     var template = {
                                         "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
                                         "role": "doctor",
                                         "postdata": {
                                             "template_id": "cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k",
+                                            "url": actionUrl,
                                             "data": {
                                                 "first": {
                                                     "value": "您的团队有一个新的咨询（问诊）消息，请及时处理",
@@ -189,7 +197,7 @@ function messageSaveSend(data, url){
 exports.chat = function (io, socket) {
     count += 1;
     socket.on('newUser',function(data){
-        // console.log('newUser: ' +data.user_id);
+
         var nickname = data.user_name,
             user_id = data.user_id;
         socket.id = user_id;
@@ -209,16 +217,24 @@ exports.chat = function (io, socket) {
         //     Arrayremove(freeList,to)
         //     io.emit("getChat",{p1:from,p2:to},userList)
         // }
+        // console.log('newUser: ' +data.user_id);
+        // console.log(Object.keys(userServer));
     })
     socket.on('disconnect',function(){ //用户注销登陆执行内容
+
         // console.log('disconnect');
+
         count -= 1; 
         var id = socket.id
         delete userServer[id]
         delete userList[id]
+        // console.log(id);
+        // console.log(Object.keys(userServer));
         // io.emit('onlineCount',freeList)
         // io.emit('offline',{id:id})
         // io.emit('addCount', count)
+        // console.log('disconnect: ' + id);
+        // console.log(Object.keys(userServer));
     })
     socket.on('message',function(data){
         var contentType = data.msg.contentType;

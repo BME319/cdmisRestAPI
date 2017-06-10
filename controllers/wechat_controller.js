@@ -48,6 +48,7 @@ var wxApis = {
 
 exports.chooseAppId = function(req,res,next){
   var role = req.query.role || req.body.role;
+  // console.log("test1");
   // console.log(role);
   if(role == 'doctor'){
     req.wxApiUserObject = config.wxDeveloperConfig.sjkshz;
@@ -63,6 +64,10 @@ exports.chooseAppId = function(req,res,next){
   }
   else if (role == 'appPatient') {
     req.wxApiUserObject = config.wxDeveloperConfig.appssgj;
+    next();
+  }
+  else if (role == 'appDoctor') {
+    req.wxApiUserObject = config.wxDeveloperConfig.appsjkshz;
     next();
   }
   else{
@@ -196,7 +201,7 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
 
     var code = paramObject.code;
     var state = paramObject.state;
-
+    console.log(code);
     var url = wxApis.oauth_access_token + '?appid=' + req.wxApiUserObject.appid
             + '&secret=' + req.wxApiUserObject.appsecret
             + '&code=' + code
@@ -208,16 +213,17 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
     }, function (err, response, body) {
         if (err) return res.status(401).send('换取网页授权access_token失败!');
         
-      
+    console.log(body);
           var wechatData = {
             access_token: body.access_token, //获取用户信息的access_token
             expires_in: body.expires_in,
             refresh_token: body.refresh_token,
             openid: body.openid,
-            scope: body.scope//,
-            // unionid: body.unionid,
+            scope: body.scope,
+            unionid: body.unionid
             // api_type: 1
           }
+            // console.log(wechatData);
           if(wechatData.scope == 'snsapi_base')
           {
             return res.json({results:wechatData})
@@ -226,6 +232,14 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
           {
             req.wechatData = wechatData;
             req.state = state;
+
+            next();
+          }
+          else
+          {
+            req.wechatData = wechatData;
+            req.state = state;
+            // console.log('else');
 
             next();
           } 
@@ -325,7 +339,8 @@ exports.getuserinfo = function(req,res) {
 exports.addOrder = function(req, res, next) {
   var orderObject = req.orderObject || {};
   orderObject['attach'] = "123";        // req.state;
-  
+  // console.log(orderObject);
+  // console.log(req.body);
   var currentDate = new Date();
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss');
   var out_trade_no = orderObject.orderNo; 
@@ -350,9 +365,15 @@ exports.addOrder = function(req, res, next) {
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
     notify_url: 'http://' + webEntry.domain + ':4050/wechat/payResult',   // 通知地址
-    trade_type: 'JSAPI',    // 交易类型
-    openid: req.body.openid    // 用户标识
+    trade_type: req.body.trade_type    // 交易类型
+    // openid: req.body.openid    // 用户标识
   };
+  // console.log(paramData);
+  // console.log(paramData.trade_type);
+  if(paramData.trade_type == "JSAPI"){
+    // wechat pay
+    paramData['openid'] = req.body.openid;  
+  }
 
   var signStr = commonFunc.rawSort(paramData);
   signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
@@ -367,6 +388,7 @@ exports.addOrder = function(req, res, next) {
     body: xmlString
   }, function(err, response, body){
     var prepay_id = '';
+    // console.log(body);
 
     if (!err && response.statusCode == 200) {       
       var parser = new xml2js.Parser();
@@ -378,6 +400,7 @@ exports.addOrder = function(req, res, next) {
       // 微信生成的预支付会话标识，用于后续接口调用中使用，该值有效期为2小时
       prepay_id = data.xml.prepay_id;
       req.prepay_id = prepay_id;
+      // console.log(prepay_id);
       next();
 
       // res.redirect('/zbtong/?#/shopping/wxpay/'+ orderObject.oid +'/' + data.xml.prepay_id);
@@ -391,81 +414,140 @@ exports.addOrder = function(req, res, next) {
 // 生成微信PaySign，用于发起微信支付请求
 exports.getPaySign = function(req, res, next) {
   prepay_id = req.prepay_id;
+  var wcPayParams;
+  
+  if(req.body.trade_type == "JSAPI"){
+    // wcPayParams['package'] = "prepay_id=" + prepay_id; 
+    wcPayParams = {
+      "appId" : req.wxApiUserObject.appid,     //公众号名称，由商户传入
+      "timeStamp" : commonFunc.createTimestamp(),         //时间戳，自1970年以来的秒数
+      "nonceStr" : commonFunc.createNonceStr(), //随机串
+      // 通过统一下单接口获取
+      "package" : "prepay_id="+prepay_id,
+      "signType" : "MD5"        //微信签名方式
+    };
+    var signStr = commonFunc.rawSort(wcPayParams);
+    signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
+    wcPayParams.paySign = commonFunc.convertToMD5(signStr, true);  //微信支付签名
+    // console.log(wcPayParams);
+    res.json({ results: {
+      appId:req.wxApiUserObject.appid, 
+      timestamp: wcPayParams.timeStamp,
+      nonceStr: wcPayParams.nonceStr,
+      package: wcPayParams.package,
+      signType: wcPayParams.signType,
+      paySign: wcPayParams.paySign,
+      prepay_id : req.prepay_id
+    }});
+  }
+  else{
+    wcPayParams = {
+      "appid" : req.wxApiUserObject.appid,     //公众号名称，由商户传入
+      "partnerid" :req.wxApiUserObject.merchantid,
+      "prepayid":prepay_id,
+      "timestamp" : commonFunc.createTimestamp(),         //时间戳，自1970年以来的秒数
+      "noncestr" : commonFunc.createNonceStr(), //随机串
+      // 通过统一下单接口获取
+      "package" : "Sign=WXPay"
+    };
+    var signStr = commonFunc.rawSort(wcPayParams);
+    signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
+    wcPayParams.paySign = commonFunc.convertToMD5(signStr, true);  //微信支付签名
+    // console.log(wcPayParams);
+    res.json({ results: {
+      appId:req.wxApiUserObject.appid, 
+      timestamp: wcPayParams.timestamp,
+      nonceStr: wcPayParams.noncestr,
+      package: wcPayParams.package,
+      paySign: wcPayParams.paySign,
+      prepay_id : req.prepay_id
+    }});
+  }
 
-  var wcPayParams = {
-    "appId" : req.wxApiUserObject.appid,     //公众号名称，由商户传入
-    "timeStamp" : commonFunc.createTimestamp(),         //时间戳，自1970年以来的秒数
-    "nonceStr" : commonFunc.createNonceStr(), //随机串
-    // 通过统一下单接口获取
-    "package" : "prepay_id="+prepay_id,
-    "signType" : "MD5"        //微信签名方式
-  };
-
-  var signStr = commonFunc.rawSort(wcPayParams);
-  signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
-  wcPayParams.paySign = commonFunc.convertToMD5(signStr, true);  //微信支付签名
-
-  res.json({ results: {
-    appId:req.wxApiUserObject.appid, 
-    timestamp: wcPayParams.timeStamp,
-    nonceStr: wcPayParams.nonceStr,
-    package: wcPayParams.package,
-    signType: wcPayParams.signType,
-    paySign: wcPayParams.paySign
-  }});
 }
 
 // 支付结果通知
-exports.payResult = function(req, res) {  
-  var payDataObject = req.payDataObject;
-  var orderNo = payDataObject.out_trade_no.split('-')[0];
+exports.payResult = function(req, res) { 
+  console.log("payResult111"); 
+ 
+  var body = '';
+  var results = '';
 
-  var query = {
-    orderNo: orderNo
-  }
-
-  Order.getOne(query, function(err, item) {
-        if (err) {
-            return res.status(500).send(err.errmsg);
-        }
-        // res.json({results: item});
-        if(payDataObject.result_code == 'SUCCESS'){
-          if(item.paystatus != 2){    // 非成功
-            var upObj = {
-              paystatus: 2,
-              paytime: payDataObject.time_end
-            };
-
-           updateOrder(query,upObj);   
-          }
-          else{   // 成功
-            res.json({results: "success!"});
-          }
-        }
-        else{       // payDataObject.result_code == 'FAIL'
-          if(item.paystatus != 3){    // 非失败
-            var upObj = {
-              paystatus: 3,
-              paytime: payDataObject.time_end
-            };
-
-            updateOrder(query,upObj);           
-          }
-          else{   // 失败
-            res.json({results: "success!"});
-          }
-        }
+  req.on('data',function(data){
+    body += data;
+    // console.log("partial: " + body);
   });
-}
+  req.on('end',function(){
+    console.log("finish: " + body);
+    var parser = new xml2js.Parser();
+    var jsondata = {};
+   
+    parser.parseString(body, function(err, result) {        
+      jsondata = result || {};
+    });
+    console.log(jsondata);
+    var payRes = jsondata.xml;
 
-function updateOrder(query,upObj){
-  Order.updateOne(query,{$set:upObj},function(err, item){
-    if (err) {
-      return res.status(500).send(err.errmsg);
+    var orderNo = payRes.out_trade_no[0].split('-')[0];
+    
+    var query = {
+      orderNo: orderNo
     }
-    res.json({results: "success!"});
+    
+    Order.getOne(query, function(err, item) {
+          if (err) {
+              results = err.errmsg;
+          }
+          else{
+            // res.json({results: item});
+            if(payRes.result_code == 'SUCCESS'){
+              if(item.paystatus != 2){    // 非成功
+                var upObj = {
+                  paystatus: 2,
+                  paytime: payRes.time_end
+                };
+
+                Order.updateOne(query,{$set:upObj},function(err, item){
+                  if (err) {
+                    results = err.errmsg;
+                  }
+                  else{
+                    results = "success";
+                  }
+                });
+              }
+              else{   // 成功
+                results = "success";
+              }
+            }
+            else{       // payRes.result_code == 'FAIL'
+              if(item.paystatus != 3){    // 非失败
+                var upObj = {
+                  paystatus: 3,
+                  paytime: payRes.time_end
+                };
+
+                Order.updateOne(query,{$set:upObj},function(err, item){
+                  if (err) {
+                    results = err.errmsg;
+                  }
+                  else{
+                    results = "success";
+                  }
+                });         
+              }
+              else{   // 失败
+                results = "success";
+              }
+            }
+          }     
+    });
   });
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  res.end(results);
+
 }
+
 
 // 查询订单
 exports.getWechatOrder = function(req, res) {
@@ -566,8 +648,8 @@ exports.refund = function(req, res) {
   };
 
   var req = https.request(options, (res) => {
-    console.log('statusCode:', res.statusCode);
-    console.log('headers:', res.headers);
+    // console.log('statusCode:', res.statusCode);
+    // console.log('headers:', res.headers);
 
     res.on('data', (d) => {
       // process.stdout.write(d);
@@ -617,53 +699,74 @@ exports.messageTemplate = function(req, res) {
   var tokenObject = req.wxToken || {};
   var token = tokenObject.token;
 
-  var query = {userId: req.body.userId};
-  var role = req.query.role || req.body.role;
- 
-  User.getOne(query, function(err, item) {
-        if (err) {
-            return res.status(500).send(err.errmsg);
-        }
-        // res.json({results: item});
-        if(item === null ){
-          return res.status(400).send('user do not exist');
-        }
-        if(item.MessageOpenId === null){
-          return res.status(400).send('openId do not exist');
-        }
-        if(role == 'doctor'){
-          messageOpenId = item.MessageOpenId.doctorWechat;
-        }
-        else if(role == 'patient'){
-          messageOpenId = item.MessageOpenId.patientWechat;
-        }
-        else if(role == 'test'){
-          messageOpenId = item.MessageOpenId.test;
-        }
-  
-        if(messageOpenId === null){
-          return res.status(400).send('openId do not exist');
+  if(req.body.userId != ''){
+    var query = {userId: req.body.userId};
+    var role = req.query.role || req.body.role;
+   
+    User.getOne(query, function(err, item) {
+          if (err) {
+              return res.status(500).send(err.errmsg);
+          }
+          // res.json({results: item});
+          if(item === null ){
+            return res.status(400).send('user do not exist');
+          }
+          if(item.MessageOpenId === null){
+            return res.status(400).send('openId do not exist');
+          }
+          if(role == 'doctor'){
+            messageOpenId = item.MessageOpenId.doctorWechat;
+          }
+          else if(role == 'patient'){
+            messageOpenId = item.MessageOpenId.patientWechat;
+          }
+          else if(role == 'test'){
+            messageOpenId = item.MessageOpenId.test;
+          }
+    
+          if(messageOpenId === null){
+            return res.status(400).send('openId do not exist');
+          }
+          else{
+            var jsondata = {};
+            jsondata = req.body.postdata;
+            jsondata.touser = messageOpenId;
+
+            request({
+              url: wxApis.messageTemplate + '?access_token=' + token,
+              method: 'POST',
+              body: jsondata,
+              json:true
+            }, function(err, response, body){
+              if (!err && response.statusCode == 200) {   
+                res.json({results:body});
+              }
+              else{
+                return res.status(500).send('Error');
+              }
+            });
+          }
+      });
+  }
+  else if(req.body.userId == ''){
+    if(req.body.postdata.touser != ''){
+      request({
+        url: wxApis.messageTemplate + '?access_token=' + token,
+        method: 'POST',
+        body: req.body.postdata,
+        json:true
+      }, function(err, response, body){
+        if (!err && response.statusCode == 200) {   
+          res.json({results:body});
         }
         else{
-          var jsondata = {};
-          jsondata = req.body.postdata;
-          jsondata.touser = messageOpenId;
-
-          request({
-            url: wxApis.messageTemplate + '?access_token=' + token,
-            method: 'POST',
-            body: jsondata,
-            json:true
-          }, function(err, response, body){
-            if (!err && response.statusCode == 200) {   
-              res.json({results:body});
-            }
-            else{
-              return res.status(500).send('Error');
-            }
-          });
+          return res.status(500).send('Error');
         }
-    });
+      });
+    }
+  }
+
+  
 
   // var jsondata = req.body || {};
   // var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
@@ -774,14 +877,80 @@ exports.receiveTextMessage = function(req, res) {
             patientOpenId: patient_openId,
             time: time
           };
-          console.log(openIdData);
+          // console.log(openIdData);
           var newOpenIdTmp = new OpenIdTmp(openIdData);
           newOpenIdTmp.save(function(err, item) {
             if (err) {
               results = err.errmsg;
             }
             else{
-              results = 'success';
+              // results = 'success';
+              var query = { userId: doctor_userId };
+              Doctor.getOne(query, function (err, doctor) {
+                if (err) {
+                  results = err;
+                }
+                if (doctor == null) {
+                  results = 'doctor not exist';
+                }
+                var name = doctor.name;
+                var title = doctor.title;
+                var workUnit = doctor.workUnit;
+
+                var template = {
+                  "userId": '',          // data.msg.content.doctorId, //医生的UID
+                  "role": "patient",
+                  "postdata": {
+                    "touser": patient_openId,
+                    "template_id": "43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg",
+                    "url": '',
+                    "data": {
+                      "first": {
+                        "value": "您现在已经绑定" + name + "医生为您的主管医生。",//医生姓名
+                        "color": "#173177"
+                      },
+                      "keyword1": {
+                        "value": name, //医生姓名
+                        "color": "#173177"
+                      },
+                      "keyword2": {
+                        "value": title, //医生职称
+                        "color": "#173177"
+                      },
+                      "keyword3": {
+                        "value": workUnit, //所在医院
+                        "color": "#173177"
+                      },
+
+                      "remark": {
+                        "value": "点击底栏【肾事管家】按钮进行注册，注册登录后可查看主管医生详情，并进行咨询问诊。",
+                        "color": "#173177"
+                      }
+                    }
+                  }
+                };
+
+                request({
+                  url: 'http://' + webEntry.domain + ':4050/wechat/messageTemplate',
+                  method: 'POST',
+                  body:template,
+                  json:true
+                }, function(err, response){
+                  if(err){
+                    results = err;
+                  }
+                  else{
+                    results = 'success';
+                  }
+
+                });
+
+
+              });
+
+          
+                     
+              
             }           
           });
         }

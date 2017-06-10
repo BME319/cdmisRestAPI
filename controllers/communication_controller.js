@@ -118,7 +118,7 @@ exports.checkTeam = function (req, res, next) {
     };
     Team.getOne(query, function (err, team) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 团队查询失败!');
         }
         if (team == null) {
@@ -138,7 +138,7 @@ exports.checkCounsel = function (req, res, next) {
     };
     Counsel.getOne(query, function (err, counsel) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 咨询信息查询失败!');
         }
         if (counsel == null) {
@@ -605,7 +605,7 @@ exports.postCommunication = function(req, res) {
         	return res.json({result:'新建成功', newResults: communicationInfo});
         }
         if(msg.targetType=='single'){
-        	console.log("111");
+        	// console.log("111");
             request({
                 url:'http://' + webEntry.domain + ':4050/new/insertNews',
                 method:'POST',
