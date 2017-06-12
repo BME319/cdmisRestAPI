@@ -88,7 +88,11 @@ module.exports = function(app,webEntry) {
   app.get('/user/getMessageOpenId',tokenManager.verifyToken(), userCtrl.checkUser, userCtrl.getMessageOpenId);
 
   // app.post('/user/registerWithOpenId',userCtrl.registerWithOpenIdTest,getNoMid.getNo(1), userCtrl.registerWithOpenId);
-  app.post('/user/reset', tokenManager.verifyToken(), userCtrl.reset);
+
+  // ------------------------------------------------------------------------------------------------------------
+  app.post('/user/reset', userCtrl.reset);
+  // ------------------------------------------------------------------------------------------------------------
+
   app.post('/user/login', userCtrl.openIdLoginTest,userCtrl.checkBinding,userCtrl.login);
   app.post('/user/logout', tokenManager.verifyToken(), userCtrl.logout);
   app.get('/user/getUserID', tokenManager.verifyToken(), userCtrl.getUserID);
