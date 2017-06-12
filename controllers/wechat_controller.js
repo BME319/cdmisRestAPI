@@ -932,7 +932,7 @@ exports.receiveTextMessage = function(req, res) {
                 };
 
                 request({
-                  url: 'http://' + webEntry.domain + ':4050/wechat/messageTemplate',
+                  url: 'http://' + webEntry.domain + ':4050/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                   method: 'POST',
                   body:template,
                   json:true

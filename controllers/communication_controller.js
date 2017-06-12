@@ -607,7 +607,7 @@ exports.postCommunication = function(req, res) {
         if(msg.targetType=='single'){
         	// console.log("111");
             request({
-                url:'http://' + webEntry.domain + ':4050/new/insertNews',
+                url:'http://' + webEntry.domain + ':4050/new/insertNews' + '?token=' + req.query.token || req.body.token,
                 method:'POST',
                 body:bodyGen(msg,communicationInfo['messageNo']),
                 json:true
@@ -617,7 +617,7 @@ exports.postCommunication = function(req, res) {
             });
         }else{
             request({
-                url:'http://' + webEntry.domain + ':4050/new/insertTeamNews',
+                url:'http://' + webEntry.domain + ':4050/new/insertTeamNews' + '?token=' + req.query.token || req.body.token,
                 method:'POST',
                 body:bodyGen(msg,communicationInfo['_id']),
                 json:true
