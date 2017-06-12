@@ -330,6 +330,7 @@ exports.editPatientDetail = function(req, res) {
 	var query = {
 		userId: req.body.userId
 	};
+	var opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true};
 	
 	var upObj = {
 		// revisionInfo:{
@@ -339,9 +340,9 @@ exports.editPatientDetail = function(req, res) {
 		// 	terminalIP:"10.12.43.32"
 		// }
 	};
-	if (req.body.userId != null){
-		upObj['userId'] = req.body.userId;
-	}
+	// if (req.body.userId != null){
+	// 	upObj['userId'] = req.body.userId;
+	// }
 	if (req.body.name != null){
 		upObj['name'] = req.body.name;
 	}
@@ -411,7 +412,7 @@ exports.editPatientDetail = function(req, res) {
 			return res.json({result:'修改失败，不存在的患者ID！'})
 		}
 		res.json({result: '修改成功', results: upPatient});
-	}, {new: true});
+	}, opts);
 }
 
 //新增疾病进程
