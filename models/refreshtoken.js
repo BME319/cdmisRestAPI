@@ -3,8 +3,14 @@ var mongoose = require('mongoose');
 
 var refreshtokenSchema = new mongoose.Schema({
 	refreshtoken: String,						
-	userPayload: String 
-});
+	userPayload: String,
+	createAt: {
+    	type: Date,
+    	default: Date.now,
+    	expires: 60 * 60 * 24 * 14  // 默认2 weeks过期
+  	}
+  },{versionKey:false}); 
+
 
 var refreshtokenModel = mongoose.model('refreshtoken', refreshtokenSchema);
 
