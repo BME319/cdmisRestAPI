@@ -6,6 +6,7 @@ var	config = require('../config'),
         OpenIdTmp = require('../models/openId'),
 		DictNumber = require('../models/dictNumber'),
 		Numbering = require('../models/numbering'),
+        Refreshtoken = require('../models/refreshtoken'),
 		Sms = require('../models/sms'),
 		crypto = require('crypto'),
 		https = require('https'),
@@ -497,7 +498,7 @@ exports.checkBinding = function(req, res,next) {
                         };
                         // console.log(jsondata);
                         request({
-                          url: 'http://' + webEntry.domain + ':4050/patient/bindingMyDoctor',
+                          url: 'http://' + webEntry.domain + ':4050/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
                           method: 'POST',
                           body: jsondata,
                           json: true
@@ -626,27 +627,45 @@ exports.login = function(req, res) {
                         userId: user.userId,
                         role:role
                     };
-                    var token = jwt.sign(userPayload, config.tokenSecret, {algorithm:'HS256'},{expiresIn: config.TOKEN_EXPIRATION});
+                    var token = jwt.sign(userPayload, config.tokenSecret, {algorithm:'HS256'},{expiresIn: config.TOKEN_EXPIRATION}); 
                     
-                    var results = {
-                        status:0,
-                        userId:item.userId,
-                        userName:item.userName||'',
-                        lastlogin:_lastlogindate,
-                        PhotoUrl:item.photoUrl,
-                        mesg:"login success!",
-                        token:token
+                    var sha1 = crypto.createHash('sha1');
+                    var refreshToken = sha1.update(token).digest('hex');
+                    
+                    // JSON.stringify(userPayload),
+                    var refreshtokenData = {
+                        refreshtoken: refreshToken,
+                        userPayload: JSON.stringify(userPayload)
                     };
 
-                    //2017-06-07GY调试
-                    // console.log('login_success');
+                    var newRefreshtoken = new Refreshtoken(refreshtokenData);
+                    newRefreshtoken.save(function(err, Info) {
+                        if (err) {
+                            return res.status(500).send(err.errmsg);
+                        }
+                        var results = {
+                            status: 0,
+                            userId: item.userId,
+                            userName: item.userName || '',
+                            lastlogin: _lastlogindate,
+                            PhotoUrl: item.photoUrl,
+                            mesg: "login success!",
+                            token: token,
+                            refreshToken: refreshToken
+                        };
 
-                    res.json({results: results});
+                        //2017-06-07GY调试
+                        // console.log('login_success');
+
+                        res.json({results: results});
+                    });
+                    
                 });
             }
         }
     });
 }
+
 exports.logout = function(req, res) {
     var _userId = req.query.userId
     var query = {userId:_userId};

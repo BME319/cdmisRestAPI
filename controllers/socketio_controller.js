@@ -46,7 +46,7 @@ function messageSaveSend(data, url){
         content:data.msg
     }
     request({
-        url: url,
+        url: url + '?token=' + req.query.token || req.body.token,
         method: 'POST',
         body: jsondata,
         json:true
@@ -83,7 +83,7 @@ function messageSaveSend(data, url){
             else{           // 群聊
                 // console.log(receiver);
                 request({
-                    url: 'http://' + webEntry.domain + ':4050/communication/getTeam?teamId=' + data.msg.teamId,
+                    url: 'http://' + webEntry.domain + ':4050/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
                     method: 'GET',
                     json:true
                 }, function(err, response){
@@ -165,7 +165,7 @@ function messageSaveSend(data, url){
 
                                     // groupSend(data);
                                     request({
-                                        url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate',
+                                        url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                                         method: 'POST',
                                         body: template,
                                         json:true
@@ -256,7 +256,7 @@ exports.chat = function (io, socket) {
         
             // download
             request({
-                url: url + '?serverId=' + mediaId + '&name=' + name + '&role=' + role,
+                url: url + '?serverId=' + mediaId + '&name=' + name + '&role=' + role + '?token=' + req.query.token || req.body.token,
                 method: 'GET',
                 json: true
             }, function(err, response){
