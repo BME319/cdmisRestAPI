@@ -288,6 +288,11 @@ module.exports = function(app,webEntry) {
   app.post('/jm/groups', tokenManager.verifyToken(), jpushCtrl.createGroup);
   app.post('/jm/groups/members', tokenManager.verifyToken(), jpushCtrl.updateGroup);
 
+  // 自定义菜单
+  app.post('/wechat/createCustomMenu', tokenManager.verifyToken(), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createCustomMenu);
+  app.get('/wechat/getCustomMenu', tokenManager.verifyToken(), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.getCustomMenu);
+  app.get('/wechat/deleteCustomMenu', tokenManager.verifyToken(), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.deleteCustomMenu);
+
   //获取二维码相关方法
   // app.get('/getAllDoctors', tokenManager.verifyToken(), getQRcodeCtrl.getAllDoctors);
   // app.post('/saveAllTDCticket', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket);
