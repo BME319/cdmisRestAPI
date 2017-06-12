@@ -13,6 +13,7 @@ var userSchema = new mongoose.Schema({
 	loginStatus:Number,
 	lastLogin:Date,
 	TDCticket: String,
+	TDCurl: String,
 	MessageOpenId:{
 		doctorWechat:String,
 		patientWechat:String,

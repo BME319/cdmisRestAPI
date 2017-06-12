@@ -906,14 +906,15 @@ exports.getPhoneNoByRole = function(req, res) {
 
 exports.setTDCticket = function(req,res){
     var TDCticket = req.results.ticket;
+    var TDCurl = req.results.url;
     var userId = req.body.userId;
 
     var query = {userId: userId};
-    User.updateOne(query,{$set:{TDCticket: TDCticket}},function(err, item){
+    User.updateOne(query,{$set:{TDCticket: TDCticket,TDCurl: TDCurl}},function(err, item){
         if (err) {
             return res.status(500).send(err.errmsg);
         }
-        res.json({results: TDCticket});
+        res.json({results: {TDCticket: TDCticket, TDCurl: TDCurl}});
     });
 
 }
@@ -1060,8 +1061,8 @@ exports.setMessageOpenId = function(req,res){
         }
         res.json({results:0,resultitem: item});
     }, {new: true});
-
 }
+
 exports.getMessageOpenId = function(req,res){
     var _type = req.query.type;
     var userId = req.query.userId;
