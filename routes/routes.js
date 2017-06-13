@@ -140,7 +140,7 @@ module.exports = function(app,webEntry) {
   app.post('/counsel/changeCounselStatus', tokenManager.verifyToken(), counselCtrl.changeCounselStatus);
   app.get('/counsel/getStatus', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus);
 
-  app.post('/counsel/changeStatus', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus);
+  app.post('/counsel/changeStatus', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus);
   app.post('/counsel/changeType', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType);
   app.post('/counsel/insertCommentScore', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
 

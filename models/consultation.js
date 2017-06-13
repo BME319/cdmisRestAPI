@@ -91,7 +91,20 @@ Consultation.updateOne = function(query, obj, callback, opts, populate) {
 		});
 };
 
+Consultation.update = function (query, obj, callback, opts, populate) {
+  var options = opts || {};
+  var populate = populate || '';
 
+  consultationModel
+  	.update(query, obj, options)
+  	.populate(populate) 
+  	.exec(function (err, upconsultation) {
+    	if (err) {
+      		return callback(err);
+    	}
+    callback(null, upconsultation);
+  });
+};
 
 
 module.exports = Consultation;

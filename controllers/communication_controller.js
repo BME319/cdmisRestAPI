@@ -280,8 +280,8 @@ exports.conclusion = function(req, res) {
 	};
 	
 	var upObj = {
-		conclusion: req.body.conclusion, 
-		status: status
+		conclusion: req.body.conclusion//, 
+		// status: status
 	};
 	//return res.json({query: query, upObj: upObj});
 	Consultation.updateOne(query, upObj, function(err, upConclusion) {
