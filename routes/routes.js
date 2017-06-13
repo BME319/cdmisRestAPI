@@ -147,7 +147,7 @@ module.exports = function(app,webEntry) {
 
   //patient_Info
   app.get('/patient/getPatientDetail', tokenManager.verifyToken(), patientCtrl.getPatientDetail);
-  app.get('/patient/getMyDoctors', tokenManager.verifyToken(), patientCtrl.getMyDoctor);
+  app.get('/patient/getMyDoctors', tokenManager.verifyToken(), patientCtrl.getPatientObject, patientCtrl.getMyDoctor);
   app.post('/patient/insertDiagnosis', tokenManager.verifyToken(), patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail);
   app.get('/patient/getDoctorLists', tokenManager.verifyToken(), patientCtrl.getDoctorLists);
   app.post('/patient/newPatientDetail', tokenManager.verifyToken(), patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
