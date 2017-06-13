@@ -587,7 +587,8 @@ exports.postCommunication = function(req, res) {
 		sendBy: req.body.sendBy, 
 		receiver: req.body.receiver, 
 		sendDateTime: req.body.content.createTimeInMillis, 
-		content: req.body.content
+		content: req.body.content, 
+		newsType: req.body.content.newsType
 	};
 	
 
@@ -660,6 +661,7 @@ exports.getCommunication = function(req, res) {
 	var messageType = Number(req.query.messageType);
 	var id1 = req.query.id1;
 	var id2 = req.query.id2;
+	var newsType = req.query.newsType;
 
 	var limit = Number(req.query.limit);
 	var skip = Number(req.query.skip);
@@ -670,6 +672,7 @@ exports.getCommunication = function(req, res) {
 	var messageTypeUrl = 'messageType=' + String(messageType);
 	var id1Url = 'id1=' + id1;
 	var id2Url = 'id2=' + id2;
+	var newsTypeUrl = 'newsType=' + newsType;
 	var limitUrl = '';
 	var skipUrl = '';
 
@@ -679,7 +682,7 @@ exports.getCommunication = function(req, res) {
 	if (skip != null && skip != undefined) {
 		skipUrl = 'skip=' + String(skip + limit);
 	}
-	if (messageTypeUrl != '' || id1Url != '' || id2Url != '' || limitUrl != '' || skipUrl != '') {
+	if (messageTypeUrl != '' || id1Url != '' || id2Url != '' || newsTypeUrl != '' || limitUrl != '' || skipUrl != '') {
 		_Url = _Url + '?'
 		if (messageTypeUrl != '') {
 			_Url = _Url + messageTypeUrl + '&';
@@ -689,6 +692,9 @@ exports.getCommunication = function(req, res) {
 		}
 		if (id2Url != '') {
 			_Url = _Url + id2Url + '&';
+		}
+		if (newsTypeUrl != '') {
+			_Url = _Url + newsTypeUrl + '&';
 		}
 		if (limitUrl != '') {
 			_Url = _Url + limitUrl + '&';
@@ -722,6 +728,19 @@ exports.getCommunication = function(req, res) {
 				{sendBy: id2, receiver: id1}
 			]
 		};
+		if (newsType != '') {
+			// query = {
+			// 	$or: [
+			// 		{sendBy: id1, receiver: id2}, 
+			// 		{sendBy: id2, receiver: id1}
+			// 	], 
+			// 	$or: [
+			// 		{'newsType': newsType}, 
+			// 		{'content.newsType': newsType}
+			// 	]
+			// };
+			query['newsType'] = newsType;
+		}
 
 		Communication.getSome(query, function(err, items) {
 			if (err) {
@@ -802,4 +821,22 @@ function bodyGen(msg,MESSAGE_ID){
     // }
     body.url = JSON.stringify(msg);
     return body;
+}
+
+//临时方法：给所有的消息记录加上一个newsType的字段，来源于原content.newsType 2017-06-13 GY 
+exports.addnewsType = function(req, res) {
+	var newsType = req.query.newsType;
+	// var newsType = Number(req.query.newsType);
+	var query = {'content.newsType':newsType};
+	var upObj = {newsType:newsType};
+	var opts = {multi:true};
+
+	Communication.update(query, upObj, function(err, upitems) {
+		if (err) {
+			console.log(err);
+		}
+		else {
+			return res.json({results:upitems});
+		}
+	}, opts);
 }

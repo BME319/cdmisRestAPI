@@ -206,6 +206,8 @@ module.exports = function(app,webEntry) {
   app.get('/communication/getConsultation', tokenManager.verifyToken(), communicationCtrl.getConsultation);
   app.post('/communication/postCommunication', tokenManager.verifyToken(), getNoMid.getNo(8),communicationCtrl.postCommunication);
   app.get('/communication/getCommunication', tokenManager.verifyToken(), communicationCtrl.getCommunication);
+  // 临时接口：给原数据写入newsType字段
+  // app.get('/communication/updateNewsType', communicationCtrl.addnewsType);
 
   //task
   app.post('/tasks/insertTaskModel', tokenManager.verifyToken(), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel);
