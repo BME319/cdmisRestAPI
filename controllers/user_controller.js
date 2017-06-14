@@ -14,7 +14,7 @@ var	config = require('../config'),
         webEntry = require('../settings').webEntry,
         request = require('request'),
         jwt = require('jsonwebtoken');
-
+var Patient = require('../models/patient');
 var commonFunc = require('../middlewares/commonFunc');
 var Base64 = {  
     // 转码表  
@@ -324,6 +324,17 @@ exports.register = function(req, res) {
     newUser.save(function(err, Info) {
         if (err) {
             return res.status(500).send(err.errmsg);
+        }
+        if (_role == 'patient') {
+            var PatientData = {
+                userId: _userNo
+            }
+            var newPatient = new Patient(PatientData);
+            newPatient.save(function(err, patientInfo) {
+                if (err) {
+                    return res.status(500).send(err.errmsg);
+                }
+            });
         }
         res.json({results: 0,userNo:_userNo,mesg:"User Register Success!"});
     });
