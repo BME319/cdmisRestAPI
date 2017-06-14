@@ -158,6 +158,7 @@ module.exports = function(app,webEntry) {
 
   app.post('/patient/bindingMyDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
   app.post('/patient/changeVIP', tokenManager.verifyToken(), patientCtrl.changeVIP);
+  app.post('/patient/wechatPhotoUrl', tokenManager.verifyToken(), patientCtrl.wechatPhotoUrl);
 
   //comment_query
   app.get('/comment/getComments', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, commentCtrl.getCommentsByDoc);

@@ -844,3 +844,35 @@ exports.changeVIP = function(req, res) {
 		res.json({result: '修改成功', results: upPatient});
 	}, {new: true});
 }
+
+//患者头像不存在时使用微信头像 2017-06-14 GY
+exports.wechatPhotoUrl = function(req, res) {
+	if (req.query.patientId == null || req.query.patientId == '') {
+		return res.json({results: '请填写userId'});
+	}
+	if (req.body.wechatPhotoUrl == null || req.body.wechatPhotoUrl == '') {
+		return res.json({results: '请填写wechatPhotoUrl'});
+	}
+	var query = {userId: req.query.patientId};
+	var newPhotoUrl = req.query.wechatPhotoUrl;
+	Patient.getOne(query, function(err, item) {
+		if (err) {
+			return res.status(500).send(err.errmsg);
+		}
+		if (item == null) {
+			return res.json({results: '不存在的患者ID'});
+		}
+		else if (item.photoUrl == undefined) {
+			var upObj = {photoUrl: newPhotoUrl};
+			Patient.updateOne(query, upObj, function(err, upitem) {
+				if (err) {
+					return res.status(500).send(err.errmsg);
+				}
+				return res.json({results: '头像已更新', editResults: upitem});
+			});
+		}
+		else {
+			return res.json({results: '已存在头像，未更新'});
+		}
+	});
+}
