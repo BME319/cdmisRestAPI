@@ -11,7 +11,8 @@ var Wechat = require('../models/wechat');
 
 // middlewares
 var getNoMid = require('../middlewares/getNoMid'),
-    tokenManager = require('../middlewares/tokenManager');
+    tokenManager = require('../middlewares/tokenManager'),
+    aclChecking = require('../middlewares/aclChecking');
 
 // controllers
 var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
@@ -28,7 +29,8 @@ var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
     taskCtrl = require('../controllers/task_controller'),
     orderCtrl = require('../controllers/order_controller'),
     complianceCtrl = require('../controllers/compliance_controller'),
-    jpushCtrl = require('../controllers/jpush_controller');
+    jpushCtrl = require('../controllers/jpush_controller'),
+    aclsettingCtrl = require('../controllers/aclsetting_controller');
 
 // controllers updated by GY 
 var doctorCtrl = require('../controllers/doctor_controller'), 
@@ -48,8 +50,8 @@ var labtestResultCtrl = require('../controllers/labtestResult_controller');
 
 var wechatCtrl = require('../controllers/wechat_controller');
 
-module.exports = function(app,webEntry) {
-  
+module.exports = function(app,webEntry, acl) {
+
   //app.use('/static', express.static( './static')).
   //    use('/images', express.static( '../images')).
   //    use('/lib', express.static( '../lib')
@@ -75,6 +77,7 @@ module.exports = function(app,webEntry) {
   app.get('/tasks',  taskCtrl.getTasks);
   app.get('/tasks/status',  taskCtrl.updateStatus);
   app.get('/tasks/time',  taskCtrl.updateStartTime);
+
   // app.post('/compliance', complianceCtrl.insertOne);
   app.get('/compliance',  complianceCtrl.getComplianceByDay);
 
@@ -94,17 +97,18 @@ module.exports = function(app,webEntry) {
   // ------------------------------------------------------------------------------------------------------------
 
   app.post('/user/login', userCtrl.openIdLoginTest,userCtrl.checkBinding,userCtrl.login);
-  app.post('/user/logout', userCtrl.logout);
-  app.get('/user/getUserID', userCtrl.getUserID);
-  app.get('/user/getUserIDbyOpenId', userCtrl.getUserIDbyOpenId);
+  app.post('/user/logout',  userCtrl.logout);
+  app.get('/user/getUserID',  userCtrl.getUserID);
+  app.get('/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
+
   app.post('/user/sendSMS',  userCtrl.sendSMS);
   app.get('/user/verifySMS',  userCtrl.verifySMS);
   app.get('/user/getUserAgreement',  userCtrl.getUserAgreement);
   app.post('/user/updateUserAgreement',  userCtrl.updateUserAgreement);
   app.get('/healthInfo/getAllHealthInfo',  healthInfoCtrl.getAllHealthInfo);
   app.get('/healthInfo/getHealthDetail',  healthInfoCtrl.getHealthDetail);
-  app.post('/healthInfo/insertHealthInfo', healthInfoCtrl.insertHealthInfo);
-  app.post('/healthInfo/modifyHealthDetail', healthInfoCtrl.modifyHealthDetail);
+  app.post('/healthInfo/insertHealthInfo',  healthInfoCtrl.insertHealthInfo);
+  app.post('/healthInfo/modifyHealthDetail',  healthInfoCtrl.modifyHealthDetail);
   app.post('/healthInfo/deleteHealthDetail',  healthInfoCtrl.deleteHealthDetail);
   // app.get('/dictNumber/getNo', getNoMid.getNo(), dictNumberCtrl.getNo);
   // app.get('/user/getIp', userCtrl.getIp); 
@@ -119,17 +123,19 @@ module.exports = function(app,webEntry) {
   //需要查询class字典表（待定）
   app.get('/doctor/getPatientList',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
   // app.get('/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
-  app.get('/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
-  app.get('/doctor/getMyGroupList', doctorCtrl.getTeams);
+  app.get('/doctor/getDoctorInfo',  doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
+  app.get('/doctor/getMyGroupList',  doctorCtrl.getTeams);
   app.get('/doctor/getGroupPatientList',  doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
   // app.get('/doctor/getTeam', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
-  app.post('/doctor/editDoctorDetail', doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember);
+  app.post('/doctor/editDoctorDetail',  doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember);
+
   app.get('/doctor/getRecentDoctorList',  doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList);
   app.get('/doctor/getPatientByDate',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate);
   app.post('/doctor/insertSchedule',  doctorCtrl.insertSchedule);
   app.post('/doctor/deleteSchedule',  doctorCtrl.deleteSchedule);
   app.get('/doctor/getSchedules',  doctorCtrl.getSchedules);
   app.post('/doctor/insertSuspendTime',  doctorCtrl.insertSuspendTime);
+
   app.post('/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime);
   app.get('/doctor/getSuspendTime', doctorCtrl.getSuspendTime);
   app.get('/doctor/getDocNum', doctorCtrl.getDocNum);
@@ -145,8 +151,10 @@ module.exports = function(app,webEntry) {
   app.post('/counsel/insertCommentScore', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
 
 
+
   //patient_Info
   app.get('/patient/getPatientDetail',  patientCtrl.getPatientDetail);
+
   app.get('/patient/getMyDoctors',  patientCtrl.getPatientObject, patientCtrl.getMyDoctor);
   app.post('/patient/insertDiagnosis',  patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail);
   app.get('/patient/getDoctorLists',  patientCtrl.getDoctorLists);
@@ -167,11 +175,12 @@ module.exports = function(app,webEntry) {
   app.get('/vitalSign/getVitalSigns',  patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns);
   app.post('/vitalSign/insertVitalSign', vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData);
 
+
   //account_Info
   //需要和user表连接
   //无法输出expenseRecords数据，暂时无法解决问题
   app.get('/account/getAccountInfo',  accountCtrl.getAccountInfo);
-  app.get('/account/getCounts', accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts);
+  app.get('/account/getCounts',  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts);
   app.post('/account/modifyCounts',  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts);
   // app.post('/account/rechargeDoctor', accountCtrl.rechargeDoctor);
   app.post('/account/updateFreeTime',  accountCtrl.checkPatient, accountCtrl.updateFreeTime);
@@ -204,11 +213,14 @@ module.exports = function(app,webEntry) {
   app.post('/communication/conclusion',  communicationCtrl.conclusion);
   app.post('/communication/updateLastTalkTime',  communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime);
   //app.get('/communication/getMessages');
+
   app.get('/communication/getConsultation',  communicationCtrl.getConsultation);
   app.post('/communication/postCommunication',  getNoMid.getNo(8),communicationCtrl.postCommunication);
   app.get('/communication/getCommunication',  communicationCtrl.getCommunication);
+
   // 临时接口：给原数据写入newsType字段
   // app.get('/communication/updateNewsType', communicationCtrl.addnewsType);
+
 
   //task
   app.post('/tasks/insertTaskModel',  taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel);
@@ -225,6 +237,7 @@ module.exports = function(app,webEntry) {
   app.get('/insurance/getPrefer',  insuranceCtrl.getPrefer);
 
   //advice
+
   app.post('/advice/postAdvice',  adviceCtrl.postAdvice);
   app.get('/advice/getAdvice',  adviceCtrl.getAdvice);
 
@@ -312,5 +325,25 @@ module.exports = function(app,webEntry) {
   // app.get('/user/:userid', function(req, res){
   //   res.send("Get User: " + req.param("userid"));
   // });
+
+  app.post('/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl));
+  app.post('/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl));
+  app.get('/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl));
+  app.get('/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl));
+
+  app.get('/acl/roleUsers', tokenManager.verifyToken(), aclsettingCtrl.roleUsers(acl)); 
+  app.post('/acl/roleParents', tokenManager.verifyToken(), aclsettingCtrl.addRoleParents(acl));
+  app.post('/acl/removeRoleParents', tokenManager.verifyToken(), aclsettingCtrl.removeRoleParents(acl));
+  app.post('/acl/removeRole', tokenManager.verifyToken(), aclsettingCtrl.removeRole(acl));
+  
+  app.post('/acl/allow', tokenManager.verifyToken(), aclsettingCtrl.allow(acl));
+  app.post('/acl/removeAllow', tokenManager.verifyToken(), aclsettingCtrl.removeAllow(acl));  
+  app.get('/acl/allow', tokenManager.verifyToken(), aclsettingCtrl.allowedPermissions(acl));
+  app.get('/acl/isAllowed', tokenManager.verifyToken(), aclsettingCtrl.isAllowed(acl));
+
+  app.post('/acl/removeResource', tokenManager.verifyToken(), aclsettingCtrl.removeResource(acl));
+  app.get('/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl));
+  app.get('/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl));
+
 };
 
