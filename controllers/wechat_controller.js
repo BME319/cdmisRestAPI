@@ -40,8 +40,14 @@ var wxApis = {
   // download
   download:'http://file.api.weixin.qq.com/cgi-bin/media/get',
   // createTDCticket 创建永久二维码
-  createTDCticket: 'https://api.weixin.qq.com/cgi-bin/qrcode/create'
-
+  createTDCticket: 'https://api.weixin.qq.com/cgi-bin/qrcode/create', 
+  //自定义菜单
+  //创建
+  createCustomMenu: 'https://api.weixin.qq.com/cgi-bin/menu/create', 
+  //查询
+  getCustomMenu: 'https://api.weixin.qq.com/cgi-bin/menu/get', 
+  //删除
+  deleteCustomMenu: 'https://api.weixin.qq.com/cgi-bin/menu/delete'
 };
 
 // var wxApiUserObject = config.wxDeveloperConfig.zdyyszbzx;
@@ -1171,3 +1177,60 @@ exports.wxJsSdkReqMedia = function (req, res, next) {
             next()
         });
 };
+
+
+//自定义菜单接口 2017-06-12 GY
+//创建接口
+exports.createCustomMenu = function(req, res) {
+    var tokenObject = req.wxToken || {};
+    var token = tokenObject.token;
+    var jsondata = req.body.postdata; //请求内容
+
+    request({
+      url: wxApis.createCustomMenu + '?access_token=' + token,
+      method: 'POST',
+      body: jsondata,
+      json: true
+    }, function(err, response, body){
+      if (err) {
+          return res.status(500).send('Error');
+      }
+      else {
+        res.json({results: body});
+      }
+    });
+}
+//查询接口
+exports.getCustomMenu = function(req, res) {
+    var tokenObject = req.wxToken || {};
+    var token = tokenObject.token;
+
+    request({
+      url: wxApis.getCustomMenu + '?access_token=' + token,
+      method: 'GET'
+    }, function(err, response, body){
+      if (err) {
+          return res.status(500).send('Error');
+      }
+      else {
+        res.json({results: body});
+      }
+    });
+}
+//删除接口
+exports.deleteCustomMenu = function(req, res) {
+    var tokenObject = req.wxToken || {};
+    var token = tokenObject.token;
+
+    request({
+      url: wxApis.deleteCustomMenu + '?access_token=' + token,
+      method: 'GET'
+    }, function(err, response, body){
+      if (err) {
+          return res.status(500).send('Error');
+      }
+      else {
+        res.json({results: body});
+      }
+    });
+}
