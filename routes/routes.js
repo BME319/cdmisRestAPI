@@ -140,14 +140,14 @@ module.exports = function(app,webEntry) {
   app.post('/counsel/changeCounselStatus', tokenManager.verifyToken(), counselCtrl.changeCounselStatus);
   app.get('/counsel/getStatus', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus);
 
-  app.post('/counsel/changeStatus', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus);
+  app.post('/counsel/changeStatus', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus);
   app.post('/counsel/changeType', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType);
   app.post('/counsel/insertCommentScore', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
 
 
   //patient_Info
   app.get('/patient/getPatientDetail', tokenManager.verifyToken(), patientCtrl.getPatientDetail);
-  app.get('/patient/getMyDoctors', tokenManager.verifyToken(), patientCtrl.getMyDoctor);
+  app.get('/patient/getMyDoctors', tokenManager.verifyToken(), patientCtrl.getPatientObject, patientCtrl.getMyDoctor);
   app.post('/patient/insertDiagnosis', tokenManager.verifyToken(), patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail);
   app.get('/patient/getDoctorLists', tokenManager.verifyToken(), patientCtrl.getDoctorLists);
   app.post('/patient/newPatientDetail', tokenManager.verifyToken(), patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
@@ -206,6 +206,8 @@ module.exports = function(app,webEntry) {
   app.get('/communication/getConsultation', tokenManager.verifyToken(), communicationCtrl.getConsultation);
   app.post('/communication/postCommunication', tokenManager.verifyToken(), getNoMid.getNo(8),communicationCtrl.postCommunication);
   app.get('/communication/getCommunication', tokenManager.verifyToken(), communicationCtrl.getCommunication);
+  // 临时接口：给原数据写入newsType字段
+  // app.get('/communication/updateNewsType', communicationCtrl.addnewsType);
 
   //task
   app.post('/tasks/insertTaskModel', tokenManager.verifyToken(), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel);

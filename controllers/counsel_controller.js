@@ -3,7 +3,8 @@ var	config = require('../config'),
 	Counsel = require('../models/counsel'), 
 	Doctor = require('../models/doctor'), 
 	Comment = require('../models/comment'), 
-	Patient = require('../models/patient');
+	Patient = require('../models/patient'), 
+	Consultation = require('../models/consultation');
 
 
 //根据状态、类型、获取咨询问诊信息 2017-03-28 GY
@@ -183,7 +184,7 @@ exports.saveQuestionaire = function(req, res) {
 	});
 }
 
-exports.changeCounselStatus = function(req, res) {
+exports.changeCounselStatus = function(req, res, next) {
 	if (req.body.counselId == null || req.body.counselId == '') {
 		return res.json({result:'请填写counselId!'});
 	}
@@ -212,8 +213,32 @@ exports.changeCounselStatus = function(req, res) {
 		if (upCounsel == null) {
 			return res.json({result:'修改失败，不存在的counselId！'})
 		}
-		res.json({result: '修改成功', editResults:upCounsel});
+		// res.json({result: '修改成功', editResults:upCounsel});
+		else {
+			// req.counsel_id = upCounsel._id;
+			// req.status = upCounsel.status;
+			req.editResults = upCounsel;
+			// console.log(req.counsel_id, req.status);
+			next();
+		}
 	}, {new: true});
+}
+exports.changeConsultationStatus = function(req, res) {
+	var query = {diseaseInfo: req.editResults._id};
+	var upObj = {status: req.editResults.status};
+	var opts = {multi:true};
+
+	Consultation.update(query, upObj, function(err, upitems) {
+		if (err) {
+			res.status(500).send(err.errmsg);
+		}
+		else if (upitems.ok == 0) {
+			return res.status(500).send('数据库连接失败');
+		}
+		else {
+			return res.json({result: '修改成功', editResults:req.editResults});
+		}
+	}, opts);
 }
 
 //根据医生患者获取咨询问诊状态
