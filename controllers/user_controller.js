@@ -6,6 +6,7 @@ var	config = require('../config'),
         OpenIdTmp = require('../models/openId'),
 		DictNumber = require('../models/dictNumber'),
 		Numbering = require('../models/numbering'),
+        Refreshtoken = require('../models/refreshtoken'),
 		Sms = require('../models/sms'),
 		crypto = require('crypto'),
 		https = require('https'),
@@ -13,7 +14,7 @@ var	config = require('../config'),
         webEntry = require('../settings').webEntry,
         request = require('request'),
         jwt = require('jsonwebtoken');
-
+var Patient = require('../models/patient');
 var commonFunc = require('../middlewares/commonFunc');
 var Base64 = {  
     // 转码表  
@@ -324,6 +325,17 @@ exports.register = function(req, res) {
         if (err) {
             return res.status(500).send(err.errmsg);
         }
+        if (_role == 'patient') {
+            var PatientData = {
+                userId: _userNo
+            }
+            var newPatient = new Patient(PatientData);
+            newPatient.save(function(err, patientInfo) {
+                if (err) {
+                    return res.status(500).send(err.errmsg);
+                }
+            });
+        }
         res.json({results: 0,userNo:_userNo,mesg:"User Register Success!"});
     });
 }
@@ -427,6 +439,10 @@ exports.setOpenIdRes = function(req, res){
     res.json({results: "success!"});
 }
 exports.openIdLoginTest = function(req, res,next) {
+
+    //2017-06-07GY调试
+    // console.log('openIdLoginTest_in');
+
     var username = req.body.username;
     if (username === '' ) {
         return res.status(422).send('请输入用户名!'); 
@@ -444,10 +460,18 @@ exports.openIdLoginTest = function(req, res,next) {
             openIdFlag=1;
         }
         req.openIdFlag=openIdFlag;
+
+        //2017-06-07GY调试
+        // console.log('openIdLoginTest_out');
+
         next();
     });
 }
 exports.checkBinding = function(req, res,next) {
+
+    //2017-06-07GY调试
+    // console.log('checkBinding_in');
+
     var username = req.body.username;
     // console.log(username);
     var query = {
@@ -485,7 +509,7 @@ exports.checkBinding = function(req, res,next) {
                         };
                         // console.log(jsondata);
                         request({
-                          url: 'http://' + webEntry.domain + ':4050/patient/bindingMyDoctor',
+                          url: 'http://' + webEntry.domain + ':4050/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
                           method: 'POST',
                           body: jsondata,
                           json: true
@@ -499,6 +523,9 @@ exports.checkBinding = function(req, res,next) {
                                 if (err) {
                                     return res.status(500).send(err.errmsg);
                                 }
+
+                                //2017-06-07GY调试
+                                // console.log('checkBinding_out');
 
                                 next();
                             })
@@ -520,22 +547,38 @@ exports.checkBinding = function(req, res,next) {
                         // else{
                         //     next();
                         // }
+
+                        //2017-06-07GY调试
+                        // console.log('checkBinding_out');
+
                         next();
                       
                     }
                 });
             }
             else{
+
+                //2017-06-07GY调试
+                // console.log('checkBinding_out');
+
                 next();
             }
         }
         else{
+
+            //2017-06-07GY调试
+            // console.log('checkBinding_err_user_not_exist');
+
             res.json({results: 1,mesg:"User doesn't Exist!"});
         }
   
     });
 }
 exports.login = function(req, res) {
+
+    //2017-06-07GY调试
+    // console.log('login_in');
+
     var username = req.body.username;
     var password = req.body.password;
     var role = req.body.role;
@@ -556,15 +599,27 @@ exports.login = function(req, res) {
             return res.status(500).send(err.errmsg);
         }
         if(item==null){
+
+            //2017-06-07GY调试
+            // console.log('login_err_user_not_exist');
+
             res.json({results: 1,mesg:"User doesn't Exist!"});
         }
         else{
 
             if(password!=item.password&&openIdFlag==0){
+
+                //2017-06-07GY调试
+                // console.log('login_err_password_not_correct');
+
                 res.json({results: 1,mesg:"User password isn't correct!"});
             }
             else if(item.role.indexOf(role) == -1)
             {
+
+                //2017-06-07GY调试
+                // console.log('login_err_no_authority');
+
                 res.json({results: 1,mesg:"No authority!"});
             }
             else
@@ -583,24 +638,45 @@ exports.login = function(req, res) {
                         userId: user.userId,
                         role:role
                     };
-                    var token = jwt.sign(userPayload, config.tokenSecret, {algorithm:'HS256'},{expiresIn: config.TOKEN_EXPIRATION});
+                    var token = jwt.sign(userPayload, config.tokenSecret, {algorithm:'HS256'},{expiresIn: config.TOKEN_EXPIRATION}); 
                     
-                    var results = {
-                        status:0,
-                        userId:item.userId,
-                        userName:item.userName||'',
-                        lastlogin:_lastlogindate,
-                        PhotoUrl:item.photoUrl,
-                        mesg:"login success!",
-                        token:token
+                    var sha1 = crypto.createHash('sha1');
+                    var refreshToken = sha1.update(token).digest('hex');
+                    
+                    // JSON.stringify(userPayload),
+                    var refreshtokenData = {
+                        refreshtoken: refreshToken,
+                        userPayload: JSON.stringify(userPayload)
                     };
 
-                    res.json({results: results});
+                    var newRefreshtoken = new Refreshtoken(refreshtokenData);
+                    newRefreshtoken.save(function(err, Info) {
+                        if (err) {
+                            return res.status(500).send(err.errmsg);
+                        }
+                        var results = {
+                            status: 0,
+                            userId: item.userId,
+                            userName: item.userName || '',
+                            lastlogin: _lastlogindate,
+                            PhotoUrl: item.photoUrl,
+                            mesg: "login success!",
+                            token: token,
+                            refreshToken: refreshToken
+                        };
+
+                        //2017-06-07GY调试
+                        // console.log('login_success');
+
+                        res.json({results: results});
+                    });
+                    
                 });
             }
         }
     });
 }
+
 exports.logout = function(req, res) {
     var _userId = req.query.userId
     var query = {userId:_userId};
@@ -838,7 +914,7 @@ exports.getPhoneNoByRole = function(req, res) {
     }
 
     var query = {role:req.query.role};
-    var fields = {userName:1, phoneNo:1, _id:0}
+    var fields = {userId:1, userName:1, phoneNo:1, _id:0}
 
     User.getSome(query, function(err, items) {
         if (err) {
@@ -860,14 +936,15 @@ exports.getPhoneNoByRole = function(req, res) {
 
 exports.setTDCticket = function(req,res){
     var TDCticket = req.results.ticket;
+    var TDCurl = req.results.url;
     var userId = req.body.userId;
 
     var query = {userId: userId};
-    User.updateOne(query,{$set:{TDCticket: TDCticket}},function(err, item){
+    User.updateOne(query,{$set:{TDCticket: TDCticket,TDCurl: TDCurl}},function(err, item){
         if (err) {
             return res.status(500).send(err.errmsg);
         }
-        res.json({results: TDCticket});
+        res.json({results: {TDCticket: TDCticket, TDCurl: TDCurl}});
     });
 
 }
@@ -1014,8 +1091,8 @@ exports.setMessageOpenId = function(req,res){
         }
         res.json({results:0,resultitem: item});
     }, {new: true});
-
 }
+
 exports.getMessageOpenId = function(req,res){
     var _type = req.query.type;
     var userId = req.query.userId;

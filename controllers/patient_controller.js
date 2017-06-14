@@ -3,6 +3,7 @@ var	config = require('../config'),
 	Patient = require('../models/patient'), 
 	Doctor = require('../models/doctor'), 
 	DpRelation = require('../models/dpRelation'), 
+	User = require('../models/user'), 
 	commonFunc = require('../middlewares/commonFunc'), 
 	Counsel = require('../models/counsel');
 
@@ -26,6 +27,9 @@ exports.getPatientDetail = function(req, res) {
     	if (item == null) {
     		return res.json({results:item});
     	}
+		else if (item.name == undefined) {
+			return res.json({results:'没有填写个人信息'});
+		}
     	else {
     		//输出最新的诊断内容
     		var recentDiagnosis = [];
@@ -329,6 +333,7 @@ exports.editPatientDetail = function(req, res) {
 	var query = {
 		userId: req.body.userId
 	};
+	var opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true};
 	
 	var upObj = {
 		// revisionInfo:{
@@ -338,9 +343,9 @@ exports.editPatientDetail = function(req, res) {
 		// 	terminalIP:"10.12.43.32"
 		// }
 	};
-	if (req.body.userId != null){
-		upObj['userId'] = req.body.userId;
-	}
+	// if (req.body.userId != null){
+	// 	upObj['userId'] = req.body.userId;
+	// }
 	if (req.body.name != null){
 		upObj['name'] = req.body.name;
 	}
@@ -410,7 +415,7 @@ exports.editPatientDetail = function(req, res) {
 			return res.json({result:'修改失败，不存在的患者ID！'})
 		}
 		res.json({result: '修改成功', results: upPatient});
-	}, {new: true});
+	}, opts);
 }
 
 //新增疾病进程
@@ -565,59 +570,134 @@ exports.bindingMyDoctor = function(req, res, next) {
 		return res.json({result:'请填写doctorId!'});
 	}
 	else{
-		var queryD = { 
-			userId: _dId
-		};
-		Doctor.getOne(queryD, function (err, doctor) {
-			if (err) {
-				console.log(err);
-				return res.status(500).send('服务器错误, 用户查询失败!');
-			}
-			if (doctor == null) {
-				return res.json({result:'不存在的医生ID！'});
-			}
-			var doc = doctor._id;
-			var query = {
-				userId: _pId
+		if (_dId.substr(0,1) == 'h'){
+			var queryH = {TDCurl:_dId};
+			console.log(_dId);
+			User.getOne(queryH, function(err, item) {
+				if (err) {
+					return res.status(500).send(err)
+				}
+				else if (item == null) {
+					return res.json({result: '不存在的医生ID！'});
+				}
+				else {
+					req.body.doctorId = item.userId;
+					var queryD = { 
+						userId: item.userId
+					};
+					Doctor.getOne(queryD, function (err, doctor) {
+						if (err) {
+							console.log(err);
+							return res.status(500).send('服务器错误, 用户查询失败!');
+						}
+						if (doctor == null) {
+							return res.json({result:'不存在的医生ID！'});
+						}
+						var doc = doctor._id;
+						var query = {
+							userId: _pId
+						};
+						Patient.getOne(query, function (err, patient) {
+							if (err) {
+								console.log(err);
+								return res.status(500).send('服务器错误, 用户查询失败!');
+							}
+							if (patient == null) {
+								return res.json({result:'不存在的患者ID！'});
+							}
+							var doctorsList=patient.doctors
+							var n=doctorsList.length
+							// var flag=0
+							for(var i=0;i<n;i++){
+								doctorsList[i].invalidFlag=1
+								// if(doctor.doctorId==_dId){
+								// 	flag=1
+								// 	doctor.invalidFlag=0
+								// }
+							}
+							// if(flag==1){
+							// 	return res.json({result:1,msg:"患者已匹配该主管医生！"});
+							// }
+							// else{
+							var doctor_new={doctorId:doc,firstTime:new Date(),invalidFlag:0}
+							doctorsList.push(doctor_new)
+							// }
+							var upObj = {$set:{doctors:doctorsList}};
+							Patient.updateOne(query, upObj,function(err, patient) {
+								if (err) {
+									return res.status(500).send(err.errmsg);
+								}
+								// res.json({results: 0,msg:"success!"});
+								req.body.doctor_id = doc;
+								req.body.patient_id = patient._id;
+								req.body.patientname = patient.name;
+								next();
+							});
+						});
+					});
+				}
+			});
+		}
+		else if (_dId.substr(0, 1) == 'U'){
+			var queryD = { 
+				userId: _dId
 			};
-			Patient.getOne(query, function (err, patient) {
+			Doctor.getOne(queryD, function (err, doctor) {
 				if (err) {
 					console.log(err);
 					return res.status(500).send('服务器错误, 用户查询失败!');
 				}
-				if (patient == null) {
-					return res.json({result:'不存在的患者ID！'});
+				if (doctor == null) {
+					return res.json({result:'不存在的医生ID！'});
 				}
-				var doctorsList=patient.doctors
-				var n=doctorsList.length
-				// var flag=0
-				for(var i=0;i<n;i++){
-					doctorsList[i].invalidFlag=1
-					// if(doctor.doctorId==_dId){
-					// 	flag=1
-					// 	doctor.invalidFlag=0
-					// }
-				}
-				// if(flag==1){
-				// 	return res.json({result:1,msg:"患者已匹配该主管医生！"});
-				// }
-				// else{
-				var doctor_new={doctorId:doc,firstTime:new Date(),invalidFlag:0}
-				doctorsList.push(doctor_new)
-				// }
-				var upObj = {$set:{doctors:doctorsList}};
-				Patient.updateOne(query, upObj,function(err, patient) {
+				var doc = doctor._id;
+				var query = {
+						userId: _pId
+				};
+				Patient.getOne(query, function (err, patient) {
 					if (err) {
-						return res.status(500).send(err.errmsg);
+						console.log(err);
+						return res.status(500).send('服务器错误, 用户查询失败!');
 					}
-					// res.json({results: 0,msg:"success!"});
-					req.body.doctor_id = doc;
-					req.body.patient_id = patient._id;
-					req.body.patientname = patient.name;
-					next();
+					if (patient == null) {
+						return res.json({result:'不存在的患者ID！'});
+					}
+					var doctorsList=patient.doctors
+					var n=doctorsList.length
+					// var flag=0
+					for(var i=0;i<n;i++){
+						doctorsList[i].invalidFlag=1
+						// if(doctor.doctorId==_dId){
+						// 	flag=1
+						// 	doctor.invalidFlag=0
+						// }
+					}
+					// if(flag==1){
+					// 	return res.json({result:1,msg:"患者已匹配该主管医生！"});
+					// }
+					// else{
+					var doctor_new={doctorId:doc,firstTime:new Date(),invalidFlag:0}
+					doctorsList.push(doctor_new)
+					// }
+					var upObj = {$set:{doctors:doctorsList}};
+						Patient.updateOne(query, upObj,function(err, patient) {
+						if (err) {
+							return res.status(500).send(err.errmsg);
+						}
+						// res.json({results: 0,msg:"success!"});
+						req.body.doctor_id = doc;
+						req.body.patient_id = patient._id;
+						req.body.patientname = patient.name;
+						next();
+					});
 				});
 			});
-		});
+		}
+		else{
+			return res.json({result: '不存在的医生ID！'})
+		}
+
+		
 	}
 }
 //3. DpRelation表中医生绑定患者
@@ -763,4 +843,36 @@ exports.changeVIP = function(req, res) {
 		}
 		res.json({result: '修改成功', results: upPatient});
 	}, {new: true});
+}
+
+//患者头像不存在时使用微信头像 2017-06-14 GY
+exports.wechatPhotoUrl = function(req, res) {
+	if (req.query.patientId == null || req.query.patientId == '') {
+		return res.json({results: '请填写userId'});
+	}
+	if (req.body.wechatPhotoUrl == null || req.body.wechatPhotoUrl == '') {
+		return res.json({results: '请填写wechatPhotoUrl'});
+	}
+	var query = {userId: req.query.patientId};
+	var newPhotoUrl = req.query.wechatPhotoUrl;
+	Patient.getOne(query, function(err, item) {
+		if (err) {
+			return res.status(500).send(err.errmsg);
+		}
+		if (item == null) {
+			return res.json({results: '不存在的患者ID'});
+		}
+		else if (item.photoUrl == undefined) {
+			var upObj = {photoUrl: newPhotoUrl};
+			Patient.updateOne(query, upObj, function(err, upitem) {
+				if (err) {
+					return res.status(500).send(err.errmsg);
+				}
+				return res.json({results: '头像已更新', editResults: upitem});
+			});
+		}
+		else {
+			return res.json({results: '已存在头像，未更新'});
+		}
+	});
 }

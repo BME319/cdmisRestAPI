@@ -10,7 +10,8 @@ var communicationSchema = new mongoose.Schema({
 	receiver:String,
 	sendDateTime:Date,
 	title:String,
-	content:mongoose.Schema.Types.Mixed
+	content:mongoose.Schema.Types.Mixed, 
+	newsType:String
 });
 
 
@@ -78,6 +79,20 @@ Communication.updateOne = function(query, obj, callback, opts, populate) {
 		});
 };
 
+Communication.update = function (query, obj, callback, opts, populate) {
+  var options = opts || {};
+  var populate = populate || '';
+
+  communicationModel
+  	.update(query, obj, options)
+  	.populate(populate) 
+  	.exec(function (err, upcommunication) {
+    	if (err) {
+      		return callback(err);
+    	}
+    callback(null, upcommunication);
+  });
+};
 
 
 module.exports = Communication;

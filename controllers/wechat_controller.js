@@ -40,15 +40,21 @@ var wxApis = {
   // download
   download:'http://file.api.weixin.qq.com/cgi-bin/media/get',
   // createTDCticket 创建永久二维码
-  createTDCticket: 'https://api.weixin.qq.com/cgi-bin/qrcode/create'
-
+  createTDCticket: 'https://api.weixin.qq.com/cgi-bin/qrcode/create', 
+  //自定义菜单
+  //创建
+  createCustomMenu: 'https://api.weixin.qq.com/cgi-bin/menu/create', 
+  //查询
+  getCustomMenu: 'https://api.weixin.qq.com/cgi-bin/menu/get', 
+  //删除
+  deleteCustomMenu: 'https://api.weixin.qq.com/cgi-bin/menu/delete'
 };
 
 // var wxApiUserObject = config.wxDeveloperConfig.zdyyszbzx;
 
 exports.chooseAppId = function(req,res,next){
   var role = req.query.role || req.body.role;
-  console.log("test1");
+  // console.log("test1");
   // console.log(role);
   if(role == 'doctor'){
     req.wxApiUserObject = config.wxDeveloperConfig.sjkshz;
@@ -201,7 +207,7 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
 
     var code = paramObject.code;
     var state = paramObject.state;
-
+    console.log(code);
     var url = wxApis.oauth_access_token + '?appid=' + req.wxApiUserObject.appid
             + '&secret=' + req.wxApiUserObject.appsecret
             + '&code=' + code
@@ -213,7 +219,7 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
     }, function (err, response, body) {
         if (err) return res.status(401).send('换取网页授权access_token失败!');
         
-      
+    console.log(body);
           var wechatData = {
             access_token: body.access_token, //获取用户信息的access_token
             expires_in: body.expires_in,
@@ -223,6 +229,7 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
             unionid: body.unionid
             // api_type: 1
           }
+            // console.log(wechatData);
           if(wechatData.scope == 'snsapi_base')
           {
             return res.json({results:wechatData})
@@ -231,6 +238,14 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
           {
             req.wechatData = wechatData;
             req.state = state;
+
+            next();
+          }
+          else
+          {
+            req.wechatData = wechatData;
+            req.state = state;
+            // console.log('else');
 
             next();
           } 
@@ -330,7 +345,8 @@ exports.getuserinfo = function(req,res) {
 exports.addOrder = function(req, res, next) {
   var orderObject = req.orderObject || {};
   orderObject['attach'] = "123";        // req.state;
-  
+  // console.log(orderObject);
+  // console.log(req.body);
   var currentDate = new Date();
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss');
   var out_trade_no = orderObject.orderNo; 
@@ -355,9 +371,15 @@ exports.addOrder = function(req, res, next) {
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
     notify_url: 'http://' + webEntry.domain + ':4050/wechat/payResult',   // 通知地址
-    trade_type: req.body.trade_type,    // 交易类型
-    openid: req.body.openid    // 用户标识
+    trade_type: req.body.trade_type    // 交易类型
+    // openid: req.body.openid    // 用户标识
   };
+  // console.log(paramData);
+  // console.log(paramData.trade_type);
+  if(paramData.trade_type == "JSAPI"){
+    // wechat pay
+    paramData['openid'] = req.body.openid;  
+  }
 
   var signStr = commonFunc.rawSort(paramData);
   signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
@@ -372,6 +394,7 @@ exports.addOrder = function(req, res, next) {
     body: xmlString
   }, function(err, response, body){
     var prepay_id = '';
+    // console.log(body);
 
     if (!err && response.statusCode == 200) {       
       var parser = new xml2js.Parser();
@@ -383,6 +406,7 @@ exports.addOrder = function(req, res, next) {
       // 微信生成的预支付会话标识，用于后续接口调用中使用，该值有效期为2小时
       prepay_id = data.xml.prepay_id;
       req.prepay_id = prepay_id;
+      // console.log(prepay_id);
       next();
 
       // res.redirect('/zbtong/?#/shopping/wxpay/'+ orderObject.oid +'/' + data.xml.prepay_id);
@@ -396,81 +420,140 @@ exports.addOrder = function(req, res, next) {
 // 生成微信PaySign，用于发起微信支付请求
 exports.getPaySign = function(req, res, next) {
   prepay_id = req.prepay_id;
+  var wcPayParams;
+  
+  if(req.body.trade_type == "JSAPI"){
+    // wcPayParams['package'] = "prepay_id=" + prepay_id; 
+    wcPayParams = {
+      "appId" : req.wxApiUserObject.appid,     //公众号名称，由商户传入
+      "timeStamp" : commonFunc.createTimestamp(),         //时间戳，自1970年以来的秒数
+      "nonceStr" : commonFunc.createNonceStr(), //随机串
+      // 通过统一下单接口获取
+      "package" : "prepay_id="+prepay_id,
+      "signType" : "MD5"        //微信签名方式
+    };
+    var signStr = commonFunc.rawSort(wcPayParams);
+    signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
+    wcPayParams.paySign = commonFunc.convertToMD5(signStr, true);  //微信支付签名
+    // console.log(wcPayParams);
+    res.json({ results: {
+      appId:req.wxApiUserObject.appid, 
+      timestamp: wcPayParams.timeStamp,
+      nonceStr: wcPayParams.nonceStr,
+      package: wcPayParams.package,
+      signType: wcPayParams.signType,
+      paySign: wcPayParams.paySign,
+      prepay_id : req.prepay_id
+    }});
+  }
+  else{
+    wcPayParams = {
+      "appid" : req.wxApiUserObject.appid,     //公众号名称，由商户传入
+      "partnerid" :req.wxApiUserObject.merchantid,
+      "prepayid":prepay_id,
+      "timestamp" : commonFunc.createTimestamp(),         //时间戳，自1970年以来的秒数
+      "noncestr" : commonFunc.createNonceStr(), //随机串
+      // 通过统一下单接口获取
+      "package" : "Sign=WXPay"
+    };
+    var signStr = commonFunc.rawSort(wcPayParams);
+    signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
+    wcPayParams.paySign = commonFunc.convertToMD5(signStr, true);  //微信支付签名
+    // console.log(wcPayParams);
+    res.json({ results: {
+      appId:req.wxApiUserObject.appid, 
+      timestamp: wcPayParams.timestamp,
+      nonceStr: wcPayParams.noncestr,
+      package: wcPayParams.package,
+      paySign: wcPayParams.paySign,
+      prepay_id : req.prepay_id
+    }});
+  }
 
-  var wcPayParams = {
-    "appId" : req.wxApiUserObject.appid,     //公众号名称，由商户传入
-    "timeStamp" : commonFunc.createTimestamp(),         //时间戳，自1970年以来的秒数
-    "nonceStr" : commonFunc.createNonceStr(), //随机串
-    // 通过统一下单接口获取
-    "package" : "prepay_id="+prepay_id,
-    "signType" : "MD5"        //微信签名方式
-  };
-
-  var signStr = commonFunc.rawSort(wcPayParams);
-  signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
-  wcPayParams.paySign = commonFunc.convertToMD5(signStr, true);  //微信支付签名
-
-  res.json({ results: {
-    appId:req.wxApiUserObject.appid, 
-    timestamp: wcPayParams.timeStamp,
-    nonceStr: wcPayParams.nonceStr,
-    package: wcPayParams.package,
-    signType: wcPayParams.signType,
-    paySign: wcPayParams.paySign
-  }});
 }
 
 // 支付结果通知
-exports.payResult = function(req, res) {  
-  var payDataObject = req.payDataObject;
-  var orderNo = payDataObject.out_trade_no.split('-')[0];
+exports.payResult = function(req, res) { 
+  console.log("payResult111"); 
+ 
+  var body = '';
+  var results = '';
 
-  var query = {
-    orderNo: orderNo
-  }
-
-  Order.getOne(query, function(err, item) {
-        if (err) {
-            return res.status(500).send(err.errmsg);
-        }
-        // res.json({results: item});
-        if(payDataObject.result_code == 'SUCCESS'){
-          if(item.paystatus != 2){    // 非成功
-            var upObj = {
-              paystatus: 2,
-              paytime: payDataObject.time_end
-            };
-
-           updateOrder(query,upObj);   
-          }
-          else{   // 成功
-            res.json({results: "success!"});
-          }
-        }
-        else{       // payDataObject.result_code == 'FAIL'
-          if(item.paystatus != 3){    // 非失败
-            var upObj = {
-              paystatus: 3,
-              paytime: payDataObject.time_end
-            };
-
-            updateOrder(query,upObj);           
-          }
-          else{   // 失败
-            res.json({results: "success!"});
-          }
-        }
+  req.on('data',function(data){
+    body += data;
+    // console.log("partial: " + body);
   });
-}
+  req.on('end',function(){
+    console.log("finish: " + body);
+    var parser = new xml2js.Parser();
+    var jsondata = {};
+   
+    parser.parseString(body, function(err, result) {        
+      jsondata = result || {};
+    });
+    console.log(jsondata);
+    var payRes = jsondata.xml;
 
-function updateOrder(query,upObj){
-  Order.updateOne(query,{$set:upObj},function(err, item){
-    if (err) {
-      return res.status(500).send(err.errmsg);
+    var orderNo = payRes.out_trade_no[0].split('-')[0];
+    
+    var query = {
+      orderNo: orderNo
     }
-    res.json({results: "success!"});
+    
+    Order.getOne(query, function(err, item) {
+          if (err) {
+              results = err.errmsg;
+          }
+          else{
+            // res.json({results: item});
+            if(payRes.result_code == 'SUCCESS'){
+              if(item.paystatus != 2){    // 非成功
+                var upObj = {
+                  paystatus: 2,
+                  paytime: payRes.time_end
+                };
+
+                Order.updateOne(query,{$set:upObj},function(err, item){
+                  if (err) {
+                    results = err.errmsg;
+                  }
+                  else{
+                    results = "success";
+                  }
+                });
+              }
+              else{   // 成功
+                results = "success";
+              }
+            }
+            else{       // payRes.result_code == 'FAIL'
+              if(item.paystatus != 3){    // 非失败
+                var upObj = {
+                  paystatus: 3,
+                  paytime: payRes.time_end
+                };
+
+                Order.updateOne(query,{$set:upObj},function(err, item){
+                  if (err) {
+                    results = err.errmsg;
+                  }
+                  else{
+                    results = "success";
+                  }
+                });         
+              }
+              else{   // 失败
+                results = "success";
+              }
+            }
+          }     
+    });
   });
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  res.end(results);
+
 }
+
 
 // 查询订单
 exports.getWechatOrder = function(req, res) {
@@ -571,8 +654,8 @@ exports.refund = function(req, res) {
   };
 
   var req = https.request(options, (res) => {
-    console.log('statusCode:', res.statusCode);
-    console.log('headers:', res.headers);
+    // console.log('statusCode:', res.statusCode);
+    // console.log('headers:', res.headers);
 
     res.on('data', (d) => {
       // process.stdout.write(d);
@@ -784,13 +867,14 @@ exports.receiveTextMessage = function(req, res) {
         if(jsondata.xml.EventKey != null ){
           var doctor_userId;
           // 
+          console.log(jsondata);
           if(jsondata.xml.Event == 'subscribe'){
-            doctor_userId =  jsondata.xml.EventKey.split('_')[1];
+            doctor_userId =  jsondata.xml.EventKey[0].split('_')[1];
           }
           if(jsondata.xml.Event == 'SCAN'){
             doctor_userId =  jsondata.xml.EventKey;
           }
-        
+        console.log(doctor_userId);
           // 暂存医生和患者的openId
           var patient_openId = jsondata.xml.FromUserName;       
           var time = Date();
@@ -854,7 +938,7 @@ exports.receiveTextMessage = function(req, res) {
                 };
 
                 request({
-                  url: 'http://' + webEntry.domain + ':4050/wechat/messageTemplate',
+                  url: 'http://' + webEntry.domain + ':4050/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                   method: 'POST',
                   body:template,
                   json:true
@@ -1093,3 +1177,60 @@ exports.wxJsSdkReqMedia = function (req, res, next) {
             next()
         });
 };
+
+
+//自定义菜单接口 2017-06-12 GY
+//创建接口
+exports.createCustomMenu = function(req, res) {
+    var tokenObject = req.wxToken || {};
+    var token = tokenObject.token;
+    var jsondata = req.body.postdata; //请求内容
+
+    request({
+      url: wxApis.createCustomMenu + '?access_token=' + token,
+      method: 'POST',
+      body: jsondata,
+      json: true
+    }, function(err, response, body){
+      if (err) {
+          return res.status(500).send('Error');
+      }
+      else {
+        res.json({results: body});
+      }
+    });
+}
+//查询接口
+exports.getCustomMenu = function(req, res) {
+    var tokenObject = req.wxToken || {};
+    var token = tokenObject.token;
+
+    request({
+      url: wxApis.getCustomMenu + '?access_token=' + token,
+      method: 'GET'
+    }, function(err, response, body){
+      if (err) {
+          return res.status(500).send('Error');
+      }
+      else {
+        res.json({results: body});
+      }
+    });
+}
+//删除接口
+exports.deleteCustomMenu = function(req, res) {
+    var tokenObject = req.wxToken || {};
+    var token = tokenObject.token;
+
+    request({
+      url: wxApis.deleteCustomMenu + '?access_token=' + token,
+      method: 'GET'
+    }, function(err, response, body){
+      if (err) {
+          return res.status(500).send('Error');
+      }
+      else {
+        res.json({results: body});
+      }
+    });
+}

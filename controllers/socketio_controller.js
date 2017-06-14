@@ -46,7 +46,7 @@ function messageSaveSend(data, url){
         content:data.msg
     }
     request({
-        url: url,
+        url: url + '?token=' + req.query.token || req.body.token,
         method: 'POST',
         body: jsondata,
         json:true
@@ -83,7 +83,7 @@ function messageSaveSend(data, url){
             else{           // 群聊
                 // console.log(receiver);
                 request({
-                    url: 'http://' + webEntry.domain + ':4050/communication/getTeam?teamId=' + data.msg.teamId,
+                    url: 'http://' + webEntry.domain + ':4050/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
                     method: 'GET',
                     json:true
                 }, function(err, response){
@@ -125,7 +125,7 @@ function messageSaveSend(data, url){
                                  if(data.msg.contentType == 'custom' && data.msg.content.type == 'card'){
 
                                     // console.log('in');
-                                    var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxab9c316b3076535d&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.targetID +'_'+data.msg.teamId + "&#wechat_redirect";
+                                    var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.content.consultationId +'_'+data.msg.teamId + "&#wechat_redirect";
 
                                     var template = {
                                         "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
@@ -165,7 +165,7 @@ function messageSaveSend(data, url){
 
                                     // groupSend(data);
                                     request({
-                                        url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate',
+                                        url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                                         method: 'POST',
                                         body: template,
                                         json:true
@@ -228,8 +228,8 @@ exports.chat = function (io, socket) {
         var id = socket.id
         delete userServer[id]
         delete userList[id]
-        console.log(id);
-        console.log(Object.keys(userServer));
+        // console.log(id);
+        // console.log(Object.keys(userServer));
         // io.emit('onlineCount',freeList)
         // io.emit('offline',{id:id})
         // io.emit('addCount', count)
@@ -256,7 +256,7 @@ exports.chat = function (io, socket) {
         
             // download
             request({
-                url: url + '?serverId=' + mediaId + '&name=' + name + '&role=' + role,
+                url: url + '?serverId=' + mediaId + '&name=' + name + '&role=' + role + '?token=' + req.query.token || req.body.token,
                 method: 'GET',
                 json: true
             }, function(err, response){
