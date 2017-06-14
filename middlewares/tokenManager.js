@@ -1,16 +1,9 @@
 var config = require('../config'),
-    //ACL = require('../helpers/ACL'),
-    //redis = require('redis'),
-    //redisClient = redis.createClient(6379, config.redisHOST),
     crypto = require('crypto'),
     jwt = require('jsonwebtoken');
 
 var Refreshtoken = require('../models/refreshtoken');
-// redisClient.on('error', function (err) {
-//     console.log('Error ' + err);
-// });
-// redisClient.on('connect', function () {
-// });
+
 
 exports.verifyToken = function () {
   return function (req, res, next) {
@@ -47,6 +40,7 @@ exports.verifyToken = function () {
 
 exports.refreshToken = function (req, res) {
   var refreshToken = req.body.refresh_token || req.query.refresh_token;
+  console.log(refreshToken);
   
   var query = {refreshtoken: refreshToken};
   Refreshtoken.getOne(query, function(err, item) {
@@ -55,16 +49,21 @@ exports.refreshToken = function (req, res) {
     }
     if (item) {
       var userPayload = JSON.parse(item.userPayload);
-      var token = jwt.sign(userPayload, config.tokenSecret, {algorithm:'HS256'},{expiresIn: config.TOKEN_EXPIRATION});
-
-      Refreshtoken.remove({refreshtoken: refreshToken},function(err){
+      
+      Refreshtoken.removeOne({refreshtoken: refreshToken},function(err){
         if (err) {
           return res.status(500).send(err.errmsg);
         }
         else{
+          
+          userPayload.exp = Date.now() + 60 * 3 * 1000;
+          userPayload = JSON.stringify(userPayload);
+
+          var token = jwt.sign(userPayload, config.tokenSecret, {algorithm:'HS256'},{expiresIn: config.TOKEN_EXPIRATION});
+
           var sha1 = crypto.createHash('sha1');
           var refreshToken = sha1.update(token).digest('hex');
-    
+
           var refreshtokenData = {
             refreshtoken: refreshToken,
             userPayload: JSON.stringify(userPayload)

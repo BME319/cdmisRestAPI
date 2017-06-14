@@ -222,7 +222,7 @@ module.exports = function(app,webEntry) {
   app.get('/insurance/getPrefer',  insuranceCtrl.getPrefer);
 
   //advice
-  app.post('/advice/postAdvice',  adviceCtrl.postAdvice);
+  app.post('/advice/postAdvice', tokenManager.verifyToken(), adviceCtrl.postAdvice);
   app.get('/advice/getAdvice',  adviceCtrl.getAdvice);
 
   //labtestResult
@@ -289,9 +289,9 @@ module.exports = function(app,webEntry) {
   app.post('/jm/groups/members',  jpushCtrl.updateGroup);
 
   // 自定义菜单
-  app.post('/wechat/createCustomMenu', tokenManager.verifyToken(), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createCustomMenu);
-  app.get('/wechat/getCustomMenu', tokenManager.verifyToken(), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.getCustomMenu);
-  app.get('/wechat/deleteCustomMenu', tokenManager.verifyToken(), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.deleteCustomMenu);
+  app.post('/wechat/createCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createCustomMenu);
+  app.get('/wechat/getCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.getCustomMenu);
+  app.get('/wechat/deleteCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.deleteCustomMenu);
 
   //获取二维码相关方法
   // app.get('/getAllDoctors', tokenManager.verifyToken(), getQRcodeCtrl.getAllDoctors);
