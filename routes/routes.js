@@ -100,6 +100,7 @@ module.exports = function(app,webEntry, acl) {
   app.post('/user/logout',  userCtrl.logout);
   app.get('/user/getUserID',  userCtrl.getUserID);
   app.get('/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
+
   app.post('/user/sendSMS',  userCtrl.sendSMS);
   app.get('/user/verifySMS',  userCtrl.verifySMS);
   app.get('/user/getUserAgreement',  userCtrl.getUserAgreement);
@@ -127,49 +128,53 @@ module.exports = function(app,webEntry, acl) {
   app.get('/doctor/getGroupPatientList',  doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
   // app.get('/doctor/getTeam', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
   app.post('/doctor/editDoctorDetail',  doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember);
+
   app.get('/doctor/getRecentDoctorList',  doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList);
   app.get('/doctor/getPatientByDate',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate);
   app.post('/doctor/insertSchedule',  doctorCtrl.insertSchedule);
   app.post('/doctor/deleteSchedule',  doctorCtrl.deleteSchedule);
   app.get('/doctor/getSchedules',  doctorCtrl.getSchedules);
   app.post('/doctor/insertSuspendTime',  doctorCtrl.insertSuspendTime);
-  app.post('/doctor/deleteSuspendTime',  doctorCtrl.deleteSuspendTime);
-  app.get('/doctor/getSuspendTime',  doctorCtrl.getSuspendTime);
-  app.get('/doctor/getDocNum',  doctorCtrl.getDocNum);
+
+  app.post('/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime);
+  app.get('/doctor/getSuspendTime', doctorCtrl.getSuspendTime);
+  app.get('/doctor/getDocNum', doctorCtrl.getDocNum);
 
   //counsel
-  app.get('/counsel/getCounsels',  doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
-  app.post('/counsel/questionaire',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire);
-  app.post('/counsel/changeCounselStatus',  counselCtrl.changeCounselStatus);
+  app.get('/counsel/getCounsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
+  app.post('/counsel/questionaire', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire);
+  app.post('/counsel/changeCounselStatus', counselCtrl.changeCounselStatus);
   app.get('/counsel/getStatus',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus);
 
-  app.post('/counsel/changeStatus',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus);
+  app.post('/counsel/changeStatus',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus);
   app.post('/counsel/changeType',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType);
-  app.post('/counsel/insertCommentScore',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
+  app.post('/counsel/insertCommentScore', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
+
 
 
   //patient_Info
   app.get('/patient/getPatientDetail',  patientCtrl.getPatientDetail);
-  app.get('/patient/getMyDoctors',  patientCtrl.getMyDoctor);
+
+  app.get('/patient/getMyDoctors',  patientCtrl.getPatientObject, patientCtrl.getMyDoctor);
   app.post('/patient/insertDiagnosis',  patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail);
   app.get('/patient/getDoctorLists',  patientCtrl.getDoctorLists);
   app.post('/patient/newPatientDetail',  patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
-  app.post('/patient/editPatientDetail',  patientCtrl.editPatientDetail);
-  app.get('/patient/getCounselRecords',  patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
- 
+  app.post('/patient/editPatientDetail', patientCtrl.editPatientDetail);
+  app.get('/patient/getCounselRecords', patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
   // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
   // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
 
-  app.post('/patient/bindingMyDoctor',  patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
-  app.post('/patient/changeVIP',  patientCtrl.changeVIP);
+  app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
+  app.post('/patient/changeVIP', patientCtrl.changeVIP);
   app.post('/patient/wechatPhotoUrl', patientCtrl.wechatPhotoUrl);
 
   //comment_query
-  app.get('/comment/getComments',  doctorCtrl.getDoctorObject, commentCtrl.getCommentsByDoc);
-  app.get('/comment/getCommentsByC',  commentCtrl.getCommentsByCounselId);
+  app.get('/comment/getComments', doctorCtrl.getDoctorObject, commentCtrl.getCommentsByDoc);
+  app.get('/comment/getCommentsByC', commentCtrl.getCommentsByCounselId);
   //vitalSign_query
   app.get('/vitalSign/getVitalSigns',  patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns);
-  app.post('/vitalSign/insertVitalSign',  vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData);
+  app.post('/vitalSign/insertVitalSign', vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData);
+
 
   //account_Info
   //需要和user表连接
@@ -232,7 +237,8 @@ module.exports = function(app,webEntry, acl) {
   app.get('/insurance/getPrefer',  insuranceCtrl.getPrefer);
 
   //advice
-  app.post('/advice/postAdvice', tokenManager.verifyToken(), adviceCtrl.postAdvice);
+
+  app.post('/advice/postAdvice',  adviceCtrl.postAdvice);
   app.get('/advice/getAdvice',  adviceCtrl.getAdvice);
 
   //labtestResult
