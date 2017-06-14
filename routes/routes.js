@@ -11,7 +11,8 @@ var Wechat = require('../models/wechat');
 
 // middlewares
 var getNoMid = require('../middlewares/getNoMid'),
-    tokenManager = require('../middlewares/tokenManager');
+    tokenManager = require('../middlewares/tokenManager'),
+    aclChecking = require('../middlewares/aclChecking');
 
 // controllers
 var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
@@ -28,7 +29,8 @@ var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
     taskCtrl = require('../controllers/task_controller'),
     orderCtrl = require('../controllers/order_controller'),
     complianceCtrl = require('../controllers/compliance_controller'),
-    jpushCtrl = require('../controllers/jpush_controller');
+    jpushCtrl = require('../controllers/jpush_controller'),
+    aclsettingCtrl = require('../controllers/aclsetting_controller');
 
 // controllers updated by GY 
 var doctorCtrl = require('../controllers/doctor_controller'), 
@@ -48,8 +50,8 @@ var labtestResultCtrl = require('../controllers/labtestResult_controller');
 
 var wechatCtrl = require('../controllers/wechat_controller');
 
-module.exports = function(app,webEntry) {
-  
+module.exports = function(app,webEntry, acl) {
+
   //app.use('/static', express.static( './static')).
   //    use('/images', express.static( '../images')).
   //    use('/lib', express.static( '../lib')
@@ -63,7 +65,8 @@ module.exports = function(app,webEntry) {
   // csq 
   app.get('/token/refresh', tokenManager.refreshToken);
 
-  app.get('/dict/typeTwo', tokenManager.verifyToken(),dictTypeTwoCtrl.getCategory);
+  app.get('/dict/typeTwo',tokenManager.verifyToken(), dictTypeTwoCtrl.getCategory);
+  // app.get('/dict/typeTwo',tokenManager.verifyToken(), acl.middleware(), dictTypeTwoCtrl.getCategory);
   app.get('/dict/typeTwo/codes', tokenManager.verifyToken(),dictTypeTwoCtrl.getTypes);
   app.get('/user', tokenManager.verifyToken(),userCtrl.getUserList);
   app.get('/user/insert', tokenManager.verifyToken(),userCtrl.insertUser);
@@ -304,5 +307,25 @@ module.exports = function(app,webEntry) {
   // app.get('/user/:userid', function(req, res){
   //   res.send("Get User: " + req.param("userid"));
   // });
+
+  app.post('/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl));
+  app.post('/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl));
+  app.get('/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl));
+  app.get('/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl));
+
+  app.get('/acl/roleUsers', tokenManager.verifyToken(), aclsettingCtrl.roleUsers(acl)); 
+  app.post('/acl/roleParents', tokenManager.verifyToken(), aclsettingCtrl.addRoleParents(acl));
+  app.post('/acl/removeRoleParents', tokenManager.verifyToken(), aclsettingCtrl.removeRoleParents(acl));
+  app.post('/acl/removeRole', tokenManager.verifyToken(), aclsettingCtrl.removeRole(acl));
+  
+  app.post('/acl/allow', tokenManager.verifyToken(), aclsettingCtrl.allow(acl));
+  app.post('/acl/removeAllow', tokenManager.verifyToken(), aclsettingCtrl.removeAllow(acl));  
+  app.get('/acl/allow', tokenManager.verifyToken(), aclsettingCtrl.allowedPermissions(acl));
+  app.get('/acl/isAllowed', tokenManager.verifyToken(), aclsettingCtrl.isAllowed(acl));
+
+  app.post('/acl/removeResource', tokenManager.verifyToken(), aclsettingCtrl.removeResource(acl));
+  app.get('/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl));
+  app.get('/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl));
+
 };
 

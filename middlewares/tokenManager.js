@@ -15,7 +15,7 @@ var Refreshtoken = require('../models/refreshtoken');
 exports.verifyToken = function () {
   return function (req, res, next) {
     var token = (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token) || null;
-
+    
     // var token = jwt.sign(userPayload, config.tokenSecret, {algorithm:'HS256'},{expiresIn: config.TOKEN_EXPIRATION});
 
     if (token) { 
@@ -30,7 +30,8 @@ exports.verifyToken = function () {
           
         }
         else{
-          req.user = decoded;
+          req.session = decoded;
+          console.log(req.session.userId);
           return next();
         }
       

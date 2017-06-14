@@ -625,7 +625,8 @@ exports.login = function(req, res) {
                     userPayload = {
                         _id: user._id,
                         userId: user.userId,
-                        role:role
+                        role:role,
+                        expireAfter:Date.now() + 60*3
                     };
                     var token = jwt.sign(userPayload, config.tokenSecret, {algorithm:'HS256'},{expiresIn: config.TOKEN_EXPIRATION}); 
                     
