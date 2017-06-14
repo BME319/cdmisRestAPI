@@ -2,6 +2,7 @@
 var	config = require('../config'),
 	webEntry = require('../settings').webEntry,
 	Patient = require('../models/patient'), 
+	Account = require('../models/account'), 
 	Expense = require('../models/expense');
 
 exports.getDocRecords = function(req, res) {
@@ -62,6 +63,9 @@ exports.rechargeDoctor = function(req, res) {
     	var query = {
     		userId: _pid
     	};
+    	var query1={
+    		userId:_did
+    	};
     	Patient.getOne(query, function (err, patient) {
 	        if (err) {
 	            return res.status(500).send('服务器错误, 用户查询失败!');
@@ -85,7 +89,44 @@ exports.rechargeDoctor = function(req, res) {
 	                return res.status(500).send(err.errmsg);
 	            }
 	            else{
-	                res.json({result:"success!"});
+	                // res.json({result:"success!"});
+	                Account.getOne(query1, function(err, item1) {
+	                    if (err) {
+	                        return res.status(500).send(err.errmsg);
+	                    }
+	                    if (item1 == null) {
+	                        var accountData = {
+	                            userId: _did, 
+	                            money: _money,
+	                        };
+	                        var newAccount = new Account(accountData);
+	                        newAccount.save(function(err, accountInfo) {
+	                            if (err) {
+	                                return res.status(500).send(err.errmsg);
+	                            }
+	                            else{
+	                                res.json({result:"success!"});
+	                            }
+	                        });
+	                    }
+	                    else {
+	                        var _money1=_money+item1.money
+	                        var upObj = {
+	                            $set:{money:_money1}
+	                        };
+	                        Account.update(query1, upObj, function(err, upaccount) {
+	                            if (err) {
+	                                return res.status(500).send(err.errmsg);
+	                            }
+	                            if (upaccount.nModified == 0) {
+	                                return res.json({result:'请获取账户信息确认是否修改成功'});
+	                            }
+	                            else if (upaccount.nModified != 0) {
+	                                return res.json({result:'修改成功', updateResult:upaccount});
+	                            }
+	                        });
+	                    }
+	                });
 	            }
 	        });
 
