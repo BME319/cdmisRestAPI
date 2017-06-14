@@ -156,6 +156,7 @@ module.exports = function(app,webEntry, acl) {
   app.post('/patient/newPatientDetail',  patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
   app.post('/patient/editPatientDetail',  patientCtrl.editPatientDetail);
   app.get('/patient/getCounselRecords',  patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
+ 
   // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
   // app.post('/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
 
@@ -206,9 +207,14 @@ module.exports = function(app,webEntry, acl) {
   app.post('/communication/conclusion',  communicationCtrl.conclusion);
   app.post('/communication/updateLastTalkTime',  communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime);
   //app.get('/communication/getMessages');
+
   app.get('/communication/getConsultation',  communicationCtrl.getConsultation);
   app.post('/communication/postCommunication',  getNoMid.getNo(8),communicationCtrl.postCommunication);
   app.get('/communication/getCommunication',  communicationCtrl.getCommunication);
+
+  // 临时接口：给原数据写入newsType字段
+  // app.get('/communication/updateNewsType', communicationCtrl.addnewsType);
+
 
   //task
   app.post('/tasks/insertTaskModel',  taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel);
