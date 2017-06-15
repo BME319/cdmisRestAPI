@@ -874,6 +874,7 @@ exports.sendSMS = function(req, res) {
         }
     });
 }
+
 exports.verifySMS = function(req, res) {
     var now = new Date()
     var _mobile = req.query.mobile;
