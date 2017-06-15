@@ -206,6 +206,28 @@ exports.getUser = function(req, res) {
         res.json({results: item});
     });
 }
+
+
+exports.getUserTDCticket = function(req, res) {
+    var username = req.query.username;
+    if (username === '' || username === null) {
+        return res.status(422).send('username字段请输入UserId或openId或手机号!'); 
+    }
+    var query = {
+        $or: [
+            {userId: username},
+            {openId: username},
+            {phoneNo: username}
+        ]
+    };
+    User.getOne(query, function(err, item) {
+        if (err) {
+            return res.status(500).send(err.errmsg);
+        }
+        res.json({results: item.TDCticket});
+    });
+}
+
 exports.getUserAgreement = function(req, res) {
     var _userId = req.query.userId
     var query = {userId:_userId};
@@ -234,10 +256,10 @@ exports.getUserList = function(req, res) {
 
     User.getSome(query, function(err, userlist) {
         if (err) {
-      return res.status(500).send(err.errmsg);
-    }
+            return res.status(500).send(err.errmsg);
+        }
 
-    res.json({results: userlist});
+        res.json({results: userlist});
     });
 }
 exports.insertUser = function(req, res) {
@@ -874,6 +896,7 @@ exports.sendSMS = function(req, res) {
         }
     });
 }
+
 exports.verifySMS = function(req, res) {
     var now = new Date()
     var _mobile = req.query.mobile;
@@ -950,7 +973,6 @@ exports.setTDCticket = function(req,res){
         }
         res.json({results: {TDCticket: TDCticket, TDCurl: TDCurl}});
     });
-
 }
 
 exports.setMessageOpenId = function(req,res){
