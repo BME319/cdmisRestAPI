@@ -143,7 +143,7 @@ module.exports = function(app,webEntry, acl) {
   app.post('/counsel/changeCounselStatus',  counselCtrl.changeCounselStatus);
   app.get('/counsel/getStatus',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus);
 
-  app.post('/counsel/changeStatus',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus);
+  app.post('/counsel/changeStatus',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus);
   app.post('/counsel/changeType',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType);
   app.post('/counsel/insertCommentScore',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
 
