@@ -182,66 +182,67 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                         // custom card 群发
                         if(data.msg.contentType == 'custom' && data.msg.content.type == 'card'){
 
-                        // console.log('in');
-                        var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.content.consultationId +'_'+data.msg.teamId + "&#wechat_redirect";
+                            // console.log('in');
+                            var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.content.consultationId +'_'+data.msg.teamId + "&#wechat_redirect";
 
-                        var template = {
-                            "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
-                            "role": "doctor",
-                            "postdata": {
-                                "template_id": "cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k",
-                                "url": actionUrl,
-                                "data": {
-                                    "first": {
-                                        "value": "您的团队有一个新的咨询（问诊）消息，请及时处理",
-                                        "color": "#173177"
-                                    },
-                                    "keyword1": {
-                                        "value": data.msg.content.counselId, //咨询ID
-                                        "color": "#173177"
-                                    },
-                                    "keyword2": {
-                                        "value": data.msg.content.patientName, //患者信息（姓名，性别，年龄）
-                                        "color": "#173177"
-                                    },
-                                    "keyword3": {
-                                        "value": data.msg.content.help, //问题描述
-                                        "color": "#173177"
-                                    },
-                                    "keyword4": {
-                                        "value": data.msg.content.time, //提交时间
-                                        "color": "#173177"
-                                    },
+                            var template = {
+                                "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
+                                "role": "doctor",
+                                "postdata": {
+                                    "template_id": "cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k",
+                                    "url": actionUrl,
+                                    "data": {
+                                        "first": {
+                                            "value": "您的团队有一个新的咨询（问诊）消息，请及时处理",
+                                            "color": "#173177"
+                                        },
+                                        "keyword1": {
+                                            "value": data.msg.content.counselId, //咨询ID
+                                            "color": "#173177"
+                                        },
+                                        "keyword2": {
+                                            "value": data.msg.content.patientName, //患者信息（姓名，性别，年龄）
+                                            "color": "#173177"
+                                        },
+                                        "keyword3": {
+                                            "value": data.msg.content.help, //问题描述
+                                            "color": "#173177"
+                                        },
+                                        "keyword4": {
+                                            "value": data.msg.content.time, //提交时间
+                                            "color": "#173177"
+                                        },
 
-                                    "remark": {
-                                        "value": "感谢您的使用！",
-                                        "color": "#173177"
+                                        "remark": {
+                                            "value": "感谢您的使用！",
+                                            "color": "#173177"
+                                        }
                                     }
                                 }
-                            }
-                        };
+                            };
 
-                        // groupSend(data);
-                        request({
-                            // url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
-                            url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate',
-                            method: 'POST',
-                            body: template,
-                            json:true
-                        }, function(err, response, body){
-                            // if (!err && response.statusCode == 200) {   
-                            //     res.json({results:body});
-                            // }
-                            // else{
-                            //     return res.status(500).send('Error');
-                            // }
-                        });                               
+                            // groupSend(data);
+                            request({
+                                // url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                                url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate',
+                                method: 'POST',
+                                body: template,
+                                json:true
+                                }, function(err, response, body){
+                                // if (!err && response.statusCode == 200) {   
+                                //     res.json({results:body});
+                                // }
+                                // else{
+                                //     return res.status(500).send('Error');
+                                // }
+                            });                               
+                        }
+
+                        // others: no process
                     }
-
-                    // others: no process
-                }
-            }                      
-        }
+                }                      
+            }
+        })
     }
 }
 
