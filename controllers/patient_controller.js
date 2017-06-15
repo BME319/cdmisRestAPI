@@ -406,6 +406,9 @@ exports.editPatientDetail = function(req, res) {
 	if (req.body.height != null){
 		upObj['height'] = req.body.height;
 	}
+	if (req.body.weight != null && req.body.weight != '' && req.body.weight != undefined) {
+		upObj['weight'] = req.body.weight;
+	}
 	if (req.body.occupation != null){
 		upObj['occupation'] = req.body.occupation;
 	}
@@ -455,6 +458,45 @@ exports.editPatientDetail = function(req, res) {
 		}
 		if (upPatient == null) {
 			return res.json({result:'修改失败，不存在的患者ID！'})
+		}
+		if (req.body.weight != null && req.body.weight != '' && req.body.weight != undefined) {
+			var timenow = commonFunc.getNowFormatSecond();
+			var queryVital = {
+    			patientId: upPatient._id, 
+    			type: 'Weight', 
+    			code: 'Weight_1', 
+    			unit: 'kg', 
+    			date: commonFunc.getNowDate()
+    		};
+			var upVital = {};
+			var opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true};
+			console.log(queryVital);
+			VitalSign.updateOne(queryVital, upVital, function(err, upweight) {
+				if (err) {
+					return res.status(500).send(err.errmsg);
+				}
+				else {
+					var queryWeight = {
+						patientId: upPatient._id, 
+						type: upweight.type, 
+						code: upweight.code, 
+						date: new Date(upweight.date)
+					};
+        			var upWeight = {
+            			$push: {
+                			data: {
+                    			time:new Date(timenow), 
+                    			value:req.body.weight
+                			}
+            			}
+        			};
+    				VitalSign.update(queryWeight, upWeight, function(err, updata) {
+						if (err){
+							return res.status(500).send(err.message);
+						}
+					});
+				}
+			}, opts);
 		}
 		res.json({result: '修改成功', results: upPatient});
 	}, opts);
