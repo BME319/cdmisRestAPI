@@ -1,7 +1,5 @@
 
 
-
-
 // 慢病管理 REST 2017-03-14 池胜强 创建文档
 
 // import necessary 3rd modules
@@ -11,6 +9,7 @@ var mongoose = require('mongoose');
 var log4js = require('./controllers/log_controller');
 var sio = require('socket.io');  
 var path = require('path');
+var acl = require('acl');
 
 // import necessary self-defined modules
 
@@ -35,7 +34,10 @@ if (typeof(db.db) === 'undefined') {
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
   console.log(domain + ' MongoDB connected!');
+  
 });
+
+acl = new acl(new acl.mongodbBackend(db.db, 'rbac_'));
 
 // node服务
 var app = express();
@@ -75,7 +77,7 @@ app.all('*', function (req, res, next) {
 //})); 
 
 // 路由设置
-routes(app, webEntry);
+routes(app, webEntry, acl);
 
 app.use('/public', express.static( './public')).use('/lib', express.static( '../lib'));
 
