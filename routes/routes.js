@@ -100,6 +100,7 @@ module.exports = function(app,webEntry, acl) {
   app.post('/user/logout',  userCtrl.logout);
   app.get('/user/getUserID',  userCtrl.getUserID);
   app.get('/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
+  app.get('/user/TDCticket',  userCtrl.getUserTDCticket);
 
   app.post('/user/sendSMS',  userCtrl.sendSMS);
   app.get('/user/verifySMS',  userCtrl.verifySMS);
