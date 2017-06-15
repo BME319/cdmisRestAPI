@@ -7,6 +7,7 @@ var	config = require('../config'),
 	Consultation = require('../models/consultation'), 
 	Counsel = require('../models/counsel'), 
 	Comment = require('../models/comment'), 
+	User = require('../models/user'), 
 	commonFunc = require('../middlewares/commonFunc');
  var pinyin = require('pinyin');
 
@@ -238,6 +239,23 @@ exports.getGroupPatientList = function(req, res) {
 // 	}, opts, fields, populate);
 // }
 
+//获取医生User表信息 2017-06-15 GY
+exports.getUserInfo = function(req, res, next) {
+	var query = {userId: req.query.userId};
+	User.getOne(query, function(err, item) {
+		if (err) {
+			return res.status(500).send(err.errmsg);
+		}
+		if (item == null) {
+			return res.json({result: '请重新注册'});
+		}
+		else {
+			req.body.TDCticket = item.TDCticket;
+			next();
+		}
+	});
+}
+
 //修改获取医生详细信息方法 2017-4-12 GY
 exports.getComments = function(req, res, next) {
 	//查询条件
@@ -365,8 +383,17 @@ exports.getDoctorInfo = function(req, res) {
 		if (err){
 			return res.status(422).send(err.message);
 		}
+		// console.log(req.body.TDCticket);
+		if (req.body.TDCticket == undefined) {
+			req.body.TDCticket = null;
+		}
+		// console.log(req.body.TDCticket);
+		// var DocInfo = upDoctor;
+		// DocInfo['TDCticket'] = req.body.TDCticket;
+		// console.log(DocInfo.TDCticket);
+		// console.log(DocInfo);
 		
-		res.json({results:upDoctor, comments: comments, nexturl:req.body.nexturl});
+		res.json({results:upDoctor, TDCticket:req.body.TDCticket, comments: comments, nexturl:req.body.nexturl});
 	}, {new: true});
 }
 
