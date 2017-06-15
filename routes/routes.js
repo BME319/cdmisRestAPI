@@ -239,7 +239,7 @@ module.exports = function(app,webEntry, acl) {
 
   //advice
 
-  app.post('/advice/postAdvice',  adviceCtrl.postAdvice);
+  app.post('/advice/postAdvice', tokenManager.verifyToken(), adviceCtrl.postAdvice);
   app.get('/advice/getAdvice',  adviceCtrl.getAdvice);
 
   //labtestResult
