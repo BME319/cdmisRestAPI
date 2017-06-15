@@ -119,7 +119,7 @@ module.exports = function(app,webEntry) {
   //需要查询class字典表（待定）
   app.get('/doctor/getPatientList', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
   // app.get('/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
-  app.get('/doctor/getDoctorInfo', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
+  app.get('/doctor/getDoctorInfo', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, doctorCtrl.getUserInfo, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
   app.get('/doctor/getMyGroupList', tokenManager.verifyToken(), doctorCtrl.getTeams);
   app.get('/doctor/getGroupPatientList', tokenManager.verifyToken(), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
   // app.get('/doctor/getTeam', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
