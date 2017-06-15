@@ -9,6 +9,7 @@ var config = require('../config'),
     webEntry = require('../settings').webEntry,
     commonFunc = require('../middlewares/commonFunc'),
     User = require('../models/user'),
+    Doctor = require('../models/doctor'), 
     OpenIdTmp = require('../models/openId'),
     Order = require('../models/order');
 
@@ -322,6 +323,9 @@ exports.getuserinfo = function(req,res) {
         url: api_url,
         json: true
     }, function(err, response, body) {
+      if(err){
+        return res.status(500).send(err.errmsg);     
+      }
         var wechatData = {
             openid: body.openid,
             nickname: body.nickname,
