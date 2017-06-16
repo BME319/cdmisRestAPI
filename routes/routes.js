@@ -143,6 +143,9 @@ module.exports = function(app,webEntry, acl) {
   app.get('/doctor/getSuspendTime', doctorCtrl.getSuspendTime);
   app.get('/doctor/getDocNum', doctorCtrl.getDocNum);
 
+  app.get('/doctor/getAliPayAccount', doctorCtrl.getAliPayAccount);
+  app.post('/doctor/editAliPayAccount', doctorCtrl.editAliPayAccount);
+
   //counsel
   app.get('/counsel/getCounsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
   app.post('/counsel/questionaire', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire);
