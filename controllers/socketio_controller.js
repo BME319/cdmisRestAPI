@@ -74,14 +74,16 @@ function messageSaveSend(data, url){
             // console.log(response.body);
             // send message
             /// send to sendBy
-            console.log("app_doctor:  "+Object.keys(userAppDoctorServer));
-            console.log("app_patient:  "+Object.keys(userAppPatientServer));
-            console.log("wechat_doctor:  "+Object.keys(userWechatDoctorServer));
-            console.log("wechat_doctor:  "+Object.keys(userWechatPatientServer));
+            console.log("SENDBY: "+ sendBy);
+            // console.log("app_doctor:  "+Object.keys(userAppDoctorServer));
+            // console.log("app_patient:  "+Object.keys(userAppPatientServer));
+            // console.log("wechat_doctor:  "+Object.keys(userWechatDoctorServer));
+            // console.log("wechat_patient:  "+Object.keys(userWechatPatientServer));
 
 
             if(client == 'doctor'){
                 if(userAppDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
+                    console.log("messageRes to [doctor]: "+sendBy)
                     userAppDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
                     // socket.emit('messageRes',{msg:data.msg});
                 }
@@ -91,6 +93,7 @@ function messageSaveSend(data, url){
             }
             else if(client == 'patient'){
                 if(userAppPatientServer.hasOwnProperty(sendBy)){         // 用户在线
+                    console.log("messageRes to [patient]: "+sendBy)
                     userAppPatientServer[sendBy].emit('messageRes',{msg:data.msg});
                     // socket.emit('messageRes',{msg:data.msg});
                 }
@@ -100,6 +103,7 @@ function messageSaveSend(data, url){
             }
             else if(client == 'wechatdoctor'){
                   if(userWechatDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
+                    console.log("messageRes to [wechatdoctor]: "+sendBy)
                     userWechatDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
                     // socket.emit('messageRes',{msg:data.msg});
                 }
@@ -109,6 +113,7 @@ function messageSaveSend(data, url){
             }
             else if(client == 'wechatpatient'){
                 if(userWechatPatientServer.hasOwnProperty(sendBy)){         // 用户在线
+                    console.log("messageRes to [wechatpatient]: "+sendBy)
                     userWechatPatientServer[sendBy].emit('messageRes',{msg:data.msg});
                     // socket.emit('messageRes',{msg:data.msg});
                 }
@@ -261,22 +266,30 @@ exports.chat = function (io, socket) {
         socket.id = user_id;
         
         if(client == 'doctor'){
+            console.log("newUser @doctor:  "+ data.user_id);
             userAppDoctorServer[user_id] = socket;
             userAppDoctorList[user_id] = nickname;
         }
         else if(client == 'patient'){
+            console.log("newUser @patient:  "+ data.user_id);
             userAppPatientServer[user_id] = socket;
             userAppPatientList[user_id] = nickname;
         }
         else if(client == 'wechatdoctor'){
+        console.log("newUser @wechatdoctor:  "+ data.user_id);
+
             userWechatDoctorServer[user_id] = socket;
             userWechatDoctorList[user_id] = nickname;
         }
         else if(client == 'wechatpatient'){
+        console.log("newUser @wechatpatient:  "+ data.user_id);
+
             userWechatPatientServer[user_id] = socket;
             userWechatPatientList[user_id] = nickname;
         }
         else{
+            console.error('newUser not match');
+            console.error(data);
             // do
         }
         
@@ -331,7 +344,7 @@ exports.chat = function (io, socket) {
         // console.log(Object.keys(userServer));
     })
     socket.on('message', function(data){
-        console.log('message');
+        console.log('message by: '+data.msg.fromName );
         var contentType = data.msg.contentType;
         var clientType = data.msg.clientType;
         var role = data.role;
