@@ -1,4 +1,4 @@
-
+// ver  hotfix
 
 // global var
 var version = '';
@@ -126,9 +126,10 @@ module.exports = function(app,webEntry, acl) {
   //doctor_Info
   app.post(version + '/doctor/postDocBasic',  doctorCtrl.insertDocBasic);
   //需要查询class字典表（待定）
+
   app.get(version + '/doctor/getPatientList',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
-  app.get(version + '/doctor/getDoctorInfo',  doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
+  app.get(version + '/doctor/getDoctorInfo',  doctorCtrl.getDoctorObject,  doctorCtrl.getUserInfo, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
   app.get(version + '/doctor/getMyGroupList',  doctorCtrl.getTeams);
   app.get(version + '/doctor/getGroupPatientList',  doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
   // app.get(version + '/doctor/getTeam', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
@@ -144,6 +145,9 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime);
   app.get(version + '/doctor/getSuspendTime', doctorCtrl.getSuspendTime);
   app.get(version + '/doctor/getDocNum', doctorCtrl.getDocNum);
+
+  app.get('/doctor/getAliPayAccount', doctorCtrl.getAliPayAccount);
+  app.post('/doctor/editAliPayAccount', doctorCtrl.editAliPayAccount);
 
   //counsel
   app.get(version + '/counsel/getCounsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
