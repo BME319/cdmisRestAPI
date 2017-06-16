@@ -239,9 +239,10 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                     }
 
                     // others: no process
+                    }
                 }
             }                      
-        }
+        })
     }
 }
 

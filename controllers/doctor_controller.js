@@ -1043,3 +1043,39 @@ exports.getPatientList = function(req, res) {
 	}, opts, fields, populate);
 	// });
 }
+
+// 修改用户支付宝账号 2017-06-16 GY
+exports.editAliPayAccount = function (req, res) {
+	var query = {userId: req.body.userId};
+	var upObj = {aliPayAccount: req.body.aliPayAccount};
+	var opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true};
+
+	Doctor.updateOne(query, upObj, function (err, upDoctor) {
+		if (err) {
+			return res.status(400).send(err);
+		}
+		return res.json({results: '修改成功', editResult: upDoctor.aliPayAccount});
+	}, opts);
+} 
+
+//获取用户支付宝账号 2017-06-16 GY
+exports.getAliPayAccount = function (req, res) {
+	var query = {userId: req.query.userId};
+
+	Doctor.getOne(query, function (err, item) {
+		if (err) {
+			return res.status(500).send(err);
+		}
+		if (item == null) {
+			return res.status(400).send('不存在的医生');
+		}
+		else {
+			if (item.aliPayAccount === undefined) {
+				return res.json({results: ''});
+			}
+			else {
+				return res.json({results: item.aliPayAccount});
+			}
+		}
+	});
+}

@@ -10,6 +10,10 @@ var doctorSchema = new mongoose.Schema({
 	birthday: Date, 
 	gender: Number, 
 	IDNo: String, 
+	aliPayAccount: {
+		type: String, 
+		match: /(^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,51}[a-z0-9]+$)|(^1[3458]\d{9}$)/
+	}, 
 	province: String, 
 	city: String,
 	district: String,
