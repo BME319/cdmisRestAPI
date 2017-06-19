@@ -94,7 +94,7 @@ function messageSaveSend(data, url, socket){
                 }
             }
             else if(client == 'wechatdoctor'){
-                  if(userWechatDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
+                if(userWechatDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
                     // userWechatDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
                     socket.emit('messageRes',{msg:data.msg});
                 }
