@@ -31,12 +31,12 @@ function Arrayremove(array,name){
     }
 }
 
-function messageSaveSend(data, url, socket){
+function messageSaveSend(data, url){
 
     var targetType = data.msg.targetType;
     var messageType;
-    var client = data.client;
-    var targetRole = data.targetRole;
+    var client = data.msg.clientType;
+    var targetRole = data.msg.targetRole;
 
     if(targetType == 'single'){         // 单聊
         messageType = 1;
@@ -74,11 +74,16 @@ function messageSaveSend(data, url, socket){
             // console.log(response.body);
             // send message
             /// send to sendBy
+            console.log("app_doctor:  "+Object.keys(userAppDoctorServer));
+            console.log("app_patient:  "+Object.keys(userAppPatientServer));
+            console.log("wechat_doctor:  "+Object.keys(userWechatDoctorServer));
+            console.log("wechat_doctor:  "+Object.keys(userWechatPatientServer));
+
 
             if(client == 'doctor'){
                 if(userAppDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
-                    // userAppDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
-                    socket.emit('messageRes',{msg:data.msg});
+                    userAppDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
+                    // socket.emit('messageRes',{msg:data.msg});
                 }
                 else{           // 用户不在线
                     // socket.emit("err",{msg:"对方已经下线或者断开连接"})
@@ -86,17 +91,18 @@ function messageSaveSend(data, url, socket){
             }
             else if(client == 'patient'){
                 if(userAppPatientServer.hasOwnProperty(sendBy)){         // 用户在线
-                    // userAppPatientServer[sendBy].emit('messageRes',{msg:data.msg});
-                    socket.emit('messageRes',{msg:data.msg});
+                    userAppPatientServer[sendBy].emit('messageRes',{msg:data.msg});
+                    // socket.emit('messageRes',{msg:data.msg});
                 }
                 else{           // 用户不在线
                     // socket.emit("err",{msg:"对方已经下线或者断开连接"})
                 }
             }
             else if(client == 'wechatdoctor'){
+
                   if(userWechatDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
-                    // userWechatDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
-                    socket.emit('messageRes',{msg:data.msg});
+                    userWechatDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
+                    // socket.emit('messageRes',{msg:data.msg});
                 }
                 else{           // 用户不在线
                     // socket.emit("err",{msg:"对方已经下线或者断开连接"})
@@ -104,8 +110,8 @@ function messageSaveSend(data, url, socket){
             }
             else if(client == 'wechatpatient'){
                 if(userWechatPatientServer.hasOwnProperty(sendBy)){         // 用户在线
-                    // userWechatPatientServer[sendBy].emit('messageRes',{msg:data.msg});
-                    socket.emit('messageRes',{msg:data.msg});
+                    userWechatPatientServer[sendBy].emit('messageRes',{msg:data.msg});
+                    // socket.emit('messageRes',{msg:data.msg});
                 }
                 else{           // 用户不在线
                     // socket.emit("err",{msg:"对方已经下线或者断开连接"})
@@ -182,72 +188,72 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                         // custom card 群发
                         if(data.msg.contentType == 'custom' && data.msg.content.type == 'card'){
 
-                        // console.log('in');
-                        var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.content.consultationId +'_'+data.msg.teamId + "&#wechat_redirect";
+                            // console.log('in');
+                            var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.content.consultationId +'_'+data.msg.teamId + "&#wechat_redirect";
 
-                        var template = {
-                            "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
-                            "role": "doctor",
-                            "postdata": {
-                                "template_id": "cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k",
-                                "url": actionUrl,
-                                "data": {
-                                    "first": {
-                                        "value": "您的团队有一个新的咨询（问诊）消息，请及时处理",
-                                        "color": "#173177"
-                                    },
-                                    "keyword1": {
-                                        "value": data.msg.content.counselId, //咨询ID
-                                        "color": "#173177"
-                                    },
-                                    "keyword2": {
-                                        "value": data.msg.content.patientName, //患者信息（姓名，性别，年龄）
-                                        "color": "#173177"
-                                    },
-                                    "keyword3": {
-                                        "value": data.msg.content.help, //问题描述
-                                        "color": "#173177"
-                                    },
-                                    "keyword4": {
-                                        "value": data.msg.content.time, //提交时间
-                                        "color": "#173177"
-                                    },
+                            var template = {
+                                "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
+                                "role": "doctor",
+                                "postdata": {
+                                    "template_id": "cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k",
+                                    "url": actionUrl,
+                                    "data": {
+                                        "first": {
+                                            "value": "您的团队有一个新的咨询（问诊）消息，请及时处理",
+                                            "color": "#173177"
+                                        },
+                                        "keyword1": {
+                                            "value": data.msg.content.counselId, //咨询ID
+                                            "color": "#173177"
+                                        },
+                                        "keyword2": {
+                                            "value": data.msg.content.patientName, //患者信息（姓名，性别，年龄）
+                                            "color": "#173177"
+                                        },
+                                        "keyword3": {
+                                            "value": data.msg.content.help, //问题描述
+                                            "color": "#173177"
+                                        },
+                                        "keyword4": {
+                                            "value": data.msg.content.time, //提交时间
+                                            "color": "#173177"
+                                        },
 
-                                    "remark": {
-                                        "value": "感谢您的使用！",
-                                        "color": "#173177"
+                                        "remark": {
+                                            "value": "感谢您的使用！",
+                                            "color": "#173177"
+                                        }
                                     }
                                 }
-                            }
-                        };
+                            };
 
-                        // groupSend(data);
-                        request({
-                            // url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
-                            url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate',
-                            method: 'POST',
-                            body: template,
-                            json:true
-                        }, function(err, response, body){
-                            // if (!err && response.statusCode == 200) {   
-                            //     res.json({results:body});
-                            // }
-                            // else{
-                            //     return res.status(500).send('Error');
-                            // }
-                        });                               
+                            // groupSend(data);
+                            request({
+                                // url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                                url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate',
+                                method: 'POST',
+                                body: template,
+                                json:true
+                            }, function(err, response, body){
+                                // if (!err && response.statusCode == 200) {   
+                                //     res.json({results:body});
+                                // }
+                                // else{
+                                //     return res.status(500).send('Error');
+                                // }
+                            });                               
+                        }
+
+                        // others: no process
                     }
-
-                    // others: no process
-                }
-            }                      
-        }
+                }                      
+            }
+        });
     }
 }
 
 // namespace chat
 exports.chat = function (io, socket) {
-
     socket.on('newUser',function(data){
         var nickname = data.user_name,
             user_id = data.user_id,
@@ -326,6 +332,7 @@ exports.chat = function (io, socket) {
         // console.log(Object.keys(userServer));
     })
     socket.on('message', function(data){
+        console.log('message');
         var contentType = data.msg.contentType;
         var clientType = data.msg.clientType;
         var role = data.role;
@@ -333,7 +340,7 @@ exports.chat = function (io, socket) {
         
         var url = 'http://'+ webEntry.domain +':4050/wechat/download';
 
-        if(clientType != 'app' &&(contentType == 'image' || contentType == 'voice')){           // image voice
+        if(clientType != 'doctor' && clientType!= 'patient' &&(contentType == 'image' || contentType == 'voice')){           // image voice
             var mediaId = data.msg.content.mediaId;
             var name;
             if(contentType == 'image' ){
@@ -356,11 +363,11 @@ exports.chat = function (io, socket) {
                 else{
                     var resUrl = "uploads/photos/" + name;
                     data.msg.content['src_thumb'] = resUrl;
-                    messageSaveSend(data, resUrl, socket);
+                    messageSaveSend(data, resUrl);
                 }
             });
         }else{          // text custom
-            messageSaveSend(data, data.msg.content.src, socket);
+            messageSaveSend(data, data.msg.content.src);
         }
 
      
