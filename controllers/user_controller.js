@@ -725,37 +725,30 @@ exports.logout = function(req, res) {
     });
 }
 exports.getUserID = function(req, res) {
-    var _phoneNo = req.query.phoneNo
-    var query = {phoneNo:_phoneNo};
+    var username = req.query.username;
+    console.log(username);
+    var query = {
+        $or: [
+            {phoneNo: username},
+            {openId: username}
+        ]
+    };
+    console.log(query);
     User.getOne(query, function(err, item) {
         if (err) {
             return res.status(500).send(err.errmsg);
         }
-        if(item==null){
+        if(item == null){
             res.json({results: 1,mesg:"User doesn't Exist!"});
         }
         else{
-
-            res.json({results: 0,UserId:item.userId,roles:item.role, mesg:"Get UserId Success!"});
+            console.log(item);
+            res.json({results: 0, UserId: item.userId, phoneNo: item.phoneNo, roles: item.role, mesg:"Get UserId Success!"});
 
         }
     });
 }
-exports.getUserIDbyOpenId = function(req, res) {
-    var _openId = req.query.openId
-    var query = {openId:_openId};
-    User.getOne(query, function(err, item) {
-        if (err) {
-            return res.status(500).send(err.errmsg);
-        }
-        if(item==null){
-            res.json({results: 1,mesg:"User doesn't Exist!"});
-        }
-        else{
-            res.json({results: 0,UserId:item.userId,phoneNo:item.phoneNo,role:item.role,mesg:"Get UserId Success!"});
-        }
-    });
-}
+
 exports.sendSMS = function(req, res) {
     var now = new Date()
     var _mobile = req.query.mobile;

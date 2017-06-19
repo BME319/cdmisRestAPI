@@ -69,9 +69,9 @@ module.exports = function(app,webEntry, acl) {
 
   app.get(version + '/dict/typeTwo', dictTypeTwoCtrl.getCategory);
   app.get(version + '/dict/typeTwo/codes', dictTypeTwoCtrl.getTypes);
-  app.get(version + '/user', userCtrl.getUserList);
-  app.get(version + '/user/insert', userCtrl.insertUser);
-  app.get(version + '/user/one',  userCtrl.getUser);
+  // app.get(version + '/user', userCtrl.getUserList);
+  // app.get(version + '/user/insert', userCtrl.insertUser);
+  // app.get(version + '/user/one',  userCtrl.getUser);
 
   app.get(version + '/dict/typeOne',  dictTypeOneCtrl.getCategory);
   app.get(version + '/dict/district',  dictDistrictCtrl.getDistrict);
@@ -101,7 +101,7 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/user/login', userCtrl.openIdLoginTest,userCtrl.checkBinding,userCtrl.login);
   app.post(version + '/user/logout',  userCtrl.logout);
   app.get(version + '/user/getUserID',  userCtrl.getUserID);
-  app.get(version + '/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
+  // app.get(version + '/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
   app.get(version + '/user/TDCticket',  userCtrl.getUserTDCticket);
 
   app.post(version + '/user/sendSMS',  userCtrl.sendSMS);
