@@ -931,10 +931,10 @@ exports.changeVIP = function(req, res) {
 
 //患者头像不存在时使用微信头像 2017-06-14 GY
 exports.wechatPhotoUrl = function(req, res) {
-	if (req.query.patientId == null || req.query.patientId == '') {
+	if (req.query.patientId === null || req.query.patientId === '') {
 		return res.json({results: '请填写userId'});
 	}
-	if (req.body.wechatPhotoUrl == null || req.body.wechatPhotoUrl == '') {
+	if (req.query.wechatPhotoUrl === null || req.query.wechatPhotoUrl === '') {
 		return res.json({results: '请填写wechatPhotoUrl'});
 	}
 	var query = {userId: req.query.patientId};
