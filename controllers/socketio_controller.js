@@ -234,7 +234,9 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                                 method: 'POST',
                                 body: template,
                                 json:true
+
                             }, function(err, response, body){
+
                                 // if (!err && response.statusCode == 200) {   
                                 //     res.json({results:body});
                                 // }
@@ -248,6 +250,8 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                     }
                 }                      
             }
+
+
         });
 
     }
