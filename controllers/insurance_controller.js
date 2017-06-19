@@ -152,10 +152,10 @@ exports.getInsMsg = function(req, res) {
 
 exports.setPrefer = function(req,res){
 	var preference = {
-		status: req.query.status,
-		time: req.query.date
+		status: req.body.status,
+		time: req.body.date
 	}
-	var query = {patientId: req.query.patientId};
+	var query = {patientId: req.body.patientId};
 
 	InsuranceMsg.update(query,{ $set: { preference: preference} },function(err, item){
         if (err) {

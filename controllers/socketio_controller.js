@@ -102,6 +102,7 @@ function messageSaveSend(data, url){
                 }
             }
             else if(client == 'wechatdoctor'){
+
                   if(userWechatDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
                     console.log("messageRes to [wechatdoctor]: "+sendBy)
                     userWechatDoctorServer[sendBy].emit('messageRes',{msg:data.msg});

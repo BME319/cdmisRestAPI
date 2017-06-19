@@ -79,8 +79,8 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/dict/district',  dictDistrictCtrl.getDistrict);
   app.get(version + '/dict/hospital',  dictHospitalCtrl.getHospital);
   app.get(version + '/tasks',  taskCtrl.getTasks);
-  app.get(version + '/tasks/status',  taskCtrl.updateStatus);
-  app.get(version + '/tasks/time',  taskCtrl.updateStartTime);
+  app.post(version + '/tasks/status',  taskCtrl.updateStatus);
+  app.post(version + '/tasks/time',  taskCtrl.updateStartTime);
 
   // app.post(version + '/compliance', complianceCtrl.insertOne);
   app.get(version + '/compliance',  complianceCtrl.getComplianceByDay);
@@ -242,7 +242,7 @@ module.exports = function(app,webEntry, acl) {
   //insurance
   app.post(version + '/insurance/updateInsuranceMsg',  insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage);
   app.get(version + '/insurance/getInsMsg',  insuranceCtrl.getInsMsg);
-  app.get(version + '/insurance/setPrefer',  insuranceCtrl.setPrefer);
+  app.post(version + '/insurance/setPrefer',  insuranceCtrl.setPrefer);
   app.get(version + '/insurance/getPrefer',  insuranceCtrl.getPrefer);
 
   //advice

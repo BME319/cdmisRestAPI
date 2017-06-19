@@ -37,12 +37,12 @@ exports.getTasks = function(req, res) {
 }
 
 exports.updateStatus = function(req, res) {
-	var userId = req.query.userId,
-	    sortNo = req.query.sortNo,
-	    type = req.query.type,
-	    code = req.query.code,
-	    status = req.query.status;
-      console.log(sortNo);
+	var userId = req.body.userId,
+	    sortNo = req.body.sortNo,
+	    type = req.body.type,
+	    code = req.body.code,
+	    status = req.body.status;
+      // console.log(sortNo);
 
 
 	var query = {userId:userId,sortNo:sortNo};  
@@ -96,11 +96,11 @@ exports.updateStatus = function(req, res) {
 }
 
 exports.updateStartTime = function(req, res) {
-	var userId = req.query.userId,
-	    sortNo = req.query.sortNo,
-	    type = req.query.type,
-	    code = req.query.code,
-	    startTime = req.query.startTime;
+	var userId = req.body.userId,
+	    sortNo = req.body.sortNo,
+	    type = req.body.type,
+	    code = req.body.code,
+	    startTime = req.body.startTime;
 
 
 	var query = {userId:userId,sortNo:sortNo};  
