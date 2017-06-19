@@ -43,7 +43,7 @@ exports.getCategory = function(req, res) {
 
 exports.getTypes = function(req, res) {
   var category = req.query.category;
-  var type = req.quert.type;
+  var type = req.query.type;
   var query = {category:category,type:type};
 
   DictTypeTwo.getOneCategory(query, function(err, items) {
