@@ -249,6 +249,7 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                 }                      
             }
         });
+
     }
 }
 
