@@ -104,7 +104,7 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/user/logout',  userCtrl.logout);
   app.get(version + '/user/getUserID',  userCtrl.getUserID);
   // app.get(version + '/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
-  app.get(version + '/user/TDCticket',  userCtrl.getUserTDCticket);
+  // app.get(version + '/user/TDCticket',  userCtrl.getUserTDCticket);
 
   app.post(version + '/user/sendSMS',  userCtrl.sendSMS);
   app.get(version + '/user/verifySMS',  userCtrl.verifySMS);
