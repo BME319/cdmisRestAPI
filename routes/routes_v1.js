@@ -91,9 +91,9 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/user/register', userCtrl.registerTest,getNoMid.getNo(1), userCtrl.register);
   // -------------------------------------------------------------------------------------------------------------------
 
-  app.post(version + '/user/setOpenId', userCtrl.setOpenId, userCtrl.checkBinding, userCtrl.setOpenIdRes);
-  app.post(version + '/user/setMessageOpenId', userCtrl.checkUser, userCtrl.setMessageOpenId);
-  app.get(version + '/user/getMessageOpenId', userCtrl.checkUser, userCtrl.getMessageOpenId);
+  app.post(version + '/user/unionid', userCtrl.setOpenId, userCtrl.checkBinding, userCtrl.setOpenIdRes);
+  app.post(version + '/user/openId', userCtrl.checkUser, userCtrl.setMessageOpenId);
+  app.get(version + '/user/openId', userCtrl.checkUser, userCtrl.getMessageOpenId);
 
   // app.post('/user/registerWithOpenId',userCtrl.registerWithOpenIdTest,getNoMid.getNo(1), userCtrl.registerWithOpenId);
 
@@ -103,18 +103,19 @@ module.exports = function(app,webEntry, acl) {
 
   app.post(version + '/user/login', userCtrl.openIdLoginTest,userCtrl.checkBinding,userCtrl.login);
   app.post(version + '/user/logout',  userCtrl.logout);
-  app.get(version + '/user/getUserID',  userCtrl.getUserID);
+
+  app.get(version + '/user/userID',  userCtrl.getUserID);
   // app.get(version + '/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
   // app.get(version + '/user/TDCticket',  userCtrl.getUserTDCticket);
 
-  app.post(version + '/user/sendSMS',  userCtrl.sendSMS);
-  app.get(version + '/user/verifySMS',  userCtrl.verifySMS);
-  app.get(version + '/user/getUserAgreement',  userCtrl.getUserAgreement);
-  app.post(version + '/user/updateUserAgreement',  userCtrl.updateUserAgreement);
-  app.get(version + '/healthInfo/getAllHealthInfo',  healthInfoCtrl.getAllHealthInfo);
-  app.get(version + '/healthInfo/getHealthDetail',  healthInfoCtrl.getHealthDetail);
-  app.post(version + '/healthInfo/insertHealthInfo',  healthInfoCtrl.insertHealthInfo);
-  app.post(version + '/healthInfo/modifyHealthDetail',  healthInfoCtrl.modifyHealthDetail);
+  app.post(version + '/user/sms',  userCtrl.sendSMS);
+  app.get(version + '/user/sms',  userCtrl.verifySMS);
+  app.get(version + '/user/agreement',  userCtrl.getUserAgreement);
+  app.post(version + '/user/agreement',  userCtrl.updateUserAgreement);
+  app.get(version + '/healthInfo/healthInfos',  healthInfoCtrl.getAllHealthInfo);
+  app.get(version + '/healthInfo/healthDetail',  healthInfoCtrl.getHealthDetail);
+  app.post(version + '/healthInfo/healthInfo',  healthInfoCtrl.insertHealthInfo);
+  app.post(version + '/healthInfo/healthDetail',  healthInfoCtrl.modifyHealthDetail);
   app.post(version + '/healthInfo/deleteHealthDetail',  healthInfoCtrl.deleteHealthDetail);
   // app.get(version + '/dictNumber/getNo', getNoMid.getNo(), dictNumberCtrl.getNo);
   // app.get(version + '/user/getIp', userCtrl.getIp); 
@@ -128,50 +129,49 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/doctor/postDocBasic',  doctorCtrl.insertDocBasic);
   //需要查询class字典表（待定）
 
-  app.get(version + '/doctor/getPatientList',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
+  app.get(version + '/doctor/mypatients',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
-  app.get(version + '/doctor/getDoctorInfo',  doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
-  app.get(version + '/doctor/getMyGroupList',  doctorCtrl.getTeams);
-  app.get(version + '/doctor/getGroupPatientList',  doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
-  // app.get(version + '/doctor/getTeam', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
-  app.post(version + '/doctor/editDoctorDetail',  doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember);
+  app.get(version + '/doctor/detail',  doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
+  app.get(version + '/doctor/myTeams',  doctorCtrl.getTeams);
+  app.get(version + '/doctor/teamPatients',  doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
+  // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
+  app.post(version + '/doctor/editDetail',  doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember);
 
-  app.get(version + '/doctor/getRecentDoctorList',  doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList);
-  app.get(version + '/doctor/getPatientByDate',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate);
-  app.post(version + '/doctor/insertSchedule',  doctorCtrl.insertSchedule);
+  app.get(version + '/doctor/myRecentDoctors',  doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList);
+  app.get(version + '/doctor/myPatientsByDate',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate);
+  app.post(version + '/doctor/schedule',  doctorCtrl.insertSchedule);
   app.post(version + '/doctor/deleteSchedule',  doctorCtrl.deleteSchedule);
-  app.get(version + '/doctor/getSchedules',  doctorCtrl.getSchedules);
-  app.post(version + '/doctor/insertSuspendTime',  doctorCtrl.insertSuspendTime);
+  app.get(version + '/doctor/schedules',  doctorCtrl.getSchedules);
+  app.post(version + '/doctor/suspendTime',  doctorCtrl.insertSuspendTime);
 
   app.post(version + '/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime);
-  app.get(version + '/doctor/getSuspendTime', doctorCtrl.getSuspendTime);
-  app.get(version + '/doctor/getDocNum', doctorCtrl.getDocNum);
+  app.get(version + '/doctor/suspendTime', doctorCtrl.getSuspendTime);
+  app.get(version + '/doctor/numbers', doctorCtrl.getDocNum);
 
 
-  app.get('/doctor/getAliPayAccount', doctorCtrl.getAliPayAccount);
-  app.post('/doctor/editAliPayAccount', doctorCtrl.editAliPayAccount);
+  app.get('/doctor/AliPayAccount', doctorCtrl.getAliPayAccount);
+  app.post('/doctor/AliPayAccount', doctorCtrl.editAliPayAccount);
 
   //counsel
-  app.get(version + '/counsel/getCounsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
+  app.get(version + '/counsel/counsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
   app.post(version + '/counsel/questionaire', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire);
   app.post(version + '/counsel/changeCounselStatus', counselCtrl.changeCounselStatus);
-  app.get(version + '/counsel/getStatus',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus);
+  app.get(version + '/counsel/status',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus);
 
-  app.post(version + '/counsel/changeStatus',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus);
-  app.post(version + '/counsel/changeType',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType);
-  app.post(version + '/counsel/insertCommentScore', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
-
+  app.post(version + '/counsel/status',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus);
+  app.post(version + '/counsel/type',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType);
+  app.post(version + '/counsel/score', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
 
 
   //patient_Info
-  app.get(version + '/patient/getPatientDetail',  patientCtrl.getPatientDetail);
+  app.get(version + '/patient/detail',  patientCtrl.getPatientDetail);
 
-  app.get(version + '/patient/getMyDoctors',  patientCtrl.getPatientObject, patientCtrl.getMyDoctor);
-  app.post(version + '/patient/insertDiagnosis',  patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail);
-  app.get(version + '/patient/getDoctorLists',  patientCtrl.getDoctorLists);
-  app.post(version + '/patient/newPatientDetail',  patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
-  app.post(version + '/patient/editPatientDetail', patientCtrl.editPatientDetail);
-  app.get(version + '/patient/getCounselRecords', patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
+  app.get(version + '/patient/myDoctors',  patientCtrl.getPatientObject, patientCtrl.getMyDoctor);
+  app.post(version + '/patient/diagnosis',  patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail);
+  app.get(version + '/patient/doctors',  patientCtrl.getDoctorLists);
+  app.post(version + '/patient/detail',  patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
+  app.post(version + '/patient/editDetail', patientCtrl.editPatientDetail);
+  app.get(version + '/patient/counselRecords', patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
   // app.post(version + '/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
   // app.post(version + '/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
 
@@ -183,69 +183,70 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/comment/getComments', doctorCtrl.getDoctorObject, commentCtrl.getCommentsByDoc);
   app.get(version + '/comment/getCommentsByC', commentCtrl.getCommentsByCounselId);
   //vitalSign_query
-  app.get(version + '/vitalSign/getVitalSigns',  patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns);
-  app.post(version + '/vitalSign/insertVitalSign', vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData);
+  app.get(version + '/vitalSign/vitalSigns',  patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns);
+  app.post(version + '/vitalSign/vitalSign', vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData);
 
 
   //account_Info
   //需要和user表连接
   //无法输出expenseRecords数据，暂时无法解决问题
-  app.get(version + '/account/getAccountInfo',  accountCtrl.getAccountInfo);
-  app.get(version + '/account/getCounts',  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts);
-  app.post(version + '/account/modifyCounts',  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts);
+  app.get(version + '/account/counts',  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts);
+  app.post(version + '/account/counts',  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts);
   // app.post(version + '/account/rechargeDoctor', accountCtrl.rechargeDoctor);
   app.post(version + '/account/updateFreeTime',  accountCtrl.checkPatient, accountCtrl.updateFreeTime);
   app.get(version + '/account/getCountsRespective',  accountCtrl.checkPatient, accountCtrl.getCountsRespective);
   
   app.post(version + '/expense/rechargeDoctor',  accountCtrl.checkPatient, doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor);
-  app.get(version + '/expense/getDocRecords',  doctorCtrl.checkDoctor, expenseCtrl.getDocRecords);
+
+  app.get(version + '/expense/docRecords',  doctorCtrl.checkDoctor, expenseCtrl.getDocRecords);
 
   //message
-  app.get(version + '/message/getMessages',  messageCtrl.getMessages);
-  app.post(version + '/message/changeMessageStatus',  messageCtrl.changeMessageStatus);
-  app.post(version + '/message/insertMessage',  getNoMid.getNo(6), messageCtrl.insertMessage);
+  app.get(version + '/message/messages',  messageCtrl.getMessages);
+  app.post(version + '/message/status',  messageCtrl.changeMessageStatus);
+  app.post(version + '/message/message',  getNoMid.getNo(6), messageCtrl.insertMessage);
 
   //new
-  app.get(version + '/new/getNews',  newsCtrl.getNews);
-  app.get(version + '/new/getNewsByReadOrNot',  newsCtrl.getNewsByReadOrNot);
-  app.post(version + '/new/insertNews',  newsCtrl.insertNews);
-  app.post(version + '/new/insertTeamNews',  newsCtrl.insertTeamNews);
+  app.get(version + '/new/news',  newsCtrl.getNews);
+  app.get(version + '/new/newsByReadOrNot',  newsCtrl.getNewsByReadOrNot);
+  app.post(version + '/new/news',  newsCtrl.insertNews);
+  app.post(version + '/new/teamNews',  newsCtrl.insertTeamNews);
   
   //communication
-  app.get(version + '/communication/getCounselReport',  communicationCtrl.getCounselReport);
+  app.get(version + '/communication/counselReport',  communicationCtrl.getCounselReport);
   app.post(version + '/communication/insertMember',  communicationCtrl.insertMember, communicationCtrl.updateNumber);
   app.post(version + '/communication/removeMember',  communicationCtrl.removeMember, communicationCtrl.updateNumber);
   // app.post(version + '/communication/newTeam', getNoMid.getNo(4), communicationCtrl.newTeam);
-  app.post(version + '/communication/newTeam',  communicationCtrl.newTeam);
+  app.post(version + '/communication/team',  communicationCtrl.newTeam);
   app.post(version + '/communication/deleteTeam',  communicationCtrl.deleteTeam);
-  app.get(version + '/communication/getTeam',  communicationCtrl.getTeam);
+  app.get(version + '/communication/team',  communicationCtrl.getTeam);
   // app.post(version + '/communication/newConsultation', getNoMid.getNo(5), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
-  app.post(version + '/communication/newConsultation',  communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
+  app.post(version + '/communication/consultation',  communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
+
   app.post(version + '/communication/conclusion',  communicationCtrl.conclusion);
   app.post(version + '/communication/updateLastTalkTime',  communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime);
   //app.get(version + '/communication/getMessages');
 
-  app.get(version + '/communication/getConsultation',  communicationCtrl.getConsultation);
-  app.post(version + '/communication/postCommunication',  getNoMid.getNo(8),communicationCtrl.postCommunication);
-  app.get(version + '/communication/getCommunication',  communicationCtrl.getCommunication);
+  app.get(version + '/communication/consultation',  communicationCtrl.getConsultation);
+  app.post(version + '/communication/communication',  getNoMid.getNo(8),communicationCtrl.postCommunication);
+  app.get(version + '/communication/communication',  communicationCtrl.getCommunication);
 
   // 临时接口：给原数据写入newsType字段
   // app.get(version + '/communication/updateNewsType', communicationCtrl.addnewsType);
 
-
   //task
-  app.post(version + '/tasks/insertTaskModel',  taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel);
-  app.get(version + '/tasks/getUserTask',  taskCtrl.getUserTask);
-  app.post(version + '/tasks/updateUserTask',  taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent);
+
+  app.post(version + '/tasks/taskModel',  taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel);
+  app.get(version + '/tasks/task',  taskCtrl.getUserTask);
+  app.post(version + '/tasks/task',  taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent);
 
   //compliance
-  app.post(version + '/compliance/update',  complianceCtrl.getCompliance, complianceCtrl.updateCompliance);
+  app.post(version + '/compliance',  complianceCtrl.getCompliance, complianceCtrl.updateCompliance);
 
   //insurance
-  app.post(version + '/insurance/updateInsuranceMsg',  insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage);
-  app.get(version + '/insurance/getInsMsg',  insuranceCtrl.getInsMsg);
-  app.post(version + '/insurance/setPrefer',  insuranceCtrl.setPrefer);
-  app.get(version + '/insurance/getPrefer',  insuranceCtrl.getPrefer);
+  app.post(version + '/insurance/message',  insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage);
+  app.get(version + '/insurance/message',  insuranceCtrl.getInsMsg);
+  app.post(version + '/insurance/prefer',  insuranceCtrl.setPrefer);
+  app.get(version + '/insurance/prefer',  insuranceCtrl.getPrefer);
 
   //advice
   app.post(version + '/advice/postAdvice', tokenManager.verifyToken(), adviceCtrl.postAdvice);
@@ -261,9 +262,8 @@ module.exports = function(app,webEntry, acl) {
 
   // order
   // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
-  app.post(version + '/order/updateOrder',  orderCtrl.updateOrder);
-  app.get(version + '/order/getOrder',   orderCtrl.getOrder);
-
+  app.post(version + '/order/order',  orderCtrl.updateOrder);
+  app.get(version + '/order/order',   orderCtrl.getOrder);
 
   // // weixin wechatCtrl
   // app.get(version + '/wechat/settingConfig', wechatCtrl.getAccessTokenMid,wechatCtrl.wxJsApiTicket, wechatCtrl.settingConfig);
@@ -358,5 +358,6 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/devicedata/BPDevice/binding', devicedataCtrl.getDeviceInfo);
   app.post(version + '/devicedata/BPDevice/debinding', devicedataCtrl.debindingDevice);
   app.post(version + '/devicedata/BPDevice/data', devicedataCtrl.receiveBloodPressure);
+
 };
 
