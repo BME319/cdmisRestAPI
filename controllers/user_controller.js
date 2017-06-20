@@ -725,15 +725,18 @@ exports.logout = function(req, res) {
     });
 }
 exports.getUserID = function(req, res) {
-    var username = req.query.username;
-    console.log(username);
+    var username = req.query.username || null;
+    if(username == null || username == ''){
+        return res.status(400).send('invalid input');
+    }
+    // console.log(username);
     var query = {
         $or: [
             {phoneNo: username},
             {openId: username}
         ]
     };
-    console.log(query);
+    // console.log(query);
     User.getOne(query, function(err, item) {
         if (err) {
             return res.status(500).send(err.errmsg);

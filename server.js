@@ -24,7 +24,8 @@ var _config = webEntry.config || 'config',
 var config = require('./' + _config),
     dbUri = webEntry.dbUri,
     restPort = webEntry.restPort,
-    routes = require('./routes/'+route);
+    routes = require('./routes/'+route),
+    routes_v1 = require('./routes/routes_v1');
 
 // 数据库连接
 var db = mongoose.connection; 
@@ -78,6 +79,7 @@ app.all('*', function (req, res, next) {
 
 // 路由设置
 routes(app, webEntry, acl);
+routes_v1(app, webEntry, acl);
 
 app.use('/public', express.static( './public')).use('/lib', express.static( '../lib'));
 
