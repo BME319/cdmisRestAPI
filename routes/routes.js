@@ -104,7 +104,7 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/user/logout',  userCtrl.logout);
   app.get(version + '/user/getUserID',  userCtrl.getUserID);
   // app.get(version + '/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
-  app.get(version + '/user/TDCticket',  userCtrl.getUserTDCticket);
+  // app.get(version + '/user/TDCticket',  userCtrl.getUserTDCticket);
 
   app.post(version + '/user/sendSMS',  userCtrl.sendSMS);
   app.get(version + '/user/verifySMS',  userCtrl.verifySMS);
@@ -126,7 +126,7 @@ module.exports = function(app,webEntry, acl) {
   //doctor_Info
   app.post(version + '/doctor/postDocBasic',  doctorCtrl.insertDocBasic);
   //需要查询class字典表（待定）
-<<<<<<< HEAD
+
   app.get(version + '/doctor/getPatientList',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
   app.get(version + '/doctor/getDoctorInfo',  doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
@@ -145,28 +145,7 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime);
   app.get(version + '/doctor/getSuspendTime', doctorCtrl.getSuspendTime);
   app.get(version + '/doctor/getDocNum', doctorCtrl.getDocNum);
-=======
-  app.get('/doctor/getPatientList',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
-  // app.get('/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
 
-  app.get('/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getUserInfo, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
-  app.get('/doctor/getMyGroupList', doctorCtrl.getTeams);
-  app.get('/doctor/getGroupPatientList', doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
-
-  // app.get('/doctor/getTeam', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
-  app.post('/doctor/editDoctorDetail',  doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember);
-
-  app.get('/doctor/getRecentDoctorList',  doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList);
-  app.get('/doctor/getPatientByDate',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate);
-  app.post('/doctor/insertSchedule',  doctorCtrl.insertSchedule);
-  app.post('/doctor/deleteSchedule',  doctorCtrl.deleteSchedule);
-  app.get('/doctor/getSchedules',  doctorCtrl.getSchedules);
-  app.post('/doctor/insertSuspendTime',  doctorCtrl.insertSuspendTime);
-
-  app.post('/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime);
-  app.get('/doctor/getSuspendTime', doctorCtrl.getSuspendTime);
-  app.get('/doctor/getDocNum', doctorCtrl.getDocNum);
->>>>>>> upstream/hotfix
 
   app.get('/doctor/getAliPayAccount', doctorCtrl.getAliPayAccount);
   app.post('/doctor/editAliPayAccount', doctorCtrl.editAliPayAccount);

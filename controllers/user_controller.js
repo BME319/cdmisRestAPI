@@ -208,25 +208,25 @@ exports.getUser = function(req, res) {
 }
 
 
-exports.getUserTDCticket = function(req, res) {
-    var username = req.query.username;
-    if (username === '' || username === null) {
-        return res.status(422).send('username字段请输入UserId或openId或手机号!'); 
-    }
-    var query = {
-        $or: [
-            {userId: username},
-            {openId: username},
-            {phoneNo: username}
-        ]
-    };
-    User.getOne(query, function(err, item) {
-        if (err) {
-            return res.status(500).send(err.errmsg);
-        }
-        res.json({results: item.TDCticket});
-    });
-}
+// exports.getUserTDCticket = function(req, res) {
+//     var username = req.query.username;
+//     if (username === '' || username === null) {
+//         return res.status(422).send('username字段请输入UserId或openId或手机号!'); 
+//     }
+//     var query = {
+//         $or: [
+//             {userId: username},
+//             {openId: username},
+//             {phoneNo: username}
+//         ]
+//     };
+//     User.getOne(query, function(err, item) {
+//         if (err) {
+//             return res.status(500).send(err.errmsg);
+//         }
+//         res.json({results: item.TDCticket});
+//     });
+// }
 
 exports.getUserAgreement = function(req, res) {
     var _userId = req.query.userId
