@@ -909,7 +909,7 @@ exports.receiveTextMessage = function(req, res) {
                 var workUnit = doctor.workUnit;
 
                 var template = {
-                  "userId": '',          // data.msg.content.doctorId, //医生的UID
+                  "userId": patient_openId,         
                   "role": "patient",
                   "postdata": {
                     "touser": patient_openId,
@@ -952,6 +952,7 @@ exports.receiveTextMessage = function(req, res) {
                   }
                   else{
                     results = 'success';
+                    console.log('test');
                   }
 
                 });

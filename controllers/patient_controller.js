@@ -934,7 +934,7 @@ exports.wechatPhotoUrl = function(req, res) {
 	if (req.query.patientId == null || req.query.patientId == '') {
 		return res.json({results: '请填写userId'});
 	}
-	if (req.body.wechatPhotoUrl == null || req.body.wechatPhotoUrl == '') {
+	if (req.query.wechatPhotoUrl == null || req.query.wechatPhotoUrl == '') {
 		return res.json({results: '请填写wechatPhotoUrl'});
 	}
 	var query = {userId: req.query.patientId};
