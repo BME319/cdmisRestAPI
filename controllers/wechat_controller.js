@@ -951,8 +951,13 @@ exports.receiveTextMessage = function(req, res) {
                     results = err;
                   }
                   else{
-                    results = 'success';
-                    console.log('test');
+                    if( jsondata.xml.Event == 'SCAN'){
+                      results = 'success';
+                    }
+                    else{
+                      results = "您好，欢迎关注肾事管家~让每一位慢性肾病患者得到有效管理。找名医进行咨询问诊，请点击底栏【肾事管家】~定制私人肾病全程管理方案，请点击底栏【全程管理】~";
+                    }
+
                   }
 
                 });
