@@ -733,7 +733,8 @@ exports.getUserID = function(req, res) {
     var query = {
         $or: [
             {phoneNo: username},
-            {openId: username}
+            {openId: username},
+            {userId: username}
         ]
     };
     // console.log(query);
@@ -746,7 +747,7 @@ exports.getUserID = function(req, res) {
         }
         else{
             console.log(item);
-            res.json({results: 0, UserId: item.userId, phoneNo: item.phoneNo, roles: item.role, mesg:"Get UserId Success!"});
+            res.json({results: 0, UserId: item.userId, phoneNo: item.phoneNo, roles: item.role, openId: item.openId, mesg:"Get UserId Success!"});
 
         }
     });
