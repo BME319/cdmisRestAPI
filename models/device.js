@@ -95,4 +95,17 @@ Device.update = function (query, obj, callback, opts, populate) {
 };
 
 
+Device.removeOne = function(query, callback, opts) {
+	var options = opts || {};
+
+	deviceModel
+		.findOneAndRemove(query, options, function(err, device) {
+			if (err) {
+				return callback(err);
+			}
+			callback(null, device);
+		});
+};
+
+
 module.exports = Device;

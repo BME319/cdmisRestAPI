@@ -1,5 +1,7 @@
 var	request = require('request'),
 	config = require('../config'),
+	Patient = require('../models/patient'), 
+	VitalSign = require('../models/vitalSign'), 
 	Device = require('../models/device');
 
 exports.getDeviceInfo = function(req, res){
@@ -53,7 +55,20 @@ exports.getDeviceInfo = function(req, res){
 }
 
 exports.debindingDevice = function(req, res){
-    var jsondata = req.body;
+	var userId = req.body.userId || null;
+	var appId = req.body.appId || null;
+	var sn = req.body.sn || null;
+    var imei = req.body.imei || null;
+    
+
+	if(userId === null || userId === '' || appId === null || appId === '' || sn === null || sn === '' || imei === null || imei === '' ){
+		return res.status(400).send('invalid input');     
+	}
+    var jsondata = {
+    	appId: appId,
+    	sn: sn
+    };
+    
 
     request({
         method: 'POST',
@@ -67,22 +82,121 @@ exports.debindingDevice = function(req, res){
         if(err){
             return res.status(500).send(err.errmsg);     
         }
-        res.json({results: body});
+        if(body.errorCode == 0){
+        	// save data
+        	var deviceId = sn + imei;
+
+        	var query = {deviceId: deviceId};
+
+			Device.removeOne(query,function(err, item){
+				if (err) {
+					return res.status(500).send(err.errmsg);
+				}
+				res.json({results: body});
+			});
+        	
+        }
+        else{
+        	// send error msg to the front end
+        	// res.statusCode = 500;
+        	res.json({results: body});
+        }     
     }); 
 }
 
 exports.receiveBloodPressure = function(req, res){
-  console.log("receiveBloodPressure"); 
-  var res_data = req.body;
-  console.log(res_data);
+  // console.log("receiveBloodPressure"); 
+  // var res_data = req.body;
+  // console.log(res_data);
+  var sn = req.body.sn;
+  var imei = req.body.imei;
+  var deviceId = sn + imei;
+  var query = {deviceId: deviceId};
+
 
   var results = {
-    "code": 1,
-    "status": "success",
-    "msg": "提交成功",
+    "code": 10,
+    "status": "fail",
+    "msg": "提交失败",
     "data": {}
   };
-  res.json(results);
+
+  Device.getOne(query, function(err, item) {
+    if (err) {
+        // return res.status(500).send(err.errmsg);
+        res.json(results);
+    }
+    if(item == null){
+        // res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
+        res.json(results);
+    }
+    else{
+        var userId = item.userId;
+        var querypatient = { 
+    		userId: userId
+    	};
+    	
+    	Patient.getOne(querypatient, function (err, patient) {
+        	if (err) {
+            	// return res.status(500).send(err.errmsg);
+            	res.json(results);
+        	}
+        	if (patient == null) {
+        		// return res.status(400).send('user not exist');
+        		res.json(results);
+        	}
+        	else {
+        		var datetime = new Date();
+        		var query = {
+					patientId: patient._id, 
+					type: '血压', 
+					code: '血压', 
+					date: datetime
+				};
+	
+        		var upObj = {
+            		$push: {
+                		data: {
+                    		time: datetime, 
+                    		value: req.body.systolicpressure, 
+                    		value2: req.body.diastolicpressure
+                		}
+            		}
+        		};
+
+				VitalSign.update(query, upObj, function(err, updata) {
+					if (err){
+						// return res.status(422).send(err.message);
+						res.json(results);
+					}
+			        if (updata.nModified == 0) {
+			            // return res.json({result:'未成功修改！请检查输入是否符合要求！', results:updata});
+			            res.json(results);
+			        }
+			        else if (updata.nModified == 1) {
+			            // return res.json({result:'新建或修改成功', resluts:updata});
+			            results.code = 1;
+			            results.status = 'success';
+			            results.msg = '提交成功'；
+			            res.json(results);
+			        }
+				}, {new: true});
+        	}   
+    	});
+    }
+  });
+
+
+
+
+
+
+
+
+
+  
+
+
  
   // var body = '';
   // var results = '';
