@@ -1,8 +1,19 @@
 var	request = require('request'),
-	config = require('../config');
+	config = require('../config'),
+	Device = require('../models/device');
 
 exports.getDeviceInfo = function(req, res){
-    var jsondata = req.body;
+	var userId = req.body.userId || null;
+	var appId = req.body.appId || null;
+	var twoDimensionalCode = req.body.twoDimensionalCode || null;
+
+	if(userId === null || userId === '' || appId === null || appId === '' || twoDimensionalCode === null || twoDimensionalCode === '' ){
+		return res.status(400).send('invalid input');     
+	}
+    var jsondata = {
+    	appId: appId;
+    	twoDimensionalCode: twoDimensionalCode
+    };
    
     request({
         method: 'POST',
@@ -13,7 +24,31 @@ exports.getDeviceInfo = function(req, res){
         if(err){
             return res.status(500).send(err.errmsg);     
         }
-        res.json({results: body});
+        if(body.errorCode == 0){
+        	// save device info
+        	var sn = body.deviceInfo.sn;
+        	var imei = body.deviceInfo.imei;
+        	var deviceId = sn + imei;
+
+        	var deviceData = {
+		        userId: userId,
+		        deviceId: deviceId,
+		        deviceType: 'sphygmomanometer',
+		        deviceInfo: body.deviceInfo
+		    };
+		    var newDevice = new Device(deviceData);
+		    newDevice.save(function(err, Info) {
+		        if (err) {
+		            return res.status(500).send(err.errmsg);
+		        }
+		        res.json({results: body});
+		    });
+        	
+        }
+        else{
+        	// send error msg to the front end
+        	res.json({results: body});
+        }     
     }); 
 }
 
