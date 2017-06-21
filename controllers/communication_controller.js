@@ -840,3 +840,71 @@ exports.addnewsType = function(req, res) {
 		}
 	}, opts);
 }
+
+//临时方法：给所有消息记录加上一个content.time字段，来源于原文档中的sendDateTime 2017-06-21 GY 
+exports.addcontenttime = function (req, res) {
+	var queryall = {};
+	
+	Communication.getSome(queryall, function (err, items) {
+		var ids = [];
+		for (var j = 0; j < items.length; j ++) {
+			ids[j] = items[j]._id;
+		}
+		// return res.json({'count': ids.length, 'result': ids});
+		for (let i = 0; i < ids.length; i ++) {
+			var query = {'_id': ids[i]};
+			// console.log(query);
+			Communication.getOne(query, function (err, item) {
+				if (err) {
+					console.log(err);
+				}
+				else if (item === null) {
+					console.log('item_of_null');
+					console.log(i);
+				}
+				else if (item.content.createTimeInMillis === undefined) {
+					console.log('item_createTimeInMillis_of_undefined');
+					console.log(i);
+				}
+				// else if (item.content.time !== undefined) {
+				else {
+					var queryup = {'_id': ids[i]};
+					var upObj = {'content.time': item.content.createTimeInMillis};
+					Communication.updateOne(queryup, upObj, function (err, upCM) {
+						if (err) {
+							console.log(err);
+						}
+						else {
+							console.log('updateSuccess');
+							console.log(upCM._id);
+							// console.log(upCM.content.time);
+							console.log(i)
+						}
+					}, {new: true});
+				}
+			});
+		}
+	});
+}
+//临时方法：确认content.time字段是否都加上了 2017-06-21 GY
+exports.timeconfirmation = function (req, res) {
+	var query = {};
+	var flag = 0;
+	Communication.getSome(query, function (err, items) {
+		if (err) {
+			console.log(err);
+		}
+		for (let i = 0; i < items.length; i ++) {
+			if (!(items[i].content.time)) {
+				console.log(i);
+				console.log(items[i]._id);
+			}
+			flag = i;
+			console.log(flag);
+		}
+		console.log(items.length);
+		if (flag === items.length-1) {
+			return res.json({'result': 'finish'});
+		}
+	});
+}
