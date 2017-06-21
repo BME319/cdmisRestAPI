@@ -11,7 +11,7 @@ exports.getDeviceInfo = function(req, res){
 		return res.status(400).send('invalid input');     
 	}
     var jsondata = {
-    	appId: appId;
+    	appId: appId,
     	twoDimensionalCode: twoDimensionalCode
     };
    
