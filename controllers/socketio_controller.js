@@ -50,6 +50,8 @@ function messageSaveSend(data, url){
     var url = url;
     data.msg.content['src'] = url;
     data.msg.status = 'send_success';
+    data.msg['time'] = Date.now();
+
 
     // save data
     var url = 'http://' + webEntry.domain + ':4050/communication/postCommunication';
@@ -79,6 +81,8 @@ function messageSaveSend(data, url){
             // console.log("app_patient:  "+Object.keys(userAppPatientServer));
             // console.log("wechat_doctor:  "+Object.keys(userWechatDoctorServer));
             // console.log("wechat_patient:  "+Object.keys(userWechatPatientServer));
+
+            data.msg['messageId'] = response.body.messageNo;
 
 
             if(client == 'doctor'){
