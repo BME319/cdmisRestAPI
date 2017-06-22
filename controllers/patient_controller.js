@@ -117,6 +117,7 @@ exports.getDoctorLists = function(req, res) {
 	// 	query["name"] = _name
 
 	// }
+	//模糊搜索方式 2017-06-22 GY
 	if (_name) {
 		query.name = new RegExp(_name);
 	}
