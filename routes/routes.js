@@ -26,7 +26,6 @@ var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
     dictNumberCtrl = require('../controllers/dictNumber_controller'),
     loadCtrl = require('../controllers/load_controller');
 
-  
     dictTypeOneCtrl = require('../controllers/dictTypeOne_controller'),
     dictDistrictCtrl = require('../controllers/dictDistrict_controller'),
     dictHospitalCtrl = require('../controllers/dictHospital_controller'),

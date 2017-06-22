@@ -4,7 +4,7 @@ var	request = require('request'),
 	VitalSign = require('../models/vitalSign'), 
 	Device = require('../models/device');
 
-exports.getDeviceInfo = function(req, res){
+exports.bindingDevice = function(req, res){
 	var userId = req.body.userId || null;
 	var appId = req.body.appId || null;
 	var twoDimensionalCode = req.body.twoDimensionalCode || null;
@@ -36,6 +36,7 @@ exports.getDeviceInfo = function(req, res){
 		        userId: userId,
 		        deviceId: deviceId,
 		        deviceType: 'sphygmomanometer',
+		        deviceName: '血压计',
 		        deviceInfo: body.deviceInfo
 		    };
 		    var newDevice = new Device(deviceData);
@@ -234,4 +235,25 @@ exports.receiveBloodPressure = function(req, res){
   //   res.end();
   // }); 
   
+}
+
+exports.getDeviceInfo = function(req, res){
+	var userId = req.query.userId || null;
+	var deviceType = req.query.deviceType || null;
+
+	if(userId === null || userId === '' ){
+		return res.status(400).send('invalid input');     
+	}
+    
+    var query = {userId: userId};
+    if(deviceType != null && deviceType != '' ){
+    	query['deviceType'] = deviceType;
+    }
+
+    Device.getSome(query, function(err, item) {
+        if (err) {
+            return res.status(500).send(err.errmsg);
+        }
+        res.json({results: item});
+    }); 
 }
