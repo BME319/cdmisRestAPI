@@ -12,10 +12,6 @@ exports.bindingDevice = function(req, res){
 	if(userId === null || userId === '' || appId === null || appId === '' || twoDimensionalCode === null || twoDimensionalCode === '' ){
 		return res.status(400).send('invalid input');     
 	}
-    var jsondata = {
-    	appId: appId,
-    	twoDimensionalCode: twoDimensionalCode
-    };
    
     request({
         method: 'POST',
@@ -25,6 +21,7 @@ exports.bindingDevice = function(req, res){
         if(err){
             return res.status(500).send(err.errmsg);     
         }
+        body = JSON.parse(body);  
         if(body.errorCode == 0){
         	// save device info
         	var sn = body.deviceInfo.sn;
@@ -37,14 +34,14 @@ exports.bindingDevice = function(req, res){
 		        deviceType: 'sphygmomanometer',
 		        deviceName: '血压计',
 		        deviceInfo: body.deviceInfo
-		    };
-		    var newDevice = new Device(deviceData);
-		    newDevice.save(function(err, Info) {
+		      };
+		      var newDevice = new Device(deviceData);
+		      newDevice.save(function(err, Info) {
 		        if (err) {
 		            return res.status(500).send(err.errmsg);
 		        }
 		        res.json({results: body});
-		    });
+		      });
         	
         }
         else{
