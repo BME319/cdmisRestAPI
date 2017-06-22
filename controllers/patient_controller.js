@@ -112,10 +112,13 @@ exports.getDoctorLists = function(req, res) {
 		query["workUnit"] = _workUnit
 
 	}
-	if(_name != ""&&_name!=null)
-	{
-		query["name"] = _name
+	// if(_name != ""&&_name!=null)
+	// {
+	// 	query["name"] = _name
 
+	// }
+	if (_name) {
+		query.name = new RegExp(_name);
 	}
 	//输出内容
 
