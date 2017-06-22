@@ -20,8 +20,7 @@ exports.bindingDevice = function(req, res){
     request({
         method: 'POST',
         url: config.third_party_data.bloodpressure.get_device_url,
-        body: jsondata,
-        json: true
+        body: 'appId=' + appId + '&twoDimensionalCode=' + twoDimensionalCode
     }, function(err, response, body) {
         if(err){
             return res.status(500).send(err.errmsg);     
