@@ -177,7 +177,7 @@ exports.receiveBloodPressure = function(req, res){
 			            // return res.json({result:'新建或修改成功', resluts:updata});
 			            results.code = 1;
 			            results.status = 'success';
-			            results.msg = '提交成功'；
+			            results.msg = '提交成功';
 			            res.json(results);
 			        }
 				}, {new: true});
