@@ -79,11 +79,12 @@ exports.debindingDevice = function(req, res){
         if(err){
             return res.status(500).send(err.errmsg);     
         }
+        body = JSON.parse(body);  
         if(body.errorCode == 0){
         	// save data
         	var deviceId = sn + imei;
 
-        	var query = {deviceId: deviceId};
+        	var query = {userId: userId, deviceId: deviceId};
 
 			Device.removeOne(query,function(err, item){
 				if (err) {
