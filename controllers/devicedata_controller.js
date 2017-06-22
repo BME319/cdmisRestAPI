@@ -70,11 +70,10 @@ exports.debindingDevice = function(req, res){
     request({
         method: 'POST',
         url: config.third_party_data.bloodpressure.debinding_device_url,
-        body: jsondata,
+        body: 'appId=' + appId + '&sn' + sn
      //    headers: {
      //    	'Content-Type': 'application/x-www-form-urlencoded'
     	// },
-        json: true
     }, function(err, response, body) {
         if(err){
             return res.status(500).send(err.errmsg);     
