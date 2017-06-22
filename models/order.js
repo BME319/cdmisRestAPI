@@ -11,8 +11,12 @@ var orderSchema = new mongoose.Schema({
 		name: String, 
 		notes: String
 	}, 
+	//paystatus: 0：生成商户订单成功；1：生成预付单成功；2：支付成功；3：支付失败；4：取消订单；5：订单超时；6：退款处理中；7：退款关闭；8：退款异常；9：退款成功
 	paystatus: Number, 
-	paytime: Date
+	paytime: Date, 
+	refundNo: String, //退款单号
+	refundAppTime: Date, //退款申请时间
+	refundSucTime: Date //退款成功时间
 });
 
 

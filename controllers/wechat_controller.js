@@ -632,11 +632,11 @@ exports.refund = function(req, res) {
     mch_id: req.wxApiUserObject.merchantid,   // 商户号
     nonce_str: commonFunc.randomString(32),   // 随机字符串
     sign_type : 'MD5',
-    out_trade_no : req.query.orderNo,     // 商户订单号
-    out_refund_no : req.query.out_refund_no,
-    total_fee: total_fee,
-    refund_fee: refund_fee,
-    op_user_id: req.wxApiUserObject.merchantid // 默认为商户号
+    out_trade_no : req.orderDetail.orderNo,     // 商户订单号
+    out_refund_no : req.orderDetail.refundNo,
+    total_fee: req.orderDetail.money,
+    refund_fee: req.orderDetail.money//,
+    // op_user_id: req.wxApiUserObject.merchantid // 默认为商户号
   };
 
   var signStr = commonFunc.rawSort(paramData);
@@ -646,41 +646,71 @@ exports.refund = function(req, res) {
   var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
   var xmlString = xmlBuilder.buildObject(paramData);
 
+  //读取商户证书
+  var pfxpath = req.wxApiUserObject.pfxpath;
 
-  // https请求  //  refund:'/secapi/pay/refund',
-  var options = {
-    hostname: 'api.mch.weixin.qq.com',
-    port: 443,
-    path: '/secapi/pay/refund',
+  // console.log(wxApis.refund);
+  // console.log(xmlString);
+  // console.log(pfxpath);
+  // console.log(req.wxApiUserObject.merchantid);
+  // return res.json({result: 'finish'});
+
+  request({
+    url: wxApis.refund,
     method: 'POST',
-    // key: fs.readFileSync('test/fixtures/keys/agent2-key.pem'),
-    cert: fs.readFileSync('test/fixtures/keys/agent2-cert.pem')
-  };
-
-  var req = https.request(options, (res) => {
-    // console.log('statusCode:', res.statusCode);
-    // console.log('headers:', res.headers);
-
-    res.on('data', (d) => {
-      // process.stdout.write(d);
-      res.json({results:d});
-    });
+    body: xmlString, 
+    agentOptions: {
+      pfx: fs.readFileSync(pfxpath),
+      passphrase: req.wxApiUserObject.merchantid
+    }
+  }, function(err, response, body){
+    if (err) {       
+      return res.status(500).send(err);
+    }
+    else {
+      // return res.json({results: body});
+      xml2js.parseString(body, { explicitArray : false, ignoreAttrs : true }, function (err, result) {
+        jsondata = result || {};
+      });
+      return res.json({results: jsondata});
+    }
   });
-  req.on('error', (e) => {
-    console.error(e);
-  });
-  req.end();
+
+
+  // // https请求  //  refund:'/secapi/pay/refund',
+  // var options = {
+  //   hostname: 'api.mch.weixin.qq.com',
+  //   port: 443,
+  //   path: '/secapi/pay/refund',
+  //   method: 'POST',
+  //   // key: fs.readFileSync('test/fixtures/keys/agent2-key.pem'),
+  //   cert: fs.readFileSync('test/fixtures/keys/agent2-cert.pem')
+  // };
+
+  // var req = https.request(options, (res) => {
+  //   // console.log('statusCode:', res.statusCode);
+  //   // console.log('headers:', res.headers);
+
+  //   res.on('data', (d) => {
+  //     // process.stdout.write(d);
+  //     res.json({results:d});
+  //   });
+  // });
+  // req.on('error', (e) => {
+  //   console.error(e);
+  // });
+  // req.end();
 }
 
 // 查询退款
-exports.refundquery = function(req, res) {
+exports.refundquery = function(req, res, next) {
   
   var paramData = {
     appid: req.wxApiUserObject.appid,   // 公众账号ID
     mch_id: req.wxApiUserObject.merchantid,   // 商户号
     nonce_str: commonFunc.randomString(32),   // 随机字符串
     sign_type : 'MD5',
-    out_trade_no : req.orderNo,     // 商户订单号
+    out_trade_no : req.orderDetail.orderNo     // 商户订单号
   };
 
   var signStr = commonFunc.rawSort(paramData);
@@ -695,13 +725,56 @@ exports.refundquery = function(req, res) {
     method: 'POST',
     body: xmlString
   }, function(err, response, body){
-    if (!err && response.statusCode == 200) {       
-      res.json({results:body});
+    if (err) {       
+      return res.status(500).send(err);
     }
-    else{
-      return res.status(500).send('Error');
+    else {
+      // return res.json({results: body});
+      xml2js.parseString(body, { explicitArray : false, ignoreAttrs : true }, function (err, result) {
+        jsondata = result || {};
+      });
+
+      if (jsondata.xml.return_code === 'FAIL') {
+        return res.json({results: jsondata.xml});
+      }
+      else if (jsondata.xml.return_code === 'SUCCESS' && jsondata.xml.result_code === 'SUCCESS') {
+        req.refundQueryMsg = jsondata.xml;
+        // console.log(req.refundQueryMsg);
+        next();
+      }
+      else {
+        return res.status(404).json({results: jsondata.xml});
+      }
     }
   });
+}
+
+// 测试函数用的
+exports.testxml = function (req, res) {
+    // var paramData = req.body.data;
+    var paramData = '<xml><appid><![CDATA[wx2421b1c4370ec43b]]></appid><mch_id><![CDATA[10000100]]></mch_id><nonce_str><![CDATA[TeqClE3i0mvn3DrK]]></nonce_str><out_refund_no_0><![CDATA[1415701182]]></out_refund_no_0><out_trade_no><![CDATA[1415757673]]></out_trade_no><refund_count>1</refund_count></xml>'
+
+    // var signStr = commonFunc.rawSort(paramData);
+    // signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
+    
+    // paramData.sign = commonFunc.convertToMD5(signStr, true);    // 签名
+    // var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+    // var xmlString = xmlBuilder.buildObject(paramData);
+    // console.log(xmlString)
+    // return res.json({result: xmlString});
+    // var parser = new xml2js.Parser();
+    // var jsondata = {};
+   
+    // parser.parseString(xmlString, function(err, result) {        
+    //   jsondata = result || {};
+    // });
+
+    xml2js.parseString(paramData, { explicitArray : false, ignoreAttrs : true }, function (err, result) {
+      jsondata = result || {};
+    })
+    // console.log(jsondata);
+    // return res.json({result: jsondata});
+    return res.status(400).json({result: jsondata});
 }
 
 // 消息模板
