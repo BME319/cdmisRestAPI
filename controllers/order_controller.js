@@ -93,7 +93,7 @@ exports.refundChangeStatus = function (status) {
             var _status = status;
         }
         var query = {orderNo: req.body.orderNo};
-        console.log(_status);
+        // console.log(_status);
 
         if (_status === 'refundApplication') {
             var upObj = {

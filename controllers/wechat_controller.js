@@ -750,32 +750,32 @@ exports.refundquery = function(req, res, next) {
 }
 
 // 测试函数用的
-exports.testxml = function (req, res) {
-    // var paramData = req.body.data;
-    var paramData = '<xml><appid><![CDATA[wx2421b1c4370ec43b]]></appid><mch_id><![CDATA[10000100]]></mch_id><nonce_str><![CDATA[TeqClE3i0mvn3DrK]]></nonce_str><out_refund_no_0><![CDATA[1415701182]]></out_refund_no_0><out_trade_no><![CDATA[1415757673]]></out_trade_no><refund_count>1</refund_count></xml>'
+// exports.testxml = function (req, res) {
+//     // var paramData = req.body.data;
+//     var paramData = '<xml><appid><![CDATA[wx2421b1c4370ec43b]]></appid><mch_id><![CDATA[10000100]]></mch_id><nonce_str><![CDATA[TeqClE3i0mvn3DrK]]></nonce_str><out_refund_no_0><![CDATA[1415701182]]></out_refund_no_0><out_trade_no><![CDATA[1415757673]]></out_trade_no><refund_count>1</refund_count></xml>'
 
-    // var signStr = commonFunc.rawSort(paramData);
-    // signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
+//     // var signStr = commonFunc.rawSort(paramData);
+//     // signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey;
     
-    // paramData.sign = commonFunc.convertToMD5(signStr, true);    // 签名
-    // var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
-    // var xmlString = xmlBuilder.buildObject(paramData);
-    // console.log(xmlString)
-    // return res.json({result: xmlString});
-    // var parser = new xml2js.Parser();
-    // var jsondata = {};
+//     // paramData.sign = commonFunc.convertToMD5(signStr, true);    // 签名
+//     // var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+//     // var xmlString = xmlBuilder.buildObject(paramData);
+//     // console.log(xmlString)
+//     // return res.json({result: xmlString});
+//     // var parser = new xml2js.Parser();
+//     // var jsondata = {};
    
-    // parser.parseString(xmlString, function(err, result) {        
-    //   jsondata = result || {};
-    // });
+//     // parser.parseString(xmlString, function(err, result) {        
+//     //   jsondata = result || {};
+//     // });
 
-    xml2js.parseString(paramData, { explicitArray : false, ignoreAttrs : true }, function (err, result) {
-      jsondata = result || {};
-    })
-    // console.log(jsondata);
-    // return res.json({result: jsondata});
-    return res.status(400).json({result: jsondata});
-}
+//     xml2js.parseString(paramData, { explicitArray : false, ignoreAttrs : true }, function (err, result) {
+//       jsondata = result || {};
+//     })
+//     // console.log(jsondata);
+//     // return res.json({result: jsondata});
+//     return res.status(400).json({result: jsondata});
+// }
 
 // 消息模板
 exports.messageTemplate = function(req, res) {
