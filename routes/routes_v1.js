@@ -355,9 +355,10 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl));
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl));
 
-  app.post(version + '/devicedata/BPDevice/binding', devicedataCtrl.getDeviceInfo);
+  app.post(version + '/devicedata/BPDevice/binding', devicedataCtrl.bindingDevice);
   app.post(version + '/devicedata/BPDevice/debinding', devicedataCtrl.debindingDevice);
   app.post(version + '/devicedata/BPDevice/data', devicedataCtrl.receiveBloodPressure);
+  app.get(version + '/devicedata/devices', devicedataCtrl.getDeviceInfo);
 
 };
 

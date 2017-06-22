@@ -12,6 +12,9 @@ var deviceSchema = new mongoose.Schema({
     	type: String,
     	enum: ['sphygmomanometer']
   	},
+  	deviceName: {
+  		type: String
+  	},
 	deviceInfo: mongoose.Schema.Types.Mixed
 });
 
