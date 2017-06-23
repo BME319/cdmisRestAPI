@@ -124,7 +124,7 @@ module.exports = function(app,webEntry, acl) {
   //routes updated by GY
   //说明：测试需要，post方法返回的均为post内容，测试通过需要修改为成功或失败
   //doctor_Info
-  app.post(version + '/doctor/postDocBasic',  doctorCtrl.insertDocBasic);
+  app.post(version + '/doctor/detail',  doctorCtrl.insertDocBasic);
   //需要查询class字典表（待定）
 
   app.get(version + '/doctor/mypatients',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
