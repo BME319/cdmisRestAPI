@@ -5,7 +5,8 @@ var deviceSchema = new mongoose.Schema({
 	userId: String,
   	deviceId: {
   		type: String,
-  		required: true
+  		required: true,
+  		unique: true
   	},
   	deviceType: {
     	type: String,

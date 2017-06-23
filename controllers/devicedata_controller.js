@@ -34,14 +34,14 @@ exports.bindingDevice = function(req, res){
 		        deviceType: 'sphygmomanometer',
 		        deviceName: '血压计',
 		        deviceInfo: body.deviceInfo
-		    };
-		    var newDevice = new Device(deviceData);
-		    newDevice.save(function(err, Info) {
+		      };
+		      var newDevice = new Device(deviceData);
+		      newDevice.save(function(err, Info) {
 		        if (err) {
 		            return res.status(500).send(err.errmsg);
 		        }
 		        res.json({results: body});
-		    });
+		      });
         	
         }
         else{
@@ -102,13 +102,16 @@ exports.debindingDevice = function(req, res){
 }
 
 exports.receiveBloodPressure = function(req, res){
-  // console.log("receiveBloodPressure"); 
+  console.log("receiveBloodPressure"); 
   // var res_data = req.body;
   // console.log(res_data);
+
   var sn = req.body.sn;
   var imei = req.body.imei;
   var deviceId = sn + imei;
   var query = {deviceId: deviceId};
+  console.log(sn);
+  
 
 
   var results = {
@@ -121,125 +124,38 @@ exports.receiveBloodPressure = function(req, res){
   Device.getOne(query, function(err, item) {
     if (err) {
         // return res.status(500).send(err.errmsg);
+        console.log('err');
         res.json(results);
     }
     if(item == null){
         // res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
+        console.log('null');
         res.json(results);
     }
     else{
-        var userId = item.userId;
-        var querypatient = { 
+      var userId = item.userId;
+      console.log(userId);
+      var querypatient = { 
     		userId: userId
     	};
     	
     	Patient.getOne(querypatient, function (err, patient) {
         	if (err) {
             	// return res.status(500).send(err.errmsg);
+              console.log('err2');
             	res.json(results);
         	}
         	if (patient == null) {
         		// return res.status(400).send('user not exist');
+            console.log('null2');
         		res.json(results);
         	}
         	else {
-        		var datetime = req.body.time;
-        		var year = datetime.substring(0,4);
-        		var month = datetime.substring(4,6);
-        		var day = datetime.substring(6,8);
-        		var hour = datetime.substring(8,10);
-        		var minite = datetime.substring(10,12);
-        		var second = datetime.substring(12,14);
-
-        		var query = {
-					patientId: patient._id, 
-					type: '血压', 
-					code: '血压', 
-					date: year + '-' + month + '-' + day
-				};
-	
-        		var upObj = {
-            		$push: {
-                		data: {
-                    		time: year + '-' + month + '-' + day + ' ' + hour + ':' + minite + ':' + second, 
-                    		value: req.body.systolicpressure, 
-                    		value2: req.body.diastolicpressure
-                		}
-            		}
-        		};
-        		console.log(query);
-        		console.log(upObj);
-
-				VitalSign.update(query, upObj, function(err, updata) {
-					if (err){
-						// return res.status(422).send(err.message);
-						res.json(results);
-					}
-			        if (updata.nModified == 0) {
-			            // return res.json({result:'未成功修改！请检查输入是否符合要求！', results:updata});
-			            res.json(results);
-			        }
-			        else if (updata.nModified == 1) {
-			            // return res.json({result:'新建或修改成功', resluts:updata});
-			            results.code = 1;
-			            results.status = 'success';
-			            results.msg = '提交成功';
-			            res.json(results);
-			        }
-				}, {new: true});
-        	}   
+        		saveBPdata(patient, req, results, res);
+            }   
     	});
     }
   });
-
-
-
-
-
-
-
-
-
-  
-
-
- 
-  // var body = '';
-  // var results = '';
-
-  // req.on('data',function(data){
-  //   body += data;
-  //   // console.log("partial: " + body);
-  // });
-  // req.on('end',function(){
-  //   console.log("finish: " + body);
-  //   results = {
-  //     "code": 1,
-  //     "status": "success",
-  //     "msg": "提交成功",
-  //     "data": {}
-  //   };
-  //   res.statusCode = 200;
-  //   res.setHeader('Content-Type', 'application/json');
-  //   res.write(results);
-  //   res.end();
-  
-  // });
-
-  // req.on('error', function(err) { 
-  //   console.log('problem with request: ' + err.message); 
-  //   results = {
-  //     "code": 3,
-  //     "status": "fail",
-  //     "msg": "提交失败",
-  //     "data": {}
-  //   };
-  //   res.statusCode = 500;
-  //   res.setHeader('Content-Type', 'application/json');
-  //   res.write(results);
-  //   res.end();
-  // }); 
-  
 }
 
 exports.getDeviceInfo = function(req, res){
@@ -261,4 +177,88 @@ exports.getDeviceInfo = function(req, res){
         }
         res.json({results: item});
     }); 
+}
+
+function saveBPdata(patient, req, results, res){
+    var datetime = req.body.time;
+    var year = datetime.substring(0,4);
+    var month = datetime.substring(4,6);
+    var day = datetime.substring(6,8);
+    var hour = datetime.substring(8,10);
+    var minite = datetime.substring(10,12);
+    var second = datetime.substring(12,14);
+
+    var query = {
+        patientId: patient._id, 
+        type: '血压', 
+        code: '血压', 
+        date: year + '-' + month + '-' + day
+    };
+    
+    var upObj = {
+        $push: {
+            data: {
+                time: year + '-' + month + '-' + day + ' ' + hour + ':' + minite + ':' + second, 
+                value: req.body.systolicpressure, 
+                value2: req.body.diastolicpressure
+            }
+        }
+    };
+    console.log(query);
+    console.log(upObj);
+
+    VitalSign.update(query, upObj, function(err, updata) {
+        if (err){
+            // return res.status(422).send(err.message);
+            res.json(results);
+        }
+        console.log(updata);
+            // if (updata.nModified == 0) {
+            //     console.log('err3');
+            //     res.json(results);
+            // }
+            // else if (updata.nModified == 1) {
+            //     results.code = 1;
+            //     results.status = 'success';
+            //     results.msg = '提交成功';
+            //     console.log('err4');
+            //     res.json(results);
+            // }
+        var query = {
+            patientId: patient._id, 
+            type: '心率', 
+            code: '心率', 
+            date: year + '-' + month + '-' + day
+        };
+    
+        var upObj = {
+            $push: {
+                data: {
+                    time: year + '-' + month + '-' + day + ' ' + hour + ':' + minite + ':' + second, 
+                    value: req.body.pulse
+                }
+            }
+        };
+
+        VitalSign.update(query, upObj, function(err, updata) {
+            if (err){
+                // return res.status(422).send(err.message);
+                res.json(results);
+            }
+            console.log(updata);
+            
+            if (err){
+                // return res.status(422).send(err.message);
+                res.json(results);
+            }
+            results.code = 1;
+            results.status = 'success';
+            results.msg = '提交成功';
+            console.log('提交成功');
+            res.json(results);     
+            
+        }, {upsert: true});
+
+
+    }, {upsert: true});
 }

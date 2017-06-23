@@ -190,6 +190,7 @@ module.exports = function(app,webEntry, acl) {
   //account_Info
   //需要和user表连接
   //无法输出expenseRecords数据，暂时无法解决问题
+  app.get(version + '/account/getAccountInfo',  accountCtrl.getAccountInfo);
   app.get(version + '/account/counts',  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts);
   app.post(version + '/account/counts',  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts);
   // app.post(version + '/account/rechargeDoctor', accountCtrl.rechargeDoctor);
