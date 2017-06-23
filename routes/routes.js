@@ -230,6 +230,9 @@ module.exports = function(app,webEntry, acl) {
 
   // 临时接口：给原数据写入newsType字段
   // app.get(version + '/communication/updateNewsType', communicationCtrl.addnewsType);
+  // 临时接口：给原数据写入content.time字段并检测是否成功
+  // app.get('/communication/addcontenttime', communicationCtrl.addcontenttime);
+  // app.get('/communication/timeconfirmation', communicationCtrl.timeconfirmation);
 
 
   //task
@@ -293,6 +296,12 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/wechat/getWechatOrder',  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.getWechatOrder);
   // 关闭订单   orderNo 
   app.get(version + '/wechat/closeWechatOrder',  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.closeWechatOrder);
+
+  // 退款接口
+  app.post('/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund);
+  // 退款查询
+  app.post('/wechat/refundquery', orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus());
+  // app.post('/test/test', wechatCtrl.testxml);
 
 
   // app.post(version + '/wechat/notif',wechatCtrl.register);
