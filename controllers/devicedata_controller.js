@@ -38,6 +38,10 @@ exports.bindingDevice = function(req, res){
 		      var newDevice = new Device(deviceData);
 		      newDevice.save(function(err, Info) {
 		        if (err) {
+                    if(err.code == 11000){
+                        // 403   （禁止） 服务器拒绝请求。
+                        return res.status(403).send('duplication key');
+                    }
 		            return res.status(500).send(err.errmsg);
 		        }
 		        res.json({results: body});
