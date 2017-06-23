@@ -728,7 +728,7 @@ exports.getCommunication = function(req, res) {
 				{sendBy: id2, receiver: id1}
 			]
 		};
-		if (newsType != '') {
+		if (newsType != undefined) {
 			// query = {
 			// 	$or: [
 			// 		{sendBy: id1, receiver: id2}, 
@@ -741,6 +741,7 @@ exports.getCommunication = function(req, res) {
 			// };
 			query['newsType'] = newsType;
 		}
+		console.log(query);
 
 		Communication.getSome(query, function(err, items) {
 			if (err) {
