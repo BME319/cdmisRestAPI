@@ -250,7 +250,7 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/insurance/prefer',  insuranceCtrl.getPrefer);
 
   //advice
-  app.post(version + '/advice/postAdvice', tokenManager.verifyToken(), adviceCtrl.postAdvice);
+  app.post(version + '/advice/postAdvice',  adviceCtrl.postAdvice);
   app.get(version + '/advice/getAdvice',  adviceCtrl.getAdvice);
 
   //labtestResult
