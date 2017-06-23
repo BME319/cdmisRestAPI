@@ -147,8 +147,8 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/doctor/numbers', doctorCtrl.getDocNum);
 
 
-  app.get('/doctor/AliPayAccount', doctorCtrl.getAliPayAccount);
-  app.post('/doctor/AliPayAccount', doctorCtrl.editAliPayAccount);
+  app.get(version + '/doctor/AliPayAccount', doctorCtrl.getAliPayAccount);
+  app.post(version + '/doctor/AliPayAccount', doctorCtrl.editAliPayAccount);
 
   //counsel
   app.get(version + '/counsel/counsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
