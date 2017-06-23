@@ -659,10 +659,10 @@ exports.login = function(req, res) {
                         _id: user._id,
                         userId: user.userId,
                         role:role,
-                        exp: Date.now() + 60 * 3 * 1000
+                        exp: Date.now() + config.TOKEN_EXPIRATION * 1000
                     };
-                     console.log(Date.now());
-                    console.log( Date.now() + 60 * 3 * 1000);
+                    //  console.log(Date.now());
+                    // console.log( Date.now() + 60 * 3 * 1000);
                     var token = jwt.sign(userPayload, config.tokenSecret, {algorithm:'HS256'},{expiresIn: config.TOKEN_EXPIRATION}); 
                     
                     var sha1 = crypto.createHash('sha1');
@@ -673,7 +673,7 @@ exports.login = function(req, res) {
                         refreshtoken: refreshToken,
                         userPayload: JSON.stringify(userPayload)
                     };
-                    console.log(refreshtokenData);
+                    // console.log(refreshtokenData);
 
                     var newRefreshtoken = new Refreshtoken(refreshtokenData);
                     newRefreshtoken.save(function(err, Info) {
