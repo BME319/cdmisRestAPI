@@ -18,7 +18,7 @@ exports.getPatientDetail = function(req, res) {
 	var _userId = req.query.userId;
 	var query = {userId:_userId};
 	//输出内容
-	var fields = {'_id':0, 'revisionInfo':0, 'doctors':0};
+	var fields = {'revisionInfo':0, 'doctors':0};
 	var populate = {path: 'diagnosisInfo.doctor', select: {'_id':0, 'userId':1, 'name':1, 'workUnit':1, 'department':1}};
 
 	Patient.getOne(query, function(err, item) {
@@ -39,7 +39,23 @@ exports.getPatientDetail = function(req, res) {
     		}
     		//禁止输出item.diagnosisInfo
     		// item.diagnosisInfo = [];
-    		return res.json({results: item, recentDiagnosis:recentDiagnosis});
+    		// return res.json({results: item, recentDiagnosis:recentDiagnosis});
+
+			//取体征表中最近体重值
+			var queryWeight = {patientId: item._id, type: 'Weight'};
+			var optsWeight = {sort:'-_id'};
+			VitalSign.getSome(queryWeight, function (err, vitalitems) {
+				if (err) {
+					return res.status(500).send(err);
+				}
+				if (vitalitems.length === 0) {
+					var patientWeight = 0;
+				}
+				else {
+					var patientWeight = vitalitems[0].data[vitalitems[0].data.length - 1].value;
+				}
+				return res.json({results: item, weight: patientWeight, recentDiagnosis:recentDiagnosis});
+			}, optsWeight);
     	}
     	// res.json({results: item});
 	}, '', fields, populate);
@@ -96,10 +112,14 @@ exports.getDoctorLists = function(req, res) {
 		query["workUnit"] = _workUnit
 
 	}
-	if(_name != ""&&_name!=null)
-	{
-		query["name"] = _name
+	// if(_name != ""&&_name!=null)
+	// {
+	// 	query["name"] = _name
 
+	// }
+	//模糊搜索方式 2017-06-22 GY
+	if (_name) {
+		query.name = new RegExp(_name);
 	}
 	//输出内容
 

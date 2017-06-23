@@ -124,7 +124,7 @@ module.exports = function(app,webEntry, acl) {
   //routes updated by GY
   //说明：测试需要，post方法返回的均为post内容，测试通过需要修改为成功或失败
   //doctor_Info
-  app.post(version + '/doctor/postDocBasic',  doctorCtrl.insertDocBasic);
+  app.post(version + '/doctor/detail',  doctorCtrl.insertDocBasic);
   //需要查询class字典表（待定）
 
   app.get(version + '/doctor/mypatients',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
@@ -147,8 +147,8 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/doctor/numbers', doctorCtrl.getDocNum);
 
 
-  app.get('/doctor/AliPayAccount', doctorCtrl.getAliPayAccount);
-  app.post('/doctor/AliPayAccount', doctorCtrl.editAliPayAccount);
+  app.get(version + '/doctor/AliPayAccount', doctorCtrl.getAliPayAccount);
+  app.post(version + '/doctor/AliPayAccount', doctorCtrl.editAliPayAccount);
 
   //counsel
   app.get(version + '/counsel/counsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
@@ -293,7 +293,12 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/wechat/getWechatOrder',  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.getWechatOrder);
   // 关闭订单   orderNo 
   app.get(version + '/wechat/closeWechatOrder',  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.closeWechatOrder);
-
+  
+  // 退款接口
+  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund);
+  // 退款查询
+  app.post('/wechat/refundquery', orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus());
+  // app.post('/test/test', wechatCtrl.testxml);
 
   // app.post(version + '/wechat/notif',wechatCtrl.register);
   // 消息模板
