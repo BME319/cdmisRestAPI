@@ -143,23 +143,32 @@ exports.receiveBloodPressure = function(req, res){
         		res.json(results);
         	}
         	else {
-        		var datetime = new Date();
+        		var datetime = req.body.time;
+        		var year = datetime.substring(0,4);
+        		var month = datetime.substring(4,6);
+        		var day = datetime.substring(6,8);
+        		var hour = datetime.substring(8,10);
+        		var minite = datetime.substring(10,12);
+        		var second = datetime.substring(12,14);
+
         		var query = {
 					patientId: patient._id, 
 					type: '血压', 
 					code: '血压', 
-					date: datetime
+					date: year + '-' + month + '-' + day
 				};
 	
         		var upObj = {
             		$push: {
                 		data: {
-                    		time: datetime, 
+                    		time: year + '-' + month + '-' + day + ' ' + hour + ':' + minite + ':' + second, 
                     		value: req.body.systolicpressure, 
                     		value2: req.body.diastolicpressure
                 		}
             		}
         		};
+        		console.log(query);
+        		console.log(upObj);
 
 				VitalSign.update(query, upObj, function(err, updata) {
 					if (err){
