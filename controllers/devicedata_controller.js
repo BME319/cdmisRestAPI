@@ -255,14 +255,87 @@ function saveBPdata(patient, req, results, res){
                 // return res.status(422).send(err.message);
                 res.json(results);
             }
-            results.code = 1;
-            results.status = 'success';
-            results.msg = '提交成功';
-            console.log('提交成功');
-            res.json(results);     
+
+
+            var complianceQuery1 = {
+                userId: patient.userId, 
+                type: 'Measure', 
+                code: 'HeartRate', 
+                date: new Date(year + '-' + month + '-' + day)
+            };
+              
+            var upObj = {
+                status: 0,
+                description: req.body.pulse
+            };
             
+            Compliance.updateOne(complianceQuery1, upObj, function(err, upCompliance) {
+                if (err){
+                    return res.status(500).send(err.message);
+                }
+                if (upCompliance == null) {
+                    res.statusCode = 500;
+                    return res.json({result:'修改失败！'})
+                }
+
+                var complianceQuery2 = {
+                    userId: patient.userId, 
+                    type: 'Measure', 
+                    code: 'BloodPressure', 
+                    date: new Date(year + '-' + month + '-' + day)
+                };
+
+                Compliance.getOne(complianceQuery2, function(err, complianceitem){
+                    if (err) {
+                        return res.status(500).send('查询失败');
+                    }
+                    //查询不到，需要新建一个条目
+                    if (complianceitem == null) {
+                        var complianceData = {
+                            userId: patient.userId, 
+                            type: 'Measure', 
+                            code: 'BloodPressure', 
+                            date: new Date(year + '-' + month + '-' + day),
+                            status: 1,
+                            description: req.body.systolicpressure + '/' + req.body.diastolicpressure
+                        };
+                        //return res.json({result:complianceData});
+                        var newCompliance = new Compliance(complianceData);
+                        newCompliance.save(function(err, complianceInfo) {
+                            if (err) {
+                                  return res.status(500).send(err.errmsg);
+                            }
+                            results.code = 1;
+                            results.status = 'success';
+                            results.msg = '提交成功';
+                            console.log('提交成功');
+                            res.json(results);    
+                        });
+                    }
+                    //查询到条目，添加data
+                    else if (complianceitem != null) {
+                        var upObj = {
+                            status: 0,
+                            description: complianceitem.description + ',' + req.body.systolicpressure + '/' + req.body.diastolicpressure
+                        };
+                        Compliance.updateOne(complianceQuery2, upObj, function(err, upCompliance) {
+                            if (err){
+                                return res.status(500).send(err.message);
+                            }
+                            if (upCompliance == null) {
+                                res.statusCode = 500;
+                                return res.json({result:'修改失败！'})
+                            }
+                            results.code = 1;
+                            results.status = 'success';
+                            results.msg = '提交成功';
+                            console.log('提交成功');
+                            res.json(results);  
+                        })
+                    }
+                }
+
+            }, {upsert: true});
         }, {upsert: true});
-
-
     }, {upsert: true});
 }
