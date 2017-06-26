@@ -5,10 +5,15 @@ var	config = require('../config'),
 
 exports.getVersionInfo = function(req, res) {
 	var versionId = req.query.versionId;
+	var versionType = req.query.versionType || null;
 	var query;
 
+	if (versionType === null || versionType === '') {
+		return res.status(400).send('invalid input');
+	}
+
 	if (versionId === null || versionId === '') {
-        query = {};
+        query = {versionType: versionType};
         Version.getSome(query, function(err, items) {
 			if (err) {
 	      		return res.status(500).send(err.errmsg);
@@ -18,6 +23,7 @@ exports.getVersionInfo = function(req, res) {
     }
     else{
     	var opts = { sort: '-_id' };
+    	query = {versionType: versionType};
     	Version.getSome(query, function(err, items) {
 			if (err) {
 	      		return res.status(500).send(err.errmsg);
@@ -34,16 +40,18 @@ exports.getVersionInfo = function(req, res) {
 
 exports.insertVersionInfo = function(req, res) {
 	var versionId = req.newId;		
+	var versionType = req.body.versionType;
 	var versionName = req.body.versionName || null;
 	var time = new Date(); 
 	var content = req.body.content || null;
 
-	if (versionName === null || versionName === '' || content === null || content === '' ) {
+	if (versionName === null || versionName === '' || content === null || content === '' || versionType === null || versionType === '') {
         return res.status(400).send('invalid input');
     }
 
     var versionData = {
         versionId: versionId,
+        versionType: versionType,
         versionName: versionName,
         time: time,
         content: content

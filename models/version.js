@@ -3,7 +3,8 @@
 var mongoose = require('mongoose');
 
 var versionSchema = new mongoose.Schema({
-	versionId: { type: String,	require: true},					
+	versionId: { type: String,	require: true},		
+	versionType: {type: String, require: true},			
 	versionName: { type: String,	require: true},			
 	time: Date, 
 	content: { type: String,	require: true}	
