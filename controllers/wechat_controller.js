@@ -925,7 +925,7 @@ exports.receiveTextMessage = function(req, res) {
     // console.log("partial: " + body);
   });
   req.on('end',function(){
-    // console.log("finish: " + body);
+    console.log("finish: " + body);
     var parser = new xml2js.Parser();
     var jsondata = {};
    
@@ -954,7 +954,7 @@ exports.receiveTextMessage = function(req, res) {
         console.log(doctor_userId);
           // 暂存医生和患者的openId
           var patient_openId = jsondata.xml.FromUserName;       
-          var time = Date();
+          var time = new Date();
 
           var openIdData = {
             doctorUserId: doctor_userId,

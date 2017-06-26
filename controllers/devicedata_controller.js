@@ -333,7 +333,7 @@ function saveBPdata(patient, req, results, res){
                             res.json(results);  
                         })
                     }
-                }
+                })
 
             }, {upsert: true});
         }, {upsert: true});

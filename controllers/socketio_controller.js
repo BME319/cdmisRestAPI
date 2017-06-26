@@ -77,17 +77,17 @@ function messageSaveSend(data, url){
             // send message
             /// send to sendBy
             // console.log("SENDBY: "+ sendBy);
-            console.log("app_doctor:  "+Object.keys(userAppDoctorServer));
-            console.log("app_patient:  "+Object.keys(userAppPatientServer));
-            console.log("wechat_doctor:  "+Object.keys(userWechatDoctorServer));
-            console.log("wechat_patient:  "+Object.keys(userWechatPatientServer));
+            // console.log("app_doctor:  "+Object.keys(userAppDoctorServer));
+            // console.log("app_patient:  "+Object.keys(userAppPatientServer));
+            // console.log("wechat_doctor:  "+Object.keys(userWechatDoctorServer));
+            // console.log("wechat_patient:  "+Object.keys(userWechatPatientServer));
 
             data.msg['messageId'] = response.body.messageNo;
 
 
             if(client == 'doctor'){
                 if(userAppDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
-                    console.log("messageRes to [doctor]: "+sendBy)
+                    // console.log("messageRes to [doctor]: "+sendBy)
                     userAppDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
                     // socket.emit('messageRes',{msg:data.msg});
                 }
@@ -145,15 +145,18 @@ function messageSaveSend(data, url){
 }
 
 function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechatServer, data){
+    var online = false;
     if(messageType == 1){       // 单聊
         if(userAppServer.hasOwnProperty(receiver)){         // 用户在线
+            online = true;
             // console.log('getMsg: ' + receiver);
             userAppServer[receiver].emit('getMsg',{msg:data.msg});
         }
-        else if(userWechatServer.hasOwnProperty(receiver)){
+        if(userWechatServer.hasOwnProperty(receiver)){
+            online = true;
             userWechatServer[receiver].emit('getMsg',{msg:data.msg});
         }
-        else{           // 用户不在线
+        if(!online){           // 用户不在线
             // socket.emit("err",{msg:"对方已经下线或者断开连接"})
         }
     }
@@ -178,7 +181,9 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                 // console.log(members);
                 for(var idx in members){
                     // console.log(member);
+                    
                     if(userAppServer.hasOwnProperty(members[idx].userId)){         // 用户在线
+                        online = true;
                         // console.log(member.userId);
                         if(members[idx].userId != sendBy){
                             // console.log(member.userId);
@@ -186,14 +191,15 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                         }                            
                     }
                     // console.log(member);
-                    else if(userWechatServer.hasOwnProperty(members[idx].userId)){         // 用户在线
+                    if(userWechatServer.hasOwnProperty(members[idx].userId)){         // 用户在线
+                        online = true;
                         // console.log(member.userId);
                         if(members[idx].userId != sendBy){
                             // console.log(member.userId);
                             userWechatServer[members[idx].userId].emit('getMsg',{msg:data.msg});
                         }                            
                     }
-                    else{       // 用户不在线
+                    if(!online){       // 用户不在线
                         // custom card 群发
                         if(data.msg.contentType == 'custom' && data.msg.content.type == 'card'){
 
@@ -295,8 +301,8 @@ exports.chat = function (io, socket) {
             userWechatPatientList[user_id] = nickname;
         }
         else{
-            console.error('newUser not match');
-            console.error(data);
+            console.log('newUser not match');
+            console.log(data);
             // do
         }
         
@@ -351,7 +357,7 @@ exports.chat = function (io, socket) {
         // console.log(Object.keys(userServer));
     })
     socket.on('message', function(data){
-        console.log('message by: '+data.msg.fromName );
+        // console.log('message by: '+data.msg.fromName );
         var contentType = data.msg.contentType;
         var clientType = data.msg.clientType;
         var role = data.role;
