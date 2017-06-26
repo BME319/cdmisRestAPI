@@ -35,7 +35,8 @@ var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
     complianceCtrl = require('../controllers/compliance_controller'),
     jpushCtrl = require('../controllers/jpush_controller'),
     devicedataCtrl = require('../controllers/devicedata_controller'),
-    aclsettingCtrl = require('../controllers/aclsetting_controller');
+    aclsettingCtrl = require('../controllers/aclsetting_controller'),
+    versionCtrl = require('../controllers/version_controller');
 
 // controllers updated by GY 
 var doctorCtrl = require('../controllers/doctor_controller'), 
@@ -365,6 +366,9 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/devicedata/BPDevice/debinding', devicedataCtrl.debindingDevice);
   app.post(version + '/devicedata/BPDevice/data', devicedataCtrl.receiveBloodPressure);
   app.get(version + '/devicedata/devices', devicedataCtrl.getDeviceInfo);
+
+  app.get(version + '/version', versionCtrl.getVersionInfo);
+  app.post(version + '/version', getNoMid.getNo(10), versionCtrl.insertVersionInfo);
 
 };
 
