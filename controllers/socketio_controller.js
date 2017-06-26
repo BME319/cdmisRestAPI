@@ -50,9 +50,11 @@ function messageSaveSend(data, url){
     var url = url;
     data.msg.content['src'] = url;
     data.msg.status = 'send_success';
+    data.msg['time'] = Date.now();
+
 
     // save data
-    var url = 'http://' + webEntry.domain + ':4050/communication/postCommunication';
+    var url = 'http://' + webEntry.domain + ':4050/api/v1/communication/communication';
     var jsondata = {
         messageType: messageType,
         sendBy:sendBy,
@@ -74,14 +76,18 @@ function messageSaveSend(data, url){
             // console.log(response.body);
             // send message
             /// send to sendBy
-            console.log("app_doctor:  "+Object.keys(userAppDoctorServer));
-            console.log("app_patient:  "+Object.keys(userAppPatientServer));
-            console.log("wechat_doctor:  "+Object.keys(userWechatDoctorServer));
-            console.log("wechat_doctor:  "+Object.keys(userWechatPatientServer));
+            // console.log("SENDBY: "+ sendBy);
+            // console.log("app_doctor:  "+Object.keys(userAppDoctorServer));
+            // console.log("app_patient:  "+Object.keys(userAppPatientServer));
+            // console.log("wechat_doctor:  "+Object.keys(userWechatDoctorServer));
+            // console.log("wechat_patient:  "+Object.keys(userWechatPatientServer));
+
+            data.msg['messageId'] = response.body.messageNo;
 
 
             if(client == 'doctor'){
                 if(userAppDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
+                    // console.log("messageRes to [doctor]: "+sendBy)
                     userAppDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
                     // socket.emit('messageRes',{msg:data.msg});
                 }
@@ -91,6 +97,7 @@ function messageSaveSend(data, url){
             }
             else if(client == 'patient'){
                 if(userAppPatientServer.hasOwnProperty(sendBy)){         // 用户在线
+                    // console.log("messageRes to [patient]: "+sendBy)
                     userAppPatientServer[sendBy].emit('messageRes',{msg:data.msg});
                     // socket.emit('messageRes',{msg:data.msg});
                 }
@@ -101,6 +108,7 @@ function messageSaveSend(data, url){
             else if(client == 'wechatdoctor'){
 
                   if(userWechatDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
+                    // console.log("messageRes to [wechatdoctor]: "+sendBy)
                     userWechatDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
                     // socket.emit('messageRes',{msg:data.msg});
                 }
@@ -110,6 +118,7 @@ function messageSaveSend(data, url){
             }
             else if(client == 'wechatpatient'){
                 if(userWechatPatientServer.hasOwnProperty(sendBy)){         // 用户在线
+                    // console.log("messageRes to [wechatpatient]: "+sendBy)
                     userWechatPatientServer[sendBy].emit('messageRes',{msg:data.msg});
                     // socket.emit('messageRes',{msg:data.msg});
                 }
@@ -136,23 +145,26 @@ function messageSaveSend(data, url){
 }
 
 function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechatServer, data){
+    var online = false;
     if(messageType == 1){       // 单聊
         if(userAppServer.hasOwnProperty(receiver)){         // 用户在线
+            online = true;
             // console.log('getMsg: ' + receiver);
             userAppServer[receiver].emit('getMsg',{msg:data.msg});
         }
-        else if(userWechatServer.hasOwnProperty(receiver)){
+        if(userWechatServer.hasOwnProperty(receiver)){
+            online = true;
             userWechatServer[receiver].emit('getMsg',{msg:data.msg});
         }
-        else{           // 用户不在线
+        if(!online){           // 用户不在线
             // socket.emit("err",{msg:"对方已经下线或者断开连接"})
         }
     }
     else{           // 群聊
         // console.log(receiver);
         request({
-            // url: 'http://' + webEntry.domain + ':4050/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
-            url: 'http://' + webEntry.domain + ':4050/communication/getTeam?teamId=' + data.msg.teamId,
+            // url: 'http://' + webEntry.domain + ':4050/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
+            url: 'http://' + webEntry.domain + ':4050/api/v1/communication/team?teamId=' + data.msg.teamId,
             method: 'GET',
             json:true
         }, function(err, response){
@@ -169,7 +181,9 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                 // console.log(members);
                 for(var idx in members){
                     // console.log(member);
+                    
                     if(userAppServer.hasOwnProperty(members[idx].userId)){         // 用户在线
+                        online = true;
                         // console.log(member.userId);
                         if(members[idx].userId != sendBy){
                             // console.log(member.userId);
@@ -177,14 +191,15 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                         }                            
                     }
                     // console.log(member);
-                    else if(userWechatServer.hasOwnProperty(members[idx].userId)){         // 用户在线
+                    if(userWechatServer.hasOwnProperty(members[idx].userId)){         // 用户在线
+                        online = true;
                         // console.log(member.userId);
                         if(members[idx].userId != sendBy){
                             // console.log(member.userId);
                             userWechatServer[members[idx].userId].emit('getMsg',{msg:data.msg});
                         }                            
                     }
-                    else{       // 用户不在线
+                    if(!online){       // 用户不在线
                         // custom card 群发
                         if(data.msg.contentType == 'custom' && data.msg.content.type == 'card'){
 
@@ -229,8 +244,8 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
 
                             // groupSend(data);
                             request({
-                                // url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
-                                url: 'http://'+ webEntry.domain +':4050/wechat/messageTemplate',
+                                // url: 'http://'+ webEntry.domain +':4050/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                                url: 'http://'+ webEntry.domain +':4050/api/v1/wechat/messageTemplate',
                                 method: 'POST',
                                 body: template,
                                 json:true
@@ -250,10 +265,7 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                     }
                 }                      
             }
-
-
         });
-
     }
 }
 
@@ -267,22 +279,30 @@ exports.chat = function (io, socket) {
         socket.id = user_id;
         
         if(client == 'doctor'){
+            // console.log("newUser @doctor:  "+ data.user_id);
             userAppDoctorServer[user_id] = socket;
             userAppDoctorList[user_id] = nickname;
         }
         else if(client == 'patient'){
+            // console.log("newUser @patient:  "+ data.user_id);
             userAppPatientServer[user_id] = socket;
             userAppPatientList[user_id] = nickname;
         }
         else if(client == 'wechatdoctor'){
+            // console.log("newUser @wechatdoctor:  "+ data.user_id);
+
             userWechatDoctorServer[user_id] = socket;
             userWechatDoctorList[user_id] = nickname;
         }
         else if(client == 'wechatpatient'){
+            // console.log("newUser @wechatpatient:  "+ data.user_id);
+
             userWechatPatientServer[user_id] = socket;
             userWechatPatientList[user_id] = nickname;
         }
         else{
+            console.log('newUser not match');
+            console.log(data);
             // do
         }
         
@@ -337,13 +357,13 @@ exports.chat = function (io, socket) {
         // console.log(Object.keys(userServer));
     })
     socket.on('message', function(data){
-        console.log('message');
+        // console.log('message by: '+data.msg.fromName );
         var contentType = data.msg.contentType;
         var clientType = data.msg.clientType;
         var role = data.role;
         // var toUserId = data.to;
         
-        var url = 'http://'+ webEntry.domain +':4050/wechat/download';
+        var url = 'http://'+ webEntry.domain +':4050/api/v1/wechat/download';
 
         if(clientType != 'doctor' && clientType!= 'patient' &&(contentType == 'image' || contentType == 'voice')){           // image voice
             var mediaId = data.msg.content.mediaId;

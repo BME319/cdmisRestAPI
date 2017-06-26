@@ -374,7 +374,7 @@ exports.addOrder = function(req, res, next) {
     spbill_create_ip: req.body.ip,   // 终端IP
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
-    notify_url: 'http://' + webEntry.domain + ':4050/wechat/payResult',   // 通知地址
+    notify_url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/payResult',   // 通知地址
     trade_type: req.body.trade_type    // 交易类型
     // openid: req.body.openid    // 用户标识
   };
@@ -925,7 +925,7 @@ exports.receiveTextMessage = function(req, res) {
     // console.log("partial: " + body);
   });
   req.on('end',function(){
-    // console.log("finish: " + body);
+    console.log("finish: " + body);
     var parser = new xml2js.Parser();
     var jsondata = {};
    
@@ -954,7 +954,7 @@ exports.receiveTextMessage = function(req, res) {
         console.log(doctor_userId);
           // 暂存医生和患者的openId
           var patient_openId = jsondata.xml.FromUserName;       
-          var time = Date();
+          var time = new Date();
 
           var openIdData = {
             doctorUserId: doctor_userId,
@@ -982,7 +982,7 @@ exports.receiveTextMessage = function(req, res) {
                 var workUnit = doctor.workUnit;
 
                 var template = {
-                  "userId": '',          // data.msg.content.doctorId, //医生的UID
+                  "userId": patient_openId,         
                   "role": "patient",
                   "postdata": {
                     "touser": patient_openId,
@@ -1015,7 +1015,7 @@ exports.receiveTextMessage = function(req, res) {
                 };
 
                 request({
-                  url: 'http://' + webEntry.domain + ':4050/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                  url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                   method: 'POST',
                   body:template,
                   json:true
@@ -1024,7 +1024,13 @@ exports.receiveTextMessage = function(req, res) {
                     results = err;
                   }
                   else{
-                    results = 'success';
+                    if( jsondata.xml.Event == 'SCAN'){
+                      results = 'success';
+                    }
+                    else{
+                      results = "您好，欢迎关注肾事管家~让每一位慢性肾病患者得到有效管理。找名医进行咨询问诊，请点击底栏【肾事管家】~定制私人肾病全程管理方案，请点击底栏【全程管理】~";
+                    }
+
                   }
 
                 });
