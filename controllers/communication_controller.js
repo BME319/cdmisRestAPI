@@ -7,7 +7,8 @@ var	config = require('../config'),
 	Patient = require('../models/patient'), 
 	Doctor = require('../models/doctor'), 
 	Consultation = require('../models/consultation'), 
-	DpRelation = require('../models/dpRelation'),
+	DpRelation = require('../models/dpRelation'), 
+	commonFunc = require('../middlewares/commonFunc'), 
 	request = require('request');
 
 //根据counselId获取counsel表除messages外的信息 2017-03-31 GY 
@@ -71,18 +72,19 @@ exports.newTeam = function(req, res) {
 	 //  		}
 		// ], 
 		// time: new Date(), 
-		description: req.body.description, 
+		description: req.body.description//, 
 		// number: req.body., 
 
-		revisionInfo:{
-			operationTime:new Date(),
-			userId:"gy",
-			userName:"gy",
-			terminalIP:"10.12.43.32"
-		}
+		// revisionInfo:{
+		// 	operationTime:new Date(),
+		// 	userId:"gy",
+		// 	userName:"gy",
+		// 	terminalIP:"10.12.43.32"
+		// }
 	};
 	if (req.body.time == null || req.body.time == '') {
 		teamData['time'] = new Date();
+		// teamData['time'] = commonFunc.getNowFormatSecond();
 	}
 	else {
 		teamData['time'] = new Date(req.body.time);
@@ -202,6 +204,7 @@ exports.newConsultation = function(req, res) {
 		sponsorId: req.body.sponsorObject._id, 
 		patientId: req.body.patientObject._id, 
 		time: new Date(), 
+		// time: commonFunc.getNowFormatSecond(), 
 		diseaseInfo: req.body.diseaseInfo._id, 
 		status:status,
 		// messages: [
