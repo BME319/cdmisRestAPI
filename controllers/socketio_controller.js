@@ -276,30 +276,42 @@ exports.chat = function (io, socket) {
             user_id = data.user_id,
             client = data.client;
         
-        socket.id = user_id;
+        // socket.id = user_id;
         
         if(client == 'doctor'){
             // console.log("newUser @doctor:  "+ data.user_id);
-            if(userAppDoctorServer.hasOwnProperty(user_id)){         // 用户在线
-                userAppDoctorServer[user_id].emit('getMsg',{msg:data.msg});
+            if(userAppDoctorServer[user_id]  && userAppDoctorServer[user_id].id!=socket.id){
+                userAppDoctorServer[user_id].emit('kick');
+                // if(user_id == 'U201705120004'){
+                //     console.log('old:  '+userAppDoctorServer[user_id].id);
+                //     console.log(socket.id);
+                // }
             }
+            // if(user_id == 'U201705120004') console.log('new:  '+socket.id);
+            socket.id = user_id;
             userAppDoctorServer[user_id] = socket;
             userAppDoctorList[user_id] = nickname;
         }
         else if(client == 'patient'){
             // console.log("newUser @patient:  "+ data.user_id);
+            if(userAppPatientServer[user_id]  && userAppPatientServer[user_id].id!=socket.id){
+                userAppPatientServer[user_id].emit('kick');
+            }
+            socket.id = user_id;
             userAppPatientServer[user_id] = socket;
             userAppPatientList[user_id] = nickname;
         }
         else if(client == 'wechatdoctor'){
             // console.log("newUser @wechatdoctor:  "+ data.user_id);
 
+            socket.id = user_id;
             userWechatDoctorServer[user_id] = socket;
             userWechatDoctorList[user_id] = nickname;
         }
         else if(client == 'wechatpatient'){
             // console.log("newUser @wechatpatient:  "+ data.user_id);
 
+            socket.id = user_id;
             userWechatPatientServer[user_id] = socket;
             userWechatPatientList[user_id] = nickname;
         }

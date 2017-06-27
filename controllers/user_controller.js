@@ -853,31 +853,34 @@ exports.sendSMS = function(req, res) {
                             }
                         }
                         var code=1;
-                        var req=https.request(options,function(res){
+                        var requests=https.request(options,function(response){
                             var resdata="";
-                            res.on("data",function(chunk){
+                            response.on("data",function(chunk){
                                 resdata += chunk;
                                 // console.log(chunk);
                             });
-                            res.on("end",function(){
+                            response.on("end",function(){
                                 // console.log("### end ##");
                                 var json = eval('(' + resdata + ')');
                                 code=json.resp.respCode;
-
+								if(code==="000000"){
+                            		res.json({results: 0,mesg:"User doesn't Exist!"});
+                        		}
+                        		else{
+                            		res.json({results: 2,ErrorCode: code});
+                        		}
                                 // console.log(json.resp.respCode);
                             });
                             // console.log(res.statusCode);
                             
                         });
 
-                        req.on("error",function(err){
+                        requests.on("error",function(err){
                             console.log(err.message);
                         })
-                        req.write(JSONData);
-                        req.end();
-                        if(code="000000"){
-                            res.json({results: 0,mesg:"User doesn't Exist!"});
-                        }
+                        requests.write(JSONData);
+                        requests.end();
+                        
                     });
 
                     // res.json({results: 0,mesg:"User doesn't Exist!"});

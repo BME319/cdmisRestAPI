@@ -18,7 +18,7 @@ exports.getVersionInfo = function(req, res) {
 			if (err) {
 	      		return res.status(500).send(err.errmsg);
 	    	}
-	    	res.json({results: items});
+	    	res.json({results:  {status:0, msg: items}});
 	    });
     }
     else{
@@ -36,7 +36,7 @@ exports.getVersionInfo = function(req, res) {
 		    		res.json({results: {status:0, msg: 'latest'}});
 		    	}
 		    	else{
-		    		res.json({results: {status:0, msg: items[0]}});
+		    		res.json({results: {status:0, msg: [items[0]]}});
 		    	}
 	    	}
 	    }, opts);
