@@ -782,6 +782,7 @@ function bodyGen(msg,MESSAGE_ID){
         description:'',
         readOrNot:0,
         url:'',
+        role:msg.targetRole,
         messageId:MESSAGE_ID //从post communication/postCommunication response取
     }
     if(msgType=='custom'){
