@@ -280,6 +280,9 @@ exports.chat = function (io, socket) {
         
         if(client == 'doctor'){
             // console.log("newUser @doctor:  "+ data.user_id);
+            if(userAppDoctorServer.hasOwnProperty(user_id)){         // 用户在线
+                userAppDoctorServer[user_id].emit('getMsg',{msg:data.msg});
+            }
             userAppDoctorServer[user_id] = socket;
             userAppDoctorList[user_id] = nickname;
         }
