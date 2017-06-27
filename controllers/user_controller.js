@@ -251,16 +251,68 @@ exports.updateUserAgreement = function(req, res) {
         res.json({results: item1,msg:"success!"});
     });
 }
-exports.getUserList = function(req, res) {
-    var query = {};
-
-    User.getSome(query, function(err, userlist) {
+//WF 20170626
+function changeUserInvalidFlag(req, res, invalidFlag) {
+    var _userId = req.body.userId
+    var _invalidFlag= invalidFlag
+    var query = {userId:_userId};
+    User.updateOne(query,{$set:{invalidFlag: _invalidFlag}},function(err, item1){
         if (err) {
             return res.status(500).send(err.errmsg);
         }
+        res.json({results: item1,msg:"success!"});
+    }, {new: true});
+}
+exports.cancelUser = function(req, res) {
+    changeUserInvalidFlag(req, res,1);
+}
+exports.getUserList = function( acl) {
+	return function(req, res){
+		var query = {};
+		var limit = Number(req.query.limit);
+		var skip = Number(req.query.skip);
+		var opts = {limit: limit, skip:skip, sort:'_id'};
+		// var fields = {'_id':0, 'revisionInfo':0};
+		//通过子表查询主表，定义主表查询路径及输出内容
+		// var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
 
-        res.json({results: userlist});
-    });
+		User.getSome(query, function(err, userlist) {
+			// var users = new Array(userlist.length);
+			var users = [];
+		    if (err) {
+		        return res.status(500).send(err.errmsg);
+		    }
+		    for(var i=0;i<userlist.length;i++){
+		    	var userId = userlist[i].userId;
+				if(userId){
+					acl.userRoles(userId, function(err, roles){
+						if(err){
+							return res.status(500).send(err.errmsg);  
+						}
+						users.push({info: userlist[i],roles:roles});
+						// userlist[i]["roles"]=roles;
+					});
+				}
+		    }
+		    res.json({results: users});
+		}, opts);
+	};
+}
+function getroles(user,acl){
+	var userId = user.userId;
+	var ret;
+	if(userId){
+		acl.userRoles(userId, function(err, roles){
+			if(err){
+				return res.status(500).send(err.errmsg);  
+			}
+			console.log(roles);
+			ret = roles;
+			// userlist[i]["roles"]=roles;
+		});
+	}
+	console.log(ret);
+	return ret;
 }
 exports.insertUser = function(req, res) {
     var userData = {

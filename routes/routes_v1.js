@@ -87,6 +87,8 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/compliance',  complianceCtrl.getComplianceByDay);
 
   // wf
+  app.get(version + '/user/userList', userCtrl.getUserList(acl));
+  app.post(version + '/user/cancelUser', userCtrl.checkUser,userCtrl.cancelUser);
   // -------------------------------------------- 注册时如何验证用户 ------------------------------------------------------
   app.post(version + '/user/register', userCtrl.registerTest,getNoMid.getNo(1), userCtrl.register);
   // -------------------------------------------------------------------------------------------------------------------
@@ -151,6 +153,8 @@ module.exports = function(app,webEntry, acl) {
 
   app.get(version + '/doctor/AliPayAccount', doctorCtrl.getAliPayAccount);
   app.post(version + '/doctor/AliPayAccount', doctorCtrl.editAliPayAccount);
+
+  app.get(version + '/doctor/Doctors', doctorCtrl.getDoctors);
 
   //counsel
   app.get(version + '/counsel/counsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
