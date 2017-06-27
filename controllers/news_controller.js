@@ -46,6 +46,7 @@ exports.getNewsByReadOrNot = function(req, res) {
 	}
 
 	var userId = req.query.userId;
+	var userRole = req.query.userRole;
 	var type = req.query.type;
 	var _readOrNot = req.query.readOrNot;
 	if (userId == null || userId == '') {
@@ -54,7 +55,7 @@ exports.getNewsByReadOrNot = function(req, res) {
 
 	var query = {};
 
-	if (type != '' && type != undefined) {
+	if (type !== '' && type !== undefined) {
         query["type"] = type;
         if(type=="chat")
         {
@@ -63,7 +64,10 @@ exports.getNewsByReadOrNot = function(req, res) {
     }
     query["userId"] = userId;
     query["readOrNot"] = _readOrNot;
-
+    if(userRole !== '' && userRole !== undefined){
+    	query["userRole"] = userRole;
+    }
+	query["readOrNot"] = _readOrNot;
     // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
 	var opts = {'sort':'-time'};
 
@@ -89,7 +93,7 @@ function insertOneNews(userId,sendBy,req,res) {
 	// return res.json({messageId:req.newId})
 	// console.log("11");
 	// var ret=1;
-
+	// console.log(1);
 	var newData = {
 		// userId: req.body.userId,
 		// sendBy: req.body.sendBy,
@@ -105,27 +109,30 @@ function insertOneNews(userId,sendBy,req,res) {
 		sendBy:userId,
 		userId:sendBy
 	};
-	if (req.body.type != null){
+	if (req.body.type !== null){
 		newData['type'] = req.body.type;
 		query1['type'] = req.body.type;
 		query2['type'] = req.body.type;
 	}
-	if (req.body.messageId != null){
+	if (req.body.userRole !== null && req.body.userRole !== undefined){
+		newData['userRole'] = req.body.userRole;
+	}
+	if (req.body.messageId !== null){
 		newData['messageId'] = req.body.messageId;
 	}
-	if (req.body.time != null && req.body.time != ''){
+	if (req.body.time !== null && req.body.time !== ''&& req.body.time !== undefined){
 		newData['time'] = new Date(req.body.time);
 	}
 	else {
 		newData['time'] = new Date();
 	}
-	if (req.body.title != null){
+	if (req.body.title !== null){
 		newData['title'] = req.body.title;
 	}
-	if (req.body.description != null){
+	if (req.body.description !== null){
 		newData['description'] = req.body.description;
 	}
-	if (req.body.url != null){
+	if (req.body.url !== null){
 		newData['url'] = req.body.url;
 	}
 
@@ -134,6 +141,7 @@ function insertOneNews(userId,sendBy,req,res) {
 	News.getOne(query1, function(err, item1) {
         if (err) {
         	if(res!=undefined){
+        		// console.log(2);
         		return res.status(500).send(err.errmsg);}
             // return 500;
         }
@@ -142,6 +150,7 @@ function insertOneNews(userId,sendBy,req,res) {
     		News.getOne(query2, function(err, item2) {
 		        if (err) {
 		        	if(res!=undefined){
+		        		// console.log(3);
 		            return res.status(500).send(err.errmsg);}
 		            // return 500;
 		        }
@@ -151,7 +160,9 @@ function insertOneNews(userId,sendBy,req,res) {
 					newnew.save(function(err, newInfo) {
 						if (err) {
 							if(res!=undefined){
-					  		return res.status(500).send(err.errmsg);}
+								// console.log(4);
+								// console.log(err);
+					  			return res.status(500).send(err.errmsg);}
 					  		// return 500;
 						}
 						var newResults = newInfo;
