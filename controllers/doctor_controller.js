@@ -827,6 +827,10 @@ exports.getPatientByDate = function(req, res) {
 	//查询条件
 	var doctorObject = req.body.doctorObject;
 	var query = {doctorId:doctorObject._id};
+	
+	//模糊搜索GY
+	var _name = req.query.name;
+
 	if (req.query.date != null && req.query.date != '') {
 		var date = new Date(req.query.date);
 		date = commonFunc.convertToFormatDate(date);
@@ -840,6 +844,10 @@ exports.getPatientByDate = function(req, res) {
 	var fields = {'_id':0, 'patients':1};
 	//通过子表查询主表，定义主表查询路径及输出内容
 	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
+
+	if (_name) {
+		populate['match'] = {'name': new RegExp(_name)};
+	}
 
 	DpRelation.getOne(query, function(err, item) {
 		if (err) {
@@ -974,9 +982,15 @@ exports.getPatientList = function(req, res) {
 	var fields = {'_id':0, 'patients.patientId':1, 'patients.dpRelationTime':1};
 	//通过子表查询主表，定义主表查询路径及输出内容
 	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
-	if(_name!=""&&_name!=undefined){
+	// if(_name!=""&&_name!=undefined){
 		
+	// }
+	//模糊搜索
+	var nameReg = new RegExp(_name);
+	if (_name) {
+		populate['match'] = {'name': nameReg};
 	}
+	console.log(populate);
 	// console.log(query);
 	DpRelation.getOne(query, function(err, item) {
 		if (err) {
@@ -1013,7 +1027,8 @@ exports.getPatientList = function(req, res) {
 	    		if(item.patients[i].dpRelationTime === null || item.patients[i].dpRelationTime === '' || item.patients[i].dpRelationTime === undefined) {
 	    			item.patients[i].dpRelationTime = new Date('2017-05-15');
 	    		}
-	    		if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
+	    		// if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
+				if(item.patients[i].patientId!=null){
 	    			if(_skip>0)
 	    			{
 	    				_skip--;
