@@ -109,7 +109,7 @@ function insertOneNews(userId,sendBy,req,res) {
 		sendBy:userId,
 		userId:sendBy
 	};
-	if (req.body.type !== null){
+	if (req.body.type !== null && req.body.type !== undefined){
 		newData['type'] = req.body.type;
 		query1['type'] = req.body.type;
 		query2['type'] = req.body.type;
@@ -117,7 +117,7 @@ function insertOneNews(userId,sendBy,req,res) {
 	if (req.body.userRole !== null && req.body.userRole !== undefined){
 		newData['userRole'] = req.body.userRole;
 	}
-	if (req.body.messageId !== null){
+	if (req.body.messageId !== null && req.body.messageId !== undefined){
 		newData['messageId'] = req.body.messageId;
 	}
 	if (req.body.time !== null && req.body.time !== ''&& req.body.time !== undefined){
@@ -126,13 +126,13 @@ function insertOneNews(userId,sendBy,req,res) {
 	else {
 		newData['time'] = new Date();
 	}
-	if (req.body.title !== null){
+	if (req.body.title !== null && req.body.title !== undefined){
 		newData['title'] = req.body.title;
 	}
-	if (req.body.description !== null){
+	if (req.body.description !== null && req.body.description !== undefined){
 		newData['description'] = req.body.description;
 	}
-	if (req.body.url !== null){
+	if (req.body.url !== null && req.body.url !== undefined){
 		newData['url'] = req.body.url;
 	}
 
@@ -239,13 +239,13 @@ function insertOneNews(userId,sendBy,req,res) {
     });
 }
 exports.insertNews = function(req, res) {
-	if (req.body.userId === null || req.body.userId === '') {
+	if (req.body.userId === null || req.body.userId === ''|| req.body.userId === undefined) {
 		return res.json({result: '请填写userId'});
 	}
-	if (req.body.sendBy === null || req.body.sendBy === '') {
+	if (req.body.sendBy === null || req.body.sendBy === '' || req.body.sendBy === undefined) {
 		return res.json({result: '请填写sendBy'});
 	}
-	if (req.body.readOrNot === null || req.body.readOrNot === '') {
+	if (req.body.readOrNot === null || req.body.readOrNot === '' || req.body.readOrNot === undefined) {
 		return res.json({resutl: '请填写readOrNot'});
 	}
 	var userId=req.body.userId;
