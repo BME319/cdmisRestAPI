@@ -4,7 +4,7 @@ var	config = require('../config'),
 
 
 exports.getVersionInfo = function(req, res) {
-	var versionId = req.query.versionId;
+	var versionName = req.query.versionName;
 	var versionType = req.query.versionType || null;
 	var query;
 
@@ -12,7 +12,7 @@ exports.getVersionInfo = function(req, res) {
 		return res.status(400).send('invalid input');
 	}
 
-	if (versionId === null || versionId === '') {
+	if (versionName === null || versionName === '') {
         query = {versionType: versionType};
         Version.getSome(query, function(err, items) {
 			if (err) {
@@ -28,11 +28,16 @@ exports.getVersionInfo = function(req, res) {
 			if (err) {
 	      		return res.status(500).send(err.errmsg);
 	    	}
-	    	if(items[0].versionId == versionId){
-	    		res.json({results: {status:0, msg: 'latest'}});
+	    	if(items == null){
+	    		return res.status(400).send('版本号不存在');
 	    	}
 	    	else{
-	    		res.json({results: items[0]});
+	    		if(items[0].versionName == versionName){
+		    		res.json({results: {status:0, msg: 'latest'}});
+		    	}
+		    	else{
+		    		res.json({results: items[0]});
+		    	}
 	    	}
 	    }, opts);
     }
