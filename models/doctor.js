@@ -49,6 +49,7 @@ var doctorSchema = new mongoose.Schema({
 	reviewerId: {type: mongoose.Schema.Types.ObjectId, ref:'user'}, 
 	reviewContent: String, 
 	registerTime: Date, 
+	user_id: {type: mongoose.Schema.Types.ObjectId, ref:'user'}, 
 	revisionInfo:{
 		operationTime:Date,
 		userId:String,

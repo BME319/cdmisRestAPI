@@ -255,8 +255,9 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/advice/getAdvice',  adviceCtrl.getAdvice);
 
   //review
-  app.post(version + '/review/reviewInfo', reviewCtrl.reviewInfo);
-  app.get(version + '/review/certificate', reviewCtrl.certificate);
+  app.post(version + '/review/reviewInfo', reviewCtrl.postReviewInfo);
+  app.get(version + '/review/certificate', reviewCtrl.getCertificate);
+  app.get(version + '/review/reviewInfo', reviewCtrl.getReviewInfo);
 
   //labtestResult
   app.post(version + '/labtestResult/post',  labtestResultCtrl.postLabtestResult);
