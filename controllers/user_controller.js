@@ -450,6 +450,9 @@ exports.setOpenId = function(req, res, next) {
     var query = {phoneNo:_phoneNo};
     User.updateOne(query,{$set:{openId: _openId}},function(err, item){
         if (err) {
+        	if(err.code == 11000){
+        		return res.status(403).send('unionid已存在');
+        	}
             return res.status(500).send(err.errmsg);
         }
         // res.json({results: item,msg:"success!"});
@@ -600,7 +603,6 @@ exports.login = function(req, res) {
 
     //2017-06-07GY调试
     console.log('login_in');
-    console.log(req);
 
     var username = req.body.username;
     var password = req.body.password;
