@@ -59,7 +59,10 @@ exports.bindingDevice = function(req, res){
                             }
                         })
                     }
-		            return res.status(500).send(err.errmsg);
+                    else{
+                        return res.status(500).send(err.errmsg);
+                    }
+		            
 		        }
 		        res.json({results: body});
 		      });
