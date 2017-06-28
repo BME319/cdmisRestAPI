@@ -866,7 +866,7 @@ exports.sendSMS = function(req, res) {
                             		res.json({results: 0,mesg:"User doesn't Exist!"});
                         		}
                         		else{
-                            		res.json({results: 2,ErrorCode: code});
+                            		res.json({
                         		}
                                 // console.log(json.resp.respCode);
                             });
