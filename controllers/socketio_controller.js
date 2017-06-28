@@ -280,7 +280,6 @@ exports.chat = function (io, socket) {
         
         if(client == 'doctor'){
             // console.log("newUser @doctor:  "+ data.user_id);
-            
             if(userAppDoctorServer[user_id]  && userAppDoctorServer[user_id].id!=socket.id){
                 userAppDoctorServer[user_id].emit('kick');
                 // if(user_id == 'U201705120004'){

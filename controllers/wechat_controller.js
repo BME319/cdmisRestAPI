@@ -352,6 +352,12 @@ exports.addOrder = function(req, res, next) {
   // console.log(orderObject);
   // console.log(req.body);
   var currentDate = new Date();
+  if(currentDate <= new Date('2017-06-01')){
+    return res.json({ results: {
+      status: 0,
+      msg: 'free'
+    }});
+  }
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss');
   var out_trade_no = orderObject.orderNo; 
   var total_fee = parseInt(orderObject.money); 
