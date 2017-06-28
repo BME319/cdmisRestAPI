@@ -35,8 +35,8 @@ exports.bindingDevice = function(req, res){
 		        deviceType: 'sphygmomanometer',
 		        deviceName: '血压计',
 		        deviceInfo: body.deviceInfo
-		      };
-		      var newDevice = new Device(deviceData);
+		    };
+		    var newDevice = new Device(deviceData);
 		      newDevice.save(function(err, Info) {
 		        if (err) {
                     if(err.code == 11000){
@@ -54,8 +54,11 @@ exports.bindingDevice = function(req, res){
                                     if (err) {
                                         return res.status(500).send(err.errmsg);
                                     }
-                                    res.json({results: patient.name + '已绑定'});
+                                    res.json({results: patient.name + '已绑定该设备'});
                                 });
+                            }
+                            else{
+                                res.json({results: '该设备已被绑定'});
                             }
                         })
                     }
@@ -64,7 +67,10 @@ exports.bindingDevice = function(req, res){
                     }
 		            
 		        }
-		        res.json({results: body});
+                else{
+                    res.json({results: body});
+                }
+		        
 		      });
         	
         }
