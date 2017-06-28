@@ -11,7 +11,8 @@ var commonFunc = {
 	        req.socket.remoteAddress ||
 	        req.connection.socket.remoteAddress || '';
 	    if(ip.split(',').length > 0){
-	        ip = ip.split(',')[0]
+	        // ip = ip.split(',')[0].split(':')[3]
+	        ip = ip.split(',')[0].split(':').pop()
 	    }
 	    return ip;
 	},

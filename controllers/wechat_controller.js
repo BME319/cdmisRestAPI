@@ -357,7 +357,7 @@ exports.addOrder = function(req, res, next) {
   var total_fee = parseInt(orderObject.money); 
   
   var detail = '<![CDATA[{"goods_detail":' + JSON.stringify(orderObject.goodsInfo) + '}]]>';
-
+    // console.log(commonFunc.getClientIp(req).split(':')[3]);
   var paramData = {
     appid: req.wxApiUserObject.appid,   // 公众账号ID
     mch_id: req.wxApiUserObject.merchantid,   // 商户号
@@ -411,7 +411,7 @@ exports.addOrder = function(req, res, next) {
       // 微信生成的预支付会话标识，用于后续接口调用中使用，该值有效期为2小时
       prepay_id = data.xml.prepay_id;
       req.prepay_id = prepay_id;
-      // console.log(prepay_id);
+      console.log(prepay_id);
       next();
 
       // res.redirect('/zbtong/?#/shopping/wxpay/'+ orderObject.oid +'/' + data.xml.prepay_id);

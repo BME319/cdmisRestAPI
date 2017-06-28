@@ -463,7 +463,7 @@ exports.setOpenIdRes = function(req, res){
 exports.openIdLoginTest = function(req, res,next) {
 
     //2017-06-07GY调试
-    console.log('openIdLoginTest_in');
+    // console.log('openIdLoginTest_in');
 
     var username = req.body.username;
     if (username === '' ) {
@@ -484,7 +484,7 @@ exports.openIdLoginTest = function(req, res,next) {
         req.openIdFlag=openIdFlag;
 
         //2017-06-07GY调试
-        console.log('openIdLoginTest_out');
+        // console.log('openIdLoginTest_out');
 
         next();
     });
@@ -492,7 +492,7 @@ exports.openIdLoginTest = function(req, res,next) {
 exports.checkBinding = function(req, res,next) {
 
     //2017-06-07GY调试
-    console.log('checkBinding_in');
+    // console.log('checkBinding_in');
 
     var username = req.body.username;
     // console.log(username);
@@ -503,7 +503,7 @@ exports.checkBinding = function(req, res,next) {
             {phoneNo: username}
         ]
     };
-    console.log(query);
+    // console.log(query);
 
     User.getOne(query, function(err, item) {
         if (err) {
@@ -540,14 +540,14 @@ exports.checkBinding = function(req, res,next) {
                                 return res.status(500).send(err.errmsg);
                             }
                             // 绑定成功后 删除OpenIdTmp表中的数据  
-                            console.log({query1:query});                          
+                            // console.log({query1:query});                          
                             OpenIdTmp.remove(query,function(err){
                                 if (err) {
                                     return res.status(500).send(err.errmsg);
                                 }
 
                                 //2017-06-07GY调试
-                                console.log('checkBinding_out');
+                                // console.log('checkBinding_out');
 
                                 next();
                             })
@@ -571,7 +571,7 @@ exports.checkBinding = function(req, res,next) {
                         // }
 
                         //2017-06-07GY调试
-                        console.log('checkBinding_out22');
+                        // console.log('checkBinding_out22');
 
                         next();
                       
@@ -599,8 +599,8 @@ exports.checkBinding = function(req, res,next) {
 exports.login = function(req, res) {
 
     //2017-06-07GY调试
-    console.log('login_in');
-    console.log(req);
+    // console.log('login_in');
+    // console.log(req);
 
     var username = req.body.username;
     var password = req.body.password;
@@ -641,7 +641,7 @@ exports.login = function(req, res) {
             {
 
                 //2017-06-07GY调试
-                console.log('login_err_no_authority');
+                // console.log('login_err_no_authority');
 
                 res.json({results: 1,mesg:"No authority!"});
             }
@@ -876,7 +876,7 @@ exports.sendSMS = function(req, res) {
                         });
 
                         requests.on("error",function(err){
-                            console.log(err.message);
+                            // console.log(err.message);
                         })
                         requests.write(JSONData);
                         requests.end();
