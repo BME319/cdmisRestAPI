@@ -2,6 +2,7 @@ var	request = require('request'),
 	config = require('../config'),
 	Patient = require('../models/patient'), 
 	VitalSign = require('../models/vitalSign'), 
+    Compliance = require('../models/compliance'),
 	Device = require('../models/device');
 
 exports.bindingDevice = function(req, res){
