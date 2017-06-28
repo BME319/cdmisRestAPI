@@ -30,6 +30,7 @@ exports.insertDocBasic = function(req, res) {
 		return res.json({result:'请填写userId!'});
 	}
 	var doctorData = {
+		registerTime: commonFunc.getNowFormatSecond()
 		// revisionInfo:{
 		// 	operationTime:commonFunc.getNowFormatSecond(),
 		// 	userId:"gy",
