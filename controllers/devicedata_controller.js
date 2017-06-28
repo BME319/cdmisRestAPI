@@ -54,8 +54,14 @@ exports.bindingDevice = function(req, res){
                                     if (err) {
                                         return res.status(500).send(err.errmsg);
                                     }
+                                    if(patient){
+                                        res.json({results: patient.name });
+                                    }
+                                    else{
+                                        res.json({results: '患者不存在' });
+                                    }
                                     // res.json({results: patient.name + '已绑定该设备'});
-                                    res.json({results: patient.name });
+                                    
                                 });
                             }
                             else{
