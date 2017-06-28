@@ -26,7 +26,6 @@ var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
     dictNumberCtrl = require('../controllers/dictNumber_controller'),
     loadCtrl = require('../controllers/load_controller');
 
-  
     dictTypeOneCtrl = require('../controllers/dictTypeOne_controller'),
     dictDistrictCtrl = require('../controllers/dictDistrict_controller'),
     dictHospitalCtrl = require('../controllers/dictHospital_controller'),
@@ -71,16 +70,16 @@ module.exports = function(app,webEntry, acl) {
 
   app.get(version + '/dict/typeTwo', dictTypeTwoCtrl.getCategory);
   app.get(version + '/dict/typeTwo/codes', dictTypeTwoCtrl.getTypes);
-  app.get(version + '/user', userCtrl.getUserList);
-  app.get(version + '/user/insert', userCtrl.insertUser);
-  app.get(version + '/user/one',  userCtrl.getUser);
+  // app.get(version + '/user', userCtrl.getUserList);
+  // app.get(version + '/user/insert', userCtrl.insertUser);
+  // app.get(version + '/user/one',  userCtrl.getUser);
 
   app.get(version + '/dict/typeOne',  dictTypeOneCtrl.getCategory);
   app.get(version + '/dict/district',  dictDistrictCtrl.getDistrict);
   app.get(version + '/dict/hospital',  dictHospitalCtrl.getHospital);
   app.get(version + '/tasks',  taskCtrl.getTasks);
-  app.get(version + '/tasks/status',  taskCtrl.updateStatus);
-  app.get(version + '/tasks/time',  taskCtrl.updateStartTime);
+  app.post(version + '/tasks/status',  taskCtrl.updateStatus);
+  app.post(version + '/tasks/time',  taskCtrl.updateStartTime);
 
   // app.post(version + '/compliance', complianceCtrl.insertOne);
   app.get(version + '/compliance',  complianceCtrl.getComplianceByDay);
@@ -103,8 +102,8 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/user/login', userCtrl.openIdLoginTest,userCtrl.checkBinding,userCtrl.login);
   app.post(version + '/user/logout',  userCtrl.logout);
   app.get(version + '/user/getUserID',  userCtrl.getUserID);
-  app.get(version + '/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
-  app.get(version + '/user/TDCticket',  userCtrl.getUserTDCticket);
+  // app.get(version + '/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
+  // app.get(version + '/user/TDCticket',  userCtrl.getUserTDCticket);
 
   app.post(version + '/user/sendSMS',  userCtrl.sendSMS);
   app.get(version + '/user/verifySMS',  userCtrl.verifySMS);
@@ -126,9 +125,11 @@ module.exports = function(app,webEntry, acl) {
   //doctor_Info
   app.post(version + '/doctor/postDocBasic',  doctorCtrl.insertDocBasic);
   //需要查询class字典表（待定）
+
   app.get(version + '/doctor/getPatientList',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
-  app.get(version + '/doctor/getDoctorInfo',  doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
+  app.get(version + '/doctor/getDoctorInfo',  doctorCtrl.getDoctorObject,  doctorCtrl.getUserInfo, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
+
   app.get(version + '/doctor/getMyGroupList',  doctorCtrl.getTeams);
   app.get(version + '/doctor/getGroupPatientList',  doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
   // app.get(version + '/doctor/getTeam', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
@@ -144,6 +145,10 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime);
   app.get(version + '/doctor/getSuspendTime', doctorCtrl.getSuspendTime);
   app.get(version + '/doctor/getDocNum', doctorCtrl.getDocNum);
+
+
+  app.get('/doctor/getAliPayAccount', doctorCtrl.getAliPayAccount);
+  app.post('/doctor/editAliPayAccount', doctorCtrl.editAliPayAccount);
 
   //counsel
   app.get(version + '/counsel/getCounsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
@@ -241,11 +246,11 @@ module.exports = function(app,webEntry, acl) {
   //insurance
   app.post(version + '/insurance/updateInsuranceMsg',  insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage);
   app.get(version + '/insurance/getInsMsg',  insuranceCtrl.getInsMsg);
-  app.get(version + '/insurance/setPrefer',  insuranceCtrl.setPrefer);
+  app.post(version + '/insurance/setPrefer',  insuranceCtrl.setPrefer);
   app.get(version + '/insurance/getPrefer',  insuranceCtrl.getPrefer);
 
   //advice
-  app.post(version + '/advice/postAdvice', tokenManager.verifyToken(), adviceCtrl.postAdvice);
+  app.post(version + '/advice/postAdvice', adviceCtrl.postAdvice);
   app.get(version + '/advice/getAdvice',  adviceCtrl.getAdvice);
 
   //labtestResult

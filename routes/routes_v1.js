@@ -34,6 +34,7 @@ var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
     orderCtrl = require('../controllers/order_controller'),
     complianceCtrl = require('../controllers/compliance_controller'),
     jpushCtrl = require('../controllers/jpush_controller'),
+    devicedataCtrl = require('../controllers/devicedata_controller'),
     aclsettingCtrl = require('../controllers/aclsetting_controller');
 
 // controllers updated by GY 
@@ -102,6 +103,7 @@ module.exports = function(app,webEntry, acl) {
 
   app.post(version + '/user/login', userCtrl.openIdLoginTest,userCtrl.checkBinding,userCtrl.login);
   app.post(version + '/user/logout',  userCtrl.logout);
+
   app.get(version + '/user/userID',  userCtrl.getUserID);
   // app.get(version + '/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
   // app.get(version + '/user/TDCticket',  userCtrl.getUserTDCticket);
@@ -161,7 +163,6 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/counsel/score', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
 
 
-
   //patient_Info
   app.get(version + '/patient/detail',  patientCtrl.getPatientDetail);
 
@@ -197,6 +198,7 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/account/getCountsRespective',  accountCtrl.checkPatient, accountCtrl.getCountsRespective);
   
   app.post(version + '/expense/rechargeDoctor',  accountCtrl.checkPatient, doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor);
+
   app.get(version + '/expense/docRecords',  doctorCtrl.checkDoctor, expenseCtrl.getDocRecords);
 
   //message
@@ -220,6 +222,7 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/communication/team',  communicationCtrl.getTeam);
   // app.post(version + '/communication/newConsultation', getNoMid.getNo(5), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
   app.post(version + '/communication/consultation',  communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
+
   app.post(version + '/communication/conclusion',  communicationCtrl.conclusion);
   app.post(version + '/communication/updateLastTalkTime',  communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime);
   //app.get(version + '/communication/getMessages');
@@ -231,8 +234,8 @@ module.exports = function(app,webEntry, acl) {
   // 临时接口：给原数据写入newsType字段
   // app.get(version + '/communication/updateNewsType', communicationCtrl.addnewsType);
 
-
   //task
+
   app.post(version + '/tasks/taskModel',  taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel);
   app.get(version + '/tasks/task',  taskCtrl.getUserTask);
   app.post(version + '/tasks/task',  taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent);
@@ -247,7 +250,7 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/insurance/prefer',  insuranceCtrl.getPrefer);
 
   //advice
-  app.post(version + '/advice/postAdvice', tokenManager.verifyToken(), adviceCtrl.postAdvice);
+  app.post(version + '/advice/postAdvice',  adviceCtrl.postAdvice);
   app.get(version + '/advice/getAdvice',  adviceCtrl.getAdvice);
 
   //labtestResult
@@ -262,7 +265,6 @@ module.exports = function(app,webEntry, acl) {
   // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
   app.post(version + '/order/order',  orderCtrl.updateOrder);
   app.get(version + '/order/order',   orderCtrl.getOrder);
-
 
   // // weixin wechatCtrl
   // app.get(version + '/wechat/settingConfig', wechatCtrl.getAccessTokenMid,wechatCtrl.wxJsApiTicket, wechatCtrl.settingConfig);
@@ -358,6 +360,11 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/acl/removeResource', tokenManager.verifyToken(), aclsettingCtrl.removeResource(acl));
   app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl));
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl));
+
+  app.post(version + '/devicedata/BPDevice/binding', devicedataCtrl.bindingDevice);
+  app.post(version + '/devicedata/BPDevice/debinding', devicedataCtrl.debindingDevice);
+  app.post(version + '/devicedata/BPDevice/data', devicedataCtrl.receiveBloodPressure);
+  app.get(version + '/devicedata/devices', devicedataCtrl.getDeviceInfo);
 
 };
 
