@@ -355,7 +355,7 @@ exports.addOrder = function(req, res, next) {
   if(currentDate <= new Date('2017-08-01')){
     return res.json({ results: {
       status: 0,
-      msg: 'free'
+      msg: '2017年8月1日前免费'
     }});
   }
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss');
