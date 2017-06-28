@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var userSchema = new mongoose.Schema({
 	userId: String,						
 	userName: String,					
-	openId: String,//UnionId
+	openId: {type: String, unique: true},	//UnionId
 	phoneNo: String,					
 	password:String,
 	agreement:String,
