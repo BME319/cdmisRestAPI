@@ -41,7 +41,23 @@ exports.bindingDevice = function(req, res){
 		        if (err) {
                     if(err.code == 11000){
                         // 403   （禁止） 服务器拒绝请求。
-                        return res.status(403).send('duplication key');
+                        // return res.status(403).send('duplication key');
+                        Device.getOne({deviceId: deviceId}, function(err, item) {
+                            if (err) {
+                                return res.status(500).send(err.errmsg);
+                            }
+                            if(item){
+                                // res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
+                                // console.log('null');
+                                // res.json(results);
+                                Patient.getOne({userId: userId}, function(err, patient) {
+                                    if (err) {
+                                        return res.status(500).send(err.errmsg);
+                                    }
+                                    res.json({results: patient.name + '已绑定'});
+                                });
+                            }
+                        })
                     }
 		            return res.status(500).send(err.errmsg);
 		        }
