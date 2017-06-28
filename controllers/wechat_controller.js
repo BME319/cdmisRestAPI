@@ -355,7 +355,7 @@ exports.addOrder = function(req, res, next) {
   if(currentDate <= new Date('2017-08-01')){
     return res.json({ results: {
       status: 0,
-      msg: '2017年8月1日前免费'
+      msg: '现在为免费体验期，不收取任何费用'
     }});
   }
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss');
