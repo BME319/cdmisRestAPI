@@ -352,7 +352,7 @@ exports.addOrder = function(req, res, next) {
   // console.log(orderObject);
   // console.log(req.body);
   var currentDate = new Date();
-  if(currentDate <= new Date('2017-06-01')){
+  if(currentDate <= new Date('2017-08-01')){
     return res.json({ results: {
       status: 0,
       msg: 'free'
