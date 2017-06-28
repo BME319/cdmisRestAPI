@@ -600,6 +600,7 @@ exports.login = function(req, res) {
 
     //2017-06-07GY调试
     console.log('login_in');
+    console.log(req);
 
     var username = req.body.username;
     var password = req.body.password;

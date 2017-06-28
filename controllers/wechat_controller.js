@@ -352,6 +352,12 @@ exports.addOrder = function(req, res, next) {
   // console.log(orderObject);
   // console.log(req.body);
   var currentDate = new Date();
+  if(currentDate <= new Date('2017-06-01')){
+    return res.json({ results: {
+      status: 0,
+      msg: 'free'
+    }});
+  }
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss');
   var out_trade_no = orderObject.orderNo; 
   var total_fee = parseInt(orderObject.money); 
@@ -371,7 +377,8 @@ exports.addOrder = function(req, res, next) {
     out_trade_no: out_trade_no + '-' + commonFunc.getRandomSn(4),   // 商户订单号
     
     total_fee: total_fee,   // 标价金额
-    spbill_create_ip: req.body.ip,   // 终端IP
+    // spbill_create_ip: req.body.ip,   // 终端IP
+    spbill_create_ip: commonFunc.getClientIp(req),   // 终端IP
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
     notify_url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/payResult',   // 通知地址
