@@ -50,7 +50,7 @@ exports.bindingDevice = function(req, res){
                                 // res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
                                 // console.log('null');
                                 // res.json(results);
-                                Patient.getOne({userId: userId}, function(err, patient) {
+                                Patient.getOne({userId: item.userId}, function(err, patient) {
                                     if (err) {
                                         return res.status(500).send(err.errmsg);
                                     }
