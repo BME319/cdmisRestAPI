@@ -455,9 +455,16 @@ exports.setOpenId = function(req, res, next) {
         	}
             return res.status(500).send(err.errmsg);
         }
+        if(item){
+            // console.log(item);
         // res.json({results: item,msg:"success!"});
-        req.body.username = _openId;
-        next();
+            req.body.username = _openId;
+            next();
+        }
+        else{
+            return res.status(403).send('用户不存在');
+        }
+        
     });
 }
 exports.setOpenIdRes = function(req, res){
