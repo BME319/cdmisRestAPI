@@ -83,6 +83,7 @@ function messageSaveSend(data, url,sender){
             // console.log("wechat_patient:  "+Object.keys(userWechatPatientServer));
 
             data.msg['messageId'] = response.body.messageNo;
+
             sender.emit('messageRes',{msg:data.msg});
 
             // if(client == 'doctor'){
@@ -129,6 +130,7 @@ function messageSaveSend(data, url,sender){
             // else{
             //     // do
             // }
+
 
             /// send to receiver
             if(targetRole == 'doctor'){
@@ -298,13 +300,14 @@ exports.chat = function (io, socket) {
                 userAppPatientServer[user_id].emit('kick');
             }
             socket.id = user_id;
+
             userAppPatientServer[user_id] = socket;
             userAppPatientList[user_id] = nickname;
         }
         else if(client == 'wechatdoctor'){
             // console.log("newUser @wechatdoctor:  "+ data.user_id);
-
             socket.id = user_id;
+
             userWechatDoctorServer[user_id] = socket;
             userWechatDoctorList[user_id] = nickname;
         }

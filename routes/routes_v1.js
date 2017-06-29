@@ -38,6 +38,7 @@ var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
     aclsettingCtrl = require('../controllers/aclsetting_controller'),
     versionCtrl = require('../controllers/version_controller');
 
+
 // controllers updated by GY 
 var doctorCtrl = require('../controllers/doctor_controller'), 
     counselCtrl = require('../controllers/counsel_controller'), 
@@ -369,6 +370,7 @@ module.exports = function(app,webEntry, acl) {
 
   app.get(version + '/version', versionCtrl.getVersionInfo);
   app.post(version + '/version', getNoMid.getNo(10), versionCtrl.insertVersionInfo);
+
 
 };
 
