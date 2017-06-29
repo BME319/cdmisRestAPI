@@ -446,13 +446,16 @@ exports.reset = function(req, res) {
 }
 exports.setOpenId = function(req, res, next) {
     var _phoneNo = req.body.phoneNo
-    var _openId = req.body.openId
+    var _openId = req.body.openId;
     var query = {phoneNo:_phoneNo};
+    if(_openId === undefined || _openId === null || _openId === "" ){
+    	return res.status(403).send('unionid不能为空');
+    }
     User.updateOne(query,{$set:{openId: _openId}},function(err, item){
         if (err) {
-        	if(err.code == 11000){
-        		return res.status(403).send('unionid已存在');
-        	}
+          if(err.code == 11000){
+            return res.status(403).send('unionid已存在');
+          }
             return res.status(500).send(err.errmsg);
         }
         if(item){
@@ -990,6 +993,9 @@ exports.setMessageOpenId = function(req,res){
     if(_type===""||_type==undefined)
     {
         return res.json({result:1,msg:"plz input type"});
+    }
+    if(_openId === undefined || _openId === null || _openId === "" ){
+    	return res.status(403).send('openId不能为空');
     }
     var query = {userId: userId};
 
