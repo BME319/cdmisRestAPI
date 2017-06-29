@@ -15,11 +15,15 @@ exports.getOrder = function(req, res) {
 }
 
 exports.insertOrder = function(req, res, next) {
+    var money = req.body.money || null;
+    if(money === null || money == '' || money == 0){
+        return res.status(403).send('invalid input');
+    }
     var orderData = {
         userId: req.body.userId,
         orderNo: req.newId,//req.body.orderNo,
         ordertime:new Date(),
-        money:req.body.money,
+        money: money,
         goodsInfo:{
             class:req.body.class,
             name:req.body.name,

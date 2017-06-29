@@ -446,15 +446,28 @@ exports.reset = function(req, res) {
 }
 exports.setOpenId = function(req, res, next) {
     var _phoneNo = req.body.phoneNo
-    var _openId = req.body.openId
+    var _openId = req.body.openId;
     var query = {phoneNo:_phoneNo};
+    if(_openId === undefined || _openId === null || _openId === "" ){
+    	return res.status(403).send('unionid不能为空');
+    }
     User.updateOne(query,{$set:{openId: _openId}},function(err, item){
         if (err) {
+          if(err.code == 11000){
+            return res.status(403).send('unionid已存在');
+          }
             return res.status(500).send(err.errmsg);
         }
+        if(item){
+            // console.log(item);
         // res.json({results: item,msg:"success!"});
-        req.body.username = _openId;
-        next();
+            req.body.username = _openId;
+            next();
+        }
+        else{
+            return res.status(403).send('用户不存在');
+        }
+        
     });
 }
 exports.setOpenIdRes = function(req, res){
@@ -852,31 +865,34 @@ exports.sendSMS = function(req, res) {
                             }
                         }
                         var code=1;
-                        var req=https.request(options,function(res){
+                        var requests=https.request(options,function(response){
                             var resdata="";
-                            res.on("data",function(chunk){
+                            response.on("data",function(chunk){
                                 resdata += chunk;
                                 // console.log(chunk);
                             });
-                            res.on("end",function(){
+                            response.on("end",function(){
                                 // console.log("### end ##");
                                 var json = eval('(' + resdata + ')');
                                 code=json.resp.respCode;
-
+								if(code==="000000"){
+                            		res.json({results: 0,mesg:"User doesn't Exist!"});
+                        		}
+                        		else{
+                            		res.json({results: 2,ErrorCode: code});
+                        		}
                                 // console.log(json.resp.respCode);
                             });
                             // console.log(res.statusCode);
                             
                         });
 
-                        req.on("error",function(err){
+                        requests.on("error",function(err){
                             console.log(err.message);
                         })
-                        req.write(JSONData);
-                        req.end();
-                        if(code="000000"){
-                            res.json({results: 0,mesg:"User doesn't Exist!"});
-                        }
+                        requests.write(JSONData);
+                        requests.end();
+                        
                     });
 
                     // res.json({results: 0,mesg:"User doesn't Exist!"});
@@ -979,6 +995,9 @@ exports.setMessageOpenId = function(req,res){
     if(_type===""||_type==undefined)
     {
         return res.json({result:1,msg:"plz input type"});
+    }
+    if(_openId === undefined || _openId === null || _openId === "" ){
+    	return res.status(403).send('openId不能为空');
     }
     var query = {userId: userId};
 
