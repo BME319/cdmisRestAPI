@@ -408,65 +408,65 @@ exports.editPatientDetail = function(req, res) {
 	// if (req.body.userId != null){
 	// 	upObj['userId'] = req.body.userId;
 	// }
-	if (req.body.name != null){
+	if (req.body.name != null && req.body.name != '' && req.body.name != undefined){
 		upObj['name'] = req.body.name;
 	}
-	if (req.body.photoUrl != null){
+	if (req.body.photoUrl != null && req.body.photoUrl != '' && req.body.photoUrl != undefined){
 		upObj['photoUrl'] = req.body.photoUrl;
 	}
-	if (req.body.birthday != null && req.body.birthday != ''){
+	if (req.body.birthday != null && req.body.birthday != '' && req.body.birthday != undefined){
 		upObj['birthday'] = new Date(req.body.birthday);
 	}
-	if (req.body.gender != null){
+	if (req.body.gender != null && req.body.gender != '' && req.body.gender != undefined){
 		upObj['gender'] = req.body.gender;
 	}
-	if (req.body.IDNo != null){
+	if (req.body.IDNo != null && req.body.IDNo != '' && req.body.IDNo != undefined){
 		upObj['IDNo'] = req.body.IDNo;
 	}
-	if (req.body.height != null){
+	if (req.body.height != null && req.body.height != '' && req.body.height != undefined){
 		upObj['height'] = req.body.height;
 	}
 	if (req.body.weight != null && req.body.weight != '' && req.body.weight != undefined) {
 		upObj['weight'] = req.body.weight;
 	}
-	if (req.body.occupation != null){
+	if (req.body.occupation != null && req.body.occupation != '' && req.body.occupation != undefined){
 		upObj['occupation'] = req.body.occupation;
 	}
-	if (req.body.bloodType != null){
+	if (req.body.bloodType != null && req.body.bloodType != '' && req.body.bloodType != undefined){
 		upObj['bloodType'] = req.body.bloodType;
 	}
-	if (req.body.nation != null){
+	if (req.body.nation != null && req.body.nation != '' && req.body.nation != undefined){
 		upObj['address.nation'] = req.body.nation;
 	}
-	if (req.body.province != null){
+	if (req.body.province != null && req.body.province != '' && req.body.province != undefined){
 		upObj['address.province'] = req.body.province;
 	}
-	if (req.body.city != null){
+	if (req.body.city != null && req.body.city != '' && req.body.city != undefined){
 		upObj['address.city'] = req.body.city;
 	}
-	if (req.body.class != null){
+	if (req.body.class != null && req.body.class != '' && req.body.class != undefined){
 		upObj['class'] = req.body.class;
 	}
-	if (req.body.class_info != null){
+	if (req.body.class_info != null && req.body.class_info != '' && req.body.class_info != undefined){
 		upObj['class_info'] = req.body.class_info;
 	}
-	if (req.body.operationTime != null && req.body.operationTime != ''){
+	if (req.body.operationTime != null && req.body.operationTime != '' && req.body.operationTime != undefined){
 		upObj['operationTime'] = new Date(req.body.operationTime);
 	}
-	if (req.body.hypertension != null){
+	if (req.body.hypertension != null && req.body.hypertension != '' && req.body.hypertension != undefined){
 		upObj['hypertension'] = req.body.hypertension;
 	}
-	if (req.body.allergic != null){
+	if (req.body.allergic != null && req.body.allergic != '' && req.body.allergic != undefined){
 		upObj['allergic'] = req.body.allergic;
 	}
 	if (req.body.lastVisit != null) {
-		if (req.body.lastVisit.time != null && req.body.lastVisit.time != ''){
+		if (req.body.lastVisit.time != null && req.body.lastVisit.time != '' && req.body.lastVisit.time != undefined){
 			upObj['lastVisit.time'] = new Date(req.body.lastVisit.time);
 		}
-		if (req.body.lastVisit.hospital != null){
+		if (req.body.lastVisit.hospital != null && req.body.lastVisit.hospital != '' && req.body.lastVisit.hospital != undefined){
 			upObj['lastVisit.hospital'] = req.body.lastVisit.hospital;
 		}
-		if (req.body.lastVisit.diagnosis != null){
+		if (req.body.lastVisit.diagnosis != null && req.body.lastVisit.diagnosis != '' && req.body.lastVisit.diagnosis != undefined){
 			upObj['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis;
 		}
 	}
