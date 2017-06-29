@@ -952,11 +952,16 @@ exports.receiveTextMessage = function(req, res) {
           var doctor_userId;
           // 
           console.log(jsondata);
+          var patientType;
           if(jsondata.xml.Event == 'subscribe'){
             doctor_userId =  jsondata.xml.EventKey[0].split('_')[1];
+            // 未注册
+            patientType = 0;
           }
           if(jsondata.xml.Event == 'SCAN'){
             doctor_userId =  jsondata.xml.EventKey;
+            // 已注册
+            patientType = 1;
           }
         console.log(doctor_userId);
           // 暂存医生和患者的openId
@@ -966,7 +971,8 @@ exports.receiveTextMessage = function(req, res) {
           var openIdData = {
             doctorUserId: doctor_userId,
             patientOpenId: patient_openId,
-            time: time
+            time: time,
+            patientType: patientType
           };
           // console.log(openIdData);
           var newOpenIdTmp = new OpenIdTmp(openIdData);
