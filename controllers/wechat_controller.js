@@ -352,12 +352,18 @@ exports.addOrder = function(req, res, next) {
   // console.log(orderObject);
   // console.log(req.body);
   var currentDate = new Date();
+  if(currentDate <= new Date('2017-08-01')){
+    return res.json({ results: {
+      status: 0,
+      msg: '现在为免费体验期，不收取任何费用'
+    }});
+  }
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss');
   var out_trade_no = orderObject.orderNo; 
   var total_fee = parseInt(orderObject.money); 
   
   var detail = '<![CDATA[{"goods_detail":' + JSON.stringify(orderObject.goodsInfo) + '}]]>';
-
+    // console.log(commonFunc.getClientIp(req).split(':')[3]);
   var paramData = {
     appid: req.wxApiUserObject.appid,   // 公众账号ID
     mch_id: req.wxApiUserObject.merchantid,   // 商户号
@@ -371,7 +377,8 @@ exports.addOrder = function(req, res, next) {
     out_trade_no: out_trade_no + '-' + commonFunc.getRandomSn(4),   // 商户订单号
     
     total_fee: total_fee,   // 标价金额
-    spbill_create_ip: req.body.ip,   // 终端IP
+    // spbill_create_ip: req.body.ip,   // 终端IP
+    spbill_create_ip: commonFunc.getClientIp(req),   // 终端IP
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
     notify_url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/payResult',   // 通知地址
@@ -410,7 +417,7 @@ exports.addOrder = function(req, res, next) {
       // 微信生成的预支付会话标识，用于后续接口调用中使用，该值有效期为2小时
       prepay_id = data.xml.prepay_id;
       req.prepay_id = prepay_id;
-      // console.log(prepay_id);
+      console.log(prepay_id);
       next();
 
       // res.redirect('/zbtong/?#/shopping/wxpay/'+ orderObject.oid +'/' + data.xml.prepay_id);
@@ -945,11 +952,16 @@ exports.receiveTextMessage = function(req, res) {
           var doctor_userId;
           // 
           console.log(jsondata);
+          var patientType;
           if(jsondata.xml.Event == 'subscribe'){
             doctor_userId =  jsondata.xml.EventKey[0].split('_')[1];
+            // 未注册
+            patientType = 0;
           }
           if(jsondata.xml.Event == 'SCAN'){
             doctor_userId =  jsondata.xml.EventKey;
+            // 已注册
+            patientType = 1;
           }
         console.log(doctor_userId);
           // 暂存医生和患者的openId
@@ -959,7 +971,8 @@ exports.receiveTextMessage = function(req, res) {
           var openIdData = {
             doctorUserId: doctor_userId,
             patientOpenId: patient_openId,
-            time: time
+            time: time,
+            patientType: patientType
           };
           // console.log(openIdData);
           var newOpenIdTmp = new OpenIdTmp(openIdData);

@@ -756,7 +756,7 @@ exports.updateFreeTime = function(req, res) {
 	var month = date.getMonth() + 1;
 	var year = date.getFullYear();
 	var activity=0;
-	if (month < 7 && year == 2017) {activity=1;}
+	if (month < 8 && year == 2017) {activity=1;}
 
 	var query = {userId:req.patientId};
 	Account.getOne(query, function(err, item) {

@@ -43,9 +43,15 @@ exports.getCounsels = function(req, res) {
 	var fields = {"_id":0, "messages":0, "revisionInfo":0};
 	//关联主表patient获取患者信息
 	var populate = {path: 'patientId', select:{'_id':0, 'revisionInfo':0, 'doctors':0}}
-	if(_name!=""&&_name!=undefined){
-		populate["match"]={"name":_name};
+	// if(_name!=""&&_name!=undefined){
+	// 	populate["match"]={"name":_name};
+	// }
+	//模糊搜索
+	var nameReg = new RegExp(_name);
+	if (_name) {
+		populate['match'] = {'name': nameReg};
 	}
+	console.log(populate)
 	Counsel.getSome(query, function(err, item) {
 		if (err) {
       		return res.status(500).send(err.errmsg);

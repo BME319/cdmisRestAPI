@@ -5,10 +5,16 @@ var ZEROS = '0000000000000';
 
 var commonFunc = {
 	getClientIp: function (req) {
-		return req.headers['x-forwarded-for'] ||
-		req.connection.remoteAddress ||
-		req.socket.remoteAddress ||
-		req.connection.socket.remoteAddress;
+		var ip = req.headers['x-forwarded-for'] ||
+	        req.ip ||
+	        req.connection.remoteAddress ||
+	        req.socket.remoteAddress ||
+	        req.connection.socket.remoteAddress || '';
+	    if(ip.split(',').length > 0){
+	        // ip = ip.split(',')[0].split(':')[3]
+	        ip = ip.split(',')[0].split(':').pop()
+	    }
+	    return ip;
 	},
 	stringToBytes: function( str ){
 		var ch, st, re = [];
