@@ -3,9 +3,8 @@ var mongoose = require('mongoose');
 
 var userSchema = new mongoose.Schema({
 	userId: String,						
-	userName: String,
-	gender: Number,					
-	openId: String,//UnionId
+	userName: String,					
+	openId:  {type: String, unique: true, sparse : true},	//UnionId
 	phoneNo: String,					
 	password:String,
 	agreement:String,
@@ -100,7 +99,6 @@ User.updateOne = function(query, obj, callback, opts, populate) {
 			callback(null, upuser);
 		});
 };
-
 
 
 
