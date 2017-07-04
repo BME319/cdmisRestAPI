@@ -35,7 +35,7 @@ var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
     complianceCtrl = require('../controllers/compliance_controller'),
     jpushCtrl = require('../controllers/jpush_controller'),
     devicedataCtrl = require('../controllers/devicedata_controller'),
-    aclsettingCtrl = require('../controllers/aclsetting_controller'),
+    // aclsettingCtrl = require('../controllers/aclsetting_controller'),
     versionCtrl = require('../controllers/version_controller');
 
 
