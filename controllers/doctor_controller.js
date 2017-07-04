@@ -24,6 +24,34 @@ var	config = require('../config'),
 // 	});
 // }
 
+//WF 20170626
+// 获取医生列表（或者详细信息）
+// 输入：无/用户ID，角色
+// 输出：用户ID，姓名，性别，手机号码，医院，科室，职称，咨询量，问诊量，评分；
+
+exports.getDoctors = function (req, res) {
+	
+    var query = {}; 
+    if (req.query.userId !== null && req.query.userId !== ''&& req.query.userId !== undefined) {
+        query["userId"]= req.query.userId;
+    };
+    var opts = '';
+	var fields = {'_id':0, 'patients':1};
+	//通过子表查询主表，定义主表查询路径及输出内容
+	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
+    Doctor.getSome(query, function (err, doctor) {
+        if (err) {
+            console.log(err);
+            return res.status(500).send('服务器错误, 用户查询失败!');
+        }
+        if (doctor == null) {
+        	return res.json({result:'不存在的医生ID！'});
+        }
+        return res.json({doctors:doctor});
+        
+    }, opts, fields, populate);
+};
+
 //新建医生基本信息 2017-04-01 GY
 exports.insertDocBasic = function(req, res) {
 	if (req.body.userId == null || req.body.userId == '') {
@@ -828,6 +856,10 @@ exports.getPatientByDate = function(req, res) {
 	//查询条件
 	var doctorObject = req.body.doctorObject;
 	var query = {doctorId:doctorObject._id};
+	
+	//模糊搜索GY
+	var _name = req.query.name;
+
 	if (req.query.date != null && req.query.date != '') {
 		var date = new Date(req.query.date);
 		date = commonFunc.convertToFormatDate(date);
@@ -841,6 +873,10 @@ exports.getPatientByDate = function(req, res) {
 	var fields = {'_id':0, 'patients':1};
 	//通过子表查询主表，定义主表查询路径及输出内容
 	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
+
+	if (_name) {
+		populate['match'] = {'name': new RegExp(_name)};
+	}
 
 	DpRelation.getOne(query, function(err, item) {
 		if (err) {
@@ -975,9 +1011,15 @@ exports.getPatientList = function(req, res) {
 	var fields = {'_id':0, 'patients.patientId':1, 'patients.dpRelationTime':1};
 	//通过子表查询主表，定义主表查询路径及输出内容
 	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
-	if(_name!=""&&_name!=undefined){
+	// if(_name!=""&&_name!=undefined){
 		
+	// }
+	//模糊搜索
+	var nameReg = new RegExp(_name);
+	if (_name) {
+		populate['match'] = {'name': nameReg};
 	}
+	console.log(populate);
 	// console.log(query);
 	DpRelation.getOne(query, function(err, item) {
 		if (err) {
@@ -1014,7 +1056,8 @@ exports.getPatientList = function(req, res) {
 	    		if(item.patients[i].dpRelationTime === null || item.patients[i].dpRelationTime === '' || item.patients[i].dpRelationTime === undefined) {
 	    			item.patients[i].dpRelationTime = new Date('2017-05-15');
 	    		}
-	    		if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
+	    		// if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
+				if(item.patients[i].patientId!=null){
 	    			if(_skip>0)
 	    			{
 	    				_skip--;

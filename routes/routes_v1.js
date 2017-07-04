@@ -22,6 +22,7 @@ var getNoMid = require('../middlewares/getNoMid'),
 var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
 
     userCtrl = require('../controllers/user_controller'),
+    alluserCtrl = require('../controllers/alluser_controller'),
     healthInfoCtrl = require('../controllers/healthInfo_controller'),
     dictNumberCtrl = require('../controllers/dictNumber_controller'),
     loadCtrl = require('../controllers/load_controller');
@@ -35,7 +36,9 @@ var dictTypeOneCtrl = require('../controllers/dictTypeOne_controller'),
     complianceCtrl = require('../controllers/compliance_controller'),
     jpushCtrl = require('../controllers/jpush_controller'),
     devicedataCtrl = require('../controllers/devicedata_controller'),
-    aclsettingCtrl = require('../controllers/aclsetting_controller');
+    aclsettingCtrl = require('../controllers/aclsetting_controller'),
+    versionCtrl = require('../controllers/version_controller');
+
 
 // controllers updated by GY 
 var doctorCtrl = require('../controllers/doctor_controller'), 
@@ -88,6 +91,33 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/compliance',  complianceCtrl.getComplianceByDay);
 
   // wf
+  app.get(version + '/alluser/userList', alluserCtrl.getAlluserList(0));
+  app.get(version + '/alluser/doctorList', alluserCtrl.getAlluserList(1));
+  app.get(version + '/alluser/patientList', alluserCtrl.getAlluserList(2));
+  app.get(version + '/alluser/nurseList', alluserCtrl.getAlluserList(3));
+  app.get(version + '/alluser/insuranceList', alluserCtrl.getAlluserList(4));
+  app.get(version + '/alluser/healthList', alluserCtrl.getAlluserList(5));
+  app.get(version + '/alluser/adminList', alluserCtrl.getAlluserList(6));
+
+  app.post(version + '/alluser/alluser', alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList);
+
+  app.post(version + '/alluser/register', alluserCtrl.registerTest(acl),getNoMid.getNo(1), alluserCtrl.register(acl));
+  app.post(version + '/alluser/cancelUser', alluserCtrl.checkAlluser,alluserCtrl.cancelAlluser);
+  app.post(version + '/alluser/unionid', alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes);
+  app.post(version + '/alluser/openId', alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId);
+  app.get(version + '/alluser/openId', alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId);
+  app.post(version + '/alluser/reset', alluserCtrl.reset);
+  app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest,alluserCtrl.checkBinding,alluserCtrl.login);
+  app.post(version + '/alluser/logout',  alluserCtrl.logout);
+  app.get(version + '/alluser/userID',  alluserCtrl.getAlluserID);
+  app.post(version + '/alluser/sms',  alluserCtrl.sendSMS);
+  app.get(version + '/alluser/sms',  alluserCtrl.verifySMS);
+  app.get(version + '/alluser/agreement',  alluserCtrl.getAlluserAgreement);
+  app.post(version + '/alluser/agreement',  alluserCtrl.updateAlluserAgreement);
+
+  //***********************************************************************************************//
+  app.get(version + '/user/userList', userCtrl.getUserList(acl));
+  app.post(version + '/user/cancelUser', userCtrl.checkUser,userCtrl.cancelUser);
   // -------------------------------------------- 注册时如何验证用户 ------------------------------------------------------
   app.post(version + '/user/register', userCtrl.registerTest,getNoMid.getNo(1), userCtrl.register);
   // -------------------------------------------------------------------------------------------------------------------
@@ -113,6 +143,8 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/user/sms',  userCtrl.verifySMS);
   app.get(version + '/user/agreement',  userCtrl.getUserAgreement);
   app.post(version + '/user/agreement',  userCtrl.updateUserAgreement);
+
+  //***************************************************************************************************//
   app.get(version + '/healthInfo/healthInfos',  healthInfoCtrl.getAllHealthInfo);
   app.get(version + '/healthInfo/healthDetail',  healthInfoCtrl.getHealthDetail);
   app.post(version + '/healthInfo/healthInfo',  healthInfoCtrl.insertHealthInfo);
@@ -152,6 +184,8 @@ module.exports = function(app,webEntry, acl) {
 
   app.get(version + '/doctor/AliPayAccount', doctorCtrl.getAliPayAccount);
   app.post(version + '/doctor/AliPayAccount', doctorCtrl.editAliPayAccount);
+
+  app.get(version + '/doctor/Doctors', doctorCtrl.getDoctors);
 
   //counsel
   app.get(version + '/counsel/counsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
@@ -371,6 +405,10 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/devicedata/BPDevice/debinding', devicedataCtrl.debindingDevice);
   app.post(version + '/devicedata/BPDevice/data', devicedataCtrl.receiveBloodPressure);
   app.get(version + '/devicedata/devices', devicedataCtrl.getDeviceInfo);
+
+  app.get(version + '/version', versionCtrl.getVersionInfo);
+  app.post(version + '/version', getNoMid.getNo(10), versionCtrl.insertVersionInfo);
+
 
 };
 

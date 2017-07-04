@@ -2,6 +2,8 @@ var	request = require('request'),
 	config = require('../config'),
 	Patient = require('../models/patient'), 
 	VitalSign = require('../models/vitalSign'), 
+  Compliance = require('../models/compliance'),
+
 	Device = require('../models/device');
 
 exports.bindingDevice = function(req, res){
@@ -34,17 +36,50 @@ exports.bindingDevice = function(req, res){
 		        deviceType: 'sphygmomanometer',
 		        deviceName: '血压计',
 		        deviceInfo: body.deviceInfo
-		      };
-		      var newDevice = new Device(deviceData);
+		    };
+		    var newDevice = new Device(deviceData);
 		      newDevice.save(function(err, Info) {
 		        if (err) {
                     if(err.code == 11000){
                         // 403   （禁止） 服务器拒绝请求。
-                        return res.status(403).send('duplication key');
+                        // return res.status(403).send('duplication key');
+                        Device.getOne({deviceId: deviceId}, function(err, item) {
+                            if (err) {
+                                return res.status(500).send(err.errmsg);
+                            }
+                            if(item){
+                                // res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
+                                // console.log('null');
+                                // res.json(results);
+                                Patient.getOne({userId: item.userId}, function(err, patient) {
+                                    if (err) {
+                                        return res.status(500).send(err.errmsg);
+                                    }
+                                    if(patient){
+                                        res.json({results: patient.name });
+                                    }
+                                    else{
+                                        res.json({results: '患者不存在' });
+                                    }
+                                    // res.json({results: patient.name + '已绑定该设备'});
+                                    
+                                });
+                            }
+                            else{
+                                // res.json({results: '该设备已被绑定'});
+                                res.json({results: ''});
+                            }
+                        })
                     }
-		            return res.status(500).send(err.errmsg);
+                    else{
+                        return res.status(500).send(err.errmsg);
+                    }
+		            
 		        }
-		        res.json({results: body});
+                else{
+                    res.json({results: body});
+                }
+		        
 		      });
         	
         }

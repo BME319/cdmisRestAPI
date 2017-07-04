@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var userSchema = new mongoose.Schema({
 	userId: String,						
 	userName: String,					
-	openId: String,//UnionId
+	openId:  {type: String, unique: true, sparse : true},	//UnionId
 	phoneNo: String,					
 	password:String,
 	agreement:String,
@@ -14,6 +14,7 @@ var userSchema = new mongoose.Schema({
 	lastLogin:Date,
 	TDCticket: String,
 	TDCurl: String,
+	invalidFlag: Number,
 	MessageOpenId:{
 		doctorWechat:String,
 		patientWechat:String,
@@ -98,7 +99,6 @@ User.updateOne = function(query, obj, callback, opts, populate) {
 			callback(null, upuser);
 		});
 };
-
 
 
 
