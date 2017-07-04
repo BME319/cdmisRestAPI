@@ -28,7 +28,7 @@ var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
     loadCtrl = require('../controllers/load_controller');
 
   
-    dictTypeOneCtrl = require('../controllers/dictTypeOne_controller'),
+var dictTypeOneCtrl = require('../controllers/dictTypeOne_controller'),
     dictDistrictCtrl = require('../controllers/dictDistrict_controller'),
     dictHospitalCtrl = require('../controllers/dictHospital_controller'),
     taskCtrl = require('../controllers/task_controller'),
@@ -52,6 +52,7 @@ var doctorCtrl = require('../controllers/doctor_controller'),
     communicationCtrl = require('../controllers/communication_controller'), 
     messageCtrl = require('../controllers/message_controller'), 
     newsCtrl = require('../controllers/news_controller'), 
+    reviewCtrl = require('../controllers/review_controller'), 
     insuranceCtrl = require('../controllers/insurance_controller');
 var getQRcodeCtrl = require('../controllers/getQRcode');
 var labtestResultCtrl = require('../controllers/labtestResult_controller');
@@ -286,6 +287,11 @@ module.exports = function(app,webEntry, acl) {
   //advice
   app.post(version + '/advice/postAdvice',  adviceCtrl.postAdvice);
   app.get(version + '/advice/getAdvice',  adviceCtrl.getAdvice);
+
+  //review
+  app.post(version + '/review/reviewInfo', reviewCtrl.postReviewInfo);
+  app.get(version + '/review/certificate', reviewCtrl.getCertificate);
+  app.get(version + '/review/reviewInfo', reviewCtrl.getReviewInfo);
 
   //labtestResult
   app.post(version + '/labtestResult/post',  labtestResultCtrl.postLabtestResult);
