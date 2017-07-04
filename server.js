@@ -25,7 +25,8 @@ var config = require('./' + _config),
     dbUri = webEntry.dbUri,
     restPort = webEntry.restPort,
     // routes = require('./routes/'+route),     // 2017年6月22日停止使用
-    routes_v1 = require('./routes/routes_v1');
+    routes_v1 = require('./routes/routes_v1'),
+    routes_v2 = require('./routes/routes_v2');
 
 // 数据库连接
 var db = mongoose.connection; 
@@ -80,6 +81,7 @@ app.all('*', function (req, res, next) {
 // 路由设置
 // routes(app, webEntry, acl);
 routes_v1(app, webEntry, acl);
+routes_v2(app, webEntry, acl);
 
 app.use('/public', express.static( './public')).use('/lib', express.static( '../lib'));
 
