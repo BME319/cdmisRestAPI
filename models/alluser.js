@@ -109,12 +109,6 @@ var alluserSchema = new mongoose.Schema({
 		hospital: String, 
 		diagnosis: String
 	}, 
-	revisionInfo:{
-		operationTime:Date,
-		userId:String,
-		userName:String,
-		terminalIP:String
-	},
 	workAmounts:Number, //工作量
 	boardingTime:Date,//入职时间
 	creationTime:Date,//创建时间
