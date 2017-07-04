@@ -19,8 +19,8 @@ var getNoMid = require('../middlewares/getNoMid'),
     aclChecking = require('../middlewares/aclChecking');
 
 // controllers
-var aclsettingCtrl = require('../controllers/aclsetting_controller'),
-    alluserCtrl = require('../controllers/alluser_controller');
+var aclsettingCtrl = require('../controllers_v2/aclsetting_controller'),
+    alluserCtrl = require('../controllers_v2/alluser_controller');
 
 
 module.exports = function(app,webEntry, acl) {
