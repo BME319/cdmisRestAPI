@@ -67,6 +67,11 @@ var alluserSchema = new mongoose.Schema({
 			end: Date
 		}
 	], 
+	//状态定义：0未审核，1审核通过，2审核拒绝
+	reviewStatus: {type: Number, default: 0}, 
+	reviewDate: Date, 
+	adminId: {type: mongoose.Schema.Types.ObjectId, ref:'alluser'}, 
+	reviewContent: String, 
 
 	//patient_info
 	height: String,
@@ -179,6 +184,21 @@ Alluser.updateOne = function(query, obj, callback, opts, populate) {
 			}
 			callback(null, upalluser);
 		});
+};
+
+Alluser.update = function (query, obj, callback, opts, populate) {
+  var options = opts || {};
+  var populate = populate || '';
+
+  alluserModel
+  	.update(query, obj, options)
+  	.populate(populate) 
+  	.exec(function (err, upalluser) {
+    	if (err) {
+      		return callback(err);
+    	}
+    callback(null, upalluser);
+  });
 };
 
 

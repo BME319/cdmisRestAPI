@@ -22,6 +22,7 @@ var getNoMid = require('../middlewares/getNoMid'),
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller'),
     alluserCtrl = require('../controllers_v2/alluser_controller');
 
+var reviewCtrl = require('../controllers_v2/review_controller');
 
 module.exports = function(app,webEntry, acl) {
 
@@ -73,6 +74,12 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/alluser/sms',   tokenManager.verifyToken(), alluserCtrl.verifySMS);
   app.get(version + '/alluser/agreement',   tokenManager.verifyToken(), alluserCtrl.getAlluserAgreement);
   app.post(version + '/alluser/agreement',   tokenManager.verifyToken(), alluserCtrl.updateAlluserAgreement);
+
+  // gy
+  //review
+  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo);
+  app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate);
+  app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo);
 
 };
 
