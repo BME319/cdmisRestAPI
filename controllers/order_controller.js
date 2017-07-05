@@ -16,8 +16,10 @@ exports.getOrder = function(req, res) {
 }
 
 exports.insertOrder = function(req, res, next) {
-    var money = req.body.money || null;
-    if(money === null || money == ''){
+    var money = req.body.money;
+   
+    if(money == null || money === '' || money == 'undefined'){
+        console.log('in');
         return res.status(403).send('invalid input');
     }
 
@@ -35,13 +37,13 @@ exports.insertOrder = function(req, res, next) {
         else{
             var true_money;
             if(req.body.class == '01'){
-                true_money = doctor.charge1;
+                true_money = doctor.charge1 * 100;
             }
             else if(req.body.class == '02'){
-                true_money = doctor.charge2;
+                true_money = doctor.charge2 * 100;
             }
             else if(req.body.class == '03'){
-                true_money = doctor.charge2 - doctor.charge1;
+                true_money = doctor.charge2 * 100 - doctor.charge1 * 100;
             }
             else{
                 return res.status(403).send('服务类型不存在!');

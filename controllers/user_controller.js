@@ -476,7 +476,7 @@ exports.setOpenIdRes = function(req, res){
 exports.openIdLoginTest = function(req, res,next) {
 
     //2017-06-07GY调试
-    // console.log('openIdLoginTest_in');
+    console.log('openIdLoginTest_in');
 
     var username = req.body.username;
     if (username === '' ) {
@@ -497,7 +497,7 @@ exports.openIdLoginTest = function(req, res,next) {
         req.openIdFlag=openIdFlag;
 
         //2017-06-07GY调试
-        // console.log('openIdLoginTest_out');
+        console.log('openIdLoginTest_out');
 
         next();
     });
@@ -505,7 +505,7 @@ exports.openIdLoginTest = function(req, res,next) {
 exports.checkBinding = function(req, res,next) {
 
     //2017-06-07GY调试
-    // console.log('checkBinding_in');
+    console.log('checkBinding_in');
 
     var username = req.body.username;
     // console.log(username);
@@ -544,7 +544,7 @@ exports.checkBinding = function(req, res,next) {
                         };
                         // console.log(jsondata);
                         request({
-                          url: 'http://' + webEntry.domain + ':4050/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
+                          url: 'http://' + webEntry.domain + ':4060/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
                           method: 'POST',
                           body: jsondata,
                           json: true
@@ -560,7 +560,7 @@ exports.checkBinding = function(req, res,next) {
                                 }
 
                                 //2017-06-07GY调试
-                                // console.log('checkBinding_out');
+                                console.log('checkBinding_out1');
 
                                 next();
                             })
@@ -584,7 +584,7 @@ exports.checkBinding = function(req, res,next) {
                         // }
 
                         //2017-06-07GY调试
-                        // console.log('checkBinding_out22');
+                        console.log('checkBinding_out22');
 
                         next();
                       
@@ -634,7 +634,7 @@ exports.login = function(req, res) {
         if(item==null){
 
             //2017-06-07GY调试
-            // console.log('login_err_user_not_exist');
+            console.log('login_err_user_not_exist');
 
             res.json({results: 1,mesg:"User doesn't Exist!"});
         }
@@ -757,7 +757,7 @@ exports.getUserID = function(req, res) {
             res.json({results: 1,mesg:"User doesn't Exist!"});
         }
         else{
-            console.log(item);
+            // console.log(item);
             res.json({results: 0, UserId: item.userId, phoneNo: item.phoneNo, roles: item.role, openId: item.openId, mesg:"Get UserId Success!"});
 
         }

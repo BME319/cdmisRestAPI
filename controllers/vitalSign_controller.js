@@ -38,7 +38,7 @@ exports.getPatientObject = function (req, res, next) {
     };
     Patient.getOne(querypatient, function (err, patient) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (patient == null) {
@@ -74,7 +74,7 @@ exports.getVitalSign = function (req, res, next) {
     };
     VitalSign.getOne(queryVital, function(err, vitalsignitem){
     	if (err) {
-    		console.log(err);
+    		// console.log(err);
     		return res.status(500).send('查询失败');
     	}
 

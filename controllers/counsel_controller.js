@@ -51,7 +51,7 @@ exports.getCounsels = function(req, res) {
 	if (_name) {
 		populate['match'] = {'name': nameReg};
 	}
-	console.log(populate)
+	// console.log(populate)
 	Counsel.getSome(query, function(err, item) {
 		if (err) {
       		return res.status(500).send(err.errmsg);
@@ -97,7 +97,7 @@ exports.getPatientObject = function (req, res, next) {
 	var query = {userId: req.patientId};
     Patient.getOne(query, function (err, patient) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (patient == null) {
@@ -123,7 +123,7 @@ exports.getDoctorObject = function (req, res, next) {
 	var query = {userId: req.doctorId};
     Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (doctor == null) {

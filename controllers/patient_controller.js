@@ -186,7 +186,7 @@ exports.getPatientObject = function (req, res, next) {
     };
     Patient.getOne(query, function (err, patient) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (patient == null) {
@@ -260,7 +260,7 @@ exports.checkPatientId = function (req, res, next) {
     };
     Patient.getOne(query, function (err, patient) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (patient != null) {
@@ -532,7 +532,7 @@ exports.getDoctorObject = function (req, res, next) {
     };
     Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (doctor == null) {
@@ -676,7 +676,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 	else{
 		if (_dId.substr(0,1) == 'h'){
 			var queryH = {TDCurl:_dId};
-			console.log(_dId);
+			// console.log(_dId);
 			User.getOne(queryH, function(err, item) {
 				if (err) {
 					return res.status(500).send(err)
@@ -691,7 +691,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 					};
 					Doctor.getOne(queryD, function (err, doctor) {
 						if (err) {
-							console.log(err);
+							// console.log(err);
 							return res.status(500).send('服务器错误, 用户查询失败!');
 						}
 						if (doctor == null) {
@@ -703,7 +703,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 						};
 						Patient.getOne(query, function (err, patient) {
 							if (err) {
-								console.log(err);
+								// console.log(err);
 								return res.status(500).send('服务器错误, 用户查询失败!');
 							}
 							if (patient == null) {
@@ -748,7 +748,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 			};
 			Doctor.getOne(queryD, function (err, doctor) {
 				if (err) {
-					console.log(err);
+					// console.log(err);
 					return res.status(500).send('服务器错误, 用户查询失败!');
 				}
 				if (doctor == null) {
@@ -760,7 +760,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 				};
 				Patient.getOne(query, function (err, patient) {
 					if (err) {
-						console.log(err);
+						// console.log(err);
 						return res.status(500).send('服务器错误, 用户查询失败!');
 					}
 					if (patient == null) {

@@ -159,7 +159,7 @@ exports.checkPatient = function (req, res, next) {
     };
     Patient.getOne(query, function (err, patient) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 患者查询失败!');
         }
         if (patient == null) {
@@ -178,7 +178,7 @@ exports.checkDoctor = function (req, res, next) {
     };
     Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 医生查询失败!');
         }
         if (doctor == null) {
@@ -337,7 +337,7 @@ exports.updateNumber = function(req, res) {
 	var query = {teamId: req.body.teamId};
 	Team.getOne(query, function (err, team) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 团队查询失败!');
         }
 
@@ -403,7 +403,7 @@ exports.getDoctor1Object = function (req, res, next) {
     };
     Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (doctor == null) {
@@ -422,7 +422,7 @@ exports.getDoctor2Object = function (req, res, next) {
     };
     Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (doctor == null) {
@@ -611,7 +611,7 @@ exports.postCommunication = function(req, res) {
         if(msg.targetType=='single'){
         	// console.log("111");
             request({
-                url:'http://' + webEntry.domain + ':4050/api/v1/new/news' + '?token=' + req.query.token || req.body.token,
+                url:'http://' + webEntry.domain + ':4060/api/v1/new/news' + '?token=' + req.query.token || req.body.token,
                 method:'POST',
                 body:bodyGen(msg,communicationInfo['messageNo']),
                 json:true
@@ -621,7 +621,7 @@ exports.postCommunication = function(req, res) {
             });
         }else{
             request({
-                url:'http://' + webEntry.domain + ':4050/api/v1/new/teamNews' + '?token=' + req.query.token || req.body.token,
+                url:'http://' + webEntry.domain + ':4060/api/v1/new/teamNews' + '?token=' + req.query.token || req.body.token,
                 method:'POST',
                 body:bodyGen(msg,communicationInfo['_id']),
                 json:true
@@ -838,7 +838,7 @@ exports.addnewsType = function(req, res) {
 
 	Communication.update(query, upObj, function(err, upitems) {
 		if (err) {
-			console.log(err);
+			// console.log(err);
 		}
 		else {
 			return res.json({results:upitems});
@@ -861,11 +861,11 @@ exports.addcontenttime = function (req, res) {
 			// console.log(query);
 			Communication.getOne(query, function (err, item) {
 				if (err) {
-					console.log(err);
+					// console.log(err);
 				}
 				else if (item === null) {
 					console.log('item_of_null');
-					console.log(i);
+					// console.log(i);
 				}
 				else if (item.content.createTimeInMillis === undefined) {
 					console.log('item_createTimeInMillis_of_undefined');

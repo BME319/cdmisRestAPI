@@ -304,7 +304,7 @@ exports.insertTeamNews = function(req, res) {
 			//req.body.status = _status;
 			Team.getOne(query, function (err, team2) {
 			    if (err) {
-			        console.log(err);
+			        // console.log(err);
 			        // return res.status(500).send('服务器错误, 用户查询失败!');
 			        return 500;
 			    }
@@ -316,7 +316,7 @@ exports.insertTeamNews = function(req, res) {
 				    //sendMesg
 				    Doctors=team2.members;
 				    Doctors.push({"userId":team2.sponsorId});
-				    console.log(Doctors);
+				    // console.log(Doctors);
 			        for(var i=0;i<Doctors.length;i++)
 			        {
 			        	DocId=Doctors[i].userId;
