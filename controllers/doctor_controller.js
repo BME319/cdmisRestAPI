@@ -329,7 +329,7 @@ exports.getComments = function(req, res, next) {
 		}
 		_Url = _Url.substr(0, _Url.length - 1)
 	}
-	req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/doctor/getDoctorInfo' + _Url
+	req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v1/doctor/getDoctorInfo' + _Url
 
 	Comment.getSome(query, function(err, items) {
 		if (err) {
