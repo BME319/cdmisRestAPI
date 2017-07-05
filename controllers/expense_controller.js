@@ -39,7 +39,7 @@ exports.getDocRecords = function(req, res) {
 		}
 		_Url = _Url.substr(0, _Url.length - 1)
 	}
-	req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/expense/getDocRecords' + _Url
+	req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v1/expense/getDocRecords' + _Url
 
 	Expense.getSome(query, function(err, item) {
 		if (err) {

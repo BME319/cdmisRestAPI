@@ -707,7 +707,7 @@ exports.getCommunication = function(req, res) {
 		}
 		_Url = _Url.substr(0, _Url.length - 1)
 	}
-	var nexturl = webEntry.domain + ':' + webEntry.restPort + '/communication/getCommunication' + _Url
+	var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v1/communication/getCommunication' + _Url
 
 	if (messageType === 2) {
 		var query = {receiver: id2};
