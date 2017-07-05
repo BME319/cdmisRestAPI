@@ -162,7 +162,7 @@ exports.getDoctorLists = function(req, res) {
 		}
 		_Url=_Url.substr(0,_Url.length-1)
 	}
-	var nexturl=webEntry.domain+":"+webEntry.restPort+"/patient/getDoctorLists"+_Url
+	var nexturl=webEntry.domain+":"+webEntry.restPort+"/api/v1/patient/getDoctorLists"+_Url
 	Doctor.getSome(query, function(err, items) {
 		if (err) {
       		return res.status(500).send(err.errmsg);
