@@ -52,7 +52,12 @@ exports.postReviewInfo = function (req, res) {
         if (req.body.reviewContent !== null && req.body.reviewContent !== '' && req.body.reviewContent !== undefined) {
             upObj['reviewContent'] = req.body.reviewContent;
         }
-        var opts = {new: true};
+        var opts = {
+          new: true, 
+          fields: {
+            'class_info':0, 'VIP':0, 'doctors':0, 'diagnosisInfo':0
+          }
+        };
         Alluser.updateOne(queryDoctor, upObj, function (err, upReview) {
           if (err) {
             return res.status(500).send(err);
