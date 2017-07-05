@@ -77,9 +77,9 @@ module.exports = function(app,webEntry, acl) {
 
   // gy
   //review
-  app.post(version + '/review/reviewInfo', reviewCtrl.postReviewInfo);
-  app.get(version + '/review/certificate', reviewCtrl.getCertificate);
-  app.get(version + '/review/reviewInfo', reviewCtrl.getReviewInfo);
+  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo);
+  app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate);
+  app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo);
 
 };
 
