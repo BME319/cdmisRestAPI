@@ -137,7 +137,7 @@ exports.getReviewInfo = function (req, res) {
   var opts = {limit: limit, skip:skip};
   var fields = {
     'userId':1, 'name':1, 'gender':1, 'birthday':1, 'province':1, 'city':1, 'workUnit':1, 
-    'department':1, 'title':1, 'IDNo':1, 'registerTime':1, 'reviewStatus':1, 'reviewDate':1, 
+    'department':1, 'title':1, 'IDNo':1, 'reviewStatus':1, 'reviewDate':1, 
     'adminId':1, 'reviewContent':1, 'phoneNo':1, 'role':1, 'creationTime':1
   };
   var populate = {'path':'adminId', 'select':{'userId':1, 'name':1}};
