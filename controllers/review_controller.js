@@ -7,6 +7,7 @@ var	config = require('../config'),
 	Counsel = require('../models/counsel'), 
 	Comment = require('../models/comment'), 
 	User = require('../models/user'), 
+  Alluser = require('../models/alluser'), 
 	commonFunc = require('../middlewares/commonFunc');
 
 var async = require('async')
@@ -20,7 +21,7 @@ exports.postReviewInfo = function (req, res) {
     return res.status(412).json({results: '请填写reviewerId'});
   }
   var queryReviewer = {userId: req.body.reviewerId};
-  User.getOne(queryReviewer, function (err, reviewItem) {
+  Alluser.getOne(queryReviewer, function (err, reviewItem) {
     if (err) {
       return res.status(500).send(err);
     }
