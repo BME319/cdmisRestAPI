@@ -1,83 +1,77 @@
 
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 var dictRoleSchema = new mongoose.Schema({
-	code: String,
-	name:String,
-	sortNo:Number,
-	description:String,
-	invalidFlag:Number,
+  code: String,
+  name: String,
+  sortNo: Number,
+  description: String,
+  invalidFlag: Number
 
+})
 
-});
+dictRoleModel = mongoose.model('dictRole', dictRoleSchema)
 
-
-dictRoleModel = mongoose.model('dictRole', dictRoleSchema);
-
-function DictRole(dictRole) {
-	this.dictRole = dictRole;
+function DictRole (dictRole) {
+  this.dictRole = dictRole
 }
 
-DictRole.prototype.save = function(callback) {
-	var dictRole = this.dictRole;
-	var newDictRole = new dictRoleModel(dictRole);
-	newDictRole.save(function(err, item) {
-		if (err) {
-			return callback(err);
-		}
-		callback(null, item);
-	});
+DictRole.prototype.save = function (callback) {
+  var dictRole = this.dictRole
+  var newDictRole = new dictRoleModel(dictRole)
+  newDictRole.save(function (err, item) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, item)
+  })
 }
 
-DictRole.getOne = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
+DictRole.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var fields = fields || null
+  var populate = populate || ''
 
-	dictRoleModel
+  dictRoleModel
 		.findOne(query, fields, opts)
 		.populate(populate)
-		.exec(function(err, item) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, item);
-		});
-};
+		.exec(function (err, item) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, item)
+})
+}
 
+DictRole.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var fields = fields || null
+  var populate = populate || ''
 
-DictRole.getSome = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
-
-	dictRoleModel
+  dictRoleModel
 		.find(query, fields, options)
 		.populate(populate)
-		.exec(function(err, items) {
-			if(err) {
-				return callback(err);
-			}
-			callback(null, items);
-		});
-};
+		.exec(function (err, items) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, items)
+})
+}
 
-DictRole.updateOne = function(query, obj, callback, opts, populate) {
-	var options = opts || {};
-	var populate = populate || '';
+DictRole.updateOne = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var populate = populate || ''
 
-	dictRoleModel
+  dictRoleModel
 		.findOneAndUpdate(query, obj, options)
 		.populate(populate)
-		.exec(function(err, updata) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, updata);
-		});
-};
+		.exec(function (err, updata) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, updata)
+})
+}
 
-
-
-
-module.exports = DictRole;
+module.exports = DictRole

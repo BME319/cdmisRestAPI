@@ -1,110 +1,107 @@
 
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
-var dpRelationSchema = new mongoose.Schema({					
-	doctorId: {type: mongoose.Schema.Types.ObjectId, ref:'doctor'}, 
-	patients: [
+var dpRelationSchema = new mongoose.Schema({
+  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
+  patients: [
 	  {
-	  	_id:0, 
-	  	patientId: {type: mongoose.Schema.Types.ObjectId, ref:'patient'}, 
+	  	_id: 0,
+	  	patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'patient'},
 	  	labels: [String],
-	  	dpRelationTime:Date
+	  	dpRelationTime: Date
 	  }
-	], 
-	doctors: [
+  ],
+  doctors: [
 	  {
-	  	_id:0, 
-	  	doctorId: {type: mongoose.Schema.Types.ObjectId, ref:'doctor'}, 
+	  	_id: 0,
+	  	doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
 	  	lastTalkTime: Date
 	  }
-	], 
-	revisionInfo:{
-		operationTime:Date,
-		userId:String,
-		userName:String,
-		terminalIP:String
-	}
-});
+  ],
+  revisionInfo: {
+    operationTime: Date,
+    userId: String,
+    userName: String,
+    terminalIP: String
+  }
+})
 
+var dpRelationModel = mongoose.model('dpRelation', dpRelationSchema)
 
-var dpRelationModel = mongoose.model('dpRelation', dpRelationSchema);
-
-function DpRelation(dpRelation) {
-	this.dpRelation = dpRelation;
+function DpRelation (dpRelation) {
+  this.dpRelation = dpRelation
 }
 
-DpRelation.prototype.save = function(callback) {
-	var dpRelation = this.dpRelation;
-	var newDpRelation = new dpRelationModel(dpRelation);
-	newDpRelation.save(function(err, dpRelationItem) {
-		if (err) {
-			return callback(err);
-		}
-		callback(null, dpRelationItem);
-	});
+DpRelation.prototype.save = function (callback) {
+  var dpRelation = this.dpRelation
+  var newDpRelation = new dpRelationModel(dpRelation)
+  newDpRelation.save(function (err, dpRelationItem) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, dpRelationItem)
+  })
 }
 
-DpRelation.getOne = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
+DpRelation.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var fields = fields || null
+  var populate = populate || ''
 
-	dpRelationModel
+  dpRelationModel
 		.findOne(query, fields, opts)
 		.populate(populate)
-		.exec(function(err, dpRelationInfo) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, dpRelationInfo);
-		});
-};
+		.exec(function (err, dpRelationInfo) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, dpRelationInfo)
+})
+}
 
-
-DpRelation.getSome = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
-	dpRelationModel
+DpRelation.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var fields = fields || null
+  var populate = populate || ''
+  dpRelationModel
 		.find(query, fields, options)
 		.populate(populate)
-		.exec(function(err, dpRelations) {
-			if(err) {
-				return callback(err);
-			}
-			callback(null, dpRelations);
-		});
-};
+		.exec(function (err, dpRelations) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, dpRelations)
+})
+}
 
-DpRelation.updateOne = function(query, obj, callback, opts, populate) {
-	var options = opts || {};
-	var populate = populate || '';
+DpRelation.updateOne = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var populate = populate || ''
 
-	dpRelationModel
+  dpRelationModel
 		.findOneAndUpdate(query, obj, options)
 		.populate(populate)
-		.exec(function(err, updpRelation) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, updpRelation);
-		});
-};
+		.exec(function (err, updpRelation) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, updpRelation)
+})
+}
 
 DpRelation.update = function (query, obj, callback, opts, populate) {
-  var options = opts || {};
-  var populate = populate || '';
+  var options = opts || {}
+  var populate = populate || ''
 
   dpRelationModel
   	.update(query, obj, options)
-  	.populate(populate) 
+  	.populate(populate)
   	.exec(function (err, updpRelation) {
     	if (err) {
-      		return callback(err);
+      		return callback(err)
     	}
-    callback(null, updpRelation);
-  });
-};
+    callback(null, updpRelation)
+  })
+}
 
-module.exports = DpRelation;
-
+module.exports = DpRelation

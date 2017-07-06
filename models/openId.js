@@ -1,115 +1,110 @@
 
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
-var openIdSchema = new mongoose.Schema({					
-	doctorUserId: String, 
-	patientOpenId: {type: String}, 
-	time: Date,
-	patientType: Number
+var openIdSchema = new mongoose.Schema({
+  doctorUserId: String,
+  patientOpenId: {type: String},
+  time: Date,
+  patientType: Number
 
-});
+})
 
+var openIdModel = mongoose.model('openId', openIdSchema)
 
-var openIdModel = mongoose.model('openId', openIdSchema);
-
-function OpenId(openId) {
-	this.openId = openId;
+function OpenId (openId) {
+  this.openId = openId
 }
 
-OpenId.prototype.save = function(callback) {
-	var openId = this.openId;
-	var newOpenId = new openIdModel(openId);
-	newOpenId.save(function(err, openIdItem) {
-		if (err) {
-			return callback(err);
-		}
-		callback(null, openIdItem);
-	});
+OpenId.prototype.save = function (callback) {
+  var openId = this.openId
+  var newOpenId = new openIdModel(openId)
+  newOpenId.save(function (err, openIdItem) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, openIdItem)
+  })
 }
 
-OpenId.getOne = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
+OpenId.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var fields = fields || null
+  var populate = populate || ''
 
-	openIdModel
+  openIdModel
 		.findOne(query, fields, opts)
 		.populate(populate)
-		.exec(function(err, openIdInfo) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, openIdInfo);
-		});
-};
+		.exec(function (err, openIdInfo) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, openIdInfo)
+})
+}
 
-
-OpenId.getSome = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
-	openIdModel
+OpenId.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var fields = fields || null
+  var populate = populate || ''
+  openIdModel
 		.find(query, fields, options)
 		.populate(populate)
-		.exec(function(err, openIds) {
-			if(err) {
-				return callback(err);
-			}
-			callback(null, openIds);
-		});
-};
+		.exec(function (err, openIds) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, openIds)
+})
+}
 
-OpenId.updateOne = function(query, obj, callback, opts, populate) {
-	var options = opts || {};
-	var populate = populate || '';
+OpenId.updateOne = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var populate = populate || ''
 
-	openIdModel
+  openIdModel
 		.findOneAndUpdate(query, obj, options)
 		.populate(populate)
-		.exec(function(err, upopenId) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, upopenId);
-		});
-};
+		.exec(function (err, upopenId) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, upopenId)
+})
+}
 
 OpenId.update = function (query, obj, callback, opts, populate) {
-  var options = opts || {};
-  var populate = populate || '';
+  var options = opts || {}
+  var populate = populate || ''
 
   openIdModel
   	.update(query, obj, options)
-  	.populate(populate) 
+  	.populate(populate)
   	.exec(function (err, upopenId) {
     	if (err) {
-      		return callback(err);
+      		return callback(err)
     	}
-    callback(null, upopenId);
-  });
-};
+    callback(null, upopenId)
+  })
+}
 
-OpenId.removeOne = function(query, callback, opts) {
-	var options = opts || {};
+OpenId.removeOne = function (query, callback, opts) {
+  var options = opts || {}
 
-	openIdModel
-		.findOneAndRemove(query, options, function(err, item) {
-			if (err) {
-				return callback(err);
-			}
-			callback(null, item);
-		});
-};
+  openIdModel
+		.findOneAndRemove(query, options, function (err, item) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, item)
+})
+}
 
-OpenId.remove = function(query, callback) {
-	
-	openIdModel
+OpenId.remove = function (query, callback) {
+  openIdModel
 		.remove(query)
-		.exec(function(err) {
-			callback(err);
-		});
-};
+		.exec(function (err) {
+  callback(err)
+})
+}
 
-
-module.exports = OpenId;
-
+module.exports = OpenId
