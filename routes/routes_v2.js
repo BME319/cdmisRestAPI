@@ -23,6 +23,7 @@ var aclsettingCtrl = require('../controllers_v2/aclsetting_controller'),
     alluserCtrl = require('../controllers_v2/alluser_controller');
 
 var reviewCtrl = require('../controllers_v2/review_controller');
+var labtestImportCtrl = require('../controllers_v2/labtestImport_controller');
 
 module.exports = function(app,webEntry, acl) {
 
@@ -80,6 +81,9 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo);
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate);
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo);
+
+  //labtestImport
+  app.get(version + '/labtestImport/listByStatus', labtestImportCtrl.listByStatus);
 
 };
 
