@@ -90,29 +90,29 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/compliance',  complianceCtrl.getComplianceByDay);
 
   // wf
-  app.get(version + '/alluser/userList', alluserCtrl.getAlluserList(0));
-  app.get(version + '/alluser/doctorList', alluserCtrl.getAlluserList(1));
-  app.get(version + '/alluser/patientList', alluserCtrl.getAlluserList(2));
-  app.get(version + '/alluser/nurseList', alluserCtrl.getAlluserList(3));
-  app.get(version + '/alluser/insuranceList', alluserCtrl.getAlluserList(4));
-  app.get(version + '/alluser/healthList', alluserCtrl.getAlluserList(5));
-  app.get(version + '/alluser/adminList', alluserCtrl.getAlluserList(6));
+  app.get(version + '/alluser/userList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(0));
+  app.get(version + '/alluser/doctorList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(1));
+  app.get(version + '/alluser/patientList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(2));
+  app.get(version + '/alluser/nurseList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(3));
+  app.get(version + '/alluser/insuranceList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(4));
+  app.get(version + '/alluser/healthList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(5));
+  app.get(version + '/alluser/adminList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(6));
 
-  app.post(version + '/alluser/alluser', alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList);
+  app.post(version + '/alluser/alluser',  tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList);
 
-  app.post(version + '/alluser/register', alluserCtrl.registerTest(acl),getNoMid.getNo(1), alluserCtrl.register(acl));
-  app.post(version + '/alluser/cancelUser', alluserCtrl.checkAlluser,alluserCtrl.cancelAlluser);
-  app.post(version + '/alluser/unionid', alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes);
-  app.post(version + '/alluser/openId', alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId);
-  app.get(version + '/alluser/openId', alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId);
-  app.post(version + '/alluser/reset', alluserCtrl.reset);
-  app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest,alluserCtrl.checkBinding,alluserCtrl.login);
-  app.post(version + '/alluser/logout',  alluserCtrl.logout);
-  app.get(version + '/alluser/userID',  alluserCtrl.getAlluserID);
-  app.post(version + '/alluser/sms',  alluserCtrl.sendSMS);
-  app.get(version + '/alluser/sms',  alluserCtrl.verifySMS);
-  app.get(version + '/alluser/agreement',  alluserCtrl.getAlluserAgreement);
-  app.post(version + '/alluser/agreement',  alluserCtrl.updateAlluserAgreement);
+  app.post(version + '/alluser/register',  tokenManager.verifyToken(), alluserCtrl.registerTest(acl),getNoMid.getNo(1), alluserCtrl.register(acl));
+  app.post(version + '/alluser/cancelUser',  tokenManager.verifyToken(), alluserCtrl.checkAlluser,alluserCtrl.cancelAlluser);
+  app.post(version + '/alluser/unionid',  tokenManager.verifyToken(), alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes);
+  app.post(version + '/alluser/openId',  tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId);
+  app.get(version + '/alluser/openId',  tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId);
+  app.post(version + '/alluser/reset',  tokenManager.verifyToken(), alluserCtrl.reset);
+  app.post(version + '/alluser/login',  tokenManager.verifyToken(), alluserCtrl.openIdLoginTest,alluserCtrl.checkBinding,alluserCtrl.login);
+  app.post(version + '/alluser/logout',   tokenManager.verifyToken(), alluserCtrl.logout);
+  app.get(version + '/alluser/userID',   tokenManager.verifyToken(), alluserCtrl.getAlluserID);
+  app.post(version + '/alluser/sms',   tokenManager.verifyToken(), alluserCtrl.sendSMS);
+  app.get(version + '/alluser/sms',   tokenManager.verifyToken(), alluserCtrl.verifySMS);
+  app.get(version + '/alluser/agreement',   tokenManager.verifyToken(), alluserCtrl.getAlluserAgreement);
+  app.post(version + '/alluser/agreement',   tokenManager.verifyToken(), alluserCtrl.updateAlluserAgreement);
 
   //***********************************************************************************************//
   app.get(version + '/user/userList', userCtrl.getUserList(acl));
