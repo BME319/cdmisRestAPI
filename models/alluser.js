@@ -114,6 +114,18 @@ var alluserSchema = new mongoose.Schema({
 		hospital: String, 
 		diagnosis: String
 	}, 
+	//健康专员录入时需要的字段，属于patient信息
+	//化验结果是否录入，0未录入，1已录入
+	labtestImportStatus: {type:Number, default:1}, 
+	//最早的上传图片的时间
+	earliestUploadTime: {type: Date}, 
+	//最近一次的录入人
+	latestImportUserId: {type: mongoose.Schema.Types.ObjectId, ref:'alluser'}, 
+	//最近一次录入日期
+	latestImportDate: Date, 
+	//图片上传日期
+	latestUploadTime: Date, 
+
 	workAmounts:Number, //工作量
 	boardingTime:Date,//入职时间
 	creationTime:Date,//创建时间
