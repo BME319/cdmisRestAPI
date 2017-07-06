@@ -267,13 +267,14 @@ exports.getAlluserList = function( role) {
     return function(req, res){
         var query = {'invalidFlag':0};
         var fields = {'_id':0};//, 'revisionInfo':0
-        var opts = {limit: limit, skip:skip, sort:'_id'};
-
+        
         var limit = Number(req.query.limit);
         var skip = Number(req.query.skip);
+        var opts = {limit: limit, skip:skip, sort:'_id'};
 
         var _uid = req.query.userId;
         var _role = role;
+  
         //role 0-user 1-doctor 2-patient 3-nurse 4-insurance 5-health 6-admin
         if(_uid !== null && _uid !== undefined && _uid !== "" ){
             query["userId"]=_uid;
@@ -327,10 +328,8 @@ exports.getAlluserList = function( role) {
         }
 		//通过子表查询主表，定义主表查询路径及输出内容
 		// var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
-
+        // console.log(query);
 		Alluser.getSome(query, function(err, userlist) {
-			// var users = new Array(userlist.length);
-			var users = [];
 		    if (err) {
 		        return res.status(500).send(err.errmsg);
 		    }
