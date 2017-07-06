@@ -45,7 +45,7 @@ exports.getLoginParam = function(req, res){
 	res.json({results: results});
 }
 
-function getSign = function(appkey, appsecret, atime){
+function getSign(appkey, appsecret, atime){
 	var step1 = appkey + ':' + appsecret;
 	var step2 = commonFunc.convertToMD5(step1, true);
 	var step3 = step2.substring(8,24);
