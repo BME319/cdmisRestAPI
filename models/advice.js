@@ -1,98 +1,93 @@
 
-
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 var adviceSchema = new mongoose.Schema({
-	userId: String,	
-	role: {
-		type: String,
-		enum: ['doctor', 'patient']
-	}, 
-	time: Date, 
-	topic: String, 
-	content: String
-});
+  userId: String,
+  role: {
+    type: String,
+    enum: ['doctor', 'patient']
+  },
+  time: Date,
+  topic: String,
+  content: String
+})
 
+var adviceModel = mongoose.model('advice', adviceSchema)
 
-var adviceModel = mongoose.model('advice', adviceSchema);
-
-
-function Advice(advice) {
-	this.advice = advice;
+function Advice (advice) {
+  this.advice = advice
 }
 
-Advice.prototype.save = function(callback) {
-	var advice = this.advice;
-	var newAdvice = new adviceModel(advice);
-	newAdvice.save(function(err, adviceItem) {
-		if (err) {
-			return callback(err);
-		}
-		callback(null, adviceItem);
-	});
+Advice.prototype.save = function (callback) {
+  var advice = this.advice
+  var newAdvice = new adviceModel(advice)
+  newAdvice.save(function (err, adviceItem) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, adviceItem)
+  })
 }
 
-Advice.getOne = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
+Advice.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var fields = fields || null
+  var populate = populate || ''
 
-	adviceModel
+  adviceModel
 		.findOne(query, fields, opts)
 		.populate(populate)
-		.exec(function(err, adviceInfo) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, adviceInfo);
-		});
-};
+		.exec(function (err, adviceInfo) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, adviceInfo)
+})
+}
 
-
-Advice.getSome = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
-	adviceModel
+Advice.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var fields = fields || null
+  var populate = populate || ''
+  adviceModel
 		.find(query, fields, options)
 		.populate(populate)
-		.exec(function(err, advices) {
-			if(err) {
-				return callback(err);
-			}
-			callback(null, advices);
-		});
-};
+		.exec(function (err, advices) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, advices)
+})
+}
 
-Advice.updateOne = function(query, obj, callback, opts, populate) {
-	var options = opts || {};
-	var populate = populate || '';
+Advice.updateOne = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var populate = populate || ''
 
-	adviceModel
+  adviceModel
 		.findOneAndUpdate(query, obj, options)
 		.populate(populate)
-		.exec(function(err, upadvice) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, upadvice);
-		});
-};
+		.exec(function (err, upadvice) {
+  if (err) {
+    return callback(err)
+  }
+  callback(null, upadvice)
+})
+}
 
 Advice.update = function (query, obj, callback, opts, populate) {
-  	var options = opts || {};
-  	var populate = populate || '';
+  	var options = opts || {}
+  	var populate = populate || ''
 
   	adviceModel
   		.update(query, obj, options)
-  		.populate(populate) 
+  		.populate(populate)
   		.exec(function (err, upadvice) {
     		if (err) {
-      			return callback(err);
+      			return callback(err)
     		}
-    		callback(null, upadvice);
-  		});
-};
+    		callback(null, upadvice)
+  		})
+}
 
-
-module.exports = Advice;
+module.exports = Advice
