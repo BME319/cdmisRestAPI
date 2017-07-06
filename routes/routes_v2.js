@@ -20,6 +20,7 @@ var getNoMid = require('../middlewares/getNoMid'),
 
 // controllers
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller'),
+    niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller'),
     alluserCtrl = require('../controllers_v2/alluser_controller');
 
 var reviewCtrl = require('../controllers_v2/review_controller');
@@ -80,6 +81,9 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo);
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate);
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo);
+
+  // niaodaifu
+  app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam);
 
 };
 
