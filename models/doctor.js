@@ -43,6 +43,13 @@ var doctorSchema = new mongoose.Schema({
 			end: Date
 		}
 	], 
+	//状态定义：0未审核，1审核通过，2审核拒绝
+	reviewStatus: {type: Number, default: 0}, 
+	reviewDate: Date, 
+	reviewerId: {type: mongoose.Schema.Types.ObjectId, ref:'user'}, 
+	reviewContent: String, 
+	registerTime: Date, 
+	user_id: {type: mongoose.Schema.Types.ObjectId, ref:'user'}, 
 	revisionInfo:{
 		operationTime:Date,
 		userId:String,

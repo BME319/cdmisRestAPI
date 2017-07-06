@@ -22,13 +22,12 @@ var getNoMid = require('../middlewares/getNoMid'),
 var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
 
     userCtrl = require('../controllers/user_controller'),
-    alluserCtrl = require('../controllers/alluser_controller'),
     healthInfoCtrl = require('../controllers/healthInfo_controller'),
     dictNumberCtrl = require('../controllers/dictNumber_controller'),
     loadCtrl = require('../controllers/load_controller');
 
   
-    dictTypeOneCtrl = require('../controllers/dictTypeOne_controller'),
+var dictTypeOneCtrl = require('../controllers/dictTypeOne_controller'),
     dictDistrictCtrl = require('../controllers/dictDistrict_controller'),
     dictHospitalCtrl = require('../controllers/dictHospital_controller'),
     taskCtrl = require('../controllers/task_controller'),
@@ -36,7 +35,7 @@ var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
     complianceCtrl = require('../controllers/compliance_controller'),
     jpushCtrl = require('../controllers/jpush_controller'),
     devicedataCtrl = require('../controllers/devicedata_controller'),
-    aclsettingCtrl = require('../controllers/aclsetting_controller'),
+    // aclsettingCtrl = require('../controllers/aclsetting_controller'),
     versionCtrl = require('../controllers/version_controller');
 
 
@@ -52,6 +51,7 @@ var doctorCtrl = require('../controllers/doctor_controller'),
     communicationCtrl = require('../controllers/communication_controller'), 
     messageCtrl = require('../controllers/message_controller'), 
     newsCtrl = require('../controllers/news_controller'), 
+    reviewCtrl = require('../controllers/review_controller'), 
     insuranceCtrl = require('../controllers/insurance_controller');
 var getQRcodeCtrl = require('../controllers/getQRcode');
 var labtestResultCtrl = require('../controllers/labtestResult_controller');
@@ -90,33 +90,7 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/compliance',  complianceCtrl.getComplianceByDay);
 
   // wf
-  app.get(version + '/alluser/userList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(0));
-  app.get(version + '/alluser/doctorList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(1));
-  app.get(version + '/alluser/patientList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(2));
-  app.get(version + '/alluser/nurseList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(3));
-  app.get(version + '/alluser/insuranceList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(4));
-  app.get(version + '/alluser/healthList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(5));
-  app.get(version + '/alluser/adminList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(6));
 
-  app.post(version + '/alluser/alluser',  tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList);
-
-  app.post(version + '/alluser/register',  tokenManager.verifyToken(), alluserCtrl.registerTest(acl),getNoMid.getNo(1), alluserCtrl.register(acl));
-  app.post(version + '/alluser/cancelUser',  tokenManager.verifyToken(), alluserCtrl.checkAlluser,alluserCtrl.cancelAlluser);
-  app.post(version + '/alluser/unionid',  tokenManager.verifyToken(), alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes);
-  app.post(version + '/alluser/openId',  tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId);
-  app.get(version + '/alluser/openId',  tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId);
-  app.post(version + '/alluser/reset',  tokenManager.verifyToken(), alluserCtrl.reset);
-  app.post(version + '/alluser/login',  tokenManager.verifyToken(), alluserCtrl.openIdLoginTest,alluserCtrl.checkBinding,alluserCtrl.login);
-  app.post(version + '/alluser/logout',   tokenManager.verifyToken(), alluserCtrl.logout);
-  app.get(version + '/alluser/userID',   tokenManager.verifyToken(), alluserCtrl.getAlluserID);
-  app.post(version + '/alluser/sms',   tokenManager.verifyToken(), alluserCtrl.sendSMS);
-  app.get(version + '/alluser/sms',   tokenManager.verifyToken(), alluserCtrl.verifySMS);
-  app.get(version + '/alluser/agreement',   tokenManager.verifyToken(), alluserCtrl.getAlluserAgreement);
-  app.post(version + '/alluser/agreement',   tokenManager.verifyToken(), alluserCtrl.updateAlluserAgreement);
-
-  //***********************************************************************************************//
-  app.get(version + '/user/userList', userCtrl.getUserList(acl));
-  app.post(version + '/user/cancelUser', userCtrl.checkUser,userCtrl.cancelUser);
   // -------------------------------------------- 注册时如何验证用户 ------------------------------------------------------
   app.post(version + '/user/register', userCtrl.registerTest,getNoMid.getNo(1), userCtrl.register);
   // -------------------------------------------------------------------------------------------------------------------
@@ -142,8 +116,6 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/user/sms',  userCtrl.verifySMS);
   app.get(version + '/user/agreement',  userCtrl.getUserAgreement);
   app.post(version + '/user/agreement',  userCtrl.updateUserAgreement);
-
-  //***************************************************************************************************//
   app.get(version + '/healthInfo/healthInfos',  healthInfoCtrl.getAllHealthInfo);
   app.get(version + '/healthInfo/healthDetail',  healthInfoCtrl.getHealthDetail);
   app.post(version + '/healthInfo/healthInfo',  healthInfoCtrl.insertHealthInfo);
@@ -183,8 +155,6 @@ module.exports = function(app,webEntry, acl) {
 
   app.get(version + '/doctor/AliPayAccount', doctorCtrl.getAliPayAccount);
   app.post(version + '/doctor/AliPayAccount', doctorCtrl.editAliPayAccount);
-
-  app.get(version + '/doctor/Doctors', doctorCtrl.getDoctors);
 
   //counsel
   app.get(version + '/counsel/counsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
@@ -287,6 +257,11 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/advice/postAdvice',  adviceCtrl.postAdvice);
   app.get(version + '/advice/getAdvice',  adviceCtrl.getAdvice);
 
+  //review
+  app.post(version + '/review/reviewInfo', reviewCtrl.postReviewInfo);
+  app.get(version + '/review/certificate', reviewCtrl.getCertificate);
+  app.get(version + '/review/reviewInfo', reviewCtrl.getReviewInfo);
+
   //labtestResult
   app.post(version + '/labtestResult/post',  labtestResultCtrl.postLabtestResult);
   app.post(version + '/labtestResult/update',  labtestResultCtrl.updateLabtestResult);
@@ -376,24 +351,24 @@ module.exports = function(app,webEntry, acl) {
   //   res.send("Get User: " + req.param("userid"));
   // });
 
-  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl));
-  app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl));
-  app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl));
-  app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl));
+  // app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl));
+  // app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl));
+  // app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl));
+  // app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl));
 
-  app.get(version + '/acl/roleUsers', tokenManager.verifyToken(), aclsettingCtrl.roleUsers(acl)); 
-  app.post(version + '/acl/roleParents', tokenManager.verifyToken(), aclsettingCtrl.addRoleParents(acl));
-  app.post(version + '/acl/removeRoleParents', tokenManager.verifyToken(), aclsettingCtrl.removeRoleParents(acl));
-  app.post(version + '/acl/removeRole', tokenManager.verifyToken(), aclsettingCtrl.removeRole(acl));
+  // app.get(version + '/acl/roleUsers', tokenManager.verifyToken(), aclsettingCtrl.roleUsers(acl)); 
+  // app.post(version + '/acl/roleParents', tokenManager.verifyToken(), aclsettingCtrl.addRoleParents(acl));
+  // app.post(version + '/acl/removeRoleParents', tokenManager.verifyToken(), aclsettingCtrl.removeRoleParents(acl));
+  // app.post(version + '/acl/removeRole', tokenManager.verifyToken(), aclsettingCtrl.removeRole(acl));
   
-  app.post(version + '/acl/allow', tokenManager.verifyToken(), aclsettingCtrl.allow(acl));
-  app.post(version + '/acl/removeAllow', tokenManager.verifyToken(), aclsettingCtrl.removeAllow(acl));  
-  app.get(version + '/acl/allow', tokenManager.verifyToken(), aclsettingCtrl.allowedPermissions(acl));
-  app.get(version + '/acl/isAllowed', tokenManager.verifyToken(), aclsettingCtrl.isAllowed(acl));
+  // app.post(version + '/acl/allow', tokenManager.verifyToken(), aclsettingCtrl.allow(acl));
+  // app.post(version + '/acl/removeAllow', tokenManager.verifyToken(), aclsettingCtrl.removeAllow(acl));  
+  // app.get(version + '/acl/allow', tokenManager.verifyToken(), aclsettingCtrl.allowedPermissions(acl));
+  // app.get(version + '/acl/isAllowed', tokenManager.verifyToken(), aclsettingCtrl.isAllowed(acl));
 
-  app.post(version + '/acl/removeResource', tokenManager.verifyToken(), aclsettingCtrl.removeResource(acl));
-  app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl));
-  app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl));
+  // app.post(version + '/acl/removeResource', tokenManager.verifyToken(), aclsettingCtrl.removeResource(acl));
+  // app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl));
+  // app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl));
 
   app.post(version + '/devicedata/BPDevice/binding', devicedataCtrl.bindingDevice);
   app.post(version + '/devicedata/BPDevice/debinding', devicedataCtrl.debindingDevice);
