@@ -28,8 +28,10 @@ exports.getLoginParam = function(req, res){
 	}
 	
 	// var atime = new Date().getTime();
-	var atime = Date.parse(new Date());  
+	var atime = Date.parse(new Date()); 
+	// console.log(atime); 
 	atime = atime / 1000;  
+	// console.log(atime);
 	var mode = 1;
 	var redirect_uri = req.query.redirect_uri || 'http://121.43.107.106:4060';
 	var sign = getSign(appkey, appsecret, atime);
@@ -45,10 +47,13 @@ exports.getLoginParam = function(req, res){
 	res.json({results: results});
 }
 
-function getSign = function(appkey, appsecret, atime){
+function getSign(appkey, appsecret, atime){
 	var step1 = appkey + ':' + appsecret;
 	var step2 = commonFunc.convertToMD5(step1, true);
 	var step3 = step2.substring(8,24);
+	console.log(step1);
+	console.log(step2);
+	console.log(step3);
 	var step4 = step3 + ':' + atime;
 	var step5 = commonFunc.convertToMD5(step4, true);
 	return step5;

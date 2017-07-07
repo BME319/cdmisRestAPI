@@ -20,6 +20,7 @@ var getNoMid = require('../middlewares/getNoMid'),
 
 // controllers
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller'),
+    niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller'),
     alluserCtrl = require('../controllers_v2/alluser_controller');
 
 var reviewCtrl = require('../controllers_v2/review_controller');
@@ -61,7 +62,7 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/alluser/adminList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(6));
   app.post(version + '/alluser/alluser',  tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList);
   
-  app.post(version + '/alluser/register',  tokenManager.verifyToken(), alluserCtrl.registerTest(acl),getNoMid.getNo(1), alluserCtrl.register(acl));
+  app.post(version + '/alluser/register', alluserCtrl.registerTest(acl),getNoMid.getNo(1), alluserCtrl.register(acl));
   app.post(version + '/alluser/cancelUser',  tokenManager.verifyToken(), alluserCtrl.checkAlluser,alluserCtrl.cancelAlluser);
   app.post(version + '/alluser/unionid',  tokenManager.verifyToken(), alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes);
   app.post(version + '/alluser/openId',  tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId);
@@ -80,6 +81,9 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo);
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate);
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo);
+
+  // niaodaifu
+  app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam);
 
 };
 
