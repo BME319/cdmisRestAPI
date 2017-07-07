@@ -51,7 +51,7 @@ exports.getCounsels = function(req, res) {
 	if (_name) {
 		populate['match'] = {'name': nameReg};
 	}
-	console.log(populate)
+	// console.log(populate)
 	Counsel.getSome(query, function(err, item) {
 		if (err) {
       		return res.status(500).send(err.errmsg);
