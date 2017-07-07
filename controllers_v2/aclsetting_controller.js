@@ -279,11 +279,11 @@ exports.whatResources = function (acl) {
       })
     } else if (roles) {
 // Returns what resources a given role has permissions over.
-      acl.whatResources(roles, function (err, res_perm) {
+      acl.whatResources(roles, function (err, resPerm) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
-        res.json({results: {status: 1, msg: 'success', res_perm: res_perm}})
+        res.json({results: {status: 1, msg: 'success', resPerm: resPerm}})
       })
     } else {
       return res.status(400).send('empty inputs')
