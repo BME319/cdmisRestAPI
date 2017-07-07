@@ -804,6 +804,7 @@ exports.messageTemplate = function(req, res) {
           if(item.MessageOpenId === null){
             return res.status(400).send('openId do not exist');
           }
+          var messageOpenId;
           if(role == 'doctor'){
             messageOpenId = item.MessageOpenId.doctorWechat;
           }
