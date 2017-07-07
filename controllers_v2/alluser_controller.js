@@ -264,6 +264,7 @@ exports.cancelAlluser = function(req, res) {
     changeAlluserInvalidFlag(req, res,1);
 }
 exports.getAlluserList = function( role) {
+    // console.log(1);
     return function(req, res){
         var query = {'invalidFlag':0};
         var fields = {'_id':0};//, 'revisionInfo':0
@@ -287,6 +288,7 @@ exports.getAlluserList = function( role) {
             fields["role"] = 1;
         }
         if(_role === 1){
+            query["$or"] = [{"role":"doctor"},{"role":"Leader"},{"role":"master"}];
             fields["workUnit"] = 1;
             fields["department"] = 1;
             fields["title"] = 1;
@@ -297,6 +299,7 @@ exports.getAlluserList = function( role) {
             fields["major"] = 1;
         }
         if(_role === 2){
+            query["role"] = "patient";
             fields["VIP"] = 1;
             fields["IDNo"] = 1;
             fields["class"] = 1;
@@ -309,33 +312,37 @@ exports.getAlluserList = function( role) {
             fields["allergic"] = 1;
         }
         if(_role === 3){
+            query["role"] = "nurse";
             fields["workUnit"] = 1;
             fields["department"] = 1;
             fields["workAmounts"] = 1;
         }
         if(_role === 4){
+            query["$or"] = [{"role":"insuranceA"},{"role":"insuranceR"},{"role":"insuranceC"}];
             fields["boardingTime"] = 1;
             fields["role"] = 1;
             fields["workAmounts"] = 1;
         }
         if(_role === 5){
+            query["role"] = "health";
             fields["boardingTime"] = 1;
             fields["workAmounts"] = 1;
         }
         if(_role === 6){
+            query["role"] = "admin";
             fields["workUnit"] = 1;
             fields["creationTime"] = 1;
         }
-		//通过子表查询主表，定义主表查询路径及输出内容
-		// var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
+        //通过子表查询主表，定义主表查询路径及输出内容
+        // var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
         // console.log(query);
-		Alluser.getSome(query, function(err, userlist) {
-		    if (err) {
-		        return res.status(500).send(err.errmsg);
-		    }
-		    res.json({results: userlist});
-		}, opts, fields);
-	};
+        Alluser.getSome(query, function(err, userlist) {
+            if (err) {
+                return res.status(500).send(err.errmsg);
+            }
+            res.json({results: userlist});
+        }, opts, fields);
+    };
 }
 
 exports.updateAlluserList = function(req, res){
