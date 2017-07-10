@@ -1334,3 +1334,51 @@ exports.checkAlluser = function (req, res, next) {
     }
   })
 }
+
+exports.changerole = function (req, res) {
+  var userId = req.body.userId
+  var roles = req.body.roles
+  var _type = req.type
+  var query = {userId: userId}
+    // var _userNo = req.newId
+  Alluser.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    if (item != null) {
+      var query1 = {userId: userId, role: roles}
+      Alluser.getOne(query1, function (err, item1) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item1 != null) {
+          if (_type === 2) {
+            Alluser.updateOne(query, {$pull: { role: roles }}, function (err, item2) {
+              if (err) {
+                return res.status(500).send(err.errmsg)
+              }
+              return res.json({results: 0, userNo: item.userId, mesg: 'User Register Success!'})
+            })
+          }
+          if (_type === 1) {
+            return res.json({results: 1, userNo: userId, mesg: 'User Role Already Exist!'})
+          }
+        } else {
+          if (_type === 2) {
+            return res.status(405).send('no such role to delete!')
+          }
+          if (_type === 1) {
+            Alluser.updateOne(query, {$push: { role: roles }}, function (err, item2) {
+              if (err) {
+                return res.status(500).send(err.errmsg)
+              }
+              res.json({results: 0, userNo: item.userId, mesg: 'User Register Success!'})
+            })
+          }
+        }
+      })
+    } else {
+      return res.status(405).send('no such user!')
+    }
+  })
+}
