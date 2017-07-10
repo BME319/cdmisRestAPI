@@ -63,7 +63,7 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/alluser/adminList',  tokenManager.verifyToken(), alluserCtrl.getAlluserList(6));
   app.post(version + '/alluser/alluser',  tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList);
   
-  app.post(version + '/alluser/register',  tokenManager.verifyToken(), alluserCtrl.registerTest(acl),getNoMid.getNo(1), alluserCtrl.register(acl));
+  app.post(version + '/alluser/register', alluserCtrl.registerTest(acl),getNoMid.getNo(1), alluserCtrl.register(acl));
   app.post(version + '/alluser/cancelUser',  tokenManager.verifyToken(), alluserCtrl.checkAlluser,alluserCtrl.cancelAlluser);
   app.post(version + '/alluser/unionid',  tokenManager.verifyToken(), alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes);
   app.post(version + '/alluser/openId',  tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId);
