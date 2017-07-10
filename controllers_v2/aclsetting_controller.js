@@ -1,7 +1,7 @@
 
 // Adds roles to a given user id.
 exports.addUserRoles = function (acl) {
-  return function (req, res) {
+  return function (req, res, next) {
     var userId = req.body.userId
     var roles = req.body.roles
 
@@ -10,7 +10,9 @@ exports.addUserRoles = function (acl) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
-        res.json({results: {status: 1, msg: 'success'}})
+        req.type = 1
+        next()
+        // res.json({results: {status: 1, msg: 'success'}})
       })
     } else {
       return res.status(400).send('empty inputs')
@@ -20,7 +22,7 @@ exports.addUserRoles = function (acl) {
 
 // Remove roles from a given user.
 exports.removeUserRoles = function (acl) {
-  return function (req, res) {
+  return function (req, res, next) {
     var userId = req.body.userId
     var roles = req.body.roles
 
@@ -29,7 +31,9 @@ exports.removeUserRoles = function (acl) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
-        res.json({results: {status: 1, msg: 'success'}})
+        req.type = 2
+        next()
+        // res.json({results: {status: 1, msg: 'success'}})
       })
     } else {
       return res.status(400).send('empty inputs')
