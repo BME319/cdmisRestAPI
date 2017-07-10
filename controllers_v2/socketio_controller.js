@@ -2,6 +2,7 @@
 var request = require('request')
 var webEntry = require('../settings').webEntry
 
+<<<<<<< HEAD
 var wechatCtrl = require('../controllers/wechat_controller')
 
 var userWechatServer = {}
@@ -38,6 +39,26 @@ function messageSaveSend (data, url, sender) {
   var targetRole = data.msg.targetRole
 
   if (targetType == 'single') {         // 单聊
+=======
+var userWechatPatientServer = {}
+var userWechatPatientList = {}
+
+var userWechatDoctorServer = {}
+var userWechatDoctorList = {}
+
+var userAppPatientServer = {}
+var userAppPatientList = {}
+
+var userAppDoctorServer = {}
+var userAppDoctorList = {}
+
+function messageSaveSend (data, url, sender) {
+  var targetType = data.msg.targetType
+  var messageType
+  var targetRole = data.msg.targetRole
+
+  if (targetType === 'single') {         // 单聊
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     messageType = 1
   } else {       // 群聊
     messageType = 2
@@ -45,13 +66,22 @@ function messageSaveSend (data, url, sender) {
   var sendBy = data.msg.fromID
   var receiver = data.to
 
+<<<<<<< HEAD
   var url = url
   data.msg.content['src'] = url
+=======
+  var contentUrl = url
+  data.msg.content['src'] = contentUrl
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   data.msg.status = 'send_success'
   data.msg['time'] = Date.now()
 
     // save data
+<<<<<<< HEAD
   var url = 'http://' + webEntry.domain + ':4050/api/v1/communication/communication'
+=======
+  var reqUrl = 'http://' + webEntry.domain + ':4050/api/v1/communication/communication'
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   var jsondata = {
     messageType: messageType,
     sendBy: sendBy,
@@ -61,7 +91,11 @@ function messageSaveSend (data, url, sender) {
   }
   request({
         // url: url + '?token=' + req.query.token || req.body.token,
+<<<<<<< HEAD
     url: url,
+=======
+    url: reqUrl,
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     method: 'POST',
     body: jsondata,
     json: true
@@ -128,9 +162,15 @@ function messageSaveSend (data, url, sender) {
             // }
 
             /// send to receiver
+<<<<<<< HEAD
       if (targetRole == 'doctor') {
         sendToReceiver(messageType, receiver, sendBy, userAppDoctorServer, userWechatDoctorServer, data)
       } else if (targetRole == 'patient') {
+=======
+      if (targetRole === 'doctor') {
+        sendToReceiver(messageType, receiver, sendBy, userAppDoctorServer, userWechatDoctorServer, data)
+      } else if (targetRole === 'patient') {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         sendToReceiver(messageType, receiver, sendBy, userAppPatientServer, userWechatPatientServer, data)
       } else {
 
@@ -141,7 +181,11 @@ function messageSaveSend (data, url, sender) {
 
 function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWechatServer, data) {
   var online = false
+<<<<<<< HEAD
   if (messageType == 1) {       // 单聊
+=======
+  if (messageType === 1) {       // 单聊
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     if (userAppServer.hasOwnProperty(receiver)) {         // 用户在线
       online = true
             // console.log('getMsg: ' + receiver);
@@ -178,7 +222,11 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
           if (userAppServer.hasOwnProperty(members[idx].userId)) {         // 用户在线
             online = true
                         // console.log(member.userId);
+<<<<<<< HEAD
             if (members[idx].userId != sendBy) {
+=======
+            if (members[idx].userId !== sendBy) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                             // console.log(member.userId);
               userAppServer[members[idx].userId].emit('getMsg', {msg: data.msg})
             }
@@ -187,14 +235,22 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
           if (userWechatServer.hasOwnProperty(members[idx].userId)) {         // 用户在线
             online = true
                         // console.log(member.userId);
+<<<<<<< HEAD
             if (members[idx].userId != sendBy) {
+=======
+            if (members[idx].userId !== sendBy) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                             // console.log(member.userId);
               userWechatServer[members[idx].userId].emit('getMsg', {msg: data.msg})
             }
           }
           if (!online) {       // 用户不在线
                         // custom card 群发
+<<<<<<< HEAD
             if (data.msg.contentType == 'custom' && data.msg.content.type == 'card') {
+=======
+            if (data.msg.contentType === 'custom' && data.msg.content.type === 'card') {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                             // console.log('in');
               var actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_' + data.msg.content.consultationId + '_' + data.msg.teamId + '&#wechat_redirect'
 
@@ -266,6 +322,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
 // namespace chat
 exports.chat = function (io, socket) {
   socket.on('newUser', function (data) {
+<<<<<<< HEAD
     var nickname = data.user_name,
       user_id = data.user_id,
       client = data.client
@@ -276,12 +333,25 @@ exports.chat = function (io, socket) {
             // console.log("newUser @doctor:  "+ data.user_id);
       if (userAppDoctorServer[user_id] && userAppDoctorServer[user_id].id != socket.id) {
         userAppDoctorServer[user_id].emit('kick')
+=======
+    var nickname = data.user_name
+    var userId = data.user_id
+    var client = data.client
+
+        // socket.id = user_id;
+
+    if (client === 'doctor') {
+            // console.log("newUser @doctor:  "+ data.user_id);
+      if (userAppDoctorServer[userId] && userAppDoctorServer[userId].id !== socket.id) {
+        userAppDoctorServer[userId].emit('kick')
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                 // if(user_id == 'U201705120004'){
                 //     console.log('old:  '+userAppDoctorServer[user_id].id);
                 //     console.log(socket.id);
                 // }
       }
             // if(user_id == 'U201705120004') console.log('new:  '+socket.id);
+<<<<<<< HEAD
       socket.id = user_id
       userAppDoctorServer[user_id] = socket
       userAppDoctorList[user_id] = nickname
@@ -306,6 +376,32 @@ exports.chat = function (io, socket) {
       socket.id = user_id
       userWechatPatientServer[user_id] = socket
       userWechatPatientList[user_id] = nickname
+=======
+      socket.id = userId
+      userAppDoctorServer[userId] = socket
+      userAppDoctorList[userId] = nickname
+    } else if (client === 'patient') {
+            // console.log("newUser @patient:  "+ data.user_id);
+      if (userAppPatientServer[userId] && userAppPatientServer[userId].id !== socket.id) {
+        userAppPatientServer[userId].emit('kick')
+      }
+      socket.id = userId
+
+      userAppPatientServer[userId] = socket
+      userAppPatientList[userId] = nickname
+    } else if (client === 'wechatdoctor') {
+            // console.log("newUser @wechatdoctor:  "+ data.user_id);
+      socket.id = userId
+
+      userWechatDoctorServer[userId] = socket
+      userWechatDoctorList[userId] = nickname
+    } else if (client === 'wechatpatient') {
+            // console.log("newUser @wechatpatient:  "+ data.user_id);
+
+      socket.id = userId
+      userWechatPatientServer[userId] = socket
+      userWechatPatientList[userId] = nickname
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     } else {
       console.log('newUser not match')
       console.log(data)
@@ -333,6 +429,7 @@ exports.chat = function (io, socket) {
         // console.log('disconnect');
 
     var id = socket.id
+<<<<<<< HEAD
     if (data.client == 'doctor') {
       delete userAppDoctorServer[id]
       delete userAppDoctorList[id]
@@ -343,6 +440,18 @@ exports.chat = function (io, socket) {
       delete userWechatDoctorServer[id]
       delete userWechatDoctorList[id]
     } else if (data.client == 'wechatpatient') {
+=======
+    if (data.client === 'doctor') {
+      delete userAppDoctorServer[id]
+      delete userAppDoctorList[id]
+    } else if (data.client === 'patient') {
+      delete userAppPatientServer[id]
+      delete userAppPatientList[id]
+    } else if (data.client === 'wechatdoctor') {
+      delete userWechatDoctorServer[id]
+      delete userWechatDoctorList[id]
+    } else if (data.client === 'wechatpatient') {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       delete userWechatPatientServer[id]
       delete userWechatPatientList[id]
     } else {
@@ -366,10 +475,17 @@ exports.chat = function (io, socket) {
 
     var url = 'http://' + webEntry.domain + ':4050/api/v1/wechat/download'
 
+<<<<<<< HEAD
     if (clientType != 'doctor' && clientType != 'patient' && (contentType == 'image' || contentType == 'voice')) {           // image voice
       var mediaId = data.msg.content.mediaId
       var name
       if (contentType == 'image') {
+=======
+    if (clientType !== 'doctor' && clientType !== 'patient' && (contentType === 'image' || contentType === 'voice')) {           // image voice
+      var mediaId = data.msg.content.mediaId
+      var name
+      if (contentType === 'image') {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         name = data.to + data.msg.createTimeInMillis + '.jpg'
       } else {
         name = data.to + data.msg.createTimeInMillis + '.mp3'

@@ -7,12 +7,12 @@ exports.addUserRoles = function (acl) {
 
     if (userId && roles) {
       acl.addUserRoles(userId, roles, function (err) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success'}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success'}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -26,12 +26,12 @@ exports.removeUserRoles = function (acl) {
 
     if (userId && roles) {
       acl.removeUserRoles(userId, roles, function (err) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success'}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success'}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -44,12 +44,12 @@ exports.userRoles = function (acl) {
 
     if (userId) {
       acl.userRoles(userId, function (err, roles) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success', roles: roles}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success', roles: roles}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -62,12 +62,12 @@ exports.roleUsers = function (acl) {
 
     if (rolename) {
       acl.roleUsers(rolename, function (err, users) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success', users: users}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success', users: users}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -81,12 +81,12 @@ exports.hasRole = function (acl) {
 
     if (userId && rolename) {
       acl.hasRole(userId, rolename, function (err, hasRole) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success', hasRole: hasRole}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success', hasRole: hasRole}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -100,12 +100,12 @@ exports.addRoleParents = function (acl) {
 
     if (role && parents) {
       acl.addRoleParents(role, parents, function (err) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success'}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success'}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -119,12 +119,12 @@ exports.removeRoleParents = function (acl) {
 
     if (role && parents) {
       acl.removeRoleParents(role, parents, function (err) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success'}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success'}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -137,12 +137,12 @@ exports.removeRole = function (acl) {
 
     if (role) {
       acl.removeRole(role, function (err) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success'}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success'}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -155,12 +155,12 @@ exports.removeResource = function (acl) {
 
     if (resource) {
       acl.removeResource(resource, function (err) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success'}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success'}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -174,12 +174,12 @@ exports.allow = function (acl) {
     var permissions = req.body.permissions
     if (roles && resources && permissions) {
       acl.allow(roles, resources, permissions, function (err) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success'}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success'}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -194,12 +194,12 @@ exports.removeAllow = function (acl) {
 
     if (roles && resources && permissions) {
       acl.removeAllow(roles, resources, permissions, function (err) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success'}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success'}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -213,12 +213,12 @@ exports.allowedPermissions = function (acl) {
 
     if (userId && resources) {
       acl.allowedPermissions(userId, resources, function (err, permissions) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success', permissions: permissions}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success', permissions: permissions}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -233,12 +233,12 @@ exports.isAllowed = function (acl) {
 
     if (userId && resources && permissions) {
       acl.isAllowed(userId, resources, permissions, function (err, allowed) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success', allowed: allowed}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success', allowed: allowed}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -253,12 +253,12 @@ exports.areAnyRolesAllowed = function (acl) {
 
     if (roles && resources && permissions) {
       acl.areAnyRolesAllowed(roles, resources, permissions, function (err, allowed) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success', allowed: allowed}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success', allowed: allowed}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }
@@ -270,22 +270,22 @@ exports.whatResources = function (acl) {
     var permissions = req.query.permissions
 
     if (roles && permissions) {
-			// Returns what resources a role has the given permissions over.
+// Returns what resources a role has the given permissions over.
       acl.whatResources(roles, permissions, function (err, resources) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success', resources: resources}})
-	  		})
-    }		else if (roles) {
-			// Returns what resources a given role has permissions over.
-      acl.whatResources(roles, function (err, res_perm) {
-	    		if (err) {
-	    			return res.status(500).send(err.errmsg)
-	    		}
-	    		res.json({results: {status: 1, msg: 'success', res_perm: res_perm}})
-	  		})
-    }		else {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success', resources: resources}})
+      })
+    } else if (roles) {
+// Returns what resources a given role has permissions over.
+      acl.whatResources(roles, function (err, resPerm) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({results: {status: 1, msg: 'success', resPerm: resPerm}})
+      })
+    } else {
       return res.status(400).send('empty inputs')
     }
   }

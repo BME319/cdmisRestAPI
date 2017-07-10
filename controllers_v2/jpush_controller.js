@@ -1,7 +1,12 @@
 
+<<<<<<< HEAD
 var config = require('../config'),
   User = require('../models/user'),
   request = require('request')
+=======
+var User = require('../models/user')
+var request = require('request')
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
 var jpushUrl = 'https://api.im.jpush.cn/v1/'
 var doctorKey = 'Basic Y2YzMmI5NDQ0NGM0ZWFhY2VmODY5MDNlOmJhYjI4M2NkOWQzMDY4ZTE5NDYwODgzMg=='
@@ -20,6 +25,7 @@ exports.register = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
       // res.json({results: item});
     if (item != null) {
       	nickname = item.userName
@@ -31,11 +37,25 @@ exports.register = function (req, res) {
       	key = patientKey
     } else {
       	return res.status(400).send('flag Error')
+=======
+// res.json({results: item});
+    if (item != null) {
+      nickname = item.userName
+    }
+
+    if (flag === 'doctor') {
+      key = doctorKey
+    } else if (flag === 'patient') {
+      key = patientKey
+    } else {
+      return res.status(400).send('flag Error')
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     }
 
     var jsondata = [{'username': username, 'password': password, 'nickname': nickname}]
 
     request({
+<<<<<<< HEAD
       	url: jpushUrl + 'users',
       	method: 'POST',
       	body: jsondata,
@@ -51,18 +71,42 @@ exports.register = function (req, res) {
       		return res.status(500).send('Error')
     	}
   	})
+=======
+      url: jpushUrl + 'users',
+      method: 'POST',
+      body: jsondata,
+      json: true,
+      headers: {
+        'Authorization': key,
+        'Content-Type': 'application/json'
+      }
+    }, function (err, response, body) {
+      if (!err) {
+        res.json({results: body})
+      } else {
+        return res.status(500).send('Error')
+      }
+    })
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   })
 }
 
 // 创建群组
 exports.createGroup = function (req, res) {
+<<<<<<< HEAD
   var owner_username = req.body.owner_username
   var name = req.body.name
   var members_username = req.body.members_username
+=======
+  var ownerUsername = req.body.owner_username
+  var name = req.body.name
+  var membersUsername = req.body.members_username
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   var desc = req.body.desc
   var flag = req.body.flag
   var key
 
+<<<<<<< HEAD
   if (flag == 'doctor') {
       	key = doctorKey
   } else if (flag == 'patient') {
@@ -94,11 +138,45 @@ exports.createGroup = function (req, res) {
       		return res.status(500).send('Error')
     	}
   	})
+=======
+  if (flag === 'doctor') {
+    key = doctorKey
+  } else if (flag === 'patient') {
+    key = patientKey
+  } else {
+    return res.status(400).send('flag Error')
+  }
+
+  var jsondata = {
+    'owner_username': ownerUsername,
+    'name': name,
+    'members_username': membersUsername,
+    'desc': desc
+  }
+
+  request({
+    url: jpushUrl + 'groups',
+    method: 'POST',
+    body: jsondata,
+    json: true,
+    headers: {
+      'Authorization': key,
+      'Content-Type': 'application/json'
+    }
+  }, function (err, response, body) {
+    if (!err) {
+      res.json({results: body})
+    } else {
+      return res.status(500).send('Error')
+    }
+  })
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 }
 
 // 更新群组成员
 exports.updateGroup = function (req, res) {
   var groupId = req.body.groupId
+<<<<<<< HEAD
   	var add = req.body.add
   	var remove = req.body.remove
   	var flag = req.body.flag
@@ -133,4 +211,40 @@ exports.updateGroup = function (req, res) {
       		return res.status(500).send('Error')
     	}
   	})
+=======
+  var add = req.body.add
+  var remove = req.body.remove
+  var flag = req.body.flag
+  var key
+
+  if (flag === 'doctor') {
+    key = doctorKey
+  } else if (flag === 'patient') {
+    key = patientKey
+  } else {
+    return res.status(400).send('flag Error')
+  }
+
+  var jsondata = {
+    'add': add,
+    'remove': remove
+  }
+
+  request({
+    url: jpushUrl + 'groups/' + groupId + '/members',
+    method: 'POST',
+    body: jsondata,
+    json: true,
+    headers: {
+      'Authorization': key,
+      'Content-Type': 'application/json'
+    }
+  }, function (err, response, body) {
+    if (!err) {
+      res.json({results: body})
+    } else {
+      return res.status(500).send('Error')
+    }
+  })
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 }

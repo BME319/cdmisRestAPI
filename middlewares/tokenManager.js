@@ -13,10 +13,18 @@ exports.verifyToken = function () {
     if (token) {
       jwt.verify(token, config.tokenSecret, function (err, decoded) {
         if (err) {
+<<<<<<< HEAD
           if (err.name == 'TokenExpiredError') {
             return res.status(401).send('TokenExpiredError')
           } else {
             return res.status(401).send(err.errmsg)
+=======
+          if(err.name == "TokenExpiredError"){
+            return res.status(401).send("TokenExpiredError");
+          }
+          else{
+            return res.status(401).send(err);
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
           }
         } else {
           req.session = decoded

@@ -1,6 +1,10 @@
 
+<<<<<<< HEAD
 var	config = require('../config'),
   Version = require('../models/version')
+=======
+var Version = require('../models/version')
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
 exports.getVersionInfo = function (req, res) {
   var versionName = req.query.versionName
@@ -15,6 +19,7 @@ exports.getVersionInfo = function (req, res) {
     query = {versionType: versionType}
     Version.getSome(query, function (err, items) {
       if (err) {
+<<<<<<< HEAD
 	      		return res.status(500).send(err.errmsg)
 	    	}
 	    	res.json({results: {status: 0, msg: items}})
@@ -39,6 +44,32 @@ exports.getVersionInfo = function (req, res) {
 		    	}
 	    	}
 	    }, opts)
+=======
+        return res.status(500).send(err.errmsg)
+      }
+      res.json({results: {status: 0, msg: items}})
+    })
+  } else {
+    var opts = { sort: '-_id' }
+    query = {versionType: versionType}
+  // console.log(query);
+    Version.getSome(query, function (err, items) {
+      if (err) {
+        return res.status(500).send(err.errmsg)
+      }
+    // console.log(items);
+      if (items.length === 0) {
+        return res.status(400).send('版本号不存在')
+      } else {
+      // console.log(items[0]);
+        if (items[0].versionName === versionName) {
+          res.json({results: {status: 0, msg: 'latest'}})
+        } else {
+          res.json({results: {status: 0, msg: [items[0]]}})
+        }
+      }
+    }, opts)
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   }
 }
 
@@ -65,6 +96,10 @@ exports.insertVersionInfo = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     	res.json({results: Info})
+=======
+    res.json({results: Info})
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   })
 }

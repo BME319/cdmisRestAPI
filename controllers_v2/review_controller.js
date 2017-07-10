@@ -10,10 +10,17 @@ exports.postReviewInfo = function (req, res) {
   if (req.body.doctorId === null || req.body.doctorId === '' || req.body.doctorId === undefined) {
     return res.status(412).json({results: '请填写doctorId'})
   }
+<<<<<<< HEAD
   if (req.body.adminId === null || req.body.adminId === '' || req.body.adminId === undefined) {
     return res.status(412).json({results: '请填写adminId'})
   }
   var queryAdmin = {userId: req.body.adminId}
+=======
+  // if (req.body.adminId === null || req.body.adminId === '' || req.body.adminId === undefined) {
+  //   return res.status(412).json({results: '请填写adminId'});
+  // }
+  var queryAdmin = {userId: req.session._id};
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   Alluser.getOne(queryAdmin, function (err, reviewItem) {
     if (err) {
       return res.status(500).send(err)
@@ -77,8 +84,14 @@ exports.getCertificate = function (req, res) {
   var query = {userId: req.query.doctorId}
   var opts = ''
   var fields = {
+<<<<<<< HEAD
     'userId': 1, 'name': 1, 'gender': 1, 'certificatePhotoUrl': 1, 'description': 1, 'major': 1, 'role': 1
   }
+=======
+    'userId':1, 'name':1, 'gender':1, 'certificatePhotoUrl':1, 'description':1, 
+    'major':1, 'role':1, 'province':1, 'city':1, 'workUnit':1, 'department':1, 'title':1
+  };
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
@@ -111,6 +124,10 @@ exports.getReviewInfo = function (req, res) {
     return res.status(412).json({results: '非法输入'})
   }
 
+  if (req.query.name !== null && req.query.name !== '' && req.query.name !== undefined) {
+    query['name'] = new RegExp(req.query.name)
+  }
+
   if (req.query.limit === undefined) {
     var limit = 0
   } else {
@@ -124,6 +141,7 @@ exports.getReviewInfo = function (req, res) {
 
   var opts = {limit: limit, skip: skip}
   var fields = {
+<<<<<<< HEAD
     'userId': 1,
     'name': 1,
     'gender': 1,
@@ -144,6 +162,13 @@ exports.getReviewInfo = function (req, res) {
     'creationTime': 1
   }
   var populate = {'path': 'adminId', 'select': {'userId': 1, 'name': 1}}
+=======
+    'userId':1, 'name':1, 'gender':1, 'birthday':1, 'workUnit':1, 
+    'department':1, 'title':1, 'IDNo':1, 'reviewStatus':1, 'reviewDate':1, 
+    'adminId':1, 'reviewContent':1, 'phoneNo':1, 'role':1, 'creationTime':1
+  };
+  var populate = {'path':'adminId', 'select':{'userId':1, 'name':1}};
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
   var _Url = ''
   var reviewStatusUrl = 'reviewStatus=' + req.query.reviewStatus

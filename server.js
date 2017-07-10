@@ -16,13 +16,22 @@ var webEntry = require('./settings').webEntry
 
 var _config = webEntry.config || 'config'
 var domain = webEntry.domain
+<<<<<<< HEAD
 var domainName = webEntry.domainName
 // route = webEntry.route || 'default'
+=======
+// var domainName = webEntry.domainName
+  // route = webEntry.route || 'default'
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
 var config = require('./' + _config)
 var dbUri = webEntry.dbUri
 var restPort = webEntry.restPort
+<<<<<<< HEAD
 // routes = require('./routes/'+route),     // 2017年6月22日停止使用
+=======
+    // routes = require('./routes/'+route),     // 2017年6月22日停止使用
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 var routesV1 = require('./routes/routes_v1')
 var routesV2 = require('./routes/routes_v2')
 

@@ -8,9 +8,15 @@ exports.configure = function () {
     // log4js.configure(path.join(__dirname, "log4js.json"));
   log4js.configure({
     'appenders': [
+<<<<<<< HEAD
 		// {
 		// 	"type": "console"
 		// },
+=======
+  // {
+  //  "type": "console"
+  // },
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       {
         'type': 'dateFile',
         'filename': 'logs/CKD',

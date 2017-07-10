@@ -84,6 +84,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/compliance', complianceCtrl.getComplianceByDay)
 
   // wf
+
   // -------------------------------------------- 注册时如何验证用户 ------------------------------------------------------
   app.post(version + '/user/register', userCtrl.registerTest, getNoMid.getNo(1), userCtrl.register)
   // -------------------------------------------------------------------------------------------------------------------

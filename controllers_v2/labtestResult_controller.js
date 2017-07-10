@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 var config = require('../config')
+=======
+// var config = require('../config')
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 var LabtestResult = require('../models/labtestResult')
 var HealthInfo = require('../models/healthInfo')
 
@@ -23,7 +27,11 @@ exports.postLabtestResult = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
 		// res.json({results: labtestResultInfo});
+=======
+  // res.json({results: labtestResultInfo});
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     var healthInfoData = {
       userId: req.body.userId,
       type: req.body.type,
@@ -48,10 +56,17 @@ exports.postLabtestResult = function (req, res) {
 
 // 直接根据userId和insertTime修改数据, 2017-06-06 GY
 exports.updateLabtestResult = function (req, res) {
+<<<<<<< HEAD
   if (req.body.userId == null || req.body.userId == '') {
     return res.json({result: '请填写userId!'})
   }
   if (req.body.insertTime == null || req.body.insertTime == '') {
+=======
+  if (req.body.userId === null || req.body.userId === '') {
+    return res.json({result: '请填写userId!'})
+  }
+  if (req.body.insertTime === null || req.body.insertTime === '') {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     return res.json({result: '请填写insertTime!'})
   }
 
@@ -83,7 +98,11 @@ exports.updateLabtestResult = function (req, res) {
     if (err) {
       return res.status(422).send(err.message)
     }
+<<<<<<< HEAD
     if (upHealthInfo == null) {
+=======
+    if (upHealthInfo === null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       return res.json({result: '修改失败，不存在的记录!'})
     } else {
       var query2 = {_id: upHealthInfo.resultId}
@@ -91,23 +110,38 @@ exports.updateLabtestResult = function (req, res) {
         if (err) {
           return res.status(500).send(err.message)
         }
+<<<<<<< HEAD
         if (upResult == null) {
+=======
+        if (upResult === null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
           return res.json({result: '修改失败，不存在的记录!'})
         } else {
           return res.json({result: '修改成功', healthInfoResult: upHealthInfo, labtestResult: upResult})
         }
       }, {new: true})
+<<<<<<< HEAD
 			// return res.json({result: '修改成功', editResults:upHealthInfo});
+=======
+   // return res.json({result: '修改成功', editResults:upHealthInfo});
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     }
   })
 }
 
 // 删除健康信息及对应的化验结果 2017-06-06 GY
 exports.deleteLabtestResult = function (req, res) {
+<<<<<<< HEAD
   if (req.body.userId == null || req.body.userId == '') {
     return res.json({result: '请填写userId!'})
   }
   if (req.body.insertTime == null || req.body.insertTime == '') {
+=======
+  if (req.body.userId === null || req.body.userId === '') {
+    return res.json({result: '请填写userId!'})
+  }
+  if (req.body.insertTime === null || req.body.insertTime === '') {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     return res.json({result: '请填写insertTime!'})
   }
 
@@ -117,8 +151,13 @@ exports.deleteLabtestResult = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
 		// res.json({results: item});
     if (item == null) {
+=======
+  // res.json({results: item});
+    if (item === null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       return res.json({result: '删除失败，请检查是否存在健康信息'})
     } else {
       var query2 = {_id: item.resultId}
@@ -126,7 +165,11 @@ exports.deleteLabtestResult = function (req, res) {
         if (err) {
           return res.status(500).send(err.message)
         }
+<<<<<<< HEAD
         if (item2 == null) {
+=======
+        if (item2 === null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
           return res.json({result: '删除失败，请检查是否存在化验结果数据'})
         } else {
           return res.json({result: '删除成功', deleteHealthInfo: item, deleteLabtest: item2})

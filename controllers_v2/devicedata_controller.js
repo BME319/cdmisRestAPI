@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 var	request = require('request'),
   config = require('../config'),
   Patient = require('../models/patient'),
@@ -15,6 +16,24 @@ exports.bindingDevice = function (req, res) {
     return res.status(400).send('invalid input')
   }
 
+=======
+var request = require('request')
+var config = require('../config')
+var Patient = require('../models/patient')
+var VitalSign = require('../models/vitalSign')
+var Compliance = require('../models/compliance')
+var Device = require('../models/device')
+
+exports.bindingDevice = function (req, res) {
+  var userId = req.body.userId || null
+  var appId = req.body.appId || null
+  var twoDimensionalCode = req.body.twoDimensionalCode || null
+
+  if (userId === null || userId === '' || appId === null || appId === '' || twoDimensionalCode === null || twoDimensionalCode === '') {
+    return res.status(400).send('invalid input')
+  }
+
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   request({
     method: 'POST',
     url: config.third_party_data.bloodpressure.get_device_url,
@@ -24,6 +43,7 @@ exports.bindingDevice = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     body = JSON.parse(body)
+<<<<<<< HEAD
     if (body.errorCode == 0) {
         	// save device info
         	var sn = body.deviceInfo.sn
@@ -43,19 +63,47 @@ exports.bindingDevice = function (req, res) {
           if (err.code == 11000) {
                         // 403   （禁止） 服务器拒绝请求。
                         // return res.status(403).send('duplication key');
+=======
+    if (body.errorCode === 0) {
+  // save device info
+      var sn = body.deviceInfo.sn
+      var imei = body.deviceInfo.imei
+      var deviceId = sn + imei
+
+      var deviceData = {
+        userId: userId,
+        deviceId: deviceId,
+        deviceType: 'sphygmomanometer',
+        deviceName: '血压计',
+        deviceInfo: body.deviceInfo
+      }
+      var newDevice = new Device(deviceData)
+      newDevice.save(function (err, Info) {
+        if (err) {
+          if (err.code === 11000) {
+// 403 （禁止） 服务器拒绝请求。
+// return res.status(403).send('duplication key');
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
             Device.getOne({deviceId: deviceId}, function (err, item) {
               if (err) {
                 return res.status(500).send(err.errmsg)
               }
               if (item) {
+<<<<<<< HEAD
                                 // res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
                                 // console.log('null');
                                 // res.json(results);
+=======
+// res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
+// console.log('null');
+// res.json(results);
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                 Patient.getOne({userId: item.userId}, function (err, patient) {
                   if (err) {
                     return res.status(500).send(err.errmsg)
                   }
                   if (patient) {
+<<<<<<< HEAD
                     res.json({results: patient.name })
                   } else {
                     res.json({results: '患者不存在' })
@@ -64,12 +112,23 @@ exports.bindingDevice = function (req, res) {
                 })
               } else {
                                 // res.json({results: '该设备已被绑定'});
+=======
+                    res.json({results: patient.name})
+                  } else {
+                    res.json({results: '患者不存在'})
+                  }
+// res.json({results: patient.name + '已绑定该设备'});
+                })
+              } else {
+// res.json({results: '该设备已被绑定'});
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                 res.json({results: ''})
               }
             })
           } else {
             return res.status(500).send(err.errmsg)
           }
+<<<<<<< HEAD
 		        } else {
           res.json({results: body})
         }
@@ -77,6 +136,15 @@ exports.bindingDevice = function (req, res) {
     } else {
         	// send error msg to the front end
         	res.json({results: body})
+=======
+        } else {
+          res.json({results: body})
+        }
+      })
+    } else {
+  // send error msg to the front end
+      res.json({results: body})
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     }
   })
 }
@@ -90,28 +158,45 @@ exports.debindingDevice = function (req, res) {
   if (userId === null || userId === '' || appId === null || appId === '' || sn === null || sn === '' || imei === null || imei === '') {
     return res.status(400).send('invalid input')
   }
+<<<<<<< HEAD
   var jsondata = {
     	appId: appId,
     	sn: sn
   }
+=======
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
   request({
     method: 'POST',
     url: config.third_party_data.bloodpressure.debinding_device_url,
     body: 'appId=' + appId + '&sn=' + sn
+<<<<<<< HEAD
      //    headers: {
      //    	'Content-Type': 'application/x-www-form-urlencoded'
     	// },
+=======
+ // headers: {
+ // 'Content-Type': 'application/x-www-form-urlencoded'
+  // },
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   }, function (err, response, body) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     body = JSON.parse(body)
+<<<<<<< HEAD
     if (body.errorCode == 0) {
         	// save data
         	var deviceId = sn + imei
 
         	var query = {userId: userId, deviceId: deviceId}
+=======
+    if (body.errorCode === 0) {
+  // save data
+      var deviceId = sn + imei
+
+      var query = {userId: userId, deviceId: deviceId}
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
       Device.removeOne(query, function (err, item) {
         if (err) {
@@ -120,17 +205,28 @@ exports.debindingDevice = function (req, res) {
         res.json({results: body})
       })
     } else {
+<<<<<<< HEAD
         	// send error msg to the front end
         	// res.statusCode = 500;
         	res.json({results: body})
+=======
+  // send error msg to the front end
+  // res.statusCode = 500;
+      res.json({results: body})
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     }
   })
 }
 
 exports.receiveBloodPressure = function (req, res) {
   console.log('receiveBloodPressure')
+<<<<<<< HEAD
   // var res_data = req.body;
   // console.log(res_data);
+=======
+// var res_data = req.body;
+// console.log(res_data);
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
   var sn = req.body.sn
   var imei = req.body.imei
@@ -147,18 +243,27 @@ exports.receiveBloodPressure = function (req, res) {
 
   Device.getOne(query, function (err, item) {
     if (err) {
+<<<<<<< HEAD
         // return res.status(500).send(err.errmsg);
+=======
+// return res.status(500).send(err.errmsg);
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       console.log('err')
       res.json(results)
     }
     if (item == null) {
+<<<<<<< HEAD
         // res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
+=======
+// res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       console.log('null')
       res.json(results)
     } else {
       var userId = item.userId
       console.log(userId)
       var querypatient = {
+<<<<<<< HEAD
     		userId: userId
     	}
 
@@ -176,6 +281,25 @@ exports.receiveBloodPressure = function (req, res) {
         		saveBPdata(patient, req, results, res)
         }
     	})
+=======
+        userId: userId
+      }
+
+      Patient.getOne(querypatient, function (err, patient) {
+        if (err) {
+  // return res.status(500).send(err.errmsg);
+          console.log('err2')
+          res.json(results)
+        }
+        if (patient == null) {
+    // return res.status(400).send('user not exist');
+          console.log('null2')
+          res.json(results)
+        } else {
+          saveBPdata(patient, req, results, res)
+        }
+      })
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     }
   })
 }
@@ -189,8 +313,13 @@ exports.getDeviceInfo = function (req, res) {
   }
 
   var query = {userId: userId}
+<<<<<<< HEAD
   if (deviceType != null && deviceType != '') {
     	query['deviceType'] = deviceType
+=======
+  if (deviceType != null && deviceType !== '') {
+    query['deviceType'] = deviceType
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   }
 
   Device.getSome(query, function (err, item) {
@@ -216,6 +345,7 @@ function saveBPdata (patient, req, results, res) {
     code: '血压',
     date: year + '-' + month + '-' + day
   }
+<<<<<<< HEAD
 
   var upObj = {
     $push: {
@@ -271,6 +401,63 @@ function saveBPdata (patient, req, results, res) {
 
       if (err) {
                 // return res.status(422).send(err.message);
+=======
+
+  var upObj = {
+    $push: {
+      data: {
+        time: year + '-' + month + '-' + day + ' ' + hour + ':' + minite + ':' + second,
+        value: req.body.systolicpressure,
+        value2: req.body.diastolicpressure
+      }
+    }
+  }
+  console.log(query)
+  console.log(upObj)
+
+  VitalSign.update(query, upObj, function (err, updata) {
+    if (err) {
+// return res.status(422).send(err.message);
+      res.json(results)
+    }
+    console.log(updata)
+// if (updata.nModified == 0) {
+// console.log('err3');
+// res.json(results);
+// }
+// else if (updata.nModified == 1) {
+// results.code = 1;
+// results.status = 'success';
+// results.msg = '提交成功';
+// console.log('err4');
+// res.json(results);
+// }
+    var query = {
+      patientId: patient._id,
+      type: '心率',
+      code: '心率',
+      date: year + '-' + month + '-' + day
+    }
+
+    var upObj = {
+      $push: {
+        data: {
+          time: year + '-' + month + '-' + day + ' ' + hour + ':' + minite + ':' + second,
+          value: req.body.pulse
+        }
+      }
+    }
+
+    VitalSign.update(query, upObj, function (err, updata) {
+      if (err) {
+// return res.status(422).send(err.message);
+        res.json(results)
+      }
+      console.log(updata)
+
+      if (err) {
+// return res.status(422).send(err.message);
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         res.json(results)
       }
 
@@ -306,7 +493,11 @@ function saveBPdata (patient, req, results, res) {
           if (err) {
             return res.status(500).send('查询失败')
           }
+<<<<<<< HEAD
                     // 查询不到，需要新建一个条目
+=======
+// 查询不到，需要新建一个条目
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
           if (complianceitem == null) {
             var complianceData = {
               userId: patient.userId,
@@ -316,7 +507,11 @@ function saveBPdata (patient, req, results, res) {
               status: 1,
               description: req.body.systolicpressure + '/' + req.body.diastolicpressure
             }
+<<<<<<< HEAD
                         // return res.json({result:complianceData});
+=======
+// return res.json({result:complianceData});
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
             var newCompliance = new Compliance(complianceData)
             newCompliance.save(function (err, complianceInfo) {
               if (err) {
@@ -328,9 +523,14 @@ function saveBPdata (patient, req, results, res) {
               console.log('提交成功')
               res.json(results)
             })
+<<<<<<< HEAD
           }
                     // 查询到条目，添加data
           else if (complianceitem != null) {
+=======
+          } else if (complianceitem != null) {
+            // 查询到条目，添加data
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
             var upObj = {
               status: 0,
               description: complianceitem.description + ',' + req.body.systolicpressure + '/' + req.body.diastolicpressure

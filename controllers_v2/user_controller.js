@@ -1,4 +1,5 @@
 
+<<<<<<< HEAD
 var	config = require('../config'),
   User = require('../models/user'),
   OpenIdTmp = require('../models/openId'),
@@ -12,6 +13,21 @@ var	config = require('../config'),
   webEntry = require('../settings').webEntry,
   request = require('request'),
   jwt = require('jsonwebtoken')
+=======
+var config = require('../config')
+var User = require('../models/user')
+var OpenIdTmp = require('../models/openId')
+// var DictNumber = require('../models/dictNumber')
+// var Numbering = require('../models/numbering')
+var Refreshtoken = require('../models/refreshtoken')
+var Sms = require('../models/sms')
+var crypto = require('crypto')
+var https = require('https')
+// var xml2js = require('xml2js')
+var webEntry = require('../settings').webEntry
+var request = require('request')
+var jwt = require('jsonwebtoken')
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 var Patient = require('../models/patient')
 var commonFunc = require('../middlewares/commonFunc')
 var Base64 = {
@@ -27,7 +43,15 @@ var Base64 = {
     '4', '5', '6', '7', '8', '9', '+', '/'
   ],
   UTF16ToUTF8: function (str) {
+<<<<<<< HEAD
     var res = [], len = str.length
+=======
+    var res = []
+    var len = str.length
+    var byte1
+    var byte2
+    var byte3
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     for (var i = 0; i < len; i++) {
       var code = str.charCodeAt(i)
       if (code > 0x0000 && code <= 0x007F) {
@@ -38,9 +62,15 @@ var Base64 = {
                 // 双字节
                 // U+00000080 – U+000007FF  110xxxxx 10xxxxxx
                 // 110xxxxx
+<<<<<<< HEAD
         var byte1 = 0xC0 | ((code >> 6) & 0x1F)
                 // 10xxxxxx
         var byte2 = 0x80 | (code & 0x3F)
+=======
+        byte1 = 0xC0 | ((code >> 6) & 0x1F)
+                // 10xxxxxx
+        byte2 = 0x80 | (code & 0x3F)
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         res.push(
                     String.fromCharCode(byte1),
                     String.fromCharCode(byte2)
@@ -49,11 +79,19 @@ var Base64 = {
                 // 三字节
                 // U+00000800 – U+0000FFFF  1110xxxx 10xxxxxx 10xxxxxx
                 // 1110xxxx
+<<<<<<< HEAD
         var byte1 = 0xE0 | ((code >> 12) & 0x0F)
                 // 10xxxxxx
         var byte2 = 0x80 | ((code >> 6) & 0x3F)
                 // 10xxxxxx
         var byte3 = 0x80 | (code & 0x3F)
+=======
+        byte1 = 0xE0 | ((code >> 12) & 0x0F)
+                // 10xxxxxx
+        byte2 = 0x80 | ((code >> 6) & 0x3F)
+                // 10xxxxxx
+        byte3 = 0x80 | (code & 0x3F)
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         res.push(
                     String.fromCharCode(byte1),
                     String.fromCharCode(byte2),
@@ -70,6 +108,7 @@ var Base64 = {
                 // U+04000000 – U+7FFFFFFF  1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
       }
     }
+<<<<<<< HEAD
 
     return res.join('')
   },
@@ -156,22 +195,133 @@ var Base64 = {
     var i = 0
     var res = []
 
+=======
+
+    return res.join('')
+  },
+  UTF8ToUTF16: function (str) {
+    var res = []
+    var len = str.length
+    var i = 0
+    var code
+    var code2
+    var code3
+    var byte1
+    var byte2
+    var utf16
+    for (i = 0; i < len; i++) {
+      code = str.charCodeAt(i)
+            // 对第一个字节进行判断
+      if (((code >> 7) & 0xFF) === 0x0) {
+                // 单字节
+                // 0xxxxxxx
+        res.push(str.charAt(i))
+      } else if (((code >> 5) & 0xFF) === 0x6) {
+                // 双字节
+                // 110xxxxx 10xxxxxx
+        code2 = str.charCodeAt(++i)
+        byte1 = (code & 0x1F) << 6
+        byte2 = code2 & 0x3F
+        utf16 = byte1 | byte2
+        res.push(String.fromCharCode(utf16))
+      } else if (((code >> 4) & 0xFF) === 0xE) {
+                // 三字节
+                // 1110xxxx 10xxxxxx 10xxxxxx
+        code2 = str.charCodeAt(++i)
+        code3 = str.charCodeAt(++i)
+        byte1 = (code << 4) | ((code2 >> 2) & 0x0F)
+        byte2 = ((code2 & 0x03) << 6) | (code3 & 0x3F)
+        utf16 = ((byte1 & 0x00FF) << 8) | byte2
+        res.push(String.fromCharCode(utf16))
+      } else if (((code >> 3) & 0xFF) === 0x1E) {
+                // 四字节
+                // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+      } else if (((code >> 2) & 0xFF) === 0x3E) {
+                // 五字节
+                // 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+      } else /** if (((code >> 1) & 0xFF) === 0x7E) */ {
+                // 六字节
+                // 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+      }
+    }
+
+    return res.join('')
+  },
+  encode: function (str) {
+    if (!str) {
+      return ''
+    }
+    var utf8 = this.UTF16ToUTF8(str) // 转成UTF8
+    var i = 0 // 遍历索引
+    var len = utf8.length
+    var res = []
+    while (i < len) {
+      var c1 = utf8.charCodeAt(i++) & 0xFF
+      res.push(this.table[c1 >> 2])
+            // 需要补2个=
+      if (i === len) {
+        res.push(this.table[(c1 & 0x3) << 4])
+        res.push('==')
+        break
+      }
+      var c2 = utf8.charCodeAt(i++)
+            // 需要补1个=
+      if (i === len) {
+        res.push(this.table[((c1 & 0x3) << 4) | ((c2 >> 4) & 0x0F)])
+        res.push(this.table[(c2 & 0x0F) << 2])
+        res.push('=')
+        break
+      }
+      var c3 = utf8.charCodeAt(i++)
+      res.push(this.table[((c1 & 0x3) << 4) | ((c2 >> 4) & 0x0F)])
+      res.push(this.table[((c2 & 0x0F) << 2) | ((c3 & 0xC0) >> 6)])
+      res.push(this.table[c3 & 0x3F])
+    }
+
+    return res.join('')
+  },
+  decode: function (str) {
+    if (!str) {
+      return ''
+    }
+
+    var len = str.length
+    var i = 0
+    var res = []
+    var code1
+    var code2
+    var code3
+    var code4
+    var c1
+    var c2
+    var c3
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     while (i < len) {
       code1 = this.table.indexOf(str.charAt(i++))
       code2 = this.table.indexOf(str.charAt(i++))
       code3 = this.table.indexOf(str.charAt(i++))
       code4 = this.table.indexOf(str.charAt(i++))
+<<<<<<< HEAD
 
+=======
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       c1 = (code1 << 2) | (code2 >> 4)
       c2 = ((code2 & 0xF) << 4) | (code3 >> 2)
       c3 = ((code3 & 0x3) << 6) | code4
 
       res.push(String.fromCharCode(c1))
 
+<<<<<<< HEAD
       if (code3 != 64) {
         res.push(String.fromCharCode(c2))
       }
       if (code4 != 64) {
+=======
+      if (code3 !== 64) {
+        res.push(String.fromCharCode(c2))
+      }
+      if (code4 !== 64) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         res.push(String.fromCharCode(c3))
       }
     }
@@ -179,7 +329,15 @@ var Base64 = {
     return this.UTF8ToUTF16(res.join(''))
   }
 }
+<<<<<<< HEAD
 
+=======
+function evil (fn) {
+  var Fn = Function
+  // 一个变量指向Function，防止有些前端编译工具报错
+  return new Fn('return ' + fn)()
+}
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 exports.getUser = function (req, res) {
     // var _userId = req.query.userId
     // var query = {userId:_userId};
@@ -228,7 +386,11 @@ exports.getUserAgreement = function (req, res) {
   var _userId = req.query.userId
   var query = {userId: _userId}
   var opts = ''
+<<<<<<< HEAD
   var fields = { 'agreement': 1}
+=======
+  var fields = {'agreement': 1}
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -300,16 +462,27 @@ exports.registerTest = function (req, res, next) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     if (item != null) {
+=======
+    if (item !== null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       var query1 = {phoneNo: _phoneNo, role: _role}
       User.getOne(query1, function (err, item1) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
+<<<<<<< HEAD
         if (item1 != null) {
           res.json({results: 1, userNo: '', mesg: 'User Already Exist!'})
         } else {
           User.updateOne(query, { $push: { role: _role }, $set: {password: _password}}, function (err, item2) {
+=======
+        if (item1 !== null) {
+          res.json({results: 1, userNo: '', mesg: 'User Already Exist!'})
+        } else {
+          User.updateOne(query, {$push: { role: _role }, $set: {password: _password}}, function (err, item2) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
             if (err) {
               return res.status(500).send(err.errmsg)
             }
@@ -340,7 +513,11 @@ exports.register = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     if (_role == 'patient') {
+=======
+    if (_role === 'patient') {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       var PatientData = {
         userId: _userNo
       }
@@ -424,7 +601,11 @@ exports.reset = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     if (item == null) {
+=======
+    if (item === null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       res.json({results: 1, mesg: "User doesn't Exist!"})
     } else {
       User.updateOne(query, { $set: { password: _password } }, function (err, item1) {
@@ -441,11 +622,19 @@ exports.setOpenId = function (req, res, next) {
   var _openId = req.body.openId
   var query = {phoneNo: _phoneNo}
   if (_openId === undefined || _openId === null || _openId === '') {
+<<<<<<< HEAD
     	return res.status(403).send('unionid不能为空')
   }
   User.updateOne(query, {$set: {openId: _openId}}, function (err, item) {
     if (err) {
       if (err.code == 11000) {
+=======
+    return res.status(403).send('unionid不能为空')
+  }
+  User.updateOne(query, {$set: {openId: _openId}}, function (err, item) {
+    if (err) {
+      if (err.code === 11000) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         return res.status(403).send('unionid已存在')
       }
       return res.status(500).send(err.errmsg)
@@ -480,7 +669,11 @@ exports.openIdLoginTest = function (req, res, next) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     if (item != null) {
+=======
+    if (item !== null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       openIdFlag = 1
     }
     req.openIdFlag = openIdFlag
@@ -510,8 +703,13 @@ exports.checkBinding = function (req, res, next) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     if (item != null) {
       if (item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
+=======
+    if (item !== null) {
+      if (item.MessageOpenId !== null && (item.MessageOpenId.patientWechat !== null || item.MessageOpenId.test !== null)) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                 // openId 存在
         var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test}
                 // console.log(query);
@@ -520,8 +718,13 @@ exports.checkBinding = function (req, res, next) {
             return res.status(500).send(err.errmsg)
           }
                     // console.log({item1:item1});
+<<<<<<< HEAD
                     // if(item1 != null && item1.doctorUserId != null){
           if (item1 != null) {
+=======
+                    // if(item1 !== null && item1.doctorUserId !== null){
+          if (item1 !== null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                         // console.log(1111);
 
                         // binding doctor
@@ -555,7 +758,7 @@ exports.checkBinding = function (req, res, next) {
             })
           } else {
                         // console.log("No OpenIdTmp");
-                        // if(item1.doctorUserId == null){
+                        // if(item1.doctorUserId === null){
                         //     console.log(11112222);
                         //      OpenIdTmp.remove(query,function(err){
                         //         if (err) {
@@ -610,18 +813,30 @@ exports.login = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     if (item == null) {
+=======
+    if (item === null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
             // 2017-06-07GY调试
             // console.log('login_err_user_not_exist');
 
       res.json({results: 1, mesg: "User doesn't Exist!"})
     } else {
+<<<<<<< HEAD
       if (password != item.password && openIdFlag == 0) {
+=======
+      if (password !== item.password && openIdFlag === 0) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                 // 2017-06-07GY调试
                 // console.log('login_err_password_not_correct');
 
         res.json({results: 1, mesg: "User password isn't correct!"})
+<<<<<<< HEAD
       } else if (item.role.indexOf(role) == -1) {
+=======
+      } else if (item.role.indexOf(role) === -1) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                 // 2017-06-07GY调试
                 // console.log('login_err_no_authority');
 
@@ -629,14 +844,22 @@ exports.login = function (req, res) {
       } else {
         var _lastlogindate = item.lastLogin
                 // console.log(Date())
+<<<<<<< HEAD
         User.updateOne(query, { $set: { loginStatus: 0, lastLogin: Date()} }, function (err, user) {
+=======
+        User.updateOne(query, { $set: {loginStatus: 0, lastLogin: Date()} }, function (err, user) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
           if (err) {
             return res.status(500).send(err.errmsg)
           }
 
                     // csq 返回token信息
                     // console.log(user);
+<<<<<<< HEAD
           userPayload = {
+=======
+          var userPayload = {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
             _id: user._id,
             userId: user.userId,
             role: role,
@@ -690,10 +913,17 @@ exports.logout = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     if (item == null) {
       res.json({results: 1, mesg: "User doesn't Exist!"})
     } else {
       User.updateOne(query, { $set: { loginStatus: 1} }, function (err, item1) {
+=======
+    if (item === null) {
+      res.json({results: 1, mesg: "User doesn't Exist!"})
+    } else {
+      User.updateOne(query, { $set: {loginStatus: 1} }, function (err, item1) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         if (err) {
           return res.status(500).send(err.errmsg)
         }
@@ -704,7 +934,11 @@ exports.logout = function (req, res) {
 }
 exports.getUserID = function (req, res) {
   var username = req.query.username || null
+<<<<<<< HEAD
   if (username == null || username == '') {
+=======
+  if (username === null || username === '') {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     return res.status(400).send('invalid input')
   }
     // console.log(username);
@@ -720,7 +954,11 @@ exports.getUserID = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     if (item == null) {
+=======
+    if (item === null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       res.json({results: 1, mesg: "User doesn't Exist!"})
     } else {
       console.log(item)
@@ -745,7 +983,11 @@ exports.sendSMS = function (req, res) {
   var tplId = '51064'
   var appId1 = 'a4aab03e083c46b29dd539ec63a52b24'
   var tplId1 = '51041'
+<<<<<<< HEAD
   if (_smsType == 2) {
+=======
+  if (_smsType === 2) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     tplId = tplId1
     appId = appId1
   }
@@ -771,13 +1013,21 @@ exports.sendSMS = function (req, res) {
     }
         // res.json({results: 0});
             // query by _mobile and _smsType
+<<<<<<< HEAD
     if (_mobile != null && _mobile != '' && _mobile != undefined && _smsType != null && _smsType != '' && _smsType != undefined) {
+=======
+    if (_mobile !== null && _mobile !== '' && _mobile !== undefined && _smsType !== null && _smsType !== '' && _smsType !== undefined) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       var query1 = {mobile: _mobile, smsType: _smsType}
       Sms.getOne(query1, function (err, item) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
+<<<<<<< HEAD
         if (item == null) {
+=======
+        if (item === null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                     // not exist
                     // var _expire=60*3
           var _expire = 60
@@ -802,7 +1052,11 @@ exports.sendSMS = function (req, res) {
                         // console.log(md5)
                         // console.log(authorization)
             var bytes = commonFunc.stringToBytes(JSONData)
+<<<<<<< HEAD
             var Url = 'https://api.ucpaas.com/2014-06-30/Accounts/' + accountSid + '/Messages/templateSMS?sig=' + md5
+=======
+            // var Url = 'https://api.ucpaas.com/2014-06-30/Accounts/' + accountSid + '/Messages/templateSMS?sig=' + md5
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                         // console.log(Url);
             var options = {
               hostname: 'api.ucpaas.com',
@@ -820,7 +1074,7 @@ exports.sendSMS = function (req, res) {
                                 // "Host":"www.imooc.com",
                                 // "Origin":"http://www.imooc.com",
                                 // "Referer":"http://www.imooc.com/video/8837",
-                                // "User-Agent":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2763.0 Safari/537.36",
+                                // "Alluser-Agent":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2763.0 Safari/537.36",
                                 // "X-Requested-With":"XMLHttpRequest",
                 'Authorization': authorization
               }
@@ -834,6 +1088,7 @@ exports.sendSMS = function (req, res) {
               })
               response.on('end', function () {
                                 // console.log("### end ##");
+<<<<<<< HEAD
                 var json = eval('(' + resdata + ')')
                 code = json.resp.respCode
                 if (code === '000000') {
@@ -841,19 +1096,37 @@ exports.sendSMS = function (req, res) {
                         		}                        		else {
                             		res.json({results: 2, ErrorCode: code})
                         		}
+=======
+                // var json = eval('(' + resdata + ')')
+                var json = evil(resdata)
+                code = json.resp.respCode
+                if (code === '000000') {
+                  res.json({results: 0, mesg: "Alluser doesn't Exist!"})
+                } else {
+                  res.json({results: 2, ErrorCode: code})
+                }
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                                 // console.log(json.resp.respCode);
               })
                             // console.log(res.statusCode);
             })
 
             requests.on('error', function (err) {
+<<<<<<< HEAD
                             // console.log(err.message);
+=======
+              console.log(err.message)
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
             })
             requests.write(JSONData)
             requests.end()
           })
 
+<<<<<<< HEAD
                     // res.json({results: 0,mesg:"User doesn't Exist!"});
+=======
+                    // res.json({results: 0,mesg:"Alluser doesn't Exist!"});
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         } else {
           var ttl = (item.Expire - now.getTime()) / 1000
                     // sms exist
@@ -879,8 +1152,13 @@ exports.verifySMS = function (req, res) {
     }
         // res.json({results: 0});
             // query by _mobile and _smsType
+<<<<<<< HEAD
     if (item != null) {
       if (item.randNum == _smsCode) {
+=======
+    if (item !== null) {
+      if (item.randNum === _smsCode) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         res.json({results: 0, mesg: '验证码正确!'})
       } else {
         res.json({results: 1, mesg: '验证码错误'})
@@ -899,9 +1177,15 @@ exports.verifySMS = function (req, res) {
 
 // 根据角色获取电话号码 2017-04-25 GY
 exports.getPhoneNoByRole = function (req, res) {
+<<<<<<< HEAD
   if (req.query.role == null || req.query.role == '') {
     return res.json({result: '请输入role!'})
   } else if (req.query.role != 'doctor' && req.query.role != 'patient') {
+=======
+  if (req.query.role === null || req.query.role === '') {
+    return res.json({result: '请输入role!'})
+  } else if (req.query.role !== 'doctor' && req.query.role !== 'patient') {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     return res.json({result: '不合法的role!'})
   }
 
@@ -912,7 +1196,11 @@ exports.getPhoneNoByRole = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     if (items == null) {
+=======
+    if (items === null) {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
             // res.json({results: 1,mesg:"User doesn't Exist!"});
     } else {
             // var phoneNos = [];
@@ -934,6 +1222,7 @@ exports.setTDCticket = function (req, res) {
   User.updateOne(query, {$set: {TDCticket: TDCticket, TDCurl: TDCurl}}, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
+<<<<<<< HEAD
     }
     res.json({results: {TDCticket: TDCticket, TDCurl: TDCurl}})
   })
@@ -991,6 +1280,42 @@ exports.setMessageOpenId = function (req, res) {
           MessageOpenId: {
             doctorWechat: _mesgOid.doctorWechat,
             patientWechat: _openId,
+=======
+    }
+    res.json({results: {TDCticket: TDCticket, TDCurl: TDCurl}})
+  })
+}
+
+exports.setMessageOpenId = function (req, res) {
+  var _type = req.body.type
+  var _openId = req.body.openId
+  var userId = req.body.userId
+  if (_type === '' || _type === undefined) {
+    return res.json({result: 1, msg: 'plz input type'})
+  }
+  if (_openId === undefined || _openId === null || _openId === '') {
+    return res.status(403).send('openId不能为空')
+  }
+  var query = {userId: userId}
+
+  var _mesgOid = req.user.MessageOpenId
+  var upObj
+  if (_type === 1) {
+    upObj = {
+      $set: {
+        MessageOpenId: {
+          doctorWechat: _openId
+
+        }
+      }
+    }
+    if (_mesgOid !== null && _mesgOid !== undefined) {
+      upObj = {
+        $set: {
+          MessageOpenId: {
+            doctorWechat: _openId,
+            patientWechat: _mesgOid.patientWechat,
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
             doctorApp: _mesgOid.doctorApp,
             patientApp: _mesgOid.patientApp,
             test: _mesgOid.test
@@ -999,6 +1324,7 @@ exports.setMessageOpenId = function (req, res) {
       }
     }
   }
+<<<<<<< HEAD
   if (_type == 3) {
     var upObj = {
       $set: {
@@ -1122,6 +1448,153 @@ exports.checkUser = function (req, res, next) {
       return res.json({result: '不存在的用户ID', userId: req.userId})
     } else {
         	req.user = item
+=======
+  if (_type === 2) {
+    upObj = {
+      $set: {
+        MessageOpenId: {
+
+          patientWechat: _openId
+        }
+      }
+    }
+    if (_mesgOid !== null && _mesgOid !== undefined) {
+      upObj = {
+        $set: {
+          MessageOpenId: {
+            doctorWechat: _mesgOid.doctorWechat,
+            patientWechat: _openId,
+            doctorApp: _mesgOid.doctorApp,
+            patientApp: _mesgOid.patientApp,
+            test: _mesgOid.test
+          }
+        }
+      }
+    }
+  }
+  if (_type === 3) {
+    upObj = {
+      $set: {
+        MessageOpenId: {
+
+          doctorApp: _openId
+        }
+      }
+    }
+    if (_mesgOid !== null && _mesgOid !== undefined) {
+      upObj = {
+        $set: {
+          MessageOpenId: {
+            doctorWechat: _mesgOid.doctorWechat,
+            patientWechat: _mesgOid.patientWechat,
+            doctorApp: _openId,
+            patientApp: _mesgOid.patientApp,
+            test: _mesgOid.test
+          }
+        }
+      }
+    }
+  }
+  if (_type === 4) {
+    upObj = {
+      $set: {
+        MessageOpenId: {
+          patientApp: _openId
+        }
+      }
+    }
+    if (_mesgOid !== null && _mesgOid !== undefined) {
+      upObj = {
+        $set: {
+          MessageOpenId: {
+            doctorWechat: _mesgOid.doctorWechat,
+            patientWechat: _mesgOid.patientWechat,
+            doctorApp: _mesgOid.doctorApp,
+            patientApp: _openId,
+            test: _mesgOid.test
+          }
+        }
+      }
+    }
+  }
+  if (_type === 5) {
+    upObj = {
+      $set: {
+        MessageOpenId: {
+          test: _openId
+        }
+      }
+    }
+
+    if (_mesgOid !== null && _mesgOid !== undefined) {
+      upObj = {
+        $set: {
+          MessageOpenId: {
+            doctorWechat: _mesgOid.doctorWechat,
+            patientWechat: _mesgOid.patientWechat,
+            doctorApp: _mesgOid.doctorApp,
+            patientApp: _mesgOid.patientApp,
+            test: _openId
+          }
+        }
+      }
+    }
+  }
+  User.updateOne(query, upObj, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    res.json({results: 0, resultitem: item})
+  }, {new: true})
+}
+
+exports.getMessageOpenId = function (req, res) {
+  var _type = req.query.type
+  var userId = req.query.userId
+  if (_type === '' || _type === undefined) {
+    return res.json({result: 1, msg: 'plz input type'})
+  }
+  var query = {userId: userId}
+
+  User.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    if (_type === 1) {
+      res.json({results: item.MessageOpenId.doctorWechat})
+    } else if (_type === 2) {
+      res.json({results: item.MessageOpenId.patientWechat})
+    } else if (_type === 3) {
+      res.json({results: item.MessageOpenId.doctorApp})
+    } else if (_type === 4) {
+      res.json({results: item.MessageOpenId.patientApp})
+    } else if (_type === 5) {
+      res.json({results: item.MessageOpenId.test})
+    } else {
+      res.json({results: 'type must be 1-4'})
+    }
+  })
+}
+exports.checkUser = function (req, res, next) {
+  if (req.query.userId === null || req.query.userId === '' || req.query.userId === undefined) {
+    if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) {
+      return res.json({result: '请填写userId!'})
+    } else {
+      req.userId = req.body.userId
+    }
+  } else {
+    req.userId = req.query.userId
+  }
+  var query = {userId: req.userId}
+  User.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    if (item === null) {
+      return res.json({result: '不存在的用户ID', userId: req.userId})
+    } else {
+      req.user = item
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       next()
     }
   })

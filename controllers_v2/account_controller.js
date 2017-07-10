@@ -1,11 +1,20 @@
+<<<<<<< HEAD
 var Account = require('../models/account')
 var Patient = require('../models/patient')
 var Doctor = require('../models/doctor')
+=======
+
+var Account = require('../models/account')
+var Patient = require('../models/patient')
+var Doctor = require('../models/doctor')
+
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 // 根据doctorId查询相关评价 2017-03-30 GY
 exports.getAccountInfo = function (req, res) {
   if (req.query.userId === null || req.query.userId === '') {
     return res.json({result: '请填写userId!'})
   }
+<<<<<<< HEAD
 // 查询条件
   var _userId = req.query.userId
   var query = {userId: _userId}
@@ -16,6 +25,18 @@ exports.getAccountInfo = function (req, res) {
 // var fields = '';
 // var populate = {path: 'patientId', select:{'_id':0, 'userId':1, 'name':1}};
 // var populate = '';
+=======
+  // 查询条件
+  var _userId = req.query.userId
+  var query = {userId: _userId}
+
+  // 设置参数
+  // var opts = '';
+  // var fields = {'_id':0};
+  // var fields = '';
+  // var populate = {path: 'patientId', select:{'_id':0, 'userId':1, 'name':1}};
+  // var populate = '';
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
   Account.getSome(query, function (err, item) {
     if (err) {
@@ -41,7 +62,7 @@ exports.checkPatient = function (req, res, next) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (item == null) {
+    if (item === null) {
       return res.json({result: '不存在的患者ID'})
     } else {
       next()
@@ -51,13 +72,17 @@ exports.checkPatient = function (req, res, next) {
 exports.checkDoctor = function (req, res, next) {
   if (req.query.doctorId === null || req.query.doctorId === '') {
     if (req.body.doctorId === null || req.body.doctorId === '') {
+<<<<<<< HEAD
 // return res.json({result: '请填写doctorId!'});
+=======
+      // return res.json({result: '请填写doctorId!'});
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       var queryPatient = {userId: req.patientId}
       Account.getOne(queryPatient, function (err, accountitem) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
-        if (accountitem == null) {
+        if (accountitem === null) {
           var accountData = {
             userId: req.patientId,
             freeTimes: 3,
@@ -84,7 +109,7 @@ exports.checkDoctor = function (req, res, next) {
       Doctor.getOne(query, function (err, item) {
         if (err) {
           return res.status(500).send(err.errmsg)
-        } else if (item == null) {
+        } else if (item === null) {
           return res.json({result: '不存在的医生ID'})
         } else {
           next()
@@ -93,17 +118,22 @@ exports.checkDoctor = function (req, res, next) {
     }
   } else {
     req.doctorId = req.query.doctorId
+<<<<<<< HEAD
 // var query = {userId:  req.doctorId}
+=======
+    query = {userId: req.doctorId}
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     Doctor.getOne(query, function (err, item) {
       if (err) {
         return res.status(500).send(err.errmsg)
-      } else if (item == null) {
+      } else if (item === null) {
         return res.json({result: '不存在的医生ID'})
       } else {
         next()
       }
     })
   }
+<<<<<<< HEAD
 // var query = {userId: req.doctorId};
 // Doctor.getOne(query, function(err, item) {
 // if (err) {
@@ -111,6 +141,110 @@ exports.checkDoctor = function (req, res, next) {
 // }
 // else if (item == null) {
 //   return res.json({result: '不存在的医生ID'});
+=======
+  // var query = {userId: req.doctorId};
+  // Doctor.getOne(query, function(err, item) {
+  //   if (err) {
+  //     return res.status(500).send(err.errmsg);
+  //   }
+  //   else if (item === null) {
+  //     return res.json({result: '不存在的医生ID'});
+  //   }
+  //   else {
+  //     next();
+  //   }
+  // });
+}
+
+// //获取咨询计数 2017-04-20 GY
+// exports.getCounts = function(req, res, next) {
+
+//   var query = {
+//     userId: req.patientId
+//   };
+//   if (req.body.modify === 0) {
+//     return res.json({result:'此处禁止输入0!'});
+//   }
+//   else if (req.body.modify < -1) {
+//     return res.json({result:'非法输入!'});
+//   }
+//   else if (req.body.modify != null && req.body.modify != '') {
+//     req.modify = parseInt(req.body.modify, 10);
+//   }
+//   else {
+//     req.modify = 0;
+//   }
+//   // return res.json({modify: req.modify});
+
+//   Account.getOne(query, function(err, item) {
+//     if (err) {
+//       return res.status(500).send(err.errmsg);
+//     }
+//     if (item === null) {
+//       if (req.modify === 0) {
+//         var accountData = {
+//             userId: req.patientId,
+//             freeTimes: 3,
+//             money: 0
+//           };
+//       }
+//       else if (req.modify === -1) {
+//         var accountData = {
+//             userId: req.patientId,
+//             freeTimes: 2,
+//             money: 0
+//           };
+//       }
+//       else if (req.modify > 0) {
+//         var accountData = {
+//             userId: req.patientId,
+//             freeTimes: 3,
+//             money: 0,
+//             times: [
+//               {
+//                 count: req.modify,
+//                 doctorId: req.doctorId
+//               }
+//             ]
+//           };
+//       }
+//         var newAccount = new Account(accountData);
+//       newAccount.save(function(err, accountInfo) {
+//         if (err) {
+//               return res.status(500).send(err.errmsg);
+//           }
+//       });
+//       if (req.modify === 0) {
+//         return res.json({results: 3});
+//       }
+//       else {
+//         req.freeTimes = 3;
+//         req.count = 0;
+//         req.totalCount = 3;
+//         next();
+//       }
+//     }
+//     else {
+//       var count = 0;
+//       for (var i = item.times.length - 1; i >= 0; i--) {
+//         if (item.times[i].doctorId === req.doctorId) {
+//           count = item.times[i].count;
+//           break;
+//         }
+//       }
+//       var totalCount = count + item.freeTimes;
+//       if (req.modify === 0) {
+//         return res.json({result: totalCount});
+//       }
+//       else {
+//         req.freeTimes = item.freeTimes;
+//         req.count = count;
+//         req.totalCount = totalCount;
+//         next();
+//       }
+//     }
+//   });
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 // }
 // else {
 // next();
@@ -132,15 +266,26 @@ exports.getCounts = function (req, res, next) {
   } else {
     req.modify = 0
   }
+<<<<<<< HEAD
 // return res.json({modify: req.modify});
+=======
+  // return res.json({modify: req.modify});
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
   Account.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
     if (item == null) {
       if (req.modify === 0) {
         var accountData = {
+=======
+    if (item === null) {
+      var accountData
+      if (req.modify === 0) {
+        accountData = {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
           userId: req.patientId,
           freeTimes: 3,
           money: 0,
@@ -152,6 +297,7 @@ exports.getCounts = function (req, res, next) {
           ]
         }
       } else if (req.modify === -1) {
+<<<<<<< HEAD
         var accountData = {
     		  userId: req.patientId,
     			freeTimes: 2,
@@ -184,9 +330,43 @@ exports.getCounts = function (req, res, next) {
       })
       if (req.modify == 0) {
 // console.log('new record');
+=======
+        accountData = {
+          userId: req.patientId,
+          freeTimes: 2,
+          money: 0,
+          times: [
+            {
+              count: 2,
+              doctorId: req.doctorId
+            }
+          ]
+        }
+      } else if (req.modify > 0) {
+        accountData = {
+          userId: req.patientId,
+          freeTimes: 3,
+          money: 0,
+          times: [
+            {
+              count: req.modify,
+              doctorId: req.doctorId
+            }
+          ]
+        }
+      }
+      var newAccount = new Account(accountData)
+      newAccount.save(function (err, accountInfo) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+      })
+      if (req.modify === 0) {
+        // console.log('new record');
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         return res.json({results: {freeTimes: 3, count: 0}})
       } else {
-				// console.log('new record for modify');
+        // console.log('new record for modify');
         req.freeTimes = 3
         req.count = 0
         req.totalCount = 3
@@ -195,38 +375,38 @@ exports.getCounts = function (req, res, next) {
     } else {
       var count = 0
       for (var i = item.times.length - 1; i >= 0; i--) {
-        if (item.times[i].doctorId == req.doctorId) {
+        if (item.times[i].doctorId === req.doctorId) {
           count = item.times[i].count
           break
         }
       }
-			// console.log(i);
-			// console.log(count);
-      if (i == -1) {
+      // console.log(i);
+      // console.log(count);
+      if (i === -1) {
         var querytemp = {userId: req.patientId}
         var upObj = {
           $addToSet: {
             times: {
-    						count: 0,
-    						doctorId: req.doctorId
-    					}
+              count: 0,
+              doctorId: req.doctorId
+            }
 
           }
         }
-				// console.log('i=-1')
+        // console.log('i=-1')
         Account.update(querytemp, upObj, function (err, upaccountadd) {
           if (err) {
             return res.status(500).send(err.errmsg)
           }
-					// console.log('doctor not exist')
-					// if (upaccountadd.nModified == 0) {
-					// 	return res.json({result:'修改失败，请重新修改'});
-					// }
-					// else if (upaccountadd.nModified != 0) {
-					// 	return res.json({result:'修改成功', updateResult:upaccountadd});
-					// }
-          if (req.modify == 0) {
-						// console.log('patient exist');
+          // console.log('doctor not exist')
+          // if (upaccountadd.nModified === 0) {
+          //   return res.json({result:'修改失败，请重新修改'});
+          // }
+          // else if (upaccountadd.nModified != 0) {
+          //   return res.json({result:'修改成功', updateResult:upaccountadd});
+          // }
+          if (req.modify === 0) {
+            // console.log('patient exist');
             return res.json({result: {freeTimes: item.freeTimes, count: count}})
           } else {
             req.freeTimes = item.freeTimes
@@ -236,8 +416,8 @@ exports.getCounts = function (req, res, next) {
           }
         })
       } else {
-        if (req.modify == 0) {
-					// console.log('patient exist');
+        if (req.modify === 0) {
+          // console.log('patient exist');
           return res.json({result: {freeTimes: item.freeTimes, count: count}})
         } else {
           req.freeTimes = item.freeTimes
@@ -256,16 +436,16 @@ exports.modifyCounts = function (req, res) {
     userId: req.patientId
   }
 
-  if (req.modify == -1) {
-		// console.log(req);
-		// console.log({'req.count':req.count})
-    if (req.totalCount == 0) {
+  if (req.modify === -1) {
+    // console.log(req);
+    // console.log({'req.count':req.count})
+    if (req.totalCount === 0) {
       return res.json({result: '咨询次数已达0, 无法继续减小!'})
     } else if (req.freeTimes > 0) {
       if (req.count > 0) {
         req.count -= 1
-      } else if (req.count == 0) {
-				// console.log('here')
+      } else if (req.count === 0) {
+        // console.log('here')
         req.freeTimes -= 1
         req.count = 2
       }
@@ -280,9 +460,10 @@ exports.modifyCounts = function (req, res) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
-        if (upaccount.nModified == 0) {
-					// return res.json({result:'请获取账户信息确认是否修改成功'});
-          var upObjAdd = {
+        var upObjAdd
+        if (upaccount.nModified === 0) {
+          // return res.json({result:'请获取账户信息确认是否修改成功'});
+          upObjAdd = {
             $addToSet: {
               times: {
                 count: req.count,
@@ -295,15 +476,15 @@ exports.modifyCounts = function (req, res) {
             if (err) {
               return res.status(500).send(err.errmsg)
             }
-            if (upaccountadd.nModified == 0) {
+            if (upaccountadd.nModified === 0) {
               return res.json({result: '修改成功', updateResult: upaccountadd})
-            } else if (upaccountadd.nModified != 0) {
+            } else if (upaccountadd.nModified !== 0) {
               return res.json({result: '修改成功', updateResult: upaccountadd})
             }
           })
-        } else if (upaccount.nModified != 0) {
-					// return res.json({result:'修改成功', updateResult:upaccount});
-          var upObjAdd = {
+        } else if (upaccount.nModified !== 0) {
+          // return res.json({result:'修改成功', updateResult:upaccount});
+          upObjAdd = {
             $addToSet: {
               times: {
                 count: req.count,
@@ -316,18 +497,18 @@ exports.modifyCounts = function (req, res) {
             if (err) {
               return res.status(500).send(err.errmsg)
             }
-            if (upaccountadd.nModified == 0) {
+            if (upaccountadd.nModified === 0) {
               return res.json({result: '修改失败，请重新修改2'})
-            } else if (upaccountadd.nModified != 0) {
+            } else if (upaccountadd.nModified !== 0) {
               return res.json({result: '修改成功', updateResult: upaccountadd})
             }
           })
         }
       })
-    } else if (req.freeTimes == 0) {
-			// var modifyResult = req.count + req.modify;
+    } else if (req.freeTimes === 0) {
+      // var modifyResult = req.count + req.modify;
       req.count -= 1
-      var upObj = {
+      upObj = {
         $pull: {
           times: {
             doctorId: req.doctorId
@@ -338,10 +519,10 @@ exports.modifyCounts = function (req, res) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
-        if (upaccount.nModified == 0) {
+        if (upaccount.nModified === 0) {
           return res.json({result: '请获取账户信息确认是否修改成功'})
-        } else if (upaccount.nModified != 0) {
-					// return res.json({result:'修改成功', updateResult:upaccount});
+        } else if (upaccount.nModified !== 0) {
+          // return res.json({result:'修改成功', updateResult:upaccount});
           var upObjAdd = {
             $addToSet: {
               times: {
@@ -354,20 +535,20 @@ exports.modifyCounts = function (req, res) {
             if (err) {
               return res.status(500).send(err.errmsg)
             }
-            if (upaccountadd.nModified == 0) {
+            if (upaccountadd.nModified === 0) {
               return res.json({result: '修改失败，请重新修改3'})
-            } else if (upaccountadd.nModified != 0) {
+            } else if (upaccountadd.nModified !== 0) {
               return res.json({result: '修改成功', updateResult: upaccountadd})
             }
           })
         }
       })
     }
-  }	else if (req.modify == 3) {
-		// 无论之前req.count是否大于0，均为3，保证这个数字不大于3
-		// var modifyResult = req.count + req.modify;
+  } else if (req.modify === 3) {
+    // 无论之前req.count是否大于0，均为3，保证这个数字不大于3
+    // var modifyResult = req.count + req.modify;
     var modifyResult = 3
-    var upObj = {
+    upObj = {
       $pull: {
         times: {
           doctorId: req.doctorId
@@ -378,7 +559,7 @@ exports.modifyCounts = function (req, res) {
       if (err) {
         return res.status(500).send(err.errmsg)
       }
-      if (upaccountadd.nModified == 0) {
+      if (upaccountadd.nModified === 0) {
         var upObjfirst = {
           $addToSet: {
             times: {
@@ -391,13 +572,13 @@ exports.modifyCounts = function (req, res) {
           if (err) {
             return res.status(500).send(err.errmsg)
           }
-          if (upaccountfirst.nModified == 0) {
+          if (upaccountfirst.nModified === 0) {
             return res.json({result: '修改成功', updateResult: upaccountfirst})
-          } else if (upaccountfirst.nModified != 0) {
+          } else if (upaccountfirst.nModified !== 0) {
             return res.json({result: '修改成功', updateResult: upaccountfirst})
           }
         })
-      } else if (upaccountadd.nModified != 0) {
+      } else if (upaccountadd.nModified !== 0) {
         var upObjnotfirst = {
           $addToSet: {
             times: {
@@ -410,19 +591,19 @@ exports.modifyCounts = function (req, res) {
           if (err) {
             return res.status(500).send(err.errmsg)
           }
-          if (upaccountnotfirst.nModified == 0) {
+          if (upaccountnotfirst.nModified === 0) {
             return res.json({result: '修改失败，讲道理这句话不会执行'})
-          } else if (upaccountnotfirst.nModified != 0) {
+          } else if (upaccountnotfirst.nModified !== 0) {
             return res.json({result: '修改成功', updateResult: upaccountnotfirst})
           }
         })
-				// return res.json({result: '修改成功', updateResult: upaccountadd});
+        // return res.json({result: '修改成功', updateResult: upaccountadd});
       }
     })
-  } else if (req.modify == 999) {
-		// 问诊情况，将count置为999
-    var modifyResult = 999
-    var upObj = {
+  } else if (req.modify === 999) {
+    // 问诊情况，将count置为999
+    modifyResult = 999
+    upObj = {
       $pull: {
         times: {
           doctorId: req.doctorId
@@ -433,7 +614,7 @@ exports.modifyCounts = function (req, res) {
       if (err) {
         return res.status(500).send(err.errmsg)
       }
-      if (upaccountadd.nModified == 0) {
+      if (upaccountadd.nModified === 0) {
         var upObjfirst = {
           $addToSet: {
             times: {
@@ -446,13 +627,13 @@ exports.modifyCounts = function (req, res) {
           if (err) {
             return res.status(500).send(err.errmsg)
           }
-          if (upaccountfirst.nModified == 0) {
+          if (upaccountfirst.nModified === 0) {
             return res.json({result: '修改成功', updateResult: upaccountfirst})
-          } else if (upaccountfirst.nModified != 0) {
+          } else if (upaccountfirst.nModified !== 0) {
             return res.json({result: '修改成功', updateResult: upaccountfirst})
           }
         })
-      } else if (upaccountadd.nModified != 0) {
+      } else if (upaccountadd.nModified !== 0) {
         var upObjnotfirst = {
           $addToSet: {
             times: {
@@ -465,19 +646,19 @@ exports.modifyCounts = function (req, res) {
           if (err) {
             return res.status(500).send(err.errmsg)
           }
-          if (upaccountnotfirst.nModified == 0) {
+          if (upaccountnotfirst.nModified === 0) {
             return res.json({result: '修改失败，讲道理这句话不会执行'})
-          } else if (upaccountnotfirst.nModified != 0) {
+          } else if (upaccountnotfirst.nModified !== 0) {
             return res.json({result: '修改成功', updateResult: upaccountnotfirst})
           }
         })
-				// return res.json({result: '修改成功', updateResult: upaccountadd});
+        // return res.json({result: '修改成功', updateResult: upaccountadd});
       }
     })
-  } else if (req.modify == 900) {
-		// 问诊结束，将count置为0
-    var modifyResult = 0
-    var upObj = {
+  } else if (req.modify === 900) {
+    // 问诊结束，将count置为0
+    modifyResult = 0
+    upObj = {
       $pull: {
         times: {
           doctorId: req.doctorId
@@ -488,7 +669,7 @@ exports.modifyCounts = function (req, res) {
       if (err) {
         return res.status(500).send(err.errmsg)
       }
-      if (upaccountadd.nModified == 0) {
+      if (upaccountadd.nModified === 0) {
         var upObjfirst = {
           $addToSet: {
             times: {
@@ -501,13 +682,13 @@ exports.modifyCounts = function (req, res) {
           if (err) {
             return res.status(500).send(err.errmsg)
           }
-          if (upaccountfirst.nModified == 0) {
+          if (upaccountfirst.nModified === 0) {
             return res.json({result: '修改成功', updateResult: upaccountfirst})
-          } else if (upaccountfirst.nModified != 0) {
+          } else if (upaccountfirst.nModified !== 0) {
             return res.json({result: '修改成功', updateResult: upaccountfirst})
           }
         })
-      } else if (upaccountadd.nModified != 0) {
+      } else if (upaccountadd.nModified !== 0) {
         var upObjnotfirst = {
           $addToSet: {
             times: {
@@ -520,13 +701,13 @@ exports.modifyCounts = function (req, res) {
           if (err) {
             return res.status(500).send(err.errmsg)
           }
-          if (upaccountnotfirst.nModified == 0) {
+          if (upaccountnotfirst.nModified === 0) {
             return res.json({result: '修改失败，讲道理这句话不会执行'})
-          } else if (upaccountnotfirst.nModified != 0) {
+          } else if (upaccountnotfirst.nModified !== 0) {
             return res.json({result: '修改成功', updateResult: upaccountnotfirst})
           }
         })
-				// return res.json({result: '修改成功', updateResult: upaccountadd});
+        // return res.json({result: '修改成功', updateResult: upaccountadd});
       }
     })
   }
@@ -545,7 +726,7 @@ exports.modifyCounts = function (req, res) {
 //             if (err) {
 //                 return res.status(500).send(err.errmsg);
 //             }
-//             if (item == null) {
+//             if (item === null) {
 //                 return res.json({result: '不存在的医生ID'});
 //             }
 //             else {
@@ -557,14 +738,14 @@ exports.modifyCounts = function (req, res) {
 //                     _money=item.charge2
 //                 }
 //                 else{
-//                 	_money=item.charge2-item.charge1
+//                   _money=item.charge2-item.charge1
 //                 }
 //                 // console.log(_money)
 //                 Account.getOne(query, function(err, item1) {
 //                     if (err) {
 //                         return res.status(500).send(err.errmsg);
 //                     }
-//                     if (item1 == null) {
+//                     if (item1 === null) {
 //                         var accountData = {
 //                             userId: _did,
 //                             money: _money,
@@ -600,7 +781,7 @@ exports.modifyCounts = function (req, res) {
 //                             if (err) {
 //                                 return res.status(500).send(err.errmsg);
 //                             }
-//                             if (upaccount.nModified == 0) {
+//                             if (upaccount.nModified === 0) {
 //                                 return res.json({result:'请获取账户信息确认是否修改成功'});
 //                             }
 //                             else if (upaccount.nModified != 0) {
@@ -621,42 +802,42 @@ exports.updateFreeTime = function (req, res) {
   var month = date.getMonth() + 1
   var year = date.getFullYear()
   var activity = 0
-  if (month < 8 && year == 2017) { activity = 1 }
+  if (month < 8 && year === 2017) { activity = 1 }
 
   var query = {userId: req.patientId}
   Account.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (item == null) {
-			// return res.json({result:'不存在的账户'})；
+    if (item === null) {
+      // return res.json({result:'不存在的账户'})；
       var accountData = {
-    			userId: req.patientId,
-    			freeTimes: 2,
-    			money: 0
-    		}
-    		if (activity == 1) {
-	    		accountData = {
-	    			userId: req.patientId,
-	    			freeTimes: 3,
-	    			money: 0
-	    		}
-    		}
-    		var newAccount = new Account(accountData)
+        userId: req.patientId,
+        freeTimes: 2,
+        money: 0
+      }
+      if (activity === 1) {
+        accountData = {
+          userId: req.patientId,
+          freeTimes: 3,
+          money: 0
+        }
+      }
+      var newAccount = new Account(accountData)
       newAccount.save(function (err, accountInfo) {
         if (err) {
-      				return res.status(500).send(err.errmsg)
-    			}
-    			return res.json({result: accountInfo})
+          return res.status(500).send(err.errmsg)
+        }
+        return res.json({result: accountInfo})
       })
-    }		else {
-      if (item.freeTimes == 0) {
+    } else {
+      if (item.freeTimes === 0) {
         return res.json({result: 'freeTimes = 0 !'})
-      }			else {
+      } else {
         var upObj = {freeTimes: item.freeTimes - 1}
-        if (activity == 1) {
-		    		upObj = {freeTimes: item.freeTimes}
-	    		}
+        if (activity === 1) {
+          upObj = {freeTimes: item.freeTimes}
+        }
         Account.updateOne(query, upObj, function (err, upaccount) {
           if (err) {
             return res.status(500).send(err.errmsg)
@@ -675,27 +856,27 @@ exports.getCountsRespective = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (item == null) {
-			// return res.json({result: '不存在的账户'});
+    if (item === null) {
+      // return res.json({result: '不存在的账户'});
       var accountData = {
-    			userId: req.patientId,
-    			freeTimes: 3,
-    			money: 0
-    		}
-    		var newAccount = new Account(accountData)
+        userId: req.patientId,
+        freeTimes: 3,
+        money: 0
+      }
+      var newAccount = new Account(accountData)
       newAccount.save(function (err, accountInfo) {
         if (err) {
-      				return res.status(500).send(err.errmsg)
-    			}
-    			return res.json({result: {count1: 0, count2: 0}})
+          return res.status(500).send(err.errmsg)
+        }
+        return res.json({result: {count1: 0, count2: 0}})
       })
-    }		else {
+    } else {
       var count1 = 0 // 咨询
       var count2 = 0 // 问诊
 
       for (var i = item.times.length - 1; i >= 0; i--) {
-				// item.times[i]
-        if (item.times[i].count == 999) {
+        // item.times[i]
+        if (item.times[i].count === 999) {
           count2 += 1
         } else if (item.times[i].count > 0 && item.times[i].count < 4) {
           count1 += 1
