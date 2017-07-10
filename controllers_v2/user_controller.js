@@ -1,5 +1,6 @@
+
 var config = require('../config')
-var Alluser = require('../models/alluser')
+var User = require('../models/user')
 var OpenIdTmp = require('../models/openId')
 // var DictNumber = require('../models/dictNumber')
 // var Numbering = require('../models/numbering')
@@ -11,7 +12,7 @@ var https = require('https')
 var webEntry = require('../settings').webEntry
 var request = require('request')
 var jwt = require('jsonwebtoken')
-// var Patient = require('../models/patient')
+var Patient = require('../models/patient')
 var commonFunc = require('../middlewares/commonFunc')
 var Base64 = {
     // 转码表
@@ -28,10 +29,11 @@ var Base64 = {
   UTF16ToUTF8: function (str) {
     var res = []
     var len = str.length
+    var byte1
+    var byte2
+    var byte3
     for (var i = 0; i < len; i++) {
       var code = str.charCodeAt(i)
-      var byte1
-      var byte2
       if (code > 0x0000 && code <= 0x007F) {
                 // 单字节，这里并不考虑0x0000，因为它是空字节
                 // U+00000000 – U+0000007F  0xxxxxxx
@@ -55,7 +57,7 @@ var Base64 = {
                 // 10xxxxxx
         byte2 = 0x80 | ((code >> 6) & 0x3F)
                 // 10xxxxxx
-        var byte3 = 0x80 | (code & 0x3F)
+        byte3 = 0x80 | (code & 0x3F)
         res.push(
                     String.fromCharCode(byte1),
                     String.fromCharCode(byte2),
@@ -79,13 +81,14 @@ var Base64 = {
     var res = []
     var len = str.length
     var i = 0
+    var code
+    var code2
+    var code3
+    var byte1
+    var byte2
+    var utf16
     for (i = 0; i < len; i++) {
-      var code = str.charCodeAt(i)
-      var code2
-      var code3
-      var byte1
-      var byte2
-      var utf16
+      code = str.charCodeAt(i)
             // 对第一个字节进行判断
       if (((code >> 7) & 0xFF) === 0x0) {
                 // 单字节
@@ -170,13 +173,11 @@ var Base64 = {
     var c1
     var c2
     var c3
-
     while (i < len) {
       code1 = this.table.indexOf(str.charAt(i++))
       code2 = this.table.indexOf(str.charAt(i++))
       code3 = this.table.indexOf(str.charAt(i++))
       code4 = this.table.indexOf(str.charAt(i++))
-
       c1 = (code1 << 2) | (code2 >> 4)
       c2 = ((code2 & 0xF) << 4) | (code3 >> 2)
       c3 = ((code3 & 0x3) << 6) | code4
@@ -199,12 +200,12 @@ function evil (fn) {
   // 一个变量指向Function，防止有些前端编译工具报错
   return new Fn('return ' + fn)()
 }
-exports.getAlluser = function (req, res) {
+exports.getUser = function (req, res) {
     // var _userId = req.query.userId
     // var query = {userId:_userId};
   var username = req.query.username
   if (username === '' || username === null) {
-        // return res.status(422).send('username字段请输入AlluserId或openId或手机号!');
+        // return res.status(422).send('username字段请输入UserId或openId或手机号!');
     return res.status(422).send('username字段请输入openId!')
   }
     // var query = {openId:username};
@@ -215,7 +216,7 @@ exports.getAlluser = function (req, res) {
             {phoneNo: username}
     ]
   }
-  Alluser.getOne(query, function (err, item) {
+  User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -223,10 +224,10 @@ exports.getAlluser = function (req, res) {
   })
 }
 
-// exports.getAlluserTDCticket = function(req, res) {
+// exports.getUserTDCticket = function(req, res) {
 //     var username = req.query.username;
 //     if (username === '' || username === null) {
-//         return res.status(422).send('username字段请输入AlluserId或openId或手机号!');
+//         return res.status(422).send('username字段请输入UserId或openId或手机号!');
 //     }
 //     var query = {
 //         $or: [
@@ -235,7 +236,7 @@ exports.getAlluser = function (req, res) {
 //             {phoneNo: username}
 //         ]
 //     };
-//     Alluser.getOne(query, function(err, item) {
+//     User.getOne(query, function(err, item) {
 //         if (err) {
 //             return res.status(500).send(err.errmsg);
 //         }
@@ -243,208 +244,41 @@ exports.getAlluser = function (req, res) {
 //     });
 // }
 
-exports.getAlluserAgreement = function (req, res) {
+exports.getUserAgreement = function (req, res) {
   var _userId = req.query.userId
   var query = {userId: _userId}
   var opts = ''
   var fields = {'agreement': 1}
-  Alluser.getOne(query, function (err, item) {
+  User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     res.json({results: item})
   }, opts, fields)
 }
-exports.updateAlluserAgreement = function (req, res) {
+exports.updateUserAgreement = function (req, res) {
   var _userId = req.body.userId
   var _agreement = req.body.agreement
   var query = {userId: _userId}
-  Alluser.updateOne(query, {$set: {agreement: _agreement}}, function (err, item1) {
+  User.updateOne(query, {$set: {agreement: _agreement}}, function (err, item1) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     res.json({results: item1, msg: 'success!'})
   })
 }
-// WF 20170626
-function changeAlluserInvalidFlag (req, res, invalidFlag) {
-  var _userId = req.body.userId
-  var _invalidFlag = invalidFlag
-  var query = {userId: _userId}
-  Alluser.updateOne(query, {$set: {invalidFlag: _invalidFlag}}, function (err, item1) {
+exports.getUserList = function (req, res) {
+  var query = {}
+
+  User.getSome(query, function (err, userlist) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    res.json({results: item1, msg: 'success!'})
+
+    res.json({results: userlist})
   })
 }
-exports.cancelAlluser = function (req, res) {
-  changeAlluserInvalidFlag(req, res, 1)
-}
-exports.getAlluserList = function (role) {
-    // console.log(1);
-  return function (req, res) {
-    var query = {'invalidFlag': 0}
-    var fields = {'_id': 0}//, 'revisionInfo':0
-
-    var limit = Number(req.query.limit)
-    var skip = Number(req.query.skip)
-    var opts = {limit: limit, skip: skip, sort: '_id'}
-
-    var _uid = req.query.userId
-    var _role = role
-
-        // role 0-user 1-doctor 2-patient 3-nurse 4-insurance 5-health 6-admin
-    if (_uid !== null && _uid !== undefined && _uid !== '') {
-      query['userId'] = _uid
-    }
-    fields['userId'] = 1
-    fields['name'] = 1
-    fields['gender'] = 1
-    fields['phoneNo'] = 1
-    if (_role === 0) {
-      fields['role'] = 1
-    }
-    if (_role === 1) {
-      query['$or'] = [{'role': 'doctor'}, {'role': 'Leader'}, {'role': 'master'}]
-      fields['workUnit'] = 1
-      fields['department'] = 1
-      fields['title'] = 1
-      fields['count1'] = 1
-      fields['count2'] = 1
-      fields['score'] = 1
-      fields['description'] = 1
-      fields['major'] = 1
-    }
-    if (_role === 2) {
-      query['role'] = 'patient'
-      fields['VIP'] = 1
-      fields['IDNo'] = 1
-      fields['class'] = 1
-      fields['hypertension'] = 1
-      fields['bloodType'] = 1
-      fields['height'] = 1
-      fields['weight'] = 1
-      fields['class_info'] = 1
-      fields['birthday'] = 1
-      fields['allergic'] = 1
-    }
-    if (_role === 3) {
-      query['role'] = 'nurse'
-      fields['workUnit'] = 1
-      fields['department'] = 1
-      fields['workAmounts'] = 1
-    }
-    if (_role === 4) {
-      query['$or'] = [{'role': 'insuranceA'}, {'role': 'insuranceR'}, {'role': 'insuranceC'}]
-      fields['boardingTime'] = 1
-      fields['role'] = 1
-      fields['workAmounts'] = 1
-    }
-    if (_role === 5) {
-      query['role'] = 'health'
-      fields['boardingTime'] = 1
-      fields['workAmounts'] = 1
-    }
-    if (_role === 6) {
-      query['role'] = 'admin'
-      fields['workUnit'] = 1
-      fields['creationTime'] = 1
-    }
-        // 通过子表查询主表，定义主表查询路径及输出内容
-        // var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
-        // console.log(query);
-    Alluser.getSome(query, function (err, userlist) {
-      if (err) {
-        return res.status(500).send(err.errmsg)
-      }
-      res.json({results: userlist})
-    }, opts, fields)
-  }
-}
-
-exports.updateAlluserList = function (req, res) {
-  var _userId = req.body.userId
-  var _name = req.body.name
-  // var _birthday = req.body.birthday// Date
-  var _gender = req.body.gender// Number
-  // var _IDNo = req.body.IDNo
-  var _phoneNo = req.body.phoneNo
-  // var _photoUrl = req.body.photoUrl
-  // var _province = req.body.province
-  // var _city = req.body.city
-  // var _district = req.body.district
-  var _workUnit = req.body.workUnit
-  // var _title = req.body.title
-  // var _job = req.body.job
-  var _department = req.body.department
-  // var _major = req.body.major
-  // var _description = req.body.description
-  // var _height = req.body.height
-  // var _weight = req.body.weight
-  // var _occupation = req.body.occupation
-  // var _bloodType = req.body.bloodType// Number
-  // var _address = req.body.address
-  // var _class = req.body.class
-  // var _class_info = req.body.class_info
-  var _workAmounts = req.body.workAmounts
-  var _boardingTime = req.body.boardingTime
-  // var _creationTime = req.body.creationTime
-
-  var query = {userId: _userId}
-  var upObj = {}
-  if (_name !== null && _name !== undefined && _name !== '') {
-    upObj['name'] = _name
-  }
-  if (_gender !== null && _gender !== undefined && _gender !== '') {
-    if (_gender === 0 || _gender === 1) {
-      upObj['gender'] = Number(_gender)
-    } else {
-      return res.json({status: 1, results: 'gender must be 0 or 1!'})
-    }
-  }
-  if (_phoneNo !== null && _phoneNo !== undefined && _phoneNo !== '') {
-    upObj['phoneNo'] = _phoneNo
-  }
-  if (_workUnit !== null && _workUnit !== undefined && _workUnit !== '') {
-    upObj['workUnit'] = _workUnit
-  }
-  if (_department !== null && _department !== undefined && _department !== '') {
-    upObj['department'] = _department
-  }
-  if (_workAmounts !== null && _workAmounts !== undefined && _workAmounts !== '') {
-    upObj['workAmounts'] = _workAmounts
-  }
-  if (_boardingTime !== null && _boardingTime !== undefined && _boardingTime !== '') {
-    upObj['boardingTime'] = new Date(_boardingTime)
-  }
-    // console.log(upObj);
-  Alluser.updateOne(query, {$set: upObj}, function (err, item1) {
-    if (err) {
-            // console.log(err);
-      return res.status(500).send(err.errmsg)
-    }
-    res.json({status: 0, results: item1, msg: 'success!'})
-  })
-}
-
-// function getroles(user,acl){
-//  var userId = user.userId;
-//  var ret;
-//  if(userId){
-//      acl.userRoles(userId, function(err, roles){
-//          if(err){
-//              return res.status(500).send(err.errmsg);
-//          }
-//          console.log(roles);
-//          ret = roles;
-//          // userlist[i]["roles"]=roles;
-//      });
-//  }
-//  console.log(ret);
-//  return ret;
-// }
-exports.insertAlluser = function (req, res) {
+exports.insertUser = function (req, res) {
   var userData = {
     userId: 'whoareyou',
     userName: 'chi',
@@ -468,99 +302,77 @@ exports.insertAlluser = function (req, res) {
     }
   }
 
-  var newAlluser = new Alluser(userData)
-  newAlluser.save(function (err, userInfo) {
+  var newUser = new User(userData)
+  newUser.save(function (err, userInfo) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     res.json({results: userInfo})
   })
 }
-exports.registerTest = function (acl) {
-  return function (req, res, next) {
-    var _phoneNo = req.query.phoneNo
-    var _password = req.query.password
-    var _role = req.query.role
-    var query = {phoneNo: _phoneNo}
-        // var _userNo = req.newId
-    Alluser.getOne(query, function (err, item) {
-      if (err) {
-        return res.status(500).send(err.errmsg)
-      }
-      if (item != null) {
-        var query1 = {phoneNo: _phoneNo, role: _role}
-        Alluser.getOne(query1, function (err, item1) {
-          if (err) {
-            return res.status(500).send(err.errmsg)
-          }
-          if (item1 != null) {
-            res.json({results: 1, userNo: '', mesg: 'Alluser Already Exist!'})
-          } else {
-            Alluser.updateOne(query, {$push: { role: _role }, $set: {password: _password}}, function (err, item2) {
-              if (err) {
-                return res.status(500).send(err.errmsg)
-              }
-              var userId = item.userId
-              var roles = _role
-
-              if (userId && roles) {
-                acl.addUserRoles(userId, roles, function (err) {
-                  if (err) {
-                    return res.status(500).send(err.errmsg)
-                  }
-                                    // res.json({results: {status:1,msg:'success'}});
-                  res.json({results: 0, userNo: item.userId, mesg: 'Alluser Register Success!'})
-                })
-              } else {
-                return res.status(400).send('empty inputs')
-              }
-                            // res.json({results: 0,userNo:item.userId,mesg:"Alluser Register Success!"});
-            })
-          }
-        })
-      } else {
-        next()
-      }
-    })
-  }
-}
-exports.register = function (acl) {
-  return function (req, res) {
-    var _phoneNo = req.query.phoneNo
-    var _password = req.query.password
-    var _role = req.query.role
-        // var query = {phoneNo:_phoneNo};
-    var _userNo = req.newId
-
-    var userData = {
-      phoneNo: _phoneNo,
-      password: _password,
-      role: _role,
-      userId: _userNo,
-      invalidFlag: 0
+exports.registerTest = function (req, res, next) {
+  var _phoneNo = req.query.phoneNo
+  var _password = req.query.password
+  var _role = req.query.role
+  var query = {phoneNo: _phoneNo}
+    // var _userNo = req.newId
+  User.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
     }
-    var newAlluser = new Alluser(userData)
-    newAlluser.save(function (err, Info) {
-      if (err) {
-        return res.status(500).send(err.errmsg)
-      }
-      var userId = _userNo
-      var roles = _role
+    if (item !== null) {
+      var query1 = {phoneNo: _phoneNo, role: _role}
+      User.getOne(query1, function (err, item1) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item1 !== null) {
+          res.json({results: 1, userNo: '', mesg: 'User Already Exist!'})
+        } else {
+          User.updateOne(query, {$push: { role: _role }, $set: {password: _password}}, function (err, item2) {
+            if (err) {
+              return res.status(500).send(err.errmsg)
+            }
+            res.json({results: 0, userNo: item.userId, mesg: 'User Register Success!'})
+          })
+        }
+      })
+    } else {
+      next()
+    }
+  })
+}
+exports.register = function (req, res) {
+  var _phoneNo = req.query.phoneNo
+  var _password = req.query.password
+  var _role = req.query.role
+    // var query = {phoneNo:_phoneNo};
+  var _userNo = req.newId
 
-      if (userId && roles) {
-        acl.addUserRoles(userId, roles, function (err) {
-          if (err) {
-            return res.status(500).send(err.errmsg)
-          }
-                    // res.json({results: {status:1,msg:'success'}});
-          res.json({results: 0, userNo: _userNo, mesg: 'Alluser Register Success!'})
-        })
-      } else {
-        return res.status(400).send('empty inputs')
-      }
-            // res.json({results: 0,userNo:_userNo,mesg:"Alluser Register Success!"});
-    })
+  var userData = {
+    phoneNo: _phoneNo,
+    password: _password,
+    role: _role,
+    userId: _userNo
   }
+  var newUser = new User(userData)
+  newUser.save(function (err, Info) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    if (_role === 'patient') {
+      var PatientData = {
+        userId: _userNo
+      }
+      var newPatient = new Patient(PatientData)
+      newPatient.save(function (err, patientInfo) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+      })
+    }
+    res.json({results: 0, userNo: _userNo, mesg: 'User Register Success!'})
+  })
 }
 // exports.registerWithOpenIdTest = function(req, res,next) {
 //     var parser = new xml2js.Parser();
@@ -570,29 +382,29 @@ exports.register = function (acl) {
 //     });
 //     // var _openId = req.query.openId
 //     // var _role = req.query.role
-//     var _openId=data.xml.FromAlluserName
-//     // var _openId=data.xml.FromAlluserName
+//     var _openId=data.xml.FromUserName
+//     // var _openId=data.xml.FromUserName
 //     var query = {openId:_openId};
 //     // var _userNo = req.newId
-//     Alluser.getOne(query, function(err, item) {
+//     User.getOne(query, function(err, item) {
 //         if (err) {
 //             return res.status(500).send(err.errmsg);
 //         }
 //         if(item!=null){
 //             var query1 = {openId:_openId,role: _role};
-//             Alluser.getOne(query1, function(err, item1) {
+//             User.getOne(query1, function(err, item1) {
 //                 if (err) {
 //                     return res.status(500).send(err.errmsg);
 //                 }
 //                 if(item1!=null){
-//                     res.json({results: 1,userNo:"",mesg:"Alluser Already Exist!"});
+//                     res.json({results: 1,userNo:"",mesg:"User Already Exist!"});
 //                 }
 //                 else{
-//                     Alluser.updateOne(query,{ $push: { role: _role } },function(err, item2){
+//                     User.updateOne(query,{ $push: { role: _role } },function(err, item2){
 //                         if (err) {
 //                             return res.status(500).send(err.errmsg);
 //                         }
-//                         res.json({results: 0,mesg:"Alluser Register Success!"});
+//                         res.json({results: 0,mesg:"User Register Success!"});
 //                     });
 //                 }
 //             });
@@ -616,26 +428,26 @@ exports.register = function (acl) {
 //         role: _role,
 //         userId:_userNo
 //     };
-//     var newAlluser = new Alluser(userData);
-//     newAlluser.save(function(err, Info) {
+//     var newUser = new User(userData);
+//     newUser.save(function(err, Info) {
 //         if (err) {
 //             return res.status(500).send(err.errmsg);
 //         }
-//         res.json({results: 0,userNo:_userNo,mesg:"Alluser Register Success!"});
+//         res.json({results: 0,userNo:_userNo,mesg:"User Register Success!"});
 //     });
 // }
 exports.reset = function (req, res) {
   var _phoneNo = req.query.phoneNo
   var _password = req.query.password
   var query = {phoneNo: _phoneNo}
-  Alluser.getOne(query, function (err, item) {
+  User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     if (item === null) {
-      res.json({results: 1, mesg: "Alluser doesn't Exist!"})
+      res.json({results: 1, mesg: "User doesn't Exist!"})
     } else {
-      Alluser.updateOne(query, { $set: { password: _password } }, function (err, item1) {
+      User.updateOne(query, { $set: { password: _password } }, function (err, item1) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
@@ -651,7 +463,7 @@ exports.setOpenId = function (req, res, next) {
   if (_openId === undefined || _openId === null || _openId === '') {
     return res.status(403).send('unionid不能为空')
   }
-  Alluser.updateOne(query, {$set: {openId: _openId}}, function (err, item) {
+  User.updateOne(query, {$set: {openId: _openId}}, function (err, item) {
     if (err) {
       if (err.code === 11000) {
         return res.status(403).send('unionid已存在')
@@ -684,11 +496,11 @@ exports.openIdLoginTest = function (req, res, next) {
     openId: username
   }
   var openIdFlag = 0
-  Alluser.getOne(query, function (err, item) {
+  User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (item != null) {
+    if (item !== null) {
       openIdFlag = 1
     }
     req.openIdFlag = openIdFlag
@@ -714,12 +526,12 @@ exports.checkBinding = function (req, res, next) {
   }
     // console.log(query);
 
-  Alluser.getOne(query, function (err, item) {
+  User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (item != null) {
-      if (item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
+    if (item !== null) {
+      if (item.MessageOpenId !== null && (item.MessageOpenId.patientWechat !== null || item.MessageOpenId.test !== null)) {
                 // openId 存在
         var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test}
                 // console.log(query);
@@ -728,14 +540,14 @@ exports.checkBinding = function (req, res, next) {
             return res.status(500).send(err.errmsg)
           }
                     // console.log({item1:item1});
-                    // if(item1 != null && item1.doctorAlluserId != null){
-          if (item1 != null) {
+                    // if(item1 !== null && item1.doctorUserId !== null){
+          if (item1 !== null) {
                         // console.log(1111);
 
                         // binding doctor
             var jsondata = {
               patientId: item.userId,
-              doctorId: item1.doctorAlluserId,
+              doctorId: item1.doctorUserId,
               dpRelationTime: Date()
             }
                         // console.log(jsondata);
@@ -763,7 +575,7 @@ exports.checkBinding = function (req, res, next) {
             })
           } else {
                         // console.log("No OpenIdTmp");
-                        // if(item1.doctorAlluserId === null){
+                        // if(item1.doctorUserId === null){
                         //     console.log(11112222);
                         //      OpenIdTmp.remove(query,function(err){
                         //         if (err) {
@@ -793,7 +605,7 @@ exports.checkBinding = function (req, res, next) {
             // 2017-06-07GY调试
             // console.log('checkBinding_err_user_not_exist');
 
-      res.json({results: 1, mesg: "Alluser doesn't Exist!"})
+      res.json({results: 1, mesg: "User doesn't Exist!"})
     }
   })
 }
@@ -814,7 +626,7 @@ exports.login = function (req, res) {
     ]
   }
   var openIdFlag = req.openIdFlag
-  Alluser.getOne(query, function (err, item) {
+  User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -822,13 +634,13 @@ exports.login = function (req, res) {
             // 2017-06-07GY调试
             // console.log('login_err_user_not_exist');
 
-      res.json({results: 1, mesg: "Alluser doesn't Exist!"})
+      res.json({results: 1, mesg: "User doesn't Exist!"})
     } else {
       if (password !== item.password && openIdFlag === 0) {
                 // 2017-06-07GY调试
                 // console.log('login_err_password_not_correct');
 
-        res.json({results: 1, mesg: "Alluser password isn't correct!"})
+        res.json({results: 1, mesg: "User password isn't correct!"})
       } else if (item.role.indexOf(role) === -1) {
                 // 2017-06-07GY调试
                 // console.log('login_err_no_authority');
@@ -837,7 +649,7 @@ exports.login = function (req, res) {
       } else {
         var _lastlogindate = item.lastLogin
                 // console.log(Date())
-        Alluser.updateOne(query, { $set: {loginStatus: 0, lastLogin: Date()} }, function (err, user) {
+        User.updateOne(query, { $set: {loginStatus: 0, lastLogin: Date()} }, function (err, user) {
           if (err) {
             return res.status(500).send(err.errmsg)
           }
@@ -894,14 +706,14 @@ exports.login = function (req, res) {
 exports.logout = function (req, res) {
   var _userId = req.query.userId
   var query = {userId: _userId}
-  Alluser.getOne(query, function (err, item) {
+  User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     if (item === null) {
-      res.json({results: 1, mesg: "Alluser doesn't Exist!"})
+      res.json({results: 1, mesg: "User doesn't Exist!"})
     } else {
-      Alluser.updateOne(query, { $set: {loginStatus: 1} }, function (err, item1) {
+      User.updateOne(query, { $set: {loginStatus: 1} }, function (err, item1) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
@@ -910,7 +722,7 @@ exports.logout = function (req, res) {
     }
   })
 }
-exports.getAlluserID = function (req, res) {
+exports.getUserID = function (req, res) {
   var username = req.query.username || null
   if (username === null || username === '') {
     return res.status(400).send('invalid input')
@@ -924,15 +736,15 @@ exports.getAlluserID = function (req, res) {
     ]
   }
     // console.log(query);
-  Alluser.getOne(query, function (err, item) {
+  User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     if (item === null) {
-      res.json({results: 1, mesg: "Alluser doesn't Exist!"})
+      res.json({results: 1, mesg: "User doesn't Exist!"})
     } else {
       console.log(item)
-      res.json({results: 0, AlluserId: item.userId, phoneNo: item.phoneNo, roles: item.role, openId: item.openId, mesg: 'Get AlluserId Success!'})
+      res.json({results: 0, UserId: item.userId, phoneNo: item.phoneNo, roles: item.role, openId: item.openId, mesg: 'Get UserId Success!'})
     }
   })
 }
@@ -1088,7 +900,7 @@ exports.verifySMS = function (req, res) {
     }
         // res.json({results: 0});
             // query by _mobile and _smsType
-    if (item != null) {
+    if (item !== null) {
       if (item.randNum === _smsCode) {
         res.json({results: 0, mesg: '验证码正确!'})
       } else {
@@ -1117,12 +929,12 @@ exports.getPhoneNoByRole = function (req, res) {
   var query = {role: req.query.role}
   var fields = {userId: 1, userName: 1, phoneNo: 1, _id: 0}
 
-  Alluser.getSome(query, function (err, items) {
+  User.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     if (items === null) {
-            // res.json({results: 1,mesg:"Alluser doesn't Exist!"});
+            // res.json({results: 1,mesg:"User doesn't Exist!"});
     } else {
             // var phoneNos = [];
             // for (var i = items.length - 1; i >= 0; i--) {
@@ -1140,7 +952,7 @@ exports.setTDCticket = function (req, res) {
   var userId = req.body.userId
 
   var query = {userId: userId}
-  Alluser.updateOne(query, {$set: {TDCticket: TDCticket, TDCurl: TDCurl}}, function (err, item) {
+  User.updateOne(query, {$set: {TDCticket: TDCticket, TDCurl: TDCurl}}, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -1276,7 +1088,7 @@ exports.setMessageOpenId = function (req, res) {
       }
     }
   }
-  Alluser.updateOne(query, upObj, function (err, item) {
+  User.updateOne(query, upObj, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -1292,7 +1104,7 @@ exports.getMessageOpenId = function (req, res) {
   }
   var query = {userId: userId}
 
-  Alluser.getOne(query, function (err, item) {
+  User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -1311,7 +1123,7 @@ exports.getMessageOpenId = function (req, res) {
     }
   })
 }
-exports.checkAlluser = function (req, res, next) {
+exports.checkUser = function (req, res, next) {
   if (req.query.userId === null || req.query.userId === '' || req.query.userId === undefined) {
     if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) {
       return res.json({result: '请填写userId!'})
@@ -1322,7 +1134,7 @@ exports.checkAlluser = function (req, res, next) {
     req.userId = req.query.userId
   }
   var query = {userId: req.userId}
-  Alluser.getOne(query, function (err, item) {
+  User.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }

@@ -20,6 +20,7 @@ var getNoMid = require('../middlewares/getNoMid'),
 
 // controllers
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller'),
+    niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller'),
     alluserCtrl = require('../controllers_v2/alluser_controller');
 
 var reviewCtrl = require('../controllers_v2/review_controller');
@@ -82,6 +83,7 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate);
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo);
 
+
   //labtestImport
   app.get(version + '/labtestImport/listByStatus', tokenManager.verifyToken(), labtestImportCtrl.listByStatus);
   app.get(version + '/labtestImoprt/photoList', tokenManager.verifyToken(), labtestImportCtrl.photoList);
@@ -90,6 +92,10 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/labtestImport', tokenManager.verifyToken(), labtestImportCtrl.getLabtest);
   app.get(version + '/labtestImport/photoByLabtest', tokenManager.verifyToken(), labtestImportCtrl.photoByLabtest);
   app.post(version + '/labtestImport/labelphoto', labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest);
+
+  // niaodaifu
+  app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam);
+
 
 };
 
