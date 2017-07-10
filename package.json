@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "pm2 start server.js"
+    "start": "pm2 start server.js",
+    "codeformat": "standard"
   },
   "author": "csq",
   "license": "ISC",
