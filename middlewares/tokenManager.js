@@ -18,7 +18,7 @@ exports.verifyToken = function () {
             return res.status(401).send("TokenExpiredError");
           }
           else{
-            return res.status(401).send(err.errmsg);
+            return res.status(401).send(err);
           }
           
         }
