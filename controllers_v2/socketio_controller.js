@@ -205,32 +205,32 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
                   'template_id': 'cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k',
                   'url': actionUrl,
                   'data': {
-                      'first': {
-                        'value': '您的团队有一个新的咨询（问诊）消息，请及时处理',
-                        'color': '#173177'
-                      },
-                      'keyword1': {
-                        'value': data.msg.content.counselId, // 咨询ID
-                        'color': '#173177'
-                      },
-                      'keyword2': {
-                        'value': data.msg.content.patientName, // 患者信息（姓名，性别，年龄）
-                        'color': '#173177'
-                      },
-                      'keyword3': {
-                        'value': data.msg.content.help, // 问题描述
-                        'color': '#173177'
-                      },
-                      'keyword4': {
-                        'value': data.msg.content.time, // 提交时间
-                        'color': '#173177'
-                      },
+                    'first': {
+                      'value': '您的团队有一个新的咨询（问诊）消息，请及时处理',
+                      'color': '#173177'
+                    },
+                    'keyword1': {
+                      'value': data.msg.content.counselId, // 咨询ID
+                      'color': '#173177'
+                    },
+                    'keyword2': {
+                      'value': data.msg.content.patientName, // 患者信息（姓名，性别，年龄）
+                      'color': '#173177'
+                    },
+                    'keyword3': {
+                      'value': data.msg.content.help, // 问题描述
+                      'color': '#173177'
+                    },
+                    'keyword4': {
+                      'value': data.msg.content.time, // 提交时间
+                      'color': '#173177'
+                    },
 
-                      'remark': {
-                        'value': '感谢您的使用！',
-                        'color': '#173177'
-                      }
+                    'remark': {
+                      'value': '感谢您的使用！',
+                      'color': '#173177'
                     }
+                  }
                 }
               }
 

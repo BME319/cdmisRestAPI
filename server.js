@@ -14,17 +14,17 @@ var acl = require('acl')
 
 var webEntry = require('./settings').webEntry
 
-var _config = webEntry.config || 'config',
-  domain = webEntry.domain,
-  domainName = webEntry.domainName
-  // route = webEntry.route || 'default'
+var _config = webEntry.config || 'config'
+var domain = webEntry.domain
+var domainName = webEntry.domainName
+// route = webEntry.route || 'default'
 
-var config = require('./' + _config),
-  dbUri = webEntry.dbUri,
-  restPort = webEntry.restPort,
-    // routes = require('./routes/'+route),     // 2017年6月22日停止使用
-  routesV1 = require('./routes/routes_v1'),
-  routesV2 = require('./routes/routes_v2')
+var config = require('./' + _config)
+var dbUri = webEntry.dbUri
+var restPort = webEntry.restPort
+// routes = require('./routes/'+route),     // 2017年6月22日停止使用
+var routesV1 = require('./routes/routes_v1')
+var routesV2 = require('./routes/routes_v2')
 
 // 数据库连接
 var db = mongoose.connection
