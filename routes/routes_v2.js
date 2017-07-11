@@ -5,20 +5,20 @@ var version = '/api/v2'
 // 3rd packages
 
 // self-defined configurations
-var config = require('../config')
+// var config = require('../config')
 
 // models
-var Wechat = require('../models/wechat')
+// var Wechat = require('../models/wechat')
 
 // middlewares
-var getNoMid = require('../middlewares/getNoMid'),
-  tokenManager = require('../middlewares/tokenManager'),
-  aclChecking = require('../middlewares/aclChecking')
+var getNoMid = require('../middlewares/getNoMid')
+var tokenManager = require('../middlewares/tokenManager')
+// var aclChecking = require('../middlewares/aclChecking')
 
 // controllers
-var aclsettingCtrl = require('../controllers_v2/aclsetting_controller'),
-  niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller'),
-  alluserCtrl = require('../controllers_v2/alluser_controller')
+var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
+var niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller')
+var alluserCtrl = require('../controllers_v2/alluser_controller')
 
 var reviewCtrl = require('../controllers_v2/review_controller')
 var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
