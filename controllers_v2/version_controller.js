@@ -1,5 +1,5 @@
 
-var Version = require('../models/version')
+var Version = require('../models/version');
 
 exports.getVersionInfo = function (req, res) {
   var versionName = req.query.versionName
