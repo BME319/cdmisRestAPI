@@ -261,7 +261,18 @@ exports.getLabtest = function (req, res) {
   if (req.query.time !== null && req.query.time !== '' && req.query.time !== undefined) {
     query['time'] = new Date(req.query.time);
   }
-  var opts = '';
+  var opts = {};
+  if (req.query.sort !== null && req.query.sort !== '' && req.query.sort !== undefined) {
+    if (req.query.sort === '-time') {
+      opts['sort'] = '-time'
+    }
+    else if (req.query.sort === '+time') {
+      opts['sort'] = 'time'
+    }
+    else {
+      return res.status(412).json({results: 'sort字段输入不合法'})
+    }
+  }
   var fields = {'photoId':0};
   var populate = {
     path: 'importer', 
