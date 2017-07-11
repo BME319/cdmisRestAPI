@@ -1,19 +1,3 @@
-<<<<<<< HEAD
-var request = require('request'),
-  xml2js = require('xml2js'),
-  https = require('https'),
-  moment = require('moment'),
-  crypto = require('crypto'),
-  fs = require('fs')
-
-var config = require('../config'),
-  webEntry = require('../settings').webEntry,
-  commonFunc = require('../middlewares/commonFunc'),
-  User = require('../models/user'),
-  Doctor = require('../models/doctor'),
-  OpenIdTmp = require('../models/openId'),
-  Order = require('../models/order')
-=======
 var request = require('request')
 var xml2js = require('xml2js')
 var moment = require('moment')
@@ -28,7 +12,6 @@ var User = require('../models/user')
 var Doctor = require('../models/doctor')
 var OpenIdTmp = require('../models/openId')
 var Order = require('../models/order')
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
 // appid: wx8a6a43fb9585fb7c;secret: b23a4696c3b0c9b506891209d2856ab2
 
@@ -74,21 +57,6 @@ exports.chooseAppId = function (req, res, next) {
   var role = req.query.role || req.body.role
   // console.log("test1");
   // console.log(role);
-<<<<<<< HEAD
-  if (role == 'doctor') {
-    req.wxApiUserObject = config.wxDeveloperConfig.sjkshz
-    next()
-  } else if (role == 'patient') {
-    req.wxApiUserObject = config.wxDeveloperConfig.ssgj
-    next()
-  } else if (role == 'test') {
-    req.wxApiUserObject = config.wxDeveloperConfig.test
-    next()
-  } else if (role == 'appPatient') {
-    req.wxApiUserObject = config.wxDeveloperConfig.appssgj
-    next()
-  } else if (role == 'appDoctor') {
-=======
   if (role === 'doctor') {
     req.wxApiUserObject = config.wxDeveloperConfig.sjkshz
     next()
@@ -102,7 +70,6 @@ exports.chooseAppId = function (req, res, next) {
     req.wxApiUserObject = config.wxDeveloperConfig.appssgj
     next()
   } else if (role === 'appDoctor') {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     req.wxApiUserObject = config.wxDeveloperConfig.appsjkshz
     next()
   } else {
@@ -201,11 +168,7 @@ exports.getServerSignature = function (req, res) {
 
 exports.settingConfig = function (req, res) {
   var ticketObject = req.wxToken || {}
-<<<<<<< HEAD
-  var request_url = req.query.url
-=======
   var requestUrl = req.query.url
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
   var paramData = {
     url: requestUrl,
@@ -255,15 +218,9 @@ exports.gettokenbycode = function (req, res, next) { // 获取用户信息的acc
             // api_type: 1
     }
             // console.log(wechatData);
-<<<<<<< HEAD
-    if (wechatData.scope == 'snsapi_base') {
-      return res.json({results: wechatData})
-    } else if (wechatData.scope == 'snsapi_userinfo') {
-=======
     if (wechatData.scope === 'snsapi_base') {
       return res.json({results: wechatData})
     } else if (wechatData.scope === 'snsapi_userinfo') {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       req.wechatData = wechatData
       req.state = state
 
@@ -282,41 +239,6 @@ exports.returntoken = function (req, res) {
   return res.json({result: req.wechatData})
 }
 
-<<<<<<< HEAD
-exports.refresh_token = function (req, res, next) {
-  var refresh_Token = req.query.refresh_token
-
-  var api_url = wxApis.refresh_token + '?appid=' + paramData.appid + '&grant_type=refresh_token' + '&refresh_token=' + refresh_Token
-
-  request({
-    method: 'GET',
-    url: api_url,
-    json: true
-  }, function (err, response, body) {
-    var wechatData = {
-      access_token: body.access_token, // 获取用户信息的access_token
-      expires_in: body.expires_in,
-      refresh_token: body.refresh_token,
-      openid: body.openid,
-      scope: body.scope//,
-            // unionid: body.unionid,
-            // api_type: 1
-    }
-    res.json(wechatData)
-    next()
-  })
-}
-
-exports.verifyaccess_token = function (req, res, next) { // 获取用户信息的access_token
-  var openid = req.query.openid
-  var access_token = req.query.access_token// 获取用户信息的access_token
-
-  var api_url = wxApis.verifyaccess_token + '?access_token=' + access_token + '&openid=' + openid
-
-  request({
-    method: 'GET',
-    url: api_url,
-=======
 // exports.refresh_token = function (req, res, next) {
 //   var refreshToken = req.query.refresh_token
 
@@ -350,7 +272,6 @@ exports.verifyaccess_token = function (req, res, next) { // 获取用户信息�
   request({
     method: 'GET',
     url: apiUrl,
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     json: true
   }, function (err, response, body) {
     var wechatData = {
@@ -360,11 +281,7 @@ exports.verifyaccess_token = function (req, res, next) { // 获取用户信息�
       openid: body.openid,
       scope: body.scope
     }
-<<<<<<< HEAD
-    if (body.errcode == 0) {
-=======
     if (body.errcode === 0) {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       res.json(wechatData)
       next()
     } else {
@@ -375,15 +292,6 @@ exports.verifyaccess_token = function (req, res, next) { // 获取用户信息�
 
 exports.getuserinfo = function (req, res) {
   var openid = req.wechatData.openid
-<<<<<<< HEAD
-  var access_token = req.wechatData.access_token// 获取用户信息的access_token
-
-  var api_url = wxApis.getuserinfo + '?access_token=' + access_token + '&openid=' + openid + '&lang=zh_CN'
-
-  request({
-    method: 'GET',
-    url: api_url,
-=======
   var accessToken = req.wechatData.access_token// 获取用户信息的access_token
 
   var apiUrl = wxApis.getuserinfo + '?access_token=' + accessToken + '&openid=' + openid + '&lang=zh_CN'
@@ -391,7 +299,6 @@ exports.getuserinfo = function (req, res) {
   request({
     method: 'GET',
     url: apiUrl,
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     json: true
   }, function (err, response, body) {
     if (err) {
@@ -428,17 +335,10 @@ exports.addOrder = function (req, res, next) {
     }})
   }
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss')
-<<<<<<< HEAD
-  var out_trade_no = orderObject.orderNo
-  var total_fee = parseInt(orderObject.money)
-
-  var detail = '<![CDATA[{"goods_detail":' + JSON.stringify(orderObject.goodsInfo) + '}]]>'
-=======
   var outTradeNo = orderObject.orderNo
   var totalFee = parseInt(orderObject.money)
 
   // var detail = '<![CDATA[{"goods_detail":' + JSON.stringify(orderObject.goodsInfo) + '}]]>'
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     // console.log(commonFunc.getClientIp(req).split(':')[3]);
   var paramData = {
     appid: req.wxApiUserObject.appid,   // 公众账号ID
@@ -449,15 +349,9 @@ exports.addOrder = function (req, res, next) {
     body: req.body.body_description,    // 商品描述
     attach: orderObject.attach,    // 附加数据   state
 
-<<<<<<< HEAD
-    out_trade_no: out_trade_no + '-' + commonFunc.getRandomSn(4),   // 商户订单号
-
-    total_fee: total_fee,   // 标价金额
-=======
     out_trade_no: outTradeNo + '-' + commonFunc.getRandomSn(4),   // 商户订单号
 
     total_fee: totalFee,   // 标价金额
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     // spbill_create_ip: req.body.ip,   // 终端IP
     spbill_create_ip: commonFunc.getClientIp(req),   // 终端IP
     time_start: ymdhms,     // 交易起始时间
@@ -468,11 +362,7 @@ exports.addOrder = function (req, res, next) {
   }
   // console.log(paramData);
   // console.log(paramData.trade_type);
-<<<<<<< HEAD
-  if (paramData.trade_type == 'JSAPI') {
-=======
   if (paramData.trade_type === 'JSAPI') {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     // wechat pay
     paramData['openid'] = req.body.openid
   }
@@ -489,17 +379,10 @@ exports.addOrder = function (req, res, next) {
     method: 'POST',
     body: xmlString
   }, function (err, response, body) {
-<<<<<<< HEAD
-    var prepay_id = ''
-    // console.log(body);
-
-    if (!err && response.statusCode == 200) {
-=======
     var prepayId = ''
     // console.log(body);
 
     if (!err && response.statusCode === 200) {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       var parser = new xml2js.Parser()
       var data = {}
       parser.parseString(body, function (err, result) {
@@ -507,15 +390,9 @@ exports.addOrder = function (req, res, next) {
       })
 
       // 微信生成的预支付会话标识，用于后续接口调用中使用，该值有效期为2小时
-<<<<<<< HEAD
-      prepay_id = data.xml.prepay_id
-      req.prepay_id = prepay_id
-      console.log(prepay_id)
-=======
       prepayId = data.xml.prepay_id
       req.prepay_id = prepayId
       console.log(prepayId)
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       next()
 
       // res.redirect('/zbtong/?#/shopping/wxpay/'+ orderObject.oid +'/' + data.xml.prepay_id);
@@ -527,35 +404,21 @@ exports.addOrder = function (req, res, next) {
 
 // 生成微信PaySign，用于发起微信支付请求
 exports.getPaySign = function (req, res, next) {
-<<<<<<< HEAD
-  prepay_id = req.prepay_id
-  var wcPayParams
-
-  if (req.body.trade_type == 'JSAPI') {
-=======
   var prepayId = req.prepay_id
   var wcPayParams
 
   var signStr
   if (req.body.trade_type === 'JSAPI') {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     // wcPayParams['package'] = "prepay_id=" + prepay_id;
     wcPayParams = {
       'appId': req.wxApiUserObject.appid,     // 公众号名称，由商户传入
       'timeStamp': commonFunc.createTimestamp(),         // 时间戳，自1970年以来的秒数
       'nonceStr': commonFunc.createNonceStr(), // 随机串
       // 通过统一下单接口获取
-<<<<<<< HEAD
-      'package': 'prepay_id=' + prepay_id,
-      'signType': 'MD5'        // 微信签名方式
-    }
-    var signStr = commonFunc.rawSort(wcPayParams)
-=======
       'package': 'prepay_id=' + prepayId,
       'signType': 'MD5'        // 微信签名方式
     }
     signStr = commonFunc.rawSort(wcPayParams)
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey
     wcPayParams.paySign = commonFunc.convertToMD5(signStr, true)  // 微信支付签名
     // console.log(wcPayParams);
@@ -572,21 +435,13 @@ exports.getPaySign = function (req, res, next) {
     wcPayParams = {
       'appid': req.wxApiUserObject.appid,     // 公众号名称，由商户传入
       'partnerid': req.wxApiUserObject.merchantid,
-<<<<<<< HEAD
-      'prepayid': prepay_id,
-=======
       'prepayid': prepayId,
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       'timestamp': commonFunc.createTimestamp(),         // 时间戳，自1970年以来的秒数
       'noncestr': commonFunc.createNonceStr(), // 随机串
       // 通过统一下单接口获取
       'package': 'Sign=WXPay'
     }
-<<<<<<< HEAD
-    var signStr = commonFunc.rawSort(wcPayParams)
-=======
     signStr = commonFunc.rawSort(wcPayParams)
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey
     wcPayParams.paySign = commonFunc.convertToMD5(signStr, true)  // 微信支付签名
     // console.log(wcPayParams);
@@ -634,16 +489,10 @@ exports.payResult = function (req, res) {
         results = err.errmsg
       } else {
             // res.json({results: item});
-<<<<<<< HEAD
-        if (payRes.result_code == 'SUCCESS') {
-          if (item.paystatus != 2) {    // 非成功
-            var upObj = {
-=======
         var upObj
         if (payRes.result_code === 'SUCCESS') {
           if (item.paystatus !== 2) {    // 非成功
             upObj = {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
               paystatus: 2,
               paytime: payRes.time_end
             }
@@ -658,15 +507,9 @@ exports.payResult = function (req, res) {
           } else {   // 成功
             results = 'success'
           }
-<<<<<<< HEAD
-        } else {       // payRes.result_code == 'FAIL'
-          if (item.paystatus != 3) {    // 非失败
-            var upObj = {
-=======
         } else {       // payRes.result_code === 'FAIL'
           if (item.paystatus !== 3) {    // 非失败
             upObj = {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
               paystatus: 3,
               paytime: payRes.time_end
             }
@@ -698,17 +541,10 @@ exports.getWechatOrder = function (req, res) {
     nonce_str: commonFunc.randomString(32),   // 随机字符串
     sign_type: 'MD5'
   }
-<<<<<<< HEAD
 
   var signStr = commonFunc.rawSort(paramData)
   signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey
 
-=======
-
-  var signStr = commonFunc.rawSort(paramData)
-  signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey
-
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   paramData.sign = commonFunc.convertToMD5(signStr, true)    // 签名
   var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
   var xmlString = xmlBuilder.buildObject(paramData)
@@ -718,11 +554,7 @@ exports.getWechatOrder = function (req, res) {
     method: 'POST',
     body: xmlString
   }, function (err, response, body) {
-<<<<<<< HEAD
-    if (!err && response.statusCode == 200) {
-=======
     if (!err && response.statusCode === 200) {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       res.json({results: body})
     } else {
       return res.status(500).send('Error')
@@ -739,17 +571,10 @@ exports.closeWechatOrder = function (req, res) {
     nonce_str: commonFunc.randomString(32),   // 随机字符串
     sign_type: 'MD5'
   }
-<<<<<<< HEAD
 
   var signStr = commonFunc.rawSort(paramData)
   signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey
 
-=======
-
-  var signStr = commonFunc.rawSort(paramData)
-  signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey
-
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   paramData.sign = commonFunc.convertToMD5(signStr, true)    // 签名
   var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
   var xmlString = xmlBuilder.buildObject(paramData)
@@ -759,11 +584,7 @@ exports.closeWechatOrder = function (req, res) {
     method: 'POST',
     body: xmlString
   }, function (err, response, body) {
-<<<<<<< HEAD
-    if (!err && response.statusCode == 200) {
-=======
     if (!err && response.statusCode === 200) {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       res.json({results: body})
     } else {
       return res.status(500).send('Error')
@@ -785,7 +606,6 @@ exports.refund = function (req, res) {
     refund_fee: req.orderDetail.money
     // op_user_id: req.wxApiUserObject.merchantid // 默认为商户号
   }
-<<<<<<< HEAD
 
   var signStr = commonFunc.rawSort(paramData)
   signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey
@@ -794,16 +614,6 @@ exports.refund = function (req, res) {
   var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
   var xmlString = xmlBuilder.buildObject(paramData)
 
-=======
-
-  var signStr = commonFunc.rawSort(paramData)
-  signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey
-
-  paramData.sign = commonFunc.convertToMD5(signStr, true)    // 签名
-  var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
-  var xmlString = xmlBuilder.buildObject(paramData)
-
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   // 读取商户证书
   var pfxpath = req.wxApiUserObject.pfxpath
 
@@ -826,10 +636,7 @@ exports.refund = function (req, res) {
       return res.status(500).send(err)
     } else {
       // return res.json({results: body});
-<<<<<<< HEAD
-=======
       var jsondata
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       xml2js.parseString(body, { explicitArray: false, ignoreAttrs: true }, function (err, result) {
         jsondata = result || {}
       })
@@ -871,17 +678,10 @@ exports.refundquery = function (req, res, next) {
     sign_type: 'MD5',
     out_trade_no: req.orderDetail.orderNo     // 商户订单号
   }
-<<<<<<< HEAD
 
   var signStr = commonFunc.rawSort(paramData)
   signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey
 
-=======
-
-  var signStr = commonFunc.rawSort(paramData)
-  signStr = signStr + '&key=' + req.wxApiUserObject.merchantkey
-
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
   paramData.sign = commonFunc.convertToMD5(signStr, true)    // 签名
   var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
   var xmlString = xmlBuilder.buildObject(paramData)
@@ -895,10 +695,7 @@ exports.refundquery = function (req, res, next) {
       return res.status(500).send(err)
     } else {
       // return res.json({results: body});
-<<<<<<< HEAD
-=======
       var jsondata
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       xml2js.parseString(body, { explicitArray: false, ignoreAttrs: true }, function (err, result) {
         jsondata = result || {}
       })
@@ -949,11 +746,7 @@ exports.messageTemplate = function (req, res) {
   var tokenObject = req.wxToken || {}
   var token = tokenObject.token
 
-<<<<<<< HEAD
-  if (req.body.userId != '') {
-=======
   if (req.body.userId !== '') {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     var query = {userId: req.body.userId}
     var role = req.query.role || req.body.role
 
@@ -968,20 +761,12 @@ exports.messageTemplate = function (req, res) {
       if (item.MessageOpenId === null) {
         return res.status(400).send('openId do not exist')
       }
-<<<<<<< HEAD
-      if (role == 'doctor') {
-        messageOpenId = item.MessageOpenId.doctorWechat
-      } else if (role == 'patient') {
-        messageOpenId = item.MessageOpenId.patientWechat
-      } else if (role == 'test') {
-=======
       var messageOpenId
       if (role === 'doctor') {
         messageOpenId = item.MessageOpenId.doctorWechat
       } else if (role === 'patient') {
         messageOpenId = item.MessageOpenId.patientWechat
       } else if (role === 'test') {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         messageOpenId = item.MessageOpenId.test
       }
 
@@ -998,11 +783,7 @@ exports.messageTemplate = function (req, res) {
           body: jsondata,
           json: true
         }, function (err, response, body) {
-<<<<<<< HEAD
-          if (!err && response.statusCode == 200) {
-=======
           if (!err && response.statusCode === 200) {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
             res.json({results: body})
           } else {
             return res.status(500).send('Error')
@@ -1010,24 +791,15 @@ exports.messageTemplate = function (req, res) {
         })
       }
     })
-<<<<<<< HEAD
-  } else if (req.body.userId == '') {
-    if (req.body.postdata.touser != '') {
-=======
   } else if (req.body.userId === '') {
     if (req.body.postdata.touser !== '') {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       request({
         url: wxApis.messageTemplate + '?access_token=' + token,
         method: 'POST',
         body: req.body.postdata,
         json: true
       }, function (err, response, body) {
-<<<<<<< HEAD
-        if (!err && response.statusCode == 200) {
-=======
         if (!err && response.statusCode === 200) {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
           res.json({results: body})
         } else {
           return res.status(500).send('Error')
@@ -1056,11 +828,7 @@ exports.download = function (req, res) {
     method: 'GET',
     json: true
   }, function (err, response) {
-<<<<<<< HEAD
-    if (!err && response.statusCode == 200) {
-=======
     if (!err && response.statusCode === 200) {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       request.head(fileurl, function (err, response1, body) {
         request(fileurl).pipe(fs.createWriteStream(dir + '/' + name))
 
@@ -1069,11 +837,7 @@ exports.download = function (req, res) {
       })
     }
 
-<<<<<<< HEAD
-    // if(!err && response.statusCode == 200) {
-=======
     // if(!err && response.statusCode === 200) {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     //   download(fileurl, dir, name);
     //   console.log("Done: " + fileurl);
     //   res.json({results:"success"});
@@ -1099,19 +863,11 @@ exports.download = function (req, res) {
   })
 }
 
-<<<<<<< HEAD
-var download = function (url, dir, filename) {
-  request.head(url, function (err, res, body) {
-    request(url).pipe(fs.createWriteStream(dir + '/' + filename))
-  })
-}
-=======
 // var download = function (url, dir, filename) {
 //   request.head(url, function (err, res, body) {
 //     request(url).pipe(fs.createWriteStream(dir + '/' + filename))
 //   })
 // }
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
 // 消息管理--接收消息
 exports.receiveTextMessage = function (req, res) {
@@ -1128,36 +884,6 @@ exports.receiveTextMessage = function (req, res) {
     var jsondata = {}
 
     parser.parseString(body, function (err, result) {
-<<<<<<< HEAD
-      jsondata = result || {}
-    })
-    MsgType = jsondata.xml.MsgType
-
-    // 事件推送
-    if (MsgType == 'event') {
-      // 扫描带参数二维码事件    用户未关注时，进行关注后的事件推送 || 用户已关注时的事件推送
-      if (jsondata.xml.Event == 'subscribe' || jsondata.xml.Event == 'SCAN') {
-        // do something
-
-        if (jsondata.xml.EventKey != null) {
-          var doctor_userId
-          //
-          console.log(jsondata)
-          var patientType
-          if (jsondata.xml.Event == 'subscribe') {
-            doctor_userId = jsondata.xml.EventKey[0].split('_')[1]
-            // 未注册
-            patientType = 0
-          }
-          if (jsondata.xml.Event == 'SCAN') {
-            doctor_userId = jsondata.xml.EventKey
-            // 已注册
-            patientType = 1
-          }
-          console.log(doctor_userId)
-          // 暂存医生和患者的openId
-          var patient_openId = jsondata.xml.FromUserName
-=======
       if (err) {
         results = err.errmsg
       } else {
@@ -1190,7 +916,6 @@ exports.receiveTextMessage = function (req, res) {
           console.log(doctorUserId)
           // 暂存医生和患者的openId
           var patientOpenId = jsondata.xml.FromUserName
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
           var time = new Date()
 
           var openIdData = {
@@ -1206,20 +931,12 @@ exports.receiveTextMessage = function (req, res) {
               results = err.errmsg
             } else {
               // results = 'success';
-<<<<<<< HEAD
-              var query = { userId: doctor_userId }
-=======
               var query = { userId: doctorUserId }
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
               Doctor.getOne(query, function (err, doctor) {
                 if (err) {
                   results = err
                 }
-<<<<<<< HEAD
-                if (doctor == null) {
-=======
                 if (doctor === null) {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                   results = 'doctor not exist'
                 }
                 var name = doctor.name
@@ -1227,17 +944,10 @@ exports.receiveTextMessage = function (req, res) {
                 var workUnit = doctor.workUnit
 
                 var template = {
-<<<<<<< HEAD
-                  'userId': patient_openId,
-                  'role': 'patient',
-                  'postdata': {
-                    'touser': patient_openId,
-=======
                   'userId': patientOpenId,
                   'role': 'patient',
                   'postdata': {
                     'touser': patientOpenId,
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                     'template_id': '43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg',
                     'url': '',
                     'data': {
@@ -1275,11 +985,7 @@ exports.receiveTextMessage = function (req, res) {
                   if (err) {
                     results = err
                   } else {
-<<<<<<< HEAD
-                    if (jsondata.xml.Event == 'SCAN') {
-=======
                     if (jsondata.xml.Event === 'SCAN') {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
                       results = 'success'
                     } else {
                       results = '您好，欢迎关注肾事管家~让每一位慢性肾病患者得到有效管理。找名医进行咨询问诊，请点击底栏【肾事管家】~定制私人肾病全程管理方案，请点击底栏【全程管理】~'
@@ -1317,11 +1023,7 @@ exports.createTDCticket = function (req, res, next) {
     body: jsondata,
     json: true
   }, function (err, response, body) {
-<<<<<<< HEAD
-    if (!err && response.statusCode == 200) {
-=======
     if (!err && response.statusCode === 200) {
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       // res.json({results:body});
       req.results = body
       next()
@@ -1334,107 +1036,6 @@ exports.createTDCticket = function (req, res, next) {
 exports.wxTestApiP = function (req, res) {
   console.log(req.body)
 }
-<<<<<<< HEAD
-
-// https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxbeefa0d0e1830e92&redirect_uri=http%3A%2F%2Fweb.go5le.net/wx/getUserInfo&response_type=code&scope=snsapi_userinfo&state=123#wechat_redirect
-// https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxbeefa0d0e1830e92&redirect_uri=http%3A%2F%2F7jxklkd7dv.proxy.qqbrowser.cc/v1/wx/getUserInfo&response_type=code&scope=snsapi_userinfo&state=123#wechat_redirect
-exports.wxGetUserInfo = function (req, res) {
-    // console.log(req.query);
-  if (!req.query.code) {
-    return res.status(400).send('用户未授权!')
-  }
-
-    // 这里可以查询appid=wxbeefa0d0e1830e92是否存在有效期内的access_token, 有的话就直接使用,
-    // 没有的话就用refresh_token重新获取(同样要检查refresh_token是否过期, 没有或过期的话就用下面的完整代码重新获取)
-
-  request.get({
-    url: 'https://api.weixin.qq.com/sns/oauth2/access_token?' +
-        'appid=' + req.wxToken.appid +
-        '&secret=' + req.wxToken.secret +
-        '&code=' + req.query.code +
-        '&grant_type=authorization_code',
-    json: true
-  }, function (err, res1, body) {
-        // console.log(body);
-    if (!body.access_token || !body.openid) {
-      return res.status(400).send('未获取令牌!')
-    }
-
-        // 这里可以保存body.access_token/body.expires_in/body.refresh_token, 以备重复调用
-
-    request.get({
-      url: 'https://api.weixin.qq.com/sns/userinfo?' +
-            'access_token=' + body.access_token + '&' +
-            'openid=' + body.openid + '&' +
-            'lang=zh_CN',
-      json: true
-    }, function (err, res2, body) {
-            // console.log(body);
-      if (!body.nickname) {
-        return res.status(400).send('用户信息获取错误!')
-      }
-
-            // 这里可以根据获取的用户信息生成新的账号并登陆或直接登陆(unionid或openid在本地系统已经存在则直接登陆, 否则生成新账号并登陆)
-            // var emuToken = '这里要被替换成真正的token, 可以根据openid查询本地系统中是否已经有该用户, 有的话就新生成一个token, 没有就新建一个用户并返回token, 下面带token参数访问/zh页面, 可以进行自动登录';
-            // console.log('http://web.go5le.net/zh?token=' + emuToken);
-      res.redirect(301, 'http://web.go5le.net/zh/#/login?token=token')  // 这里不能用中文?
-    })
-  })
-}
-
-// 服务器端返回wx.config的所有参数
-exports.wxJsSdkConfig = function (req, res) {
-    // console.log(req.query);
-  if (!req.wxToken) {
-    return res.status(404).send('微信令牌不存在!')
-  }
-
-  var noncestr = randomstring.generate(16),
-    jsapi_ticket = req.wxToken.jsapi_ticket,
-    timestamp = Math.floor(Date.now() / 1000),
-        // origin = req.get('origin') &&
-        //          req.get('origin').match(/^https?:\/\/.*/) &&
-        //          req.get('origin') ||
-        //          (req.get('referer') && req.get('referer').match(/^https?:\/\/.*/) && req.get('referer')) ||
-        //          req.get('host'),
-        // host = origin.replace(/^https?:\/\/([^\/]*)\/?.*?\/?$/, '$1'),
-        // domain = host.replace(/^.*?\./, '')
-        // url = origin + req.originalUrl.substr(1)
-    url = req.query.url
-
-    // return res.send(url);
-
-  var lookup = {}
-    // lookup[noncestr] = 'noncestr';
-    // lookup[jsapi_ticket] = 'jsapi_ticket';
-    // lookup[timestamp] = 'timestamp';
-    // lookup[url] = 'url';
-  lookup['noncestr'] = noncestr
-  lookup['jsapi_ticket'] = jsapi_ticket
-  lookup['timestamp'] = timestamp
-  lookup['url'] = url
-
-  var sha1Gen = crypto.createHash('sha1')
-  var sortedParams = ['jsapi_ticket', 'noncestr', 'timestamp', 'url'].sort()  // .sort()对数组元素进行字典排序
-  var input = sortedParams[0] + '=' + lookup[sortedParams[0]] + '&' + sortedParams[1] + '=' + lookup[sortedParams[1]] + '&' + sortedParams[2] + '=' + lookup[sortedParams[2]] + '&' + sortedParams[3] + '=' + lookup[sortedParams[3]]
-    // console.log(input);
-  var sha1 = sha1Gen.update(input).digest('hex')
-
-  res.json({
-        // lookup: lookup,
-        // input: input,
-    results: {
-            // debug: true, // 开启调试模式 调用的所有api的返回值会在客户端alert出来, 若要查看传入的参数, 可以在pc端打开, 参数信息会通过log打出, 仅在pc端时才会打印.
-      appId: req.wxToken.appid, // 必填, 公众号的唯一标识
-      timestamp: timestamp, // 必填, 生成签名的时间戳
-      nonceStr: noncestr, // 必填, 生成签名的随机串
-      signature: sha1// 必填, 签名, 见附录1
-            // jsApiList: ['chooseImage', 'previewImage', 'uploadImage'] // 必填, 需要使用的JS接口列表, 所有JS接口列表见附录2
-    }
-  })
-}
-=======
->>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
 // 服务器端获取微信临时素材
 exports.wxJsSdkReqMedia = function (req, res, next) {
