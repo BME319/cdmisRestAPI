@@ -28,7 +28,7 @@ exports.getLoginParam = function (req, res) {
 // var atime = new Date().getTime();
   var atime = Date.parse(new Date())
   atime = atime / 1000
-  var mode = 1
+  var mode = 2
   var redirectUri = req.query.redirect_uri || 'http://121.43.107.106:4060'
   var sign = getSign(appkey, appsecret, atime)
 
