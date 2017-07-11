@@ -1,4 +1,4 @@
-// var config = require('../config')
+var config = require('../config')
 var Counsel = require('../models/counsel')
 var Doctor = require('../models/doctor')
 var Comment = require('../models/comment')

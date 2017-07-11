@@ -1,4 +1,4 @@
-// var config = require('../config')
+var config = require('../config')
 var Compliance = require('../models/compliance')
 
 // exports.insertOne = function(req, res) {

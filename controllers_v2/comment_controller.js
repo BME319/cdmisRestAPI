@@ -1,4 +1,4 @@
-// var config = require('../config')
+var config = require('../config')
 var Comment = require('../models/comment')
 
 // 根据doctorId查询相关评价 2017-03-30 GY

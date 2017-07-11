@@ -1,4 +1,4 @@
-// var config = require('../config')
+var config = require('../config')
 var webEntry = require('../settings').webEntry
 var Doctor = require('../models/doctor')
 var Team = require('../models/team')

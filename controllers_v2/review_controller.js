@@ -1,4 +1,4 @@
-// varconfig = require('../config')
+var config = require('../config')
 var webEntry = require('../settings').webEntry
 var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')

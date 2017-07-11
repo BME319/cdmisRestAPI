@@ -1,4 +1,4 @@
-// var config = require('../config')
+var config = require('../config')
 var commonFunc = require('../middlewares/commonFunc')
 var User = require('../models/user')
 var Advice = require('../models/advice')

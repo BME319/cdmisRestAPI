@@ -1,5 +1,4 @@
-
-// var config = require('../config')
+var config = require('../config')
 var webEntry = require('../settings').webEntry
 var Communication = require('../models/communication')
 var Counsel = require('../models/counsel')
@@ -262,13 +261,13 @@ exports.getConsultation = function (req, res) {
 
 // 根据consultationId更新conclusion 2017-04-06 GY
 exports.conclusion = function (req, res) {
-  var status
   if (req.body.consultationId == null || req.body.consultationId === '') {
     return res.json({result: '请填写consultationId!'})
   }
   if (req.body.conclusion == null || req.body.conclusion === '') {
     return res.json({result: '请填写conclusion!'})
   }
+  var status
   if (req.body.status == null || req.body.status === '') {
       // 无status参数传入时，自动设置为已完成
     status = 0
