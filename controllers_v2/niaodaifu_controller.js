@@ -51,3 +51,4 @@ function getSign (appkey, appsecret, atime) {
   var step5 = commonFunc.convertToMD5(step4, false)
   return step5
 }
+

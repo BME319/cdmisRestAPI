@@ -5,6 +5,7 @@ var version = '/api/v2'
 // 3rd packages
 
 // self-defined configurations
+<<<<<<< HEAD
 var config = require('../config')
 
 // models
@@ -21,6 +22,25 @@ var aclsettingCtrl = require('../controllers_v2/aclsetting_controller'),
   alluserCtrl = require('../controllers_v2/alluser_controller')
 
 var reviewCtrl = require('../controllers_v2/review_controller')
+=======
+// var config = require('../config')
+
+// models
+// var Wechat = require('../models/wechat')
+
+// middlewares
+var getNoMid = require('../middlewares/getNoMid')
+var tokenManager = require('../middlewares/tokenManager')
+// var aclChecking = require('../middlewares/aclChecking')
+
+// controllers
+var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
+var niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller')
+var alluserCtrl = require('../controllers_v2/alluser_controller')
+
+var reviewCtrl = require('../controllers_v2/review_controller')
+var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
+>>>>>>> upstream/develop
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -28,8 +48,8 @@ module.exports = function (app, webEntry, acl) {
   // });
 
   // csq
-  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl))
-  app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl))
+  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
+  app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
   app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl))
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl))
 
@@ -57,7 +77,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/alluser/adminList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(6))
   app.post(version + '/alluser/alluser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList)
 
-  app.post(version + '/alluser/register', tokenManager.verifyToken(), alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
+
+  app.post(version + '/alluser/register', alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
   app.post(version + '/alluser/cancelUser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.cancelAlluser)
   app.post(version + '/alluser/unionid', tokenManager.verifyToken(), alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
   app.post(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
@@ -76,6 +97,15 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo)
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate)
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo)
+
+  // labtestImport
+  app.get(version + '/labtestImport/listByStatus', tokenManager.verifyToken(), labtestImportCtrl.listByStatus)
+  app.get(version + '/labtestImoprt/photoList', tokenManager.verifyToken(), labtestImportCtrl.photoList)
+  app.post(version + '/labtestImport', tokenManager.verifyToken(), getNoMid.getNo(11), labtestImportCtrl.saveLabtest)
+  app.post(version + '/labtestImport/edit', tokenManager.verifyToken(), labtestImportCtrl.editLabtest)
+  app.get(version + '/labtestImport', tokenManager.verifyToken(), labtestImportCtrl.getLabtest)
+  app.get(version + '/labtestImport/photoByLabtest', tokenManager.verifyToken(), labtestImportCtrl.photoByLabtest)
+  app.post(version + '/labtestImport/labelphoto', tokenManager.verifyToken(), labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
