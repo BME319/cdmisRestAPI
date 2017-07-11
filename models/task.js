@@ -1,128 +1,126 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 var taskSchema = new mongoose.Schema({
-	userId: String,						
-	sortNo: Number, 
-	name: String, 
-	date: Date, 
-	description: String, 
-	invalidFlag:Number,
-	task: [
-	  {
-	  	_id:0, 
-	  	type: {type:String}, 
-	    details:[{
-	    	code:String,
-	    	instruction:String,
-	    	content:String,
-	    	startTime : Date,
-            endTime : Date,
-            times:Number,
-            timesUnits:String,
-            frequencyTimes : Number,
-            frequencyUnits : String,
-            status:Number
-	    }]
-	  }
-	],  
-	revisionInfo:{
-		operationTime:Date,
-		userId:String,
-		userName:String,
-		terminalIP:String
-	}
-});
+  userId: String,
+  sortNo: Number,
+  name: String,
+  date: Date,
+  description: String,
+  invalidFlag: Number,
+  task: [
+    {
+      _id: 0,
+      type: {type: String},
+      details: [{
+        code: String,
+        instruction: String,
+        content: String,
+        startTime: Date,
+        endTime: Date,
+        times: Number,
+        timesUnits: String,
+        frequencyTimes: Number,
+        frequencyUnits: String,
+        status: Number
+      }]
+    }
+  ],
+  revisionInfo: {
+    operationTime: Date,
+    userId: String,
+    userName: String,
+    terminalIP: String
+  }
+})
 
+var taskModel = mongoose.model('task', taskSchema)
 
-var taskModel = mongoose.model('task', taskSchema);
-
-function Task(task) {
-	this.task = task;
+function Task (task) {
+  this.task = task
 }
 
-Task.prototype.save = function(callback) {
-	var task = this.task;
-	var newTask = new taskModel(task);
-	newTask.save(function(err, taskItem) {
-		if (err) {
-			return callback(err);
-		}
-		callback(null, taskItem);
-	});
+Task.prototype.save = function (callback) {
+  var task = this.task
+  var newTask = new taskModel(task)
+  newTask.save(function (err, taskItem) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, taskItem)
+  })
 }
 
-Task.getOne = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
-
-	taskModel
-		.findOne(query, fields, opts)
-		.populate(populate)
-		.exec(function(err, taskInfo) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, taskInfo);
-		});
-};
-
-
-Task.getSome = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
-	taskModel
-		.find(query, fields, options)
-		.populate(populate)
-		.exec(function(err, tasks) {
-			if(err) {
-				return callback(err);
-			}
-			callback(null, tasks);
-		});
-};
-
-Task.updateOne = function(query, obj, callback, opts, populate) {
-	var options = opts || {};
-	var populate = populate || '';
-
-	taskModel
-		.findOneAndUpdate(query, obj, options)
-		.populate(populate)
-		.exec(function(err, uptask) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, uptask);
-		});
-};
-
-Task.update = function (query, obj, callback, opts, populate) {
-  var options = opts || {};
-  var populate = populate || '';
+Task.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
 
   taskModel
-  	.update(query, obj, options)
-  	.populate(populate) 
-  	.exec(function (err, uptask) {
-    	if (err) {
-      		return callback(err);
-    	}
-    callback(null, uptask);
-  });
-};
+  .findOne(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, taskInfo) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, taskInfo)
+  })
+}
 
-Task.removeOne = function(query, callback, opts) {
-	var options = opts || {};
+Task.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
+  taskModel
+  .find(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, tasks) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, tasks)
+  })
+}
 
-	taskModel
-		.findOneAndRemove(query, options, function(err, task) {
-			if (err) {
-				return callback(err);
-			}
-			callback(null, task);
-		});
-};
+Task.updateOne = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var _populate = populate || ''
 
-module.exports = Task;
+  taskModel
+  .findOneAndUpdate(query, obj, options)
+  .populate(_populate)
+  .exec(function (err, uptask) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, uptask)
+  })
+}
+
+Task.update = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var _populate = populate || ''
+
+  taskModel
+    .update(query, obj, options)
+    .populate(_populate)
+    .exec(function (err, uptask) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, uptask)
+    })
+}
+
+Task.removeOne = function (query, callback, opts) {
+  var options = opts || {}
+
+  taskModel
+  .findOneAndRemove(query, options, function (err, task) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, task)
+  })
+}
+
+module.exports = Task
