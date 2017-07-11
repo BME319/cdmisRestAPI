@@ -1,13 +1,31 @@
+<<<<<<< HEAD
+var Account = require('../models/account')
+var Patient = require('../models/patient')
+var Doctor = require('../models/doctor')
+=======
 
 var Account = require('../models/account')
 var Patient = require('../models/patient')
 var Doctor = require('../models/doctor')
 
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 // 根据doctorId查询相关评价 2017-03-30 GY
 exports.getAccountInfo = function (req, res) {
   if (req.query.userId === null || req.query.userId === '') {
     return res.json({result: '请填写userId!'})
   }
+<<<<<<< HEAD
+// 查询条件
+  var _userId = req.query.userId
+  var query = {userId: _userId}
+
+// 设置参数
+// var opts = '';
+// var fields = {'_id':0};
+// var fields = '';
+// var populate = {path: 'patientId', select:{'_id':0, 'userId':1, 'name':1}};
+// var populate = '';
+=======
   // 查询条件
   var _userId = req.query.userId
   var query = {userId: _userId}
@@ -18,6 +36,7 @@ exports.getAccountInfo = function (req, res) {
   // var fields = '';
   // var populate = {path: 'patientId', select:{'_id':0, 'userId':1, 'name':1}};
   // var populate = '';
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
   Account.getSome(query, function (err, item) {
     if (err) {
@@ -53,7 +72,11 @@ exports.checkPatient = function (req, res, next) {
 exports.checkDoctor = function (req, res, next) {
   if (req.query.doctorId === null || req.query.doctorId === '') {
     if (req.body.doctorId === null || req.body.doctorId === '') {
+<<<<<<< HEAD
+// return res.json({result: '请填写doctorId!'});
+=======
       // return res.json({result: '请填写doctorId!'});
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
       var queryPatient = {userId: req.patientId}
       Account.getOne(queryPatient, function (err, accountitem) {
         if (err) {
@@ -95,7 +118,11 @@ exports.checkDoctor = function (req, res, next) {
     }
   } else {
     req.doctorId = req.query.doctorId
+<<<<<<< HEAD
+// var query = {userId:  req.doctorId}
+=======
     query = {userId: req.doctorId}
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
     Doctor.getOne(query, function (err, item) {
       if (err) {
         return res.status(500).send(err.errmsg)
@@ -106,6 +133,15 @@ exports.checkDoctor = function (req, res, next) {
       }
     })
   }
+<<<<<<< HEAD
+// var query = {userId: req.doctorId};
+// Doctor.getOne(query, function(err, item) {
+// if (err) {
+//   return res.status(500).send(err.errmsg);
+// }
+// else if (item == null) {
+//   return res.json({result: '不存在的医生ID'});
+=======
   // var query = {userId: req.doctorId};
   // Doctor.getOne(query, function(err, item) {
   //   if (err) {
@@ -208,7 +244,13 @@ exports.checkDoctor = function (req, res, next) {
 //       }
 //     }
 //   });
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 // }
+// else {
+// next();
+// }
+// });
+}
 
 // 获取咨询计数，重新定义freeTimes = 3版本 2017-05-03 GY
 exports.getCounts = function (req, res, next) {
@@ -224,16 +266,26 @@ exports.getCounts = function (req, res, next) {
   } else {
     req.modify = 0
   }
+<<<<<<< HEAD
+// return res.json({modify: req.modify});
+=======
   // return res.json({modify: req.modify});
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
 
   Account.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+<<<<<<< HEAD
+    if (item == null) {
+      if (req.modify === 0) {
+        var accountData = {
+=======
     if (item === null) {
       var accountData
       if (req.modify === 0) {
         accountData = {
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
           userId: req.patientId,
           freeTimes: 3,
           money: 0,
@@ -245,6 +297,40 @@ exports.getCounts = function (req, res, next) {
           ]
         }
       } else if (req.modify === -1) {
+<<<<<<< HEAD
+        var accountData = {
+    		  userId: req.patientId,
+    			freeTimes: 2,
+    			money: 0,
+    			times: [
+    			  {
+    				  count: 2,
+    					doctorId: req.doctorId
+    			  }
+    			]
+    		}
+      } else if (req.modify > 0) {
+        var accountData = {
+    			userId: req.patientId,
+    			freeTimes: 3,
+    			money: 0,
+    			times: [
+    				{
+    					count: req.modify,
+    					doctorId: req.doctorId
+    				}
+    			]
+    	  }
+      }
+    	var newAccount = new Account(accountData)
+      newAccount.save(function (err, accountInfo) {
+        if (err) {
+      		return res.status(500).send(err.errmsg)
+    		}
+      })
+      if (req.modify == 0) {
+// console.log('new record');
+=======
         accountData = {
           userId: req.patientId,
           freeTimes: 2,
@@ -277,6 +363,7 @@ exports.getCounts = function (req, res, next) {
       })
       if (req.modify === 0) {
         // console.log('new record');
+>>>>>>> e6fe93318624b841b2b8d43610dac484be8b2832
         return res.json({results: {freeTimes: 3, count: 0}})
       } else {
         // console.log('new record for modify');

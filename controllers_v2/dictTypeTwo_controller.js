@@ -1,4 +1,3 @@
-
 var DictTypeTwo = require('../models/dictTypeTwo')
 
 exports.insertCategory = function (req, res) {
