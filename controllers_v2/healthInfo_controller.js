@@ -1,3 +1,4 @@
+
 var	config = require('../config'),
   Alluser = require('../models/alluser'), 
 		HealthInfo = require('../models/healthInfo');
