@@ -262,11 +262,12 @@ exports.getLabtest = function (req, res) {
     query['time'] = new Date(req.query.time);
   }
   var opts = {};
+  console.log(req.query.sort)
   if (req.query.sort !== null && req.query.sort !== '' && req.query.sort !== undefined) {
     if (req.query.sort === '-time') {
       opts['sort'] = '-time'
     }
-    else if (req.query.sort === '+time') {
+    else if (req.query.sort === 'time') {
       opts['sort'] = 'time'
     }
     else {
