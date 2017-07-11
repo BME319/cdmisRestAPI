@@ -311,6 +311,7 @@ exports.getAlluserList = function (role) {
     }
     if (_role === 1) {
       query['$or'] = [{'role': 'doctor'}, {'role': 'Leader'}, {'role': 'master'}]
+      fields['role'] = 1
       fields['workUnit'] = 1
       fields['department'] = 1
       fields['title'] = 1
@@ -401,10 +402,10 @@ exports.updateAlluserList = function (req, res) {
     upObj['name'] = _name
   }
   if (_gender !== null && _gender !== undefined && _gender !== '') {
-    if (_gender === 0 || _gender === 1) {
+    if (_gender === 1 || _gender === 2) {
       upObj['gender'] = Number(_gender)
     } else {
-      return res.json({status: 1, results: 'gender must be 0 or 1!'})
+      return res.json({status: 1, results: 'gender must be 1(male) or 2(female)!'})
     }
   }
   if (_phoneNo !== null && _phoneNo !== undefined && _phoneNo !== '') {
