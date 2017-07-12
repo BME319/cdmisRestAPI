@@ -13,7 +13,7 @@ exports.postReviewInfo = function (req, res) {
   // if (req.body.adminId === null || req.body.adminId === '' || req.body.adminId === undefined) {
   //   return res.status(412).json({results: '请填写adminId'});
   // }
-  var queryAdmin = {userId: req.session._id};
+  var queryAdmin = {_id: req.session._id};
   Alluser.getOne(queryAdmin, function (err, reviewItem) {
     if (err) {
       return res.status(500).send(err);
@@ -21,7 +21,7 @@ exports.postReviewInfo = function (req, res) {
     if (reviewItem === null || reviewItem === undefined || reviewItem === '') {
       return res.status(401).json({results: 'admin查找失败'});
     }
-    else if (reviewItem.role.indexOf('admin') === -1) {
+    else if (req.session.role.indexOf('admin') === -1) {
       return res.status(401).json({results:'无审核权限'});
     }
     else {
