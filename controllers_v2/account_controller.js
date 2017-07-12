@@ -5,11 +5,13 @@ var Doctor = require('../models/doctor')
 
 // 根据doctorId查询相关评价 2017-03-30 GY
 exports.getAccountInfo = function (req, res) {
-  if (req.query.userId === null || req.query.userId === '') {
+  // if (req.query.userId === null || req.query.userId === '') {
+  if (req.session.userId === null || req.session.userId === '') {
     return res.json({result: '请填写userId!'})
   }
   // 查询条件
-  var _userId = req.query.userId
+  // var _userId = req.query.userId
+  var _userId = req.session.userId
   var query = {userId: _userId}
 
   // 设置参数
@@ -29,15 +31,17 @@ exports.getAccountInfo = function (req, res) {
 
 // 通用方法：判断patientId和doctorId是否可用 2017-04-20 GY
 exports.checkPatient = function (req, res, next) {
-  if (req.query.patientId === null || req.query.patientId === '' || req.query.patientId === undefined) {
-    if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
-      return res.json({result: '请填写patientId!'})
-    } else {
-      req.patientId = req.body.patientId
-    }
+  // if (req.query.patientId === null || req.query.patientId === '' || req.query.patientId === undefined) {
+  //   if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
+  if (req.session.patientId === null || req.session.patientId === '' || req.session.patientId === undefined) {
+    return res.json({result: '请填写patientId!'})
   } else {
-    req.patientId = req.query.patientId
+    // req.patientId = req.body.patientId
+    req.patientId = req.session.patientId
   }
+  // } else {
+  //   req.patientId = req.query.patientId
+  // }
   var query = {userId: req.patientId}
   Patient.getOne(query, function (err, item) {
     if (err) {
@@ -51,51 +55,40 @@ exports.checkPatient = function (req, res, next) {
   })
 }
 exports.checkDoctor = function (req, res, next) {
-  if (req.query.doctorId === null || req.query.doctorId === '') {
-    if (req.body.doctorId === null || req.body.doctorId === '') {
-      // return res.json({result: '请填写doctorId!'});
-      var queryPatient = {userId: req.patientId}
-      Account.getOne(queryPatient, function (err, accountitem) {
-        if (err) {
-          return res.status(500).send(err.errmsg)
+  // if (req.query.doctorId === null || req.query.doctorId === '') {
+  //   if (req.body.doctorId === null || req.body.doctorId === '') {
+  if (req.session.doctorId === null || req.session.doctorId === '') {
+    // return res.json({result: '请填写doctorId!'});
+    var queryPatient = {userId: req.patientId}
+    Account.getOne(queryPatient, function (err, accountitem) {
+      if (err) {
+        return res.status(500).send(err.errmsg)
+      }
+      if (accountitem === null) {
+        var accountData = {
+          userId: req.patientId,
+          freeTimes: 3,
+          money: 0
         }
-        if (accountitem === null) {
-          var accountData = {
-            userId: req.patientId,
-            freeTimes: 3,
-            money: 0
+        var newAccount = new Account(accountData)
+        newAccount.save(function (err, accountInfo) {
+          if (err) {
+            return res.status(500).send(err.errmsg)
           }
-          var newAccount = new Account(accountData)
-          newAccount.save(function (err, accountInfo) {
-            if (err) {
-              return res.status(500).send(err.errmsg)
-            }
-          })
-          return res.json({result: {freeTimes: 3, totalPaidTimes: 0}})
-        } else {
-          var count = 0
-          for (var i = accountitem.times.length - 1; i >= 0; i--) {
-            count += accountitem.times[i].count
-          }
-          return res.json({result: {freeTimes: accountitem.freeTimes, totalCount: count}})
+        })
+        return res.json({result: {freeTimes: 3, totalPaidTimes: 0}})
+      } else {
+        var count = 0
+        for (var i = accountitem.times.length - 1; i >= 0; i--) {
+          count += accountitem.times[i].count
         }
-      })
-    } else {
-      req.doctorId = req.body.doctorId
-      var query = {userId: req.doctorId}
-      Doctor.getOne(query, function (err, item) {
-        if (err) {
-          return res.status(500).send(err.errmsg)
-        } else if (item === null) {
-          return res.json({result: '不存在的医生ID'})
-        } else {
-          next()
-        }
-      })
-    }
+        return res.json({result: {freeTimes: accountitem.freeTimes, totalCount: count}})
+      }
+    })
   } else {
-    req.doctorId = req.query.doctorId
-    query = {userId: req.doctorId}
+    // req.doctorId = req.body.doctorId
+    req.doctorId = req.session.doctorId
+    var query = {userId: req.doctorId}
     Doctor.getOne(query, function (err, item) {
       if (err) {
         return res.status(500).send(err.errmsg)
@@ -106,6 +99,19 @@ exports.checkDoctor = function (req, res, next) {
       }
     })
   }
+  // } else {
+  //   req.doctorId = req.query.doctorId
+  //   query = {userId: req.doctorId}
+  //   Doctor.getOne(query, function (err, item) {
+  //     if (err) {
+  //       return res.status(500).send(err.errmsg)
+  //     } else if (item === null) {
+  //       return res.json({result: '不存在的医生ID'})
+  //     } else {
+  //       next()
+  //     }
+  //   })
+  // }
   // var query = {userId: req.doctorId};
   // Doctor.getOne(query, function(err, item) {
   //   if (err) {
@@ -215,12 +221,16 @@ exports.getCounts = function (req, res, next) {
   var query = {
     userId: req.patientId
   }
-  if (req.body.modify === 0) {
+  // if (req.body.modify === 0) {
+  if (req.session.modify === 0) {
     return res.json({result: '此处禁止输入0!'})
-  } else if (req.body.modify < -1) {
+  // } else if (req.body.modify < -1) {
+  } else if (req.session.modify < -1) {
     return res.json({result: '非法输入!'})
-  } else if (req.body.modify !== null && req.body.modify !== '') {
-    req.modify = parseInt(req.body.modify, 10)
+  // } else if (req.body.modify !== null && req.body.modify !== '') {
+  } else if (req.session.modify !== null && req.session.modify !== '') {
+  // req.modify = parseInt(req.body.modify, 10)
+    req.modify = parseInt(req.session.modify, 10)
   } else {
     req.modify = 0
   }

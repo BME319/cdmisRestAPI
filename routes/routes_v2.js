@@ -23,6 +23,10 @@ var alluserCtrl = require('../controllers_v2/alluser_controller')
 var reviewCtrl = require('../controllers_v2/review_controller')
 var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
 
+var accountCtrl = require('../controllers_v2/account_controller')
+var expenseCtrl = require('../controllers/expense_controller')
+var doctorCtrl = require('../controllers/doctor_controller')
+
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
   //   res.send("Server Root");
@@ -89,4 +93,14 @@ module.exports = function (app, webEntry, acl) {
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
+
+  // lgf
+  // account
+  app.get(version + '/account/accountInfo', tokenManager.verifyToken(), accountCtrl.getAccountInfo)
+  app.get(version + '/account/counts', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts)
+  app.post(version + '/account/counts', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts)
+  app.post(version + '/account/freeTime', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
+  app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
+  app.post(version + '/expense/rechargeDoctor', tokenManager.verifyToken(), accountCtrl.checkPatient, doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  app.get(version + '/expense/docRecords', tokenManager.verifyToken(), doctorCtrl.checkDoctor, expenseCtrl.getDocRecords)
 }
