@@ -80,7 +80,7 @@ module.exports = function (app, webEntry, acl) {
 
   // labtestImport
   app.get(version + '/labtestImport/listByStatus', tokenManager.verifyToken(), labtestImportCtrl.listByStatus)
-  app.get(version + '/labtestImoprt/photoList', tokenManager.verifyToken(), labtestImportCtrl.photoList)
+  app.get(version + '/labtestImport/photoList', tokenManager.verifyToken(), labtestImportCtrl.photoList)
   app.post(version + '/labtestImport', tokenManager.verifyToken(), getNoMid.getNo(11), labtestImportCtrl.saveLabtest)
   app.post(version + '/labtestImport/edit', tokenManager.verifyToken(), labtestImportCtrl.editLabtest)
   app.get(version + '/labtestImport', tokenManager.verifyToken(), labtestImportCtrl.getLabtest)
@@ -89,4 +89,5 @@ module.exports = function (app, webEntry, acl) {
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
+  app.post('/devicedata/niaodaifu/data', niaodaifuCtrl.receiveData)
 }
