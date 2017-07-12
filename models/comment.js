@@ -22,7 +22,7 @@ var commentSchema = new mongoose.Schema({
   }
 })
 
-var CommentModel = mongoose.model('comment', commentSchema)
+var commentModel = mongoose.model('comment', commentSchema)
 
 function Comment (comment) {
   this.comment = comment
@@ -30,7 +30,8 @@ function Comment (comment) {
 
 Comment.prototype.save = function (callback) {
   var comment = this.comment
-  var newComment = new CommentModel(comment)
+
+  var newComment = new commentModel(comment)
   newComment.save(function (err, commentItem) {
     if (err) {
       return callback(err)
@@ -44,7 +45,7 @@ Comment.getOne = function (query, callback, opts, fields, populate) {
   var _fields = fields || null
   var _populate = populate || ''
 
-  CommentModel
+  commentModel
     .findOne(query, _fields, options)
     .populate(_populate)
     .exec(function (err, commentInfo) {
@@ -59,7 +60,8 @@ Comment.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
-  CommentModel
+
+  commentModel
     .find(query, _fields, options)
     .populate(_populate)
     .exec(function (err, comments) {
@@ -74,7 +76,7 @@ Comment.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  CommentModel
+  commentModel
     .findOneAndUpdate(query, obj, options)
     .populate(_populate)
     .exec(function (err, upcomment) {

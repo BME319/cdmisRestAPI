@@ -1,4 +1,4 @@
-var config = require('../config')
+// var config = require('../config')
 var webEntry = require('../settings').webEntry
 var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
@@ -12,7 +12,8 @@ exports.postReviewInfo = function (req, res) {
   // if (req.body.adminId === null || req.body.adminId === '' || req.body.adminId === undefined) {
   //   return res.status(412).json({results: '请填写adminId'});
   // }
-  var queryAdmin = {userId: req.session._id}
+  var queryAdmin = {_id: req.session._id}
+
   Alluser.getOne(queryAdmin, function (err, reviewItem) {
     if (err) {
       return res.status(500).send(err)

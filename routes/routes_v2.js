@@ -5,15 +5,15 @@ var version = '/api/v2'
 // 3rd packages
 
 // self-defined configurations
-var config = require('../config')
+// var config = require('../config')
 
 // models
-var Wechat = require('../models/wechat')
+// var Wechat = require('../models/wechat')
 
 // middlewares
 var getNoMid = require('../middlewares/getNoMid')
 var tokenManager = require('../middlewares/tokenManager')
-var aclChecking = require('../middlewares/aclChecking')
+// var aclChecking = require('../middlewares/aclChecking')
 
 // controllers
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
@@ -84,12 +84,12 @@ module.exports = function (app, webEntry, acl) {
 
   // labtestImport
   app.get(version + '/labtestImport/listByStatus', tokenManager.verifyToken(), labtestImportCtrl.listByStatus)
-  app.get(version + '/labtestImoprt/photoList', tokenManager.verifyToken(), labtestImportCtrl.photoList)
+  app.get(version + '/labtestImport/photoList', tokenManager.verifyToken(), labtestImportCtrl.photoList)
   app.post(version + '/labtestImport', tokenManager.verifyToken(), getNoMid.getNo(11), labtestImportCtrl.saveLabtest)
   app.post(version + '/labtestImport/edit', tokenManager.verifyToken(), labtestImportCtrl.editLabtest)
   app.get(version + '/labtestImport', tokenManager.verifyToken(), labtestImportCtrl.getLabtest)
   app.get(version + '/labtestImport/photoByLabtest', tokenManager.verifyToken(), labtestImportCtrl.photoByLabtest)
-  app.post(version + '/labtestImport/labelphoto', labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
+  app.post(version + '/labtestImport/labelphoto', tokenManager.verifyToken(), labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)

@@ -1,99 +1,96 @@
 
-
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 var messageSchema = new mongoose.Schema({
-	messageId:String,
-	userId:String,
+  messageId: String,
+  userId: String,
 
-	sendBy: String, 
-	readOrNot: Number, 
+  sendBy: String,
+  readOrNot: Number,
 
-	type:Number,
-	time:Date,
-	title:String,
-	description:String,
-	url:String
-});
+  type: Number,
+  time: Date,
+  title: String,
+  description: String,
+  url: String
+})
 
+var messageModel = mongoose.model('message', messageSchema)
 
-messageModel = mongoose.model('message', messageSchema);
-
-function Message(message) {
-	this.message = message;
+function Message (message) {
+  this.message = message
 }
 
-Message.prototype.save = function(callback) {
-	var message = this.message;
-	var newMessage = new messageModel(message);
-	newMessage.save(function(err, messageItem) {
-		if (err) {
-			return callback(err);
-		}
-		callback(null, messageItem);
-	});
+Message.prototype.save = function (callback) {
+  var message = this.message
+  var newMessage = new messageModel(message)
+  newMessage.save(function (err, messageItem) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, messageItem)
+  })
 }
 
-Message.getOne = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
-
-	messageModel
-		.findOne(query, fields, opts)
-		.populate(populate)
-		.exec(function(err, messageInfo) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, messageInfo);
-		});
-};
-
-
-Message.getSome = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
-	messageModel
-		.find(query, fields, options)
-		.populate(populate)
-		.exec(function(err, messages) {
-			if(err) {
-				return callback(err);
-			}
-			callback(null, messages);
-		});
-};
-
-Message.updateOne = function(query, obj, callback, opts, populate) {
-	var options = opts || {};
-	var populate = populate || '';
-
-	messageModel
-		.findOneAndUpdate(query, obj, options)
-		.populate(populate)
-		.exec(function(err, upmessage) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, upmessage);
-		});
-};
-
-Message.update = function (query, obj, callback, opts, populate) {
-  var options = opts || {};
-  var populate = populate || '';
+Message.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
 
   messageModel
-  	.update(query, obj, options)
-  	.populate(populate) 
-  	.exec(function (err, upmessage) {
-    	if (err) {
-      		return callback(err);
-    	}
-    callback(null, upmessage);
-  });
-};
+  .findOne(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, messageInfo) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, messageInfo)
+  })
+}
 
-module.exports = Message;
+Message.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
+  messageModel
+  .find(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, messages) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, messages)
+  })
+}
+
+Message.updateOne = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var _populate = populate || ''
+
+  messageModel
+  .findOneAndUpdate(query, obj, options)
+  .populate(_populate)
+  .exec(function (err, upmessage) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, upmessage)
+  })
+}
+
+Message.update = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var _populate = populate || ''
+
+  messageModel
+    .update(query, obj, options)
+    .populate(_populate)
+    .exec(function (err, upmessage) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, upmessage)
+    })
+}
+
+module.exports = Message
