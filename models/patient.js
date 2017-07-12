@@ -81,7 +81,7 @@ Patient.getOne = function(query, callback, opts, fields, populate) {
 
   patientModel
   .findOne(query, _fields, options)
-  .populate_populate)
+  .populate(_populate)
   .exec(function(err, patientInfo) {
   if(err){
   return callback(err);
