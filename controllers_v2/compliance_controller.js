@@ -1,4 +1,7 @@
-var config = require('../config')
+// 代码 2017-04-17 GY
+// 注释 2017-07-12 YQC
+
+// var config = require('../config')
 var Compliance = require('../models/compliance')
 
 // exports.insertOne = function(req, res) {
@@ -20,12 +23,14 @@ var Compliance = require('../models/compliance')
 //   });
 // }
 
+// 根据日期获取任务执行情况
 exports.getComplianceByDay = function (req, res) {
-  var userId = req.query.userId
-  var date = req.query.date
-  var type = req.query.type
-  var code = req.query.code
-
+  // 请求数据提取
+  var userId = req.session.userId
+  var date = req.session.date
+  var type = req.session.type
+  var code = req.session.code
+  // 判断查询参数定义并写入
   var query = {}
   if (userId !== '' && userId !== undefined) {
     query['userId'] = userId
@@ -39,6 +44,7 @@ exports.getComplianceByDay = function (req, res) {
   if (code !== '' && code !== undefined) {
     query['code'] = code
   }
+  // 调用任务执行情况获取函数Compliance.getSome
   Compliance.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -47,45 +53,53 @@ exports.getComplianceByDay = function (req, res) {
   })
 }
 
-// 写入任务执行情况 2017-04-17 GY
+// 获取任务执行情况
 exports.getCompliance = function (req, res, next) {
-  if (req.body.type == null || req.body.type === '') {
+  // 请求数据提取
+  var userId = req.session.userId
+  var date = req.session.date
+  var type = req.session.type
+  var code = req.session.code
+  // 判断参数输入，无输入则提示
+  if (type == null || type === '') {
     return res.json({result: '请填写type!'})
   }
-  if (req.body.code == null || req.body.code === '') {
+  if (code == null || code === '') {
     return res.json({result: '请填写code!'})
   }
-  if (req.body.userId == null || req.body.userId === '') {
+  if (userId == null || userId === '') {
     return res.json({result: '请填写userId!'})
   }
-  if (req.body.date == null || req.body.date === '') {
+  if (date == null || date === '') {
     return res.json({result: '请填写date!'})
   }
   // return res.json({result:req.body});
   // 查询vitalsign表中是否存在已有对应日期的条目
   var query = {
-    type: req.body.type,
-    code: req.body.code,
-    userId: req.body.userId,
-    date: new Date(req.body.date)
+    type: type,
+    code: code,
+    userId: userId,
+    date: new Date(date)
   }
-  Compliance.getOne(query, function (err, complianceitem) {
+  // 调用任务执行情况获取函数Compliance.getOne获取一条任务执行条目
+  Compliance.getOne(query, function (err, complianceItem) {
     if (err) {
       console.log(err)
       return res.status(500).send('查询失败')
     }
 
-      // 查询不到，需要新建一个条目
-    if (complianceitem == null) {
+    // 查询不到已有条目则新建一个条目
+    if (complianceItem == null) {
         // return res.json({result:req.body});
         // return res.status(200).send('查询不到');
       var complianceData = {
-        type: req.body.type,
-        code: req.body.code,
-        userId: req.body.userId,
-        date: new Date(req.body.date)
+        type: type,
+        code: code,
+        userId: userId,
+        date: new Date(date)
       }
         // return res.json({result:complianceData});
+      // 新建compliance条目，调用save函数保存信息
       var newCompliance = new Compliance(complianceData)
       newCompliance.save(function (err, complianceInfo) {
         if (err) {
@@ -93,29 +107,30 @@ exports.getCompliance = function (req, res, next) {
         }
         next()
       })
-    } else if (complianceitem != null) {
+    } else if (complianceItem != null) {
       next()
     }
   })
 }
 
-// 写入任务执行情况 2017-04-17 GY
+// 更新任务执行情况
 exports.updateCompliance = function (req, res) {
   var query = {
-    userId: req.body.userId,
-    type: req.body.type,
-    code: req.body.code,
-    date: new Date(req.body.date)
+    userId: req.session.userId,
+    type: req.session.type,
+    code: req.session.code,
+    date: new Date(req.session.date)
   }
-
+  // 若存在更新状态与描述则写入
   var upObj = {}
-  if (req.body.status != null) {
-    upObj['status'] = req.body.status
+  if (req.session.status != null) {
+    upObj['status'] = req.session.status
   }
-  if (req.body.description != null) {
-    upObj['description'] = req.body.description
+  if (req.session.description != null) {
+    upObj['description'] = req.session.description
   }
   // return res.json({query: query, upObj: upObj});
+  // 调用Compliance.updateOne函数更新数据
   Compliance.updateOne(query, upObj, function (err, upCompliance) {
     if (err) {
       return res.status(422).send(err.message)

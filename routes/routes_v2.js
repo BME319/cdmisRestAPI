@@ -11,17 +11,21 @@ var config = require('../config')
 var Wechat = require('../models/wechat')
 
 // middlewares
-var getNoMid = require('../middlewares/getNoMid'),
-  tokenManager = require('../middlewares/tokenManager'),
-  aclChecking = require('../middlewares/aclChecking')
+var getNoMid = require('../middlewares/getNoMid')
+var tokenManager = require('../middlewares/tokenManager')
+var aclChecking = require('../middlewares/aclChecking')
 
 // controllers
-var aclsettingCtrl = require('../controllers_v2/aclsetting_controller'),
-  niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller'),
-  alluserCtrl = require('../controllers_v2/alluser_controller')
+var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
+var niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller')
+var alluserCtrl = require('../controllers_v2/alluser_controller')
 
 var reviewCtrl = require('../controllers_v2/review_controller')
 var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
+
+var commentCtrl = require('../controllers_v2/comment_controller')
+var adviceCtrl = require('../controllers_v2/advice_controller')
+var complianceCtrl = require('../controllers/compliance_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -89,4 +93,15 @@ module.exports = function (app, webEntry, acl) {
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
+
+  // YQC
+  // comment
+  app.get(version + '/comment/commentByDoc', tokenManager.verifyToken(), commentCtrl.getCommentsByDoc)
+  app.get(version + '/comment/commentByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
+  // advice
+  app.get(version + '/advice/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
+  app.post(version + '/advice/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
+  // compliance
+  app.get(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
+  app.post(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
 }
