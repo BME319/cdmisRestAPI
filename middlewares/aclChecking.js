@@ -31,7 +31,7 @@ exports.Checking = function (acl, numPathComponents, userId, actions) {
     if (!numPathComponents) {
       resource = url
     } else {
-      resource = url.split('/').slice(1, numPathComponents + 1).join('/')
+      resource = url.split('/').slice(3, numPathComponents + 1).join('/')
     }
 
     if (!_actions) {

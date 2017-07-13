@@ -367,7 +367,51 @@ exports.getAlluserList = function (role) {
     }, opts, fields)
   }
 }
+exports.countAlluserList = function (req, res) {
+  var query = {'invalidFlag': 0}
 
+  var _uid = req.query.userId
+  var _role = req.query.role
+  var _name = req.query.name
+
+        // role 0-user 1-doctor 2-patient 3-nurse 4-insurance 5-health 6-admin
+  if (_uid !== null && _uid !== undefined && _uid !== '') {
+    query['userId'] = _uid
+  }
+  if (_name !== null && _name !== undefined && _name !== '') {
+    query['name'] = { $regex: _name }
+  }
+  if (_role !== null && _role !== undefined && _role !== '') {
+    _role = Number(_role)
+  }
+  if (_role === 1) {
+    query['$or'] = [{'role': 'doctor'}, {'role': 'Leader'}, {'role': 'master'}]
+  }
+  if (_role === 2) {
+    query['role'] = 'patient'
+  }
+  if (_role === 3) {
+    query['role'] = 'nurse'
+  }
+  if (_role === 4) {
+    query['$or'] = [{'role': 'insuranceA'}, {'role': 'insuranceR'}, {'role': 'insuranceC'}]
+  }
+  if (_role === 5) {
+    query['role'] = 'health'
+  }
+  if (_role === 6) {
+    query['role'] = 'admin'
+  }
+        // 通过子表查询主表，定义主表查询路径及输出内容
+        // var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
+  console.log(query)
+  Alluser.countSome(query, function (err, userlist) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    res.json({results: userlist})
+  })
+}
 exports.updateAlluserList = function (req, res) {
   var _userId = req.body.userId
   var _name = req.body.name
@@ -394,7 +438,7 @@ exports.updateAlluserList = function (req, res) {
   // var _class_info = req.body.class_info
   var _workAmounts = req.body.workAmounts
   var _boardingTime = req.body.boardingTime
-  // var _creationTime = req.body.creationTime
+  var _creationTime = req.body.creationTime
 
   var query = {userId: _userId}
   var upObj = {}
@@ -422,6 +466,9 @@ exports.updateAlluserList = function (req, res) {
   }
   if (_boardingTime !== null && _boardingTime !== undefined && _boardingTime !== '') {
     upObj['boardingTime'] = new Date(_boardingTime)
+  }
+  if (_creationTime !== null && _creationTime !== undefined && _creationTime !== '') {
+    upObj['creationTime'] = new Date(_creationTime)
   }
     // console.log(upObj);
   Alluser.updateOne(query, {$set: upObj}, function (err, item1) {

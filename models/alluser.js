@@ -153,6 +153,7 @@ Alluser.prototype.save = function (callback) {
 
 Alluser.getOne = function (query, callback, opts, fields, populate) {
   var options = opts || {}
+
   var _fields = fields || null
   var _populate = populate || ''
 
@@ -169,6 +170,7 @@ Alluser.getOne = function (query, callback, opts, fields, populate) {
 
 Alluser.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
+
   var _fields = fields || null
   var _populate = populate || ''
   alluserModel
@@ -182,6 +184,17 @@ Alluser.getSome = function (query, callback, opts, fields, populate) {
     })
 }
 
+Alluser.countSome = function (query, callback) {
+  alluserModel
+    .count(query)
+    .exec(function (err, allusers) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, allusers)
+    })
+}
+ 
 Alluser.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''

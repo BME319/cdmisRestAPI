@@ -197,6 +197,7 @@ exports.changeCounselStatus = function (req, res, next) {
   }
 
   // return res.json({query: query, upObj: upObj});
+
   Counsel.updateOne(query, upObj, function (err, upCounsel) {
     if (err) {
       return res.status(422).send(err.message)
@@ -270,6 +271,7 @@ exports.getStatus = function (req, res, next) {
 
   Counsel.getSome(query, function (err, items) {
     if (err) {
+<<<<<<< HEAD
       return res.status(500).send(err.errmsg)
     }
     if (items.length === 0) {
@@ -299,8 +301,8 @@ exports.changeCounselType = function (req, res) {
   } else {
     return res.json({result: '不可更改的类型!'})
   }
-
   // return res.json({query: query, upObj: upObj});
+
   Counsel.updateOne(query, upObj, function (err, upCounsel) {
     if (err) {
       return res.status(422).send(err.message)

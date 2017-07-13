@@ -13,7 +13,7 @@ var Wechat = require('../models/wechat')
 // middlewares
 var getNoMid = require('../middlewares/getNoMid')
 var tokenManager = require('../middlewares/tokenManager')
-// var aclChecking = require('../middlewares/aclChecking')
+var aclChecking = require('../middlewares/aclChecking')
 
 // controllers
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
@@ -57,6 +57,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl))
 
   // wf
+  app.get(version + '/alluser/count', tokenManager.verifyToken(), alluserCtrl.countAlluserList)
   app.get(version + '/alluser/userList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(0))
   app.get(version + '/alluser/doctorList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(1))
   app.get(version + '/alluser/patientList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(2))
@@ -82,7 +83,7 @@ module.exports = function (app, webEntry, acl) {
 
   // gy
   // review
-  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo)
+  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), aclChecking.Checking(acl), reviewCtrl.postReviewInfo)
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate)
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo)
 
@@ -95,25 +96,11 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/labtestImport/photoByLabtest', tokenManager.verifyToken(), labtestImportCtrl.photoByLabtest)
   app.post(version + '/labtestImport/labelphoto', tokenManager.verifyToken(), labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
 
-  // niaodaifu
-  app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
-
   // YQC
-  // patient
-  app.get(version + '/patient/patientDetail', tokenManager.verifyToken(), patientCtrl.getPatientDetail)
-  app.get(version + '/patient/doctorsList', tokenManager.verifyToken(), patientCtrl.getDoctorLists)
-  app.get(version + '/patient/myDoctors', patientCtrl.getPatientObject, patientCtrl.getMyDoctor)
-  app.post(version + '/patient/diagnosis', patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
-  app.post(version + '/patient/detail', patientCtrl.checkPatientId, patientCtrl.newPatientDetail)
-  app.post(version + '/patient/editDetail', patientCtrl.editPatientDetail)
-  app.get(version + '/patient/counselRecords', patientCtrl.getPatientObject, patientCtrl.getCounselRecords)
-  app.post(version + '/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
-  app.post(version + '/patient/changeVIP', patientCtrl.changeVIP)
-  app.post(version + '/patient/wechatPhotoUrl', patientCtrl.wechatPhotoUrl)
   // comment - debug complete
   app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
   app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
-  // advice
+  // advice - debug complete
   app.get(version + '/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
   app.post(version + '/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
   // compliance
@@ -122,4 +109,9 @@ module.exports = function (app, webEntry, acl) {
   // vitalSign
   app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
   app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
+
+  // niaodaifu
+  app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
+  app.post('/devicedata/niaodaifu/data', niaodaifuCtrl.receiveData)
+  // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 }
