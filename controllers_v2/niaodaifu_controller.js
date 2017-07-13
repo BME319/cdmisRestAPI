@@ -56,20 +56,4 @@ exports.receiveData = function (req, res) {
   console.log('receiveNiaodaifu')
   console.log(req.body)
 
-  var returnData = req.body
-  var userId = returnData.userbind
-  var suggestion = returnData.suggestion
-  var description = returnData.desc
-  var status = returnData.status
-  var type = returnData.type
-  var createdTime = returnData.created
-  var data = returnData.data
-  var insertData = []
-  for(let i = 0; i < data.length; i++){
-    let id = data[i].id
-    switch(id){
-      case 1:
-      insertData.push({})
-    }
-  }
 }
