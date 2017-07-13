@@ -1,4 +1,8 @@
-var config = require('../config')
+// 代码 2017-03-29 GY
+// 修改 患者详情，只输出最新的诊断内容 2017-05-14 GY
+// 注释 2017-07-13 YQC
+
+// var config = require('../config')
 var webEntry = require('../settings').webEntry
 var Patient = require('../models/patient')
 var Doctor = require('../models/doctor')
@@ -8,15 +12,14 @@ var commonFunc = require('../middlewares/commonFunc')
 var Counsel = require('../models/counsel')
 var VitalSign = require('../models/vitalSign')
 
-// 根据userId查询患者详细信息 2017-03-29 GY
-// 修改：只输出最新的诊断内容 2017-05-14 GY
+// 根据userId查询患者详细信息
 exports.getPatientDetail = function (req, res) {
-  if (req.query.userId == null || req.query.userId === '') {
+  if (req.session.userId == null || req.session.userId === '') {
     return res.json({result: '请填写userId!'})
   }
   // 查询条件
-  var _userId = req.query.userId
-  var query = {userId: _userId}
+  var userId = req.session.userId
+  var query = {userId: userId}
   // 输出内容
   var fields = {'revisionInfo': 0, 'doctors': 0}
   var populate = {path: 'diagnosisInfo.doctor', select: {'_id': 0, 'userId': 1, 'name': 1, 'workUnit': 1, 'department': 1}}
@@ -59,15 +62,15 @@ exports.getPatientDetail = function (req, res) {
   }, '', fields, populate)
 }
 
-// 根据医院和医生姓名（选填）获取医生信息 2017-03-29 GY
+// 根据医院和医生姓名（选填）获取医生信息
 exports.getDoctorLists = function (req, res) {
   // 查询条件
-  var _province = req.query.province
-  var _city = req.query.city
-  var _district = req.query.district
+  var _province = req.query.province || null
+  var _city = req.query.city || null
+  var _district = req.query.district || null
 
-  var _workUnit = req.query.workUnit
-  var _name = req.query.name
+  var _workUnit = req.query.workUnit || null
+  var _name = req.query.name || null
 
   var _limit = Number(req.query.limit)
   var _skip = Number(req.query.skip)
@@ -110,8 +113,6 @@ exports.getDoctorLists = function (req, res) {
     query.name = new RegExp(_name)
   }
   // 输出内容
-
-  // if(_limit==null||_limit==)
   var option = {limit: _limit, skip: _skip, sort: -'_id'}
   var fields = {'_id': 0, 'revisionInfo': 0}
 
@@ -121,18 +122,20 @@ exports.getDoctorLists = function (req, res) {
   var _limitUrl = ''
   var _skipUrl = ''
   var _Url = ''
-  if (_workUnit != null && _workUnit !== undefined) {
+  // 检查查询条件存在并设定
+  if (_workUnit != null && _workUnit !== '') {
     _workUnitUrl = 'workUnit=' + _workUnit
   }
-  if (_name != null && _name !== undefined) {
+  if (_name != null && _name !== '') {
     _nameUrl = 'name=' + _name
   }
-  if (_limit != null && _limit !== undefined) {
+  if (_limit != null && _limit !== '') {
     _limitUrl = 'limit=' + String(_limit)
   }
-  if (_skip != null && _skip !== undefined) {
+  if (_skip != null && _skip !== '') {
     _skipUrl = 'skip=' + String(_skip + _limit)
   }
+  // 路径尾部添加查询条件
   if (_workUnitUrl !== '' || _nameUrl !== '' || _limitUrl !== '' || _skipUrl !== '') {
     _Url = _Url + '?'
     if (_workUnitUrl !== '') {
@@ -149,7 +152,8 @@ exports.getDoctorLists = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v1/patient/getDoctorLists' + _Url
+  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/getDoctorLists' + _Url
+  // ？？？
   Doctor.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -162,11 +166,11 @@ exports.getDoctorLists = function (req, res) {
 // 通过patient表中userId返回PatientObject 2017-03-30 GY
 // 修改：增加判断不存在ID情况 2017-04-05 GY
 exports.getPatientObject = function (req, res, next) {
-  if (req.query.userId == null || req.query.userId === '') {
+  if (req.session.userId == null || req.session.userId === '') {
     return res.json({result: '请填写userId!'})
   }
   var query = {
-    userId: req.query.userId
+    userId: req.session.userId
   }
   Patient.getOne(query, function (err, patient) {
     if (err) {

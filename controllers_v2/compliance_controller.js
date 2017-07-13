@@ -23,13 +23,13 @@ var Compliance = require('../models/compliance')
 //   });
 // }
 
-// 根据日期获取任务执行情况
+// 获取某日任务执行情况
 exports.getComplianceByDay = function (req, res) {
   // 请求数据提取
-  var userId = req.session.userId
-  var date = req.session.date
-  var type = req.session.type
-  var code = req.session.code
+  var userId = req.session.userId || null
+  var date = req.query.date || null
+  var type = req.query.type || null
+  var code = req.query.code || null
   // 判断查询参数定义并写入
   var query = {}
   if (userId !== '' && userId !== undefined) {
@@ -56,10 +56,10 @@ exports.getComplianceByDay = function (req, res) {
 // 获取任务执行情况
 exports.getCompliance = function (req, res, next) {
   // 请求数据提取
-  var userId = req.session.userId
-  var date = req.session.date
-  var type = req.session.type
-  var code = req.session.code
+  var userId = req.session.userId || null
+  var date = req.body.date || null
+  var type = req.body.type || null
+  var code = req.body.code || null
   // 判断参数输入，无输入则提示
   if (type == null || type === '') {
     return res.json({result: '请填写type!'})
@@ -116,18 +116,18 @@ exports.getCompliance = function (req, res, next) {
 // 更新任务执行情况
 exports.updateCompliance = function (req, res) {
   var query = {
-    userId: req.session.userId,
-    type: req.session.type,
-    code: req.session.code,
-    date: new Date(req.session.date)
+    userId: req.session.userId || null,
+    type: req.body.type || null,
+    code: req.body.code || null,
+    date: new Date(req.body.date)
   }
   // 若存在更新状态与描述则写入
   var upObj = {}
-  if (req.session.status != null) {
-    upObj['status'] = req.session.status
+  if (req.body.status != null) {
+    upObj['status'] = req.body.status
   }
-  if (req.session.description != null) {
-    upObj['description'] = req.session.description
+  if (req.body.description != null) {
+    upObj['description'] = req.body.description
   }
   // return res.json({query: query, upObj: upObj});
   // 调用Compliance.updateOne函数更新数据

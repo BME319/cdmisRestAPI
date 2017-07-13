@@ -8,7 +8,7 @@ var version = '/api/v2'
 // var config = require('../config')
 
 // models
-// var Wechat = require('../models/wechat')
+var Wechat = require('../models/wechat')
 
 // middlewares
 var getNoMid = require('../middlewares/getNoMid')
@@ -25,7 +25,11 @@ var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
 
 var commentCtrl = require('../controllers_v2/comment_controller')
 var adviceCtrl = require('../controllers_v2/advice_controller')
-var complianceCtrl = require('../controllers/compliance_controller')
+var complianceCtrl = require('../controllers_v2/compliance_controller')
+var vitalSignCtrl = require('../controllers_v2/vitalSign_controller')
+var patientCtrl = require('../controllers_v2/patient_controller')
+var doctorCtrl = require('../controllers_v2/doctor_controller')
+var wechatCtrl = require('../controllers_v2/wechat_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -68,7 +72,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
   app.get(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId)
   app.post(version + '/alluser/reset', tokenManager.verifyToken(), alluserCtrl.reset)
-  app.post(version + '/alluser/login', tokenManager.verifyToken(), alluserCtrl.openIdLoginTest, alluserCtrl.checkBinding, alluserCtrl.login)
+  app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest, alluserCtrl.checkBinding, alluserCtrl.login)
   app.post(version + '/alluser/logout', tokenManager.verifyToken(), alluserCtrl.logout)
   app.get(version + '/alluser/userID', tokenManager.verifyToken(), alluserCtrl.getAlluserID)
   app.post(version + '/alluser/sms', tokenManager.verifyToken(), alluserCtrl.sendSMS)
@@ -95,13 +99,27 @@ module.exports = function (app, webEntry, acl) {
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 
   // YQC
-  // comment
-  app.get(version + '/comment/commentByDoc', tokenManager.verifyToken(), commentCtrl.getCommentsByDoc)
-  app.get(version + '/comment/commentByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
+  // patient
+  app.get(version + '/patient/patientDetail', tokenManager.verifyToken(), patientCtrl.getPatientDetail)
+  app.get(version + '/patient/doctorsList', tokenManager.verifyToken(), patientCtrl.getDoctorLists)
+  app.get(version + '/patient/myDoctors', patientCtrl.getPatientObject, patientCtrl.getMyDoctor)
+  app.post(version + '/patient/diagnosis', patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
+  app.post(version + '/patient/detail', patientCtrl.checkPatientId, patientCtrl.newPatientDetail)
+  app.post(version + '/patient/editDetail', patientCtrl.editPatientDetail)
+  app.get(version + '/patient/counselRecords', patientCtrl.getPatientObject, patientCtrl.getCounselRecords)
+  app.post(version + '/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
+  app.post(version + '/patient/changeVIP', patientCtrl.changeVIP)
+  app.post(version + '/patient/wechatPhotoUrl', patientCtrl.wechatPhotoUrl)
+  // comment - debug complete
+  app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
+  app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
   // advice
-  app.get(version + '/advice/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
-  app.post(version + '/advice/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
+  app.get(version + '/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
+  app.post(version + '/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
   // compliance
   app.get(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
   app.post(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
+  // vitalSign
+  app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
+  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
 }

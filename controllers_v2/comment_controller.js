@@ -4,7 +4,7 @@
 // var config = require('../config')
 var Comment = require('../models/comment')
 
-// 根据 doctorId 查询评价
+// 注释 根据doctorId查询评价；输入，doctorObject._id；输出，相应医生的评价
 exports.getCommentsByDoc = function (req, res) {
   // 提取doctorId
   var doctorObject = req.body.doctorObject
@@ -23,14 +23,14 @@ exports.getCommentsByDoc = function (req, res) {
   }, opts, fields, populate)
 }
 
-// 根据 counselId 查询评价
+// 注释 根据counselId查询评价；输入，counselId;输出，相应评价条目
 exports.getCommentsByCounselId = function (req, res) {
   // 提取counselId
-  var _counselId = req.query.counselId
+  var _counselId = req.query.counselId || null
   // 评价获取函数参数设置
   var query = {}
   // 判断counselId存在则进入参数设置
-  if (_counselId !== '' && _counselId !== undefined) {
+  if (_counselId !== '' && _counselId !== null) {
     query['counselId'] = _counselId
   }
   var opts = ''

@@ -1,23 +1,27 @@
+// 代码 2017-04-06 GY
+// 注释 2017-07-13 YQC
+// 函数功能 查询体征记录，新建体征记录
+
 var config = require('../config')
-var xml2js = require('xml2js')
+// var xml2js = require('xml2js')
 var VitalSign = require('../models/vitalSign')
 var Patient = require('../models/patient')
+var request = require('request')
 
-// 查询某患者某一种体征记录
+// 根据userId和type查询体征记录
 exports.getVitalSigns = function (req, res) {
   if (req.query.type == null || req.query.type === '') {
     return res.json({result: '请填写type!'})
   }
-  // 查询条件
+  // 设置查询条件
   var query = {
-    patientId: req.body.patientObject._id,
+    patientId: req.body.patientObject._Id,
     type: req.query.type
   }
-  // 输出内容
   var opts = ''
   var fields = {'_id': 0, 'revisionInfo': 0}
   var populate = {path: 'patientId', select: {'_id': 0, 'userId': 1}}
-
+  // 调用体征查询函数VitalSign.getSome输出体征记录内容
   VitalSign.getSome(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -26,14 +30,14 @@ exports.getVitalSigns = function (req, res) {
   }, opts, fields, populate)
 }
 
-// 新建体征记录 2017-04-06 GY
+// 新建体征记录
 exports.getPatientObject = function (req, res, next) {
-  if (req.body.patientId == null || req.body.patientId === '') {
+  if (req.session.userId == null || req.session.userId === '') {
     return res.json({result: '请填写patientId!'})
   }
   // 通过patientId获取patient表中对应的_id
   var querypatient = {
-    userId: req.body.patientId
+    userId: req.session.userId
   }
   Patient.getOne(querypatient, function (err, patient) {
     if (err) {
@@ -149,7 +153,7 @@ exports.insertData = function (req, res) {
       return res.json({result: '未成功修改！请检查输入是否符合要求！', results: updata})
     }
     if (updata.nModified === 1) {
-      return res.json({result: '新建或修改成功', resluts: updata})
+      return res.json({result: '新建或修改成功', results: updata})
     }
     res.json({results: updata})
   }, {new: true})
@@ -157,7 +161,6 @@ exports.insertData = function (req, res) {
 
 exports.receiveBloodPressure = function (req, res) {
   var jsondata = req.body
-
   request({
     method: 'POST',
     url: config.third_party_data.bloodpressure.get_bp_data_url,

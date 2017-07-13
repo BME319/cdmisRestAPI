@@ -156,12 +156,13 @@ exports.getTeams = function (req, res) {
 
 // 通过doctor表中userId查询_id 2017-03-30 GY
 // 修改：增加判断不存在ID情况 2017-04-05 GY
+// 注释 输入，userId（要查询的doctorId）；输出，对应的doctorObject；目的，得到doctorObject._id
 exports.getDoctorObject = function (req, res, next) {
-  if (req.query.userId == null || req.query.userId === '') {
-    return res.json({result: '请填写userId!'})
+  if (req.query.doctorId == null || req.query.doctorId === '') {
+    return res.json({result: '请填写doctorId!'})
   }
   var query = {
-    userId: req.query.userId
+    userId: req.query.doctorId
   }
   Doctor.getOne(query, function (err, doctor) {
     if (err) {
