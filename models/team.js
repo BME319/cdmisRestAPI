@@ -83,7 +83,7 @@ Team.updateOne = function(query, obj, callback, opts, populate) {
 
   teamModel
   .findOneAndUpdate(query, obj, options)
-  .populate_populate)
+  .populate(_populate)
   .exec(function(err, upteam) {
   if(err){
   return callback(err);
