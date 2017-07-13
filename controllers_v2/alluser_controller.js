@@ -367,7 +367,51 @@ exports.getAlluserList = function (role) {
     }, opts, fields)
   }
 }
+exports.countAlluserList = function (req, res) {
+  var query = {'invalidFlag': 0}
 
+  var _uid = req.query.userId
+  var _role = req.query.role
+  var _name = req.query.name
+
+        // role 0-user 1-doctor 2-patient 3-nurse 4-insurance 5-health 6-admin
+  if (_uid !== null && _uid !== undefined && _uid !== '') {
+    query['userId'] = _uid
+  }
+  if (_name !== null && _name !== undefined && _name !== '') {
+    query['name'] = { $regex: _name }
+  }
+  if (_role !== null && _role !== undefined && _role !== '') {
+    _role = Number(_role)
+  }
+  if (_role === 1) {
+    query['$or'] = [{'role': 'doctor'}, {'role': 'Leader'}, {'role': 'master'}]
+  }
+  if (_role === 2) {
+    query['role'] = 'patient'
+  }
+  if (_role === 3) {
+    query['role'] = 'nurse'
+  }
+  if (_role === 4) {
+    query['$or'] = [{'role': 'insuranceA'}, {'role': 'insuranceR'}, {'role': 'insuranceC'}]
+  }
+  if (_role === 5) {
+    query['role'] = 'health'
+  }
+  if (_role === 6) {
+    query['role'] = 'admin'
+  }
+        // 通过子表查询主表，定义主表查询路径及输出内容
+        // var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
+  console.log(query)
+  Alluser.countSome(query, function (err, userlist) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    res.json({results: userlist})
+  })
+}
 exports.updateAlluserList = function (req, res) {
   var _userId = req.body.userId
   var _name = req.body.name
