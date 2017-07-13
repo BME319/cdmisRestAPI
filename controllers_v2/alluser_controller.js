@@ -394,7 +394,7 @@ exports.updateAlluserList = function (req, res) {
   // var _class_info = req.body.class_info
   var _workAmounts = req.body.workAmounts
   var _boardingTime = req.body.boardingTime
-  // var _creationTime = req.body.creationTime
+  var _creationTime = req.body.creationTime
 
   var query = {userId: _userId}
   var upObj = {}
@@ -422,6 +422,9 @@ exports.updateAlluserList = function (req, res) {
   }
   if (_boardingTime !== null && _boardingTime !== undefined && _boardingTime !== '') {
     upObj['boardingTime'] = new Date(_boardingTime)
+  }
+  if (_creationTime !== null && _creationTime !== undefined && _creationTime !== '') {
+    upObj['creationTime'] = new Date(_creationTime)
   }
     // console.log(upObj);
   Alluser.updateOne(query, {$set: upObj}, function (err, item1) {
