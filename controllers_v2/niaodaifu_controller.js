@@ -52,3 +52,7 @@ function getSign (appkey, appsecret, atime) {
   return step5
 }
 
+exports.receiveData = function (req, res) {
+  console.log('receiveNiaodaifu')
+  console.log(req.body)
+}

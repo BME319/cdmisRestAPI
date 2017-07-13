@@ -134,7 +134,7 @@ var alluserSchema = new mongoose.Schema({
 
 })
 
-alluserModel = mongoose.model('alluser', alluserSchema)
+var alluserModel = mongoose.model('alluser', alluserSchema)
 
 function Alluser (alluser) {
   this.alluser = alluser
@@ -153,12 +153,13 @@ Alluser.prototype.save = function (callback) {
 
 Alluser.getOne = function (query, callback, opts, fields, populate) {
   var options = opts || {}
-  var fields = fields || null
-  var populate = populate || ''
+
+  var _fields = fields || null
+  var _populate = populate || ''
 
   alluserModel
-    .findOne(query, fields, opts)
-    .populate(populate)
+    .findOne(query, _fields, options)
+    .populate(_populate)
     .exec(function (err, alluserInfo) {
       if (err) {
         return callback(err)
@@ -169,11 +170,12 @@ Alluser.getOne = function (query, callback, opts, fields, populate) {
 
 Alluser.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
-  var fields = fields || null
-  var populate = populate || ''
+
+  var _fields = fields || null
+  var _populate = populate || ''
   alluserModel
-    .find(query, fields, options)
-    .populate(populate)
+    .find(query, _fields, options)
+    .populate(_populate)
     .exec(function (err, allusers) {
       if (err) {
         return callback(err)
@@ -192,14 +194,14 @@ Alluser.countSome = function (query, callback) {
       callback(null, allusers)
     })
 }
-
+ 
 Alluser.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
-  var populate = populate || ''
+  var _populate = populate || ''
 
   alluserModel
     .findOneAndUpdate(query, obj, options)
-    .populate(populate)
+    .populate(_populate)
     .exec(function (err, upalluser) {
       if (err) {
         return callback(err)
@@ -210,11 +212,11 @@ Alluser.updateOne = function (query, obj, callback, opts, populate) {
 
 Alluser.update = function (query, obj, callback, opts, populate) {
   var options = opts || {}
-  var populate = populate || ''
+  var _populate = populate || ''
 
   alluserModel
     .update(query, obj, options)
-    .populate(populate)
+    .populate(_populate)
     .exec(function (err, upalluser) {
       if (err) {
         return callback(err)
