@@ -24,8 +24,9 @@ var reviewCtrl = require('../controllers_v2/review_controller')
 var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
 
 var accountCtrl = require('../controllers_v2/account_controller')
-var expenseCtrl = require('../controllers/expense_controller')
-var doctorCtrl = require('../controllers/doctor_controller')
+var expenseCtrl = require('../controllers_v2/expense_controller')
+var doctorCtrl = require('../controllers_v2/doctor_controller')
+var healthInfoCtrl = require('../controllers_v2/healthInfo_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -101,6 +102,14 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/account/counts', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts)
   app.post(version + '/account/freeTime', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
   app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
-  app.post(version + '/expense/rechargeDoctor', tokenManager.verifyToken(), accountCtrl.checkPatient, doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+
+  app.post(version + '/expense/doctor', tokenManager.verifyToken(), accountCtrl.checkPatient, doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
   app.get(version + '/expense/docRecords', tokenManager.verifyToken(), doctorCtrl.checkDoctor, expenseCtrl.getDocRecords)
+
+  // healthInfo
+  app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)
+  app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.getHealthDetail)
+  app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), healthInfoCtrl.insertHealthInfo)
+  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.modifyHealthDetail)
+  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.deleteHealthDetail)
 }

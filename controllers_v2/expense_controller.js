@@ -6,8 +6,8 @@ var Expense = require('../models/expense')
 
 exports.getDocRecords = function (req, res) {
   // 查询条件
-  var query = {doctorId: req.query.doctorId}
-
+  // var query = {doctorId: req.query.doctorId}
+  var query = {doctorId: req.session.userId}
   var limit = Number(req.query.limit)
   var skip = Number(req.query.skip)
 
@@ -15,7 +15,8 @@ exports.getDocRecords = function (req, res) {
   var fields = {'_id': 0, 'doctorId': 0, 'doctorName': 0, 'patientId': 0}
 
   var _Url = ''
-  var userIdUrl = 'doctorId=' + req.query.doctorId
+  // var userIdUrl = 'doctorId=' + req.query.doctorId
+  var userIdUrl = 'doctorId=' + req.session.userId
   var limitUrl = ''
   var skipUrl = ''
 

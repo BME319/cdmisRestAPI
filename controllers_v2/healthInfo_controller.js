@@ -4,7 +4,8 @@ var Alluser = require('../models/alluser')
 var HealthInfo = require('../models/healthInfo')
 
 exports.getAllHealthInfo = function (req, res) {
-  var _userId = req.query.userId
+  // var _userId = req.query.userId
+  var _userId = req.session.userId
   var query = {userId: _userId}
   // var opts = {sort:-"time"};
   var opts = {'sort': {'time': -1, 'revisionInfo.operationTime': -1}}
@@ -12,6 +13,7 @@ exports.getAllHealthInfo = function (req, res) {
   // var fields = {'_id':0};
   var populate = {'path': 'resultId'}
 
+  // 获取部分患者的健康信息,定义的opts,fields和populate未使用？
   HealthInfo.getSome(query, function (err, healthInfolist) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -21,8 +23,10 @@ exports.getAllHealthInfo = function (req, res) {
 }
 
 exports.getHealthDetail = function (req, res) {
-  var _userId = req.query.userId
-  var _insertTime = new Date(req.query.insertTime)
+  // var _userId = req.query.userId
+  // var _insertTime = new Date(req.query.insertTime)
+  var _userId = req.session.userId
+  var _insertTime = new Date(req.query.insertTime)         // session不包含insertTime
   var query = {userId: _userId, insertTime: _insertTime}
   var opts = ''
   var fields = {'_id': 0, 'revisionInfo': 0}
@@ -66,12 +70,15 @@ exports.getHealthDetail = function (req, res) {
 // 重写插入方法 2017-07-07 GY
 exports.insertHealthInfo = function (req, res) {
   var healthInfoData = {
-    userId: req.body.userId,
+    // userId: req.body.userId,
+    userId: req.session.userId,
     type: req.body.type,
     insertTime: new Date(),
     time: new Date(req.body.time),
     label: req.body.label
   }
+  console.log(healthInfoData)
+  // 对url description comments 进行非空判断
   if (req.body.url !== null && req.body.url !== '' && req.body.url !== undefined) {
     if (req.body.url.constructor === Array) {
       healthInfoData['url'] = req.body.url
@@ -118,13 +125,20 @@ exports.insertHealthInfo = function (req, res) {
           })
         }
       })
+    } else {
+      //  如果不是化验的健康信息，直接返回
+      if (err) {
+        return res.status(500).send(err.errmsg)
+      }
+      res.json({results: healthInfo})
     }
   })
 }
 
 // 重写修改方法 2017-07-07 GY
 exports.modifyHealthDetail = function (req, res) {
-  var query = {userId: req.body.userId, insertTime: new Date(req.body.insertTime)}
+  // var query = {userId: req.body.userId, insertTime: new Date(req.body.insertTime)}
+  var query = {userId: req.session.userId, insertTime: new Date(req.body.insertTime)}
   var upObj = {}
   if (req.body.url !== null && req.body.url !== '' && req.body.url !== undefined) {
     if (req.body.url.constructor === Array) {
@@ -187,7 +201,8 @@ exports.modifyHealthDetail = function (req, res) {
 // }
 
 exports.deleteHealthDetail = function (req, res) {
-  var query = {userId: req.query.userId, insertTime: new Date(req.query.insertTime)}
+  // var query = {userId: req.query.userId, insertTime: new Date(req.query.insertTime)}
+  var query = {userId: req.session.userId, insertTime: new Date(req.query.insertTime)}
 
   HealthInfo.removeOne(query, function (err, item1) {
     if (err) {

@@ -33,15 +33,16 @@ exports.getAccountInfo = function (req, res) {
 exports.checkPatient = function (req, res, next) {
   // if (req.query.patientId === null || req.query.patientId === '' || req.query.patientId === undefined) {
   //   if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
-  if (req.session.patientId === null || req.session.patientId === '' || req.session.patientId === undefined) {
+  if (req.session.userId === null || req.session.userId === '' || req.session.userId === undefined) {
     return res.json({result: '请填写patientId!'})
   } else {
     // req.patientId = req.body.patientId
-    req.patientId = req.session.patientId
+    req.patientId = req.session.userId
   }
   // } else {
   //   req.patientId = req.query.patientId
   // }
+  // 判断患者ID是否存在
   var query = {userId: req.patientId}
   Patient.getOne(query, function (err, item) {
     if (err) {
@@ -57,13 +58,15 @@ exports.checkPatient = function (req, res, next) {
 exports.checkDoctor = function (req, res, next) {
   // if (req.query.doctorId === null || req.query.doctorId === '') {
   //   if (req.body.doctorId === null || req.body.doctorId === '') {
-  if (req.session.doctorId === null || req.session.doctorId === '') {
+  if (req.session.userId === null || req.session.userId === '' || req.session.userId === undefined) {
     // return res.json({result: '请填写doctorId!'});
+    // 显示免费咨询次数和总咨询次数
     var queryPatient = {userId: req.patientId}
     Account.getOne(queryPatient, function (err, accountitem) {
       if (err) {
         return res.status(500).send(err.errmsg)
       }
+      // 无历史咨询信息，初始化
       if (accountitem === null) {
         var accountData = {
           userId: req.patientId,
@@ -78,6 +81,7 @@ exports.checkDoctor = function (req, res, next) {
         })
         return res.json({result: {freeTimes: 3, totalPaidTimes: 0}})
       } else {
+        // 有历史咨询信息，times.length 表示历史咨询医生的个数，times[i].count表示对应每个医生的咨询次数
         var count = 0
         for (var i = accountitem.times.length - 1; i >= 0; i--) {
           count += accountitem.times[i].count
@@ -87,7 +91,8 @@ exports.checkDoctor = function (req, res, next) {
     })
   } else {
     // req.doctorId = req.body.doctorId
-    req.doctorId = req.session.doctorId
+    // 判断医生ID是否存在
+    req.doctorId = req.body.doctorId
     var query = {userId: req.doctorId}
     Doctor.getOne(query, function (err, item) {
       if (err) {
@@ -221,26 +226,23 @@ exports.getCounts = function (req, res, next) {
   var query = {
     userId: req.patientId
   }
-  // if (req.body.modify === 0) {
-  if (req.session.modify === 0) {
+  if (req.body.modify === 0) {
     return res.json({result: '此处禁止输入0!'})
-  // } else if (req.body.modify < -1) {
-  } else if (req.session.modify < -1) {
+  } else if (req.body.modify < -1) {
     return res.json({result: '非法输入!'})
-  // } else if (req.body.modify !== null && req.body.modify !== '') {
-  } else if (req.session.modify !== null && req.session.modify !== '') {
-  // req.modify = parseInt(req.body.modify, 10)
-    req.modify = parseInt(req.session.modify, 10)
+  } else if (req.body.modify !== null && req.body.modify !== '') {
+    req.modify = parseInt(req.body.modify, 10)
   } else {
     req.modify = 0
   }
   // return res.json({modify: req.modify});
-
+  // 查询单个患者账户信息
   Account.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     if (item === null) {
+      // 若账户信息为空，即以前未就诊该医生，则根据modify信息进行初始化
       var accountData
       if (req.modify === 0) {
         accountData = {
@@ -296,6 +298,7 @@ exports.getCounts = function (req, res, next) {
         next()
       }
     } else {
+      // 有历史咨询信息，查询是否有咨询该医生的历史信息
       var count = 0
       for (var i = item.times.length - 1; i >= 0; i--) {
         if (item.times[i].doctorId === req.doctorId) {
@@ -305,6 +308,7 @@ exports.getCounts = function (req, res, next) {
       }
       // console.log(i);
       // console.log(count);
+      // 无咨询该医生的历史信息，则添加该医生的咨询信息
       if (i === -1) {
         var querytemp = {userId: req.patientId}
         var upObj = {
@@ -339,6 +343,7 @@ exports.getCounts = function (req, res, next) {
           }
         })
       } else {
+        // 有咨询该医生的历史信息，直接读取
         if (req.modify === 0) {
           // console.log('patient exist');
           return res.json({result: {freeTimes: item.freeTimes, count: count}})
