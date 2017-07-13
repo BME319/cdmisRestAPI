@@ -50,12 +50,12 @@ exports.bindingDevice = function (req, res) {
           if (err.code === 11000) {
             // 获取该deviceID的设备信息
             Device.getOne({deviceId: deviceId}, function (err, item) {
-              // 若不存在，向前端发送500错误
+              // 报错
               if (err) {
                 return res.status(500).send(err.errmsg)
               }
               if (item) {
-                // 若存在，获取对应患者信息
+                // 获取对应患者信息
                 Patient.getOne({userId: item.userId}, function (err, patient) {
                   if (err) {
                     return res.status(500).send(err.errmsg)
@@ -181,7 +181,7 @@ exports.receiveBloodPressure = function (req, res) {
           console.log('null2')
           res.json(results)
         } else {
-          // 若患者存在，保存BP数据到数据库
+          // 若患者存在，保存血压和心率数据到数据库
           saveBPdata(patient, req, results, res)
         }
       })
@@ -191,7 +191,7 @@ exports.receiveBloodPressure = function (req, res) {
 
 // 获取设备信息
 exports.getDeviceInfo = function (req, res) {
-  var userId = req.query.userId || null
+  var userId = req.session.userId || null
   var deviceType = req.query.deviceType || null
 
   if (userId === null || userId === '') {
