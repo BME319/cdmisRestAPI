@@ -13,7 +13,7 @@ var version = '/api/v2'
 // middlewares
 var getNoMid = require('../middlewares/getNoMid')
 var tokenManager = require('../middlewares/tokenManager')
-// var aclChecking = require('../middlewares/aclChecking')
+var aclChecking = require('../middlewares/aclChecking')
 
 // controllers
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
@@ -54,6 +54,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl))
 
   // wf
+  app.get(version + '/alluser/count', tokenManager.verifyToken(), alluserCtrl.countAlluserList)
   app.get(version + '/alluser/userList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(0))
   app.get(version + '/alluser/doctorList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(1))
   app.get(version + '/alluser/patientList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(2))
@@ -69,7 +70,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
   app.get(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId)
   app.post(version + '/alluser/reset', tokenManager.verifyToken(), alluserCtrl.reset)
-  app.post(version + '/alluser/login', tokenManager.verifyToken(), alluserCtrl.openIdLoginTest, alluserCtrl.checkBinding, alluserCtrl.login)
+  app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest, alluserCtrl.checkBinding, alluserCtrl.login)
   app.post(version + '/alluser/logout', tokenManager.verifyToken(), alluserCtrl.logout)
   app.get(version + '/alluser/userID', tokenManager.verifyToken(), alluserCtrl.getAlluserID)
   app.post(version + '/alluser/sms', tokenManager.verifyToken(), alluserCtrl.sendSMS)
@@ -79,7 +80,7 @@ module.exports = function (app, webEntry, acl) {
 
   // gy
   // review
-  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo)
+  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), aclChecking.Checking(acl), reviewCtrl.postReviewInfo)
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate)
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo)
 
@@ -94,6 +95,8 @@ module.exports = function (app, webEntry, acl) {
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
+  app.post('/devicedata/niaodaifu/data', niaodaifuCtrl.receiveData)
+  // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 
   // lgf
   // account
