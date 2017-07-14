@@ -24,24 +24,25 @@ var Compliance = require('../models/compliance')
 // }
 
 // 获取某日任务执行情况
+// 注释 输入，userId，date，type，code；输出，任务执行情况
 exports.getComplianceByDay = function (req, res) {
   // 请求数据提取
-  var userId = req.session.userId || null
+  var userId = req.query.userId || null
   var date = req.query.date || null
   var type = req.query.type || null
   var code = req.query.code || null
   // 判断查询参数定义并写入
   var query = {}
-  if (userId !== '' && userId !== undefined) {
+  if (userId !== '' && userId !== null) {
     query['userId'] = userId
   }
-  if (date !== '' && date !== undefined) {
+  if (date !== '' && date !== null) {
     query['date'] = date
   }
-  if (type !== '' && type !== undefined) {
+  if (type !== '' && type !== null) {
     query['type'] = type
   }
-  if (code !== '' && code !== undefined) {
+  if (code !== '' && code !== null) {
     query['code'] = code
   }
   // 调用任务执行情况获取函数Compliance.getSome
@@ -56,7 +57,7 @@ exports.getComplianceByDay = function (req, res) {
 // 获取任务执行情况
 exports.getCompliance = function (req, res, next) {
   // 请求数据提取
-  var userId = req.session.userId || null
+  var userId = req.body.userId || null
   var date = req.body.date || null
   var type = req.body.type || null
   var code = req.body.code || null
@@ -74,7 +75,7 @@ exports.getCompliance = function (req, res, next) {
     return res.json({result: '请填写date!'})
   }
   // return res.json({result:req.body});
-  // 查询vitalsign表中是否存在已有对应日期的条目
+  // 查询compliance表中是否存在已有对应日期的条目
   var query = {
     type: type,
     code: code,
@@ -88,7 +89,7 @@ exports.getCompliance = function (req, res, next) {
       return res.status(500).send('查询失败')
     }
 
-    // 查询不到已有条目则新建一个条目
+    // 查询不到已有条目则新建一个条目，查询到存在条目则进入更新函数判断
     if (complianceItem == null) {
         // return res.json({result:req.body});
         // return res.status(200).send('查询不到');
@@ -116,7 +117,7 @@ exports.getCompliance = function (req, res, next) {
 // 更新任务执行情况
 exports.updateCompliance = function (req, res) {
   var query = {
-    userId: req.session.userId || null,
+    userId: req.body.userId || null,
     type: req.body.type || null,
     code: req.body.code || null,
     date: new Date(req.body.date)

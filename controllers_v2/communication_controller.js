@@ -1,4 +1,6 @@
-var config = require('../config')
+// 注释 2017-07-14 YQC
+
+// var config = require('../config')
 var webEntry = require('../settings').webEntry
 var Communication = require('../models/communication')
 var Counsel = require('../models/counsel')
@@ -11,6 +13,7 @@ var DpRelation = require('../models/dpRelation')
 var request = require('request')
 
 // 根据counselId获取counsel表除messages外的信息 2017-03-31 GY
+// 注释 输入，counselId；输出，问诊信息
 exports.getCounselReport = function (req, res) {
   if (req.query.counselId == null || req.query.counselId === '') {
     return res.json({result: '请填写counselId!'})
@@ -33,6 +36,7 @@ exports.getCounselReport = function (req, res) {
 }
 
 // 根据teamId获取team表所有信息 2017-03-31 GY
+// 注释 输入，teamId；输出，团队信息
 exports.getTeam = function (req, res) {
   if (req.query.teamId == null || req.query.teamId === '') {
     return res.json({result: '请填写teamId!'})
@@ -55,6 +59,7 @@ exports.getTeam = function (req, res) {
 }
 
 // 新建组 2017-04-06 GY
+// 注释 输入teamId，name，sponsorId，sponsorName，sponsorPhoto，photoAddress，description，time可选；输出，团队条目保存
 exports.newTeam = function (req, res) {
   var teamData = {
     // teamId: req.newId,
@@ -97,6 +102,7 @@ exports.newTeam = function (req, res) {
   })
 }
 
+// 注释 删除组 输入，teamId；输出，团队条目删除
 exports.deleteTeam = function (req, res) {
   var _teamId = req.body.teamId
   var query = {teamId: _teamId}
@@ -109,6 +115,7 @@ exports.deleteTeam = function (req, res) {
 }
 
 // 新建会诊 2017-04-06 GY
+// 注释 查询团队 输入teamId，输出teamObject
 exports.checkTeam = function (req, res, next) {
   if (req.body.teamId == null || req.body.teamId === '') {
     return res.json({result: '请填写teamId!'})
@@ -128,7 +135,7 @@ exports.checkTeam = function (req, res, next) {
     next()
   })
 }
-
+// 注释 查询咨询信息 输入counselId，输出diseaseInfo
 exports.checkCounsel = function (req, res, next) {
   if (req.body.counselId == null || req.body.counselId === '') {
     return res.json({result: '请填写counselId!'})
@@ -148,6 +155,7 @@ exports.checkCounsel = function (req, res, next) {
     next()
   })
 }
+// 注释 查询患者信息 输入patientId，输出patientObject
 exports.checkPatient = function (req, res, next) {
   if (req.body.patientId == null || req.body.patientId === '') {
     return res.json({result: '请填写patientId!'})
@@ -167,6 +175,7 @@ exports.checkPatient = function (req, res, next) {
     next()
   })
 }
+// 注释 查询（主管）医生信息 输入sponsorId，输出sponsorObject
 exports.checkDoctor = function (req, res, next) {
   if (req.body.sponsorId == null || req.body.sponsorId === '') {
     return res.json({result: '请填写sponsorId!'})
@@ -186,6 +195,7 @@ exports.checkDoctor = function (req, res, next) {
     next()
   })
 }
+// 注释 承接team／counsel／patient／sponsorObeject，输入status，consultationId；输出，新建会诊信息保存
 exports.newConsultation = function (req, res) {
   var status
   if (req.body.status == null || req.body.status === '') {
@@ -233,6 +243,7 @@ exports.newConsultation = function (req, res) {
 }
 
 // 根据ID获取consultation
+// 注释 输入，consultationId；输出，会诊信息
 exports.getConsultation = function (req, res) {
   if (req.query.consultationId == null || req.query.consultationId === '') {
     return res.json({result: '请填写consultationId!'})
@@ -260,6 +271,7 @@ exports.getConsultation = function (req, res) {
 }
 
 // 根据consultationId更新conclusion 2017-04-06 GY
+// 注释 输入，consultationId；输出，更新会诊信息
 exports.conclusion = function (req, res) {
   if (req.body.consultationId == null || req.body.consultationId === '') {
     return res.json({result: '请填写consultationId!'})
@@ -267,21 +279,21 @@ exports.conclusion = function (req, res) {
   if (req.body.conclusion == null || req.body.conclusion === '') {
     return res.json({result: '请填写conclusion!'})
   }
-  var status
-  if (req.body.status == null || req.body.status === '') {
-      // 无status参数传入时，自动设置为已完成
-    status = 0
-  } else {
-    status = req.body.status
-  }
+  // var status
+  // if (req.body.status == null || req.body.status === '') {
+  //     // 无status参数传入时，自动设置为已完成
+  //   status = 0
+  // } else {
+  //   status = req.body.status
+  // }
 
   var query = {
     consultationId: req.body.consultationId
   }
 
   var upObj = {
-    conclusion: req.body.conclusion
-  // status: status
+    conclusion: req.body.conclusion// ,
+    // status: status
   }
   // return res.json({query: query, upObj: upObj});
   Consultation.updateOne(query, upObj, function (err, upConclusion) {
@@ -296,6 +308,7 @@ exports.conclusion = function (req, res) {
 }
 
 // 给team表中members字段增加组员 2017-04-06 GY
+// 注释 输入，teamId，members；输出，增加组员信息
 exports.insertMember = function (req, res, next) {
   if (req.body.teamId == null || req.body.teamId === '') {
     return res.json({result: '请填写teamId!'})
@@ -323,13 +336,15 @@ exports.insertMember = function (req, res, next) {
       return res.json({result: '未成功修改！请检查是否成员已添加！', results: upmember})
     }
     if (upmember.nModified !== 0) {
-            // return res.json({result:'新建或修改成功', results:upmember});
+      // return res.json({result:'新建或修改成功', results:upmember});
       next()
     }
   // res.json({results: upmember});
   }, {new: true})
 }
+
 // 更新成员数量
+// 注释 输入，teamId；输出，更新团队成员数量
 exports.updateNumber = function (req, res) {
   var query = {teamId: req.body.teamId}
   Team.getOne(query, function (err, team) {
@@ -354,6 +369,7 @@ exports.updateNumber = function (req, res) {
 }
 
 // 删除team表中members字段指定组员 2017-04-06 GY
+// 注释 输入，teamId，membersUserId；输出，删除组员信息
 exports.removeMember = function (req, res, next) {
   if (req.body.teamId == null || req.body.teamId === '') {
     return res.json({result: '请填写teamId!'})
@@ -365,7 +381,7 @@ exports.removeMember = function (req, res, next) {
   var upObj = {
     $pull: {
       members: {
-        userId: req.body.membersuserId
+        userId: req.body.membersUserId
       }
     }
   }
@@ -374,12 +390,15 @@ exports.removeMember = function (req, res, next) {
     if (err) {
       return res.status(422).send(err.message)
     }
+    // upmember未选中文件，即团队编号不匹配
     if (upmember.n === 0 && upmember.nModified === 0) {
       return res.json({result: '未成功移除，请检查组是否存在！', results: upmember})
     }
+    // upmember选中文件，但未更新文件，即团队编号匹配但团队成员不匹配
     if (upmember.n !== 0 && upmember.nModified === 0) {
       return res.json({result: '未成功移除，请检查成员是否存在！', results: upmember})
     }
+    // upmember更新文件，即更新了团队成员
     if (upmember.nModified !== 0) {
   // return res.json({result:'移除成功', results: upmember});
       next()
@@ -390,6 +409,7 @@ exports.removeMember = function (req, res, next) {
 }
 
 // 更新医生与医生的最后交流时间
+// 注释 从doctor表获取A医生信息 输入，doctorId；输出，doctorObject
 exports.getDoctor1Object = function (req, res, next) {
   if (req.body.doctorId == null || req.body.doctorId === '') {
     return res.json({result: '请填写doctorId!'})
@@ -409,6 +429,7 @@ exports.getDoctor1Object = function (req, res, next) {
     next()
   })
 }
+// 注释 从doctor表获取B医生信息 输入，doctorId；输出，doctor2Object
 exports.getDoctor2Object = function (req, res, next) {
   if (req.body.doctorId2 == null || req.body.doctorId2 === '') {
     return res.json({result: '请填写doctorId2!'})
@@ -428,6 +449,7 @@ exports.getDoctor2Object = function (req, res, next) {
     next()
   })
 }
+// 注释 承接doctorObject，doctor2Object；输出，删除DpRelation表中A医生条目中与B医生的交流记录
 exports.removeDoctor = function (req, res, next) {
   var query = {
     doctorId: req.body.doctorObject._id
@@ -470,6 +492,7 @@ exports.removeDoctor = function (req, res, next) {
     }
   }, {new: true})
 }
+// 注释 承接doctorObject，doctor2Object；输出，删除DpRelation表中B医生条目中与A医生的交流记录
 exports.removeDoctor2 = function (req, res, next) {
   var query = {
     doctorId: req.body.doctor2Object._id
@@ -512,6 +535,7 @@ exports.removeDoctor2 = function (req, res, next) {
     }
   }, {new: true})
 }
+// 注释 承接doctorObject，doctor2Object；输出，新建DpRelation表中B医生条目中与A医生的交流记录
 exports.updateLastTalkTime2 = function (req, res, next) {
   var query = {
     doctorId: req.body.doctor2Object._id
@@ -542,6 +566,7 @@ exports.updateLastTalkTime2 = function (req, res, next) {
     }
   })
 }
+// 注释 承接doctorObject，doctor2Object；输出，新建DpRelation表中A医生条目中与B医生的交流记录
 exports.updateLastTalkTime = function (req, res) {
   var query = {
     doctorId: req.body.doctorObject._id
@@ -572,6 +597,7 @@ exports.updateLastTalkTime = function (req, res) {
 }
 
 // 根据ID及type存储交流记录 2017-04-21 GY
+// 注释 承接communication类型newId；输入messageType，sendBy，receiver，content.createTimeInMillis/newsType；输出，交流记录存储
 exports.postCommunication = function (req, res) {
   var commmunicationData = {
     messageNo: req.newId,
@@ -592,13 +618,15 @@ exports.postCommunication = function (req, res) {
     var msg = communicationInfo.content
         // do not save into news
 
+    // 用户咨询记录
     if (msg.contentType === 'custom' && (msg.content.type === 'count-notice' || msg.content.type === 'counsel-upgrade')) {
       return res.json({result: '新建成功', newResults: communicationInfo})
     }
-    if (msg.targetType === 'single') {
+    // 医生交流沟通记录
+    if (msg.targetType === 'single') { // 点对点交流记录
           // console.log("111");
       request({
-        url: 'http://' + webEntry.domain + ':4050/api/v1/new/news' + '?token=' + req.query.token || req.body.token,
+        url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/new/news' + '?token=' + req.query.token || req.body.token,
         method: 'POST',
         body: bodyGen(msg, communicationInfo['messageNo']),
         json: true
@@ -606,9 +634,9 @@ exports.postCommunication = function (req, res) {
         if (err) return res.status(500).send(err)
         return res.json({result: '新建成功', newResults: communicationInfo})
       })
-    } else {
+    } else { // team群发记录
       request({
-        url: 'http://' + webEntry.domain + ':4050/api/v1/new/teamNews' + '?token=' + req.query.token || req.body.token,
+        url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/new/teamNews' + '?token=' + req.query.token || req.body.token,
         method: 'POST',
         body: bodyGen(msg, communicationInfo['_id']),
         json: true
@@ -625,6 +653,7 @@ exports.postCommunication = function (req, res) {
       // res.json({result:'新建成功', newResults: communicationInfo});
   })
 }
+
 // exports.postCommunication = function(req, res) {
 
 //   var commmunicationData = {
@@ -645,6 +674,7 @@ exports.postCommunication = function (req, res) {
 // }
 
 // 根据ID及type获取交流记录 2017-04-21 GY
+// 注释 输入messageType（1点对点2团队交流），id1，id2（团队交流时为teamId），newsType；输出，相应交流记录
 exports.getCommunication = function (req, res) {
   var messageType = Number(req.query.messageType)
   var id1 = req.query.id1
@@ -692,7 +722,7 @@ exports.getCommunication = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v1/communication/getCommunication' + _Url
+  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/communication/getCommunication' + _Url
 
   if (messageType === 2) {
     var query = {receiver: id2}
@@ -742,17 +772,20 @@ exports.getCommunication = function (req, res) {
   }
 }
 
+// 注释 判断是否符合DoctorUserPatient的Id样式
 function isID (str) {
   var pat = /^[DUP][0-9]{12}$/
   if (pat.test(str)) return str
   return null
 }
+
+// 注释 根据信息内容msg和信息编号MESSAGE_ID返回req.body
 function bodyGen (msg, MESSAGE_ID) {
-    // type define 4 种
-    // 11:医-患
-    // 12:医-医
-    // 13:医-团队
-    // teamId as type:医-会诊
+  // type define 4 种
+  // 11:医-患
+  // 12:医-医
+  // 13:医-团队
+  // teamId as type:医-会诊
   var msgType = msg.contentType
   var isSingle = msg.targetType === 'single'
   var receiver = msg.targetID
@@ -794,6 +827,9 @@ function bodyGen (msg, MESSAGE_ID) {
     // if(!isSingle) desc=msg.fromName + ':' +desc;
   body.description = desc
     // body.title
+
+  // 点对点沟通 body.title设置内容包含交流双方
+  // 团队交流 body.title设置内容为团队编号
   if (isSingle) {
     var twoUser = {}
     twoUser[msg.fromID] = msg.targetName
@@ -831,6 +867,8 @@ exports.addcontenttime = function (req, res) {
   var queryall = {}
 
   Communication.getSome(queryall, function (err, items) {
+    if (err) console.log(err)
+
     var ids = []
     for (var j = 0; j < items.length; j++) {
       ids[j] = items[j]._id

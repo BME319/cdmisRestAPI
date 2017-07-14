@@ -293,14 +293,28 @@ exports.getAlluserList = function (role) {
 
     var _uid = req.query.userId
     var _role = role
+    var _r = req.query.role
     var _name = req.query.name
-
+    var _phoneNo = req.query.phoneNo
+    var _gender = req.query.gender
+    var _class = req.query.class
+    var _province = req.query.province
+    var _city = req.query.city
+  // var _district = req.query.district
+    var _workUnit = req.query.workUnit
+    var _title = req.query.title
         // role 0-user 1-doctor 2-patient 3-nurse 4-insurance 5-health 6-admin
     if (_uid !== null && _uid !== undefined && _uid !== '') {
-      query['userId'] = _uid
+      query['userId'] = { $regex: _uid }
     }
     if (_name !== null && _name !== undefined && _name !== '') {
       query['name'] = { $regex: _name }
+    }
+    if (_phoneNo !== null && _phoneNo !== undefined && _phoneNo !== '') {
+      query['phoneNo'] = { $regex: _phoneNo }
+    }
+    if (_gender !== null && _gender !== undefined && _gender !== '') {
+      query['gender'] = _gender
     }
     fields['userId'] = 1
     fields['name'] = 1
@@ -308,9 +322,28 @@ exports.getAlluserList = function (role) {
     fields['phoneNo'] = 1
     if (_role === 0) {
       fields['role'] = 1
+      if (_r !== null && _r !== undefined && _r !== '') {
+        query['role'] = _r
+      }
     }
     if (_role === 1) {
-      query['$or'] = [{'role': 'doctor'}, {'role': 'Leader'}, {'role': 'master'}]
+      if (_r !== null && _r !== undefined && _r !== '') {
+        query['role'] = _r
+      } else {
+        query['$or'] = [{'role': 'doctor'}, {'role': 'Leader'}, {'role': 'master'}]
+      }
+      if (_province !== null && _province !== undefined && _province !== '') {
+        query['province'] = { $regex: _province }
+      }
+      if (_city !== null && _city !== undefined && _city !== '') {
+        query['city'] = { $regex: _city }
+      }
+      if (_workUnit !== null && _workUnit !== undefined && _workUnit !== '') {
+        query['workUnit'] = { $regex: _workUnit }
+      }
+      if (_title !== null && _title !== undefined && _title !== '') {
+        query['title'] = { $regex: _title }
+      }
       fields['role'] = 1
       fields['workUnit'] = 1
       fields['department'] = 1
@@ -322,6 +355,9 @@ exports.getAlluserList = function (role) {
       fields['major'] = 1
     }
     if (_role === 2) {
+      if (_class !== null && _class !== undefined && _class !== '') {
+        query['class'] = _class
+      }
       query['role'] = 'patient'
       fields['VIP'] = 1
       fields['IDNo'] = 1
@@ -335,13 +371,26 @@ exports.getAlluserList = function (role) {
       fields['allergic'] = 1
     }
     if (_role === 3) {
+      if (_province !== null && _province !== undefined && _province !== '') {
+        query['province'] = { $regex: _province }
+      }
+      if (_city !== null && _city !== undefined && _city !== '') {
+        query['city'] = { $regex: _city }
+      }
+      if (_workUnit !== null && _workUnit !== undefined && _workUnit !== '') {
+        query['workUnit'] = { $regex: _workUnit }
+      }
       query['role'] = 'nurse'
       fields['workUnit'] = 1
       fields['department'] = 1
       fields['workAmounts'] = 1
     }
     if (_role === 4) {
-      query['$or'] = [{'role': 'insuranceA'}, {'role': 'insuranceR'}, {'role': 'insuranceC'}]
+      if (_r !== null && _r !== undefined && _r !== '') {
+        query['role'] = _r
+      } else {
+        query['$or'] = [{'role': 'insuranceA'}, {'role': 'insuranceR'}, {'role': 'insuranceC'}]
+      }
       fields['boardingTime'] = 1
       fields['role'] = 1
       fields['workAmounts'] = 1
@@ -371,30 +420,80 @@ exports.countAlluserList = function (req, res) {
   var query = {'invalidFlag': 0}
 
   var _uid = req.query.userId
-  var _role = req.query.role
+  var _role = req.query.role1
   var _name = req.query.name
+  var _phoneNo = req.query.phoneNo
+  var _gender = req.query.gender
 
+  var _r = req.query.role2
+  var _class = req.query.class
+  var _province = req.query.province
+  var _city = req.query.city
+  // var _district = req.query.district
+  var _workUnit = req.query.workUnit
+  var _title = req.query.title
         // role 0-user 1-doctor 2-patient 3-nurse 4-insurance 5-health 6-admin
   if (_uid !== null && _uid !== undefined && _uid !== '') {
-    query['userId'] = _uid
+    query['userId'] = { $regex: _uid }
   }
   if (_name !== null && _name !== undefined && _name !== '') {
     query['name'] = { $regex: _name }
   }
-  if (_role !== null && _role !== undefined && _role !== '') {
-    _role = Number(_role)
+  if (_phoneNo !== null && _phoneNo !== undefined && _phoneNo !== '') {
+    query['phoneNo'] = { $regex: _phoneNo }
+  }
+  if (_gender !== null && _gender !== undefined && _gender !== '') {
+    query['gender'] = _gender
+  }
+
+  if (_role === 0) {
+    if (_r !== null && _r !== undefined && _r !== '') {
+      query['role'] = _r
+    }
   }
   if (_role === 1) {
-    query['$or'] = [{'role': 'doctor'}, {'role': 'Leader'}, {'role': 'master'}]
+    if (_r !== null && _r !== undefined && _r !== '') {
+      query['role'] = _r
+    } else {
+      query['$or'] = [{'role': 'doctor'}, {'role': 'Leader'}, {'role': 'master'}]
+    }
+    if (_province !== null && _province !== undefined && _province !== '') {
+      query['province'] = { $regex: _province }
+    }
+    if (_city !== null && _city !== undefined && _city !== '') {
+      query['city'] = { $regex: _city }
+    }
+    if (_workUnit !== null && _workUnit !== undefined && _workUnit !== '') {
+      query['workUnit'] = { $regex: _workUnit }
+    }
+    if (_title !== null && _title !== undefined && _title !== '') {
+      query['title'] = { $regex: _title }
+    }
   }
   if (_role === 2) {
+    if (_class !== null && _class !== undefined && _class !== '') {
+      query['class'] = _class
+    }
     query['role'] = 'patient'
   }
   if (_role === 3) {
+    if (_province !== null && _province !== undefined && _province !== '') {
+      query['province'] = { $regex: _province }
+    }
+    if (_city !== null && _city !== undefined && _city !== '') {
+      query['city'] = { $regex: _city }
+    }
+    if (_workUnit !== null && _workUnit !== undefined && _workUnit !== '') {
+      query['workUnit'] = { $regex: _workUnit }
+    }
     query['role'] = 'nurse'
   }
   if (_role === 4) {
-    query['$or'] = [{'role': 'insuranceA'}, {'role': 'insuranceR'}, {'role': 'insuranceC'}]
+    if (_r !== null && _r !== undefined && _r !== '') {
+      query['role'] = _r
+    } else {
+      query['$or'] = [{'role': 'insuranceA'}, {'role': 'insuranceR'}, {'role': 'insuranceC'}]
+    }
   }
   if (_role === 5) {
     query['role'] = 'health'

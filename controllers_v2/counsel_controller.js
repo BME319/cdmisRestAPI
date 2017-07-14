@@ -1,13 +1,15 @@
-var config = require('../config')
+// 代码 2017-03-28 GY
+// 注释 2017-07-14 YQC
+
+// var config = require('../config')
 var Counsel = require('../models/counsel')
 var Doctor = require('../models/doctor')
 var Comment = require('../models/comment')
 var Patient = require('../models/patient')
 var Consultation = require('../models/consultation')
 
-// 根据状态、类型、获取咨询问诊信息 2017-03-28 GY
-// 暂未实现计数
-// status 和type 传入参数
+// 根据状态、类型获取咨询问诊信息，暂未实现计数
+// 注释 输入，status，type，name，skip，limit，承接doctorObject；输出，问诊信息
 exports.getCounsels = function (req, res) {
   // 查询条件
   var _doctorId = req.body.doctorObject._id
@@ -72,7 +74,8 @@ exports.getCounsels = function (req, res) {
   }, opts, fields, populate)
 }
 
-// 获取患者ID对象(用于咨询问卷方法) 2017-04-05 GY
+// 获取患者ID对象(用于咨询问卷方法)
+// 注释 输入，patientId；输出，相应的patientObject
 exports.getPatientObject = function (req, res, next) {
   if (req.query.patientId == null || req.query.patientId === '') {
     if (req.body.patientId == null || req.body.patientId === '') {
@@ -96,7 +99,8 @@ exports.getPatientObject = function (req, res, next) {
     next()
   })
 }
-// 获取医生ID对象(用于咨询问卷方法) 2017-04-05 GY
+// 获取医生ID对象(用于咨询问卷方法)
+// 注释 输入，doctorId；输出，相应的doctorObject
 exports.getDoctorObject = function (req, res, next) {
   if (req.query.doctorId == null || req.query.doctorId === '') {
     if (req.body.doctorId == null || req.body.doctorId === '') {
@@ -120,8 +124,10 @@ exports.getDoctorObject = function (req, res, next) {
     next()
   })
 }
+
 // 提交咨询问卷 2017-04-05 GY
 // 增加选填字段 2017-04-13 GY
+// 注释 输入，type，sickTime，symptom/photo,help,选填hospital,visitDate,diagnosis/photo；输出，保存问卷
 exports.saveQuestionaire = function (req, res) {
   if (req.body.type == null || req.body.type === '') {
     return res.json({result: '请填写type,咨询=1,问诊=2'})
@@ -176,12 +182,15 @@ exports.saveQuestionaire = function (req, res) {
   })
 }
 
+// 注释 更改咨询状态
+// 输入，counselId，status；输出，咨询状态更新
 exports.changeCounselStatus = function (req, res, next) {
-  if (req.body.counselId == null || req.body.counselId === '') {
+  var counselId = req.body.counselId || null
+  if (counselId == null || counselId === '') {
     return res.json({result: '请填写counselId!'})
   }
   var query = {
-    counselId: req.body.counselId
+    counselId: counselId
   }
 
   var upObj = {
@@ -205,14 +214,16 @@ exports.changeCounselStatus = function (req, res, next) {
     if (upCounsel == null) {
       return res.json({result: '修改失败，不存在的counselId！'})
     } else {
-  // req.counsel_id = upCounsel._id;
-  // req.status = upCounsel.status;
+      // req.counsel_id = upCounsel._id
+      // req.status = upCounsel.status
+      // console.log(req.counsel_id, req.status)
       req.editResults = upCounsel
-  // console.log(req.counsel_id, req.status);
       next()
     }
   }, {new: true})
 }
+
+// 注释 更改会诊状态，承接editResults；输出，更改结果
 exports.changeConsultationStatus = function (req, res) {
   var query = {diseaseInfo: req.editResults._id}
   var upObj = {status: req.editResults.status}
@@ -230,6 +241,7 @@ exports.changeConsultationStatus = function (req, res) {
 }
 
 // 根据医生患者获取咨询问诊状态
+// 注释 承接patientObject，doctorObject；输入，status，type，changetype；输出，最新的问诊状态或跳入changeCounselType函数
 exports.getStatus = function (req, res, next) {
   // if (req.query.type == null || req.query.type == '') {
   //   if (req.body.type == null || req.body.type == '') {
@@ -245,6 +257,7 @@ exports.getStatus = function (req, res, next) {
   if (req.body.status === null || req.body.status === '' || req.body.status === undefined) {
     req.body.status = null
   } else {
+    // 以十进制解析状态字符串
     req.body.status = parseInt(req.body.status, 10)
   }
   // console.log(req.body.status)
@@ -271,7 +284,6 @@ exports.getStatus = function (req, res, next) {
 
   Counsel.getSome(query, function (err, items) {
     if (err) {
-<<<<<<< HEAD
       return res.status(500).send(err.errmsg)
     }
     if (items.length === 0) {
@@ -290,7 +302,9 @@ exports.getStatus = function (req, res, next) {
   }, opts, fields, populate)
 }
 
+// 注释 更改问诊类型 输入，type，changetype，counselId；输出，更新成功或失败
 exports.changeCounselType = function (req, res) {
+  // 若类型为1 更改类型标识为True 写入查询和更新参数 否则返回错误
   if (req.body.type === 1 && req.body.changeType === 'true') {
     var query = {
       counselId: req.body.counselId
@@ -314,6 +328,7 @@ exports.changeCounselType = function (req, res) {
   }, {new: true})
 }
 
+// 注释 提交评价分数 承接patientObject，doctorObject；输入totalScore，content，counselId；输出，存储新建问诊评价，更新问诊评价信息
 exports.insertCommentScore = function (req, res) {
   var commentData = {
     commentId: req.newId,   // counselpost01

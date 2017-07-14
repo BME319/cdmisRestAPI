@@ -1,6 +1,8 @@
-var config = require('../config')
+// 注释 2017-07-14 YQC
+// var config = require('../config')
 var Task = require('../models/task')
 
+// 注释 获取任务模版 输入，userId，sortNo（可选）；输出，返回任务模版
 exports.getTasks = function (req, res) {
   var userId = req.query.userId
   var query = {userId: userId}
@@ -9,13 +11,12 @@ exports.getTasks = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-
+    // 未输入userId则为管理员
     if (tasks.length === 0) {
       query = {userId: 'Admin'}
     }
 
     var sortNo = req.query.sortNo
-
     if (sortNo !== '') {
       query['sortNo'] = sortNo
     }
@@ -29,9 +30,9 @@ exports.getTasks = function (req, res) {
     })
   })
 }
-
+// 注释 用户修改自有某一任务的状态 输入，session.userId,sortNo,type,code,status;输出，修改相应任务状态
 exports.updateStatus = function (req, res) {
-  var userId = req.body.userId
+  var userId = req.session.userId
   var sortNo = req.body.sortNo
   var type = req.body.type
   var code = req.body.code
@@ -46,8 +47,10 @@ exports.updateStatus = function (req, res) {
 
     // res.json({results: item});
     // console.log(item.task);
+    // 查询到用户任务记录
     if (item != null) {
       var flag = 0
+      // 查询参数对应任务并将其状态修改
       for (var i = 0; i < item.task.length; i++) {
         if (item.task[i].type === type) {
           for (var j = 0; j < item.task[i].details.length; j++) {
@@ -70,12 +73,13 @@ exports.updateStatus = function (req, res) {
 
         res.json({results: 0})
       })
-    } else {
+    } else { // 未查询到用户任务记录
       res.json({results: 1})
     }
   })
 }
 
+// 注释 修改任务起始时间
 exports.updateStartTime = function (req, res) {
   var userId = req.body.userId
   var sortNo = req.body.sortNo
@@ -118,6 +122,7 @@ exports.updateStartTime = function (req, res) {
 }
 
 // 插入任务模板 2017-04-15 GY
+// 注释 删除旧任务
 exports.removeOldTask = function (req, res, next) {
   if (req.body.userId == null || req.body.userId === '') {
     return res.json({result: '请填写userId!'})
@@ -135,6 +140,7 @@ exports.removeOldTask = function (req, res, next) {
     next()
   })
 }
+// 注释 获取任务模版
 exports.getTaskModel = function (req, res, next) {
   // var userId = 'Admin';
   var query = {userId: 'Admin', sortNo: req.body.sortNo}
@@ -148,6 +154,7 @@ exports.getTaskModel = function (req, res, next) {
     next()
   })
 }
+// 注释 更新任务模版
 exports.insertTaskModel = function (req, res) {
   if (req.body.userId == null || req.body.userId === '') {
     return res.json({result: '请填写userId!'})
@@ -174,10 +181,10 @@ exports.insertTaskModel = function (req, res) {
   })
 }
 
-// 只根据userId获取任务模板 2017-04-17 GY
+// 注释 根据userId获取任务 输入，session.id；输出，用户任务
 exports.getUserTask = function (req, res) {
   // var userId = 'Admin';
-  var query = {userId: req.query.userId}
+  var query = {userId: req.session.userId}
 
   Task.getOne(query, function (err, task) {
     if (err) {

@@ -166,11 +166,11 @@ exports.getDoctorLists = function (req, res) {
 // 通过patient表中userId返回PatientObject 2017-03-30 GY
 // 修改：增加判断不存在ID情况 2017-04-05 GY
 exports.getPatientObject = function (req, res, next) {
-  if (req.session.userId == null || req.session.userId === '') {
+  if (req.query.patientId == null || req.query.patientId === '') {
     return res.json({result: '请填写userId!'})
   }
   var query = {
-    userId: req.session.userId
+    userId: req.query.patientId
   }
   Patient.getOne(query, function (err, patient) {
     if (err) {

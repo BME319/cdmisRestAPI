@@ -29,7 +29,10 @@ var complianceCtrl = require('../controllers_v2/compliance_controller')
 var vitalSignCtrl = require('../controllers_v2/vitalSign_controller')
 var patientCtrl = require('../controllers_v2/patient_controller')
 var doctorCtrl = require('../controllers_v2/doctor_controller')
-var wechatCtrl = require('../controllers_v2/wechat_controller')
+// var wechatCtrl = require('../controllers_v2/wechat_controller')
+var counselCtrl = require('../controllers_v2/counsel_controller')
+var communicationCtrl = require('../controllers_v2/communication_controller')
+var taskCtrl = require('../controllers_v2/task_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -97,18 +100,48 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/labtestImport/labelphoto', tokenManager.verifyToken(), labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
 
   // YQC
-  // comment - debug complete
+  // comment - debug complete 2017-07-13
   app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
   app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
-  // advice - debug complete
+  // advice - debug complete 2017-07-13
   app.get(version + '/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
   app.post(version + '/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
-  // compliance
+  // compliance - debug complete 2017-07-13
   app.get(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
   app.post(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
-  // vitalSign
+  // vitalSign 2017-07-14
   app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
   app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
+  // counsel 2017-07-14
+  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, counselCtrl.getCounsels)
+  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire)
+  app.post(version + '/counsel/counselStatus', tokenManager.verifyToken(), counselCtrl.changeCounselStatus)// 测试会出现Router Error 但数据库中status可改
+  app.get(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
+  app.post(version + '/counsel/consultationStatus', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
+  app.post(version + '/counsel/type', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
+  app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
+  // communication 2017-07-14
+  app.get(version + '/communication/counselReport', tokenManager.verifyToken(), communicationCtrl.getCounselReport)
+  // app.post(version + '/communication/newTeam', tokenManager.verifyToken(), getNoMid.getNo(4), communicationCtrl.newTeam)
+  app.post(version + '/communication/team', tokenManager.verifyToken(), communicationCtrl.newTeam)
+  app.post(version + '/communication/deleteTeam', tokenManager.verifyToken(), communicationCtrl.deleteTeam)
+  app.get(version + '/communication/team', tokenManager.verifyToken(), communicationCtrl.getTeam)
+  app.post(version + '/communication/consultation', tokenManager.verifyToken(), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation)
+  // app.post(version + '/communication/consultation', tokenManager.verifyToken(), getNoMid.getNo(5), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
+  app.get(version + '/communication/consultation', tokenManager.verifyToken(), communicationCtrl.getConsultation)
+  app.post(version + '/communication/conclusion', tokenManager.verifyToken(), communicationCtrl.conclusion)
+  app.post(version + '/communication/insertMember', tokenManager.verifyToken(), communicationCtrl.insertMember, communicationCtrl.updateNumber)
+  app.post(version + '/communication/removeMember', tokenManager.verifyToken(), communicationCtrl.removeMember, communicationCtrl.updateNumber)
+  app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
+  app.post(version + '/communication/communication', tokenManager.verifyToken(), getNoMid.getNo(8), communicationCtrl.postCommunication)
+  app.get(version + '/communication/communication', tokenManager.verifyToken(), communicationCtrl.getCommunication)
+  // task 2017-07-14
+  app.get(version + '/tasks', tokenManager.verifyToken(), taskCtrl.getTasks)
+  app.post(version + '/tasks/status', tokenManager.verifyToken(), taskCtrl.updateStatus)
+  app.post(version + '/tasks/time', tokenManager.verifyToken(), taskCtrl.updateStartTime)
+  app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
+  app.get(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getUserTask)
+  app.post(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)

@@ -9,6 +9,7 @@ var Patient = require('../models/patient')
 var request = require('request')
 
 // 根据userId和type查询体征记录
+// 注释 输入，type，承接patientObject；输出相应患者的相应体征类型的记录
 exports.getVitalSigns = function (req, res) {
   if (req.query.type == null || req.query.type === '') {
     return res.json({result: '请填写type!'})
@@ -31,6 +32,7 @@ exports.getVitalSigns = function (req, res) {
 }
 
 // 新建体征记录
+// 注释 获取患者对象 输入session.userId；输出patientObject
 exports.getPatientObject = function (req, res, next) {
   if (req.session.userId == null || req.session.userId === '') {
     return res.json({result: '请填写patientId!'})
@@ -51,6 +53,8 @@ exports.getPatientObject = function (req, res, next) {
     next()
   })
 }
+// 注释 根据患者的类型，编码，单位和日期查询体征记录，判断该记录是否存在，不存在则新建体征记录
+// 输入，type，code，unit，date；输出，存储对应体征记录
 exports.getVitalSign = function (req, res, next) {
   if (req.body.type == null || req.body.type === '') {
     return res.json({result: '请填写type!'})
@@ -104,6 +108,8 @@ exports.getVitalSign = function (req, res, next) {
     }
   })
 }
+// 注释 根据患者提供的数据采集时间和数据数值更新相应体征记录的数值
+// 输入，datatime，datavalue，datavalue2（用于血压）；输出体征数据更新
 exports.insertData = function (req, res) {
   if (req.body.datatime == null || req.body.datatime === '') {
     return res.json({result: '请填写datatime!'})
@@ -159,6 +165,7 @@ exports.insertData = function (req, res) {
   }, {new: true})
 }
 
+// 注释 第三方获取血压数据
 exports.receiveBloodPressure = function (req, res) {
   var jsondata = req.body
   request({

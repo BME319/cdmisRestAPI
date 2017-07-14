@@ -32,12 +32,12 @@ exports.postAdvice = function (req, res) {
   var userId = req.session.userId || null
   var role = req.session.role || null
 
-  if (userId == null || userId === '') {
-    return res.json({result: '请填写userId!'})
-  }
-  if (role == null || role === '') {
-    return res.json({result: '请填写role!'})
-  }
+  // if (userId == null || userId === '') {
+  //   return res.json({result: '请填写userId!'})
+  // }
+  // if (role == null || role === '') {
+  //   return res.json({result: '请填写role!'})
+  // }
 
   var query = {userId: userId}
   // 调用用户获取函数User.getOne
@@ -52,8 +52,8 @@ exports.postAdvice = function (req, res) {
       return res.json({result: '用户与角色不匹配!'})
     } else {
       var adviceData = {
-        userId: req.body.userId,
-        role: req.body.role,
+        userId: req.session.userId,
+        role: req.session.role,
         time: commonFunc.getNowFormatSecond(),
         topic: req.body.topic,
         content: req.body.content
