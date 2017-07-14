@@ -317,7 +317,8 @@ exports.changeCounselType = function(req, res) {
 			counselId: req.body.counselId
 		};
 		var upObj = {
-			type: 3
+			type: 3, 
+			time: new Date()
 		};
 	}
 	else {
