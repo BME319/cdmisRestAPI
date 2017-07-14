@@ -1,86 +1,81 @@
 
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 var dictTaskSchema = new mongoose.Schema({
-	type: String,
-	typeName:String,
-	details:[
-    { code:String,
-  		  name:String,
-  		  description:String,
-  		  content:String,
-        invalidFlag:Number
+  type: String,
+  typeName: String,
+  details: [
+    { code: String,
+      name: String,
+      description: String,
+      content: String,
+      invalidFlag: Number
     }]
 
-});
+})
 
+var dictTaskModel = mongoose.model('dictTask', dictTaskSchema)
 
-dictTaskModel = mongoose.model('dictTask', dictTaskSchema);
-
-function DictTask(dictTask) {
-	this.dictTask = dictTask;
+function DictTask (dictTask) {
+  this.dictTask = dictTask
 }
 
-DictTask.prototype.save = function(callback) {
-	var dictTask = this.dictTask;
-	var newDictTask = new dictTaskModel(dictTask);
-	newDictTask.save(function(err, item) {
-		if (err) {
-			return callback(err);
-		}
-		callback(null, item);
-	});
+DictTask.prototype.save = function (callback) {
+  var dictTask = this.dictTask
+  var newDictTask = new dictTaskModel(dictTask)
+  newDictTask.save(function (err, item) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, item)
+  })
 }
 
-DictTask.getOne = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
+DictTask.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
 
-	dictTaskModel
-		.findOne(query, fields, opts)
-		.populate(populate)
-		.exec(function(err, item) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, item);
-		});
-};
+  dictTaskModel
+  .findOne(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, item) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, item)
+  })
+}
 
+DictTask.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
 
-DictTask.getSome = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
+  dictTaskModel
+  .find(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, items) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, items)
+  })
+}
 
-	dictTaskModel
-		.find(query, fields, options)
-		.populate(populate)
-		.exec(function(err, items) {
-			if(err) {
-				return callback(err);
-			}
-			callback(null, items);
-		});
-};
+DictTask.updateOne = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var _populate = populate || ''
 
-DictTask.updateOne = function(query, obj, callback, opts, populate) {
-	var options = opts || {};
-	var populate = populate || '';
+  dictTaskModel
+  .findOneAndUpdate(query, obj, options)
+  .populate(_populate)
+  .exec(function (err, updata) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, updata)
+  })
+}
 
-	dictTaskModel
-		.findOneAndUpdate(query, obj, options)
-		.populate(populate)
-		.exec(function(err, updata) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, updata);
-		});
-};
-
-
-
-
-module.exports = DictTask;
+module.exports = DictTask
