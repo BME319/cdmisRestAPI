@@ -291,17 +291,19 @@ exports.getStatus = function (req, res, next) {
   }, opts, fields, populate)
 }
 
-exports.changeCounselType = function (req, res) {
-  if (req.body.type == 1 && req.body.changeType === 'true') {
-    var query = {
-      counselId: req.body.counselId
-    }
-    var upObj = {
-      type: 3
-    }
-  }	else {
-    return res.json({result: '不可更改的类型!'})
-  }
+exports.changeCounselType = function(req, res) {
+	if (req.body.type == 1 && req.body.changeType === 'true') {
+		var query = {
+			counselId: req.body.counselId
+		};
+		var upObj = {
+			type: 3, 
+			time: new Date()
+		};
+	}
+	else {
+		return res.json({result:'不可更改的类型!'});
+	}
 
 	// return res.json({query: query, upObj: upObj});
   Counsel.updateOne(query, upObj, function (err, upCounsel) {

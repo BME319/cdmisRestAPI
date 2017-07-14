@@ -100,6 +100,9 @@ module.exports = function (app, webEntry, acl) {
   app.post('/devicedata/niaodaifu/data', niaodaifuCtrl.receiveData)
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 
+  // 退款接口
+  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage);
+  
   // lgf
   // account
   app.get(version + '/account/accountInfo', tokenManager.verifyToken(), accountCtrl.getAccountInfo)
@@ -123,4 +126,6 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/insurance/message', tokenManager.verifyToken(), insuranceCtrl.getInsMsg)
   app.post(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.setPrefer)
   app.get(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.getPrefer)
+  
+
 }

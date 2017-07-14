@@ -433,6 +433,9 @@ exports.countAlluserList = function (req, res) {
   var _workUnit = req.query.workUnit
   var _title = req.query.title
         // role 0-user 1-doctor 2-patient 3-nurse 4-insurance 5-health 6-admin
+  if (_role !== null && _role !== undefined && _role !== '') {
+    _role = Number(_role)
+  }
   if (_uid !== null && _uid !== undefined && _uid !== '') {
     query['userId'] = { $regex: _uid }
   }

@@ -110,10 +110,11 @@ exports.checkPayStatus = function (type) {
       if (item === null) {
         return res.status(400).send('不存在的订单')
       } else if ((type === 'refund') && (item.paystatus === 2)) {
-                // 可以申请退款
+        // 可以申请退款
+        req.orderDetail = item
         next()
       } else if ((type === 'refundquery') && (item.paystatus === 6 || item.paystatus === 7 || item.paystatus === 8 || item.paystatus === 9)) {
-                // 可以查询退款
+        // 可以查询退款
         req.orderDetail = item
         next()
       } else {
@@ -139,7 +140,7 @@ exports.refundChangeStatus = function (status) {
       upObj = {
         paystatus: 6, // 退款处理中
         refundNo: req.newId,
-        refundAppTime: new Date(commonFunc.getNowFormatSecond())
+        refundAppTime: new Date()
       }
     } else if (_status === 'REFUNDCLOSE') {
       upObj = {
