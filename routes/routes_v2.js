@@ -54,6 +54,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/devicedata/devices', tokenManager.verifyToken(), devicedataCtrl.getDeviceInfo)
 
   // wf
+  app.get(version + '/alluser/count', tokenManager.verifyToken(), alluserCtrl.countAlluserList)
   app.get(version + '/alluser/userList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(0))
   app.get(version + '/alluser/doctorList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(1))
   app.get(version + '/alluser/patientList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(2))
