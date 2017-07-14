@@ -4,6 +4,7 @@ var Patient = require('../models/patient')
 var Doctor = require('../models/doctor')
 
 // 根据doctorId查询相关评价 2017-03-30 GY
+// 查询账户信息与消费及充值记录
 exports.getAccountInfo = function (req, res) {
   // if (req.query.userId === null || req.query.userId === '') {
   if (req.session.userId === null || req.session.userId === '') {
@@ -38,6 +39,7 @@ exports.checkPatient = function (req, res, next) {
   } else {
     // req.patientId = req.body.patientId
     req.patientId = req.session.userId
+    console.log(req.session)
   }
   // } else {
   //   req.patientId = req.query.patientId
@@ -51,72 +53,73 @@ exports.checkPatient = function (req, res, next) {
     if (item === null) {
       return res.json({result: '不存在的患者ID'})
     } else {
+      console.log('checkPatient successful!')
       next()
     }
   })
 }
 exports.checkDoctor = function (req, res, next) {
-  // if (req.query.doctorId === null || req.query.doctorId === '') {
-  //   if (req.body.doctorId === null || req.body.doctorId === '') {
-  if (req.session.userId === null || req.session.userId === '' || req.session.userId === undefined) {
+  if (req.query.doctorId === null || req.query.doctorId === '' || req.query.doctorId === undefined) {
+    if (req.body.doctorId === null || req.body.doctorId === '' || req.body.doctorId === undefined) {
     // return res.json({result: '请填写doctorId!'});
     // 显示免费咨询次数和总咨询次数
-    var queryPatient = {userId: req.patientId}
-    Account.getOne(queryPatient, function (err, accountitem) {
-      if (err) {
-        return res.status(500).send(err.errmsg)
-      }
-      // 无历史咨询信息，初始化
-      if (accountitem === null) {
-        var accountData = {
-          userId: req.patientId,
-          freeTimes: 3,
-          money: 0
+      var queryPatient = {userId: req.patientId}
+      Account.getOne(queryPatient, function (err, accountitem) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
         }
-        var newAccount = new Account(accountData)
-        newAccount.save(function (err, accountInfo) {
-          if (err) {
-            return res.status(500).send(err.errmsg)
+        // 无历史咨询信息，初始化
+        if (accountitem === null) {
+          var accountData = {
+            userId: req.patientId,
+            freeTimes: 3,
+            money: 0
           }
-        })
-        return res.json({result: {freeTimes: 3, totalPaidTimes: 0}})
-      } else {
-        // 有历史咨询信息，times.length 表示历史咨询医生的个数，times[i].count表示对应每个医生的咨询次数
-        var count = 0
-        for (var i = accountitem.times.length - 1; i >= 0; i--) {
-          count += accountitem.times[i].count
+          var newAccount = new Account(accountData)
+          newAccount.save(function (err, accountInfo) {
+            if (err) {
+              return res.status(500).send(err.errmsg)
+            }
+          })
+          return res.json({result: {freeTimes: 3, totalPaidTimes: 0}})
+        } else {
+          // 有历史咨询信息，times.length 表示历史咨询医生的个数，times[i].count表示对应每个医生的咨询次数
+          var count = 0
+          for (var i = accountitem.times.length - 1; i >= 0; i--) {
+            count += accountitem.times[i].count
+          }
+          return res.json({result: {freeTimes: accountitem.freeTimes, totalCount: count}})
         }
-        return res.json({result: {freeTimes: accountitem.freeTimes, totalCount: count}})
-      }
-    })
-  } else {
+      })
+    } else {
     // req.doctorId = req.body.doctorId
     // 判断医生ID是否存在
-    req.doctorId = req.body.doctorId
-    var query = {userId: req.doctorId}
+      req.doctorId = req.body.doctorId
+      var query = {userId: req.doctorId}
+      Doctor.getOne(query, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        } else if (item === null) {
+          return res.json({result: '不存在的医生ID'})
+        } else {
+          next()
+        }
+      })
+    }
+  } else {
+    req.doctorId = req.query.doctorId
+    query = {userId: req.doctorId}
     Doctor.getOne(query, function (err, item) {
       if (err) {
         return res.status(500).send(err.errmsg)
       } else if (item === null) {
         return res.json({result: '不存在的医生ID'})
       } else {
+        // console.log('checkDoctor')
         next()
       }
     })
   }
-  // } else {
-  //   req.doctorId = req.query.doctorId
-  //   query = {userId: req.doctorId}
-  //   Doctor.getOne(query, function (err, item) {
-  //     if (err) {
-  //       return res.status(500).send(err.errmsg)
-  //     } else if (item === null) {
-  //       return res.json({result: '不存在的医生ID'})
-  //     } else {
-  //       next()
-  //     }
-  //   })
-  // }
   // var query = {userId: req.doctorId};
   // Doctor.getOne(query, function(err, item) {
   //   if (err) {
@@ -226,15 +229,22 @@ exports.getCounts = function (req, res, next) {
   var query = {
     userId: req.patientId
   }
+  req.body.modify = req.body.modify || null
   if (req.body.modify === 0) {
     return res.json({result: '此处禁止输入0!'})
   } else if (req.body.modify < -1) {
     return res.json({result: '非法输入!'})
   } else if (req.body.modify !== null && req.body.modify !== '') {
+    // console.log('here')
+    // modify字符串转化为数字
     req.modify = parseInt(req.body.modify, 10)
+    // req.modify = Number(req.body.modify)
   } else {
+    // get 操作时body为null,modify置为0
     req.modify = 0
   }
+  console.log(req.body.modify)
+  console.log(req.modify)
   // return res.json({modify: req.modify});
   // 查询单个患者账户信息
   Account.getOne(query, function (err, item) {
@@ -242,7 +252,7 @@ exports.getCounts = function (req, res, next) {
       return res.status(500).send(err.errmsg)
     }
     if (item === null) {
-      // 若账户信息为空，即以前未就诊该医生，则根据modify信息进行初始化
+      // 若账户信息为空，即以前未就诊该医生，则根据modify进行将问诊信息初始化
       var accountData
       if (req.modify === 0) {
         accountData = {
@@ -257,6 +267,7 @@ exports.getCounts = function (req, res, next) {
           ]
         }
       } else if (req.modify === -1) {
+        // 可咨询问题数减少，即已咨询，免费咨询次数-1，该医生的咨询问题数-1，一次咨询机会可以问三个问题
         accountData = {
           userId: req.patientId,
           freeTimes: 2,
@@ -269,6 +280,7 @@ exports.getCounts = function (req, res, next) {
           ]
         }
       } else if (req.modify > 0) {
+        // 可咨询问题数增加，即购买咨询次数
         accountData = {
           userId: req.patientId,
           freeTimes: 3,
@@ -289,6 +301,7 @@ exports.getCounts = function (req, res, next) {
       })
       if (req.modify === 0) {
         // console.log('new record');
+        // 若是查询，则直接返回免费咨询次数和该医生剩余的咨询次数
         return res.json({results: {freeTimes: 3, count: 0}})
       } else {
         // console.log('new record for modify');
@@ -345,11 +358,12 @@ exports.getCounts = function (req, res, next) {
       } else {
         // 有咨询该医生的历史信息，直接读取
         if (req.modify === 0) {
-          // console.log('patient exist');
+          // console.log('patient exist')
           return res.json({result: {freeTimes: item.freeTimes, count: count}})
         } else {
           req.freeTimes = item.freeTimes
           req.count = count
+          // totalCount 是提醒患者是否需要充值的标签，用于判断患者咨询次数是否用完，“+”实际为或操作，在患者没有免费次数和咨询问题数的情况下，值为0
           req.totalCount = item.freeTimes + count
           next()
         }
@@ -377,6 +391,7 @@ exports.modifyCounts = function (req, res) {
         req.freeTimes -= 1
         req.count = 2
       }
+      // 对times数组数据的更新，pull操作删除数组中的upObj，addToSet操作在数组中添加upObjAdd，后期可将update操作修改为upsert操作
       var upObj = {
         $pull: {
           times: {
@@ -389,6 +404,7 @@ exports.modifyCounts = function (req, res) {
           return res.status(500).send(err.errmsg)
         }
         var upObjAdd
+        // var upObjAdd = {}，可能置空更合理
         if (upaccount.nModified === 0) {
           // return res.json({result:'请获取账户信息确认是否修改成功'});
           upObjAdd = {
@@ -405,7 +421,7 @@ exports.modifyCounts = function (req, res) {
               return res.status(500).send(err.errmsg)
             }
             if (upaccountadd.nModified === 0) {
-              return res.json({result: '修改成功', updateResult: upaccountadd})
+              return res.json({result: '修改成功', updateResult: upaccountadd})  // 修改失败？
             } else if (upaccountadd.nModified !== 0) {
               return res.json({result: '修改成功', updateResult: upaccountadd})
             }

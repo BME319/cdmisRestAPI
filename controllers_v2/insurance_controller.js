@@ -1,9 +1,10 @@
 // var config = require('../config')
 var InsuranceMsg = require('../models/insuranceMsg')
 
-// 更新或插入保险消息 2017-04-18 GY
+// 更新或插入保险消息 ,医生向患者推送 2017-04-18 GY
 exports.updateInsuranceMsg = function (req, res, next) {
-  if (req.body.doctorId === null || req.body.doctorId === '') {
+  // if (req.body.doctorId === null || req.body.doctorId === '') {
+  if (req.session.userId === null || req.session.userId === '') {
     return res.json({result: '请填写doctorId'})
   }
   if (req.body.patientId === null || req.body.patientId === '') {
@@ -15,7 +16,8 @@ exports.updateInsuranceMsg = function (req, res, next) {
 
  // 为调用insertMessage方法传入参数
   req.body.userId = req.body.patientId
-  req.body.sendBy = req.body.doctorId
+  // req.body.sendBy = req.body.doctorId
+  req.body.sendBy = req.session.userId
  // 定义保险消息类型为5
   req.body.type = 5
  // return res.json({result: req.body})
@@ -30,7 +32,8 @@ exports.updateInsuranceMsg = function (req, res, next) {
     time = new Date(req.body.time)
   }
 
-  var doctorId = req.body.doctorId
+  // var doctorId = req.body.doctorId
+  var doctorId = req.session.userId
   var patientId = req.body.patientId
 
  // return res.json({doctor: doctorId, patient: patientId, dpTime: dpRelationTime});
@@ -83,7 +86,8 @@ exports.updateInsuranceMsg = function (req, res, next) {
   }, {new: true})
 }
 exports.updateMsgCount = function (req, res, next) {
-  var doctorId = req.body.doctorId
+  // var doctorId = req.body.doctorId
+  var doctorId = req.session.userId
   var patientId = req.body.patientId
   var query = {doctorId: doctorId, patientId: patientId}
   var opts = ''
@@ -117,13 +121,15 @@ exports.getInsMsg = function (req, res) {
   if (req.query.doctorId === null || req.query.doctorId === '') {
     return res.json({result: '请填写doctorId'})
   }
-  if (req.query.patientId === null || req.query.patientId === '') {
+  // if (req.query.patientId === null || req.query.patientId === '') {
+  if (req.session.userId === null || req.session.userId === '') {
     return res.json({resutl: '请填写patientId'})
   }
 
   var query = {
     doctorId: req.query.doctorId,
-    patientId: req.query.patientId
+    // patientId: req.query.patientId
+    patientId: req.session.userId
   }
   var opts = ''
   var fields = ''
@@ -141,12 +147,16 @@ exports.getInsMsg = function (req, res) {
   }, opts, fields, populate)
 }
 
+// 设置保险购买意向
 exports.setPrefer = function (req, res) {
   var preference = {
     status: req.body.status,
     time: req.body.date
   }
-  var query = {patientId: req.body.patientId}
+  // console.log(req.session.userId)
+  // var query = {patientId: req.body.patientId}
+  var query = {patientId: req.session.userId}
+  // console.log(query)
 
   InsuranceMsg.update(query, { $set: {preference: preference} }, function (err, item) {
     if (err) {
@@ -160,8 +170,10 @@ exports.setPrefer = function (req, res) {
   }, {upsert: true})
 }
 
+// 获取保险购买意向
 exports.getPrefer = function (req, res) {
-  var query = {patientId: req.query.patientId}
+  // var query = {patientId: req.query.patientId}
+  var query = {patientId: req.session.userId}
 
   InsuranceMsg.getOne(query, function (err, item) {
     if (err) {

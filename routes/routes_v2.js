@@ -27,6 +27,8 @@ var accountCtrl = require('../controllers_v2/account_controller')
 var expenseCtrl = require('../controllers_v2/expense_controller')
 var doctorCtrl = require('../controllers_v2/doctor_controller')
 var healthInfoCtrl = require('../controllers_v2/healthInfo_controller')
+var insuranceCtrl = require('../controllers_v2/insurance_controller')
+var messageCtrl = require('../controllers/message_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -115,4 +117,10 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), healthInfoCtrl.insertHealthInfo)
   app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.modifyHealthDetail)
   app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.deleteHealthDetail)
+
+  // insurance
+  app.post(version + '/insurance/message', tokenManager.verifyToken(), insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
+  app.get(version + '/insurance/message', tokenManager.verifyToken(), insuranceCtrl.getInsMsg)
+  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.setPrefer)
+  app.get(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.getPrefer)
 }
