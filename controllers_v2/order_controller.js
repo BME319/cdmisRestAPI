@@ -139,7 +139,7 @@ exports.refundChangeStatus = function (status) {
       upObj = {
         paystatus: 6, // 退款处理中
         refundNo: req.newId,
-        refundAppTime: new Date(commonFunc.getNowFormatSecond())
+        refundAppTime: new Date()
       }
     } else if (_status === 'REFUNDCLOSE') {
       upObj = {
