@@ -12,6 +12,8 @@ var User = require('../models/user')
 var Doctor = require('../models/doctor')
 var OpenIdTmp = require('../models/openId')
 var Order = require('../models/order')
+var Message = require('../models/message')
+var News = require('../models/news')
 
 // appid: wx8a6a43fb9585fb7c;secret: b23a4696c3b0c9b506891209d2856ab2
 
@@ -593,7 +595,7 @@ exports.closeWechatOrder = function (req, res) {
 }
 
 // 申请退款
-exports.refund = function (req, res) {
+exports.refund = function (req, res, next) {
   // 请求参数
   var paramData = {
     appid: req.wxApiUserObject.appid,   // 公众账号ID
@@ -640,7 +642,9 @@ exports.refund = function (req, res) {
       xml2js.parseString(body, { explicitArray: false, ignoreAttrs: true }, function (err, result) {
         jsondata = result || {}
       })
-      return res.json({results: jsondata})
+      // return res.json({results: jsondata})
+      req.refundData = jsondata
+      next()
     }
   })
 
@@ -667,6 +671,47 @@ exports.refund = function (req, res) {
   //   console.error(e);
   // });
   // req.end();
+}
+// 申请退款后自动发消息 2017-07-14 GY
+exports.refundMessage = function (req, res) {
+  let messageData = {
+    messageId: req.newId,
+    userId: req.orderDetail.userId,
+    type: 6,
+    readOrNot: 0,
+    sendBy: 'System',
+    time: new Date(),
+    title: '退款申请成功',
+    description: '您的退款申请已成功提交，本系统有延迟，实际退款状态以微信支付通知为准'
+  }
+  let newsData = {
+    messageId: req.newId,
+    userId: req.orderDetail.userId,
+    userRole: 'patient',
+    // 以下面的为准
+    // userRole: req.session.role,
+    sendBy: 'System',
+    readOrNot: 0,
+    type: 6,
+    time: messageData.time,
+    title: messageData.title,
+    description: messageData.description
+  }
+
+  let newMessage = new Message(messageData)
+  let newNews = new News(newsData)
+  newMessage.save(function (err, messageInfo) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    newNews.save(function (err, newsInfo) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      return res.json({results: req.refundData})
+    })
+  })
+
 }
 
 // 查询退款
