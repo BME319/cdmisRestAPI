@@ -81,6 +81,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), aclChecking.Checking(acl), reviewCtrl.postReviewInfo)
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate)
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo)
+  app.get(version + '/review/countByStatus', tokenManager.verifyToken(), reviewCtrl.countByStatus)
 
   // labtestImport
   app.get(version + '/labtestImport/listByStatus', tokenManager.verifyToken(), labtestImportCtrl.listByStatus)
@@ -90,6 +91,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/labtestImport', tokenManager.verifyToken(), labtestImportCtrl.getLabtest)
   app.get(version + '/labtestImport/photoByLabtest', tokenManager.verifyToken(), labtestImportCtrl.photoByLabtest)
   app.post(version + '/labtestImport/labelphoto', tokenManager.verifyToken(), labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
+  app.get(version + '/labtestImport/countByStatus', tokenManager.verifyToken(), labtestImportCtrl.countByStatus)
 
   // doctor_services
   app.get(version + '/services', tokenManager.verifyToken(), serviceCtrl.getServices)
@@ -100,7 +102,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule)
   app.post(version + '/services/setSuspend', tokenManager.verifyToken(), serviceCtrl.setServiceSuspend)
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), serviceCtrl.deleteServiceSuspend)
-  
+
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', niaodaifuCtrl.receiveData)

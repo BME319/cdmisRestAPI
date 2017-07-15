@@ -488,3 +488,27 @@ exports.updateUserLatest = function (req, res) {
     }
   })
 }
+
+// 根据录入状态获取当前总人数 2017-07-15 GY 
+exports.countByStatus = function (req, res) {
+  let status = req.query.labtestImportStatus || null
+  let query = {}
+  if (status === null) {
+    return res.status(412).json({results: '请填写labtestImportStatus'});
+  } else if (Number(status) === 1) {
+    query = {
+      labtestImportStatus: 1,
+      role: 'patient'
+    }
+  } else if (Number(status) === 0) {
+    query = {labtestImportStatus: 0, role: 'patient'};
+  } else {
+    return res.status(412).json({results: '非法输入'});
+  }
+  Alluser.countSome(query, function (err, count) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    return res.json({results: count})
+  })
+}
