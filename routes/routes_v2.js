@@ -22,6 +22,9 @@ var alluserCtrl = require('../controllers_v2/alluser_controller')
 
 var reviewCtrl = require('../controllers_v2/review_controller')
 var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
+var serviceCtrl = require('../controllers_v2/service_controller')
+var orderCtrl = require('../controllers_v2/order_controller')
+var wechatCtrl = require('../controllers_v2/wechat_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -88,6 +91,16 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/labtestImport/photoByLabtest', tokenManager.verifyToken(), labtestImportCtrl.photoByLabtest)
   app.post(version + '/labtestImport/labelphoto', tokenManager.verifyToken(), labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
 
+  // doctor_services
+  app.get(version + '/services', tokenManager.verifyToken(), serviceCtrl.getServices)
+  app.post(version + '/services/status', tokenManager.verifyToken(), serviceCtrl.changeServiceStatus)
+  app.post(version + '/services/charge', tokenManager.verifyToken(), serviceCtrl.setCharge)
+  app.post(version + '/services/relayTarget', tokenManager.verifyToken(), serviceCtrl.setRelayTarget)
+  app.post(version + '/services/setSchedule', tokenManager.verifyToken(), serviceCtrl.setServiceSchedule)
+  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule)
+  app.post(version + '/services/setSuspend', tokenManager.verifyToken(), serviceCtrl.setServiceSuspend)
+  app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), serviceCtrl.deleteServiceSuspend)
+  
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', niaodaifuCtrl.receiveData)
