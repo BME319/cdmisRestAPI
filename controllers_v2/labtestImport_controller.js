@@ -333,10 +333,10 @@ exports.photoByLabtest = function (req, res) {
 
 //标识图片已录入 2017-07-07 GY
 exports.pullurl = function (req, res, next) {
-  if (req.body.photoId === null || req.body.photoId === '' || req.body.photoId === undefined) {
+  let photoId = req.body.photoId || null
+  if (photoId === null) {
     return res.status(412).json({results: '请填写photoId'});
   }
-  var photoId = req.body.photoId
   var query = {'url.photoId': photoId}
   HealthInfo.getOne(query, function (err, item) {
     if (err) {
@@ -376,6 +376,10 @@ exports.pullurl = function (req, res, next) {
 }
 exports.pushurl = function (req, res, next) {
   req.photoObj.status = 1
+  let photoType = req.body.photoType || null
+  if (photoType !== null) {
+    req.photoObj.photoType = photoType
+  }
   var query = {_id: req.healthinfo_id}
   var upObj2 = {
     $push: {
