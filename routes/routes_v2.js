@@ -25,6 +25,7 @@ var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
 var serviceCtrl = require('../controllers_v2/service_controller')
 var orderCtrl = require('../controllers_v2/order_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
+var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -102,6 +103,8 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule)
   app.post(version + '/services/setSuspend', tokenManager.verifyToken(), serviceCtrl.setServiceSuspend)
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), serviceCtrl.deleteServiceSuspend)
+  // 咨询问卷填写(新增自动转发功能)
+  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay)
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
