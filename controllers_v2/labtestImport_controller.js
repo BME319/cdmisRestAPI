@@ -334,10 +334,10 @@ exports.photoByLabtest = function (req, res) {
 
 //标识图片已录入 2017-07-07 GY
 exports.pullurl = function (req, res, next) {
-  if (req.body.photoId === null || req.body.photoId === '' || req.body.photoId === undefined) {
+  let photoId = req.body.photoId || null
+  if (photoId === null) {
     return res.status(412).json({results: '请填写photoId'});
   }
-  var photoId = req.body.photoId
   var query = {'url.photoId': photoId}
   HealthInfo.getOne(query, function (err, item) {
     if (err) {
@@ -377,6 +377,10 @@ exports.pullurl = function (req, res, next) {
 }
 exports.pushurl = function (req, res, next) {
   req.photoObj.status = 1
+  let photoType = req.body.photoType || null
+  if (photoType !== null) {
+    req.photoObj.photoType = photoType
+  }
   var query = {_id: req.healthinfo_id}
   var upObj2 = {
     $push: {
@@ -483,5 +487,29 @@ exports.updateUserLatest = function (req, res) {
     else {
       return res.json({results: '图片录入状态修改成功'})
     }
+  })
+}
+
+// 根据录入状态获取当前总人数 2017-07-15 GY 
+exports.countByStatus = function (req, res) {
+  let status = req.query.labtestImportStatus || null
+  let query = {}
+  if (status === null) {
+    return res.status(412).json({results: '请填写labtestImportStatus'});
+  } else if (Number(status) === 1) {
+    query = {
+      labtestImportStatus: 1,
+      role: 'patient'
+    }
+  } else if (Number(status) === 0) {
+    query = {labtestImportStatus: 0, role: 'patient'};
+  } else {
+    return res.status(412).json({results: '非法输入'});
+  }
+  Alluser.countSome(query, function (err, count) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    return res.json({results: count})
   })
 }
