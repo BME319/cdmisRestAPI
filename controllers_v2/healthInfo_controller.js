@@ -74,9 +74,29 @@ exports.insertHealthInfo = function (req, res) {
     time: new Date(req.body.time), 
     label: req.body.label
   }
+  // 自动生成图片ID
+  let urlObj = []
+  function add0(m) {
+    return m < 10 ? '0'+m : m
+  }
+  let y = healthInfoData.insertTime.getFullYear()
+  let m = healthInfoItem[i].insertTime.getMonth() + 1
+  let d = healthInfoItem[i].insertTime.getDate()
+  let h = healthInfoItem[i].insertTime.getHours()
+  let mm = healthInfoItem[i].insertTime.getMinutes()
+  let s = healthInfoItem[i].insertTime.getSeconds()
+  let insertTimestr = y + add0(m) + add0(d) + add0(h) + add0(mm) + add0(s)
+
   if (req.body.url !== null && req.body.url !== '' && req.body.url !== undefined) {
     if (req.body.url.constructor === Array) {
-      healthInfoData['url'] = req.body.url
+      // healthInfoData['url'] = req.body.url
+      if (req.body.url.length > 10) {
+        return res.status(412).json({results: '最多一次上传10张图片'})
+      }
+      for (let i = 0; i < req.body.url.length; i++) {
+        urlObj[i].photo = req.body.url[i]
+        urlObj[i].photoId = healthInfoData.userId + insertTimestr + add0(i)
+      }
     }
     else {
       return res.status(412).json({results: 'url需要是数组'})
@@ -136,7 +156,14 @@ exports.modifyHealthDetail = function (req, res) {
   var upObj = {}
   if (req.body.url !== null && req.body.url !== '' && req.body.url !== undefined) {
     if (req.body.url.constructor === Array) {
-      upObj['url'] = req.body.url
+      // healthInfoData['url'] = req.body.url
+      if (req.body.url.length > 10) {
+        return res.status(412).json({results: '最多一次上传10张图片'})
+      }
+      for (let i = 0; i < req.body.url.length; i++) {
+        urlObj[i].photo = req.body.url[i]
+        urlObj[i].photoId = healthInfoData.userId + insertTimestr + add0(i)
+      }
     }
     else {
       return res.status(412).json({results: 'url需要是数组'})
