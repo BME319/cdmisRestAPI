@@ -55,8 +55,8 @@ app.use(log4js.useLog())
 
 // 跨域访问
 app.all('*', function (req, res, next) {
-  var domain = req.headers.origin
-  if (config.Access_Control_Allow_Origin.indexOf(domain) > -1) {
+  var domain = req.headers.origin || null
+  if(domain !== null){
     res.setHeader('Access-Control-Allow-Origin', domain)
     res.setHeader('Access-Control-Allow-Credentials', true)
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT')
@@ -66,6 +66,16 @@ app.all('*', function (req, res, next) {
     res.setHeader('Pragma', 'no-cache') // HTTP 1.0.
     res.setHeader('Expires', '0') // Proxies.
   }
+  // if (config.Access_Control_Allow_Origin.indexOf(domain) > -1) {
+    // res.setHeader('Access-Control-Allow-Origin', domain)
+    // res.setHeader('Access-Control-Allow-Credentials', true)
+    // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT')
+    // res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Authorization')
+
+    // res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate') // HTTP 1.1.
+    // res.setHeader('Pragma', 'no-cache') // HTTP 1.0.
+    // res.setHeader('Expires', '0') // Proxies.
+  // }
   if (req.method === 'OPTIONS') return res.sendStatus(200)
   next()
 })
