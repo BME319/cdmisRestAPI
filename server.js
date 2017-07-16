@@ -106,3 +106,8 @@ try {
 } catch (e) {
   console.log(e)
 }
+
+// 定时任务相关 testing 2017-07-16 GY 
+var schedule = require('node-schedule')
+var wechatCtrl = require('./controllers_v2/wechat_controller')
+schedule.scheduleJob('0 0 * * * *', wechatCtrl.autoRefundQuery)
