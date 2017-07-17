@@ -16,7 +16,8 @@ var healthInfoSchema = new mongoose.Schema({
       // 图片实际链接
       photo: String,
       // 图片录入状态，0未录入，1已录入
-      status: {type: Number, default: 0}
+      status: {type: Number, default: 0},
+      photoType: String
       // 图片与数据是一对多的关系
       // resultId: [
       //   {

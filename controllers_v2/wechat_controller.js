@@ -758,6 +758,93 @@ exports.refundquery = function (req, res, next) {
   })
 }
 
+// 扫描订单 调用微信退款查询接口 更改订单状态 2017-07-16 GY
+exports.autoRefundQuery = function (req, res) {
+  let query = {paystatus: 6}
+  let orderNos = []
+  let wxApiUserObject = [config.wxDeveloperConfig.ssgj, config.wxDeveloperConfig.appssgj]
+  // console.log(wxApiUserObject)
+  function refundQuery(orderNosIndex, rolesIndex) {
+    let paramData = {
+      appid: wxApiUserObject[rolesIndex].appid,   // 公众账号ID
+      mch_id: wxApiUserObject[rolesIndex].merchantid,   // 商户号
+      nonce_str: commonFunc.randomString(32),   // 随机字符串
+      sign_type: 'MD5',
+      out_trade_no: orderNos[orderNosIndex]     // 商户订单号
+    }
+    let signStr = commonFunc.rawSort(paramData)
+    signStr = signStr + '&key=' + wxApiUserObject[rolesIndex].merchantkey
+    paramData.sign = commonFunc.convertToMD5(signStr, true)    // 签名
+    let xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
+    let xmlString = xmlBuilder.buildObject(paramData)
+    // console.log(paramData)
+
+    request({
+      url: wxApis.refundquery,
+      method: 'POST',
+      body: xmlString
+    }, function (err, response, body) {
+      if (err) {
+        console.log(err)
+        if (rolesIndex < wxApiUserObject.length - 1) {
+          refundQuery(orderNosIndex, ++rolesIndex)
+        } else if (orderNosIndex < orderNos.length - 1) {
+          refundQuery(++orderNosIndex, 0)
+        } else {
+          console.log('auto_refund_query_success')
+        }
+      } else {
+        let jsondata
+        xml2js.parseString(body, { explicitArray: false, ignoreAttrs: true }, function (err, result) {
+          jsondata = result || {}
+        })
+        if (jsondata.xml.return_code === 'SUCCESS' && jsondata.xml.result_code === 'SUCCESS') {
+          console.log(jsondata.xml)
+          // 修改数据库中订单状态
+          let queryOrder = {orderNo: orderNos[orderNosIndex]}
+          let upObj = {
+            paystatus: 9, 
+            refundScuTime: new Date(jsondata.xml.refund_success_time_0)
+          }
+          Order.updateOne(queryOrder, upObj, function (err, uporder) {
+            if (err) {
+              console.log(err)
+            }
+            if (rolesIndex < wxApiUserObject.length - 1) {
+              refundQuery(orderNosIndex, ++rolesIndex)
+            } else if (orderNosIndex < orderNos.length - 1) {
+              refundQuery(++orderNosIndex, 0)
+            } else {
+              console.log('auto_refund_query_success')
+            }
+          })
+        } else {
+          // return res.status(404).json({results: jsondata.xml})
+          console.log(jsondata.xml)
+          if (rolesIndex < wxApiUserObject.length - 1) {
+            refundQuery(orderNosIndex, ++rolesIndex)
+          } else if (orderNosIndex < orderNos.length - 1) {
+            refundQuery(++orderNosIndex, 0)
+          } else {
+            console.log('auto_refund_query_success')
+          }
+        }
+      }
+    })
+
+  }
+
+  Order.getSome(query, function (err, orderItems) {
+    if (err) 
+      console.log('getOrderItemErr')
+    // console.log(orderItems)
+    for (let i = 0; i < orderItems.length; i++) 
+      orderNos[i] = orderItems[i].orderNo
+    console.log(orderNos)
+    refundQuery(0, 0)
+  })
+}
+
 // 测试函数用的
 // exports.testxml = function (req, res) {
 //     // var paramData = req.body.data;

@@ -196,3 +196,30 @@ exports.getReviewInfo = function (req, res) {
     }
   }, opts, fields, populate)
 }
+
+// 根据审核状态获取当前总人数 2017-07-15 GY
+exports.countByStatus = function (req, res) {
+  let status = req.query.reviewStatus || null
+  let query = {}
+  if (status === null) {
+    return res.status(412).json({results: '请填写reviewStatus'})
+  } else if (Number(status) === 1) {
+    query = {
+      $or: [
+        {reviewStatus: 1},
+        {reviewStatus: 2}
+      ],
+      role: 'doctor'
+    }
+  } else if (Number(status) === 0) {
+    query = {reviewStatus: 0, role: 'doctor'}
+  } else {
+    return res.status(412).json({results: '非法输入'})
+  }
+  Alluser.countSome(query, function (err, count) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    return res.json({results: count})
+  })
+}
