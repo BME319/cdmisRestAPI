@@ -1,9 +1,14 @@
 var Alluser = require('../models/alluser')
 
-// 获取自己的服务开启状态 2017-07-14 GY
+// 获取某位医生的服务开启状态及收费情况
+// 根据医生ID获取服务开启状态 2017-07-14 GY
 exports.getServices = function (req, res) {
-  let query = {
-    userId: req.session.userId
+  let doctorId = req.query.userId || null
+  let query = {}
+  if (doctorId === null) {
+    return res.status(412).json({results: '请输入doctorId'})
+  } else {
+    query['userId'] = doctorId
   }
   let opts = {}
   let fields = {
@@ -23,7 +28,9 @@ exports.getServices = function (req, res) {
     }
   }, opts, fields)
 }
+// 获取主管医生或主管患者
 
+// 医生端使用的方法：开放修改及设置权限
 // 修改服务开启状态 2017-07-14 GY
 exports.changeServiceStatus = function (req, res) {
   let query = {
@@ -207,10 +214,10 @@ exports.setServiceSchedule = function (req, res) {
   let query = {userId: req.session.userId}
   let day = req.body.day || null
   let time = req.body.time || null
-  let count = req.body.count || null
+  let total = req.body.total || null
   let pullObj = {}
   let pushObj = {}
-  if (day === null || time === null || count === null) {
+  if (day === null || time === null || total === null) {
     return res.status(412).json({results: '请输入day, time, count'})
   } else {
     pullObj = {
@@ -226,7 +233,7 @@ exports.setServiceSchedule = function (req, res) {
         serviceSchedules: {
           day: day,
           time: time,
-          count: count
+          total: total
         }
       }
     }
@@ -344,3 +351,18 @@ exports.deleteServiceSuspend = function (req, res) {
     }
   })
 }
+// 确认收到面诊：personalDiag表修改
+// 输入：code；修改内容：personalDiag.status, time
+
+// 主管医生服务相关
+// 通过或拒绝主管医生申请：patient, dpRelation表数据修改
+// 输入：患者ID；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
+
+
+// 患者端使用的方法
+// 面诊申请：修改面诊计数，新建面诊表数据
+// 输入：医生ID和day, time 修改内容：alluser.serviceSchedules.count+1, new personalDiag
+// 返回：personalDiag.code, endTime
+
+// 主管医生申请：patient, dpRelation表数据修改
+// 输入：医生ID和购买时长；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
