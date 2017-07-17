@@ -118,10 +118,10 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay)
 
   // YQC
-  // comment - debug complete 2017-07-13
-  app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
+  // comment - debug complete 2017-07-17
+  app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), commentCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
   app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
-  // advice - debug complete 2017-07-13
+  // advice - debug complete 2017-07-17
   app.get(version + '/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
   app.post(version + '/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
   // compliance - debug complete 2017-07-13
@@ -133,7 +133,7 @@ module.exports = function (app, webEntry, acl) {
   // counsel 2017-07-14
   app.get(version + '/counsel/counsels', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, counselCtrl.getCounsels)
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire)
-  app.post(version + '/counsel/counselStatus', tokenManager.verifyToken(), counselCtrl.changeCounselStatus)// 测试会出现Router Error 但数据库中status可改
+  // app.post(version + '/counsel/counselStatus', tokenManager.verifyToken(), counselCtrl.changeCounselStatus)// 不要了
   app.get(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
   app.post(version + '/counsel/consultationStatus', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
   app.post(version + '/counsel/type', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
