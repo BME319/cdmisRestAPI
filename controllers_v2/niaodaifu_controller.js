@@ -94,7 +94,7 @@ exports.receiveData = function (req, res) {
     //   }
     // ],
     label: '化验',
-    description: desc + suggestion,
+    description: '描述：' + desc + '；' + '建议：' + suggestion,
     //comments: suggestion,
     importStatus: 1,
     revisionInfo: {
