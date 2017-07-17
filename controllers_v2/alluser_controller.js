@@ -1137,8 +1137,9 @@ exports.sendSMS = function (req, res) {
     tplId = tplId3
     appId = appId1
     param = _reason
-    JSONData = J6 + '"' + Jsonstring1 + '"' + ':' + '{' + '"' + Jsonstring2 + '"' + ':' + '"' + appId + '"' + ',' + '"' + Jsonstring3 + '"' + ':' + '"' + param + '"' + ',' + '"' + Jsonstring4 + '"' + ':' + '"' + tplId + '"' + ',' + '"' + Jsonstring5 + '"' + ':' + '"' + _mobile + '"' + '}' + '}'
+    JSONData = J6 + '"' + Jsonstring1 + '"' + ':' + '{' + '"' + Jsonstring2 + '"' + ':' + '"' + appId + '"' + ',' + '"' + Jsonstring3 + '"' + ':' + '"' + param + '"' + ',' + '"' + Jsonstring4 + '"' + ':' + '"' + tplId + '"' + ',' + '"' + Jsonstring5 + '"' + ':' + '"' + _mobile + '"' + '}' + '}' + '}'
   }
+  console.log(JSONData)
   var query = {'Expire': {'$lte': now.getTime()}}
   Sms.remove(query, function (err, item) {
     if (err) {
@@ -1210,6 +1211,7 @@ exports.sendSMS = function (req, res) {
               response.on('end', function () {
                                 // console.log("### end ##");
                 // var json = eval('(' + resdata + ')')
+                console.log(resdata)
                 var json = evil(resdata)
                 code = json.resp.respCode
                 if (code === '000000') {
