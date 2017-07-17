@@ -87,15 +87,15 @@ exports.receiveData = function (req, res) {
   var obj = {
     type: 'Health_002',
     insertTime: myDate,
-    url: [
-      {
-        photoId: userbind + _createdTime + '00',
-        status: 1
-      }
-    ],
+    // url: [
+    //   {
+    //     photoId: userbind + _createdTime + '00',
+    //     status: 1
+    //   }
+    // ],
     label: '化验',
-    description: desc,
-    comments: suggestion,
+    description: desc + suggestion,
+    //comments: suggestion,
     importStatus: 1,
     revisionInfo: {
       operationTime: createdTime,
@@ -104,10 +104,11 @@ exports.receiveData = function (req, res) {
   }
 
   // 存入healthInfo
-  HealthInfo.updateOne(query, obj, {upsert: true, runValidators: true}, function (err, Info) {
+  HealthInfo.updateOne(query, obj, {upsert: true}, function (err, Info) {
     if (err) {
       res.json({status: 1, err: err})
     } else {
+      //return res.json({status: 0})
       data = data.sort(sortNumber)
       labtestId = req.newId
       var obj2 = [
