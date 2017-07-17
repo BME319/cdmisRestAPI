@@ -28,7 +28,10 @@ var expenseCtrl = require('../controllers_v2/expense_controller')
 var doctorCtrl = require('../controllers_v2/doctor_controller')
 var healthInfoCtrl = require('../controllers_v2/healthInfo_controller')
 var insuranceCtrl = require('../controllers_v2/insurance_controller')
-var messageCtrl = require('../controllers/message_controller')
+var messageCtrl = require('../controllers_v2/message_controller')
+var orderCtrl = require('../controllers_v2/order_controller')
+var labtestResultCtrl = require('../controllers_v2/labtestResult_controller')
+var loadCtrl = require('../controllers_v2/load_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -101,8 +104,8 @@ module.exports = function (app, webEntry, acl) {
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 
   // 退款接口
-  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage);
-  
+  // app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
+
   // lgf
   // account
   app.get(version + '/account/accountInfo', tokenManager.verifyToken(), accountCtrl.getAccountInfo)
@@ -111,8 +114,8 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/account/freeTime', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
   app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
 
-  app.post(version + '/expense/doctor', tokenManager.verifyToken(), accountCtrl.checkPatient, doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
-  app.get(version + '/expense/docRecords', tokenManager.verifyToken(), doctorCtrl.checkDoctor, expenseCtrl.getDocRecords)
+  app.post(version + '/expense/doctor', tokenManager.verifyToken(), accountCtrl.checkPatient, alluserCtrl.checkAlluser, expenseCtrl.rechargeDoctor)
+  app.get(version + '/expense/docRecords', tokenManager.verifyToken(), expenseCtrl.getDocRecords)
 
   // healthInfo
   app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)
@@ -126,6 +129,17 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/insurance/message', tokenManager.verifyToken(), insuranceCtrl.getInsMsg)
   app.post(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.setPrefer)
   app.get(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.getPrefer)
-  
 
+  // message
+  app.get(version + '/message/messages', tokenManager.verifyToken(), messageCtrl.getMessages)
+  app.post(version + '/message/status', tokenManager.verifyToken(), messageCtrl.changeMessageStatus)
+  app.post(version + '/message/message', tokenManager.verifyToken(), getNoMid.getNo(6), messageCtrl.insertMessage)
+
+  // order
+  // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
+  app.post(version + '/order/order', tokenManager.verifyToken(), orderCtrl.updateOrder)
+  app.get(version + '/order/order', tokenManager.verifyToken(), orderCtrl.getOrder)
+
+  // load
+  app.post(version + '/upload', tokenManager.verifyToken(), loadCtrl.uploadphoto(), loadCtrl.upload)
 }

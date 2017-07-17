@@ -3,6 +3,7 @@ var Doctor = require('../models/doctor')
 var Order = require('../models/order')
 var commonFunc = require('../middlewares/commonFunc')
 
+// 获取订单信息
 exports.getOrder = function (req, res) {
   var _orderNo = req.query.orderNo
   var query = {orderNo: _orderNo}
@@ -84,6 +85,7 @@ exports.insertOrder = function (req, res, next) {
   })
 }
 
+// 更新订单信息
 exports.updateOrder = function (req, res) {
   var query = {orderNo: req.body.orderNo}
   var upObj = {

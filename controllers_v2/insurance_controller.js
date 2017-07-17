@@ -14,7 +14,7 @@ exports.updateInsuranceMsg = function (req, res, next) {
     return res.json({resutl: '请填写insuranceId'})
   }
 
- // 为调用insertMessage方法传入参数
+ // 为调用insertMessage方法传入参数，患者从message中查看推送信息
   req.body.userId = req.body.patientId
   // req.body.sendBy = req.body.doctorId
   req.body.sendBy = req.session.userId

@@ -3,14 +3,16 @@ var Message = require('../models/message')
 
 // 根据类型查询消息链接 2017-04-05 GY
 exports.getMessages = function (req, res) {
-  if (req.query.userId === null || req.query.userId === '') {
+  // if (req.query.userId === null || req.query.userId === '') {
+  if (req.session.userId === null || req.session.userId === '') {
     return res.json({result: '请填写userId'})
   }
   // if (req.query.type === null || req.query.type === '') {
   //  return res.json({resutl: '请填写type'});
   // }
 
-  var userId = req.query.userId
+  // var userId = req.query.userId
+  var userId = req.session.userId
   var type = req.query.type
 
   if (userId === null || userId === '') {
@@ -37,7 +39,8 @@ exports.getMessages = function (req, res) {
 
 // 根据userId修改某种类型消息的已读状态 GY 2017-04-15
 exports.changeMessageStatus = function (req, res) {
-  if (req.body.userId === null || req.body.userId === '') {
+  // if (req.body.userId === null || req.body.userId === '') {
+  if (req.session.userId === null || req.session.userId === '') {
     return res.json({result: '请填写userId'})
   }
   if (req.body.type === null || req.body.type === '') {
@@ -45,7 +48,8 @@ exports.changeMessageStatus = function (req, res) {
   }
 
   var query = {
-    userId: req.body.userId,
+    // userId: req.body.userId,
+    userId: req.session.userId,
     type: req.body.type
   }
 
@@ -76,7 +80,7 @@ exports.changeMessageStatus = function (req, res) {
 }
 
 exports.insertMessage = function (req, res) {
-  if (req.body.userId === null || req.body.userId === '') {
+  if (req.body.userId === null || req.body.userId === '') { // insurance传入，不用修改
     return res.json({result: '请填写userId'})
   }
   if (req.body.type === null || req.body.type === '') {

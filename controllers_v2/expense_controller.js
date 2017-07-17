@@ -1,9 +1,10 @@
 // var config = require('../config')
 var webEntry = require('../settings').webEntry
-var Patient = require('../models/patient')
+var Patient = require('../models/patient')     // 是否要修改为alluser
 var Account = require('../models/account')
 var Expense = require('../models/expense')
 
+// 获取医生接诊患者记录
 exports.getDocRecords = function (req, res) {
   // 查询条件
   // var query = {doctorId: req.query.doctorId}
@@ -11,7 +12,9 @@ exports.getDocRecords = function (req, res) {
   var limit = Number(req.query.limit)
   var skip = Number(req.query.skip)
 
+  // limit显示个数，skip跳过前面记录的个数，sort按时间降序排列
   var opts = {limit: limit, skip: skip, sort: '-time'}
+  // fields设定是否显示相应列
   var fields = {'_id': 0, 'doctorId': 0, 'doctorName': 0, 'patientId': 0}
 
   var _Url = ''
@@ -39,7 +42,8 @@ exports.getDocRecords = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v1/expense/getDocRecords' + _Url
+  // req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v1/expense/getDocRecords' + _Url
+  req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/expense/docRecords' + _Url
 
   Expense.getSome(query, function (err, item) {
     if (err) {
@@ -49,9 +53,11 @@ exports.getDocRecords = function (req, res) {
   }, opts, fields)
 }
 
+// 医生充值
 exports.rechargeDoctor = function (req, res) {
   var _chargetype = req.body.type
-  var _pid = req.body.patientId
+  // var _pid = req.body.patientId
+  var _pid = req.session.userId
   var _pName = req.body.patientName
   var _did = req.body.doctorId
   var _dName = req.body.doctorName
@@ -65,7 +71,7 @@ exports.rechargeDoctor = function (req, res) {
     var query1 = {
       userId: _did
     }
-    Patient.getOne(query, function (err, patient) {
+    Patient.getOne(query, function (err, patient) {   // Patient需要用AllUser替换
       if (err) {
         return res.status(500).send('服务器错误, 用户查询失败!')
       }
