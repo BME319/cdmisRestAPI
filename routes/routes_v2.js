@@ -113,7 +113,7 @@ module.exports = function (app, webEntry, acl) {
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
-  app.post('/devicedata/niaodaifu/data', niaodaifuCtrl.receiveData)
+  app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 
   // 退款接口

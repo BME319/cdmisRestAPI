@@ -65,7 +65,6 @@ exports.receiveData = function (req, res) {
   var suggestion = req.body.suggestion
   var data = req.body.data
   var created = req.body.created
-  var flag = 1
 
   // 根据时间戳生成时间对象
   var createdTime = new Date(created * 1000)
@@ -81,12 +80,12 @@ exports.receiveData = function (req, res) {
 
   var query = {
     userId: userbind,
-    insertTime: myDate
+    time: createdTime
   }
 
   var obj = {
     type: 'Health_002',
-    time: createdTime,
+    insertTime: myDate,
     url: [
       {
         photoId: userbind + _createdTime + '00',
@@ -108,201 +107,144 @@ exports.receiveData = function (req, res) {
     if (err) {
       res.json({status: 1, err: err})
     } else {
-      flag = 0
+      data = data.sort(sortNumber)
+      labtestId = req.newId
+      var obj2 = [
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '01',
+          type: 'LEU',
+          valueStr: data[0].result,
+          status: data[0].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        },
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '02',
+          type: 'NIT',
+          valueStr: data[1].result,
+          status: data[1].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        },
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '03',
+          type: 'UBG',
+          valueStr: data[2].result,
+          status: data[2].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        },
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '04',
+          type: 'PRO',
+          valueStr: data[3].result,
+          status: data[3].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        },
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '05',
+          type: 'PH',
+          valueStr: data[4].result,
+          status: data[4].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        },
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '06',
+          type: 'ERY',
+          valueStr: data[5].result,
+          status: data[5].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        },
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '07',
+          type: 'SG',
+          valueStr: data[6].result,
+          status: data[6].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        },
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '08',
+          type: 'BIL',
+          valueStr: data[7].result,
+          status: data[7].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        },
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '09',
+          type: 'VC',
+          valueStr: data[8].result,
+          status: data[8].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        },
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '10',
+          type: 'KET',
+          valueStr: data[9].result,
+          status: data[9].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        },
+        {
+          userId: userbind,
+          time: createdTime,
+          importTime: myDate,
+          labtestId: labtestId + '11',
+          type: 'GLU',
+          valueStr: data[10].result,
+          status: data[10].status,
+          importer: '59672961611ae0e26c61cc77',
+          photoId: userbind + _createdTime + '00'
+        }
+      ]
+      // 存入labtestImport
+      //var query2
+      //insertLab(0, obj2, labtestId)
+      LabtestImport.create(obj2, function (err, Info) {
+        if(err) {
+          res.json({status: 1, err: err})
+        } else {
+          return res.json({status: 0})
+        }
+      })
     }
   })
-
-  function sortNumber (a, b) {
-    return a.id - b.id
-  }
-  data = data.sort(sortNumber)
-
-  var obj2 = [
-    {
-      type: 'LEU',
-      valueStr: data[0].result,
-      status: data[0].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    },
-    {
-      type: 'NIT',
-      valueStr: data[1].result,
-      status: data[1].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    },
-    {
-      type: 'UBG',
-      valueStr: data[2].result,
-      status: data[2].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    },
-    {
-      type: 'PRO',
-      valueStr: data[3].result,
-      status: data[3].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    },
-    {
-      type: 'PH',
-      valueStr: data[4].result,
-      status: data[4].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    },
-    {
-      type: 'ERY',
-      valueStr: data[5].result,
-      status: data[5].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    },
-    {
-      type: 'SG',
-      valueStr: data[6].result,
-      status: data[6].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    },
-    {
-      type: 'BIL',
-      valueStr: data[7].result,
-      status: data[7].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    },
-    {
-      type: 'VC',
-      valueStr: data[8].result,
-      status: data[8].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    },
-    {
-      type: 'KET',
-      valueStr: data[9].result,
-      status: data[9].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    },
-    {
-      type: 'GLU',
-      valueStr: data[10].result,
-      status: data[10].status,
-      importer: '59672961611ae0e26c61cc77',
-      photoId: userbind + _createdTime + '00'
-    }
-  ]
-  // 存入labtestImport
-  insertLab(0)
-
-  function insertLab (i) {
-    var _numberingType = 11
-    var _targetDate = commonFunc.getNowFormatDate()
-    console.log('_targetData:' + _targetDate)
-    var query = {type: _numberingType}
-    var Data
-    var No
-    DictNumber.getOne(query, function (err, item) {
-      if (err) {
-        return res.status(500).send(err.errmsg)
-      }
-      Data = item
-      if (Data == null) {
-        return res.json({results: '请输入正确的numberingType!'})
-      } else {
-        var _Initial = Data.initStr
-        var _DateFormat = Data.dateFormat
-        var _SeqLength = Data.seqLength
-        // var _AlphamericFlag = Data.alphamericFlag
-        var _Date
-        var _KeyDate
-        var _TrnNumberingData
-        var _TrnNumberingNo
-        if (_DateFormat === 'YYMMDD') {
-          _Date = _targetDate.substring(2, 8)
-        } else if (_DateFormat === 'YYYYMMDD') {
-          _Date = _targetDate
-        }
-        console.log(_Date)
-        if (_Date == null) {
-          _KeyDate = '99999999'
-        } else {
-          _KeyDate = _targetDate
-        }
-        var query1 = {type: _numberingType, date: _KeyDate}
-        console.log(query1)
-        Numbering.getOne(query1, function (err, item1) {
-          if (err) {
-            return res.status(500).send(err.errmsg)
-          }
-          _TrnNumberingData = item1
-          if (_TrnNumberingData == null) {
-            _TrnNumberingNo = 0
-          } else {
-            _TrnNumberingNo = _TrnNumberingData.number
-          }
-          _TrnNumberingNo = _TrnNumberingNo + 1
-          var _Seq = _TrnNumberingNo
-          console.log('_Seq:' + _Seq)
-          if (_Seq.toString().length > _SeqLength) {
-            _TrnNumberingNo = 1
-            _Seq = 1
-          }
-          if (_TrnNumberingNo === 1) {
-            var numberingData = {
-              type: _numberingType,
-              date: _KeyDate,
-              number: _TrnNumberingNo
-            }
-
-            var newNumbering = new Numbering(numberingData)
-            newNumbering.save(function (err, Info) {
-              if (err) {
-                return res.status(500).send(err.errmsg)
-              }
-            })
-          } else {
-            Numbering.updateOne(query1, { $set: { number: _TrnNumberingNo } }, function (err, item1) {
-              if (err) {
-                return res.status(500).send(err.errmsg)
-              }
-            })
-          }
-          if (_Seq.toString().length < _SeqLength) {
-            var n = _SeqLength - _Seq.toString().length
-            while (n) {
-              _Seq = '0' + _Seq
-              n = n - 1
-            }
-          }
-          var _Ret = _Initial + _Date + _Seq
-          No = _Ret
-          console.log(No)
-          let query2 = {
-            userId: userbind,
-            importTime: myDate,
-            labtestId: No
-          }
-
-          LabtestImport.updateOne(query2, obj2[i], function (err, Info) {
-            if (err) {
-              res.json({status: 1, err: err})
-            } else {
-              // return res.json({status: 0})
-              if(i < obj2.length -1){
-                insertLab(++i)
-              } else {
-                console.log(i)
-                return res.json({status: 0})
-              }             
-            }
-          }, {upsert: true, runValidators: true})
-        })
-      }
-    })
-  }
+}
+function sortNumber (a, b) {
+  return a.id - b.id
 }

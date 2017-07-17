@@ -120,6 +120,15 @@ LabtestImport.update = function (query, obj, callback, opts, populate) {
     })
 }
 
+LabtestImport.create = function (query, callback) {
+  labtestImportModel.create(query, function (err, uplabtestImport) {
+    if (err) {
+        return callback(err)
+    }
+    callback(null, uplabtestImport)
+  })
+}
+
 LabtestImport.remove = function (query, callback) {
   labtestImportModel
     .remove(query)
