@@ -19,7 +19,7 @@ var aclChecking = require('../middlewares/aclChecking')
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
 var niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller')
 var alluserCtrl = require('../controllers_v2/alluser_controller')
-
+var devicedataCtrl = require('../controllers/devicedata_controller')
 var reviewCtrl = require('../controllers_v2/review_controller')
 var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
 var serviceCtrl = require('../controllers_v2/service_controller')
@@ -51,6 +51,11 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/acl/removeResource', tokenManager.verifyToken(), aclsettingCtrl.removeResource(acl))
   app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl))
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl))
+
+  app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), devicedataCtrl.bindingDevice)
+  app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), devicedataCtrl.debindingDevice)
+  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), devicedataCtrl.receiveBloodPressure)
+  app.get(version + '/devicedata/devices', tokenManager.verifyToken(), devicedataCtrl.getDeviceInfo)
 
   // wf
   app.get(version + '/alluser/count', tokenManager.verifyToken(), alluserCtrl.countAlluserList)
@@ -108,7 +113,7 @@ module.exports = function (app, webEntry, acl) {
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
-  app.post('/devicedata/niaodaifu/data', niaodaifuCtrl.receiveData)
+  app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 
   // 退款接口
