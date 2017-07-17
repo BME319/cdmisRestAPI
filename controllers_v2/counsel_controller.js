@@ -1,26 +1,57 @@
 // 代码 2017-03-28 GY
+// 功能 getDoctorObject-getCounsels获取咨询问诊信息 getPatientObject,getDoctorObject,getNoMid.getNo(2),saveQuestionaire,counselAutoRelay问卷
 // 注释 2017-07-14 YQC
 
 // var config = require('../config')
 var Counsel = require('../models/counsel')
-var Doctor = require('../models/doctor')
+// var Doctor = require('../models/doctor')
+var Alluser = require('../models/alluser')
 var Comment = require('../models/comment')
-var Patient = require('../models/patient')
+// var Patient = require('../models/patient')
 var Consultation = require('../models/consultation')
+
+// 获取医生ID对象，并添加自动转发标记 2017-07-15 GY
+// 注释 输入，doctorId；输出，相应的doctorObject
+exports.getDoctorObject = function (req, res, next) {
+  let doctorId = req.body.doctorId || req.query.doctorId || null
+  if (doctorId === null) {
+    return res.status(412).json({results: '请填写doctorId'})
+  } else {
+    req.doctorId = doctorId
+  }
+  let query = {userId: doctorId, role: 'doctor'}
+  console.log(query)
+  Alluser.getOne(query, function (err, doctor) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (doctor === null) {
+      return res.status(404).json({results: '不存在的医生ID'})
+    } else {
+      if (doctor.autoRelay === 1) {
+        req.body.autoRelayFlag = 1
+        req.body.relayTarget = doctor.relayTarget
+      }
+      req.body.doctorObject = doctor
+      console.log(req.body)
+      next()
+    }
+  })
+}
 
 // 根据状态、类型获取咨询问诊信息，暂未实现计数
 // 注释 输入，status，type，name，skip，limit，承接doctorObject；输出，问诊信息
 exports.getCounsels = function (req, res) {
   // 查询条件
-  var _doctorId = req.body.doctorObject._id
-  var _status = req.query.status
-  var _type = req.query.type
-  var _name = req.query.name
-  var _skip = req.query.skip
-  var _limit = req.query.limit
-  var query
+  let _doctorId = req.body.doctorObject._id || null
+  let _status = req.query.status || null
+  let _type = req.query.type || null
+  let _name = req.query.name || null
+  let _skip = req.query.skip || null
+  let _limit = req.query.limit || null
+  let query
 
-  if (_skip === '' || _skip === undefined) {
+  if (_skip === null) {
     _skip = 0
   }
   // type和status可以为空
@@ -36,25 +67,25 @@ exports.getCounsels = function (req, res) {
   // if(_name!=""&&_name!=undefined){
   //   query["patientId.name"]=_name;
   // }
-  var opts = ''
-  var fields = {'_id': 0, 'messages': 0, 'revisionInfo': 0}
+  let opts = ''
+  let fields = {'_id': 0, 'messages': 0, 'revisionInfo': 0}
   // 关联主表patient获取患者信息
-  var populate = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0}}
+  let populate = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0}}
   // if(_name!=""&&_name!=undefined){
   //   populate["match"]={"name":_name};
   // }
   // 模糊搜索
-  var nameReg = new RegExp(_name)
+  let nameReg = new RegExp(_name)
   if (_name) {
     populate['match'] = {'name': nameReg}
   }
   console.log(populate)
   Counsel.getSome(query, function (err, item) {
     if (err) {
-      return res.status(500).send(err.errmsg)
+      return res.status(500).send(err)
     }
-    var item1 = []
-    for (var i = 0; i < item.length; i++) {
+    let item1 = []
+    for (let i = 0; i < item.length; i++) {
       if (item[i].patientId != null) {
         if (_skip > 0) {
           _skip--
@@ -74,103 +105,99 @@ exports.getCounsels = function (req, res) {
   }, opts, fields, populate)
 }
 
-// 获取患者ID对象(用于咨询问卷方法)
-// 注释 输入，patientId；输出，相应的patientObject
+// 获取患者ID对象 2017-07-15 GY
 exports.getPatientObject = function (req, res, next) {
-  if (req.query.patientId == null || req.query.patientId === '') {
-    if (req.body.patientId == null || req.body.patientId === '') {
-      return res.json({result: '请填写patientId!'})
-    } else {
-      req.patientId = req.body.patientId
-    }
+  let patientId = req.body.patientId || req.query.patientId || null
+  if (patientId === null) {
+    return res.status(412).json({results: '请填写patientId'})
   } else {
-    req.patientId = req.query.patientId
+    req.patientId = patientId
   }
-  var query = {userId: req.patientId}
-  Patient.getOne(query, function (err, patient) {
+  let query = {userId: patientId, role: 'patient'}
+  Alluser.getOne(query, function (err, patient) {
     if (err) {
-      console.log(err)
-      return res.status(500).send('服务器错误, 用户查询失败!')
+      return res.status(500).send(err)
     }
-    if (patient == null) {
-      return res.json({result: '不存在的患者ID！'})
-    }
-    req.body.patientObject = patient
-    next()
-  })
-}
-// 获取医生ID对象(用于咨询问卷方法)
-// 注释 输入，doctorId；输出，相应的doctorObject
-exports.getDoctorObject = function (req, res, next) {
-  if (req.query.doctorId == null || req.query.doctorId === '') {
-    if (req.body.doctorId == null || req.body.doctorId === '') {
-      return res.json({result: '请填写doctorId!'})
+    if (patient === null) {
+      return res.status(404).json({results: '不存在的患者ID'})
     } else {
-      req.doctorId = req.body.doctorId
+      req.body.patientObject = patient
+      next()
     }
-  } else {
-    req.doctorId = req.query.doctorId
-  }
-  var query = {userId: req.doctorId}
-  Doctor.getOne(query, function (err, doctor) {
-    if (err) {
-      console.log(err)
-      return res.status(500).send('服务器错误, 用户查询失败!')
-    }
-    if (doctor == null) {
-      return res.json({result: '不存在的医生ID！'})
-    }
-    req.body.doctorObject = doctor
-    next()
   })
 }
 
+// 获取token的对象 2017-07-15 GY
+exports.getSessionObject = function (req, res, next) {
+  let query = {userId: req.session.userId}
+  Alluser.getOne(query, function (err, user) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (user === null) {
+      return res.status(404).json({results: '找不到对象'})
+    } else if (req.session.role === 'patient') {
+      req.body.patientObject = user
+      next()
+    } else if (req.session.role === 'doctor') {
+      req.body.doctorObject = user
+      next()
+    } else {
+      return res.status(400).json({results: '登录角色不是医生或患者'})
+    }
+  })
+}
 // 提交咨询问卷 2017-04-05 GY
 // 增加选填字段 2017-04-13 GY
 // 注释 输入，type，sickTime，symptom/photo,help,选填hospital,visitDate,diagnosis/photo；输出，保存问卷
-exports.saveQuestionaire = function (req, res) {
-  if (req.body.type == null || req.body.type === '') {
+exports.saveQuestionaire = function (req, res, next) {
+  let type = req.body.type || null
+  if (type === null) {
     return res.json({result: '请填写type,咨询=1,问诊=2'})
   }
 
   var counselData = {
-    counselId: req.newId,   // counselpost01
-    patientId: req.body.patientObject._id,   // p01
-    doctorId: req.body.doctorObject._id,   // doc01
-    type: req.body.type,
+    counselId: req.newId,
+    patientId: req.session._id,
+    doctorId: req.body.doctorObject._id,
+    type: type,
     time: new Date(),
     status: 1,
-  // topic: req.body.topic,
-  // content: req.body.content,
-  // title: req.body.title,
+    // topic: req.body.topic,
+    // content: req.body.content,
+    // title: req.body.title,
     sickTime: req.body.sickTime,
-  // visited: req.body.visited,
+    // visited: req.body.visited,
     symptom: req.body.symptom,
     symptomPhotoUrl: req.body.symptomPhotoUrl,
-  // description: req.body.description,
-  // drugs: req.body.drugs,
-  // history: req.body.history,
-    help: req.body.help
-  // comment: req.body.comment,
+    // description: req.body.description,
+    // drugs: req.body.drugs,
+    // history: req.body.history,
+    help: req.body.help // ,
+    // comment: req.body.comment,
 
-  // revisionInfo:{
-  //   operationTime:new Date(),
-  //   userId:"gy",
-  //   userName:"gy",
-  //   terminalIP:"10.12.43.32"
-  // }
+    // revisionInfo:{
+    //   operationTime:new Date(),
+    //   userId:"gy",
+    //   userName:"gy",
+    //   terminalIP:"10.12.43.32"
+    // }
   }
-  if (req.body.hospital != null && req.body.hospital !== '') {
-    counselData['hospital'] = req.body.hospital
+  let hospital = req.body.hospital || null
+  let visitDate = req.body.visitDate || null
+  let diagnosis = req.body.diagnosis || null
+  let diagnosisPhotoUrl = req.body.diagnosisPhotoUrl || null
+  if (hospital != null) {
+    counselData['hospital'] = hospital
   }
-  if (req.body.visitDate != null && req.body.visitDate !== '') {
-    counselData['visitDate'] = new Date(req.body.visitDate)
+  if (req.body.visitDate != null) {
+    counselData['visitDate'] = new Date(visitDate)
   }
-  if (req.body.diagnosis != null && req.body.diagnosis !== '') {
-    counselData['diagnosis'] = req.body.diagnosis
+  if (req.body.diagnosis != null) {
+    counselData['diagnosis'] = diagnosis
   }
-  if (req.body.diagnosisPhotoUrl != null && req.body.diagnosisPhotoUrl !== '') {
-    counselData['diagnosisPhotoUrl'] = req.body.diagnosisPhotoUrl
+  if (req.body.diagnosisPhotoUrl != null) {
+    counselData['diagnosisPhotoUrl'] = diagnosisPhotoUrl
   }
 
   var newCounsel = new Counsel(counselData)
@@ -178,8 +205,198 @@ exports.saveQuestionaire = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    res.json({result: '新建成功', results: counselInfo})
+    // 自动转发相关 2017-07-15 GY
+    if (req.body.autoRelayFlag) {
+      req.body.counselInfo = counselInfo
+      next()
+    } else {
+      res.json({result: '新建成功', results: counselInfo})
+    }
   })
+}
+
+// 实现自动转发 暂未实现socket功能 2017-07-15 GY
+exports.counselAutoRelay = function (req, res) {
+  function add00 (m) {
+    return m < 10 ? '00' + m : (m < 100 ? '0' + m : m)
+  }
+  function add0 (m) {
+    return m < 10 ? '0' + m : m
+  }
+  function relayOne (index) {
+    let now = new Date()
+    let y = now.getFullYear()
+    let m = now.getMonth() + 1
+    let d = now.getDate()
+    let h = now.getHours()
+    let mm = now.getMinutes()
+    let s = now.getMilliseconds()
+    let consultationId = 'G' + add0(m) + add0(d) + add0(h) + add0(mm) + add00(s)
+    let messageNo = 'CMUA' + y + add0(m) + add0(d) + add0(h) + add0(mm) + add00(s) + index
+    let queryteam = {teamId: teamIds[index].teamId}
+
+    Team.getOne(queryteam, function (err, teamitem) {
+      if (err) {
+        teamErrFlag = 1
+        console.log(err)
+      }
+      teamitem = teamitem || null
+      if (teamitem === null) {
+        teamEmptyFlag[index] = 1
+        if (index < teamIds.length - 1) {
+          relayOne(++index)
+        } else {
+          if (teamErrFlag || consultationErrFlag || communicationErrFlag || newsErrFlag) {
+            return res.status(206).json({
+              result: '新建成功',
+              results: req.body.counselInfo,
+              message: '医生设置了自动转发但在发消息时出现错误'
+            })
+          } else if (teamEmptyFlag.length !== 0) {
+            let emptyTeams = []
+            for (let i = 0; i < teamIds.length; i++) {
+              if (teamEmptyFlag[i]) emptyTeams.push(teamIds[i])
+            }
+            return res.status(206).json({
+              result: '新建成功',
+              results: req.body.counselInfo,
+              message: '医生设置了自动转发但部分转发目标不存在',
+              messageDetail: emptyTeams
+            })
+          } else {
+            return res.json({result: '新建成功', results: req.body.counselInfo})
+          }
+        }
+      } else {
+        let consultationData = {
+          consultationId: consultationId,
+          sponsorId: req.body.doctorObject._id,
+          patientId: req.session._id,
+          diseaseInfo: req.body.counselInfo._id,
+          teamId: teamitem._id,
+          time: now,
+          status: 1
+        }
+        let newConsultation = new Consultation(consultationData)
+        newConsultation.save(function (err, consultationInfo) {
+          if (err) {
+            consultationErrFlag = 1
+          }
+          // 生成咨询时，医生与患者页面的卡片消息模板
+          let msgContent = {
+            counsel: req.body.counselInfo,
+            type: 'card',
+            counselId: req.body.counselInfo.counselId,
+            patientId: req.session.userId,
+            patientName: req.body.patientObject.name,
+            doctorId: req.body.doctorObject.userId,
+            fromId: req.session.userId,
+            targetId: req.body.doctorObject.userId
+          }
+          // 转发时需要生成的卡片消息模板
+          msgContent.consultationId = consultationData.consultationId
+          msgContent.targetId = teamitem.teamId
+          msgContent.fromId = req.body.doctorObject.userId
+          let msgJson = {
+            clientType: 'doctor',
+            contentType: 'custom',
+            fromID: req.body.doctorObject.userId,
+            fromName: req.body.doctorObject.name,
+            targetID: teamitem.teamId,
+            teamId: teamitem.teamId,
+            targetName: teamitem.name,
+            targetType: 'group',
+            status: 'send_going',
+            newsType: '13',
+            targetRole: 'doctor',
+            createTimeInMillis: Date.now(),
+            content: msgContent
+          }
+          let communicationData = {
+            messageNo: messageNo,
+            messageType: 2,
+            sendBy: req.body.doctorObject.userId,
+            receiver: teamitem.teamId,
+            sendDateTime: msgJson.createTimeInMillis,
+            content: msgJson,
+            newsType: msgJson.newsType
+          }
+          let newCommunication = new Communication(communicationData)
+          newCommunication.save(function (err, communicationInfo) {
+            if (err) {
+              communicationErrFlag = 1
+            }
+            let newsData = {
+              messageId: communicationData.messageNo,
+              userId: communicationData.receiver,
+              userRole: 'doctor',
+              sendBy: req.body.doctorObject.userId,
+              readOrNot: 0,
+              type: '13',
+              time: now,
+              title: teamitem.name,
+              description: '[会诊消息]',
+              url: JSON.stringify(msgJson)
+            }
+            // 需要插入news表卧槽好多我先调已经存在的接口好了
+            request({
+              url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v1/new/teamNews' + '?token=' + req.query.token || req.body.token,
+              method: 'POST',
+              body: newsData,
+              json: true
+            }, function (err, response) {
+              if (err) {
+                newsErrFlag = 1
+              }
+              if (index < teamIds.length - 1) {
+                relayOne(++index)
+              } else {
+                if (teamErrFlag || consultationErrFlag || communicationErrFlag || newsErrFlag) {
+                  return res.status(206).json({
+                    result: '新建成功',
+                    results: req.body.counselInfo,
+                    message: '医生设置了自动转发但在发消息时出现错误'
+                  })
+                } else if (teamEmptyFlag.length !== 0) {
+                  let emptyTeams = []
+                  for (let i = 0; i < teamIds.length; i++) {
+                    if (teamEmptyFlag[i]) emptyTeams.push(teamIds[i])
+                  }
+                  return res.status(206).json({
+                    result: '新建成功',
+                    results: req.body.counselInfo,
+                    message: '医生设置了自动转发但部分转发目标不存在',
+                    messageDetail: emptyTeams
+                  })
+                } else {
+                  return res.json({result: '新建成功', results: req.body.counselInfo})
+                }
+              }
+            })
+          })
+        })
+      }
+    })
+  }
+
+  let teamIds = req.body.relayTarget
+  // err标记
+  let teamErrFlag = 0
+  let consultationErrFlag = 0
+  let communicationErrFlag = 0
+  let newsErrFlag = 0
+  // team空标记
+  let teamEmptyFlag = []
+  //
+
+  if (teamIds.length === 0) {
+    return res.status(206).json({
+      result: '新建成功',
+      results: req.body.counselInfo,
+      message: '医生设置了自动转发但没有设置转发目标'
+    })
+  }
+  relayOne(0)
 }
 
 // 注释 更改咨询状态

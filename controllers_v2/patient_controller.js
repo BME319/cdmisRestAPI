@@ -1,30 +1,31 @@
 // 代码 2017-03-29 GY
 // 修改 患者详情，只输出最新的诊断内容 2017-05-14 GY
-// 注释 2017-07-13 YQC
+// 注释 2017-07-17 YQC
 
 // var config = require('../config')
 var webEntry = require('../settings').webEntry
-var Patient = require('../models/patient')
-var Doctor = require('../models/doctor')
+var Alluser = require('../models/alluser')
+// var Patient = require('../models/patient')
+// var Doctor = require('../models/doctor')
 var DpRelation = require('../models/dpRelation')
 var User = require('../models/user')
 var commonFunc = require('../middlewares/commonFunc')
 var Counsel = require('../models/counsel')
 var VitalSign = require('../models/vitalSign')
 
-// 根据userId查询患者详细信息
+// 患者查询自身详细信息
+// 注释 承接session.userId；输出患者信息，最新体重和最新诊断
 exports.getPatientDetail = function (req, res) {
-  if (req.session.userId == null || req.session.userId === '') {
+  let userId = req.session.userId || null
+  if (userId == null) {
     return res.json({result: '请填写userId!'})
   }
-  // 查询条件
-  var userId = req.session.userId
-  var query = {userId: userId}
-  // 输出内容
-  var fields = {'revisionInfo': 0, 'doctors': 0}
-  var populate = {path: 'diagnosisInfo.doctor', select: {'_id': 0, 'userId': 1, 'name': 1, 'workUnit': 1, 'department': 1}}
+  // 查询参数
+  let query = {userId: userId, role: 'patient'}
+  let fields = {'revisionInfo': 0, 'doctors': 0}
+  let populate = {path: 'diagnosisInfo.doctor', select: {'_id': 0, 'userId': 1, 'name': 1, 'workUnit': 1, 'department': 1}}
 
-  Patient.getOne(query, function (err, item) {
+  Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -34,7 +35,7 @@ exports.getPatientDetail = function (req, res) {
       return res.json({results: '没有填写个人信息'})
     } else {
       // 输出最新的诊断内容
-      var recentDiagnosis = []
+      let recentDiagnosis = []
       if (item.diagnosisInfo.length !== 0) {
         recentDiagnosis[0] = item.diagnosisInfo[item.diagnosisInfo.length - 1]
       }
@@ -43,13 +44,13 @@ exports.getPatientDetail = function (req, res) {
       // return res.json({results: item, recentDiagnosis:recentDiagnosis});
 
   // 取体征表中最近体重值
-      var queryWeight = {patientId: item._id, type: 'Weight'}
-      var optsWeight = {sort: '-_id'}
+      let queryWeight = {patientId: item._id, type: 'Weight'}
+      let optsWeight = {sort: '-_id'}
       VitalSign.getSome(queryWeight, function (err, vitalitems) {
         if (err) {
           return res.status(500).send(err)
         }
-        var patientWeight
+        let patientWeight
         if (vitalitems.length === 0) {
           patientWeight = 0
         } else {
@@ -63,17 +64,18 @@ exports.getPatientDetail = function (req, res) {
 }
 
 // 根据医院和医生姓名（选填）获取医生信息
+// 注释 输入医生name，province，city，district，workUnit；输出，医生信息列表
 exports.getDoctorLists = function (req, res) {
   // 查询条件
-  var _province = req.query.province || null
-  var _city = req.query.city || null
-  var _district = req.query.district || null
+  let _province = req.query.province || null
+  let _city = req.query.city || null
+  let _district = req.query.district || null
 
-  var _workUnit = req.query.workUnit || null
-  var _name = req.query.name || null
+  let _workUnit = req.query.workUnit || null
+  let _name = req.query.name || null
 
-  var _limit = Number(req.query.limit)
-  var _skip = Number(req.query.skip)
+  let _limit = Number(req.query.limit)
+  let _skip = Number(req.query.skip)
 
   // var query;
   // //name选填
@@ -90,17 +92,17 @@ exports.getDoctorLists = function (req, res) {
   //   query = {workUnit:_workUnit, name:_name};
   // }
 
-  var query = {}
-  if (_province !== '' && _province != null) {
+  let query = {role: 'doctor'}
+  if (_province != null) {
     query['province'] = _province
   }
-  if (_city !== '' && _city != null) {
+  if (_city != null) {
     query['city'] = _city
   }
-  if (_district !== '' && _district != null) {
+  if (_district != null) {
     query['district'] = _district
   }
-  if (_workUnit !== '' && _workUnit != null) {
+  if (_workUnit != null) {
     query['workUnit'] = _workUnit
   }
   // if(_name != ""&&_name!=null)
@@ -113,26 +115,26 @@ exports.getDoctorLists = function (req, res) {
     query.name = new RegExp(_name)
   }
   // 输出内容
-  var option = {limit: _limit, skip: _skip, sort: -'_id'}
-  var fields = {'_id': 0, 'revisionInfo': 0}
+  let option = {limit: _limit, skip: _skip, sort: -'_id'}
+  let fields = {'_id': 0, 'revisionInfo': 0}
 
-  var populate = ''
-  var _workUnitUrl = ''
-  var _nameUrl = ''
-  var _limitUrl = ''
-  var _skipUrl = ''
-  var _Url = ''
+  let populate = ''
+  let _workUnitUrl = ''
+  let _nameUrl = ''
+  let _limitUrl = ''
+  let _skipUrl = ''
+  let _Url = ''
   // 检查查询条件存在并设定
-  if (_workUnit != null && _workUnit !== '') {
+  if (_workUnit != null) {
     _workUnitUrl = 'workUnit=' + _workUnit
   }
-  if (_name != null && _name !== '') {
+  if (_name != null) {
     _nameUrl = 'name=' + _name
   }
-  if (_limit != null && _limit !== '') {
+  if (_limit != null) {
     _limitUrl = 'limit=' + String(_limit)
   }
-  if (_skip != null && _skip !== '') {
+  if (_skip != null) {
     _skipUrl = 'skip=' + String(_skip + _limit)
   }
   // 路径尾部添加查询条件
@@ -154,7 +156,7 @@ exports.getDoctorLists = function (req, res) {
   }
   var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/getDoctorLists' + _Url
   // ？？？
-  Doctor.getSome(query, function (err, items) {
+  Alluser.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -166,13 +168,15 @@ exports.getDoctorLists = function (req, res) {
 // 通过patient表中userId返回PatientObject 2017-03-30 GY
 // 修改：增加判断不存在ID情况 2017-04-05 GY
 exports.getPatientObject = function (req, res, next) {
-  if (req.query.patientId == null || req.query.patientId === '') {
+  let patientId = req.sesion.userId
+  if (patientId == null || patientId === '') {
     return res.json({result: '请填写userId!'})
   }
   var query = {
-    userId: req.query.patientId
+    userId: patientId,
+    role: 'patient'
   }
-  Patient.getOne(query, function (err, patient) {
+  Alluser.getOne(query, function (err, patient) {
     if (err) {
       console.log(err)
       return res.status(500).send('服务器错误, 用户查询失败!')
@@ -185,15 +189,35 @@ exports.getPatientObject = function (req, res, next) {
   })
 }
 
+// 注释 承接session.userId，输出patientObject
+exports.getSessionObject = function (req, res, next) {
+  let query = {userId: req.session.userId}
+  Alluser.getOne(query, function (err, user) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (user === null) {
+      return res.status(404).json({results: '找不到对象'})
+    } else if (req.session.role === 'patient') {
+      req.body.patientObject = user
+      next()
+    } else if (req.session.role === 'doctor') {
+      req.body.doctorObject = user
+      next()
+    } else {
+      return res.status(400).json({results: '登录角色不是医生或患者'})
+    }
+  })
+}
 // 获取患者的所有医生 2017-03-30 GY
 // 2017-04-05 GY 修改：按照要求更换查询表
 exports.getMyDoctor = function (req, res) {
-  if (req.query.userId == null || req.query.userId === '') {
+  if (req.session.userId == null || req.query.userId === '') {
     return res.json({result: '请填写userId!'})
   }
   // 查询条件
   // var patientObject = req.body.patientObject;
-  var _patientId = req.query.userId
+  var _patientId = req.session.userId
   var query = {userId: _patientId}
 
   var opts = ''
@@ -202,7 +226,7 @@ exports.getMyDoctor = function (req, res) {
   var ret = {}
   var populate = {path: 'doctors.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
 
-  Patient.getOne(query, function (err, item) {
+  Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -230,7 +254,7 @@ exports.getCounselRecords = function (req, res) {
 
   Counsel.getSome(query, function (err, item) {
     if (err) {
-      return res.status(500).send(err.errmsg)
+      return res.status(500).send(err)
     }
     res.json({results: item})
   }, opts, fields, populate)
@@ -238,13 +262,10 @@ exports.getCounselRecords = function (req, res) {
 
 // 获取患者ID对象(用于新建患者方法) 2017-04-06 GY
 exports.checkPatientId = function (req, res, next) {
-  if (req.body.userId == null || req.body.userId === '') {
-    return res.json({result: '请填写userId!'})
+  let query = {
+    userId: req.session.userId
   }
-  var query = {
-    userId: req.body.userId
-  }
-  Patient.getOne(query, function (err, patient) {
+  Alluser.getOne(query, function (err, patient) {
     if (err) {
       console.log(err)
       return res.status(500).send('服务器错误, 用户查询失败!')
@@ -258,28 +279,28 @@ exports.checkPatientId = function (req, res, next) {
 }
 // 新建患者个人信息 2017-04-06 GY
 exports.newPatientDetail = function (req, res) {
-  if (req.body.userId == null || req.body.userId === '') {
-    return res.json({result: '请填写userId!'})
-  }
-  if (req.body.birthday == null || req.body.birthday === '') {
+  let birthday = req.body.birthday || null
+  let bloodType = req.body.bloodType || null
+  let hypertension = req.body.hypertension || null
+  if (birthday == null) {
     return res.json({result: '请填写birthday!'})
   }
-  if (req.body.bloodType == null || req.body.bloodType === '') {
+  if (bloodType == null) {
     return res.json({result: '请填写bloodType!'})
   }
-  if (req.body.hypertension == null || req.body.hypertension === '') {
+  if (hypertension == null) {
     return res.json({result: '请填写hypertension!'})
   }
   var patientData = {
-    userId: req.body.userId,
-    name: req.body.name,
-    gender: req.body.gender,
-    bloodType: req.body.bloodType,
-    hypertension: req.body.hypertension,
-    allergic: req.body.allergic,
-    class: req.body.class,
-    class_info: req.body.class_info,
-    birthday: new Date(req.body.birthday)
+    userId: req.session.userId,
+    name: req.body.name || null,
+    gender: req.body.gender || null,
+    bloodType: bloodType,
+    hypertension: hypertension,
+    allergic: req.body.allergic || null,
+    class: req.body.class || null,
+    class_info: req.body.class_info || null,
+    birthday: new Date(birthday)
   // revisionInfo:{
   //   operationTime:new Date(),
   //   userId:"gy",
@@ -287,72 +308,72 @@ exports.newPatientDetail = function (req, res) {
   //   terminalIP:"10.12.43.32"
   // }
   }
-  if (req.body.photoUrl != null) {
+  if (req.body.photoUrl != null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
     patientData['photoUrl'] = req.body.photoUrl
   }
-  if (req.body.IDNo != null) {
+  if (req.body.IDNo != null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
     patientData['IDNo'] = req.body.IDNo
   }
-  if (req.body.height != null) {
+  if (req.body.height != null && req.body.height !== '' && req.body.height !== undefined) {
     patientData['height'] = req.body.height
   }
   if (req.body.weight != null && req.body.weight !== '' && req.body.weight !== undefined) {
     patientData['weight'] = req.body.weight
   }
-  if (req.body.occupation != null) {
+  if (req.body.occupation != null && req.body.occupation !== '' && req.body.occupation !== undefined) {
     patientData['occupation'] = req.body.occupation
   }
-  if (req.body.nation != null) {
+  if (req.body.nation != null && req.body.nation !== '' && req.body.nation !== undefined) {
     patientData['address.nation'] = req.body.nation
   }
-  if (req.body.province != null) {
+  if (req.body.province != null && req.body.province !== '' && req.body.province !== undefined) {
     patientData['address.province'] = req.body.province
   }
-  if (req.body.city != null) {
+  if (req.body.city != null && req.body.city !== '' && req.body.city !== undefined) {
     patientData['address.city'] = req.body.city
   }
-  if (req.body.operationTime != null && req.body.operationTime !== '') {
+  if (req.body.operationTime != null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
     patientData['operationTime'] = req.body.operationTime
   }
-  if (req.body.lastVisit != null) {
-    if (req.body.lastVisit.time != null && req.body.lastVisit.time !== '') {
+  if (req.body.lastVisit != null && req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
+    if (req.body.lastVisit.time != null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
       patientData['lastVisit.time'] = new Date(req.body.lastVisit.time)
     }
-    if (req.body.lastVisit.hospital != null) {
+    if (req.body.lastVisit.hospital != null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
       patientData['lastVisit.hospital'] = req.body.lastVisit.hospital
     }
-    if (req.body.lastVisit.diagnosis != null) {
+    if (req.body.lastVisit.diagnosis != null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
       patientData['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
     }
   }
   // return res.status(200).send(counselData);
-  var newPatient = new Patient(patientData)
+  var newPatient = new Alluser(patientData)
   newPatient.save(function (err, patientInfo) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     if (req.body.weight != null && req.body.weight !== '' && req.body.weight !== undefined) {
-      var timenow = commonFunc.getNowFormatSecond()
-      var queryVital = {
+      let timenow = commonFunc.getNowFormatSecond()
+      let queryVital = {
         patientId: patientInfo._id,
         type: 'Weight',
         code: 'Weight_1',
         unit: 'kg',
         date: commonFunc.getNowDate()
       }
-      var upObj = {}
-      var opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
+      let upObj = {}
+      let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
       VitalSign.updateOne(queryVital, upObj, function (err, upweight) {
         if (err) {
           return res.status(500).send(err.errmsg)
         } else {
-          var query = {
+          let query = {
             patientId: patientInfo._id,
             type: upweight.type,
             code: upweight.code,
             date: new Date(upweight.date)
           }
-          var upObj = {
+          let upObj = {
             $push: {
               data: {
                 time: new Date(timenow),
@@ -374,15 +395,17 @@ exports.newPatientDetail = function (req, res) {
 
 // 修改患者个人信息 2017-04-06 GY
 exports.editPatientDetail = function (req, res) {
-  if (req.body.userId == null || req.body.userId === '') {
+  let patientId = req.body.patientId || null
+  if (patientId == null) {
     return res.json({result: '请填写userId!'})
   }
-  var query = {
-    userId: req.body.userId
+  let query = {
+    userId: patientId,
+    role: 'patient'
   }
-  var opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
+  let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
 
-  var upObj = {
+  let upObj = {
   // revisionInfo:{
   //   operationTime:new Date(),
   //   userId:"gy",
@@ -457,7 +480,7 @@ exports.editPatientDetail = function (req, res) {
   }
 
   // return res.json({query: query, upObj: upObj});
-  Patient.updateOne(query, upObj, function (err, upPatient) {
+  Alluser.updateOne(query, upObj, function (err, upPatient) {
     if (err) {
       return res.status(422).send(err.message)
     }
@@ -514,7 +537,7 @@ exports.getDoctorObject = function (req, res, next) {
   var query = {
     userId: req.body.doctorId
   }
-  Doctor.getOne(query, function (err, doctor) {
+  Alluser.getOne(query, function (err, doctor) {
     if (err) {
       console.log(err)
       return res.status(500).send('服务器错误, 用户查询失败!')
@@ -525,54 +548,56 @@ exports.getDoctorObject = function (req, res, next) {
     req.body.doctorObject = doctor
     next()
   })
-}
+} // 弃用
+
 exports.insertDiagnosis = function (req, res, next) {
   if (req.body.patientId == null || req.body.patientId === '') {
     return res.json({result: '请填写patientId!'})
   }
-  var query = {
-    userId: req.body.patientId
+  let query = {
+    userId: req.body.patientId,
+    role: 'patient'
   }
 
-  var diagname = req.body.diagname
-  var diagprogress = req.body.diagprogress
-  var diagcontent = req.body.diagcontent
-  var diagtime
-  var diagoperationTime
-  var diaghypertension
+  let diagName = req.body.diagname || null
+  let diagProgress = req.body.diagProgress || null
+  let diagContent = req.body.diagContent || null
+  let diagTime
+  let diagOperationTime
+  let diagHypertension
 
-  if (req.body.diagtime == null || req.body.diagtime === '') {
-    diagtime = new Date()
+  if (req.body.diagtime == null || req.body.diagtime === '' || req.body.diagtime === undefined) {
+    diagTime = new Date()
   } else {
-    diagtime = new Date(req.body.diagtime)
+    diagTime = new Date(req.body.diagtime)
   }
-  if (req.body.diagoperationTime == null || req.body.diagoperationTime === '') {
-    diagoperationTime = new Date('1900-01-01')
+  if (req.body.diagoperationTime == null || req.body.diagoperationTime === '' || req.body.diagoperationTime === undefined) {
+    diagOperationTime = new Date('1900-01-01')
   } else {
-    diagoperationTime = new Date(req.body.diagoperationTime)
+    diagOperationTime = new Date(req.body.diagoperationTime)
   }
-  if (req.body.diaghypertension == null || req.body.diaghypertension === '') {
+  if (req.body.diaghypertension == null || req.body.diaghypertension === '' || req.body.diaghypertension === undefined) {
   // 前端定义默认高血压否为2
-    diaghypertension = 2
+    diagHypertension = 2
   } else {
-    diaghypertension = req.body.diaghypertension
+    diagHypertension = req.body.diaghypertension
   }
 
   var upObj = {
     $push: {
       diagnosisInfo: {
-        name: diagname,
-        time: diagtime,
-        hypertension: diaghypertension,
-        progress: diagprogress,
-        operationTime: diagoperationTime,
-        content: diagcontent,
+        name: diagName,
+        time: diagTime,
+        hypertension: diagHypertension,
+        progress: diagProgress,
+        operationTime: diagOperationTime,
+        content: diagContent,
         doctor: req.body.doctorObject._id
       }
     }
   }
   // return res.json({query: query, upObj: upObj});
-  Patient.update(query, upObj, function (err, updiag) {
+  Alluser.update(query, upObj, function (err, updiag) {
     if (err) {
       return res.status(422).send(err.message)
     }
@@ -584,22 +609,19 @@ exports.insertDiagnosis = function (req, res, next) {
   // }
   // res.json({results: updiag});
     req.body.userId = req.body.patientId
-    req.body.class = diagname
-    req.body.class_info = diagprogress
-    req.body.hypertension = diaghypertension
+    req.body.class = diagName
+    req.body.class_info = diagProgress
+    req.body.hypertension = diagHypertension
     next()
   }, {new: true})
 }
 
-// 绑定主管医生
+// 绑定主管医生 --- 修改关注医生.待定
 // 1. 查询当前主管医生并在DPRelation表里解绑（删除）
 exports.debindingDoctor = function (req, res, next) {
-  if (req.body.patientId == null || req.body.patientId === '') {
-    return res.json({result: '请填写patientId!'})
-  }
-  var query = {userId: req.body.patientId}
+  var query = {userId: req.session.userId, role: 'patient'}
 
-  Patient.getOne(query, function (err, item) {
+  Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -607,6 +629,7 @@ exports.debindingDoctor = function (req, res, next) {
       return res.json({result: '不存在的患者ID！'})
     }
       // return res.json({results: item});
+    // 患者未匹配主管医生，跳转binding
     if (item.doctors.length === 0) {
       next()
     } else {
@@ -895,19 +918,20 @@ exports.bindingPatient = function (req, res, next) {
 
 // 修改患者VIP状态 2017-05-04 GY
 exports.changeVIP = function (req, res) {
-  if (req.body.userId == null || req.body.userId === '') {
+  let userId = req.body.userId || null
+  if (userId == null) {
     return res.json({result: '请填写userId!'})
   }
   var query = {
-    userId: req.body.userId
+    userId: userId
   }
 
   var upObj = {}
-  if (req.body.VIP != null) {
+  if (req.body.VIP != null && req.body.VIP !== '' && req.body.VIP !== undefined) {
     upObj['VIP'] = req.body.VIP
   }
 
-  Patient.updateOne(query, upObj, function (err, upPatient) {
+  Alluser.updateOne(query, upObj, function (err, upPatient) {
     if (err) {
       return res.status(500).send(err.message)
     }
@@ -920,16 +944,12 @@ exports.changeVIP = function (req, res) {
 
 // 患者头像不存在时使用微信头像 2017-06-14 GY
 exports.wechatPhotoUrl = function (req, res) {
-  if (req.query.patientId === null || req.query.patientId === '') {
-    return res.json({results: '请填写userId'})
-  }
-
-  if (req.query.wechatPhotoUrl === null || req.query.wechatPhotoUrl === '') {
+  if (req.query.wechatPhotoUrl === null || req.query.wechatPhotoUrl === '' || req.query.wechatPhotoUrl === undefined) {
     return res.json({results: '请填写wechatPhotoUrl'})
   }
-  var query = {userId: req.query.patientId}
-  var newPhotoUrl = req.query.wechatPhotoUrl
-  Patient.getOne(query, function (err, item) {
+  let query = {userId: req.session.userId}
+  let newPhotoUrl = req.query.wechatPhotoUrl
+  Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -937,11 +957,11 @@ exports.wechatPhotoUrl = function (req, res) {
       return res.json({results: '不存在的患者ID'})
     } else if (item.photoUrl === undefined) {
       var upObj = {photoUrl: newPhotoUrl}
-      Patient.updateOne(query, upObj, function (err, upitem) {
+      Alluser.updateOne(query, upObj, function (err, upItem) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
-        return res.json({results: '头像已更新', editResults: upitem})
+        return res.json({results: '头像已更新', editResults: upItem})
       })
     } else {
       return res.json({results: '已存在头像，未更新'})

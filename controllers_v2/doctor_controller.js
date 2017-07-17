@@ -1,4 +1,4 @@
-var config = require('../config')
+// var config = require('../config')
 var webEntry = require('../settings').webEntry
 var Doctor = require('../models/doctor')
 var Team = require('../models/team')
@@ -7,6 +7,7 @@ var Consultation = require('../models/consultation')
 var Counsel = require('../models/counsel')
 var Comment = require('../models/comment')
 var User = require('../models/user')
+var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
 var pinyin = require('pinyin')
 

@@ -6,7 +6,7 @@
 var Comment = require('../models/comment')
 var Alluser = require('../models/alluser')
 
-// 获取医生ID对象，并添加自动转发标记 2017-07-15 GY
+// 获取医生ID对象
 exports.getDoctorObject = function (req, res, next) {
   let doctorId = req.body.doctorId || req.query.doctorId || null
   if (doctorId === null) {
@@ -22,10 +22,6 @@ exports.getDoctorObject = function (req, res, next) {
     if (doctor === null) {
       return res.status(404).json({results: '不存在的医生ID'})
     } else {
-      if (doctor.autoRelay === 1) {
-        req.body.autoRelayFlag = 1
-        req.body.relayTarget = doctor.relayTarget
-      }
       req.body.doctorObject = doctor
       next()
     }
@@ -51,9 +47,9 @@ exports.getCommentsByDoc = function (req, res) {
   }, opts, fields, populate)
 }
 
-// 注释 ；输入，counselId;输出，相应评价条目
+// 注释 输入，counselId；输出，相应评价条目
 exports.getCommentsByCounselId = function (req, res) {
-  // 参数设置 判断counselId则进入查询参数设置
+  // 参数设置 判断counselId输入，查询参数设置
   let _counselId = req.query.counselId || null
   let query = {}
   if (_counselId !== null) {

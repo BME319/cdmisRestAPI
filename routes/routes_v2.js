@@ -124,18 +124,17 @@ module.exports = function (app, webEntry, acl) {
   // advice - debug complete 2017-07-17
   app.get(version + '/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
   app.post(version + '/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
-  // compliance - debug complete 2017-07-13
+  // compliance - debug complete 2017-07-17
   app.get(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
   app.post(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
   // vitalSign 2017-07-14
   app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
   app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
-  // counsel 2017-07-14
-  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), doctorCtrl.getDoctorObject, counselCtrl.getCounsels)
-  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire)
-  // app.post(version + '/counsel/counselStatus', tokenManager.verifyToken(), counselCtrl.changeCounselStatus)// 不要了
+  // counsel 2017-07-17 debug 1-
+  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getDoctorObject, counselCtrl.getCounsels)
+  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay)
   app.get(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
-  app.post(version + '/counsel/consultationStatus', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
+  app.post(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
   app.post(version + '/counsel/type', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
   app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
   // communication 2017-07-14
@@ -160,6 +159,43 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
   app.get(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getUserTask)
   app.post(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
+  // patient 2017-07-17
+  app.get(version + '/patient/detail', tokenManager.verifyToken(), patientCtrl.getPatientDetail)
+  app.get(version + '/patient/doctors', tokenManager.verifyToken(), patientCtrl.getDoctorLists)
+  app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), patientCtrl.getMyDoctor)
+  // app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.getMyDoctor)
+  app.get(version + '/patient/counselRecords', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.getCounselRecords)
+  app.post(version + '/patient/detail', tokenManager.verifyToken(), patientCtrl.checkPatientId, patientCtrl.newPatientDetail)
+  app.post(version + '/patient/editDetail', tokenManager.verifyToken(), patientCtrl.editPatientDetail)
+  app.post(version + '/patient/diagnosis', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
+  app.post(version + '/patient/bindingMyDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
+  app.post(version + '/patient/changeVIP', tokenManager.verifyToken(), patientCtrl.changeVIP)
+  app.post(version + '/patient/wechatPhotoUrl', tokenManager.verifyToken(), patientCtrl.wechatPhotoUrl)
+  // doctor_Info
+  app.post(version + '/doctor/detail', doctorCtrl.insertDocBasic)
+  // 需要查询class字典表（待定）
+
+  app.get(version + '/doctor/mypatients', doctorCtrl.getDoctorObject, doctorCtrl.getPatientList)
+  // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
+  app.get(version + '/doctor/detail', doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
+  app.get(version + '/doctor/myTeams', doctorCtrl.getTeams)
+  app.get(version + '/doctor/teamPatients', doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
+  // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
+  app.post(version + '/doctor/editDetail', doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember)
+
+  app.get(version + '/doctor/myRecentDoctors', doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList)
+  app.get(version + '/doctor/myPatientsByDate', doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate)
+  app.post(version + '/doctor/schedule', doctorCtrl.insertSchedule)
+  app.post(version + '/doctor/deleteSchedule', doctorCtrl.deleteSchedule)
+  app.get(version + '/doctor/schedules', doctorCtrl.getSchedules)
+  app.post(version + '/doctor/suspendTime', doctorCtrl.insertSuspendTime)
+
+  app.post(version + '/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime)
+  app.get(version + '/doctor/suspendTime', doctorCtrl.getSuspendTime)
+  app.get(version + '/doctor/numbers', doctorCtrl.getDocNum)
+
+  app.get(version + '/doctor/AliPayAccount', doctorCtrl.getAliPayAccount)
+  app.post(version + '/doctor/AliPayAccount', doctorCtrl.editAliPayAccount)
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
