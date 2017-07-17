@@ -1026,7 +1026,7 @@ exports.login = function (req, res) {
             var results = {
               status: 0,
               userId: item.userId,
-              userName: item.userName || '',
+              userName: item.name || '',
               lastlogin: _lastlogindate,
               PhotoUrl: item.photoUrl,
               mesg: 'login success!',
