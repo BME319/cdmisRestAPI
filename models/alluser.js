@@ -60,7 +60,10 @@ var alluserSchema = new mongoose.Schema({
       _id: 0,
       day: String,
       time: String,
-      count: Number
+      // 已用的面诊计数，可用的面诊计数需要用total-count
+      count: Number,
+      // 医生可以设置的面诊计数总数
+      total: Number
     }
   ],
   serviceSuspendTime: [
@@ -122,12 +125,29 @@ var alluserSchema = new mongoose.Schema({
   VIP: {type: Number, default: 0},
   hypertension: Number,
   allergic: String,
+  // 关注医生字段
   doctors: [
     {
       _id: 0,
       doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       firstTime: Date,
       invalidFlag: Number
+    }
+  ],
+  // 主管医生字段
+  doctorsInCharge: [
+    {
+      _id:0, 
+      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+      firstTime: Date,
+      // 历史、当前、待审核
+      invalidFlag: Number, 
+      rejectReason: String, 
+      // 时长数字类型以秒为单位
+      length: Number, 
+      // 有效的起止时间
+      start: Date, 
+      end: Date
     }
   ],
   diagnosisInfo: [
