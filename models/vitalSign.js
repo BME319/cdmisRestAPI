@@ -23,7 +23,7 @@ var vitalSignSchema = new mongoose.Schema({
   }
 })
 
-var vitalSignModel = mongoose.model('vitalSign', vitalSignSchema)
+var VitalSignModel = mongoose.model('vitalSign', vitalSignSchema)
 
 function VitalSign (vitalSign) {
   this.vitalSign = vitalSign
@@ -31,7 +31,7 @@ function VitalSign (vitalSign) {
 
 VitalSign.prototype.save = function (callback) {
   var vitalSign = this.vitalSign
-  var newVitalSign = new vitalSignModel(vitalSign)
+  var newVitalSign = new VitalSignModel(vitalSign)
   newVitalSign.save(function (err, vitalSignItem) {
     if (err) {
       return callback(err)
@@ -45,7 +45,7 @@ VitalSign.getOne = function (query, callback, opts, fields, populate) {
   var _fields = fields || null
   var _populate = populate || ''
 
-  vitalSignModel
+  VitalSignModel
   .findOne(query, _fields, options)
   .populate(_populate)
   .exec(function (err, vitalSignInfo) {
@@ -60,7 +60,7 @@ VitalSign.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
-  vitalSignModel
+  VitalSignModel
   .find(query, _fields, options)
   .populate(_populate)
   .exec(function (err, vitalSigns) {
@@ -75,14 +75,14 @@ VitalSign.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  vitalSignModel
+  VitalSignModel
   .findOneAndUpdate(query, obj, options)
   .populate(_populate)
-  .exec(function (err, upvitalSign) {
+  .exec(function (err, upVitalSign) {
     if (err) {
       return callback(err)
     }
-    callback(null, upvitalSign)
+    callback(null, upVitalSign)
   })
 }
 
@@ -90,7 +90,7 @@ VitalSign.update = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  vitalSignModel
+  VitalSignModel
     .update(query, obj, options)
     .populate(_populate)
     .exec(function (err, vitalSign) {
