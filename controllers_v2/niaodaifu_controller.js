@@ -94,7 +94,7 @@ exports.receiveData = function (req, res) {
     // ],
     label: '化验',
     description: desc + '\n' + '建议：' + suggestion,
-    //comments: suggestion,
+    // comments: suggestion,
     importStatus: 1,
     revisionInfo: {
       operationTime: createdTime,
@@ -107,16 +107,15 @@ exports.receiveData = function (req, res) {
     if (err) {
       res.json({status: 1, err: err})
     } else {
-      //return res.json({status: 0})
+      // return res.json({status: 0})
       data = data.sort(sortNumber)
       labtestId = req.newId
       var proValue
       var re = /^(?:.+)(?:\(|（)(.+)(?:\)|）)$/gi
       var ret = re.exec(data[3].result)
-      if(ret!=null&&ret.length == 2)
-      {
+      if (ret != null && ret.length == 2) {
         proValue = ret[1]
-      }else{
+      } else {
         proValue = '0'
       }
       proValue = parseFloat(proValue)
@@ -246,10 +245,10 @@ exports.receiveData = function (req, res) {
         }
       ]
       // 存入labtestImport
-      //var query2
-      //insertLab(0, obj2, labtestId)
+      // var query2
+      // insertLab(0, obj2, labtestId)
       LabtestImport.create(obj2, function (err, Info) {
-        if(err) {
+        if (err) {
           res.json({status: 1, err: err})
         } else {
           return res.json({status: 0})
