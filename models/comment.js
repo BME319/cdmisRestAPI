@@ -1,4 +1,3 @@
-
 var mongoose = require('mongoose')
 
 var commentSchema = new mongoose.Schema({
@@ -23,7 +22,7 @@ var commentSchema = new mongoose.Schema({
   }
 })
 
-var commentModel = mongoose.model('comment', commentSchema)
+var CommentModel = mongoose.model('comment', commentSchema)
 
 function Comment (comment) {
   this.comment = comment
@@ -31,7 +30,8 @@ function Comment (comment) {
 
 Comment.prototype.save = function (callback) {
   var comment = this.comment
-  var newComment = new commentModel(comment)
+
+  var newComment = new CommentModel(comment)
   newComment.save(function (err, commentItem) {
     if (err) {
       return callback(err)
@@ -45,7 +45,7 @@ Comment.getOne = function (query, callback, opts, fields, populate) {
   var _fields = fields || null
   var _populate = populate || ''
 
-  commentModel
+  CommentModel
     .findOne(query, _fields, options)
     .populate(_populate)
     .exec(function (err, commentInfo) {
@@ -60,7 +60,8 @@ Comment.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
-  commentModel
+
+  CommentModel
     .find(query, _fields, options)
     .populate(_populate)
     .exec(function (err, comments) {
@@ -75,14 +76,14 @@ Comment.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  commentModel
+  CommentModel
     .findOneAndUpdate(query, obj, options)
     .populate(_populate)
-    .exec(function (err, upcomment) {
+    .exec(function (err, upComment) {
       if (err) {
         return callback(err)
       }
-      callback(null, upcomment)
+      callback(null, upComment)
     })
 }
 
