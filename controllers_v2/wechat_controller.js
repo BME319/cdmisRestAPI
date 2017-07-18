@@ -12,6 +12,8 @@ var User = require('../models/user')
 var Doctor = require('../models/doctor')
 var OpenIdTmp = require('../models/openId')
 var Order = require('../models/order')
+var Message = require('../models/message')
+var News = require('../models/news')
 
 // appid: wx8a6a43fb9585fb7c;secret: b23a4696c3b0c9b506891209d2856ab2
 
@@ -53,6 +55,7 @@ var wxApis = {
 
 // var wxApiUserObject = config.wxDeveloperConfig.zdyyszbzx;
 
+// 根据角色获取AppId
 exports.chooseAppId = function (req, res, next) {
   var role = req.query.role || req.body.role
   // console.log("test1");
@@ -77,6 +80,9 @@ exports.chooseAppId = function (req, res, next) {
   }
 }
 
+// 加密签名signature检验
+// 验证消息的确来自微信服务器
+// 验证成功，原样返回echostr参数内容，则接入生效
 exports.getServerSignature = function (req, res) {
   var signature = req.query.signature
   var timestamp = req.query.timestamp
@@ -85,7 +91,8 @@ exports.getServerSignature = function (req, res) {
   var echostr = req.query.echostr
 
   var sha1Gen = crypto.createHash('sha1')
-  var input = [token, timestamp, nonce].sort().join('')  // .sort()对数组元素进行字典排序, .join('')必须加参数空字符''
+  // .sort()对数组元素进行字典排序, .join('')必须加参数空字符''
+  var input = [token, timestamp, nonce].sort().join('')
   var sha1 = sha1Gen.update(input).digest('hex')
 
   if (sha1 === signature) {
@@ -190,7 +197,8 @@ exports.settingConfig = function (req, res) {
   }})
 }
 
-exports.gettokenbycode = function (req, res, next) { // 获取用户信息的access_token
+// 获取用户信息的access_token
+exports.gettokenbycode = function (req, res, next) { 
   var paramObject = req.query || {}
 
   var code = paramObject.code
@@ -209,15 +217,14 @@ exports.gettokenbycode = function (req, res, next) { // 获取用户信息的acc
 
     console.log(body)
     var wechatData = {
-      access_token: body.access_token, // 获取用户信息的access_token
+      access_token: body.access_token, 
+      // express_in为凭证有效时间
       expires_in: body.expires_in,
       refresh_token: body.refresh_token,
       openid: body.openid,
       scope: body.scope,
       unionid: body.unionid
-            // api_type: 1
     }
-            // console.log(wechatData);
     if (wechatData.scope === 'snsapi_base') {
       return res.json({results: wechatData})
     } else if (wechatData.scope === 'snsapi_userinfo') {
@@ -228,13 +235,12 @@ exports.gettokenbycode = function (req, res, next) { // 获取用户信息的acc
     } else {
       req.wechatData = wechatData
       req.state = state
-            // console.log('else');
-
       next()
     }
   })
 }
 
+// 返回token信息
 exports.returntoken = function (req, res) {
   return res.json({result: req.wechatData})
 }
@@ -263,9 +269,10 @@ exports.returntoken = function (req, res) {
 //   })
 // }
 
-exports.verifyaccess_token = function (req, res, next) { // 获取用户信息的access_token
+// 验证token
+exports.verifyaccess_token = function (req, res, next) { 
   var openid = req.query.openid
-  var accessToken = req.query.access_token// 获取用户信息的access_token
+  var accessToken = req.query.access_token
 
   var apiUrl = wxApis.verifyaccess_token + '?access_token=' + accessToken + '&openid=' + openid
 
@@ -275,7 +282,7 @@ exports.verifyaccess_token = function (req, res, next) { // 获取用户信息�
     json: true
   }, function (err, response, body) {
     var wechatData = {
-      access_token: body.access_token, // 获取用户信息的access_token
+      access_token: body.access_token, 
       expires_in: body.expires_in,
       refresh_token: body.refresh_token,
       openid: body.openid,
@@ -290,9 +297,11 @@ exports.verifyaccess_token = function (req, res, next) { // 获取用户信息�
   })
 }
 
+// 获取用户信息
+// 返回openid,nickname,sex,province,city,country,headimgurl,privilege,unionid
 exports.getuserinfo = function (req, res) {
   var openid = req.wechatData.openid
-  var accessToken = req.wechatData.access_token// 获取用户信息的access_token
+  var accessToken = req.wechatData.access_token
 
   var apiUrl = wxApis.getuserinfo + '?access_token=' + accessToken + '&openid=' + openid + '&lang=zh_CN'
 
@@ -593,7 +602,7 @@ exports.closeWechatOrder = function (req, res) {
 }
 
 // 申请退款
-exports.refund = function (req, res) {
+exports.refund = function (req, res, next) {
   // 请求参数
   var paramData = {
     appid: req.wxApiUserObject.appid,   // 公众账号ID
@@ -640,7 +649,9 @@ exports.refund = function (req, res) {
       xml2js.parseString(body, { explicitArray: false, ignoreAttrs: true }, function (err, result) {
         jsondata = result || {}
       })
-      return res.json({results: jsondata})
+      // return res.json({results: jsondata})
+      req.refundData = jsondata
+      next()
     }
   })
 
@@ -667,6 +678,47 @@ exports.refund = function (req, res) {
   //   console.error(e);
   // });
   // req.end();
+}
+// 申请退款后自动发消息 2017-07-14 GY
+exports.refundMessage = function (req, res) {
+  let messageData = {
+    messageId: req.newId,
+    userId: req.orderDetail.userId,
+    type: 6,
+    readOrNot: 0,
+    sendBy: 'System',
+    time: new Date(),
+    title: '退款申请成功',
+    description: '您的退款申请已成功提交，本系统有延迟，实际退款状态以微信支付通知为准'
+  }
+  let newsData = {
+    messageId: req.newId,
+    userId: req.orderDetail.userId,
+    userRole: 'patient',
+    // 以下面的为准
+    // userRole: req.session.role,
+    sendBy: 'System',
+    readOrNot: 0,
+    type: 6,
+    time: messageData.time,
+    title: messageData.title,
+    description: messageData.description
+  }
+
+  let newMessage = new Message(messageData)
+  let newNews = new News(newsData)
+  newMessage.save(function (err, messageInfo) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    newNews.save(function (err, newsInfo) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      return res.json({results: req.refundData})
+    })
+  })
+
 }
 
 // 查询退款
@@ -710,6 +762,93 @@ exports.refundquery = function (req, res, next) {
         return res.status(404).json({results: jsondata.xml})
       }
     }
+  })
+}
+
+// 扫描订单 调用微信退款查询接口 更改订单状态 2017-07-16 GY
+exports.autoRefundQuery = function (req, res) {
+  let query = {paystatus: 6}
+  let orderNos = []
+  let wxApiUserObject = [config.wxDeveloperConfig.ssgj, config.wxDeveloperConfig.appssgj]
+  // console.log(wxApiUserObject)
+  function refundQuery(orderNosIndex, rolesIndex) {
+    let paramData = {
+      appid: wxApiUserObject[rolesIndex].appid,   // 公众账号ID
+      mch_id: wxApiUserObject[rolesIndex].merchantid,   // 商户号
+      nonce_str: commonFunc.randomString(32),   // 随机字符串
+      sign_type: 'MD5',
+      out_trade_no: orderNos[orderNosIndex]     // 商户订单号
+    }
+    let signStr = commonFunc.rawSort(paramData)
+    signStr = signStr + '&key=' + wxApiUserObject[rolesIndex].merchantkey
+    paramData.sign = commonFunc.convertToMD5(signStr, true)    // 签名
+    let xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
+    let xmlString = xmlBuilder.buildObject(paramData)
+    // console.log(paramData)
+
+    request({
+      url: wxApis.refundquery,
+      method: 'POST',
+      body: xmlString
+    }, function (err, response, body) {
+      if (err) {
+        console.log(err)
+        if (rolesIndex < wxApiUserObject.length - 1) {
+          refundQuery(orderNosIndex, ++rolesIndex)
+        } else if (orderNosIndex < orderNos.length - 1) {
+          refundQuery(++orderNosIndex, 0)
+        } else {
+          console.log('auto_refund_query_success')
+        }
+      } else {
+        let jsondata
+        xml2js.parseString(body, { explicitArray: false, ignoreAttrs: true }, function (err, result) {
+          jsondata = result || {}
+        })
+        if (jsondata.xml.return_code === 'SUCCESS' && jsondata.xml.result_code === 'SUCCESS') {
+          console.log(jsondata.xml)
+          // 修改数据库中订单状态
+          let queryOrder = {orderNo: orderNos[orderNosIndex]}
+          let upObj = {
+            paystatus: 9, 
+            refundScuTime: new Date(jsondata.xml.refund_success_time_0)
+          }
+          Order.updateOne(queryOrder, upObj, function (err, uporder) {
+            if (err) {
+              console.log(err)
+            }
+            if (rolesIndex < wxApiUserObject.length - 1) {
+              refundQuery(orderNosIndex, ++rolesIndex)
+            } else if (orderNosIndex < orderNos.length - 1) {
+              refundQuery(++orderNosIndex, 0)
+            } else {
+              console.log('auto_refund_query_success')
+            }
+          })
+        } else {
+          // return res.status(404).json({results: jsondata.xml})
+          console.log(jsondata.xml)
+          if (rolesIndex < wxApiUserObject.length - 1) {
+            refundQuery(orderNosIndex, ++rolesIndex)
+          } else if (orderNosIndex < orderNos.length - 1) {
+            refundQuery(++orderNosIndex, 0)
+          } else {
+            console.log('auto_refund_query_success')
+          }
+        }
+      }
+    })
+
+  }
+
+  Order.getSome(query, function (err, orderItems) {
+    if (err) 
+      console.log('getOrderItemErr')
+    // console.log(orderItems)
+    for (let i = 0; i < orderItems.length; i++) 
+      orderNos[i] = orderItems[i].orderNo
+    console.log(orderNos)
+    refundQuery(0, 0)
   })
 }
 

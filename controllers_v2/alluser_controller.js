@@ -433,6 +433,9 @@ exports.countAlluserList = function (req, res) {
   var _workUnit = req.query.workUnit
   var _title = req.query.title
         // role 0-user 1-doctor 2-patient 3-nurse 4-insurance 5-health 6-admin
+  if (_role !== null && _role !== undefined && _role !== '') {
+    _role = Number(_role)
+  }
   if (_uid !== null && _uid !== undefined && _uid !== '') {
     query['userId'] = { $regex: _uid }
   }
@@ -1023,7 +1026,7 @@ exports.login = function (req, res) {
             var results = {
               status: 0,
               userId: item.userId,
-              userName: item.userName || '',
+              userName: item.name || '',
               lastlogin: _lastlogindate,
               PhotoUrl: item.photoUrl,
               mesg: 'login success!',
@@ -1090,8 +1093,9 @@ exports.getAlluserID = function (req, res) {
 
 exports.sendSMS = function (req, res) {
   var now = new Date()
-  var _mobile = req.query.mobile
-  var _smsType = Number(req.query.smsType)
+  var _mobile = req.body.mobile
+  var _smsType = Number(req.body.smsType)
+  var _reason = req.body.reason
     // var token = "849407bfab0cf4c1a998d3d6088d957b";
     // var accountSid = "b839794e66174938828d1b8ea9c58412";
     // var appId = "38b50013289b417f9ce474c8210aebcf";
@@ -1104,6 +1108,8 @@ exports.sendSMS = function (req, res) {
   var tplId = '51064'
   var appId1 = 'a4aab03e083c46b29dd539ec63a52b24'
   var tplId1 = '51041'
+  var tplId2 = '100891'
+  var tplId3 = '100910'
   if (_smsType === 2) {
     tplId = tplId1
     appId = appId1
@@ -1122,7 +1128,18 @@ exports.sendSMS = function (req, res) {
   var param = _randNum + ',' + 1
   var JSONData = J6 + '"' + Jsonstring1 + '"' + ':' + '{' + '"' + Jsonstring2 + '"' + ':' + '"' + appId + '"' + ',' + '"' + Jsonstring3 + '"' + ':' + '"' + param + '"' + ',' + '"' + Jsonstring4 + '"' + ':' + '"' + tplId + '"' + ',' + '"' + Jsonstring5 + '"' + ':' + '"' + _mobile + '"' + '}' + '}'
     // delete all expired smss
-
+  if (_smsType === 3) {
+    tplId = tplId2
+    appId = appId1
+    JSONData = J6 + '"' + Jsonstring1 + '"' + ':' + '{' + '"' + Jsonstring2 + '"' + ':' + '"' + appId + '"' + ',' + '"' + Jsonstring4 + '"' + ':' + '"' + tplId + '"' + ',' + '"' + Jsonstring5 + '"' + ':' + '"' + _mobile + '"' + '}' + '}'
+  }
+  if (_smsType === 4) {
+    tplId = tplId3
+    appId = appId1
+    param = _reason
+    JSONData = J6 + '"' + Jsonstring1 + '"' + ':' + '{' + '"' + Jsonstring2 + '"' + ':' + '"' + appId + '"' + ',' + '"' + Jsonstring3 + '"' + ':' + '"' + param + '"' + ',' + '"' + Jsonstring4 + '"' + ':' + '"' + tplId + '"' + ',' + '"' + Jsonstring5 + '"' + ':' + '"' + _mobile + '"' + '}' + '}' + '}'
+  }
+  console.log(JSONData)
   var query = {'Expire': {'$lte': now.getTime()}}
   Sms.remove(query, function (err, item) {
     if (err) {
@@ -1137,8 +1154,8 @@ exports.sendSMS = function (req, res) {
           return res.status(500).send(err.errmsg)
         }
         if (item === null) {
-                    // not exist
-                    // var _expire=60*3
+          // not exist
+          // var _expire=60*3
           var _expire = 60
                     // insert a sms
           var smsData = {
@@ -1194,6 +1211,7 @@ exports.sendSMS = function (req, res) {
               response.on('end', function () {
                                 // console.log("### end ##");
                 // var json = eval('(' + resdata + ')')
+                console.log(resdata)
                 var json = evil(resdata)
                 code = json.resp.respCode
                 if (code === '000000') {

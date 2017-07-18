@@ -19,9 +19,13 @@ var aclChecking = require('../middlewares/aclChecking')
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
 var niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller')
 var alluserCtrl = require('../controllers_v2/alluser_controller')
-
+var devicedataCtrl = require('../controllers/devicedata_controller')
 var reviewCtrl = require('../controllers_v2/review_controller')
 var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
+var serviceCtrl = require('../controllers_v2/service_controller')
+var orderCtrl = require('../controllers_v2/order_controller')
+var wechatCtrl = require('../controllers_v2/wechat_controller')
+var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -47,6 +51,11 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/acl/removeResource', tokenManager.verifyToken(), aclsettingCtrl.removeResource(acl))
   app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl))
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl))
+
+  app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), devicedataCtrl.bindingDevice)
+  app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), devicedataCtrl.debindingDevice)
+  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), devicedataCtrl.receiveBloodPressure)
+  app.get(version + '/devicedata/devices', tokenManager.verifyToken(), devicedataCtrl.getDeviceInfo)
 
   // wf
   app.get(version + '/alluser/count', tokenManager.verifyToken(), alluserCtrl.countAlluserList)
@@ -75,9 +84,10 @@ module.exports = function (app, webEntry, acl) {
 
   // gy
   // review
-  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), aclChecking.Checking(acl), reviewCtrl.postReviewInfo)
+  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo)
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate)
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo)
+  app.get(version + '/review/countByStatus', tokenManager.verifyToken(), reviewCtrl.countByStatus)
 
   // labtestImport
   app.get(version + '/labtestImport/listByStatus', tokenManager.verifyToken(), labtestImportCtrl.listByStatus)
@@ -87,9 +97,26 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/labtestImport', tokenManager.verifyToken(), labtestImportCtrl.getLabtest)
   app.get(version + '/labtestImport/photoByLabtest', tokenManager.verifyToken(), labtestImportCtrl.photoByLabtest)
   app.post(version + '/labtestImport/labelphoto', tokenManager.verifyToken(), labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
+  app.get(version + '/labtestImport/countByStatus', tokenManager.verifyToken(), labtestImportCtrl.countByStatus)
+
+  // doctor_services
+  app.get(version + '/services', tokenManager.verifyToken(), serviceCtrl.getServices)
+  app.post(version + '/services/status', tokenManager.verifyToken(), serviceCtrl.changeServiceStatus)
+  app.post(version + '/services/charge', tokenManager.verifyToken(), serviceCtrl.setCharge)
+  app.post(version + '/services/relayTarget', tokenManager.verifyToken(), serviceCtrl.setRelayTarget)
+  app.post(version + '/services/setSchedule', tokenManager.verifyToken(), serviceCtrl.setServiceSchedule)
+  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule)
+  app.post(version + '/services/setSuspend', tokenManager.verifyToken(), serviceCtrl.setServiceSuspend)
+  app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), serviceCtrl.deleteServiceSuspend)
+  // 咨询问卷填写(新增自动转发功能)
+  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay)
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
-  app.post('/devicedata/niaodaifu/data', niaodaifuCtrl.receiveData)
+  app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
+
+  // 退款接口
+  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage);
+
 }

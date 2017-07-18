@@ -48,10 +48,46 @@ var alluserSchema = new mongoose.Schema({
   major: String,
   description: String,
   score: Number,
+  // 1: 咨询 2: 问诊 3: 加急咨询 4: 主管医生 5: 面诊服务
+  // 状态： 默认1   1为开启，0为关闭
+  counselStatus1: {type: Number, default: 1},
+  counselStatus2: {type: Number, default: 1},
+  counselStatus3: {type: Number, default: 1},
+  counselStatus4: {type: Number, default: 1},
+  counselStatus5: {type: Number, default: 1},
+  serviceSchedules: [
+    {
+      _id: 0,
+      day: String,
+      time: String,
+      // 已用的面诊计数，可用的面诊计数需要用total-count
+      count: Number,
+      // 医生可以设置的面诊计数总数
+      total: Number
+    }
+  ],
+  serviceSuspendTime: [
+    {
+      _id: 0,
+      start: Date,
+      end: Date
+    }
+  ],
   charge1: {type: Number, default: 30},
   charge2: {type: Number, default: 50},
+  charge3: {type: Number},
+  charge4: {type: Number},
+  charge5: {type: Number},
   count1: {type: Number, default: 0},
   count2: {type: Number, default: 0},
+  // 是否自动转发及转发目标 0不自动转发，1自动转发
+  autoRelay: {type: Number, default: 0},
+  relayTarget: [
+    {
+      _id:0,
+      teamId: String
+    }
+  ],
   teams: [String],
   schedules: [
     {
@@ -89,12 +125,29 @@ var alluserSchema = new mongoose.Schema({
   VIP: {type: Number, default: 0},
   hypertension: Number,
   allergic: String,
+  // 关注医生字段
   doctors: [
     {
       _id: 0,
       doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       firstTime: Date,
       invalidFlag: Number
+    }
+  ],
+  // 主管医生字段
+  doctorsInCharge: [
+    {
+      _id:0, 
+      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+      firstTime: Date,
+      // 历史、当前、待审核
+      invalidFlag: Number, 
+      rejectReason: String, 
+      // 时长数字类型以秒为单位
+      length: Number, 
+      // 有效的起止时间
+      start: Date, 
+      end: Date
     }
   ],
   diagnosisInfo: [
