@@ -9,6 +9,7 @@ var log4js = require('./controllers/log_controller')
 var sio = require('socket.io')
 var path = require('path')
 var acl = require('acl')
+var swaggerJSDoc = require('swagger-jsdoc')
 
 // import necessary self-defined modules
 
@@ -45,6 +46,8 @@ var app = express()
 // app.set('view engine', 'html');
 app.set('port', restPort)
 // app.set('trust proxy', 'loopback, localhost');
+
+// 用于swagger-jsdoc 的初始化并将适当的元数据添加到swagger规范。
 
 app.use(bodyParser.json({ limit: config.bodyParserJSONLimit }))
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -107,7 +110,7 @@ try {
   console.log(e)
 }
 
-// 定时任务相关 testing 2017-07-16 GY 
+// 定时任务相关 testing 2017-07-16 GY
 var schedule = require('node-schedule')
 var wechatCtrl = require('./controllers_v2/wechat_controller')
 schedule.scheduleJob('0 0 * * * *', wechatCtrl.autoRefundQuery)
