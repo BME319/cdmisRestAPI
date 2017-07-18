@@ -26,6 +26,7 @@ var serviceCtrl = require('../controllers_v2/service_controller')
 var orderCtrl = require('../controllers_v2/order_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
+var expenseCtrl = require('../controllers_v2/expense_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -82,6 +83,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/alluser/agreement', tokenManager.verifyToken(), alluserCtrl.getAlluserAgreement)
   app.post(version + '/alluser/agreement', tokenManager.verifyToken(), alluserCtrl.updateAlluserAgreement)
 
+  app.post(version + '/expense/rechargeDoctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
   // gy
   // review
   app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo)
@@ -117,6 +120,5 @@ module.exports = function (app, webEntry, acl) {
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 
   // 退款接口
-  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage);
-
+  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
 }
