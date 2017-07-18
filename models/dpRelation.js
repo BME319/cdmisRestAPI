@@ -2,11 +2,11 @@
 var mongoose = require('mongoose')
 
 var dpRelationSchema = new mongoose.Schema({
-  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
+  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   patients: [
     {
       _id: 0,
-      patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'patient'},
+      patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       labels: [String],
       dpRelationTime: Date
     }
@@ -30,7 +30,7 @@ var dpRelationSchema = new mongoose.Schema({
   doctors: [
     {
       _id: 0,
-      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
+      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       lastTalkTime: Date
     }
   ],

@@ -89,25 +89,25 @@ exports.saveQuestionaire = function (req, res, next) {
     type: type,
     time: new Date(),
     status: 1,
-		// topic: req.body.topic,
-		// content: req.body.content,
-		// title: req.body.title,
+    // topic: req.body.topic,
+    // content: req.body.content,
+    // title: req.body.title,
     sickTime: req.body.sickTime,
-		// visited: req.body.visited,
+    // visited: req.body.visited,
     symptom: req.body.symptom,
     symptomPhotoUrl: req.body.symptomPhotoUrl,
-		// description: req.body.description,
-		// drugs: req.body.drugs,
-		// history: req.body.history,
-    help: req.body.help//, 
-		// comment: req.body.comment,
+    // description: req.body.description,
+    // drugs: req.body.drugs,
+    // history: req.body.history,
+    help: req.body.help // ,
+    // comment: req.body.comment,
 
-		// revisionInfo:{
-		// 	operationTime:new Date(),
-		// 	userId:"gy",
-		// 	userName:"gy",
-		// 	terminalIP:"10.12.43.32"
-		// }
+    // revisionInfo:{
+    //   operationTime:new Date(),
+    //   userId:"gy",
+    //   userName:"gy",
+    //   terminalIP:"10.12.43.32"
+    // }
   }
   if (req.body.hospital != null && req.body.hospital != '') {
     counselData['hospital'] = req.body.hospital
@@ -170,7 +170,7 @@ exports.counselAutoRelay = function (req, res) {
         } else {
           if (teamErrFlag || consultationErrFlag || communicationErrFlag || newsErrFlag) {
             return res.status(206).json({
-              results: '新建成功',
+              result: '新建成功',
               results: req.body.counselInfo,
               message: '医生设置了自动转发但在发消息时出现错误'
             })
@@ -180,7 +180,7 @@ exports.counselAutoRelay = function (req, res) {
               if (teamEmptyFlag[i]) emptyTeams.push(teamIds[i])
             }
             return res.status(206).json({
-              results: '新建成功',
+              result: '新建成功',
               results: req.body.counselInfo,
               message: '医生设置了自动转发但部分转发目标不存在',
               messageDetail: emptyTeams
@@ -275,7 +275,7 @@ exports.counselAutoRelay = function (req, res) {
               } else {
                 if (teamErrFlag || consultationErrFlag || communicationErrFlag || newsErrFlag) {
                   return res.status(206).json({
-                    results: '新建成功',
+                    result: '新建成功',
                     results: req.body.counselInfo,
                     message: '医生设置了自动转发但在发消息时出现错误'
                   })
@@ -285,7 +285,7 @@ exports.counselAutoRelay = function (req, res) {
                     if (teamEmptyFlag[i]) emptyTeams.push(teamIds[i])
                   }
                   return res.status(206).json({
-                    results: '新建成功',
+                    result: '新建成功',
                     results: req.body.counselInfo,
                     message: '医生设置了自动转发但部分转发目标不存在',
                     messageDetail: emptyTeams
