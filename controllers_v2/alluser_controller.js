@@ -1551,3 +1551,48 @@ exports.changerole = function (req, res) {
     }
   })
 }
+exports.checkPatient = function (req, res, next) {
+  if (req.query.patientId === null || req.query.patientId === '' || req.query.patientId === undefined) {
+    if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      req.patientId = req.body.patientId
+    }
+  } else {
+    req.patientId = req.query.patientId
+  }
+  var query = {userId: req.patientId, role: 'patient'}
+  Alluser.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    if (item === null) {
+      return res.json({result: '不存在的患者ID'})
+    } else {
+      next()
+    }
+  })
+}
+
+exports.checkDoctor = function (req, res, next) {
+  if (req.query.doctorId === null || req.query.doctorId === '' || req.query.doctorId === undefined) {
+    if (req.body.doctorId === null || req.body.doctorId === '' || req.body.doctorId === undefined) {
+      return res.json({result: '请填写doctorId!'})
+    } else {
+      req.doctorId = req.body.doctorId
+    }
+  } else {
+    req.doctorId = req.query.doctorId
+  }
+  var query = {userId: req.doctorId, role: 'doctor'}
+  Alluser.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    if (item === null) {
+      return res.json({result: '不存在的医生ID'})
+    } else {
+      next()
+    }
+  })
+}

@@ -20,6 +20,7 @@ exports.verifyToken = function () {
           }
         } else {
           req.session = decoded
+          req.token = token
           console.log(req.session.userId)
           return next()
         }
