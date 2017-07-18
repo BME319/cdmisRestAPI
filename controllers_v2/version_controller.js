@@ -1,6 +1,7 @@
 
 var Version = require('../models/version')
 
+// 获取版本信息
 exports.getVersionInfo = function (req, res) {
   var versionName = req.query.versionName
   var versionType = req.query.versionType || null
@@ -41,6 +42,7 @@ exports.getVersionInfo = function (req, res) {
   }
 }
 
+// 插入版本信息
 exports.insertVersionInfo = function (req, res) {
   var versionId = req.newId
   var versionType = req.body.versionType
