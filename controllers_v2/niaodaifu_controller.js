@@ -3,9 +3,6 @@ var commonFunc = require('../middlewares/commonFunc')
 var config = require('../config')
 var HealthInfo = require('../models/healthInfo.js')
 var LabtestImport = require('../models/labtestImport.js')
-// var getNo = require('../models/getNo')
-var DictNumber = require('../models/dictNumber')
-var Numbering = require('../models/numbering')
 
 exports.getLoginParam = function (req, res) {
   var client = req.query.client || null
@@ -94,7 +91,7 @@ exports.receiveData = function (req, res) {
     // ],
     label: '化验',
     description: desc + '\n' + '建议：' + suggestion,
-    //comments: suggestion,
+    // comments: suggestion,
     importStatus: 1,
     revisionInfo: {
       operationTime: createdTime,
@@ -107,9 +104,9 @@ exports.receiveData = function (req, res) {
     if (err) {
       res.json({status: 1, err: err})
     } else {
-      //return res.json({status: 0})
+      // return res.json({status: 0})
       data = data.sort(sortNumber)
-      labtestId = req.newId
+      var labtestId = req.newId
       var obj2 = [
         {
           userId: userbind,
@@ -234,10 +231,10 @@ exports.receiveData = function (req, res) {
         }
       ]
       // 存入labtestImport
-      //var query2
-      //insertLab(0, obj2, labtestId)
+      // var query2
+      // insertLab(0, obj2, labtestId)
       LabtestImport.create(obj2, function (err, Info) {
-        if(err) {
+        if (err) {
           res.json({status: 1, err: err})
         } else {
           return res.json({status: 0})
