@@ -26,7 +26,7 @@ exports.getVersionInfo = function(req, res) {
     	query = {versionType: versionType};
     	// console.log(query);
     	Version.getSome(query, function(err, items) {
-			if (err) {
+    		if (err) {
 	      		return res.status(500).send(err.errmsg);
 	    	}
 	    	// console.log(items);

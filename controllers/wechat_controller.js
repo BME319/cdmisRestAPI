@@ -352,7 +352,7 @@ exports.addOrder = function(req, res, next) {
   // console.log(orderObject);
   // console.log(req.body);
   var currentDate = new Date();
-  if(currentDate <= new Date('2017-08-01')){
+  if(currentDate <= new Date('2017-09-01')){
     return res.json({ results: {
       status: 0,
       msg: '现在为免费体验期，不收取任何费用'
@@ -374,8 +374,9 @@ exports.addOrder = function(req, res, next) {
     body: req.body.body_description,    // 商品描述
     attach: orderObject.attach,    // 附加数据   state
     
-    out_trade_no: out_trade_no + '-' + commonFunc.getRandomSn(4),   // 商户订单号
-    
+    // out_trade_no: out_trade_no + '-' + commonFunc.getRandomSn(4),   // 商户订单号
+    out_trade_no: out_trade_no,   // 商户订单号
+
     total_fee: total_fee,   // 标价金额
     // spbill_create_ip: req.body.ip,   // 终端IP
     spbill_create_ip: commonFunc.getClientIp(req),   // 终端IP
@@ -640,6 +641,7 @@ exports.refund = function(req, res) {
     nonce_str: commonFunc.randomString(32),   // 随机字符串
     sign_type : 'MD5',
     out_trade_no : req.orderDetail.orderNo,     // 商户订单号
+    // out_trade_no:'O2017071300002-8956', 
     out_refund_no : req.orderDetail.refundNo,
     total_fee: req.orderDetail.money,
     refund_fee: req.orderDetail.money//,
@@ -718,6 +720,7 @@ exports.refundquery = function(req, res, next) {
     nonce_str: commonFunc.randomString(32),   // 随机字符串
     sign_type : 'MD5',
     out_trade_no : req.orderDetail.orderNo     // 商户订单号
+    // out_trade_no:'O2017071300002-8956'
   };
 
   var signStr = commonFunc.rawSort(paramData);

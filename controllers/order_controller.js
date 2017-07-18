@@ -116,6 +116,7 @@ exports.checkPayStatus = function (type) {
             if (err) {
                 return res.status(500).send(err);
             }
+            console.log(item)
             if (item === null) {
                 return res.status(400).send('不存在的订单');
             }
