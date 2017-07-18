@@ -349,7 +349,7 @@ exports.addOrder = function (req, res, next) {
     body: req.body.body_description,    // 商品描述
     attach: orderObject.attach,    // 附加数据   state
 
-    out_trade_no: outTradeNo + '-' + commonFunc.getRandomSn(4),   // 商户订单号
+    out_trade_no: outTradeNo,   // 商户订单号
 
     total_fee: totalFee,   // 标价金额
     // spbill_create_ip: req.body.ip,   // 终端IP
