@@ -175,27 +175,27 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/doctor/detail', doctorCtrl.insertDocBasic)
   // 需要查询class字典表（待定）
 
-  app.get(version + '/doctor/mypatients', doctorCtrl.getDoctorObject, doctorCtrl.getPatientList)
+  app.get(version + '/doctor/myPatients', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getPatientList)
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
   app.get(version + '/doctor/detail', doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
-  app.get(version + '/doctor/myTeams', doctorCtrl.getTeams)
-  app.get(version + '/doctor/teamPatients', doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
+  app.get(version + '/doctor/myTeams', tokenManager.verifyToken(), doctorCtrl.getTeams)
+  app.get(version + '/doctor/teamPatients', tokenManager.verifyToken(), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
   // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
   app.post(version + '/doctor/editDetail', doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember)
 
   app.get(version + '/doctor/myRecentDoctors', doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList)
   app.get(version + '/doctor/myPatientsByDate', doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate)
-  app.post(version + '/doctor/schedule', doctorCtrl.insertSchedule)
-  app.post(version + '/doctor/deleteSchedule', doctorCtrl.deleteSchedule)
-  app.get(version + '/doctor/schedules', doctorCtrl.getSchedules)
+  app.post(version + '/doctor/schedule', tokenManager.verifyToken(), doctorCtrl.insertSchedule)
+  app.post(version + '/doctor/deleteSchedule', tokenManager.verifyToken(), doctorCtrl.deleteSchedule)
+  app.get(version + '/doctor/schedules', tokenManager.verifyToken(), doctorCtrl.getSchedules)
   app.post(version + '/doctor/suspendTime', doctorCtrl.insertSuspendTime)
 
   app.post(version + '/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime)
   app.get(version + '/doctor/suspendTime', doctorCtrl.getSuspendTime)
   app.get(version + '/doctor/numbers', doctorCtrl.getDocNum)
 
-  app.get(version + '/doctor/AliPayAccount', doctorCtrl.getAliPayAccount)
-  app.post(version + '/doctor/AliPayAccount', doctorCtrl.editAliPayAccount)
+  app.get(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.getAliPayAccount)
+  app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.editAliPayAccount)
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
