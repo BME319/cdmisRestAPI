@@ -284,18 +284,44 @@ exports.getUserInfo = function (req, res, next) {
 }
 
 // 修改获取医生详细信息方法 2017-4-12 GY
+// 注释 type 123是啥？
+exports.getCount1AndCount2 = function (req, res, next) {
+  let _doctorId = req.body.doctorObject._id
+  let query = {doctorId: _doctorId}
+
+  Counsel.getSome(query, function (err, items) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    let count1 = 0
+    let count2 = 0
+    for (let i = items.length - 1; i >= 0; i--) {
+      if (items[i].type === 1 || items[i].type === 3) {
+        count1 += 1
+      }
+      if (items[i].type === 2 || items[i].type === 3) {
+        count2 += 1
+      }
+    }
+    req.count1 = count1
+    req.count2 = count2
+    next()
+      // res.json({results: items, count:items.length});
+  })
+}
+
 exports.getComments = function (req, res, next) {
   // 查询条件
-  var doctorObject = req.body.doctorObject
-  var query = {doctorId: doctorObject._id}
+  let doctorObject = req.body.doctorObject
+  let query = {doctorId: doctorObject._id}
 
-  var limit = Number(req.query.limit)
-  var skip = Number(req.query.skip)
+  let limit = Number(req.query.limit || null)
+  let skip = Number(req.query.skip || null)
 
-  var opts = {limit: limit, skip: skip, sort: '-_id'}
-  var fields = {'_id': 0, 'revisionInfo': 0}
+  let opts = {limit: limit, skip: skip, sort: '-_id'}
+  let fields = {'_id': 0, 'revisionInfo': 0}
   // 通过子表查询主表，定义主表查询路径及输出内容
-  var populate = {
+  let populate = {
     path: 'patientId',
     select: {
       '_id': 0,
@@ -305,15 +331,15 @@ exports.getComments = function (req, res, next) {
     }
   }
 
-  var _Url = ''
-  var userIdUrl = 'userId=' + req.query.userId
-  var limitUrl = ''
-  var skipUrl = ''
+  let _Url = ''
+  let userIdUrl = 'userId=' + req.query.userId
+  let limitUrl = ''
+  let skipUrl = ''
 
-  if (limit != null && limit !== undefined) {
+  if (limit !== 0) {
     limitUrl = 'limit=' + String(limit)
   }
-  if (skip != null && skip !== undefined) {
+  if (skip !== 0) {
     skipUrl = 'skip=' + String(skip + limit)
   }
   if (userIdUrl !== '' || limitUrl !== '' || skipUrl !== '') {
@@ -329,7 +355,7 @@ exports.getComments = function (req, res, next) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v1/doctor/getDoctorInfo' + _Url
+  req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/doctor/getDoctorInfo' + _Url
 
   Comment.getSome(query, function (err, items) {
     if (err) {
@@ -340,30 +366,7 @@ exports.getComments = function (req, res, next) {
     next()
   }, opts, fields, populate)
 }
-exports.getCount1AndCount2 = function (req, res, next) {
-  var _doctorId = req.body.doctorObject._id
-  var query = {doctorId: _doctorId}
 
-  Counsel.getSome(query, function (err, items) {
-    if (err) {
-      return res.status(500).send(err.errmsg)
-    }
-    var count1 = 0
-    var count2 = 0
-    for (var i = items.length - 1; i >= 0; i--) {
-      if (items[i].type === 1 || items[i].type === 3) {
-        count1 += 1
-      }
-      if (items[i].type === 2 || items[i].type === 3) {
-        count2 += 1
-      }
-    }
-    req.count1 = count1
-    req.count2 = count2
-    next()
-      // res.json({results: items, count:items.length});
-  })
-}
 // exports.getDoctorInfo = function(req, res){
 //   var query = {userId: req.query.userId};
 //   var comments = req.body.comments;
@@ -382,13 +385,13 @@ exports.getCount1AndCount2 = function (req, res, next) {
 //     }, opts, fields, populate);
 // }
 exports.getDoctorInfo = function (req, res) {
-  var query = {userId: req.query.userId}
-  var comments = req.body.comments
+  let query = {userId: req.session.userId, role: 'doctor'}
+  let comments = req.body.comments
 
-  var newScore = 0
+  let newScore = 0
   if (comments.length !== 0) {
-    var tempSum = 0
-    for (var i = 0; i < comments.length; i++) {
+    let tempSum = 0
+    for (let i = 0; i < comments.length; i++) {
       tempSum += comments[i].totalScore
     }
     newScore = tempSum / comments.length
@@ -396,13 +399,13 @@ exports.getDoctorInfo = function (req, res) {
     newScore = 10
   }
 
-  var upObj = {
+  let upObj = {
     score: newScore,
     count1: req.count1,
     count2: req.count2
   }
 
-  Doctor.updateOne(query, upObj, function (err, upDoctor) {
+  Alluser.updateOne(query, upObj, function (err, upDoctor) {
     if (err) {
       return res.status(422).send(err.message)
     }
@@ -423,14 +426,12 @@ exports.getDoctorInfo = function (req, res) {
 // 修改医生个人信息 2017-04-12 GY
 // 如果姓名或头像字段被修改，同时修改team表中所有相应字段 2017-05-25 GY
 exports.editDoctorDetail = function (req, res, next) {
-  if (req.body.userId == null || req.body.userId === '') {
-    return res.json({result: '请填写userId!'})
-  }
-  var query = {
-    userId: req.body.userId
+  let query = {
+    userId: req.session.userId,
+    role: 'doctor'
   }
 
-  var upObj = {
+  let upObj = {
   // revisionInfo:{
   //   operationTime:new Date(),
   //   userId:"gy",
@@ -438,63 +439,63 @@ exports.editDoctorDetail = function (req, res, next) {
   //   terminalIP:"10.12.43.32"
   // }
   }
-  if (req.body.certificatePhotoUrl != null) {
+  if (req.body.certificatePhotoUrl != null || req.body.certificatePhotoUrl !== '' || req.body.certificatePhotoUrl !== undefined) {
     upObj['certificatePhotoUrl'] = req.body.certificatePhotoUrl
   }
-  if (req.body.practisingPhotoUrl != null) {
+  if (req.body.practisingPhotoUrl != null || req.body.practisingPhotoUrl !== '' || req.body.practisingPhotoUrl !== undefined) {
     upObj['practisingPhotoUrl'] = req.body.practisingPhotoUrl
   }
-  if (req.body.name != null) {
+  if (req.body.name != null || req.body.name !== '' || req.body.name !== undefined) {
     upObj['name'] = req.body.name
   }
-  if (req.body.photoUrl != null) {
+  if (req.body.photoUrl != null || req.body.photoUrl !== '' || req.body.photoUrl !== undefined) {
     upObj['photoUrl'] = req.body.photoUrl
   }
-  if (req.body.birthday != null) {
+  if (req.body.birthday != null || req.body.birthday !== '' || req.body.birthday !== undefined) {
     upObj['birthday'] = new Date(req.body.birthday)
   }
-  if (req.body.gender != null) {
+  if (req.body.gender != null || req.body.gender !== '' || req.body.gender !== undefined) {
     upObj['gender'] = req.body.gender
   }
-  if (req.body.IDNo != null) {
+  if (req.body.IDNo != null || req.body.IDNo !== '' || req.body.IDNo !== undefined) {
     upObj['IDNo'] = req.body.IDNo
   }
-  if (req.body.province != null) {
+  if (req.body.province != null || req.body.province !== '' || req.body.province !== undefined) {
     upObj['province'] = req.body.province
   }
-  if (req.body.city != null) {
+  if (req.body.city != null || req.body.city !== '' || req.body.city !== undefined) {
     upObj['city'] = req.body.city
   }
-  if (req.body.district != null) {
+  if (req.body.district != null || req.body.district !== '' || req.body.district !== undefined) {
     upObj['district'] = req.body.district
   }
-  if (req.body.workUnit != null) {
+  if (req.body.workUnit != null || req.body.workUnit !== '' || req.body.workUnit !== undefined) {
     upObj['workUnit'] = req.body.workUnit
   }
-  if (req.body.title != null) {
+  if (req.body.title != null || req.body.title !== '' || req.body.title !== undefined) {
     upObj['title'] = req.body.title
   }
-  if (req.body.job != null) {
+  if (req.body.job != null || req.body.job !== '' || req.body.job !== undefined) {
     upObj['job'] = req.body.job
   }
-  if (req.body.department != null) {
+  if (req.body.department != null || req.body.department !== '' || req.body.department !== undefined) {
     upObj['department'] = req.body.department
   }
-  if (req.body.major != null) {
+  if (req.body.major != null || req.body.major !== '' || req.body.major !== undefined) {
     upObj['major'] = req.body.major
   }
-  if (req.body.description != null) {
+  if (req.body.description != null || req.body.description !== '' || req.body.description !== undefined) {
     upObj['description'] = req.body.description
   }
-  if (req.body.charge1 != null) {
+  if (req.body.charge1 != null || req.body.charge1 !== '' || req.body.charge1 !== undefined) {
     upObj['charge1'] = req.body.charge1
   }
-  if (req.body.charge2 != null) {
+  if (req.body.charge2 != null || req.body.charge2 !== '' || req.body.charge2 !== undefined) {
     upObj['charge2'] = req.body.charge2
   }
 
   // return res.json({query: query, upObj: upObj});
-  Doctor.updateOne(query, upObj, function (err, upDoctor) {
+  Alluser.updateOne(query, upObj, function (err, upDoctor) {
     if (err) {
       return res.status(422).send(err.message)
     }
@@ -511,9 +512,10 @@ exports.editDoctorDetail = function (req, res, next) {
     }
   }, {new: true})
 }
+// 更新医生作为团队主管的团队信息并删除医生作为团队成员的相应团队中的成员条目
 exports.updateTeamSponsor = function (req, res, next) {
   // console.log('updatename')
-  var _userId = req.body.userId
+  var _userId = req.session.userId
   var upObj = {}
   if (req.body.name != null) {
     upObj['sponsorName'] = req.body.name
@@ -566,12 +568,13 @@ exports.updateTeamSponsor = function (req, res, next) {
     }
   }, opts)
 }
+// 添加医生作为团队成员的相应团队中的成员条目
 exports.updateTeamMember = function (req, res) {
   // console.log(req.body.pull);
-  var index = 0
-  var pushMembers = function (upteamId) {
-    var query = {teamId: upteamId}
-    var upObj = {
+  let index = 0
+  let pushMembers = function (upteamId) {
+    let query = {teamId: upteamId}
+    let upObj = {
       $push: {
         members: {
           userId: req.body.editResults.userId,
@@ -641,7 +644,7 @@ exports.getRecentDoctorList = function (req, res) {
   }, opts, fields, populate)
 }
 
-// 医生日程设置（排班） 承接session.userId，输入日期与时间
+// 医生日程设置（排班） 承接session.userId，输入日期与时间，输出添加排班
 exports.insertSchedule = function (req, res) {
   // 查询条件
   let doctorId = req.session.userId
@@ -653,7 +656,7 @@ exports.insertSchedule = function (req, res) {
   if (_time == null) {
     return res.json({msg: 'Please input schedule time!'})
   }
-  let query = {userId: doctorId}
+  let query = {userId: doctorId, role: 'doctor'}
   let upObj = {
     $addToSet: {
       schedules: {
@@ -677,7 +680,7 @@ exports.insertSchedule = function (req, res) {
   }, {new: true})
 }
 
-// 删除医生排班
+// 删除医生排班 承接session.userId，输入日期与时间，输出删除排班
 exports.deleteSchedule = function (req, res) {
   // 查询条件
   let doctorId = req.session.userId
@@ -689,7 +692,7 @@ exports.deleteSchedule = function (req, res) {
   if (_time == null) {
     return res.json({msg: 'Please input schedule time!'})
   }
-  let query = {userId: doctorId}
+  let query = {userId: doctorId, role: 'doctor'}
   let upObj = {
     $pull: {
       schedules: {
@@ -712,11 +715,15 @@ exports.deleteSchedule = function (req, res) {
     res.json({results: updoct})
   }, {new: true})
 }
-// 获取医生排班
+
+// 患者或医生获取医生排班 输入userId（医生），输出相应医生排班信息
 exports.getSchedules = function (req, res) {
   // 查询条件
-  let doctorId = req.session.userId
-  let query = {userId: doctorId}
+  let doctorId = req.session.userId || null
+  if (doctorId === null) {
+    return res.json({msg: '请输入userId'})
+  }
+  let query = {userId: doctorId, role: 'doctor'}
   let opts = ''
   let fields = {'_id': 0, 'schedules': 1}
 
@@ -728,97 +735,101 @@ exports.getSchedules = function (req, res) {
   }, opts, fields)
 }
 
+// 医生停诊设置 承接session.userId，输入停诊起止时间，输出结果，增加停诊信息
 exports.insertSuspendTime = function (req, res) {
   // 查询条件
-  var doctorId = req.body.userId
-  var _start = req.body.start
-  var _end = req.body.end
-  if (doctorId === '' || doctorId === undefined || doctorId == null) {
-    return res.json({result: 2, msg: 'Please input doctorId!'})
-  } else if (_start === '' || _start === undefined || _start == null || _end === '' || _end === undefined || _end == null) {
-    return res.json({result: 1, msg: 'Please input start and end!'})
-  } else {
-    var query = {userId: doctorId}
-    var upObj = {
-      $addToSet: {
-        suspendTime: {
-          start: new Date(_start),
-          end: new Date(_end)
-        }
+  let doctorId = req.session.userId
+  let _start = req.body.start || null
+  let _end = req.body.end || null
+  if (_start == null) {
+    return res.json({msg: 'Please input service-suspension start time!'})
+  }
+  if (_end == null) {
+    return res.json({msg: 'Please input service-suspension end time!'})
+  }
+  let query = {userId: doctorId, role: 'doctor'}
+  let upObj = {
+    $addToSet: {
+      suspendTime: {
+        start: new Date(_start),
+        end: new Date(_end)
       }
     }
-  // return res.json({query: query, upObj: upObj});
-    Doctor.update(query, upObj, function (err, updoct) {
-      if (err) {
-        return res.status(422).send(err.message)
-      }
-      if (updoct.nModified === 0) {
-        return res.json({msg: '未成功修改！请检查输入是否符合要求！', results: updoct})
-      }
-      if (updoct.nModified === 1) {
-        return res.json({msg: '修改成功', results: updoct})
-      }
-      res.json({results: updoct})
-    }, {new: true})
   }
+  // return res.json({query: query, upObj: upObj});
+  Alluser.update(query, upObj, function (err, updoct) {
+    if (err) {
+      return res.status(422).send(err.message)
+    }
+    if (updoct.nModified === 0) {
+      return res.json({msg: '未成功修改！请检查输入是否符合要求！', results: updoct})
+    }
+    if (updoct.nModified === 1) {
+      return res.json({msg: '修改成功', results: updoct})
+    }
+    res.json({results: updoct})
+  }, {new: true})
 }
+// 医生停诊删除 承接session.userId，输入停诊起止时间，输出结果，增加停诊信息
 exports.deleteSuspendTime = function (req, res) {
   // 查询条件
-  var doctorId = req.body.userId
-  var _start = req.body.start
-  var _end = req.body.end
-  if (doctorId === '' || doctorId === undefined || doctorId == null) {
-    return res.json({result: 2, msg: 'Please input doctorId!'})
-  } else if (_start === '' || _start === undefined || _start == null || _end === '' || _end === undefined || _end == null) {
-    return res.json({result: 1, msg: 'Please input start and end!'})
-  } else {
-    var query = {userId: doctorId}
-    var upObj = {
-      $pull: {
-        suspendTime: {
-          start: new Date(_start),
-          end: new Date(_end)
-        }
+  let doctorId = req.session.userId
+  let _start = req.body.start || null
+  let _end = req.body.end || null
+  if (_start == null) {
+    return res.json({msg: 'Please input service-suspension start time!'})
+  }
+  if (_end == null) {
+    return res.json({msg: 'Please input service-suspension end time!'})
+  }
+  let query = {userId: doctorId, role: 'doctor'}
+  var upObj = {
+    $pull: {
+      suspendTime: {
+        start: new Date(_start),
+        end: new Date(_end)
       }
     }
-  // return res.json({query: query, upObj: upObj});
-    Doctor.update(query, upObj, function (err, updoct) {
-      if (err) {
-        return res.status(422).send(err.message)
-      }
-      if (updoct.nModified === 0) {
-        return res.json({msg: '未成功修改！请检查输入是否符合要求！', results: updoct})
-      }
-      if (updoct.nModified === 1) {
-        return res.json({msg: '修改成功', results: updoct})
-      }
-      res.json({results: updoct})
-    }, {new: true})
   }
+  // return res.json({query: query, upObj: upObj});
+  Alluser.update(query, upObj, function (err, updoct) {
+    if (err) {
+      return res.status(422).send(err.message)
+    }
+    if (updoct.nModified === 0) {
+      return res.json({msg: '未成功修改！请检查输入是否符合要求！', results: updoct})
+    }
+    if (updoct.nModified === 1) {
+      return res.json({msg: '修改成功', results: updoct})
+    }
+    res.json({results: updoct})
+  }, {new: true})
 }
+
+// 患者或医生获取医生停诊信息 输入userId（医生），输出结果，相应医生的停诊信息
 exports.getSuspendTime = function (req, res) {
   // 查询条件
-  var doctorId = req.query.userId
-  if (doctorId === '' || doctorId === undefined || doctorId == null) {
-    return res.json({result: 2, msg: 'Please input doctorId!'})
-  } else {
-    var query = {userId: doctorId}
-    var opts = ''
-    var fields = {'_id': 0, 'suspendTime': 1}
+  let doctorId = req.query.userId
+  let query = {userId: doctorId, role: 'doctor'}
+  var opts = ''
+  var fields = {'_id': 0, 'suspendTime': 1}
 
-    Doctor.getOne(query, function (err, item) {
-      if (err) {
-        return res.status(500).send(err.errmsg)
-      }
-      res.json({results: item})
-    }, opts, fields)
-  }
+  Doctor.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    if (item == null) {
+      return res.json({msg: '该医生无停诊信息'})
+    }
+    res.json({results: item})
+  }, opts, fields)
 }
 
+// 获取在册医生数量
 exports.getDocNum = function (req, res) {
   // 查询条件
-  var query = {}
-  Doctor.count(query, function (err, item) {
+  var query = {role: 'doctor'}
+  Alluser.count(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
