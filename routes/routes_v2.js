@@ -26,6 +26,11 @@ var serviceCtrl = require('../controllers_v2/service_controller')
 var orderCtrl = require('../controllers_v2/order_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
+var expenseCtrl = require('../controllers_v2/expense_controller')
+var dictTypeOneCtrl = require('../controllers/dictTypeOne_controller')
+var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller')
+var dictDistrictCtrl = require('../controllers/dictDistrict_controller')
+var dictHospitalCtrl = require('../controllers/dictHospital_controller')
 
 var commentCtrl = require('../controllers_v2/comment_controller')
 var adviceCtrl = require('../controllers_v2/advice_controller')
@@ -42,6 +47,16 @@ module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
   //   res.send("Server Root");
   // });
+
+  // 刷新token
+  app.get(version + '/token/refresh', tokenManager.verifyToken(), tokenManager.refreshToken)
+
+  // dict
+  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), dictTypeTwoCtrl.getCategory)
+  app.get(version + '/dict/typeTwo/codes', tokenManager.verifyToken(), dictTypeTwoCtrl.getTypes)
+  app.get(version + '/dict/typeOne', tokenManager.verifyToken(), dictTypeOneCtrl.getCategory)
+  app.get(version + '/dict/district', tokenManager.verifyToken(), dictDistrictCtrl.getDistrict)
+  app.get(version + '/dict/hospital', tokenManager.verifyToken(), dictHospitalCtrl.getHospital)
 
   // csq
   app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
@@ -63,6 +78,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl))
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl))
 
+  // devicedata
   app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), devicedataCtrl.bindingDevice)
   app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), devicedataCtrl.debindingDevice)
   app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), devicedataCtrl.receiveBloodPressure)
@@ -93,6 +109,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/alluser/agreement', tokenManager.verifyToken(), alluserCtrl.getAlluserAgreement)
   app.post(version + '/alluser/agreement', tokenManager.verifyToken(), alluserCtrl.updateAlluserAgreement)
 
+  app.post(version + '/expense/rechargeDoctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
   // gy
   // review
   app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo)
@@ -208,6 +226,5 @@ module.exports = function (app, webEntry, acl) {
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 
   // 退款接口
-  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage);
-
+  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
 }

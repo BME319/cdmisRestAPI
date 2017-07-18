@@ -107,6 +107,17 @@ exports.receiveData = function (req, res) {
       // return res.json({status: 0})
       data = data.sort(sortNumber)
       var labtestId = req.newId
+
+      var proValue
+      var re = /^(?:.+)(?:\(|（)(.+)(?:\)|）)$/gi
+      var ret = re.exec(data[3].result)
+      if (ret != null && ret.length === 2) {
+        proValue = ret[1]
+      } else {
+        proValue = '0'
+      }
+      proValue = parseFloat(proValue)
+
       var obj2 = [
         {
           userId: userbind,
@@ -147,6 +158,7 @@ exports.receiveData = function (req, res) {
           importTime: myDate,
           labtestId: labtestId + '04',
           type: 'PRO',
+          value: proValue,
           valueStr: data[3].result,
           status: data[3].status,
           importer: '59672961611ae0e26c61cc77',
