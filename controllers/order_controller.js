@@ -16,8 +16,10 @@ exports.getOrder = function(req, res) {
 }
 
 exports.insertOrder = function(req, res, next) {
-    var money = req.body.money || null;
-    if(money === null || money == ''){
+    var money = req.body.money;
+   
+    if(money == null || money === '' || money == 'undefined'){
+        console.log('in');
         return res.status(403).send('invalid input');
     }
 

@@ -208,7 +208,7 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
 
     var code = paramObject.code;
     var state = paramObject.state;
-    console.log(code);
+    // console.log(code);
     var url = wxApis.oauth_access_token + '?appid=' + req.wxApiUserObject.appid
             + '&secret=' + req.wxApiUserObject.appsecret
             + '&code=' + code
@@ -382,7 +382,7 @@ exports.addOrder = function(req, res, next) {
     spbill_create_ip: commonFunc.getClientIp(req),   // 终端IP
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
-    notify_url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/payResult',   // 通知地址
+    notify_url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/payResult',   // 通知地址
     trade_type: req.body.trade_type    // 交易类型
     // openid: req.body.openid    // 用户标识
   };
@@ -486,7 +486,7 @@ exports.getPaySign = function(req, res, next) {
 
 // 支付结果通知
 exports.payResult = function(req, res) { 
-  console.log("payResult111"); 
+  // console.log("payResult111"); 
  
   var body = '';
   var results = '';
@@ -496,14 +496,14 @@ exports.payResult = function(req, res) {
     // console.log("partial: " + body);
   });
   req.on('end',function(){
-    console.log("finish: " + body);
+    // console.log("finish: " + body);
     var parser = new xml2js.Parser();
     var jsondata = {};
    
     parser.parseString(body, function(err, result) {        
       jsondata = result || {};
     });
-    console.log(jsondata);
+    // console.log(jsondata);
     var payRes = jsondata.xml;
 
     var orderNo = payRes.out_trade_no[0].split('-')[0];
@@ -805,8 +805,11 @@ exports.messageTemplate = function(req, res) {
             return res.status(400).send('user do not exist');
           }
           if(item.MessageOpenId === null){
-            return res.status(400).send('openId do not exist');
+            // console.log("open 11");
+            // return res.status(400).send('openId do not exist');
+            res.json({results:{"errcode" : 0,"errmsg" : "ok"}});
           }
+          var messageOpenId;
           if(role == 'doctor'){
             messageOpenId = item.MessageOpenId.doctorWechat;
           }
@@ -818,7 +821,9 @@ exports.messageTemplate = function(req, res) {
           }
     
           if(messageOpenId === null){
-            return res.status(400).send('openId do not exist');
+            // console.log("open 22");
+            // return res.status(400).send('openId do not exist');
+            res.json({results:{"errcode" : 0,"errmsg" : "ok"}});
           }
           else{
             var jsondata = {};
@@ -935,7 +940,7 @@ exports.receiveTextMessage = function(req, res) {
     // console.log("partial: " + body);
   });
   req.on('end',function(){
-    console.log("finish: " + body);
+    // console.log("finish: " + body);
     var parser = new xml2js.Parser();
     var jsondata = {};
    
@@ -954,7 +959,7 @@ exports.receiveTextMessage = function(req, res) {
         if(jsondata.xml.EventKey != null ){
           var doctor_userId;
           // 
-          console.log(jsondata);
+          // console.log(jsondata);
           var patientType;
           if(jsondata.xml.Event == 'subscribe'){
             doctor_userId =  jsondata.xml.EventKey[0].split('_')[1];
@@ -1031,7 +1036,7 @@ exports.receiveTextMessage = function(req, res) {
                 };
 
                 request({
-                  url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                  url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                   method: 'POST',
                   body:template,
                   json:true
@@ -1135,7 +1140,7 @@ exports.createTDCticket = function(req,res,next){
 
 
 exports.wxTestApiP = function (req, res) {
-    console.log(req.body);
+    // console.log(req.body);
 
     
 };
@@ -1264,7 +1269,7 @@ exports.wxJsSdkReqMedia = function (req, res, next) {
             // console.log(res.headers['content-type']) // 'image/jpeg'
         })
         .on('error', function (err) {
-            console.log(err)
+            // console.log(err)
         })
         .pipe(fs.createWriteStream(filePath))
         .on('close', function () {  // 没有参数传入

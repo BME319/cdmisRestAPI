@@ -7,6 +7,7 @@ var	request = require('request'),
 	Device = require('../models/device');
 
 exports.bindingDevice = function(req, res){
+    console.log("in 111");
 	var userId = req.body.userId || null;
 	var appId = req.body.appId || null;
 	var twoDimensionalCode = req.body.twoDimensionalCode || null;
@@ -14,7 +15,7 @@ exports.bindingDevice = function(req, res){
 	if(userId === null || userId === '' || appId === null || appId === '' || twoDimensionalCode === null || twoDimensionalCode === '' ){
 		return res.status(400).send('invalid input');     
 	}
-   
+
     request({
         method: 'POST',
         url: config.third_party_data.bloodpressure.get_device_url,
@@ -23,6 +24,8 @@ exports.bindingDevice = function(req, res){
         if(err){
             return res.status(500).send(err.errmsg);     
         }
+        console.log(config.third_party_data.bloodpressure.get_device_url);
+        console.log(body);
         body = JSON.parse(body);  
         if(body.errorCode == 0){
         	// save device info
@@ -141,7 +144,7 @@ exports.debindingDevice = function(req, res){
 }
 
 exports.receiveBloodPressure = function(req, res){
-  console.log("receiveBloodPressure"); 
+  // console.log("receiveBloodPressure"); 
   // var res_data = req.body;
   // console.log(res_data);
 
@@ -163,7 +166,7 @@ exports.receiveBloodPressure = function(req, res){
   Device.getOne(query, function(err, item) {
     if (err) {
         // return res.status(500).send(err.errmsg);
-        console.log('err');
+        // console.log('err');
         res.json(results);
     }
     if(item == null){
@@ -173,7 +176,7 @@ exports.receiveBloodPressure = function(req, res){
     }
     else{
       var userId = item.userId;
-      console.log(userId);
+      // console.log(userId);
       var querypatient = { 
     		userId: userId
     	};
@@ -181,12 +184,12 @@ exports.receiveBloodPressure = function(req, res){
     	Patient.getOne(querypatient, function (err, patient) {
         	if (err) {
             	// return res.status(500).send(err.errmsg);
-              console.log('err2');
+              // console.log('err2');
             	res.json(results);
         	}
         	if (patient == null) {
         		// return res.status(400).send('user not exist');
-            console.log('null2');
+            // console.log('null2');
         		res.json(results);
         	}
         	else {
@@ -243,8 +246,8 @@ function saveBPdata(patient, req, results, res){
             }
         }
     };
-    console.log(query);
-    console.log(upObj);
+    // console.log(query);
+    // console.log(upObj);
 
     VitalSign.update(query, upObj, function(err, updata) {
         if (err){
@@ -284,7 +287,7 @@ function saveBPdata(patient, req, results, res){
                 // return res.status(422).send(err.message);
                 res.json(results);
             }
-            console.log(updata);
+            // console.log(updata);
             
             if (err){
                 // return res.status(422).send(err.message);
@@ -364,7 +367,7 @@ function saveBPdata(patient, req, results, res){
                             results.code = 1;
                             results.status = 'success';
                             results.msg = '提交成功';
-                            console.log('提交成功');
+                            // console.log('提交成功');
                             res.json(results);  
                         })
                     }
