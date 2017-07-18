@@ -33,7 +33,7 @@ var taskSchema = new mongoose.Schema({
   }
 })
 
-var taskModel = mongoose.model('task', taskSchema)
+var TaskModel = mongoose.model('task', taskSchema)
 
 function Task (task) {
   this.task = task
@@ -41,7 +41,7 @@ function Task (task) {
 
 Task.prototype.save = function (callback) {
   var task = this.task
-  var newTask = new taskModel(task)
+  var newTask = new TaskModel(task)
   newTask.save(function (err, taskItem) {
     if (err) {
       return callback(err)
@@ -55,7 +55,7 @@ Task.getOne = function (query, callback, opts, fields, populate) {
   var _fields = fields || null
   var _populate = populate || ''
 
-  taskModel
+  TaskModel
   .findOne(query, _fields, options)
   .populate(_populate)
   .exec(function (err, taskInfo) {
@@ -70,7 +70,7 @@ Task.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
-  taskModel
+  TaskModel
   .find(query, _fields, options)
   .populate(_populate)
   .exec(function (err, tasks) {
@@ -85,14 +85,14 @@ Task.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  taskModel
+  TaskModel
   .findOneAndUpdate(query, obj, options)
   .populate(_populate)
-  .exec(function (err, uptask) {
+  .exec(function (err, upTask) {
     if (err) {
       return callback(err)
     }
-    callback(null, uptask)
+    callback(null, upTask)
   })
 }
 
@@ -100,21 +100,21 @@ Task.update = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  taskModel
+  TaskModel
     .update(query, obj, options)
     .populate(_populate)
-    .exec(function (err, uptask) {
+    .exec(function (err, upTask) {
       if (err) {
         return callback(err)
       }
-      callback(null, uptask)
+      callback(null, upTask)
     })
 }
 
 Task.removeOne = function (query, callback, opts) {
   var options = opts || {}
 
-  taskModel
+  TaskModel
   .findOneAndRemove(query, options, function (err, task) {
     if (err) {
       return callback(err)

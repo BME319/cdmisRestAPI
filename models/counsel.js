@@ -38,7 +38,7 @@ var counselSchema = new mongoose.Schema({
   }
 })
 
-var counselModel = mongoose.model('counsel', counselSchema)
+var CounselModel = mongoose.model('counsel', counselSchema)
 
 function Counsel (counsel) {
   this.counsel = counsel
@@ -46,7 +46,7 @@ function Counsel (counsel) {
 
 Counsel.prototype.save = function (callback) {
   var counsel = this.counsel
-  var newCounsel = new counselModel(counsel)
+  var newCounsel = new CounselModel(counsel)
   newCounsel.save(function (err, counselItem) {
     if (err) {
       return callback(err)
@@ -60,7 +60,7 @@ Counsel.getOne = function (query, callback, opts, fields, populate) {
   var _fields = fields || null
   var _populate = populate || ''
 
-  counselModel
+  CounselModel
   .findOne(query, _fields, options)
   .populate(_populate)
   .exec(function (err, counselInfo) {
@@ -75,7 +75,7 @@ Counsel.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
-  counselModel
+  CounselModel
   .find(query, _fields, options)
   .populate(_populate)
   .exec(function (err, counsels) {
@@ -90,7 +90,7 @@ Counsel.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  counselModel
+  CounselModel
   .findOneAndUpdate(query, obj, options)
   .populate(_populate)
   .exec(function (err, upcounsel) {

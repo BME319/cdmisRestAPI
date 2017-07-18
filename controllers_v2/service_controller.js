@@ -12,10 +12,21 @@ exports.getServices = function (req, res) {
   }
   let opts = {}
   let fields = {
-    userId: 1, counselStatus1: 1, counselStatus2: 1, counselStatus3: 1, 
-    counselStatus4: 1, counselStatus5: 1, charge1: 1, charge2: 1, 
-    charge3: 1, charge4: 1, charge5: 1, serviceSchedules: 1, 
-    serviceSuspendTime: 1, autoRelay: 1, relayTarget: 1
+    userId: 1,
+    counselStatus1: 1,
+    counselStatus2: 1,
+    counselStatus3: 1,
+    counselStatus4: 1,
+    counselStatus5: 1,
+    charge1: 1,
+    charge2: 1,
+    charge3: 1,
+    charge4: 1,
+    charge5: 1,
+    serviceSchedules: 1,
+    serviceSuspendTime: 1,
+    autoRelay: 1,
+    relayTarget: 1
   }
   Alluser.getOne(query, function (err, doctorItem) {
     if (err) {
@@ -49,35 +60,46 @@ exports.changeServiceStatus = function (req, res) {
       return res.status(404).json({results: '找不到对象'})
     } else {
       switch (serviceType) {
-        case 'service1': 
+        case 'service1':
           upObj = {counselStatus1: (!doctorItem.counselStatus1)}
           break
-        case 'service2': 
+        case 'service2':
           upObj = {counselStatus2: (!doctorItem.counselStatus2)}
           break
-        case 'service3': 
+        case 'service3':
           upObj = {counselStatus3: (!doctorItem.counselStatus3)}
           break
-        case 'service4': 
+        case 'service4':
           upObj = {counselStatus4: (!doctorItem.counselStatus4)}
           break
-        case 'service5': 
+        case 'service5':
           upObj = {counselStatus5: (!doctorItem.counselStatus5)}
           break
-        case 'service6': 
+        case 'service6':
           upObj = {autoRelay: (!doctorItem.autoRelay)}
           break
-        default: 
+        default:
           break
       }
       let opts = {
         new: true,
         runValidators: true,
         fields: {
-          userId: 1, name: 1, counselStatus1: 1, counselStatus2: 1, 
-          counselStatus3: 1, counselStatus4: 1, counselStatus5: 1, 
-          charge1: 1, charge2: 1, charge3: 1, charge4: 1, charge5: 1, 
-          serviceSchedules: 1, serviceSuspendTime: 1, autoRelay: 1, 
+          userId: 1,
+          name: 1,
+          counselStatus1: 1,
+          counselStatus2: 1,
+          counselStatus3: 1,
+          counselStatus4: 1,
+          counselStatus5: 1,
+          charge1: 1,
+          charge2: 1,
+          charge3: 1,
+          charge4: 1,
+          charge5: 1,
+          serviceSchedules: 1,
+          serviceSuspendTime: 1,
+          autoRelay: 1,
           relayTarget: 1
         }
       }
@@ -117,22 +139,22 @@ exports.setCharge = function (req, res) {
       return res.status(404).json({results: '找不到对象'})
     } else {
       switch (serviceType) {
-        case 'service1': 
+        case 'service1':
           if (doctorItem.counselStatus1 === 1) upObj = {charge1: charge}
           break
-        case 'service2': 
+        case 'service2':
           if (doctorItem.counselStatus2 === 1) upObj = {charge2: charge}
           break
-        case 'service3': 
+        case 'service3':
           if (doctorItem.counselStatus3 === 1) upObj = {charge3: charge}
           break
-        case 'service4': 
+        case 'service4':
           if (doctorItem.counselStatus4 === 1) upObj = {charge4: charge}
           break
-        case 'service5': 
+        case 'service5':
           if (doctorItem.counselStatus5 === 1) upObj = {charge5: charge}
           break
-        default: 
+        default:
           break
       }
       if (JSON.stringify(upObj) === '{}') {
@@ -142,10 +164,21 @@ exports.setCharge = function (req, res) {
           new: true,
           runValidators: true,
           fields: {
-            userId: 1, name: 1, counselStatus1: 1, counselStatus2: 1, 
-            counselStatus3: 1, counselStatus4: 1, counselStatus5: 1, 
-            charge1: 1, charge2: 1, charge3: 1, charge4: 1, charge5: 1, 
-            serviceSchedules: 1, serviceSuspendTime: 1, autoRelay: 1, 
+            userId: 1,
+            name: 1,
+            counselStatus1: 1,
+            counselStatus2: 1,
+            counselStatus3: 1,
+            counselStatus4: 1,
+            counselStatus5: 1,
+            charge1: 1,
+            charge2: 1,
+            charge3: 1,
+            charge4: 1,
+            charge5: 1,
+            serviceSchedules: 1,
+            serviceSuspendTime: 1,
+            autoRelay: 1,
             relayTarget: 1
           }
         }
@@ -174,10 +207,21 @@ exports.setRelayTarget = function (req, res) {
     new: true,
     runValidators: true,
     fields: {
-      userId: 1, name: 1, counselStatus1: 1, counselStatus2: 1, 
-      counselStatus3: 1, counselStatus4: 1, counselStatus5: 1, 
-      charge1: 1, charge2: 1, charge3: 1, charge4: 1, charge5: 1, 
-      serviceSchedules: 1, serviceSuspendTime: 1, autoRelay: 1, 
+      userId: 1,
+      name: 1,
+      counselStatus1: 1,
+      counselStatus2: 1,
+      counselStatus3: 1,
+      counselStatus4: 1,
+      counselStatus5: 1,
+      charge1: 1,
+      charge2: 1,
+      charge3: 1,
+      charge4: 1,
+      charge5: 1,
+      serviceSchedules: 1,
+      serviceSuspendTime: 1,
+      autoRelay: 1,
       relayTarget: 1
     }
   }
@@ -188,15 +232,13 @@ exports.setRelayTarget = function (req, res) {
       } else {
         return res.status(500).send(err)
       }
-      
     }
     if (upitem === null) {
       return res.status(404).json({results: '找不到对象'})
     } else {
       let flag = 0
       for (let i = 0; i < upitem.relayTarget.length; i++) {
-        if (JSON.stringify(upitem.relayTarget[i]) === '{}')
-          break
+        if (JSON.stringify(upitem.relayTarget[i]) === '{}') { break }
         flag++
       }
       if (flag === upitem.relayTarget.length) {
@@ -249,7 +291,7 @@ exports.setServiceSchedule = function (req, res) {
         if (err) {
           return res.status(500).send(err)
         }
-        if (upschedule.n !== 0, upschedule.nModified === 0) {
+        if (upschedule.n !== 0 && upschedule.nModified === 0) {
           return res.status(400).json({results: '已经存在的schedule'})
         } else if (upschedule.nModified === 1) {
           return res.json({results: '修改成功'})
@@ -357,7 +399,6 @@ exports.deleteServiceSuspend = function (req, res) {
 // 主管医生服务相关
 // 通过或拒绝主管医生申请：patient, dpRelation表数据修改
 // 输入：患者ID；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
-
 
 // 患者端使用的方法
 // 面诊申请：修改面诊计数，新建面诊表数据

@@ -4,8 +4,8 @@ var config = require('../config')
 var HealthInfo = require('../models/healthInfo.js')
 var LabtestImport = require('../models/labtestImport.js')
 // var getNo = require('../models/getNo')
-var DictNumber = require('../models/dictNumber')
-var Numbering = require('../models/numbering')
+// var DictNumber = require('../models/dictNumber')
+// var Numbering = require('../models/numbering')
 
 exports.getLoginParam = function (req, res) {
   var client = req.query.client || null
@@ -109,11 +109,11 @@ exports.receiveData = function (req, res) {
     } else {
       // return res.json({status: 0})
       data = data.sort(sortNumber)
-      labtestId = req.newId
+      var labtestId = req.newId
       var proValue
       var re = /^(?:.+)(?:\(|（)(.+)(?:\)|）)$/gi
       var ret = re.exec(data[3].result)
-      if (ret != null && ret.length == 2) {
+      if (ret != null && ret.length === 2) {
         proValue = ret[1]
       } else {
         proValue = '0'
