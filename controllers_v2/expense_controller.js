@@ -1,6 +1,6 @@
 // var config = require('../config')
 var webEntry = require('../settings').webEntry
-var Patient = require('../models/patient')     // 是否要修改为alluser
+var Patient = require('../models/patient')
 var Account = require('../models/account')
 var Expense = require('../models/expense')
 
@@ -71,7 +71,7 @@ exports.rechargeDoctor = function (req, res) {
     var query1 = {
       userId: _did
     }
-    Patient.getOne(query, function (err, patient) {   // Patient需要用AllUser替换
+    Patient.getOne(query, function (err, patient) {
       if (err) {
         return res.status(500).send('服务器错误, 用户查询失败!')
       }

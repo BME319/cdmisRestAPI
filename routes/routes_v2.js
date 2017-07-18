@@ -33,9 +33,9 @@ var doctorCtrl = require('../controllers_v2/doctor_controller')
 var healthInfoCtrl = require('../controllers_v2/healthInfo_controller')
 var insuranceCtrl = require('../controllers_v2/insurance_controller')
 var messageCtrl = require('../controllers_v2/message_controller')
-var orderCtrl = require('../controllers_v2/order_controller')
-var labtestResultCtrl = require('../controllers_v2/labtestResult_controller')
+// var labtestResultCtrl = require('../controllers_v2/labtestResult_controller')
 var loadCtrl = require('../controllers_v2/load_controller')
+var newsCtrl = require('../controllers_v2/news_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -137,7 +137,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/account/freeTime', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
   app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
 
-  app.post(version + '/expense/doctor', tokenManager.verifyToken(), accountCtrl.checkPatient, alluserCtrl.checkAlluser, expenseCtrl.rechargeDoctor)
+  app.post(version + '/expense/doctor', tokenManager.verifyToken(), doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
   app.get(version + '/expense/docRecords', tokenManager.verifyToken(), expenseCtrl.getDocRecords)
 
   // healthInfo
@@ -165,4 +165,10 @@ module.exports = function (app, webEntry, acl) {
 
   // load
   app.post(version + '/upload', tokenManager.verifyToken(), loadCtrl.uploadphoto(), loadCtrl.upload)
+
+  // news
+  app.get(version + '/new/news', tokenManager.verifyToken(), newsCtrl.getNews)
+  app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), newsCtrl.getNewsByReadOrNot)
+  app.post(version + '/new/news', tokenManager.verifyToken(), newsCtrl.insertNews)
+  app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
 }

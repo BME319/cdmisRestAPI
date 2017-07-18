@@ -1,6 +1,7 @@
 // var config = require('../config')
 var Doctor = require('../models/doctor')
 var Order = require('../models/order')
+var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
 
 // 获取订单信息
@@ -25,7 +26,8 @@ exports.insertOrder = function (req, res, next) {
   var query = {
     userId: req.body.notes
   }
-  Doctor.getOne(query, function (err, doctor) {
+  // Doctor.getOne(query, function (err, doctor) {
+  Alluser.getOne(query, function (err, doctor) {
     if (err) {
             // console.log(err);
       return res.status(500).send('服务器错误, 用户查询失败!')
