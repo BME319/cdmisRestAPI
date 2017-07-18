@@ -1,141 +1,137 @@
 
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
-var patientSchema = new mongoose.Schema({  
-  userId: {type:String, unique:true}, 
-  name: String, 
-  photoUrl: String, 
-  birthday: Date, 
-  gender: Number, 
-  IDNo: String, 
-  height: String, 
-  // weight: String, 
-  occupation: String, 
-  bloodType: Number, 
+var patientSchema = new mongoose.Schema({
+  userId: {type: String, unique: true},
+  name: String,
+  photoUrl: String,
+  birthday: Date,
+  gender: Number,
+  IDNo: String,
+  height: String,
+  // weight: String,
+  occupation: String,
+  bloodType: Number,
   address: {
-  nation: String, 
-  province: String, 
-  city: String
-  }, 
-  class: String, 
-  class_info: [String], 
-  operationTime: Date, 
-  VIP: {type:Number, default:0}, 
+    nation: String,
+    province: String,
+    city: String
+  },
+  class: String,
+  class_info: [String],
+  operationTime: Date,
+  VIP: {type: Number, default: 0},
   hypertension: Number,
-  allergic: String, 
+  allergic: String,
   doctors: [
     {
-      _id:0, 
-      doctorId: {type: mongoose.Schema.Types.ObjectId, ref:'doctor'}, 
-      firstTime: Date, 
+      _id: 0,
+      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
+      firstTime: Date,
       invalidFlag: Number
     }
-  ], 
+  ],
   diagnosisInfo: [
     {
-      _id:0, 
-      name: String, 
-      time: Date, 
-      hypertension: Number, 
-      progress: String, 
-      operationTime: Date, 
-      content: String, 
-      doctor: {type: mongoose.Schema.Types.ObjectId, ref:'doctor'}
+      _id: 0,
+      name: String,
+      time: Date,
+      hypertension: Number,
+      progress: String,
+      operationTime: Date,
+      content: String,
+      doctor: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'}
     }
-  ], 
+  ],
   lastVisit: {
-  time: Date, 
-  hospital: String, 
-  diagnosis: String
-  }, 
-  revisionInfo:{
-  operationTime:Date,
-  userId:String,
-  userName:String,
-  terminalIP:String
+    time: Date,
+    hospital: String,
+    diagnosis: String
+  },
+  revisionInfo: {
+    operationTime: Date,
+    userId: String,
+    userName: String,
+    terminalIP: String
   }
-});
+})
 
+var PatientModel = mongoose.model('patient', patientSchema)
 
-var patientModel = mongoose.model('patient', patientSchema);
-
-function Patient(patient) {
-  this.patient = patient;
+function Patient (patient) {
+  this.patient = patient
 }
 
-Patient.prototype.save = function(callback) {
-  var patient = this.patient;
-  var newPatient = new patientModel(patient);
-  newPatient.save(function(err, patientItem) {
-  if (err) {
-  return callback(err);
-  }
-  callback(null, patientItem);
-  });
+Patient.prototype.save = function (callback) {
+  var patient = this.patient
+  var newPatient = new PatientModel(patient)
+  newPatient.save(function (err, patientItem) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, patientItem)
+  })
 }
 
-Patient.getOne = function(query, callback, opts, fields, populate) {
-  var options = opts || {};
-  var _fields = fields || null;
-  var _populate = populate || '';
+Patient.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
 
-  patientModel
+  PatientModel
   .findOne(query, _fields, options)
   .populate(_populate)
-  .exec(function(err, patientInfo) {
-  if(err){
-  return callback(err);
-  }
-  callback(null, patientInfo);
-  });
-};
+  .exec(function (err, patientInfo) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, patientInfo)
+  })
+}
 
-
-Patient.getSome = function(query, callback, opts, fields, populate) {
-  var options = opts || {};
-  var _fields = fields || null;
-  var _populate = populate || '';
-  patientModel
+Patient.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
+  PatientModel
   .find(query, _fields, options)
   .populate(_populate)
-  .exec(function(err, patients) {
-  if(err) {
-  return callback(err);
-  }
-  callback(null, patients);
-  });
-};
+  .exec(function (err, patients) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, patients)
+  })
+}
 
-Patient.updateOne = function(query, obj, callback, opts, populate) {
-  var options = opts || {};
-  var _populate = populate || '';
+Patient.updateOne = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var _populate = populate || ''
 
-  patientModel
+  PatientModel
   .findOneAndUpdate(query, obj, options)
   .populate(_populate)
-  .exec(function(err, uppatient) {
-  if(err){
-  return callback(err);
-  }
-  callback(null, uppatient);
-  });
-};
+  .exec(function (err, uppatient) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, uppatient)
+  })
+}
 
 Patient.update = function (query, obj, callback, opts, populate) {
-  var options = opts || {};
-  var _populate = populate || '';
+  var options = opts || {}
+  var _populate = populate || ''
 
-  patientModel
+  PatientModel
     .update(query, obj, options)
-    .populate(_populate) 
+    .populate(_populate)
     .exec(function (err, patient) {
       if (err) {
-        return callback(err);
+        return callback(err)
       }
-    callback(null, patient);
-  });
-};
+      callback(null, patient)
+    })
+}
 
-
-module.exports = Patient;
-
+module.exports = Patient
