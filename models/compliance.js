@@ -10,7 +10,7 @@ var complianceSchema = new mongoose.Schema({
 
 })
 
-var complianceModel = mongoose.model('compliance', complianceSchema)
+var ComplianceModel = mongoose.model('compliance', complianceSchema)
 
 function Compliance (compliance) {
   this.compliance = compliance
@@ -18,7 +18,7 @@ function Compliance (compliance) {
 
 Compliance.prototype.save = function (callback) {
   var compliance = this.compliance
-  var newCompliance = new complianceModel(compliance)
+  var newCompliance = new ComplianceModel(compliance)
   newCompliance.save(function (err, complianceItem) {
     if (err) {
       return callback(err)
@@ -32,7 +32,7 @@ Compliance.getOne = function (query, callback, opts, fields, populate) {
   var _fields = fields || null
   var _populate = populate || ''
 
-  complianceModel
+  ComplianceModel
   .findOne(query, _fields, options)
   .populate(_populate)
   .exec(function (err, complianceInfo) {
@@ -47,7 +47,7 @@ Compliance.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
-  complianceModel
+  ComplianceModel
   .find(query, _fields, options)
   .populate(_populate)
   .exec(function (err, compliances) {
@@ -62,14 +62,14 @@ Compliance.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  complianceModel
+  ComplianceModel
   .findOneAndUpdate(query, obj, options)
   .populate(_populate)
-  .exec(function (err, upcompliance) {
+  .exec(function (err, upCompliance) {
     if (err) {
       return callback(err)
     }
-    callback(null, upcompliance)
+    callback(null, upCompliance)
   })
 }
 

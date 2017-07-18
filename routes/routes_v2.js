@@ -8,7 +8,7 @@ var version = '/api/v2'
 // var config = require('../config')
 
 // models
-// var Wechat = require('../models/wechat')
+var Wechat = require('../models/wechat')
 
 // middlewares
 var getNoMid = require('../middlewares/getNoMid')
@@ -26,6 +26,17 @@ var serviceCtrl = require('../controllers_v2/service_controller')
 var orderCtrl = require('../controllers_v2/order_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
+
+var commentCtrl = require('../controllers_v2/comment_controller')
+var adviceCtrl = require('../controllers_v2/advice_controller')
+var complianceCtrl = require('../controllers_v2/compliance_controller')
+var vitalSignCtrl = require('../controllers_v2/vitalSign_controller')
+var patientCtrl = require('../controllers_v2/patient_controller')
+var doctorCtrl = require('../controllers_v2/doctor_controller')
+// var wechatCtrl = require('../controllers_v2/wechat_controller')
+var counselCtrl = require('../controllers_v2/counsel_controller')
+var communicationCtrl = require('../controllers_v2/communication_controller')
+var taskCtrl = require('../controllers_v2/task_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -110,6 +121,86 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), serviceCtrl.deleteServiceSuspend)
   // 咨询问卷填写(新增自动转发功能)
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay)
+
+  // YQC
+  // comment - debug complete 2017-07-17
+  app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), commentCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
+  app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
+  // advice - debug complete 2017-07-17
+  app.get(version + '/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
+  app.post(version + '/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
+  // compliance - debug complete 2017-07-17
+  app.get(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
+  app.post(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
+  // vitalSign 2017-07-14
+  app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
+  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
+  // counsel 2017-07-17 debug 1-
+  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getDoctorObject, counselCtrl.getCounsels)
+  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay)
+  app.get(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
+  app.post(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
+  app.post(version + '/counsel/type', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
+  app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
+  // communication 2017-07-14
+  app.get(version + '/communication/counselReport', tokenManager.verifyToken(), communicationCtrl.getCounselReport)
+  // app.post(version + '/communication/newTeam', tokenManager.verifyToken(), getNoMid.getNo(4), communicationCtrl.newTeam)
+  app.post(version + '/communication/team', tokenManager.verifyToken(), communicationCtrl.newTeam)
+  app.post(version + '/communication/deleteTeam', tokenManager.verifyToken(), communicationCtrl.deleteTeam)
+  app.get(version + '/communication/team', tokenManager.verifyToken(), communicationCtrl.getTeam)
+  app.post(version + '/communication/consultation', tokenManager.verifyToken(), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation)
+  // app.post(version + '/communication/consultation', tokenManager.verifyToken(), getNoMid.getNo(5), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
+  app.get(version + '/communication/consultation', tokenManager.verifyToken(), communicationCtrl.getConsultation)
+  app.post(version + '/communication/conclusion', tokenManager.verifyToken(), communicationCtrl.conclusion)
+  app.post(version + '/communication/insertMember', tokenManager.verifyToken(), communicationCtrl.insertMember, communicationCtrl.updateNumber)
+  app.post(version + '/communication/removeMember', tokenManager.verifyToken(), communicationCtrl.removeMember, communicationCtrl.updateNumber)
+  app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
+  app.post(version + '/communication/communication', tokenManager.verifyToken(), getNoMid.getNo(8), communicationCtrl.postCommunication)
+  app.get(version + '/communication/communication', tokenManager.verifyToken(), communicationCtrl.getCommunication)
+  // task 2017-07-14
+  app.get(version + '/tasks', tokenManager.verifyToken(), taskCtrl.getTasks)
+  app.post(version + '/tasks/status', tokenManager.verifyToken(), taskCtrl.updateStatus)
+  app.post(version + '/tasks/time', tokenManager.verifyToken(), taskCtrl.updateStartTime)
+  app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
+  app.get(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getUserTask)
+  app.post(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
+  // patient 2017-07-17
+  app.get(version + '/patient/detail', tokenManager.verifyToken(), patientCtrl.getPatientDetail)
+  app.get(version + '/patient/doctors', tokenManager.verifyToken(), patientCtrl.getDoctorLists)
+  app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), patientCtrl.getMyDoctor)
+  // app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.getMyDoctor)
+  app.get(version + '/patient/counselRecords', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.getCounselRecords)
+  app.post(version + '/patient/detail', tokenManager.verifyToken(), patientCtrl.checkPatientId, patientCtrl.newPatientDetail)
+  app.post(version + '/patient/editDetail', tokenManager.verifyToken(), patientCtrl.editPatientDetail)
+  app.post(version + '/patient/diagnosis', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
+  app.post(version + '/patient/bindingMyDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
+  app.post(version + '/patient/changeVIP', tokenManager.verifyToken(), patientCtrl.changeVIP)
+  app.post(version + '/patient/wechatPhotoUrl', tokenManager.verifyToken(), patientCtrl.wechatPhotoUrl)
+  // doctor_Info
+  app.post(version + '/doctor/detail', doctorCtrl.insertDocBasic)
+  // 需要查询class字典表（待定）
+
+  app.get(version + '/doctor/myPatients', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getPatientList)
+  // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
+  app.get(version + '/doctor/detail', doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
+  app.get(version + '/doctor/myTeams', tokenManager.verifyToken(), doctorCtrl.getTeams)
+  app.get(version + '/doctor/teamPatients', tokenManager.verifyToken(), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
+  // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
+  app.post(version + '/doctor/editDetail', doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember)
+
+  app.get(version + '/doctor/myRecentDoctors', doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList)
+  app.get(version + '/doctor/myPatientsByDate', doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate)
+  app.post(version + '/doctor/schedule', tokenManager.verifyToken(), doctorCtrl.insertSchedule)
+  app.post(version + '/doctor/deleteSchedule', tokenManager.verifyToken(), doctorCtrl.deleteSchedule)
+  app.get(version + '/doctor/schedules', tokenManager.verifyToken(), doctorCtrl.getSchedules)
+  app.post(version + '/doctor/suspendTime', doctorCtrl.insertSuspendTime)
+
+  app.post(version + '/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime)
+  app.get(version + '/doctor/suspendTime', doctorCtrl.getSuspendTime)
+  app.get(version + '/doctor/numbers', doctorCtrl.getDocNum)
+
+  app.get(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.getAliPayAccount)
+  app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.editAliPayAccount)
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
