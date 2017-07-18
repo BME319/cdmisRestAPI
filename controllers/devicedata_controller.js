@@ -7,6 +7,7 @@ var	request = require('request'),
 	Device = require('../models/device');
 
 exports.bindingDevice = function(req, res){
+    console.log("in 111");
 	var userId = req.body.userId || null;
 	var appId = req.body.appId || null;
 	var twoDimensionalCode = req.body.twoDimensionalCode || null;
@@ -14,7 +15,7 @@ exports.bindingDevice = function(req, res){
 	if(userId === null || userId === '' || appId === null || appId === '' || twoDimensionalCode === null || twoDimensionalCode === '' ){
 		return res.status(400).send('invalid input');     
 	}
-   
+
     request({
         method: 'POST',
         url: config.third_party_data.bloodpressure.get_device_url,
@@ -23,6 +24,8 @@ exports.bindingDevice = function(req, res){
         if(err){
             return res.status(500).send(err.errmsg);     
         }
+        console.log(config.third_party_data.bloodpressure.get_device_url);
+        console.log(body);
         body = JSON.parse(body);  
         if(body.errorCode == 0){
         	// save device info

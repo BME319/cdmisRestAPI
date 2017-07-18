@@ -802,7 +802,9 @@ exports.messageTemplate = function(req, res) {
             return res.status(400).send('user do not exist');
           }
           if(item.MessageOpenId === null){
-            return res.status(400).send('openId do not exist');
+            // console.log("open 11");
+            // return res.status(400).send('openId do not exist');
+            res.json({results:{"errcode" : 0,"errmsg" : "ok"}});
           }
           var messageOpenId;
           if(role == 'doctor'){
@@ -816,7 +818,9 @@ exports.messageTemplate = function(req, res) {
           }
     
           if(messageOpenId === null){
-            return res.status(400).send('openId do not exist');
+            // console.log("open 22");
+            // return res.status(400).send('openId do not exist');
+            res.json({results:{"errcode" : 0,"errmsg" : "ok"}});
           }
           else{
             var jsondata = {};
