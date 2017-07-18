@@ -3,15 +3,29 @@ var mongoose = require('mongoose')
 
 var departmentSchema = new mongoose.Schema({
   district: String,
-  zymanager: String,
-  portleader: [String],
+  zymanager: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'alluser'
+  },
+  portleader: [
+    {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'alluser'
+    }
+  ],
   departinfo: [
     {
       hospital: String,
       departLeader: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'alluser'
-      }
+      },
+      doctors: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'alluser'
+        }
+      ]
     }
   ]
 })
