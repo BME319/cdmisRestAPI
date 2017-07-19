@@ -505,7 +505,7 @@ exports.openIdLoginTest = function(req, res,next) {
 exports.checkBinding = function(req, res,next) {
 
     //2017-06-07GY调试
-    console.log('checkBinding_in');
+    // console.log('checkBinding_in');
 
     var username = req.body.username;
     // console.log(username);
