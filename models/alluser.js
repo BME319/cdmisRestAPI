@@ -84,7 +84,7 @@ var alluserSchema = new mongoose.Schema({
   autoRelay: {type: Number, default: 0},
   relayTarget: [
     {
-      _id:0,
+      _id: 0,
       teamId: String
     }
   ],
@@ -137,16 +137,16 @@ var alluserSchema = new mongoose.Schema({
   // 主管医生字段
   doctorsInCharge: [
     {
-      _id:0, 
+      _id: 0,
       doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       firstTime: Date,
-      // 历史、当前、待审核
-      invalidFlag: Number, 
-      rejectReason: String, 
+      // 历史2、当前1、待审核0，被拒3
+      invalidFlag: Number,
+      rejectReason: String,
       // 时长数字类型以秒为单位
-      length: Number, 
+      length: Number,
       // 有效的起止时间
-      start: Date, 
+      start: Date,
       end: Date
     }
   ],

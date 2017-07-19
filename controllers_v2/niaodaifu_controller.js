@@ -3,9 +3,6 @@ var commonFunc = require('../middlewares/commonFunc')
 var config = require('../config')
 var HealthInfo = require('../models/healthInfo.js')
 var LabtestImport = require('../models/labtestImport.js')
-// var getNo = require('../models/getNo')
-// var DictNumber = require('../models/dictNumber')
-// var Numbering = require('../models/numbering')
 
 exports.getLoginParam = function (req, res) {
   var client = req.query.client || null
@@ -111,6 +108,7 @@ exports.receiveData = function (req, res) {
       // return res.json({status: 0})
       data = data.sort(sortNumber)
       var labtestId = req.newId
+
       var proValue
       var re = /^(?:.+)(?:\(|（)(.+)(?:\)|）)$/gi
       var ret = re.exec(data[3].result)
