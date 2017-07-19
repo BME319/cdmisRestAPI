@@ -1,4 +1,5 @@
 var Alluser = require('../models/alluser')
+var DpRelation = require('../models/dpRelation')
 
 // 获取某位医生的服务开启状态及收费情况
 // 根据医生ID获取服务开启状态 2017-07-14 GY
@@ -405,5 +406,111 @@ exports.deleteServiceSuspend = function (req, res) {
 // 输入：医生ID和day, time 修改内容：alluser.serviceSchedules.count+1, new personalDiag
 // 返回：personalDiag.code, endTime
 
+// 2017-07-18 YQC
 // 主管医生申请：patient, dpRelation表数据修改
 // 输入：医生ID和购买时长；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
+exports.requestDoctorInCharge = function (req, res, next) {
+  // var patientId = req.body.patientId || null
+  let patientId = req.session.userId
+  let doctorId = req.body.doctorId || null
+  let chargeDuration = req.body.chargeDuration || null
+  // if (patientId == null) {
+  //   return res.json({result: '请填写patientId!'})
+  // }
+  if (doctorId == null) {
+    return res.json({result: '请填写doctorId!'})
+  }
+  if (chargeDuration == null) {
+    return res.json({result: '请填写chargeDuration!'})
+  }
+  let queryD = {userId: doctorId, role: 'doctor'}
+  Alluser.getOne(queryD, function (err, itemD) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (itemD == null) {
+      return res.json({result: '不存在的医生ID!'})
+    }
+
+    let doctorObjectId = itemD._id
+    let queryP = {userId: patientId, role: 'patient'}
+    Alluser.getOne(queryP, function (err, itemP) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      let doctorsInChargeList = itemP.doctorsInCharge
+      console.log(doctorsInChargeList)
+      for (let i = 0; i < doctorsInChargeList.length; i++) {
+        if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
+          return res.json({result: '当前已有主管医生!'})
+        } else if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
+          return res.json({result: '已申请主管医生，请等待审核!'})
+        }
+      }
+
+      let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0, length: chargeDuration}
+      doctorsInChargeList.push(doctorNew)
+      let upObj = {$set: {doctorsInCharge: doctorsInChargeList}}
+      Alluser.updateOne(queryP, upObj, function (err, upPatient) {
+        if (err) {
+          return res.status(500).send(err)
+        }
+        req.body.doctorObjectId = doctorObjectId
+        req.body.patientObjectId = upPatient._id
+        next()
+      })
+    })
+  })
+}
+exports.addPatientInCharge = function (req, res) {
+  let doctorObjectId = req.body.doctorObjectId
+  let patientObjectId = req.body.patientObjectId
+  let dpRelationTime = req.body.dpRelationTime || null
+  if (dpRelationTime == null) {
+    dpRelationTime = new Date()
+  } else {
+    dpRelationTime = new Date(req.body.dpRelationTime)
+  }
+  let query = {doctorId: doctorObjectId}
+
+  DpRelation.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (item == null) {
+      let dpRelationData = {
+        doctorId: doctorObjectId
+      }
+      // return res.json({result:dpRelationData});
+      var newDpRelation = new DpRelation(dpRelationData)
+      newDpRelation.save(function (err, dpRelationInfo) {
+        if (err) {
+          return res.status(500).send(err)
+        }
+      })
+    }
+  })
+
+  let upObj = {
+    $push: {
+      patientsInCharge: {
+        patientId: patientObjectId,
+        dpRelationTime: dpRelationTime,
+        invalidFlag: 0,
+        length: req.body.chargeDuration
+      }
+    }
+  }
+
+  DpRelation.update(query, upObj, function (err, upRelation) {
+    if (err) {
+      return res.status(422).send(err)
+    }
+    if (upRelation.nModified === 0) {
+      return res.json({result: '未申请成功！请检查输入是否符合要求！'})
+    } else if (upRelation.nModified === 1) {
+      return res.json({result: '申请成功，请等待审核！', results: upRelation})
+    }
+  // res.json({results: uprelation});
+  }, {new: true})
+}
