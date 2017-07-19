@@ -185,6 +185,7 @@ exports.saveQuestionaire = function(req, res) {
 }
 
 exports.changeCounselStatus = function(req, res, next) {
+// exports.changeCounselStatus = function(req, res) {
 	if (req.body.counselId == null || req.body.counselId == '') {
 		return res.json({result:'请填写counselId!'});
 	}

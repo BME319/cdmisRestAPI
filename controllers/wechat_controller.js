@@ -10,6 +10,7 @@ var config = require('../config'),
     commonFunc = require('../middlewares/commonFunc'),
     User = require('../models/user'),
     OpenIdTmp = require('../models/openId'),
+    Doctor = require('../models/doctor'), 
     Order = require('../models/order');
 
 // appid: wx8a6a43fb9585fb7c;secret: b23a4696c3b0c9b506891209d2856ab2
@@ -857,24 +858,26 @@ exports.receiveTextMessage = function(req, res) {
     });
     MsgType = jsondata.xml.MsgType;
 
+    console.log(jsondata);
+    // console.log((jsondata.xml.EventKey[0] == '' || jsondata.xml.EventKey[0] == null));
     // 事件推送
     if(MsgType == 'event'){
       // 扫描带参数二维码事件    用户未关注时，进行关注后的事件推送 || 用户已关注时的事件推送
-      if(jsondata.xml.Event == 'subscribe' || jsondata.xml.Event == 'SCAN'){
-        
+      if(jsondata.xml.Event == 'subscribe' || jsondata.xml.Event == 'SCAN'){   
         // do something
-        
-        if(jsondata.xml.EventKey != null ){
+        console.log("inin");
+        if(jsondata.xml.EventKey[0] != null && jsondata.xml.EventKey[0] != ''){
+    
           var doctor_userId;
           // 
-          console.log(jsondata);
+          // console.log(jsondata);
           if(jsondata.xml.Event == 'subscribe'){
             doctor_userId =  jsondata.xml.EventKey[0].split('_')[1];
           }
           if(jsondata.xml.Event == 'SCAN'){
             doctor_userId =  jsondata.xml.EventKey;
           }
-        console.log(doctor_userId);
+          // console.log(doctor_userId);
           // 暂存医生和患者的openId
           var patient_openId = jsondata.xml.FromUserName;       
           var time = Date();
@@ -889,6 +892,9 @@ exports.receiveTextMessage = function(req, res) {
           newOpenIdTmp.save(function(err, item) {
             if (err) {
               results = err.errmsg;
+              res.statusCode = 500;
+              res.write(results);
+              res.end();
             }
             else{
               // results = 'success';
@@ -896,9 +902,15 @@ exports.receiveTextMessage = function(req, res) {
               Doctor.getOne(query, function (err, doctor) {
                 if (err) {
                   results = err;
+                  res.statusCode = 500;
+                  res.write(results);
+                  res.end();
                 }
                 if (doctor == null) {
                   results = 'doctor not exist';
+                  res.statusCode = 500;
+                  res.write(results);
+                  res.end();
                 }
                 var name = doctor.name;
                 var title = doctor.title;
@@ -948,6 +960,24 @@ exports.receiveTextMessage = function(req, res) {
                   }
                   else{
                     results = 'success';
+                    res.statusCode = 200;
+                    res.write(results);
+                    res.end();
+                    // if( jsondata.xml.Event == 'SCAN'){
+                    //   results = 'success';
+                    // }
+                    // else{
+                    //   var res_json = {
+                    //     ToUserName: patient_openId,
+                    //     FromUserName: 'wxb830b12dc0fa74e5',
+                    //     CreateTime: Date.now(),
+                    //     MsgType: 'text',
+                    //     Content: "您好，欢迎关注肾事管家~让每一位慢性肾病患者得到有效管理。找名医进行咨询问诊，请点击底栏【肾事管家】~定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+                    //   };
+                    //   var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+                    //   var xmlString = xmlBuilder.buildObject(res_json);
+                    //   results = xmlString;
+                    // }
                   }
 
                 });
@@ -961,24 +991,57 @@ exports.receiveTextMessage = function(req, res) {
             }           
           });
         }
+        else if(jsondata.xml.EventKey[0] == '' || jsondata.xml.EventKey[0] == null){
+          // console.log("in");
+          var ToUserName = jsondata.xml.ToUserName[0];    // 开发者微信号
+          var FromUserName = jsondata.xml.FromUserName[0];  // 发送方帐号（一个OpenID）
+          var CreateTime = parseInt(jsondata.xml.CreateTime[0]); 
+          // console.log(CreateTime);
+          // var date = new Date();
+
+          var res_json = {
+            ToUserName: FromUserName,
+            FromUserName: ToUserName,
+            // ToUserName: ToUserName,
+            // FromUserName: FromUserName,
+            CreateTime: CreateTime,
+            MsgType: 'text',
+            Content: "您好，欢迎关注肾事管家~让每一位慢性肾病患者得到有效管理。找名医进行咨询问诊，请点击底栏【肾事管家】~定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+          };
+          // console.log(res_json);
+          var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+          var xmlString = xmlBuilder.buildObject(res_json);
+          // console.log(xmlString);
+          results = xmlString;
+          res.statusCode = 200;
+          res.write(results);
+          res.end();
+        }
         else{
           // EventKey为空
-          results = 'EventKey Error'
+          results = 'EventKey Error';
+          res.statusCode = 500;
+          res.write(results);
+          res.end();
         }
 
       }
       else{
         results = 'success';
+        res.statusCode = 200;
+        res.write(results);
+        res.end();
       }
     }
     else{
       results = 'success';
+      res.statusCode = 200;
+      res.write(results);
+      res.end();
     }
 
   });
 
-  res.writeHead(200, {'Content-Type': 'text/html'});
-  res.end(results);
 }
 
 

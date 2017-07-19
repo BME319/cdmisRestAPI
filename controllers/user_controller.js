@@ -347,17 +347,17 @@ exports.register = function(req, res) {
         if (err) {
             return res.status(500).send(err.errmsg);
         }
-        if (_role == 'patient') {
-            var PatientData = {
-                userId: _userNo
-            }
-            var newPatient = new Patient(PatientData);
-            newPatient.save(function(err, patientInfo) {
-                if (err) {
-                    return res.status(500).send(err.errmsg);
-                }
-            });
-        }
+        // if (_role == 'patient') {
+        //     var PatientData = {
+        //         userId: _userNo
+        //     }
+        //     var newPatient = new Patient(PatientData);
+        //     newPatient.save(function(err, patientInfo) {
+        //         if (err) {
+        //             return res.status(500).send(err.errmsg);
+        //         }
+        //     });
+        // }
         res.json({results: 0,userNo:_userNo,mesg:"User Register Success!"});
     });
 }
@@ -547,7 +547,7 @@ exports.checkBinding = function(req, res,next) {
                                 }
 
                                 //2017-06-07GY调试
-                                // console.log('checkBinding_out');
+                                console.log('checkBinding_out');
 
                                 next();
                             })
@@ -571,7 +571,7 @@ exports.checkBinding = function(req, res,next) {
                         // }
 
                         //2017-06-07GY调试
-                        // console.log('checkBinding_out');
+                        console.log('checkBinding_out');
 
                         next();
                       
@@ -581,7 +581,7 @@ exports.checkBinding = function(req, res,next) {
             else{
 
                 //2017-06-07GY调试
-                // console.log('checkBinding_out');
+                console.log('checkBinding_out');
 
                 next();
             }
@@ -589,7 +589,7 @@ exports.checkBinding = function(req, res,next) {
         else{
 
             //2017-06-07GY调试
-            // console.log('checkBinding_err_user_not_exist');
+            console.log('checkBinding_err_user_not_exist');
 
             res.json({results: 1,mesg:"User doesn't Exist!"});
         }
