@@ -143,6 +143,71 @@ module.exports = function (app, webEntry, acl) {
   // YQC
   // comment - debug complete 2017-07-17
   app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), commentCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
+  /**
+   * @swagger
+   * definitions:
+   *   Comments:
+   *     type: object
+   *     properties:
+   *       commentId:
+   *         type: string
+   *       counselId:
+   *         type: string
+   *       doctorId:
+   *         type: string
+   *       patientId:
+   *         type: string
+   *       type:
+   *         type: number
+   *       time:
+   *         type: date
+   *       helpScore:
+   *         type: number
+   *       attitudeScore:
+   *         type: number
+   *       speedScore:
+   *         type: number
+   *       totalScore:
+   *         type: number
+   *         default: 10
+   *       topic:
+   *         type: string
+   *       expense:
+   *         type: string
+   *       content:
+   *         type: string
+   */
+  /**
+   * @swagger
+   * /comment/commentsByCounsel:
+   *   get:
+   *     tags:
+   *     - "comment"
+   *     summary: "Finds comments by counsel ID"
+   *     description: ""
+   *     operationId: "commentsByCounsel"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "counselId"
+   *       in: "query"
+   *       description: "Comments of counsel to be found."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Comments'
+   *       404:
+   *         description: "CounselId not found."
+   */
   app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
   // advice - debug complete 2017-07-17
   app.get(version + '/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
@@ -225,36 +290,6 @@ module.exports = function (app, webEntry, acl) {
   // 医生端 获取主管医生待审核请求列表 2017-07-19
   app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
 
-  // niaodaifu
-  /**
-   * @swagger
-   * definition:
-   *   Puppy:
-   *     properties:
-   *       name:
-   *         type: string
-   *       breed:
-   *         type: string
-   *       age:
-   *         type: integer
-   *       sex:
-   *         type: string
-   */
-  /**
-   * @swagger
-   * /devicedata/niaodaifu/loginparam:
-   *   get:
-   *     tags:
-   *       - Puppies
-   *     description: Returns all puppies
-   *     produces:
-   *       - application/json
-   *     responses:
-   *       200:
-   *         description: An array of puppies
-   *         schema:
-   *           $ref: '#/definitions/Puppy'
-   */
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
