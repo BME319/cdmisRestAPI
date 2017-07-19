@@ -82,10 +82,10 @@ exports.getDoctorLists = function (req, res) {
   // if ((_name == null || _name == '') && (_workUnit == null || _workUnit == '')){
   //   query = {};
   // }
-  // else if((_name == null || _name == '') && _workUnit != null){
+  // else if((_name == null || _name == '') && _workUnit !== null){
   //   query = {workUnit:_workUnit};
   // }
-  // else if (_name != null && (_workUnit == null || _workUnit == '')){
+  // else if (_name !== null && (_workUnit == null || _workUnit == '')){
   //   query = {name:_name};
   // }
   // else{
@@ -93,16 +93,16 @@ exports.getDoctorLists = function (req, res) {
   // }
 
   let query = {role: 'doctor'}
-  if (_province != null) {
+  if (_province !== null) {
     query['province'] = _province
   }
-  if (_city != null) {
+  if (_city !== null) {
     query['city'] = _city
   }
-  if (_district != null) {
+  if (_district !== null) {
     query['district'] = _district
   }
-  if (_workUnit != null) {
+  if (_workUnit !== null) {
     query['workUnit'] = _workUnit
   }
   // if(_name != ""&&_name!=null)
@@ -125,16 +125,16 @@ exports.getDoctorLists = function (req, res) {
   let _skipUrl = ''
   let _Url = ''
   // 检查查询条件存在并设定
-  if (_workUnit != null) {
+  if (_workUnit !== null) {
     _workUnitUrl = 'workUnit=' + _workUnit
   }
-  if (_name != null) {
+  if (_name !== null) {
     _nameUrl = 'name=' + _name
   }
-  if (_limit != null) {
+  if (_limit !== null) {
     _limitUrl = 'limit=' + String(_limit)
   }
-  if (_skip != null) {
+  if (_skip !== null) {
     _skipUrl = 'skip=' + String(_skip + _limit)
   }
   // 路径尾部添加查询条件
@@ -289,7 +289,7 @@ exports.checkPatientId = function (req, res, next) {
       console.log(err)
       return res.status(500).send('服务器错误, 用户查询失败!')
     }
-    if (patient != null) {
+    if (patient !== null) {
       return res.json({result: '已存在的患者ID！'})
     }
         // req.body.patientObject = patient;
@@ -327,41 +327,41 @@ exports.newPatientDetail = function (req, res) {
   //   terminalIP:"10.12.43.32"
   // }
   }
-  if (req.body.photoUrl != null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
+  if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
     patientData['photoUrl'] = req.body.photoUrl
   }
-  if (req.body.IDNo != null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
+  if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
     patientData['IDNo'] = req.body.IDNo
   }
-  if (req.body.height != null && req.body.height !== '' && req.body.height !== undefined) {
+  if (req.body.height !== null && req.body.height !== '' && req.body.height !== undefined) {
     patientData['height'] = req.body.height
   }
-  if (req.body.weight != null && req.body.weight !== '' && req.body.weight !== undefined) {
+  if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
     patientData['weight'] = req.body.weight
   }
-  if (req.body.occupation != null && req.body.occupation !== '' && req.body.occupation !== undefined) {
+  if (req.body.occupation !== null && req.body.occupation !== '' && req.body.occupation !== undefined) {
     patientData['occupation'] = req.body.occupation
   }
-  if (req.body.nation != null && req.body.nation !== '' && req.body.nation !== undefined) {
+  if (req.body.nation !== null && req.body.nation !== '' && req.body.nation !== undefined) {
     patientData['address.nation'] = req.body.nation
   }
-  if (req.body.province != null && req.body.province !== '' && req.body.province !== undefined) {
+  if (req.body.province !== null && req.body.province !== '' && req.body.province !== undefined) {
     patientData['address.province'] = req.body.province
   }
-  if (req.body.city != null && req.body.city !== '' && req.body.city !== undefined) {
+  if (req.body.city !== null && req.body.city !== '' && req.body.city !== undefined) {
     patientData['address.city'] = req.body.city
   }
-  if (req.body.operationTime != null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
+  if (req.body.operationTime !== null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
     patientData['operationTime'] = req.body.operationTime
   }
-  if (req.body.lastVisit != null && req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
-    if (req.body.lastVisit.time != null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
+  if (req.body.lastVisit !== null && req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
+    if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
       patientData['lastVisit.time'] = new Date(req.body.lastVisit.time)
     }
-    if (req.body.lastVisit.hospital != null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
+    if (req.body.lastVisit.hospital !== null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
       patientData['lastVisit.hospital'] = req.body.lastVisit.hospital
     }
-    if (req.body.lastVisit.diagnosis != null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
+    if (req.body.lastVisit.diagnosis !== null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
       patientData['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
     }
   }
@@ -371,7 +371,7 @@ exports.newPatientDetail = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (req.body.weight != null && req.body.weight !== '' && req.body.weight !== undefined) {
+    if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
       let timenow = commonFunc.getNowFormatSecond()
       let queryVital = {
         patientId: patientInfo._id,
@@ -432,68 +432,68 @@ exports.editPatientDetail = function (req, res) {
   //   terminalIP:"10.12.43.32"
   // }
   }
-  // if (req.body.userId != null){
+  // if (req.body.userId !== null){
   //   upObj['userId'] = req.body.userId;
   // }
-  if (req.body.name != null && req.body.name !== '' && req.body.name !== undefined) {
+  if (req.body.name !== null && req.body.name !== '' && req.body.name !== undefined) {
     upObj['name'] = req.body.name
   }
-  if (req.body.photoUrl != null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
+  if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
     upObj['photoUrl'] = req.body.photoUrl
   }
-  if (req.body.birthday != null && req.body.birthday !== '' && req.body.birthday !== undefined) {
+  if (req.body.birthday !== null && req.body.birthday !== '' && req.body.birthday !== undefined) {
     upObj['birthday'] = new Date(req.body.birthday)
   }
-  if (req.body.gender != null && req.body.gender !== '' && req.body.gender !== undefined) {
+  if (req.body.gender !== null && req.body.gender !== '' && req.body.gender !== undefined) {
     upObj['gender'] = req.body.gender
   }
-  if (req.body.IDNo != null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
+  if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
     upObj['IDNo'] = req.body.IDNo
   }
-  if (req.body.height != null && req.body.height !== '' && req.body.height !== undefined) {
+  if (req.body.height !== null && req.body.height !== '' && req.body.height !== undefined) {
     upObj['height'] = req.body.height
   }
-  if (req.body.weight != null && req.body.weight !== '' && req.body.weight !== undefined) {
+  if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
     upObj['weight'] = req.body.weight
   }
-  if (req.body.occupation != null && req.body.occupation !== '' && req.body.occupation !== undefined) {
+  if (req.body.occupation !== null && req.body.occupation !== '' && req.body.occupation !== undefined) {
     upObj['occupation'] = req.body.occupation
   }
-  if (req.body.bloodType != null && req.body.bloodType !== '' && req.body.bloodType !== undefined) {
+  if (req.body.bloodType !== null && req.body.bloodType !== '' && req.body.bloodType !== undefined) {
     upObj['bloodType'] = req.body.bloodType
   }
-  if (req.body.nation != null && req.body.nation !== '' && req.body.nation !== undefined) {
+  if (req.body.nation !== null && req.body.nation !== '' && req.body.nation !== undefined) {
     upObj['address.nation'] = req.body.nation
   }
-  if (req.body.province != null && req.body.province !== '' && req.body.province !== undefined) {
+  if (req.body.province !== null && req.body.province !== '' && req.body.province !== undefined) {
     upObj['address.province'] = req.body.province
   }
-  if (req.body.city != null && req.body.city !== '' && req.body.city !== undefined) {
+  if (req.body.city !== null && req.body.city !== '' && req.body.city !== undefined) {
     upObj['address.city'] = req.body.city
   }
-  if (req.body.class != null && req.body.class !== '' && req.body.class !== undefined) {
+  if (req.body.class !== null && req.body.class !== '' && req.body.class !== undefined) {
     upObj['class'] = req.body.class
   }
-  if (req.body.class_info != null && req.body.class_info !== '' && req.body.class_info !== undefined) {
+  if (req.body.class_info !== null && req.body.class_info !== '' && req.body.class_info !== undefined) {
     upObj['class_info'] = req.body.class_info
   }
-  if (req.body.operationTime != null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
+  if (req.body.operationTime !== null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
     upObj['operationTime'] = new Date(req.body.operationTime)
   }
-  if (req.body.hypertension != null && req.body.hypertension !== '' && req.body.hypertension !== undefined) {
+  if (req.body.hypertension !== null && req.body.hypertension !== '' && req.body.hypertension !== undefined) {
     upObj['hypertension'] = req.body.hypertension
   }
-  if (req.body.allergic != null && req.body.allergic !== '' && req.body.allergic !== undefined) {
+  if (req.body.allergic !== null && req.body.allergic !== '' && req.body.allergic !== undefined) {
     upObj['allergic'] = req.body.allergic
   }
-  if (req.body.lastVisit != null) {
-    if (req.body.lastVisit.time != null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
+  if (req.body.lastVisit !== null) {
+    if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
       upObj['lastVisit.time'] = new Date(req.body.lastVisit.time)
     }
-    if (req.body.lastVisit.hospital != null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
+    if (req.body.lastVisit.hospital !== null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
       upObj['lastVisit.hospital'] = req.body.lastVisit.hospital
     }
-    if (req.body.lastVisit.diagnosis != null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
+    if (req.body.lastVisit.diagnosis !== null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
       upObj['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
     }
   }
@@ -506,7 +506,7 @@ exports.editPatientDetail = function (req, res) {
     if (upPatient == null) {
       return res.json({result: '修改失败，不存在的患者ID！'})
     }
-    if (req.body.weight != null && req.body.weight !== '' && req.body.weight !== undefined) {
+    if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
       var timenow = commonFunc.getNowFormatSecond()
       var queryVital = {
         patientId: upPatient._id,
@@ -1047,7 +1047,7 @@ exports.changeVIP = function (req, res) {
   }
 
   var upObj = {}
-  if (req.body.VIP != null && req.body.VIP !== '' && req.body.VIP !== undefined) {
+  if (req.body.VIP !== null && req.body.VIP !== '' && req.body.VIP !== undefined) {
     upObj['VIP'] = req.body.VIP
   }
 
