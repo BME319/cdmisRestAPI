@@ -7,6 +7,7 @@ var	config = require('../config'),
 	Consultation = require('../models/consultation'), 
 	Counsel = require('../models/counsel'), 
 	Comment = require('../models/comment'), 
+	User = require('../models/user'), 
 	commonFunc = require('../middlewares/commonFunc');
  var pinyin = require('pinyin');
 
@@ -238,6 +239,23 @@ exports.getGroupPatientList = function(req, res) {
 // 	}, opts, fields, populate);
 // }
 
+//获取医生User表信息 2017-06-15 GY
+exports.getUserInfo = function(req, res, next) {
+	var query = {userId: req.query.userId};
+	User.getOne(query, function(err, item) {
+		if (err) {
+			return res.status(500).send(err.errmsg);
+		}
+		if (item == null) {
+			return res.json({result: '请重新注册'});
+		}
+		else {
+			req.body.TDCticket = item.TDCticket;
+			next();
+		}
+	});
+}
+
 //修改获取医生详细信息方法 2017-4-12 GY
 exports.getComments = function(req, res, next) {
 	//查询条件
@@ -282,7 +300,7 @@ exports.getComments = function(req, res, next) {
 		}
 		_Url = _Url.substr(0, _Url.length - 1)
 	}
-	req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/doctor/getDoctorInfo' + _Url
+	req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v1/doctor/getDoctorInfo' + _Url
 
 	Comment.getSome(query, function(err, items) {
 		if (err) {
@@ -365,8 +383,17 @@ exports.getDoctorInfo = function(req, res) {
 		if (err){
 			return res.status(422).send(err.message);
 		}
+		// console.log(req.body.TDCticket);
+		if (req.body.TDCticket == undefined) {
+			req.body.TDCticket = null;
+		}
+		// console.log(req.body.TDCticket);
+		// var DocInfo = upDoctor;
+		// DocInfo['TDCticket'] = req.body.TDCticket;
+		// console.log(DocInfo.TDCticket);
+		// console.log(DocInfo);
 		
-		res.json({results:upDoctor, comments: comments, nexturl:req.body.nexturl});
+		res.json({results:upDoctor, TDCticket:req.body.TDCticket, comments: comments, nexturl:req.body.nexturl});
 	}, {new: true});
 }
 
@@ -800,6 +827,10 @@ exports.getPatientByDate = function(req, res) {
 	//查询条件
 	var doctorObject = req.body.doctorObject;
 	var query = {doctorId:doctorObject._id};
+	
+	//模糊搜索GY
+	var _name = req.query.name;
+
 	if (req.query.date != null && req.query.date != '') {
 		var date = new Date(req.query.date);
 		date = commonFunc.convertToFormatDate(date);
@@ -813,6 +844,10 @@ exports.getPatientByDate = function(req, res) {
 	var fields = {'_id':0, 'patients':1};
 	//通过子表查询主表，定义主表查询路径及输出内容
 	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
+
+	if (_name) {
+		populate['match'] = {'name': new RegExp(_name)};
+	}
 
 	DpRelation.getOne(query, function(err, item) {
 		if (err) {
@@ -947,9 +982,15 @@ exports.getPatientList = function(req, res) {
 	var fields = {'_id':0, 'patients.patientId':1, 'patients.dpRelationTime':1};
 	//通过子表查询主表，定义主表查询路径及输出内容
 	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
-	if(_name!=""&&_name!=undefined){
+	// if(_name!=""&&_name!=undefined){
 		
+	// }
+	//模糊搜索
+	var nameReg = new RegExp(_name);
+	if (_name) {
+		populate['match'] = {'name': nameReg};
 	}
+	console.log(populate);
 	// console.log(query);
 	DpRelation.getOne(query, function(err, item) {
 		if (err) {
@@ -986,7 +1027,8 @@ exports.getPatientList = function(req, res) {
 	    		if(item.patients[i].dpRelationTime === null || item.patients[i].dpRelationTime === '' || item.patients[i].dpRelationTime === undefined) {
 	    			item.patients[i].dpRelationTime = new Date('2017-05-15');
 	    		}
-	    		if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
+	    		// if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
+				if(item.patients[i].patientId!=null){
 	    			if(_skip>0)
 	    			{
 	    				_skip--;
@@ -1015,4 +1057,40 @@ exports.getPatientList = function(req, res) {
 	    }
 	}, opts, fields, populate);
 	// });
+}
+
+// 修改用户支付宝账号 2017-06-16 GY
+exports.editAliPayAccount = function (req, res) {
+	var query = {userId: req.body.userId};
+	var upObj = {aliPayAccount: req.body.aliPayAccount};
+	var opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true};
+
+	Doctor.updateOne(query, upObj, function (err, upDoctor) {
+		if (err) {
+			return res.status(400).send(err);
+		}
+		return res.json({results: '修改成功', editResult: upDoctor.aliPayAccount});
+	}, opts);
+} 
+
+//获取用户支付宝账号 2017-06-16 GY
+exports.getAliPayAccount = function (req, res) {
+	var query = {userId: req.query.userId};
+
+	Doctor.getOne(query, function (err, item) {
+		if (err) {
+			return res.status(500).send(err);
+		}
+		if (item == null) {
+			return res.status(400).send('不存在的医生');
+		}
+		else {
+			if (item.aliPayAccount === undefined) {
+				return res.json({results: ''});
+			}
+			else {
+				return res.json({results: item.aliPayAccount});
+			}
+		}
+	});
 }

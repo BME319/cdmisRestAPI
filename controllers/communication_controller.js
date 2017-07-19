@@ -7,7 +7,8 @@ var	config = require('../config'),
 	Patient = require('../models/patient'), 
 	Doctor = require('../models/doctor'), 
 	Consultation = require('../models/consultation'), 
-	DpRelation = require('../models/dpRelation'),
+	DpRelation = require('../models/dpRelation'), 
+	commonFunc = require('../middlewares/commonFunc'), 
 	request = require('request');
 
 //根据counselId获取counsel表除messages外的信息 2017-03-31 GY 
@@ -71,18 +72,19 @@ exports.newTeam = function(req, res) {
 	 //  		}
 		// ], 
 		// time: new Date(), 
-		description: req.body.description, 
+		description: req.body.description//, 
 		// number: req.body., 
 
-		revisionInfo:{
-			operationTime:new Date(),
-			userId:"gy",
-			userName:"gy",
-			terminalIP:"10.12.43.32"
-		}
+		// revisionInfo:{
+		// 	operationTime:new Date(),
+		// 	userId:"gy",
+		// 	userName:"gy",
+		// 	terminalIP:"10.12.43.32"
+		// }
 	};
 	if (req.body.time == null || req.body.time == '') {
 		teamData['time'] = new Date();
+		// teamData['time'] = commonFunc.getNowFormatSecond();
 	}
 	else {
 		teamData['time'] = new Date(req.body.time);
@@ -157,7 +159,7 @@ exports.checkPatient = function (req, res, next) {
     };
     Patient.getOne(query, function (err, patient) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 患者查询失败!');
         }
         if (patient == null) {
@@ -176,7 +178,7 @@ exports.checkDoctor = function (req, res, next) {
     };
     Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 医生查询失败!');
         }
         if (doctor == null) {
@@ -202,6 +204,7 @@ exports.newConsultation = function(req, res) {
 		sponsorId: req.body.sponsorObject._id, 
 		patientId: req.body.patientObject._id, 
 		time: new Date(), 
+		// time: commonFunc.getNowFormatSecond(), 
 		diseaseInfo: req.body.diseaseInfo._id, 
 		status:status,
 		// messages: [
@@ -334,7 +337,7 @@ exports.updateNumber = function(req, res) {
 	var query = {teamId: req.body.teamId};
 	Team.getOne(query, function (err, team) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 团队查询失败!');
         }
 
@@ -400,7 +403,7 @@ exports.getDoctor1Object = function (req, res, next) {
     };
     Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (doctor == null) {
@@ -419,7 +422,7 @@ exports.getDoctor2Object = function (req, res, next) {
     };
     Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (doctor == null) {
@@ -608,7 +611,7 @@ exports.postCommunication = function(req, res) {
         if(msg.targetType=='single'){
         	// console.log("111");
             request({
-                url:'http://' + webEntry.domain + ':4050/new/insertNews' + '?token=' + req.query.token || req.body.token,
+                url:'http://' + webEntry.domain + ':4060/api/v1/new/news' + '?token=' + req.query.token || req.body.token,
                 method:'POST',
                 body:bodyGen(msg,communicationInfo['messageNo']),
                 json:true
@@ -618,7 +621,7 @@ exports.postCommunication = function(req, res) {
             });
         }else{
             request({
-                url:'http://' + webEntry.domain + ':4050/new/insertTeamNews' + '?token=' + req.query.token || req.body.token,
+                url:'http://' + webEntry.domain + ':4060/api/v1/new/teamNews' + '?token=' + req.query.token || req.body.token,
                 method:'POST',
                 body:bodyGen(msg,communicationInfo['_id']),
                 json:true
@@ -704,7 +707,7 @@ exports.getCommunication = function(req, res) {
 		}
 		_Url = _Url.substr(0, _Url.length - 1)
 	}
-	var nexturl = webEntry.domain + ':' + webEntry.restPort + '/communication/getCommunication' + _Url
+	var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v1/communication/getCommunication' + _Url
 
 	if (messageType === 2) {
 		var query = {receiver: id2};
@@ -741,6 +744,7 @@ exports.getCommunication = function(req, res) {
 			// };
 			query['newsType'] = newsType;
 		}
+		console.log(query);
 
 		Communication.getSome(query, function(err, items) {
 			if (err) {
@@ -782,6 +786,7 @@ function bodyGen(msg,MESSAGE_ID){
         description:'',
         readOrNot:0,
         url:'',
+        userRole:msg.targetRole,
         messageId:MESSAGE_ID //从post communication/postCommunication response取
     }
     if(msgType=='custom'){
@@ -833,10 +838,78 @@ exports.addnewsType = function(req, res) {
 
 	Communication.update(query, upObj, function(err, upitems) {
 		if (err) {
-			console.log(err);
+			// console.log(err);
 		}
 		else {
 			return res.json({results:upitems});
 		}
 	}, opts);
+}
+
+//临时方法：给所有消息记录加上一个content.time字段，来源于原文档中的sendDateTime 2017-06-21 GY 
+exports.addcontenttime = function (req, res) {
+	var queryall = {};
+	
+	Communication.getSome(queryall, function (err, items) {
+		var ids = [];
+		for (var j = 0; j < items.length; j ++) {
+			ids[j] = items[j]._id;
+		}
+		// return res.json({'count': ids.length, 'result': ids});
+		for (let i = 0; i < ids.length; i ++) {
+			var query = {'_id': ids[i]};
+			// console.log(query);
+			Communication.getOne(query, function (err, item) {
+				if (err) {
+					// console.log(err);
+				}
+				else if (item === null) {
+					console.log('item_of_null');
+					// console.log(i);
+				}
+				else if (item.content.createTimeInMillis === undefined) {
+					console.log('item_createTimeInMillis_of_undefined');
+					console.log(i);
+				}
+				// else if (item.content.time !== undefined) {
+				else {
+					var queryup = {'_id': ids[i]};
+					var upObj = {'content.time': item.content.createTimeInMillis};
+					Communication.updateOne(queryup, upObj, function (err, upCM) {
+						if (err) {
+							console.log(err);
+						}
+						else {
+							console.log('updateSuccess');
+							console.log(upCM._id);
+							// console.log(upCM.content.time);
+							console.log(i)
+						}
+					}, {new: true});
+				}
+			});
+		}
+	});
+}
+//临时方法：确认content.time字段是否都加上了 2017-06-21 GY
+exports.timeconfirmation = function (req, res) {
+	var query = {};
+	var flag = 0;
+	Communication.getSome(query, function (err, items) {
+		if (err) {
+			console.log(err);
+		}
+		for (let i = 0; i < items.length; i ++) {
+			if (!(items[i].content.time)) {
+				console.log(i);
+				console.log(items[i]._id);
+			}
+			flag = i;
+			console.log(flag);
+		}
+		console.log(items.length);
+		if (flag === items.length-1) {
+			return res.json({'result': 'finish'});
+		}
+	});
 }

@@ -46,6 +46,7 @@ exports.getNewsByReadOrNot = function(req, res) {
 	}
 
 	var userId = req.query.userId;
+	var userRole = req.query.userRole;
 	var type = req.query.type;
 	var _readOrNot = req.query.readOrNot;
 	if (userId == null || userId == '') {
@@ -54,7 +55,7 @@ exports.getNewsByReadOrNot = function(req, res) {
 
 	var query = {};
 
-	if (type != '' && type != undefined) {
+	if (type !== '' && type !== undefined) {
         query["type"] = type;
         if(type=="chat")
         {
@@ -63,7 +64,10 @@ exports.getNewsByReadOrNot = function(req, res) {
     }
     query["userId"] = userId;
     query["readOrNot"] = _readOrNot;
-
+    if(userRole !== '' && userRole !== undefined){
+    	query["userRole"] = userRole;
+    }
+	query["readOrNot"] = _readOrNot;
     // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
 	var opts = {'sort':'-time'};
 
@@ -89,7 +93,7 @@ function insertOneNews(userId,sendBy,req,res) {
 	// return res.json({messageId:req.newId})
 	// console.log("11");
 	// var ret=1;
-
+	// console.log(1);
 	var newData = {
 		// userId: req.body.userId,
 		// sendBy: req.body.sendBy,
@@ -105,27 +109,30 @@ function insertOneNews(userId,sendBy,req,res) {
 		sendBy:userId,
 		userId:sendBy
 	};
-	if (req.body.type != null){
+	if (req.body.type !== null && req.body.type !== undefined){
 		newData['type'] = req.body.type;
 		query1['type'] = req.body.type;
 		query2['type'] = req.body.type;
 	}
-	if (req.body.messageId != null){
+	if (req.body.userRole !== null && req.body.userRole !== undefined){
+		newData['userRole'] = req.body.userRole;
+	}
+	if (req.body.messageId !== null && req.body.messageId !== undefined){
 		newData['messageId'] = req.body.messageId;
 	}
-	if (req.body.time != null && req.body.time != ''){
+	if (req.body.time !== null && req.body.time !== ''&& req.body.time !== undefined){
 		newData['time'] = new Date(req.body.time);
 	}
 	else {
 		newData['time'] = new Date();
 	}
-	if (req.body.title != null){
+	if (req.body.title !== null && req.body.title !== undefined){
 		newData['title'] = req.body.title;
 	}
-	if (req.body.description != null){
+	if (req.body.description !== null && req.body.description !== undefined){
 		newData['description'] = req.body.description;
 	}
-	if (req.body.url != null){
+	if (req.body.url !== null && req.body.url !== undefined){
 		newData['url'] = req.body.url;
 	}
 
@@ -134,6 +141,7 @@ function insertOneNews(userId,sendBy,req,res) {
 	News.getOne(query1, function(err, item1) {
         if (err) {
         	if(res!=undefined){
+        		// console.log(2);
         		return res.status(500).send(err.errmsg);}
             // return 500;
         }
@@ -142,6 +150,7 @@ function insertOneNews(userId,sendBy,req,res) {
     		News.getOne(query2, function(err, item2) {
 		        if (err) {
 		        	if(res!=undefined){
+		        		// console.log(3);
 		            return res.status(500).send(err.errmsg);}
 		            // return 500;
 		        }
@@ -151,7 +160,9 @@ function insertOneNews(userId,sendBy,req,res) {
 					newnew.save(function(err, newInfo) {
 						if (err) {
 							if(res!=undefined){
-					  		return res.status(500).send(err.errmsg);}
+								// console.log(4);
+								// console.log(err);
+					  			return res.status(500).send(err.errmsg);}
 					  		// return 500;
 						}
 						var newResults = newInfo;
@@ -228,13 +239,13 @@ function insertOneNews(userId,sendBy,req,res) {
     });
 }
 exports.insertNews = function(req, res) {
-	if (req.body.userId === null || req.body.userId === '') {
+	if (req.body.userId === null || req.body.userId === ''|| req.body.userId === undefined) {
 		return res.json({result: '请填写userId'});
 	}
-	if (req.body.sendBy === null || req.body.sendBy === '') {
+	if (req.body.sendBy === null || req.body.sendBy === '' || req.body.sendBy === undefined) {
 		return res.json({result: '请填写sendBy'});
 	}
-	if (req.body.readOrNot === null || req.body.readOrNot === '') {
+	if (req.body.readOrNot === null || req.body.readOrNot === '' || req.body.readOrNot === undefined) {
 		return res.json({resutl: '请填写readOrNot'});
 	}
 	var userId=req.body.userId;
@@ -293,7 +304,7 @@ exports.insertTeamNews = function(req, res) {
 			//req.body.status = _status;
 			Team.getOne(query, function (err, team2) {
 			    if (err) {
-			        console.log(err);
+			        // console.log(err);
 			        // return res.status(500).send('服务器错误, 用户查询失败!');
 			        return 500;
 			    }
@@ -305,7 +316,7 @@ exports.insertTeamNews = function(req, res) {
 				    //sendMesg
 				    Doctors=team2.members;
 				    Doctors.push({"userId":team2.sponsorId});
-				    console.log(Doctors);
+				    // console.log(Doctors);
 			        for(var i=0;i<Doctors.length;i++)
 			        {
 			        	DocId=Doctors[i].userId;

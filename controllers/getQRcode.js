@@ -56,7 +56,7 @@ exports.saveAllTDCticket = function(req, res) {
         }
     };
     request({
-        url: 'http://' + '121.196.221.44:4050/' + 'wechat/createTDCticket',
+        url: 'http://' + '121.196.221.44:4060/' + 'wechat/createTDCticket',
         method: 'POST',
         body: jsondata,
         json: true
@@ -68,7 +68,7 @@ exports.saveAllTDCticket = function(req, res) {
         }
         else{
  
-        console.log(body);
+        // console.log(body);
         }
     });
   }
@@ -92,7 +92,7 @@ exports.saveAllTDCticket = function(req, res) {
   //     // console.log(req.body.count)
 
   //   request({
-  //       url: 'http://' + '121.196.221.44:4050/' + 'wechat/createTDCticket',
+  //       url: 'http://' + '121.196.221.44:4060/' + 'wechat/createTDCticket',
   //       method: 'POST',
   //       body: jsondata,
   //       json: true
@@ -179,10 +179,10 @@ exports.downloadImages = function(req, res) {
                         console.log(doctoritem.userId);
                         downloadImage("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" + TDCtickets[i], 'e:/doctorQRcodes_new/'+ doctoritem.name + '_' + doctoritem.title + '_' + doctoritem.workUnit +'.jpg', function(err, data){
                             if (err) {
-                                console.log(err)
+                                // console.log(err)
                             }
                             if (data) {
-                                console.log("done: " + data);
+                                // console.log("done: " + data);
                             }
                         });
                     }

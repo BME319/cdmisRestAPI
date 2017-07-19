@@ -1,6 +1,8 @@
 var	config = require('../config'),
+    xml2js = require('xml2js'),
 	VitalSign = require('../models/vitalSign'), 
 	Patient = require('../models/patient');
+
 
 //查询某患者某一种体征记录 
 exports.getVitalSigns = function(req, res) {
@@ -36,7 +38,7 @@ exports.getPatientObject = function (req, res, next) {
     };
     Patient.getOne(querypatient, function (err, patient) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (patient == null) {
@@ -72,7 +74,7 @@ exports.getVitalSign = function (req, res, next) {
     };
     VitalSign.getOne(queryVital, function(err, vitalsignitem){
     	if (err) {
-    		console.log(err);
+    		// console.log(err);
     		return res.status(500).send('查询失败');
     	}
 
@@ -156,4 +158,20 @@ exports.insertData = function(req, res) {
         }
 		res.json({results: updata});
 	}, {new: true});
+}
+
+exports.receiveBloodPressure = function(req, res){
+    var jsondata = req.body;
+
+    request({
+        method: 'POST',
+        url: config.third_party_data.bloodpressure.get_bp_data_url,
+        body: jsondata,
+        json: true
+    }, function(err, response, body) {
+        if(err){
+            return res.status(500).send(err.errmsg);     
+        }
+        res.json({results: body});
+    }); 
 }

@@ -57,7 +57,7 @@ exports.refreshToken = function (req, res) {
         }
         else{
           
-          userPayload.exp = Date.now() + 60 * 3 * 1000;
+          userPayload.exp = Date.now() + config.TOKEN_EXPIRATION * 1000;
           userPayload = JSON.stringify(userPayload);
 
           var token = jwt.sign(userPayload, config.tokenSecret, {algorithm:'HS256'},{expiresIn: config.TOKEN_EXPIRATION});
