@@ -14,7 +14,7 @@ var communicationSchema = new mongoose.Schema({
   newsType: String
 })
 
-var communicationModel = mongoose.model('communication', communicationSchema)
+var CommunicationModel = mongoose.model('communication', communicationSchema)
 
 function Communication (communication) {
   this.communication = communication
@@ -22,7 +22,7 @@ function Communication (communication) {
 
 Communication.prototype.save = function (callback) {
   var communication = this.communication
-  var newCommunication = new communicationModel(communication)
+  var newCommunication = new CommunicationModel(communication)
   newCommunication.save(function (err, communicationItem) {
     if (err) {
       return callback(err)
@@ -36,7 +36,7 @@ Communication.getOne = function (query, callback, opts, fields, populate) {
   var _fields = fields || null
   var _populate = populate || ''
 
-  communicationModel
+  CommunicationModel
   .findOne(query, _fields, options)
   .populate(_populate)
   .exec(function (err, communicationInfo) {
@@ -51,7 +51,7 @@ Communication.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
-  communicationModel
+  CommunicationModel
   .find(query, _fields, options)
   .populate(_populate)
   .exec(function (err, communications) {
@@ -66,14 +66,14 @@ Communication.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  communicationModel
+  CommunicationModel
   .findOneAndUpdate(query, obj, options)
   .populate(_populate)
-  .exec(function (err, upcommunication) {
+  .exec(function (err, upCommunication) {
     if (err) {
       return callback(err)
     }
-    callback(null, upcommunication)
+    callback(null, upCommunication)
   })
 }
 
@@ -81,14 +81,14 @@ Communication.update = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  communicationModel
+  CommunicationModel
     .update(query, obj, options)
     .populate(_populate)
-    .exec(function (err, upcommunication) {
+    .exec(function (err, upCommunication) {
       if (err) {
         return callback(err)
       }
-      callback(null, upcommunication)
+      callback(null, upCommunication)
     })
 }
 

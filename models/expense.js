@@ -7,7 +7,8 @@ var expenseSchema = new mongoose.Schema({
   doctorName: String,
   time: Date,
   money: Number,
-  type: String
+  type: String,
+  status: Number
 })
 
 var expenseModel = mongoose.model('expense', expenseSchema)
