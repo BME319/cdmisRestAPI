@@ -4,13 +4,13 @@ var InsuranceMsg = require('../models/insuranceMsg')
 // 更新或插入保险消息 ,医生向患者推送 2017-04-18 GY
 exports.updateInsuranceMsg = function (req, res, next) {
   // if (req.body.doctorId === null || req.body.doctorId === '') {
-  if (req.session.userId === null || req.session.userId === '') {
-    return res.json({result: '请填写doctorId'})
-  }
-  if (req.body.patientId === null || req.body.patientId === '') {
+  // if (req.session.userId === null || req.session.userId === '') {
+  //   return res.json({result: '请填写doctorId'})
+  // }
+  if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
     return res.json({resutl: '请填写patientId'})
   }
-  if (req.body.insuranceId === null || req.body.insuranceId === '') {
+  if (req.body.insuranceId === null || req.body.insuranceId === '' || req.body.insuranceId === undefined) {
     return res.json({resutl: '请填写insuranceId'})
   }
 
@@ -22,11 +22,11 @@ exports.updateInsuranceMsg = function (req, res, next) {
   req.body.type = 5
  // return res.json({result: req.body})
 
-  if (req.body.insDescription === null || req.body.insDescription === '') {
+  if (req.body.insDescription === null || req.body.insDescription === '' || req.body.insDescription === undefined) {
     var insDescription = ''
   }
   var time
-  if (req.body.tiem === null || req.body.time === '') {
+  if (req.body.time === null || req.body.time === '' || req.body.time === undefined) {
     time = new Date()
   } else {
     time = new Date(req.body.time)
@@ -118,13 +118,13 @@ exports.updateMsgCount = function (req, res, next) {
 
 // 获取保险推送信息
 exports.getInsMsg = function (req, res) {
-  if (req.query.doctorId === null || req.query.doctorId === '') {
+  if (req.query.doctorId === null || req.query.doctorId === '' || req.query.doctorId === undefined) {
     return res.json({result: '请填写doctorId'})
   }
   // if (req.query.patientId === null || req.query.patientId === '') {
-  if (req.session.userId === null || req.session.userId === '') {
-    return res.json({resutl: '请填写patientId'})
-  }
+  // if (req.session.userId === null || req.session.userId === '') {
+  //   return res.json({resutl: '请填写patientId'})
+  // }
 
   var query = {
     doctorId: req.query.doctorId,

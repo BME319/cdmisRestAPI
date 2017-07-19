@@ -1,15 +1,16 @@
 
 var Account = require('../models/account')
-var Patient = require('../models/patient')
-var Doctor = require('../models/doctor')
+// var Patient = require('../models/patient')
+// var Doctor = require('../models/doctor')
+var Alluser = require('../models/alluser')
 
 // 根据doctorId查询相关评价 2017-03-30 GY
 // 查询账户信息与消费及充值记录
 exports.getAccountInfo = function (req, res) {
   // if (req.query.userId === null || req.query.userId === '') {
-  if (req.session.userId === null || req.session.userId === '') {
-    return res.json({result: '请填写userId!'})
-  }
+  // if (req.session.userId === null || req.session.userId === '') {
+  //   return res.json({result: '请填写userId!'})
+  // }
   // 查询条件
   // var _userId = req.query.userId
   var _userId = req.session.userId
@@ -39,14 +40,16 @@ exports.checkPatient = function (req, res, next) {
   } else {
     // req.patientId = req.body.patientId
     req.patientId = req.session.userId
+    req.role = req.session.role
     console.log(req.session)
   }
   // } else {
   //   req.patientId = req.query.patientId
   // }
   // 判断患者ID是否存在
-  var query = {userId: req.patientId}
-  Patient.getOne(query, function (err, item) {
+  var query = {userId: req.patientId, role: req.role}
+  // Patient.getOne(query, function (err, item) {
+  Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -95,8 +98,9 @@ exports.checkDoctor = function (req, res, next) {
     // req.doctorId = req.body.doctorId
     // 判断医生ID是否存在
       req.doctorId = req.body.doctorId
-      var query = {userId: req.doctorId}
-      Doctor.getOne(query, function (err, item) {
+      var query = {userId: req.doctorId, role: 'doctor'}
+      // Doctor.getOne(query, function (err, item) {
+      Alluser.getOne(query, function (err, item) {
         if (err) {
           return res.status(500).send(err.errmsg)
         } else if (item === null) {
@@ -108,8 +112,9 @@ exports.checkDoctor = function (req, res, next) {
     }
   } else {
     req.doctorId = req.query.doctorId
-    query = {userId: req.doctorId}
-    Doctor.getOne(query, function (err, item) {
+    query = {userId: req.doctorId, role: 'doctor'}
+    // Doctor.getOne(query, function (err, item) {
+    Alluser.getOne(query, function (err, item) {
       if (err) {
         return res.status(500).send(err.errmsg)
       } else if (item === null) {

@@ -4,9 +4,9 @@ var Message = require('../models/message')
 // 根据类型查询消息链接 2017-04-05 GY
 exports.getMessages = function (req, res) {
   // if (req.query.userId === null || req.query.userId === '') {
-  if (req.session.userId === null || req.session.userId === '') {
-    return res.json({result: '请填写userId'})
-  }
+  // if (req.session.userId === null || req.session.userId === '') {
+  //   return res.json({result: '请填写userId'})
+  // }
   // if (req.query.type === null || req.query.type === '') {
   //  return res.json({resutl: '请填写type'});
   // }
@@ -15,7 +15,7 @@ exports.getMessages = function (req, res) {
   var userId = req.session.userId
   var type = req.query.type
 
-  if (userId === null || userId === '') {
+  if (userId === null || userId === '' || userId === undefined) {
     return res.json({result: '请填写userId!'})
   }
 
@@ -40,10 +40,10 @@ exports.getMessages = function (req, res) {
 // 根据userId修改某种类型消息的已读状态 GY 2017-04-15
 exports.changeMessageStatus = function (req, res) {
   // if (req.body.userId === null || req.body.userId === '') {
-  if (req.session.userId === null || req.session.userId === '') {
-    return res.json({result: '请填写userId'})
-  }
-  if (req.body.type === null || req.body.type === '') {
+  // if (req.session.userId === null || req.session.userId === '') {
+  //   return res.json({result: '请填写userId'})
+  // }
+  if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
     return res.json({resutl: '请填写type'})
   }
 
@@ -80,10 +80,10 @@ exports.changeMessageStatus = function (req, res) {
 }
 
 exports.insertMessage = function (req, res) {
-  if (req.body.userId === null || req.body.userId === '') { // insurance传入，不用修改
+  if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) { // insurance传入，不用修改
     return res.json({result: '请填写userId'})
   }
-  if (req.body.type === null || req.body.type === '') {
+  if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
     return res.json({resutl: '请填写type'})
   }
   var readOrNot = 0

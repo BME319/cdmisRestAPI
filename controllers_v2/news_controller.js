@@ -5,9 +5,9 @@ var News = require('../models/news')
 // 根据类型查询消息链接 2017-04-05 GY
 exports.getNews = function (req, res) {
   // if (req.query.userId === null || req.query.userId === '') {
-  if (req.session.userId === null || req.session.userId === '') {
-    return res.json({result: '请填写userId'})
-  }
+  // if (req.session.userId === null || req.session.userId === '') {
+  //   return res.json({result: '请填写userId'})
+  // }
  // if (req.query.type === null || req.query.type === '') {
  //  return res.json({resutl: '请填写type'});
  // }
@@ -16,9 +16,9 @@ exports.getNews = function (req, res) {
   var userId = req.session.userId
   var type = req.query.type
 
-  if (userId === null || userId === '') {     // 重复？
-    return res.json({result: '请填写userId!'})
-  }
+  // if (userId === null || userId === '') {     // 重复？
+  //   return res.json({result: '请填写userId!'})
+  // }
 
   // 查询所有与用户相关的消息记录，并按照时间降序排列
   var query = {'$or': [{userId: userId}, {sendBy: userId}]}
@@ -40,22 +40,23 @@ exports.getNews = function (req, res) {
 
 exports.getNewsByReadOrNot = function (req, res) {
   // if (req.query.userId === null || req.query.userId === '') {
-  if (req.session.userId === null || req.session.userId === '') {
-    return res.json({result: '请填写userId'})
-  }
-  if (req.query.readOrNot === null || req.query.readOrNot === '') {
+  // if (req.session.userId === null || req.session.userId === '') {
+  //   return res.json({result: '请填写userId'})
+  // }
+  if (req.query.readOrNot === null || req.query.readOrNot === '' || req.query.readOrNot === undefined) {
     return res.json({resutl: '请填写readOrNot'})
   }
 
   // var userId = req.query.userId
   var userId = req.session.userId
-  var userRole = req.query.userRole // 可以直接从session中获取role
+  // var userRole = req.query.userRole // 可以直接从session中获取role
+  var userRole = req.session.role
   // var userRole = req.session.role
   var type = req.query.type
   var _readOrNot = req.query.readOrNot
-  if (userId === null || userId === '') {
-    return res.json({result: '请填写userId!'})
-  }
+  // if (userId === null || userId === '') {
+  //   return res.json({result: '请填写userId!'})
+  // }
 
   var query = {}
 
@@ -66,11 +67,11 @@ exports.getNewsByReadOrNot = function (req, res) {
     }
   }
   query['userId'] = userId
+  // query['readOrNot'] = _readOrNot
+  // if (userRole !== '' && userRole !== undefined) {
+  query['userRole'] = userRole
+  // }
   query['readOrNot'] = _readOrNot
-  if (userRole !== '' && userRole !== undefined) {
-    query['userRole'] = userRole
-  }
-  query['readOrNot'] = _readOrNot  // 重复？
     // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
   var opts = {'sort': '-time'}
 
@@ -241,20 +242,23 @@ function insertOneNews (userId, sendBy, req, res) {
     }
   })
 }
+// 发送消息
 exports.insertNews = function (req, res) {
-  // if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) {
-  if (req.session.userId === null || req.session.userId === '' || req.session.userId === undefined) {
+  if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) {
+  // if (req.session.userId === null || req.session.userId === '' || req.session.userId === undefined) {
     return res.json({result: '请填写userId'})
   }
-  if (req.body.sendBy === null || req.body.sendBy === '' || req.body.sendBy === undefined) {
-    return res.json({result: '请填写sendBy'})
-  }
+  // if (req.body.sendBy === null || req.body.sendBy === '' || req.body.sendBy === undefined) {
+  //   return res.json({result: '请填写sendBy'})
+  // }
   if (req.body.readOrNot === null || req.body.readOrNot === '' || req.body.readOrNot === undefined) {
     return res.json({resutl: '请填写readOrNot'})
   }
   // var userId = req.body.userId
-  var userId = req.session.userId
-  var sendBy = req.body.sendBy
+  // var userId = req.session.userId
+  // var sendBy = req.body.sendBy
+  var userId = req.body.userId
+  var sendBy = req.session.userId
   return insertOneNews(userId, sendBy, req, res)
  // console.log(status_code);
  // if(status_code === 0){
@@ -276,14 +280,14 @@ exports.insertNews = function (req, res) {
 
 // 插入团队消息，医生端会诊
 exports.insertTeamNews = function (req, res) {
-  if (req.body.userId === null || req.body.userId === '') {
+  if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) {
     return res.json({result: '请填写userId'})
   }
   // if (req.body.sendBy === null || req.body.sendBy === '') {
-  if (req.session.userId === null || req.session.userId === '') {
-    return res.json({result: '请填写sendBy'})
-  }
-  if (req.body.type === null || req.body.type === '') {
+  // if (req.session.userId === null || req.session.userId === '') {
+  //   return res.json({result: '请填写sendBy'})
+  // }
+  if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
     return res.json({resutl: '请填写type'})
   }
   var userId = req.body.userId

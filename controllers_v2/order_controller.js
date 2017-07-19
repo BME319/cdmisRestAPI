@@ -1,5 +1,5 @@
 // var config = require('../config')
-var Doctor = require('../models/doctor')
+// var Doctor = require('../models/doctor')
 var Order = require('../models/order')
 var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
@@ -19,7 +19,7 @@ exports.getOrder = function (req, res) {
 
 exports.insertOrder = function (req, res, next) {
   var money = req.body.money || null
-  if (money === null || money === '') {
+  if (money === null || money === '' || money === undefined) {
     return res.status(403).send('invalid input')
   }
 
