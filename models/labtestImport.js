@@ -20,7 +20,8 @@ var labtestImportSchema = new mongoose.Schema({
     // VC抗坏血酸
     // KET酮体
     // GLU葡萄糖
-    enum: ['SCr', 'GFR', 'ALB', 'PRO', 'LEU', 'NIT', 'UBG', 'PH', 'ERY', 'SG', 'BIL', 'VC', 'KET', 'GLU']
+    // HB血红蛋白
+    enum: ['SCr', 'GFR', 'ALB', 'PRO', 'LEU', 'NIT', 'UBG', 'PH', 'ERY', 'SG', 'BIL', 'VC', 'KET', 'GLU', 'HB']
   },
   value: Number,
   valueStr: String,
