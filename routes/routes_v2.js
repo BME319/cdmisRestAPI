@@ -216,12 +216,14 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctor/numbers', tokenManager.verifyToken(), doctorCtrl.getDocNum)
   app.get(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.getAliPayAccount)
   app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.editAliPayAccount)
-  // 患者端 关注医生
+  // 患者端 关注医生 2017-07-18
   app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), patientCtrl.bindingDoctor, patientCtrl.bindingPatient)
-  // 患者端 申请主管医生
+  // 患者端 申请主管医生 2017-07-18
   app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge)
-  // 患者端 获取关注医生列表
+  // 患者端 获取关注医生列表 2017-07-19
   app.get(version + '/patient/myFavoriteDoctors', tokenManager.verifyToken(), patientCtrl.getMyFavoriteDoctors)
+  // 医生端 获取主管医生待审核请求列表 2017-07-19
+  app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
 
   // niaodaifu
   /**
