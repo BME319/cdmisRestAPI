@@ -398,8 +398,91 @@ exports.deleteServiceSuspend = function (req, res) {
 // 输入：code；修改内容：personalDiag.status, time
 
 // 主管医生服务相关
+// 获取申请主管医生服务的患者列表
+exports.getPatientsToReview = function (req, res) {
+  let doctorId = req.session.userId
+  let queryD = {userId: doctorId, role: 'doctor'}
+  let doctorObjectId
+  Alluser.getOne(queryD, function (err, itemD) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    doctorObjectId = itemD._id
+
+    let queryR = {doctorId: doctorObjectId}
+    let opts = ''
+    let fields = {'_id': 0, 'patientsInCharge': 1}
+    let populate = {path: 'patientsInCharge.patientId', select: {'photoUrl': 1, 'name': 1, 'gender': 1, 'birthday': 1, 'class': 1, 'class_info': 1}}
+    DpRelation.getOne(queryR, function (err, itemR) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      let listToFilter = itemR.patientsInCharge
+      console.log(listToFilter)
+      let patientsList = []
+      for (let i = 0; i < listToFilter.length; i++) {
+        console.log(Number(listToFilter[i].invalidFlag))
+        if (Number(listToFilter[i].invalidFlag) === 0) {
+          patientsList.push(listToFilter[i])
+        }
+      }
+      if (patientsList.length === 0) {
+        return res.json({results: '无主管医生服务待审核的患者！', numberToReview: patientsList.length})
+      } else {
+        res.json({results: patientsList, numberToReview: patientsList.length})
+      }
+    }, opts, fields, populate)
+  })
+}
 // 通过或拒绝主管医生申请：patient, dpRelation表数据修改
 // 输入：患者ID；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
+
+// exports.reviewDoctorInCharge = function (req, res, next) {
+//   let patientId = req.body.patientId || null
+//   if (patientId == null) {
+//     return res.json({result: '请填写patientId!'})
+//   }
+//   let rejectReason = req.body.rejectReason || null
+
+//   let doctorId = req.session.doctorId
+//   let queryD = {userId: doctorId, role: 'doctor'}
+//   Alluser.getOne(queryD, function (err, itemD) {
+//     if (err) {
+//       return res.status(500).send(err)
+//     }
+//     let doctorObjectId = itemD._id
+//   })
+
+//   let queryP = {userId: doctorId, role: 'patient'}
+//   Alluser.getOne(queryP, function (err, itemP) {
+//     if (err) {
+//       return res.status(500).send(err)
+//     }
+//     if (itemP == null) {
+//       return res.json({result: '不存在的医生ID!'})
+//     }
+//     let doctorObjectId = itemD._id
+//   })
+
+//   let upObj = {doctorsInCharge: {
+//         doctorId: doctorObjectId
+//       }
+//     }
+//   if (rejectReason === null) {
+//     upObj = {doctorsInCharge: {
+//       start: new Date(),
+//       end: ,
+//       invalidFlag:
+//       }
+//     }
+//   } else {
+
+//   }
+//   let queryP = {userId: patientId, role: 'patient'}
+//   Alluser.updateOne(queryP, upObj, function (err, upPatient) {
+
+//   })
+// }
 
 // 患者端使用的方法
 // 面诊申请：修改面诊计数，新建面诊表数据
