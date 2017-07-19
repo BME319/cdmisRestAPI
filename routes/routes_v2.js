@@ -42,6 +42,12 @@ var doctorCtrl = require('../controllers_v2/doctor_controller')
 var counselCtrl = require('../controllers_v2/counsel_controller')
 var communicationCtrl = require('../controllers_v2/communication_controller')
 var taskCtrl = require('../controllers_v2/task_controller')
+var accountCtrl = require('../controllers_v2/account_controller')
+var insuranceCtrl = require('../controllers_v2/insurance_controller')
+var healthInfoCtrl = require('../controllers_v2/healthInfo_controller')
+var loadCtrl = require('../controllers_v2/load_controller')
+var messageCtrl = require('../controllers_v2/message_controller')
+var newsCtrl = require('../controllers_v2/news_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
