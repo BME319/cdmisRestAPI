@@ -43,17 +43,6 @@ var counselCtrl = require('../controllers_v2/counsel_controller')
 var communicationCtrl = require('../controllers_v2/communication_controller')
 var taskCtrl = require('../controllers_v2/task_controller')
 
-
-var accountCtrl = require('../controllers_v2/account_controller')
-var expenseCtrl = require('../controllers_v2/expense_controller')
-var doctorCtrl = require('../controllers_v2/doctor_controller')
-var healthInfoCtrl = require('../controllers_v2/healthInfo_controller')
-var insuranceCtrl = require('../controllers_v2/insurance_controller')
-var messageCtrl = require('../controllers_v2/message_controller')
-// var labtestResultCtrl = require('../controllers_v2/labtestResult_controller')
-var loadCtrl = require('../controllers_v2/load_controller')
-var newsCtrl = require('../controllers_v2/news_controller')
-
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
   //   res.send("Server Root");
@@ -203,22 +192,20 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/patient/editDetail', tokenManager.verifyToken(), patientCtrl.editPatientDetail)
   app.post(version + '/patient/diagnosis', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
   // bindingMyDoctor改为关注医生
-  app.post(version + '/patient/bindingMyDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
+  // app.post(version + '/patient/bindingMyDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
   app.post(version + '/patient/changeVIP', tokenManager.verifyToken(), patientCtrl.changeVIP)
   app.post(version + '/patient/wechatPhotoUrl', tokenManager.verifyToken(), patientCtrl.wechatPhotoUrl)
   // doctor_Info
-  app.post(version + '/doctor/detail', doctorCtrl.insertDocBasic)
-  // 需要查询class字典表（待定）
-
+  app.post(version + '/doctor/detail', tokenManager.verifyToken(), doctorCtrl.insertDocBasic)
+  // 需要查询class字典表（待定） ？？？这是啥
   app.get(version + '/doctor/myPatients', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getPatientList)
   app.get(version + '/doctor/myPatientsByDate', doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
-  app.get(version + '/doctor/detail', doctorCtrl.getSessionObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
+  app.get(version + '/doctor/detail', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
   app.get(version + '/doctor/myTeams', tokenManager.verifyToken(), doctorCtrl.getTeams)
   app.get(version + '/doctor/teamPatients', tokenManager.verifyToken(), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
   // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
   app.post(version + '/doctor/editDetail', tokenManager.verifyToken(), doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember)
-
   app.get(version + '/doctor/myRecentDoctors', doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList)
   app.post(version + '/doctor/schedule', tokenManager.verifyToken(), doctorCtrl.insertSchedule)
   app.post(version + '/doctor/deleteSchedule', tokenManager.verifyToken(), doctorCtrl.deleteSchedule)
@@ -227,11 +214,47 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/doctor/deleteSuspendTime', tokenManager.verifyToken(), doctorCtrl.deleteSuspendTime)
   app.get(version + '/doctor/suspendTime', tokenManager.verifyToken(), doctorCtrl.getSuspendTime)
   app.get(version + '/doctor/numbers', tokenManager.verifyToken(), doctorCtrl.getDocNum)
-
   app.get(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.getAliPayAccount)
   app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.editAliPayAccount)
+  // 患者端 关注医生 2017-07-18
+  app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), patientCtrl.bindingDoctor, patientCtrl.bindingPatient)
+  // 患者端 申请主管医生 2017-07-18
+  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge)
+  // 患者端 获取关注医生列表 2017-07-19
+  app.get(version + '/patient/myFavoriteDoctors', tokenManager.verifyToken(), patientCtrl.getMyFavoriteDoctors)
+  // 医生端 获取主管医生待审核请求列表 2017-07-19
+  app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
 
   // niaodaifu
+  /**
+   * @swagger
+   * definition:
+   *   Puppy:
+   *     properties:
+   *       name:
+   *         type: string
+   *       breed:
+   *         type: string
+   *       age:
+   *         type: integer
+   *       sex:
+   *         type: string
+   */
+  /**
+   * @swagger
+   * /devicedata/niaodaifu/loginparam:
+   *   get:
+   *     tags:
+   *       - Puppies
+   *     description: Returns all puppies
+   *     produces:
+   *       - application/json
+   *     responses:
+   *       200:
+   *         description: An array of puppies
+   *         schema:
+   *           $ref: '#/definitions/Puppy'
+   */
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
