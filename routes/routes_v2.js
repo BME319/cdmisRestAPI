@@ -27,10 +27,11 @@ var orderCtrl = require('../controllers_v2/order_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
 var expenseCtrl = require('../controllers_v2/expense_controller')
-var dictTypeOneCtrl = require('../controllers/dictTypeOne_controller')
-var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller')
-var dictDistrictCtrl = require('../controllers/dictDistrict_controller')
-var dictHospitalCtrl = require('../controllers/dictHospital_controller')
+var dictTypeOneCtrl = require('../controllers_v2/dictTypeOne_controller')
+var dictTypeTwoCtrl = require('../controllers_v2/dictTypeTwo_controller')
+var dictDistrictCtrl = require('../controllers_v2/dictDistrict_controller')
+var dictHospitalCtrl = require('../controllers_v2/dictHospital_controller')
+var versionCtrl = require('../controllers_v2/version_controller')
 
 var commentCtrl = require('../controllers_v2/comment_controller')
 var adviceCtrl = require('../controllers_v2/advice_controller')
@@ -38,7 +39,6 @@ var complianceCtrl = require('../controllers_v2/compliance_controller')
 var vitalSignCtrl = require('../controllers_v2/vitalSign_controller')
 var patientCtrl = require('../controllers_v2/patient_controller')
 var doctorCtrl = require('../controllers_v2/doctor_controller')
-// var wechatCtrl = require('../controllers_v2/wechat_controller')
 var counselCtrl = require('../controllers_v2/counsel_controller')
 var communicationCtrl = require('../controllers_v2/communication_controller')
 var taskCtrl = require('../controllers_v2/task_controller')
@@ -226,6 +226,39 @@ module.exports = function (app, webEntry, acl) {
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 
+  // wechat
+  app.get(version + '/wechat/settingConfig', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.settingConfig)
+  // 获取用户基本信息
+  app.get(version + '/wechat/getUserInfo', wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.getuserinfo)
+  app.get(version + '/wechat/gettokenbycode', wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken)
+  // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
+  // 输入：微信用户授权的code 商户系统生成的订单号 
+  app.post(version + '/wechat/addOrder',  getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign)
+  // 订单支付结果回调 
+  app.post(version + '/wechat/payResult', wechatCtrl.payResult)
+  // 查询订单   orderNo 
+  app.get(version + '/wechat/getWechatOrder',  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.getWechatOrder)
+  // 关闭订单   orderNo 
+  app.get(version + '/wechat/closeWechatOrder',  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.closeWechatOrder)
+  
+  // app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund)
   // 退款接口
   app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
+  // 退款查询
+  app.post('/wechat/refundquery', orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
+  // 消息模板
+  app.post(version + '/wechat/messageTemplate',  wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate)
+  // 下载
+  app.get(version + '/wechat/download',  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.download)
+  // 创建永久二维码
+  app.post(version + '/wechat/createTDCticket',  wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
+
+  // 接收微信服务器的post请求
+  app.post(version + '/wechat', wechatCtrl.receiveTextMessage)
+  // 接收微信服务器的get请求
+  app.get(version + '/wechat', wechatCtrl.getServerSignature)
+
+  // version
+  app.get(version + '/version', versionCtrl.getVersionInfo)
+  app.post(version + '/version', getNoMid.getNo(10), versionCtrl.insertVersionInfo)
 }
