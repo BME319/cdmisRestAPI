@@ -8,7 +8,7 @@ var Alluser = require('../models/alluser')
 // var Patient = require('../models/patient')
 // var Doctor = require('../models/doctor')
 var DpRelation = require('../models/dpRelation')
-var User = require('../models/user')
+// var User = require('../models/user')
 var commonFunc = require('../middlewares/commonFunc')
 var Counsel = require('../models/counsel')
 var VitalSign = require('../models/vitalSign')
@@ -82,10 +82,10 @@ exports.getDoctorLists = function (req, res) {
   // if ((_name == null || _name == '') && (_workUnit == null || _workUnit == '')){
   //   query = {};
   // }
-  // else if((_name == null || _name == '') && _workUnit != null){
+  // else if((_name == null || _name == '') && _workUnit !== null){
   //   query = {workUnit:_workUnit};
   // }
-  // else if (_name != null && (_workUnit == null || _workUnit == '')){
+  // else if (_name !== null && (_workUnit == null || _workUnit == '')){
   //   query = {name:_name};
   // }
   // else{
@@ -93,16 +93,16 @@ exports.getDoctorLists = function (req, res) {
   // }
 
   let query = {role: 'doctor'}
-  if (_province != null) {
+  if (_province !== null) {
     query['province'] = _province
   }
-  if (_city != null) {
+  if (_city !== null) {
     query['city'] = _city
   }
-  if (_district != null) {
+  if (_district !== null) {
     query['district'] = _district
   }
-  if (_workUnit != null) {
+  if (_workUnit !== null) {
     query['workUnit'] = _workUnit
   }
   // if(_name != ""&&_name!=null)
@@ -125,16 +125,16 @@ exports.getDoctorLists = function (req, res) {
   let _skipUrl = ''
   let _Url = ''
   // 检查查询条件存在并设定
-  if (_workUnit != null) {
+  if (_workUnit !== null) {
     _workUnitUrl = 'workUnit=' + _workUnit
   }
-  if (_name != null) {
+  if (_name !== null) {
     _nameUrl = 'name=' + _name
   }
-  if (_limit != null) {
+  if (_limit !== null) {
     _limitUrl = 'limit=' + String(_limit)
   }
-  if (_skip != null) {
+  if (_skip !== null) {
     _skipUrl = 'skip=' + String(_skip + _limit)
   }
   // 路径尾部添加查询条件
@@ -209,6 +209,25 @@ exports.getSessionObject = function (req, res, next) {
     }
   })
 }
+
+// 获取患者的所有关注医生 2017-07-19 YQC
+exports.getMyFavoriteDoctors = function (req, res) {
+  let query = {userId: req.session.userId, role: 'patient'}
+  var opts = ''
+  var fields = {'_id': 0, 'doctors': 1}
+  var populate = {path: 'doctors.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
+  Alluser.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    console.log(item.doctors)
+    if (item.doctors.length === 0) {
+      return res.json({results: '未关注任何医生！'})
+    }
+    res.json({results: item})
+  }, opts, fields, populate)
+}
+
 // 获取患者的所有医生 2017-03-30 GY
 // 2017-04-05 GY 修改：按照要求更换查询表
 exports.getMyDoctor = function (req, res) {
@@ -270,7 +289,7 @@ exports.checkPatientId = function (req, res, next) {
       console.log(err)
       return res.status(500).send('服务器错误, 用户查询失败!')
     }
-    if (patient != null) {
+    if (patient !== null) {
       return res.json({result: '已存在的患者ID！'})
     }
         // req.body.patientObject = patient;
@@ -308,41 +327,41 @@ exports.newPatientDetail = function (req, res) {
   //   terminalIP:"10.12.43.32"
   // }
   }
-  if (req.body.photoUrl != null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
+  if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
     patientData['photoUrl'] = req.body.photoUrl
   }
-  if (req.body.IDNo != null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
+  if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
     patientData['IDNo'] = req.body.IDNo
   }
-  if (req.body.height != null && req.body.height !== '' && req.body.height !== undefined) {
+  if (req.body.height !== null && req.body.height !== '' && req.body.height !== undefined) {
     patientData['height'] = req.body.height
   }
-  if (req.body.weight != null && req.body.weight !== '' && req.body.weight !== undefined) {
+  if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
     patientData['weight'] = req.body.weight
   }
-  if (req.body.occupation != null && req.body.occupation !== '' && req.body.occupation !== undefined) {
+  if (req.body.occupation !== null && req.body.occupation !== '' && req.body.occupation !== undefined) {
     patientData['occupation'] = req.body.occupation
   }
-  if (req.body.nation != null && req.body.nation !== '' && req.body.nation !== undefined) {
+  if (req.body.nation !== null && req.body.nation !== '' && req.body.nation !== undefined) {
     patientData['address.nation'] = req.body.nation
   }
-  if (req.body.province != null && req.body.province !== '' && req.body.province !== undefined) {
+  if (req.body.province !== null && req.body.province !== '' && req.body.province !== undefined) {
     patientData['address.province'] = req.body.province
   }
-  if (req.body.city != null && req.body.city !== '' && req.body.city !== undefined) {
+  if (req.body.city !== null && req.body.city !== '' && req.body.city !== undefined) {
     patientData['address.city'] = req.body.city
   }
-  if (req.body.operationTime != null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
+  if (req.body.operationTime !== null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
     patientData['operationTime'] = req.body.operationTime
   }
-  if (req.body.lastVisit != null && req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
-    if (req.body.lastVisit.time != null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
+  if (req.body.lastVisit !== null && req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
+    if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
       patientData['lastVisit.time'] = new Date(req.body.lastVisit.time)
     }
-    if (req.body.lastVisit.hospital != null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
+    if (req.body.lastVisit.hospital !== null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
       patientData['lastVisit.hospital'] = req.body.lastVisit.hospital
     }
-    if (req.body.lastVisit.diagnosis != null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
+    if (req.body.lastVisit.diagnosis !== null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
       patientData['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
     }
   }
@@ -352,7 +371,7 @@ exports.newPatientDetail = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (req.body.weight != null && req.body.weight !== '' && req.body.weight !== undefined) {
+    if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
       let timenow = commonFunc.getNowFormatSecond()
       let queryVital = {
         patientId: patientInfo._id,
@@ -413,68 +432,68 @@ exports.editPatientDetail = function (req, res) {
   //   terminalIP:"10.12.43.32"
   // }
   }
-  // if (req.body.userId != null){
+  // if (req.body.userId !== null){
   //   upObj['userId'] = req.body.userId;
   // }
-  if (req.body.name != null && req.body.name !== '' && req.body.name !== undefined) {
+  if (req.body.name !== null && req.body.name !== '' && req.body.name !== undefined) {
     upObj['name'] = req.body.name
   }
-  if (req.body.photoUrl != null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
+  if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
     upObj['photoUrl'] = req.body.photoUrl
   }
-  if (req.body.birthday != null && req.body.birthday !== '' && req.body.birthday !== undefined) {
+  if (req.body.birthday !== null && req.body.birthday !== '' && req.body.birthday !== undefined) {
     upObj['birthday'] = new Date(req.body.birthday)
   }
-  if (req.body.gender != null && req.body.gender !== '' && req.body.gender !== undefined) {
+  if (req.body.gender !== null && req.body.gender !== '' && req.body.gender !== undefined) {
     upObj['gender'] = req.body.gender
   }
-  if (req.body.IDNo != null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
+  if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
     upObj['IDNo'] = req.body.IDNo
   }
-  if (req.body.height != null && req.body.height !== '' && req.body.height !== undefined) {
+  if (req.body.height !== null && req.body.height !== '' && req.body.height !== undefined) {
     upObj['height'] = req.body.height
   }
-  if (req.body.weight != null && req.body.weight !== '' && req.body.weight !== undefined) {
+  if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
     upObj['weight'] = req.body.weight
   }
-  if (req.body.occupation != null && req.body.occupation !== '' && req.body.occupation !== undefined) {
+  if (req.body.occupation !== null && req.body.occupation !== '' && req.body.occupation !== undefined) {
     upObj['occupation'] = req.body.occupation
   }
-  if (req.body.bloodType != null && req.body.bloodType !== '' && req.body.bloodType !== undefined) {
+  if (req.body.bloodType !== null && req.body.bloodType !== '' && req.body.bloodType !== undefined) {
     upObj['bloodType'] = req.body.bloodType
   }
-  if (req.body.nation != null && req.body.nation !== '' && req.body.nation !== undefined) {
+  if (req.body.nation !== null && req.body.nation !== '' && req.body.nation !== undefined) {
     upObj['address.nation'] = req.body.nation
   }
-  if (req.body.province != null && req.body.province !== '' && req.body.province !== undefined) {
+  if (req.body.province !== null && req.body.province !== '' && req.body.province !== undefined) {
     upObj['address.province'] = req.body.province
   }
-  if (req.body.city != null && req.body.city !== '' && req.body.city !== undefined) {
+  if (req.body.city !== null && req.body.city !== '' && req.body.city !== undefined) {
     upObj['address.city'] = req.body.city
   }
-  if (req.body.class != null && req.body.class !== '' && req.body.class !== undefined) {
+  if (req.body.class !== null && req.body.class !== '' && req.body.class !== undefined) {
     upObj['class'] = req.body.class
   }
-  if (req.body.class_info != null && req.body.class_info !== '' && req.body.class_info !== undefined) {
+  if (req.body.class_info !== null && req.body.class_info !== '' && req.body.class_info !== undefined) {
     upObj['class_info'] = req.body.class_info
   }
-  if (req.body.operationTime != null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
+  if (req.body.operationTime !== null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
     upObj['operationTime'] = new Date(req.body.operationTime)
   }
-  if (req.body.hypertension != null && req.body.hypertension !== '' && req.body.hypertension !== undefined) {
+  if (req.body.hypertension !== null && req.body.hypertension !== '' && req.body.hypertension !== undefined) {
     upObj['hypertension'] = req.body.hypertension
   }
-  if (req.body.allergic != null && req.body.allergic !== '' && req.body.allergic !== undefined) {
+  if (req.body.allergic !== null && req.body.allergic !== '' && req.body.allergic !== undefined) {
     upObj['allergic'] = req.body.allergic
   }
-  if (req.body.lastVisit != null) {
-    if (req.body.lastVisit.time != null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
+  if (req.body.lastVisit !== null) {
+    if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
       upObj['lastVisit.time'] = new Date(req.body.lastVisit.time)
     }
-    if (req.body.lastVisit.hospital != null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
+    if (req.body.lastVisit.hospital !== null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
       upObj['lastVisit.hospital'] = req.body.lastVisit.hospital
     }
-    if (req.body.lastVisit.diagnosis != null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
+    if (req.body.lastVisit.diagnosis !== null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
       upObj['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
     }
   }
@@ -487,7 +506,7 @@ exports.editPatientDetail = function (req, res) {
     if (upPatient == null) {
       return res.json({result: '修改失败，不存在的患者ID！'})
     }
-    if (req.body.weight != null && req.body.weight !== '' && req.body.weight !== undefined) {
+    if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
       var timenow = commonFunc.getNowFormatSecond()
       var queryVital = {
         patientId: upPatient._id,
@@ -616,301 +635,402 @@ exports.insertDiagnosis = function (req, res, next) {
   }, {new: true})
 }
 
-// 绑定主管医生 --- 修改关注医生.待定
-// 1. 查询当前主管医生并在DPRelation表里解绑（删除）
-exports.debindingDoctor = function (req, res, next) {
-  var query = {userId: req.session.userId, role: 'patient'}
+// // 绑定主管医生 --- 修改关注医生.待定
+// // 1. 查询当前主管医生并在DPRelation表里解绑（删除）
+// exports.debindingDoctor = function (req, res, next) {
+//   var query = {userId: req.session.userId, role: 'patient'}
 
-  Alluser.getOne(query, function (err, item) {
-    if (err) {
-      return res.status(500).send(err.errmsg)
-    }
-    if (item == null) {
-      return res.json({result: '不存在的患者ID！'})
-    }
-      // return res.json({results: item});
-    // 患者未匹配主管医生，跳转binding
-    if (item.doctors.length === 0) {
-      next()
-    } else {
-      for (var i = item.doctors.length - 1; i >= 0; i--) {
-        if (item.doctors[i].invalidFlag === 0) {
-          var lastDocId = item.doctors[i].doctorId
-          break
-        }
-      }
-      var queryDoc = {doctorId: lastDocId}
-      var upObj = {
-        $pull: {
-          patients: {
-            patientId: item._id
-          }
-        }
-      }
+//   Alluser.getOne(query, function (err, item) {
+//     if (err) {
+//       return res.status(500).send(err.errmsg)
+//     }
+//     if (item == null) {
+//       return res.json({result: '不存在的患者ID！'})
+//     }
+//       // return res.json({results: item});
+//     // 患者未匹配主管医生，跳转binding
+//     if (item.doctors.length === 0) {
+//       next()
+//     } else {
+//       for (var i = item.doctors.length - 1; i >= 0; i--) {
+//         if (item.doctors[i].invalidFlag === 0) {
+//           var lastDocId = item.doctors[i].doctorId
+//           break
+//         }
+//       }
+//       var queryDoc = {doctorId: lastDocId}
+//       var upObj = {
+//         $pull: {
+//           patients: {
+//             patientId: item._id
+//           }
+//         }
+//       }
 
-      DpRelation.update(queryDoc, upObj, function (err, upDp) {
-        if (err) {
-          return res.status(500).send(err.errmsg)
-        }
-        // return res.json({resultpull:upDp});
-        if (upDp.n === 0) {
-        // return res.json({result: '未与其他医生或患者建立联系！'});
-          next()
-        } else if (upDp.n === 1 && upDp.nModified === 0) {
-        // return res.json({result: '已删除！请勿重新删除！'});
-          next()
-        } else if (upDp.n === 1 && upDp.nModified !== 0) {
-        // return res.json({result: '删除成功'});
-          next()
-        }
-      }, {new: true})
-    }
-  })
-}
-// 2. patient表中修改
-exports.bindingMyDoctor = function (req, res, next) {
-  var _pId = req.body.patientId
-  var _dId = req.body.doctorId
-  if (_pId == null || _pId === '' || _pId === undefined) {
-    return res.json({result: '请填写patientId!'})
-  } else if (_dId == null || _dId === '' || _dId === undefined) {
+//       DpRelation.update(queryDoc, upObj, function (err, upDp) {
+//         if (err) {
+//           return res.status(500).send(err.errmsg)
+//         }
+//         // return res.json({resultpull:upDp});
+//         if (upDp.n === 0) {
+//         // return res.json({result: '未与其他医生或患者建立联系！'});
+//           next()
+//         } else if (upDp.n === 1 && upDp.nModified === 0) {
+//         // return res.json({result: '已删除！请勿重新删除！'});
+//           next()
+//         } else if (upDp.n === 1 && upDp.nModified !== 0) {
+//         // return res.json({result: '删除成功'});
+//           next()
+//         }
+//       }, {new: true})
+//     }
+//   })
+// }
+// // 2. patient表中修改
+// exports.bindingMyDoctor = function (req, res, next) {
+//   var _pId = req.body.patientId
+//   var _dId = req.body.doctorId
+//   if (_pId == null || _pId === '' || _pId === undefined) {
+//     return res.json({result: '请填写patientId!'})
+//   } else if (_dId == null || _dId === '' || _dId === undefined) {
+//     return res.json({result: '请填写doctorId!'})
+//   } else {
+//     if (_dId.substr(0, 1) === 'h') {
+//       var queryH = {TDCurl: _dId}
+//       console.log(_dId)
+//       User.getOne(queryH, function (err, item) {
+//         if (err) {
+//           return res.status(500).send(err)
+//         } else if (item == null) {
+//           return res.json({result: '不存在的医生ID！'})
+//         } else {
+//           req.body.doctorId = item.userId
+//           var queryD = {
+//             userId: item.userId
+//           }
+//           Doctor.getOne(queryD, function (err, doctor) {
+//             if (err) {
+//               console.log(err)
+//               return res.status(500).send('服务器错误, 用户查询失败!')
+//             }
+//             if (doctor == null) {
+//               return res.json({result: '不存在的医生ID！'})
+//             }
+//             var doc = doctor._id
+//             var query = {
+//               userId: _pId
+//             }
+//             Patient.getOne(query, function (err, patient) {
+//               if (err) {
+//                 console.log(err)
+//                 return res.status(500).send('服务器错误, 用户查询失败!')
+//               }
+//               if (patient == null) {
+//                 return res.json({result: '不存在的患者ID！'})
+//               }
+//               var doctorsList = patient.doctors
+//               var n = doctorsList.length
+//               // var flag=0
+//               for (var i = 0; i < n; i++) {
+//                 doctorsList[i].invalidFlag = 1
+//               // if(doctor.doctorId==_dId){
+//               //   flag=1
+//               //   doctor.invalidFlag=0
+//               // }
+//               }
+//               // if(flag==1){
+//               //   return res.json({result:1,msg:"患者已匹配该主管医生！"});
+//               // }
+//               // else{
+//               var doctorNew = {doctorId: doc, firstTime: new Date(), invalidFlag: 0}
+//               doctorsList.push(doctorNew)
+//               // }
+//               var upObj = {$set: {doctors: doctorsList}}
+//               Patient.updateOne(query, upObj, function (err, patient) {
+//                 if (err) {
+//                   return res.status(500).send(err.errmsg)
+//                 }
+//                 // res.json({results: 0,msg:"success!"});
+//                 req.body.doctor_id = doc
+//                 req.body.patient_id = patient._id
+//                 req.body.patientname = patient.name
+//                 next()
+//               })
+//             })
+//           })
+//         }
+//       })
+//     } else if (_dId.substr(0, 1) === 'U') {
+//       var queryD = {
+//         userId: _dId
+//       }
+//       Doctor.getOne(queryD, function (err, doctor) {
+//         if (err) {
+//           console.log(err)
+//           return res.status(500).send('服务器错误, 用户查询失败!')
+//         }
+//         if (doctor == null) {
+//           return res.json({result: '不存在的医生ID！'})
+//         }
+//         var doc = doctor._id
+//         var query = {
+//           userId: _pId
+//         }
+//         Patient.getOne(query, function (err, patient) {
+//           if (err) {
+//             console.log(err)
+//             return res.status(500).send('服务器错误, 用户查询失败!')
+//           }
+//           if (patient == null) {
+//             return res.json({result: '不存在的患者ID！'})
+//           }
+//           var doctorsList = patient.doctors
+//           var n = doctorsList.length
+//           // var flag=0
+//           for (var i = 0; i < n; i++) {
+//             doctorsList[i].invalidFlag = 1
+//           // if(doctor.doctorId==_dId){
+//           //   flag=1
+//           //   doctor.invalidFlag=0
+//           // }
+//           }
+//           // if(flag==1){
+//           //   return res.json({result:1,msg:"患者已匹配该主管医生！"});
+//           // }
+//           // else{
+//           var doctorNew = {doctorId: doc, firstTime: new Date(), invalidFlag: 0}
+//           doctorsList.push(doctorNew)
+//           // }
+//           var upObj = {$set: {doctors: doctorsList}}
+//           Patient.updateOne(query, upObj, function (err, patient) {
+//             if (err) {
+//               return res.status(500).send(err.errmsg)
+//             }
+//             // res.json({results: 0,msg:"success!"});
+//             req.body.doctor_id = doc
+//             req.body.patient_id = patient._id
+//             req.body.patientname = patient.name
+//             next()
+//           })
+//         })
+//       })
+//     } else {
+//       return res.json({result: '不存在的医生ID！'})
+//     }
+//   }
+// }
+// // 3. DpRelation表中医生绑定患者
+// exports.bindingPatient = function (req, res, next) {
+//   var doctorId = req.body.doctor_id
+//   var patientId = req.body.patient_id
+//   var dpRelationTime
+//   if (req.body.dpRelationTime == null || req.body.dpRelationTime === '') {
+//     dpRelationTime = new Date()
+//   } else {
+//     dpRelationTime = new Date(req.body.dpRelationTime)
+//   }
+//   // return res.json({doctor: doctorId, patient: patientId, dpTime: dpRelationTime});
+//   var query = {doctorId: doctorId}
+
+//   var upObj = {
+//     $push: {
+//       patients: {
+//         patientId: patientId,
+//         dpRelationTime: dpRelationTime
+//       }
+//     }
+//   }
+
+//   DpRelation.update(query, upObj, function (err, uprelation) {
+//     if (err) {
+//       return res.status(422).send(err.message)
+//     }
+//     if (uprelation.n === 0) {
+//       var dpRelationData = {
+//         doctorId: doctorId
+//     //   revisionInfo:{
+//   //   operationTime:new Date(),
+//   //   userId:"gy",
+//   //   userName:"gy",
+//   //   terminalIP:"10.12.43.32"
+//   // }
+//       }
+//       // return res.json({result:dpRelationData});
+//       var newDpRelation = new DpRelation(dpRelationData)
+//       newDpRelation.save(function (err, dpRelationInfo) {
+//         if (err) {
+//           return res.status(500).send(err.errmsg)
+//         }
+//         DpRelation.update(query, upObj, function (err, updpRelation) {
+//           if (err) {
+//             return res.status(422).send(err.message)
+//           } else if (updpRelation.nModified === 0) {
+//             return res.json({result: '未成功修改！请检查输入是否符合要求！', results: updpRelation, flag: '0'})
+//           } else if (updpRelation.nModified === 1) {
+//   // return res.json({result:'修改成功', results: updpRelation, flag:'0'});
+//             req.body.userId = req.body.doctorId
+//             req.body.role = 'doctor'
+//             req.body.postdata = {
+
+//               'template_id': 'F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M',
+//               'url': 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect',
+
+//               'data': {
+//                 'first': {
+//                   'value': '您好，有一位新患者添加您为他的主管医生。',
+//                   'color': '#173177'
+//                 },
+//                 'keyword1': {
+//                   'value': req.body.patientname, // 患者姓名
+//                   'color': '#173177'
+//                 },
+//                 'keyword2': {
+//                   'value': commonFunc.getNowFormatSecond(), // 添加的时间
+//                   'color': '#173177'
+//                 },
+//                 'remark': {
+//                   'value': '感谢您的使用！',
+//                   'color': '#173177'
+//                 }
+//               }
+//             }
+//             next()
+//           }
+//   // return res.json({result:updpRelation});
+//         }, {new: true})
+//       })
+//     } else if (uprelation.nModified === 0) {
+//       return res.json({result: '未成功修改！请检查输入是否符合要求！', results: uprelation, flag: '1'})
+//     } else if (uprelation.nModified === 1) {
+//   // return res.json({result:'修改成功', results: uprelation, flag:'1'});
+//       req.body.userId = req.body.doctorId
+//       req.body.role = 'doctor'
+//       req.body.postdata = {
+//         'template_id': 'F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M',
+//         'url': 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect',
+
+//         'data': {
+//           'first': {
+//             'value': '您好，有一位新患者添加您为他的主管医生。',
+//             'color': '#173177'
+//           },
+//           'keyword1': {
+//             'value': req.body.patientname, // 患者姓名
+//             'color': '#173177'
+//           },
+//           'keyword2': {
+//             'value': commonFunc.getNowFormatSecond(), // 添加的时间
+//             'color': '#173177'
+//           },
+//           'remark': {
+//             'value': '感谢您的使用！',
+//             'color': '#173177'
+//           }
+//         }
+//       }
+//   // console.log(req.body.postdata);
+//       next()
+//     }
+//   // res.json({results: uprelation});
+//   }, {new: true})
+// }
+
+// 绑定关注医生 在alluser表patient_info部分doctors字段添加记录
+exports.bindingDoctor = function (req, res, next) {
+  // var patientId = req.body.patientId || null
+  let patientId = req.session.userId
+  let doctorId = req.body.doctorId || null
+  // if (patientId == null) {
+  //   return res.json({result: '请填写patientId!'})
+  // }
+  if (doctorId == null) {
     return res.json({result: '请填写doctorId!'})
-  } else {
-    if (_dId.substr(0, 1) === 'h') {
-      var queryH = {TDCurl: _dId}
-      console.log(_dId)
-      User.getOne(queryH, function (err, item) {
+  }
+  let queryD = {userId: doctorId, role: 'doctor'}
+  Alluser.getOne(queryD, function (err, itemD) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (itemD == null) {
+      return res.json({result: '不存在的医生ID!'})
+    }
+
+    let doctorObjectId = itemD._id
+    let queryP = {userId: patientId, role: 'patient'}
+    Alluser.getOne(queryP, function (err, itemP) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      let favoriteDoctorsList = itemP.doctors
+      console.log(favoriteDoctorsList)
+      for (let i = 0; i < favoriteDoctorsList.length; i++) {
+        if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
+          return res.json({result: '已关注该医生!'})
+        }
+      }
+
+      let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0}
+      favoriteDoctorsList.push(doctorNew)
+      let upObj = {$set: {doctors: favoriteDoctorsList}}
+      Alluser.updateOne(queryP, upObj, function (err, upPatient) {
         if (err) {
           return res.status(500).send(err)
-        } else if (item == null) {
-          return res.json({result: '不存在的医生ID！'})
-        } else {
-          req.body.doctorId = item.userId
-          var queryD = {
-            userId: item.userId
-          }
-          Doctor.getOne(queryD, function (err, doctor) {
-            if (err) {
-              console.log(err)
-              return res.status(500).send('服务器错误, 用户查询失败!')
-            }
-            if (doctor == null) {
-              return res.json({result: '不存在的医生ID！'})
-            }
-            var doc = doctor._id
-            var query = {
-              userId: _pId
-            }
-            Patient.getOne(query, function (err, patient) {
-              if (err) {
-                console.log(err)
-                return res.status(500).send('服务器错误, 用户查询失败!')
-              }
-              if (patient == null) {
-                return res.json({result: '不存在的患者ID！'})
-              }
-              var doctorsList = patient.doctors
-              var n = doctorsList.length
-              // var flag=0
-              for (var i = 0; i < n; i++) {
-                doctorsList[i].invalidFlag = 1
-              // if(doctor.doctorId==_dId){
-              //   flag=1
-              //   doctor.invalidFlag=0
-              // }
-              }
-              // if(flag==1){
-              //   return res.json({result:1,msg:"患者已匹配该主管医生！"});
-              // }
-              // else{
-              var doctorNew = {doctorId: doc, firstTime: new Date(), invalidFlag: 0}
-              doctorsList.push(doctorNew)
-              // }
-              var upObj = {$set: {doctors: doctorsList}}
-              Patient.updateOne(query, upObj, function (err, patient) {
-                if (err) {
-                  return res.status(500).send(err.errmsg)
-                }
-                // res.json({results: 0,msg:"success!"});
-                req.body.doctor_id = doc
-                req.body.patient_id = patient._id
-                req.body.patientname = patient.name
-                next()
-              })
-            })
-          })
         }
+        req.body.doctorObjectId = doctorObjectId
+        req.body.patientObjectId = upPatient._id
+        next()
       })
-    } else if (_dId.substr(0, 1) === 'U') {
-      var queryD = {
-        userId: _dId
-      }
-      Doctor.getOne(queryD, function (err, doctor) {
-        if (err) {
-          console.log(err)
-          return res.status(500).send('服务器错误, 用户查询失败!')
-        }
-        if (doctor == null) {
-          return res.json({result: '不存在的医生ID！'})
-        }
-        var doc = doctor._id
-        var query = {
-          userId: _pId
-        }
-        Patient.getOne(query, function (err, patient) {
-          if (err) {
-            console.log(err)
-            return res.status(500).send('服务器错误, 用户查询失败!')
-          }
-          if (patient == null) {
-            return res.json({result: '不存在的患者ID！'})
-          }
-          var doctorsList = patient.doctors
-          var n = doctorsList.length
-          // var flag=0
-          for (var i = 0; i < n; i++) {
-            doctorsList[i].invalidFlag = 1
-          // if(doctor.doctorId==_dId){
-          //   flag=1
-          //   doctor.invalidFlag=0
-          // }
-          }
-          // if(flag==1){
-          //   return res.json({result:1,msg:"患者已匹配该主管医生！"});
-          // }
-          // else{
-          var doctorNew = {doctorId: doc, firstTime: new Date(), invalidFlag: 0}
-          doctorsList.push(doctorNew)
-          // }
-          var upObj = {$set: {doctors: doctorsList}}
-          Patient.updateOne(query, upObj, function (err, patient) {
-            if (err) {
-              return res.status(500).send(err.errmsg)
-            }
-            // res.json({results: 0,msg:"success!"});
-            req.body.doctor_id = doc
-            req.body.patient_id = patient._id
-            req.body.patientname = patient.name
-            next()
-          })
-        })
-      })
-    } else {
-      return res.json({result: '不存在的医生ID！'})
-    }
-  }
+    })
+  })
 }
-// 3. DpRelation表中医生绑定患者
-exports.bindingPatient = function (req, res, next) {
-  var doctorId = req.body.doctor_id
-  var patientId = req.body.patient_id
-  var dpRelationTime
-  if (req.body.dpRelationTime == null || req.body.dpRelationTime === '') {
+
+// DpRelation表中医生绑定患者
+exports.bindingPatient = function (req, res) {
+  let doctorObjectId = req.body.doctorObjectId
+  let patientObjectId = req.body.patientObjectId
+  let dpRelationTime = req.body.dpRelationTime || null
+  if (dpRelationTime == null) {
     dpRelationTime = new Date()
   } else {
     dpRelationTime = new Date(req.body.dpRelationTime)
   }
-  // return res.json({doctor: doctorId, patient: patientId, dpTime: dpRelationTime});
-  var query = {doctorId: doctorId}
+  let query = {doctorId: doctorObjectId}
 
-  var upObj = {
-    $push: {
-      patients: {
-        patientId: patientId,
-        dpRelationTime: dpRelationTime
-      }
-    }
-  }
-
-  DpRelation.update(query, upObj, function (err, uprelation) {
+  DpRelation.getOne(query, function (err, item) {
     if (err) {
-      return res.status(422).send(err.message)
+      return res.status(500).send(err)
     }
-    if (uprelation.n === 0) {
-      var dpRelationData = {
-        doctorId: doctorId
-    //   revisionInfo:{
-  //   operationTime:new Date(),
-  //   userId:"gy",
-  //   userName:"gy",
-  //   terminalIP:"10.12.43.32"
-  // }
+    if (item == null) {
+      let dpRelationData = {
+        doctorId: doctorObjectId
       }
       // return res.json({result:dpRelationData});
       var newDpRelation = new DpRelation(dpRelationData)
       newDpRelation.save(function (err, dpRelationInfo) {
         if (err) {
-          return res.status(500).send(err.errmsg)
+          return res.status(500).send(err)
         }
-        DpRelation.update(query, upObj, function (err, updpRelation) {
-          if (err) {
-            return res.status(422).send(err.message)
-          } else if (updpRelation.nModified === 0) {
-            return res.json({result: '未成功修改！请检查输入是否符合要求！', results: updpRelation, flag: '0'})
-          } else if (updpRelation.nModified === 1) {
-  // return res.json({result:'修改成功', results: updpRelation, flag:'0'});
-            req.body.userId = req.body.doctorId
-            req.body.role = 'doctor'
-            req.body.postdata = {
-
-              'template_id': 'F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M',
-              'url': 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect',
-
-              'data': {
-                'first': {
-                  'value': '您好，有一位新患者添加您为他的主管医生。',
-                  'color': '#173177'
-                },
-                'keyword1': {
-                  'value': req.body.patientname, // 患者姓名
-                  'color': '#173177'
-                },
-                'keyword2': {
-                  'value': commonFunc.getNowFormatSecond(), // 添加的时间
-                  'color': '#173177'
-                },
-                'remark': {
-                  'value': '感谢您的使用！',
-                  'color': '#173177'
-                }
-              }
-            }
-            next()
-          }
-  // return res.json({result:updpRelation});
-        }, {new: true})
       })
-    } else if (uprelation.nModified === 0) {
-      return res.json({result: '未成功修改！请检查输入是否符合要求！', results: uprelation, flag: '1'})
-    } else if (uprelation.nModified === 1) {
-  // return res.json({result:'修改成功', results: uprelation, flag:'1'});
-      req.body.userId = req.body.doctorId
-      req.body.role = 'doctor'
-      req.body.postdata = {
-        'template_id': 'F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M',
-        'url': 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect',
+    }
+  })
 
-        'data': {
-          'first': {
-            'value': '您好，有一位新患者添加您为他的主管医生。',
-            'color': '#173177'
-          },
-          'keyword1': {
-            'value': req.body.patientname, // 患者姓名
-            'color': '#173177'
-          },
-          'keyword2': {
-            'value': commonFunc.getNowFormatSecond(), // 添加的时间
-            'color': '#173177'
-          },
-          'remark': {
-            'value': '感谢您的使用！',
-            'color': '#173177'
-          }
-        }
+  let upObj = {
+    $push: {
+      patients: {
+        patientId: patientObjectId,
+        dpRelationTime: dpRelationTime
       }
-  // console.log(req.body.postdata);
-      next()
+    }
+  }
+
+  DpRelation.update(query, upObj, function (err, upRelation) {
+    if (err) {
+      return res.status(422).send(err)
+    }
+    if (upRelation.nModified === 0) {
+      return res.json({result: '未关注成功！请检查输入是否符合要求！'})
+    } else if (upRelation.nModified === 1) {
+      return res.json({result: '关注成功', results: upRelation})
     }
   // res.json({results: uprelation});
   }, {new: true})
@@ -927,7 +1047,7 @@ exports.changeVIP = function (req, res) {
   }
 
   var upObj = {}
-  if (req.body.VIP != null && req.body.VIP !== '' && req.body.VIP !== undefined) {
+  if (req.body.VIP !== null && req.body.VIP !== '' && req.body.VIP !== undefined) {
     upObj['VIP'] = req.body.VIP
   }
 
