@@ -63,59 +63,59 @@ exports.insertDocBasic = function (req, res) {
   // }
   }
   // certificatePhotoUrl:String, //资格证书地址
-  // practisingPhotoUrl:String, //执业证书地址
-  if (req.body.certificatePhotoUrl != null && req.body.certificatePhotoUrl !== '' && req.body.certificatePhotoUrl !== undefined) {
+  // practisingPhotoUrl:String, //
+  if (req.body.certificatePhotoUrl !== null && req.body.certificatePhotoUrl !== '' && req.body.certificatePhotoUrl !== undefined) {
     doctorData['certificatePhotoUrl'] = req.body.certificatePhotoUrl
   }
-  if (req.body.practisingPhotoUrl != null && req.body.practisingPhotoUrl !== '' && req.body.practisingPhotoUrl !== undefined) {
+  if (req.body.practisingPhotoUrl !== null && req.body.practisingPhotoUrl !== '' && req.body.practisingPhotoUrl !== undefined) {
     doctorData['practisingPhotoUrl'] = req.body.practisingPhotoUrl
   }
-  if (req.body.name != null && req.body.name !== '' && req.body.name !== undefined) {
+  if (req.body.name !== null && req.body.name !== '' && req.body.name !== undefined) {
     doctorData['name'] = req.body.name
   }
-  if (req.body.photoUrl != null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
+  if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
     doctorData['photoUrl'] = req.body.photoUrl
   }
-  if (req.body.birthday != null && req.body.birthday !== '' && req.body.birthday !== undefined) {
+  if (req.body.birthday !== null && req.body.birthday !== '' && req.body.birthday !== undefined) {
     doctorData['birthday'] = new Date(req.body.birthday)
   }
-  if (req.body.gender != null && req.body.gender !== '' && req.body.gender !== undefined) {
+  if (req.body.gender !== null && req.body.gender !== '' && req.body.gender !== undefined) {
     doctorData['gender'] = req.body.gender
   }
-  if (req.body.IDNo != null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
+  if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
     doctorData['IDNo'] = req.body.IDNo
   }
-  if (req.body.province != null && req.body.province !== '' && req.body.province !== undefined) {
+  if (req.body.province !== null && req.body.province !== '' && req.body.province !== undefined) {
     doctorData['province'] = req.body.province
   }
-  if (req.body.city != null && req.body.city !== '' && req.body.city !== undefined) {
+  if (req.body.city !== null && req.body.city !== '' && req.body.city !== undefined) {
     doctorData['city'] = req.body.city
   }
-  if (req.body.district != null && req.body.district !== '' && req.body.district !== undefined) {
+  if (req.body.district !== null && req.body.district !== '' && req.body.district !== undefined) {
     doctorData['district'] = req.body.district
   }
-  if (req.body.workUnit != null && req.body.workUnit !== '' && req.body.workUnit !== undefined) {
+  if (req.body.workUnit !== null && req.body.workUnit !== '' && req.body.workUnit !== undefined) {
     doctorData['workUnit'] = req.body.workUnit
   }
-  if (req.body.title != null && req.body.title !== '' && req.body.title !== undefined) {
+  if (req.body.title !== null && req.body.title !== '' && req.body.title !== undefined) {
     doctorData['title'] = req.body.title
   }
-  if (req.body.job != null && req.body.job !== '' && req.body.job !== undefined) {
+  if (req.body.job !== null && req.body.job !== '' && req.body.job !== undefined) {
     doctorData['job'] = req.body.job
   }
-  if (req.body.department != null && req.body.department !== '' && req.body.department !== undefined) {
+  if (req.body.department !== null && req.body.department !== '' && req.body.department !== undefined) {
     doctorData['department'] = req.body.department
   }
-  if (req.body.major != null && req.body.major !== '' && req.body.major !== undefined) {
+  if (req.body.major !== null && req.body.major !== '' && req.body.major !== undefined) {
     doctorData['major'] = req.body.major
   }
-  if (req.body.description != null && req.body.description !== '' && req.body.description !== undefined) {
+  if (req.body.description !== null && req.body.description !== '' && req.body.description !== undefined) {
     doctorData['description'] = req.body.description
   }
-  if (req.body.charge1 != null && req.body.charge1 !== '' && req.body.charge1 !== undefined) {
+  if (req.body.charge1 !== null && req.body.charge1 !== '' && req.body.charge1 !== undefined) {
     doctorData['charge1'] = req.body.charge1
   }
-  if (req.body.charge2 != null && req.body.charge2 !== '' && req.body.charge2 !== undefined) {
+  if (req.body.charge2 !== null && req.body.charge2 !== '' && req.body.charge2 !== undefined) {
     doctorData['charge2'] = req.body.charge2
   }
 
@@ -434,58 +434,58 @@ exports.editDoctorDetail = function (req, res, next) {
   //   terminalIP:"10.12.43.32"
   // }
   }
-  if (req.body.certificatePhotoUrl != null || req.body.certificatePhotoUrl !== '' || req.body.certificatePhotoUrl !== undefined) {
+  if (req.body.certificatePhotoUrl !== null || req.body.certificatePhotoUrl !== '' || req.body.certificatePhotoUrl !== undefined) {
     upObj['certificatePhotoUrl'] = req.body.certificatePhotoUrl
   }
-  if (req.body.practisingPhotoUrl != null || req.body.practisingPhotoUrl !== '' || req.body.practisingPhotoUrl !== undefined) {
+  if (req.body.practisingPhotoUrl !== null || req.body.practisingPhotoUrl !== '' || req.body.practisingPhotoUrl !== undefined) {
     upObj['practisingPhotoUrl'] = req.body.practisingPhotoUrl
   }
-  if (req.body.name != null || req.body.name !== '' || req.body.name !== undefined) {
+  if (req.body.name !== null || req.body.name !== '' || req.body.name !== undefined) {
     upObj['name'] = req.body.name
   }
-  if (req.body.photoUrl != null || req.body.photoUrl !== '' || req.body.photoUrl !== undefined) {
+  if (req.body.photoUrl !== null || req.body.photoUrl !== '' || req.body.photoUrl !== undefined) {
     upObj['photoUrl'] = req.body.photoUrl
   }
-  if (req.body.birthday != null || req.body.birthday !== '' || req.body.birthday !== undefined) {
+  if (req.body.birthday !== null || req.body.birthday !== '' || req.body.birthday !== undefined) {
     upObj['birthday'] = new Date(req.body.birthday)
   }
-  if (req.body.gender != null || req.body.gender !== '' || req.body.gender !== undefined) {
+  if (req.body.gender !== null || req.body.gender !== '' || req.body.gender !== undefined) {
     upObj['gender'] = req.body.gender
   }
-  if (req.body.IDNo != null || req.body.IDNo !== '' || req.body.IDNo !== undefined) {
+  if (req.body.IDNo !== null || req.body.IDNo !== '' || req.body.IDNo !== undefined) {
     upObj['IDNo'] = req.body.IDNo
   }
-  if (req.body.province != null || req.body.province !== '' || req.body.province !== undefined) {
+  if (req.body.province !== null || req.body.province !== '' || req.body.province !== undefined) {
     upObj['province'] = req.body.province
   }
-  if (req.body.city != null || req.body.city !== '' || req.body.city !== undefined) {
+  if (req.body.city !== null || req.body.city !== '' || req.body.city !== undefined) {
     upObj['city'] = req.body.city
   }
-  if (req.body.district != null || req.body.district !== '' || req.body.district !== undefined) {
+  if (req.body.district !== null || req.body.district !== '' || req.body.district !== undefined) {
     upObj['district'] = req.body.district
   }
-  if (req.body.workUnit != null || req.body.workUnit !== '' || req.body.workUnit !== undefined) {
+  if (req.body.workUnit !== null || req.body.workUnit !== '' || req.body.workUnit !== undefined) {
     upObj['workUnit'] = req.body.workUnit
   }
-  if (req.body.title != null || req.body.title !== '' || req.body.title !== undefined) {
+  if (req.body.title !== null || req.body.title !== '' || req.body.title !== undefined) {
     upObj['title'] = req.body.title
   }
-  if (req.body.job != null || req.body.job !== '' || req.body.job !== undefined) {
+  if (req.body.job !== null || req.body.job !== '' || req.body.job !== undefined) {
     upObj['job'] = req.body.job
   }
-  if (req.body.department != null || req.body.department !== '' || req.body.department !== undefined) {
+  if (req.body.department !== null || req.body.department !== '' || req.body.department !== undefined) {
     upObj['department'] = req.body.department
   }
-  if (req.body.major != null || req.body.major !== '' || req.body.major !== undefined) {
+  if (req.body.major !== null || req.body.major !== '' || req.body.major !== undefined) {
     upObj['major'] = req.body.major
   }
-  if (req.body.description != null || req.body.description !== '' || req.body.description !== undefined) {
+  if (req.body.description !== null || req.body.description !== '' || req.body.description !== undefined) {
     upObj['description'] = req.body.description
   }
-  if (req.body.charge1 != null || req.body.charge1 !== '' || req.body.charge1 !== undefined) {
+  if (req.body.charge1 !== null || req.body.charge1 !== '' || req.body.charge1 !== undefined) {
     upObj['charge1'] = req.body.charge1
   }
-  if (req.body.charge2 != null || req.body.charge2 !== '' || req.body.charge2 !== undefined) {
+  if (req.body.charge2 !== null || req.body.charge2 !== '' || req.body.charge2 !== undefined) {
     upObj['charge2'] = req.body.charge2
   }
 
@@ -497,7 +497,7 @@ exports.editDoctorDetail = function (req, res, next) {
     if (upDoctor == null) {
       return res.json({result: '修改失败，不存在的医生ID！'})
     } else {
-      if (upObj.name != null || upObj.photoUrl != null) {
+      if (upObj.name !== null || upObj.photoUrl !== null) {
         req.body.editResults = upDoctor
         next()
       } else {
@@ -512,10 +512,10 @@ exports.updateTeamSponsor = function (req, res, next) {
   // console.log('updatename')
   var _userId = req.session.userId
   var upObj = {}
-  if (req.body.name != null) {
+  if (req.body.name !== null) {
     upObj['sponsorName'] = req.body.name
   }
-  if (req.body.photoUrl != null) {
+  if (req.body.photoUrl !== null) {
     upObj['sponsorPhoto'] = req.body.photoUrl
   }
 
@@ -968,7 +968,7 @@ exports.getPatientList = function (req, res) {
           item.patients[i].dpRelationTime = new Date('2017-05-15')
         }
         // if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
-        if (item.patients[i].patientId != null) {
+        if (item.patients[i].patientId !== null) {
           if (_skip > 0) {
             _skip--
           } else {
@@ -1005,7 +1005,7 @@ exports.getPatientByDate = function (req, res) {
   // 模糊搜索GY
   var _name = req.query.name
   var date
-  if (req.query.date != null && req.query.date !== '') {
+  if (req.query.date !== null && req.query.date !== '') {
     date = new Date(req.query.date)
     date = commonFunc.convertToFormatDate(date)
   } else {
@@ -1056,7 +1056,7 @@ exports.getPatientByDate = function (req, res) {
       return res.json({result: '暂无患者!'})
     } else if (item.patients.length !== 0) {
       for (var i = item.patients.length - 1; i >= 0; i--) {
-        if (item.patients[i].patientId != null) {
+        if (item.patients[i].patientId !== null) {
           if (item.patients[i].dpRelationTime === undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime === '') {
             item.patients[i].dpRelationTime = new Date('2017-05-15')
           }

@@ -209,6 +209,25 @@ exports.getSessionObject = function (req, res, next) {
     }
   })
 }
+
+// 获取患者的所有关注医生 2017-07-19 YQC
+exports.getMyFavoriteDoctors = function (req, res) {
+  let query = {userId: req.session.userId, role: 'patient'}
+  var opts = ''
+  var fields = {'_id': 0, 'doctors': 1}
+  var populate = {path: 'doctors.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
+  Alluser.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    console.log(item.doctors)
+    if (item.doctors.length === 0) {
+      return res.json({results: '未关注任何医生！'})
+    }
+    res.json({results: item})
+  }, opts, fields, populate)
+}
+
 // 获取患者的所有医生 2017-03-30 GY
 // 2017-04-05 GY 修改：按照要求更换查询表
 exports.getMyDoctor = function (req, res) {

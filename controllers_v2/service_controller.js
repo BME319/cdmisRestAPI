@@ -406,6 +406,7 @@ exports.deleteServiceSuspend = function (req, res) {
 // 输入：医生ID和day, time 修改内容：alluser.serviceSchedules.count+1, new personalDiag
 // 返回：personalDiag.code, endTime
 
+// 2017-07-18 YQC
 // 主管医生申请：patient, dpRelation表数据修改
 // 输入：医生ID和购买时长；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
 exports.requestDoctorInCharge = function (req, res, next) {

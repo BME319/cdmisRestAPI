@@ -202,6 +202,8 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), patientCtrl.bindingDoctor, patientCtrl.bindingPatient)
   // 患者端 申请主管医生
   app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge)
+  // 患者端 获取关注医生列表
+  app.get(version + '/patient/myFavoriteDoctors', tokenManager.verifyToken(), patientCtrl.getMyFavoriteDoctors)
 
   // niaodaifu
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
