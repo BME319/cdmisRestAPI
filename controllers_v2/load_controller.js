@@ -4,6 +4,7 @@ var multer = require('multer')
 var images = require('images')
 
 exports.uploadphoto = function () {
+  // 硬盘存储模式设置上传附件的存放路径
   var storage = multer.diskStorage({
     destination: 'uploads/photos',
     filename: function (req, file, cb) {
@@ -17,6 +18,7 @@ exports.uploadphoto = function () {
     }
   })
   var upload = multer({ storage: storage })
+  // 单图上传
   return upload.single('file')
 }
 
