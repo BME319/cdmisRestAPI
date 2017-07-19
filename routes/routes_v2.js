@@ -277,7 +277,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
 
   app.post(version + '/expense/doctor', tokenManager.verifyToken(), doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
-  app.get(version + '/expense/docRecords', tokenManager.verifyToken(), expenseCtrl.getDocRecords)
+  app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
 
   // healthInfo
   app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)

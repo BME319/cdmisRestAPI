@@ -24,6 +24,10 @@ var reportSchema = new mongoose.Schema({
   recommendValue2: Number, // 建议值2
   recommendValue3: Number, // 建议值3
   recommendValue4: Number, // 建议值4
+  recommendValue11: Number, // 建议值11
+  recommendValue12: Number, // 建议值12
+  recommendValue13: Number, // 建议值13
+  recommendValue14: Number, // 建议值14
   averageBMI: Number, // 平均BMI
   changeRatio: Number, // 增比 %
   changeRatioBMI: Number, // BMI增比 %
