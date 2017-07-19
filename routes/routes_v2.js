@@ -221,6 +221,35 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.editAliPayAccount)
 
   // niaodaifu
+  /**
+   * @swagger
+   * definition:
+   *   Puppy:
+   *     properties:
+   *       name:
+   *         type: string
+   *       breed:
+   *         type: string
+   *       age:
+   *         type: integer
+   *       sex:
+   *         type: string
+   */
+  /**
+   * @swagger
+   * /devicedata/niaodaifu/loginparam:
+   *   get:
+   *     tags:
+   *       - Puppies
+   *     description: Returns all puppies
+   *     produces:
+   *       - application/json
+   *     responses:
+   *       200:
+   *         description: An array of puppies
+   *         schema:
+   *           $ref: '#/definitions/Puppy'
+   */
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
   // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)

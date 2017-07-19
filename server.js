@@ -12,7 +12,7 @@ var acl = require('acl')
 var swaggerJSDoc = require('swagger-jsdoc')
 
 // import necessary self-defined modules
-
+var swaggerSetting = require('./swaggerSetting')
 var webEntry = require('./settings').webEntry
 
 var _config = webEntry.config || 'config'
@@ -41,13 +41,12 @@ acl = new acl(new acl.mongodbBackend(db.db, 'rbac_'))
 
 // node服务
 var app = express()
+
 // app.engine('.html', require('ejs').__express);
 // app.set('views', __dirname + '/views');
 // app.set('view engine', 'html');
 app.set('port', restPort)
 // app.set('trust proxy', 'loopback, localhost');
-
-// 用于swagger-jsdoc 的初始化并将适当的元数据添加到swagger规范。
 
 app.use(bodyParser.json({ limit: config.bodyParserJSONLimit }))
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -86,6 +85,18 @@ app.use('/public', express.static('./public')).use('/lib', express.static('../li
 
 app.get('/chat', function (req, res) {
   res.sendFile(path.join(__dirname, '/public/chat.html'))
+})
+
+// 用于swagger-jsdoc 的初始化并将适当的元数据添加到swagger规范。
+// 添加路由以提供swagger规范
+// initialize swagger-jsdoc
+var swaggerSpec = swaggerJSDoc(swaggerSetting.options)
+
+// serve swagger
+app.get('/swagger.json', function (req, res) {
+  res.setHeader('Content-Type', 'application/json')
+  res.send(swaggerSpec)
+  console.log('serve Swagger successful!')
 })
 
 // 找不到正确路由时，执行以下操作
