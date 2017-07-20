@@ -226,36 +226,66 @@ module.exports = function (app, webEntry, acl) {
   // niaodaifu
   /**
    * @swagger
-   * definition:
-   *   Puppy:
-   *     properties:
-   *       name:
-   *         type: string
-   *       breed:
-   *         type: string
-   *       age:
-   *         type: integer
-   *       sex:
-   *         type: string
-   */
-  /**
-   * @swagger
    * /devicedata/niaodaifu/loginparam:
    *   get:
    *     tags:
-   *       - Puppies
-   *     description: Returns all puppies
+   *       - 尿大夫
+   *     description: 获取登录参数
    *     produces:
    *       - application/json
+   *     parameters:
+   *       - name: client
+   *         description: 客户端
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: userbind
+   *         description: 用户ID
+   *         in: body
+   *         required: true
+   *         type: string
    *     responses:
    *       200:
-   *         description: An array of puppies
-   *         schema:
-   *           $ref: '#/definitions/Puppy'
+   *         description: 返回所需参数
+   * /devicedata/niaodaifu/data:
+   *   post:
+   *     tags:
+   *       - 尿大夫
+   *     description: 接收检测数据
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: userbind
+   *         description: 用户ID
+   *         in: body
+   *         required: true
+   *         schema: string
+   *       - name: suggestion
+   *         description: 建议
+   *         in: body
+   *         required: true
+   *         schema: string
+   *       - name: desc
+   *         description: 描述
+   *         in: body
+   *         required: true
+   *         schema: string
+   *       - name: created
+   *         description: 时间戳
+   *         in: body
+   *         required: true
+   *         schema: integer
+   *       - name: data
+   *         description: 检测数据
+   *         in: body
+   *         required: true
+   *         schema: array    
+   *     responses:
+   *       200:
+   *         description: 返回成功状态
    */
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
-  // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
 
   // wechat
   app.get(version + '/wechat/settingConfig', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.settingConfig)
@@ -293,3 +323,4 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/version', versionCtrl.getVersionInfo)
   app.post(version + '/version', getNoMid.getNo(10), versionCtrl.insertVersionInfo)
 }
+
