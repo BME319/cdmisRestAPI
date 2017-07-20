@@ -13,7 +13,7 @@ exports.getMessages = function (req, res) {
 
   // var userId = req.query.userId
   var userId = req.session.userId
-  var type = req.query.type
+  var type = req.query.type  // 选填
 
   if (userId === null || userId === '' || userId === undefined) {
     return res.json({result: '请填写userId!'})

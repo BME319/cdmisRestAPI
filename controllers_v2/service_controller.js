@@ -44,6 +44,7 @@ exports.getServices = function (req, res) {
 
 // 医生端使用的方法：开放修改及设置权限
 // 修改服务开启状态 2017-07-14 GY
+// 承接session.userId，输入修改的服务状态type
 exports.changeServiceStatus = function (req, res) {
   let query = {
     userId: req.session.userId
@@ -253,7 +254,7 @@ exports.setRelayTarget = function (req, res) {
 
 // 面诊服务排班时间表相关 2017-07-15 GY
 // 设置排班时间表和加号数量 2017-07-15 GY
-// 输入，排班日期／时段／加号数量，输出，添加排班信息
+// 输入，排班日期／时段／加号数量，输出，添加面诊排班信息
 exports.setServiceSchedule = function (req, res) {
   let query = {userId: req.session.userId}
   let day = req.body.day || null
@@ -303,7 +304,7 @@ exports.setServiceSchedule = function (req, res) {
   })
 }
 // 删除排班 2017-07-15 GY
-// 输入，排班日期／时段；输出，删除排班信息
+// 输入，排班日期／时段；输出，删除面诊排班信息
 exports.deleteServiceSchedule = function (req, res) {
   let query = {userId: req.session.userId}
   let day = req.body.day || null
@@ -335,20 +336,22 @@ exports.deleteServiceSchedule = function (req, res) {
   })
 }
 // 获取排班信息 2017-07-19 YQC
+// 承接session.userId；输出相应医生的面诊排班信息
 exports.getServiceSchedules = function (req, res) {
   // 查询条件
   let doctorId = req.session.userId
   let query = {userId: doctorId}
   let opts = ''
-  let fields = {'_id': 0, 'srviceSchedules': 1}
+  let fields = {'_id': 0, 'serviceSchedules': 1}
 
   Alluser.getOne(query, function (err, item) {
     if (err) {
-      return res.status(500).send(err.errmsg)
+      return res.status(500).send(err)
     }
     res.json({results: item})
   }, opts, fields)
 }
+
 // 设置面诊停诊时间 2017-07-15 GY
 exports.setServiceSuspend = function (req, res) {
   let query = {userId: req.session.userId}

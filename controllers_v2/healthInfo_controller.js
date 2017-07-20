@@ -13,7 +13,6 @@ exports.getAllHealthInfo = function (req, res) {
   // var fields = {'_id':0};
   var populate = {'path': 'resultId'}
 
-  // 获取部分患者的健康信息,定义的opts,fields和populate未使用？
   HealthInfo.getSome(query, function (err, healthInfolist) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -77,8 +76,8 @@ exports.insertHealthInfo = function (req, res) {
   }
   // 自动生成图片ID
   let urlObj = []
-  function add0(m) {
-    return m < 10 ? '0'+m : m
+  function add0 (m) {
+    return m < 10 ? '0' + m : m
   }
   let y = healthInfoData.insertTime.getFullYear()
   let m = healthInfoItem[i].insertTime.getMonth() + 1
@@ -98,8 +97,7 @@ exports.insertHealthInfo = function (req, res) {
         urlObj[i].photo = req.body.url[i]
         urlObj[i].photoId = healthInfoData.userId + insertTimestr + add0(i)
       }
-    }
-    else {
+    } else {
       return res.status(412).json({results: 'url需要是数组'})
     }
   }
@@ -167,8 +165,7 @@ exports.modifyHealthDetail = function (req, res) {
         urlObj[i].photo = req.body.url[i]
         urlObj[i].photoId = healthInfoData.userId + insertTimestr + add0(i)
       }
-    }
-    else {
+    } else {
       return res.status(412).json({results: 'url需要是数组'})
     }
   }

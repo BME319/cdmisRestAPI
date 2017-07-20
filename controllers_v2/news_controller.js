@@ -14,8 +14,8 @@ exports.getNews = function (req, res) {
 
   // var userId = req.query.userId
   var userId = req.session.userId
-  var type = req.query.type
-
+  var type = req.query.type  // type为选填,不填type = undefined
+  // console.log(type)
   // if (userId === null || userId === '') {     // 重复？
   //   return res.json({result: '请填写userId!'})
   // }
@@ -38,6 +38,7 @@ exports.getNews = function (req, res) {
   }, opts)
 }
 
+// 通过消息状态获取消息
 exports.getNewsByReadOrNot = function (req, res) {
   // if (req.query.userId === null || req.query.userId === '') {
   // if (req.session.userId === null || req.session.userId === '') {
@@ -51,6 +52,7 @@ exports.getNewsByReadOrNot = function (req, res) {
   var userId = req.session.userId
   // var userRole = req.query.userRole // 可以直接从session中获取role
   var userRole = req.session.role
+  console.log(userRole)
   // var userRole = req.session.role
   var type = req.query.type
   var _readOrNot = req.query.readOrNot
@@ -278,7 +280,7 @@ exports.insertNews = function (req, res) {
  // }
 }
 
-// 插入团队消息，医生端会诊
+// 发送团队消息，医生端会诊
 exports.insertTeamNews = function (req, res) {
   if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) {
     return res.json({result: '请填写userId'})
