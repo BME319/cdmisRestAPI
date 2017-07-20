@@ -295,6 +295,11 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/patient/myFavoriteDoctors', tokenManager.verifyToken(), patientCtrl.getMyFavoriteDoctors)
   // 医生端 获取主管医生待审核请求列表 2017-07-19
   app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
+  // 医生端 获取面诊排班信息 2017-07-19
+  app.get(version + '/doctor/myServiceSchedules', tokenManager.verifyToken(), serviceCtrl.getServiceSchedules)
+  // 医生端 设置面诊排班 2017-07-19 GY／YQC
+  app.post(version + '/doctor/serviceScheduleUp', tokenManager.verifyToken(), serviceCtrl.setServiceSchedule)
+  app.post(version + '/doctor/serviceScheduleDown', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule)
 
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
@@ -312,7 +317,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
 
   app.post(version + '/expense/doctor', tokenManager.verifyToken(), doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
-  app.get(version + '/expense/docRecords', tokenManager.verifyToken(), expenseCtrl.getDocRecords)
+  app.get(version + '/expense/docRecords', tokenManager.verifyToken(), expenseCtrl.getRecords)
 
   // healthInfo
   app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)

@@ -253,6 +253,7 @@ exports.setRelayTarget = function (req, res) {
 
 // 面诊服务排班时间表相关 2017-07-15 GY
 // 设置排班时间表和加号数量 2017-07-15 GY
+// 输入，排班日期／时段／加号数量，输出，添加排班信息
 exports.setServiceSchedule = function (req, res) {
   let query = {userId: req.session.userId}
   let day = req.body.day || null
@@ -302,6 +303,7 @@ exports.setServiceSchedule = function (req, res) {
   })
 }
 // 删除排班 2017-07-15 GY
+// 输入，排班日期／时段；输出，删除排班信息
 exports.deleteServiceSchedule = function (req, res) {
   let query = {userId: req.session.userId}
   let day = req.body.day || null
@@ -331,6 +333,21 @@ exports.deleteServiceSchedule = function (req, res) {
       return res.json({results: '修改成功'})
     }
   })
+}
+// 获取排班信息 2017-07-19 YQC
+exports.getServiceSchedules = function (req, res) {
+  // 查询条件
+  let doctorId = req.session.userId
+  let query = {userId: doctorId}
+  let opts = ''
+  let fields = {'_id': 0, 'srviceSchedules': 1}
+
+  Alluser.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    res.json({results: item})
+  }, opts, fields)
 }
 // 设置面诊停诊时间 2017-07-15 GY
 exports.setServiceSuspend = function (req, res) {
