@@ -790,25 +790,6 @@ exports.addPatientInCharge = function (req, res) {
     dpRelationTime = new Date(req.body.dpRelationTime)
   }
   let query = {doctorId: doctorObjectId}
-
-  DpRelation.getOne(query, function (err, item) {
-    if (err) {
-      return res.status(500).send(err)
-    }
-    if (item == null) {
-      let dpRelationData = {
-        doctorId: doctorObjectId
-      }
-      // return res.json({result:dpRelationData});
-      var newDpRelation = new DpRelation(dpRelationData)
-      newDpRelation.save(function (err, dpRelationInfo) {
-        if (err) {
-          return res.status(500).send(err)
-        }
-      })
-    }
-  })
-
   let upObj = {
     $push: {
       patientsInCharge: {
@@ -819,12 +800,32 @@ exports.addPatientInCharge = function (req, res) {
       }
     }
   }
-
   DpRelation.update(query, upObj, function (err, upRelation) {
     if (err) {
       return res.status(422).send(err)
     }
-    if (upRelation.nModified === 0) {
+    if (upRelation.n === 0) {
+      let dpRelationData = {
+        doctorId: doctorObjectId
+      }
+      // return res.json({result:dpRelationData});
+      var newDpRelation = new DpRelation(dpRelationData)
+      newDpRelation.save(function (err, dpRelationInfo) {
+        if (err) {
+          return res.status(500).send(err)
+        }
+        DpRelation.update(query, upObj, function (err, upRelation) {
+          if (err) {
+            return res.status(422).send(err)
+          }
+          if (upRelation.nModified === 0) {
+            return res.json({result: '未关注成功！请检查输入是否符合要求！'})
+          } else if (upRelation.nModified === 1) {
+            return res.json({result: '申请成功，请等待审核！', results: upRelation})
+          }
+        })
+      })
+    } else if (upRelation.nModified === 0) {
       return res.json({result: '未申请成功！请检查输入是否符合要求！'})
     } else if (upRelation.nModified === 1) {
       return res.json({result: '申请成功，请等待审核！', results: upRelation})
