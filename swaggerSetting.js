@@ -6,8 +6,8 @@ var swaggerDefinition = {
     version: '2.0.0',
     description: '肾事管家'
   },
-  host: 'localhost:4060',
-  basePath: '/api/v2'
+  host: '121.43.107.106:4060',
+  basePath: '/'
 }
 
 module.exports = {
