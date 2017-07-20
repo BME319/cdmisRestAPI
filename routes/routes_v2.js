@@ -42,6 +42,12 @@ var doctorCtrl = require('../controllers_v2/doctor_controller')
 var counselCtrl = require('../controllers_v2/counsel_controller')
 var communicationCtrl = require('../controllers_v2/communication_controller')
 var taskCtrl = require('../controllers_v2/task_controller')
+var accountCtrl = require('../controllers_v2/account_controller')
+var insuranceCtrl = require('../controllers_v2/insurance_controller')
+var healthInfoCtrl = require('../controllers_v2/healthInfo_controller')
+var loadCtrl = require('../controllers_v2/load_controller')
+var messageCtrl = require('../controllers_v2/message_controller')
+var newsCtrl = require('../controllers_v2/news_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -261,4 +267,47 @@ module.exports = function (app, webEntry, acl) {
 
   // 退款接口
   app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
+
+  // lgf
+  // account
+  app.get(version + '/account/accountInfo', tokenManager.verifyToken(), accountCtrl.getAccountInfo)
+  app.get(version + '/account/counts', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts)
+  app.post(version + '/account/counts', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts)
+  app.post(version + '/account/freeTime', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
+  app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
+
+  app.post(version + '/expense/doctor', tokenManager.verifyToken(), doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
+
+  // healthInfo
+  app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)
+  app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.getHealthDetail)
+  app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), healthInfoCtrl.insertHealthInfo)
+  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.modifyHealthDetail)
+  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.deleteHealthDetail)
+
+  // insurance
+  app.post(version + '/insurance/message', tokenManager.verifyToken(), insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
+  app.get(version + '/insurance/message', tokenManager.verifyToken(), insuranceCtrl.getInsMsg)
+  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.setPrefer)
+  app.get(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.getPrefer)
+
+  // message
+  app.get(version + '/message/messages', tokenManager.verifyToken(), messageCtrl.getMessages)
+  app.post(version + '/message/status', tokenManager.verifyToken(), messageCtrl.changeMessageStatus)
+  app.post(version + '/message/message', tokenManager.verifyToken(), getNoMid.getNo(6), messageCtrl.insertMessage)
+
+  // order
+  // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
+  app.post(version + '/order/order', tokenManager.verifyToken(), orderCtrl.updateOrder)
+  app.get(version + '/order/order', tokenManager.verifyToken(), orderCtrl.getOrder)
+
+  // load
+  app.post(version + '/upload', tokenManager.verifyToken(), loadCtrl.uploadphoto(), loadCtrl.upload)
+
+  // news
+  app.get(version + '/new/news', tokenManager.verifyToken(), newsCtrl.getNews)
+  app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), newsCtrl.getNewsByReadOrNot)
+  app.post(version + '/new/news', tokenManager.verifyToken(), newsCtrl.insertNews)
+  app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
 }

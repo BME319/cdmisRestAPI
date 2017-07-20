@@ -22,6 +22,7 @@ exports.getRecords = function (req, res) {
 
   if (role === 'patient') {
     query = {patientId: userId}
+    // field设定是否显示相应列
     fields = {'_id': 0, 'doctorId': 0, 'patientName': 0, 'patientId': 0}
     // userIdUrl = 'patientId=' + userId
   }
@@ -52,6 +53,7 @@ exports.getRecords = function (req, res) {
   var limit = Number(req.query.limit)
   var skip = Number(req.query.skip)
 
+  // limit为分页显示个数，skip为跳过历史记录的个数，sort按时间降序排列
   var opts = {limit: limit, skip: skip, sort: '-time'}
 
   var _Url = ''
@@ -87,6 +89,7 @@ exports.getRecords = function (req, res) {
   }, opts, fields)
 }
 
+// 医生充值
 exports.rechargeDoctor = function (req, res) {
   var _chargetype = req.body.type || null
   var _status = req.body.status || null
