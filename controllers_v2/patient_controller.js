@@ -213,42 +213,19 @@ exports.getSessionObject = function (req, res, next) {
 // 获取患者的所有关注医生 2017-07-19 YQC
 exports.getMyFavoriteDoctors = function (req, res) {
   let query = {userId: req.session.userId, role: 'patient'}
-  let _limit = Number(req.query.limit)
-  let _skip = Number(req.query.skip)
-  let opts = {limit: _limit, skip: _skip, sort: -'_id'}
+  let limit = Number(req.query.limit || null)
+  let skip = Number(req.query.skip || null)
+  let opts = ''
   let fields = {'_id': 0, 'doctors': 1}
   let populate = {path: 'doctors.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
-  let _limitUrl = ''
-  let _skipUrl = ''
-  let _Url = ''
-  // 检查查询条件存在并设定
-  if (_limit !== null) {
-    _limitUrl = 'limit=' + String(_limit)
-  }
-  if (_skip !== null) {
-    _skipUrl = 'skip=' + String(_skip + _limit)
-  }
-  // 路径尾部添加查询条件
-  if (_limitUrl !== '' || _skipUrl !== '') {
-    _Url = _Url + '?'
-    if (_limitUrl !== '') {
-      _Url = _Url + _limitUrl + '&'
-    }
-    if (_skipUrl !== '') {
-      _Url = _Url + _skipUrl + '&'
-    }
-    _Url = _Url.substr(0, _Url.length - 1)
-  }
-  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/getDoctorLists' + _Url
   Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
     }
-    console.log(item.doctors)
     if (item.doctors.length === 0) {
       return res.json({results: '未关注任何医生！'})
     }
-    res.json({results: item, nexturl: nexturl})
+    res.json({results: item.doctors.slice(skip, limit + skip)})
   }, opts, fields, populate)
 }
 
