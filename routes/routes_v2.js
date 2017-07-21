@@ -27,10 +27,11 @@ var orderCtrl = require('../controllers_v2/order_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
 var expenseCtrl = require('../controllers_v2/expense_controller')
-var dictTypeOneCtrl = require('../controllers/dictTypeOne_controller')
-var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller')
-var dictDistrictCtrl = require('../controllers/dictDistrict_controller')
-var dictHospitalCtrl = require('../controllers/dictHospital_controller')
+var dictTypeOneCtrl = require('../controllers_v2/dictTypeOne_controller')
+var dictTypeTwoCtrl = require('../controllers_v2/dictTypeTwo_controller')
+var dictDistrictCtrl = require('../controllers_v2/dictDistrict_controller')
+var dictHospitalCtrl = require('../controllers_v2/dictHospital_controller')
+var versionCtrl = require('../controllers_v2/version_controller')
 
 var commentCtrl = require('../controllers_v2/comment_controller')
 var adviceCtrl = require('../controllers_v2/advice_controller')
@@ -38,7 +39,6 @@ var complianceCtrl = require('../controllers_v2/compliance_controller')
 var vitalSignCtrl = require('../controllers_v2/vitalSign_controller')
 var patientCtrl = require('../controllers_v2/patient_controller')
 var doctorCtrl = require('../controllers_v2/doctor_controller')
-// var wechatCtrl = require('../controllers_v2/wechat_controller')
 var counselCtrl = require('../controllers_v2/counsel_controller')
 var communicationCtrl = require('../controllers_v2/communication_controller')
 var taskCtrl = require('../controllers_v2/task_controller')
@@ -48,26 +48,17 @@ var healthInfoCtrl = require('../controllers_v2/healthInfo_controller')
 var loadCtrl = require('../controllers_v2/load_controller')
 var messageCtrl = require('../controllers_v2/message_controller')
 var newsCtrl = require('../controllers_v2/news_controller')
+var departmentCtrl = require('../controllers_v2/department_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
   //   res.send("Server Root");
   // });
 
-  // 刷新token
-  app.get(version + '/token/refresh', tokenManager.verifyToken(), tokenManager.refreshToken)
-
-  // dict
-  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), dictTypeTwoCtrl.getCategory)
-  app.get(version + '/dict/typeTwo/codes', tokenManager.verifyToken(), dictTypeTwoCtrl.getTypes)
-  app.get(version + '/dict/typeOne', tokenManager.verifyToken(), dictTypeOneCtrl.getCategory)
-  app.get(version + '/dict/district', tokenManager.verifyToken(), dictDistrictCtrl.getDistrict)
-  app.get(version + '/dict/hospital', tokenManager.verifyToken(), dictHospitalCtrl.getHospital)
-
   // csq
   app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
   app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
-  app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl))
+  app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclChecking.Checking(acl), aclsettingCtrl.userRoles(acl))
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl))
 
   app.get(version + '/acl/roleUsers', tokenManager.verifyToken(), aclsettingCtrl.roleUsers(acl))
@@ -83,12 +74,6 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/acl/removeResource', tokenManager.verifyToken(), aclsettingCtrl.removeResource(acl))
   app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl))
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl))
-
-  // devicedata
-  app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), devicedataCtrl.bindingDevice)
-  app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), devicedataCtrl.debindingDevice)
-  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), devicedataCtrl.receiveBloodPressure)
-  app.get(version + '/devicedata/devices', tokenManager.verifyToken(), devicedataCtrl.getDeviceInfo)
 
   // wf
   app.get(version + '/alluser/count', tokenManager.verifyToken(), alluserCtrl.countAlluserList)
@@ -582,6 +567,544 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/new/news', tokenManager.verifyToken(), newsCtrl.insertNews)
   app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
 
+  // jyf
+  // 刷新token
+  /**
+   * @swagger
+   * /token/refresh:
+   *   get:
+   *     tags:
+   *       - 刷新token
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: refresh_token
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回刷新的token和refreshtoken
+   *       401:
+   *         description: 令牌验证错误
+   *       500:
+   *         description: 错误信息
+   */
+  app.get(version + '/token/refresh', tokenManager.verifyToken(), aclChecking.Checking(acl), tokenManager.refreshToken)
+
+  // dict
+  /**
+   * @swagger
+   * /dict/typeTwo:
+   *   get:
+   *     tags:
+   *       - 字典
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: category
+   *         description: 目录名
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: token
+   *         description: 令牌
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回目录信息
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/DictTypeTwo'
+   *       500:
+   *         description: 查询错误信息
+   * definition:
+   *   DictTypeTwo:
+   *     type: object
+   *     properties:
+   *       category:
+   *         type: string
+   *       contents:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/DictTwoContent'
+   *   DictTwoContent:
+   *     type: object
+   *     properties:
+   *       _id:
+   *         type: string
+   *       type:
+   *         type: string
+   *       typeName:
+   *         type: string
+   *       details:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/DictTwoDetail'
+   *   DictTwoDetail:
+   *     type: object
+   *     properties:
+   *       _id:
+   *         type: string
+   *       code:
+   *         type: string
+   *       name:
+   *         type: string
+   *       inputCode:
+   *         type: string
+   *       description:
+   *         type: string
+   *       invalidFlag:
+   *         type: integer
+
+   */
+  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeTwoCtrl.getCategory)
+  /**
+   * @swagger
+   * /dict/typeTwo/codes:
+   *   get:
+   *     tags:
+   *       - 字典
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: category
+   *         description: 目录名
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: type
+   *         description: 类型
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: token
+   *         description: 令牌
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回该类的编码信息
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Result'
+   *       500:
+   *         description: 查询错误信息
+   * definition:
+   *   Result:
+   *     type: object
+   *     properties:
+   *       results:
+   *         type: object
+   *         $ref: '#/definitions/Content'
+   *   Content:
+   *     type: object
+   *     properties:
+   *       _id:
+   *         type: string
+   *       type:
+   *         type: string
+   *       typeName:
+   *         type: string
+   *       details:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/Detail'
+   *   Detail:
+   *     type: object
+   *     properties:
+   *       _id:
+   *         type: string
+   *       code:
+   *         type: string
+   *       name:
+   *         type: string
+   *       inputCode:
+   *         type: string
+   *       description:
+   *         type: string
+   *       invalidFlag:
+   *         type: integer
+   */
+  app.get(version + '/dict/typeTwo/codes', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeTwoCtrl.getTypes)
+  /**
+   * @swagger
+   * /dict/typeOne:
+   *   get:
+   *     tags:
+   *       - 字典
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: category
+   *         description: 目录名
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: token
+   *         description: 令牌
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回目录信息
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/DictTypeOne'
+   *       500:
+   *         description: 查询错误信息
+   * definition:
+   *   DictTypeOne:
+   *     type: object
+   *     properties:
+   *       category:
+   *         type: string
+   *       details:
+   *         type: array
+   *         items:
+   *           type: object
+   *           $ref: '#/definitions/DictOneDetail'
+   *   DictOneDetail:
+   *     type: object
+   *     properties:
+   *       code:
+   *         type: string
+   *       name:
+   *         type: string
+   *       inputCode:
+   *         type: string
+   *       description:
+   *         type: string
+   *       invalidFlag:
+   *         type: integer
+   */
+  app.get(version + '/dict/typeOne', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeOneCtrl.getCategory)
+
+  app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl), dictDistrictCtrl.getDistrict)
+  /**
+   * @swagger
+   * /dict/hospital:
+   *   get:
+   *     tags:
+   *       - 字典
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: locationCode
+   *         in: query
+   *         type: string
+   *       - name: hostipalCode
+   *         in: query
+   *         type: string
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - city:
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回医院信息
+   *         schema:
+   *
+   */
+  app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl), dictHospitalCtrl.getHospital)
+
+  // devicedata
+  /**
+   * @swagger
+   * /devicedata/BPDevice/binding:
+   *   post:
+   *     tags:
+   *       - 血压计
+   *     description: 绑定血压计
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Binding'
+   *     responses:
+   *       200:
+   *         description: 绑定成功
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/BindingResult'
+   *       400:
+   *         description: 无效输入
+   *       500:
+   *         description: 绑定失败信息
+   * definition:
+   *   Binding:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       appId:
+   *         type: string
+   *       twoDimensionalCode:
+   *         type: string
+   *   BindingResult:
+   *     type: object
+   *     properties:
+   *       results:
+   *         type: object
+   *         $ref: '#/definitions/BindingInfo'
+   *   BindingInfo:
+   *     type: object
+   *     properties:
+   *       requestStatus:
+   *         type: string
+   *       errorCode:
+   *         type: integer
+   *       deviceInfo:
+   *         type: object
+   *         $ref: '#/definitions/DeviceInfo'
+   *   DeviceInfo:
+   *     type: object
+   *     properties:
+   *       type:
+   *         type: string
+   *       imei:
+   *         type: string
+   *       phone:
+   *         type: string
+   *       sn:
+   *         type: string
+   *       validateDate:
+   *         type: string
+   */
+  app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.bindingDevice)
+  app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.debindingDevice)
+  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.receiveBloodPressure)
+  app.get(version + '/devicedata/devices', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.getDeviceInfo)
+
+  // wechat
+  app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.settingConfig)
+  // 获取用户基本信息
+  app.get(version + '/wechat/getUserInfo', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.getuserinfo)
+  app.get(version + '/wechat/gettokenbycode', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken)
+  // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
+  // 输入：微信用户授权的code 商户系统生成的订单号
+  app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign)
+  // 订单支付结果回调
+  app.post(version + '/wechat/payResult', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.payResult)
+  // 查询订单   orderNo
+  app.get(version + '/wechat/getWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.getWechatOrder)
+  // 关闭订单   orderNo
+  app.get(version + '/wechat/closeWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.closeWechatOrder)
+
+  // app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund)
+  // 退款接口
+  app.post(version + '/wechat/refund', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
+  // 退款查询
+  app.post('/wechat/refundquery', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
+  // 消息模板
+  app.post(version + '/wechat/messageTemplate',  tokenManager.verifyToken(), aclChecking.Checking(acl),wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate)
+  // 下载
+  app.get(version + '/wechat/download', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.download)
+  // 创建永久二维码
+  app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
+
+  // 接收微信服务器的post请求
+  app.post(version + '/wechat', wechatCtrl.receiveTextMessage)
+  // 接收微信服务器的get请求
+  app.get(version + '/wechat', wechatCtrl.getServerSignature)
+
+  // 自定义菜单
+  app.post(version + '/wechat/createCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createCustomMenu)
+  app.get(version + '/wechat/getCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.getCustomMenu)
+  app.get(version + '/wechat/deleteCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.deleteCustomMenu)
+
+  // 版本信息
+  /**
+   * @swagger
+   * /version:
+   *  get:
+   *    tags:
+   *      - version
+   *    description: 获取版本信息
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: versionName
+   *        description: 版本名
+   *        in: query
+   *        required: true
+   *        type: string
+   *      - name: versionType
+   *        in: query
+   *        required: true
+   *        type: string
+   *        description: 版本类型
+   *      - name: token
+   *        description: 令牌
+   *        in: query
+   *        required: true
+   *        type: string
+   *    responses:
+   *      200:
+   *        description: 返回版本信息
+   *        schema:
+   *          type: object
+   *          $ref: '#/definitions/VersionMsg'
+   *      401:
+   *        description: 令牌验证错误
+   *  post:
+   *    tags:
+   *      - version
+   *    description: 插入版本信息
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: body
+   *        in: body
+   *        required: true
+   *        schema:
+   *          type: object
+   *          $ref: '#/definitions/VersionInput'
+   *    responses:
+   *      200:
+   *        description: 成功存入，返回存入的版本信息
+   *      400:
+   *        description: 无效输入
+   *      500:
+   *        description: 存入数据错误信息
+   *      401:
+   *        description: 令牌验证错误
+   * definition:
+   *   VersionMsg:
+   *     type: object
+   *     properties:
+   *       status:
+   *         type: integer
+   *       msg:
+   *         type: string  
+   *   VersionInput:
+   *     type: object
+   *     properties:
+   *       versionType:
+   *         type: string
+   *       versionName:
+   *         type: string
+   *       content:
+   *         type；string
+   *       token:
+   *         type: string    
+   */
+  app.get(version + '/version', tokenManager.verifyToken(), versionCtrl.getVersionInfo)
+  app.post(version + '/version', tokenManager.verifyToken(), getNoMid.getNo(10), versionCtrl.insertVersionInfo)
+
+  // niaodaifu
+  /**
+   * @swagger
+   * /devicedata/niaodaifu/loginparam:
+   *   get:
+   *     tags:
+   *       - 尿大夫
+   *     description: 获取登录参数
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: client
+   *         description: 客户端
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: userbind
+   *         description: 用户ID
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回所需参数
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Param'
+   *       403:
+   *         description: 输入错误        
+   * /devicedata/niaodaifu/data:
+   *   post:
+   *     tags:
+   *       - 尿大夫
+   *     description: 接收检测数据
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/NiaoReq'   
+   *     responses:
+   *       200:
+   *         description: 返回成功状态
+   * definition:
+   *   Param:
+   *     type: object
+   *     properties:
+   *       appkey:
+   *         type: string
+   *       sign:
+   *         type: string
+   *       atime:
+   *         type: integer
+   *       userbind:
+   *         type: string
+   *       mode:
+   *         type: integer
+   *       redirect_uri:
+   *         type: string
+   *   NiaoReq:
+   *     type: object
+   *     properties:
+   *       userbind:
+   *         type: string
+   *         description: 用户ID
+   *       suggestion:
+   *         type: string
+   *         description: 建议
+   *       desc:
+   *         type: string
+   *         description: 描述
+   *       created:
+   *         type: integer
+   *         description: 时间戳
+   *       data:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/NiaoData'
+   *   NiaoData:
+   *     type: object
+   *     properties:
+   *       id:
+   *         type: string
+   *       cname:
+   *         type: string
+   *       result:
+   *         type: string
+   *       index:
+   *         type: string
+   *       status:
+   *         type: integer
+   */
+  app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
+  app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
+
+  // department
+  app.get(version + '/department/district', departmentCtrl.getDistrict)
+
+
+
   /**
    * @swagger
    * definitions:
@@ -675,4 +1198,6 @@ module.exports = function (app, webEntry, acl) {
    *           - "0"
    *           - "1"
    */
+
 }
+
