@@ -473,6 +473,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/patient/myDoctorsInCharge', tokenManager.verifyToken(), serviceCtrl.getDoctorsInCharge)
   // 患者端 删除主管医生 2017-07-20
   app.post(version + '/patient/cancelDoctorInCharge', tokenManager.verifyToken(), serviceCtrl.getMyDoctorInCharge, serviceCtrl.deleteDoctorInCharge, serviceCtrl.getPatientInCharge, serviceCtrl.deletePatientInCharge)
+  // 患者端 判断关系 2017-07-21
+  app.get(version + '/services/relation', tokenManager.verifyToken(), serviceCtrl.relation)
   // 医生端 获取主管医生待审核请求列表 2017-07-19
   app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
   // 医生端 审核主管患者 2017-07-21

@@ -792,6 +792,56 @@ exports.deletePatientInCharge = function (req, res) {
   })
 }
 
+// 判断关系
+exports.relation = function (req, res) {
+  let patientId = req.session.userId
+  let doctorId = req.query.doctorId
+  let queryD = {userId: doctorId, role: 'doctor'}
+  let doctorObjectId
+  Alluser.getOne(queryD, function (err, itemD) {
+    if (err) {
+      return res.status(500).send(err)
+    } else if (itemD === null) {
+      return res.status(404).json({results: '找不到医生对象'})
+    } else {
+      doctorObjectId = itemD._id
+    }
+    let queryPDIC = {
+      userId: patientId,
+      role: 'patient',
+      doctorsInCharge: {$elemMatch: {invalidFlag: 1, doctorId: doctorObjectId}}
+    }
+    let DICRelation
+    let FDRelation
+    Alluser.getOne(queryPDIC, function (err, itemPDIC) {
+      console.log(itemPDIC)
+      if (err) {
+        return res.status(500).send(err)
+      } else if (itemPDIC === null) {
+        DICRelation = 0
+      } else {
+        DICRelation = 1
+      }
+      let queryPFD = {
+        userId: patientId,
+        role: 'patient',
+        doctors: {$elemMatch: {doctorId: doctorObjectId}}
+      }
+      Alluser.getOne(queryPFD, function (err, itemPFD) {
+        console.log(itemPFD)
+        if (err) {
+          return res.status(500).send(err)
+        } else if (itemPFD === null) {
+          FDRelation = 0
+        } else {
+          FDRelation = 1
+        }
+        res.json({DIC: DICRelation, FD: FDRelation})
+      })
+    })
+  })
+}
+
 // 2017-07-18 YQC
 // 主管医生申请：patient, dpRelation表数据修改
 // 输入：医生ID和购买时长；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
