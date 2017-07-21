@@ -1065,6 +1065,93 @@ exports.bindingPatient = function (req, res) {
   }, {new: true})
 }
 
+// 解绑关注医生 在alluser表patient_info部分doctors字段添加记录
+exports.debindingDoctor = function (req, res, next) {
+  // var patientId = req.body.patientId || null
+  let patientId = req.session.userId
+  let doctorId = req.body.doctorId || null
+  // if (patientId == null) {
+  //   return res.json({result: '请填写patientId!'})
+  // }
+  if (doctorId == null) {
+    return res.json({result: '请填写doctorId!'})
+  }
+
+  let queryD = {userId: doctorId, role: 'doctor'}
+  Alluser.getOne(queryD, function (err, itemD) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (itemD == null) {
+      return res.json({result: '不存在的医生ID!'})
+    }
+
+    let doctorObjectId = itemD._id
+
+    let queryP = {userId: patientId, role: 'patient'}
+    Alluser.getOne(queryP, function (err, itemP) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      let favoriteDoctorsList = itemP.doctors
+      let flag = 0
+      let doctorObject
+      for (let i = 0; i < favoriteDoctorsList.length; i++) {
+        if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
+          flag = 1
+          doctorObject = favoriteDoctorsList[i]
+          break
+        }
+      }
+      if (flag === 0) {
+        return res.json({result: '未关注该医生!'})
+      } else {
+        favoriteDoctorsList.pull(doctorObject)
+        let upObj = {$set: {doctors: favoriteDoctorsList}}
+        Alluser.updateOne(queryP, upObj, function (err, upPatient) {
+          if (err) {
+            return res.status(500).send(err)
+          }
+          if (upPatient.nModified === 0) {
+            return res.json({result: '解绑医生不成功!'})
+          } else {
+            req.body.doctorObjectId = doctorObjectId
+            req.body.patientObjectId = upPatient._id
+            next()
+          }
+        })
+      }
+    })
+  })
+}
+
+// DpRelation表中医生绑定患者
+exports.debindingPatient = function (req, res) {
+  let doctorObjectId = req.body.doctorObjectId
+  let patientObjectId = req.body.patientObjectId
+  let query = {doctorId: doctorObjectId}
+  let upObj = {
+    $pull: {
+      patients: {
+        patientId: patientObjectId
+      }
+    }
+  }
+  DpRelation.update(query, upObj, function (err, upRelation) {
+    if (err) {
+      return res.status(422).send(err)
+    }
+    if (upRelation.n === 0) {
+      return res.json({result: '找不到对象'})
+    } else if (upRelation.nModified === 0) {
+      return res.json({result: '解绑患者不成功！'})
+    } else if (upRelation.nModified === 1) {
+      return res.json({result: '取消关注成功'})
+    }
+  // res.json({results: uprelation});
+  }, {new: true})
+}
+
 // 修改患者VIP状态 2017-05-04 GY
 exports.changeVIP = function (req, res) {
   let userId = req.body.userId || null

@@ -478,6 +478,8 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.editAliPayAccount)
   // 患者端 关注医生 2017-07-18
   app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), patientCtrl.bindingDoctor, patientCtrl.bindingPatient)
+  // 患者端 取关医生 2017-07-21
+  app.post(version + '/patient/unfollowFavoriteDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.debindingPatient)
   // 患者端 获取关注医生列表 2017-07-19
   app.get(version + '/patient/myFavoriteDoctors', tokenManager.verifyToken(), patientCtrl.getMyFavoriteDoctors)
   // 患者端 申请主管医生 2017-07-18
