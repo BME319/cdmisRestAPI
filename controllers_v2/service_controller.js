@@ -431,6 +431,9 @@ exports.getPatientsToReview = function (req, res) {
     if (err) {
       return res.status(500).send(err)
     }
+    if (itemD === null) {
+      return res.json({results: '医生不存在！'})
+    }
     doctorObjectId = itemD._id
 
     let queryR = {doctorId: doctorObjectId}
@@ -874,7 +877,10 @@ exports.requestDoctorInCharge = function (req, res, next) {
       if (err) {
         return res.status(500).send(err)
       }
-      let doctorsInChargeList = itemP.doctorsInCharge
+      if (itemP === null) {
+        return res.json({results: '患者不存在'})
+      }
+      let doctorsInChargeList = itemP.doctorsInCharge || {}
       for (let i = 0; i < doctorsInChargeList.length; i++) {
         if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
           return res.json({result: '已申请主管医生，请等待审核!'})

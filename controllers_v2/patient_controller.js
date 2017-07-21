@@ -256,7 +256,7 @@ exports.getMyFavoriteDoctors = function (req, res) {
     if (item.doctors.length === 0) {
       return res.json({results: '未关注任何医生！'})
     }
-    res.json({results: item.doctors.slice(skip + 1, limit + skip + 1), nexturl: nexturl})
+    res.json({results: item.doctors.slice(skip, limit + skip), nexturl: nexturl})
   }, opts, fields, populate)
 }
 
