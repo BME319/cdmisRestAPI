@@ -473,9 +473,12 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/patient/myDoctorsInCharge', tokenManager.verifyToken(), serviceCtrl.getDoctorsInCharge)
   // 患者端 删除主管医生 2017-07-20
   app.post(version + '/patient/cancelDoctorInCharge', tokenManager.verifyToken(), serviceCtrl.getMyDoctorInCharge, serviceCtrl.deleteDoctorInCharge, serviceCtrl.getPatientInCharge, serviceCtrl.deletePatientInCharge)
+  // 患者端 判断关系 2017-07-21
+  app.get(version + '/services/relation', tokenManager.verifyToken(), serviceCtrl.relation)
   // 医生端 获取主管医生待审核请求列表 2017-07-19
   app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
-
+  // 医生端 审核主管患者 2017-07-21
+  app.post(version + '/doctor/PatientInCharge', tokenManager.verifyToken(), serviceCtrl.reviewPatientInCharge, serviceCtrl.updateDoctorInCharge)
   // 医生端 获取排班信息 2017-07-19
   /** YQC 17-07-20
    * @swagger
@@ -522,7 +525,6 @@ module.exports = function (app, webEntry, acl) {
 
   // 退款接口
   app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
-
 
   // lgf
   // account
@@ -588,7 +590,7 @@ module.exports = function (app, webEntry, acl) {
    *       401:
    *         description: 令牌验证错误
    *       500:
-   *         description: 错误信息 
+   *         description: 错误信息
    */
   app.get(version + '/token/refresh', tokenManager.verifyToken(), aclChecking.Checking(acl), tokenManager.refreshToken)
 
@@ -780,10 +782,10 @@ module.exports = function (app, webEntry, acl) {
    *       description:
    *         type: string
    *       invalidFlag:
-   *         type: integer    
+   *         type: integer
    */
   app.get(version + '/dict/typeOne', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeOneCtrl.getCategory)
-  
+
   app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl), dictDistrictCtrl.getDistrict)
   /**
    * @swagger
@@ -810,7 +812,7 @@ module.exports = function (app, webEntry, acl) {
    *       200:
    *         description: 返回医院信息
    *         schema:
-   *         
+   *
    */
   app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl), dictHospitalCtrl.getHospital)
 
@@ -892,15 +894,15 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/wechat/getUserInfo', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.getuserinfo)
   app.get(version + '/wechat/gettokenbycode', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken)
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
-  // 输入：微信用户授权的code 商户系统生成的订单号 
+  // 输入：微信用户授权的code 商户系统生成的订单号
   app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign)
-  // 订单支付结果回调 
+  // 订单支付结果回调
   app.post(version + '/wechat/payResult', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.payResult)
-  // 查询订单   orderNo 
+  // 查询订单   orderNo
   app.get(version + '/wechat/getWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.getWechatOrder)
-  // 关闭订单   orderNo 
+  // 关闭订单   orderNo
   app.get(version + '/wechat/closeWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.closeWechatOrder)
-  
+
   // app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund)
   // 退款接口
   app.post(version + '/wechat/refund', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
@@ -1101,7 +1103,7 @@ module.exports = function (app, webEntry, acl) {
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
 
   // department
-  app.get(version + '/department/district', departmentCtrl.getDistrict)
+  // app.get(version + '/department/district', departmentCtrl.getDistrict)
 
 
 
