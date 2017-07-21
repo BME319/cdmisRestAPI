@@ -1052,13 +1052,12 @@ exports.bindingPatient = function (req, res) {
         DpRelation.update(query, upObj, function (err, upRelation) {
           if (err) {
             return res.status(422).send(err)
-          }
-          if (upRelation.nModified === 0) {
+          } else if (upRelation.nModified === 0) {
             return res.json({result: '未关注成功！请检查输入是否符合要求！'})
           } else if (upRelation.nModified === 1) {
             return res.json({result: '关注成功', results: upRelation})
           }
-        })
+        }, {new: true})
       })
     } else if (upRelation.nModified === 0) {
       return res.json({result: '未关注成功！请检查输入是否符合要求！'})
