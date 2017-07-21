@@ -155,7 +155,6 @@ exports.getDoctorLists = function (req, res) {
     _Url = _Url.substr(0, _Url.length - 1)
   }
   var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/getDoctorLists' + _Url
-  // ？？？
   Alluser.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -215,9 +214,37 @@ exports.getMyFavoriteDoctors = function (req, res) {
   let query = {userId: req.session.userId, role: 'patient'}
   let limit = Number(req.query.limit || null)
   let skip = Number(req.query.skip || null)
+  let token = req.query.token || null
   let opts = ''
   let fields = {'_id': 0, 'doctors': 1}
   let populate = {path: 'doctors.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
+
+  let _Url = ''
+  let tokenUrl = 'token=' + token
+  let limitUrl = ''
+  let skipUrl = ''
+
+  if (limit !== 0) {
+    limitUrl = 'limit=' + String(limit)
+  }
+  if (skip !== 0) {
+    skipUrl = 'skip=' + String(skip + limit)
+  }
+  if (tokenUrl !== '' || limitUrl !== '' || skipUrl !== '') {
+    _Url = _Url + '?'
+    if (tokenUrl !== '') {
+      _Url = _Url + tokenUrl + '&'
+    }
+    if (limitUrl !== '') {
+      _Url = _Url + limitUrl + '&'
+    }
+    if (skipUrl !== '') {
+      _Url = _Url + skipUrl + '&'
+    }
+    _Url = _Url.substr(0, _Url.length - 1)
+  }
+
+  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/myFavoriteDoctors' + _Url
   Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
@@ -225,7 +252,7 @@ exports.getMyFavoriteDoctors = function (req, res) {
     if (item.doctors.length === 0) {
       return res.json({results: '未关注任何医生！'})
     }
-    res.json({results: item.doctors.slice(skip, limit + skip)})
+    res.json({results: item.doctors.slice(skip, limit + skip), nexturl: nexturl})
   }, opts, fields, populate)
 }
 
