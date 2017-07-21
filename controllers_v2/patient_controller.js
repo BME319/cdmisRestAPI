@@ -224,11 +224,15 @@ exports.getMyFavoriteDoctors = function (req, res) {
   let limitUrl = ''
   let skipUrl = ''
 
-  if (limit !== 0) {
+  if (limit > 0) {
     limitUrl = 'limit=' + String(limit)
+  } else {
+    return res.json({results: 'limit输入错误'})
   }
-  if (skip !== 0) {
+  if (skip >= 0) {
     skipUrl = 'skip=' + String(skip + limit)
+  } else {
+    return res.json({results: 'skip输入错误'})
   }
   if (tokenUrl !== '' || limitUrl !== '' || skipUrl !== '') {
     _Url = _Url + '?'
@@ -252,7 +256,7 @@ exports.getMyFavoriteDoctors = function (req, res) {
     if (item.doctors.length === 0) {
       return res.json({results: '未关注任何医生！'})
     }
-    res.json({results: item.doctors.slice(skip, limit + skip), nexturl: nexturl})
+    res.json({results: item.doctors.slice(skip + 1, limit + skip + 1), nexturl: nexturl})
   }, opts, fields, populate)
 }
 
@@ -1048,13 +1052,12 @@ exports.bindingPatient = function (req, res) {
         DpRelation.update(query, upObj, function (err, upRelation) {
           if (err) {
             return res.status(422).send(err)
-          }
-          if (upRelation.nModified === 0) {
+          } else if (upRelation.nModified === 0) {
             return res.json({result: '未关注成功！请检查输入是否符合要求！'})
           } else if (upRelation.nModified === 1) {
             return res.json({result: '关注成功', results: upRelation})
           }
-        })
+        }, {new: true})
       })
     } else if (upRelation.nModified === 0) {
       return res.json({result: '未关注成功！请检查输入是否符合要求！'})
