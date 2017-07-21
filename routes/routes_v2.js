@@ -121,7 +121,191 @@ module.exports = function (app, webEntry, acl) {
 
   // doctor_services
   app.get(version + '/services', tokenManager.verifyToken(), serviceCtrl.getServices)
+  /** YQC 17-07-20
+   * @swagger
+   * /services/status:
+   *   post:
+   *     tags:
+   *     - "services"
+   *     summary: "Change status of certain service"
+   *     description: ""
+   *     operationId: "status"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "serviceType"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           serviceType:
+   *             type: "string"
+   *             enum:
+   *             - "service1"
+   *             - "service2"
+   *             - "service3"
+   *             - "service4"
+   *             - "service5"
+   *             - "service6"
+   *             description: "1: 咨询 2: 问诊 3: 加急咨询 4: 主管医生 5: 面诊服务 6:自动转诊"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 counselStatus1:
+   *                   type: "number"
+   *                   default: 1
+   *                 counselStatus2:
+   *                   type: "number"
+   *                   default: 1
+   *                 counselStatus3:
+   *                   type: "number"
+   *                   default: 1
+   *                 counselStatus4:
+   *                   type: "number"
+   *                   default: 1
+   *                 counselStatus5:
+   *                   type: "number"
+   *                   default: 1
+   *                 charge1:
+   *                   type: "number"
+   *                   default: 30
+   *                 charge2:
+   *                   type: "number"
+   *                   default: 50
+   *                 charge3:
+   *                   type: "number"
+   *                 charge4:
+   *                   type: "number"
+   *                 charge5:
+   *                   type: "number"
+   *                 serviceSchedules:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/ServiceSchedule'
+   *                 serviceSuspendTime:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/ServiceSuspend'
+   *                 autoRelay:
+   *                   type: "number"
+   *                   default: 0
+   *                 relayTarget:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamTarget'
+   *       404:
+   *         description: "Doctor's userId not found."
+   */
   app.post(version + '/services/status', tokenManager.verifyToken(), serviceCtrl.changeServiceStatus)
+  /** YQC 17-07-20
+   * @swagger
+   * /services/charge:
+   *   post:
+   *     tags:
+   *     - "services"
+   *     summary: "Set/Change the charge of certain service"
+   *     description: ""
+   *     operationId: "charge"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "serviceType"
+   *           - "charge"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           serviceType:
+   *             type: "string"
+   *             enum:
+   *             - "service1"
+   *             - "service2"
+   *             - "service3"
+   *             - "service4"
+   *             - "service5"
+   *             description: "1: 咨询 2: 问诊 3: 加急咨询 4: 主管医生 5: 面诊服务"
+   *           charge:
+   *             type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 counselStatus1:
+   *                   type: "number"
+   *                   default: 1
+   *                 counselStatus2:
+   *                   type: "number"
+   *                   default: 1
+   *                 counselStatus3:
+   *                   type: "number"
+   *                   default: 1
+   *                 counselStatus4:
+   *                   type: "number"
+   *                   default: 1
+   *                 counselStatus5:
+   *                   type: "number"
+   *                   default: 1
+   *                 charge1:
+   *                   type: "number"
+   *                   default: 30
+   *                 charge2:
+   *                   type: "number"
+   *                   default: 50
+   *                 charge3:
+   *                   type: "number"
+   *                 charge4:
+   *                   type: "number"
+   *                 charge5:
+   *                   type: "number"
+   *                 serviceSchedules:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/ServiceSchedule'
+   *                 serviceSuspendTime:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/ServiceSuspend'
+   *                 autoRelay:
+   *                   type: "number"
+   *                   default: 0
+   *                 relayTarget:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamTarget'
+   *       404:
+   *         description: "Doctor's userId not found."
+   */
   app.post(version + '/services/charge', tokenManager.verifyToken(), serviceCtrl.setCharge)
   app.post(version + '/services/relayTarget', tokenManager.verifyToken(), serviceCtrl.setRelayTarget)
   app.post(version + '/services/setSchedule', tokenManager.verifyToken(), serviceCtrl.setServiceSchedule)
@@ -133,7 +317,77 @@ module.exports = function (app, webEntry, acl) {
 
   // YQC
   // comment - debug complete 2017-07-17
+  /** YQC 17-07-20
+   * @swagger
+   * /comment/commentsByDoc:
+   *   get:
+   *     tags:
+   *     - "comment"
+   *     summary: "Finds comments by doctor ID"
+   *     description: ""
+   *     operationId: "commentsByDoc"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "userId"
+   *       in: "query"
+   *       description: "Some Doctor's userId."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Comment'
+   *       404:
+   *         description: "Doctor's userId not found."
+   */
   app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), commentCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
+  /** YQC 17-07-20
+   * @swagger
+   * /comment/commentsByCounsel:
+   *   get:
+   *     tags:
+   *     - "comment"
+   *     summary: "Finds comments by counsel ID"
+   *     description: ""
+   *     operationId: "commentsByCounsel"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "counselId"
+   *       in: "query"
+   *       description: "Comments of counsel to be found."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Comment'
+   *       404:
+   *         description: "CounselId not found."
+   */
   app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
   // advice - debug complete 2017-07-17
   app.get(version + '/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
@@ -209,12 +463,66 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.editAliPayAccount)
   // 患者端 关注医生 2017-07-18
   app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), patientCtrl.bindingDoctor, patientCtrl.bindingPatient)
-  // 患者端 申请主管医生 2017-07-18
-  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge)
+  // 患者端 取关医生 2017-07-21
+  app.post(version + '/patient/unfollowFavoriteDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.debindingPatient)
   // 患者端 获取关注医生列表 2017-07-19
   app.get(version + '/patient/myFavoriteDoctors', tokenManager.verifyToken(), patientCtrl.getMyFavoriteDoctors)
+  // 患者端 申请主管医生 2017-07-18
+  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge)
+  // 患者端 获取主管医生信息 2017-07-20
+  app.get(version + '/patient/myDoctorsInCharge', tokenManager.verifyToken(), serviceCtrl.getDoctorsInCharge)
+  // 患者端 删除主管医生 2017-07-20
+  app.post(version + '/patient/cancelDoctorInCharge', tokenManager.verifyToken(), serviceCtrl.getMyDoctorInCharge, serviceCtrl.deleteDoctorInCharge, serviceCtrl.getPatientInCharge, serviceCtrl.deletePatientInCharge)
   // 医生端 获取主管医生待审核请求列表 2017-07-19
   app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
+
+  // 医生端 获取排班信息 2017-07-19
+  /** YQC 17-07-20
+   * @swagger
+   * /services/mySchedules:
+   *   get:
+   *     tags:
+   *     - "services"
+   *     summary: "Finds schedules of certain doctor"
+   *     description: ""
+   *     operationId: "mySchedules"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 serviceSchedules:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/ServiceSchedule'
+   *                 Schedules:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Schedule'
+   *       404:
+   *         description: "Doctor not found."
+   */
+  app.get(version + '/services/mySchedules', tokenManager.verifyToken(), serviceCtrl.getServiceSchedules)
+
+  app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
+  app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
+  // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
+
+  // 退款接口
+  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
+
 
   // lgf
   // account
@@ -795,6 +1103,101 @@ module.exports = function (app, webEntry, acl) {
   // department
   app.get(version + '/department/district', departmentCtrl.getDistrict)
 
+
+
+  /**
+   * @swagger
+   * definitions:
+   *   Comment:
+   *     type: object
+   *     properties:
+   *       commentId:
+   *         type: string
+   *       counselId:
+   *         type: string
+   *       doctorId:
+   *         type: string
+   *       patientId:
+   *         type: string
+   *       type:
+   *         type: number
+   *       time:
+   *         type: string
+   *         format: date-time
+   *       helpScore:
+   *         type: number
+   *       attitudeScore:
+   *         type: number
+   *       speedScore:
+   *         type: number
+   *       totalScore:
+   *         type: number
+   *         default: 10
+   *       topic:
+   *         type: string
+   *       expense:
+   *         type: string
+   *       content:
+   *         type: string
+   *   TeamTarget:
+   *     type: object
+   *     properties:
+   *       teamId:
+   *         type: string
+   *   ServiceSchedule:
+   *     type: object
+   *     properties:
+   *       day:
+   *         type: string
+   *         enum:
+   *           - "Mon"
+   *           - "Tue"
+   *           - "Wed"
+   *           - "Thur"
+   *           - "Fri"
+   *           - "Sat"
+   *           - "Sun"
+   *       time:
+   *         type: string
+   *         description: "0为上午，1为下午"
+   *         enum:
+   *           - "0"
+   *           - "1"
+   *       total:
+   *         type: number
+   *         description: "医生可以设置的面诊计数总数"
+   *       count:
+   *         type: number
+   *         description: "已用的面诊计数，可用的面诊计数需要用total-count"
+   *   ServiceSuspend:
+   *     type: object
+   *     properties:
+   *       start:
+   *         type: string
+   *         format: date-time
+   *       end:
+   *         type: string
+   *         format: date-time
+   *   Schedule:
+   *     type: object
+   *     properties:
+   *       day:
+   *         type: string
+   *         enum:
+   *           - "Mon"
+   *           - "Tue"
+   *           - "Wed"
+   *           - "Thur"
+   *           - "Fri"
+   *           - "Sat"
+   *           - "Sun"
+   *       time:
+   *         type: string
+   *         description: "0为上午，1为下午"
+   *         enum:
+   *           - "0"
+   *           - "1"
+   */
 
 }
 
