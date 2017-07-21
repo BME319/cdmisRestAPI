@@ -1101,7 +1101,7 @@ module.exports = function (app, webEntry, acl) {
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
 
   // department
-  app.get(version + '/department/district', departmentCtrl.getDistrict)
+  // app.get(version + '/department/district', departmentCtrl.getDistrict)
 
 
 

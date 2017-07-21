@@ -226,11 +226,13 @@ exports.getMyFavoriteDoctors = function (req, res) {
 
   if (limit > 0) {
     limitUrl = 'limit=' + String(limit)
-    if (skip >= 0) {
-      skipUrl = 'skip=' + String(skip + limit)
-    } else {
-      return res.json({results: 'skip,limit输入错误'})
-    }
+  } else {
+    return res.json({results: 'limit输入错误'})
+  }
+  if (skip >= 0) {
+    skipUrl = 'skip=' + String(skip + limit)
+  } else {
+    return res.json({results: 'skip输入错误'})
   }
   if (tokenUrl !== '' || limitUrl !== '' || skipUrl !== '') {
     _Url = _Url + '?'
