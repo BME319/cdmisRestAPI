@@ -490,6 +490,8 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/patient/cancelDoctorInCharge', tokenManager.verifyToken(), serviceCtrl.getMyDoctorInCharge, serviceCtrl.deleteDoctorInCharge, serviceCtrl.getPatientInCharge, serviceCtrl.deletePatientInCharge)
   // 医生端 获取主管医生待审核请求列表 2017-07-19
   app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
+  // 医生端 审核主管患者 2017-07-21
+  app.post(version + '/doctor/PatientInCharge', tokenManager.verifyToken(), serviceCtrl.reviewPatientInCharge, serviceCtrl.updateDoctorInCharge)
   // 医生端 获取排班信息 2017-07-19
   /** YQC 17-07-20
    * @swagger

@@ -461,52 +461,78 @@ exports.getPatientsToReview = function (req, res) {
 // 通过或拒绝主管医生申请：patient, dpRelation表数据修改
 // 输入：患者ID；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
 
-// exports.reviewDoctorInCharge = function (req, res, next) {
-//   let patientId = req.body.patientId || null
-//   if (patientId == null) {
-//     return res.json({result: '请填写patientId!'})
-//   }
-//   let rejectReason = req.body.rejectReason || null
+exports.reviewPatientInCharge = function (req, res, next) {
+  let patientId = req.body.patientId || null
+  let reviewResult = req.body.reviewResult || null
+  if (patientId == null) {
+    return res.json({result: '请填写patientId!'})
+  }
+  let rejectReason = req.body.rejectReason || null
+  if (reviewResult === 'reject') {
+    if (rejectReason == null) {
+      return res.json({result: '请填写rejectReason!'})
+    }
+  }
+  let doctorId = req.session.doctorId
+  let queryD = {userId: doctorId, role: 'doctor'}
+  Alluser.getOne(queryD, function (err, itemD) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (itemD == null) {
+      return res.json({result: '不存在的医生ID!'})
+    }
+    let doctorObjectId = itemD._id
+    let queryP = {userId: patientId, role: 'patient'}
+    Alluser.getOne(queryP, function (err, itemP) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      if (itemP == null) {
+        return res.json({result: '不存在的患者ID!'})
+      }
+      let patientObjectId = itemP._id
 
-//   let doctorId = req.session.doctorId
-//   let queryD = {userId: doctorId, role: 'doctor'}
-//   Alluser.getOne(queryD, function (err, itemD) {
-//     if (err) {
-//       return res.status(500).send(err)
-//     }
-//     let doctorObjectId = itemD._id
-//   })
+      let query = {doctorId: doctorObjectId}
+      let pullObj = {
+        patientsInCharge: {
+          patientId: patientObjectId,
+          invalidFlag: 0
+        }
+      }
+      DpRelation.update(query, pullObj, function (err, pull) {
+        if (err) {
+          return res.status(500).send(err)
+        }
+        if (pull.n === 0) {
+          return res.json({results: '找不到对象'})
+        } else if (pull.nModified !== 1) {
+          return res.json({results: '提取患者失败'})
+        } else {
+          // return res.json({results: '提取患者成功'})
+          console.log(pull)
+          // let pushObj = {
+          //   patientsInCharge: {
+          //     patientId: patientObjectId
+          //   }
+          // }
+          // if (reviewResult === 'reject') {
+          //   pushObj.patientsInCharge['rejectReason'] = rejectReason
+          //   pushObj.patientsInCharge['invalidFlag'] = 3
+          // } else if (reviewResult === 'consent') {
 
-//   let queryP = {userId: doctorId, role: 'patient'}
-//   Alluser.getOne(queryP, function (err, itemP) {
-//     if (err) {
-//       return res.status(500).send(err)
-//     }
-//     if (itemP == null) {
-//       return res.json({result: '不存在的医生ID!'})
-//     }
-//     let doctorObjectId = itemD._id
-//   })
+          //   pushObj.patientsInCharge['start'] = new Date()
+          //   pushObj.patientsInCharge['end'] =
+          //   pushObj.patientsInCharge['invalidFlag'] = 1
+        }
+      })
+    })
+  })
+}
 
-//   let upObj = {doctorsInCharge: {
-//         doctorId: doctorObjectId
-//       }
-//     }
-//   if (rejectReason === null) {
-//     upObj = {doctorsInCharge: {
-//       start: new Date(),
-//       end: ,
-//       invalidFlag:
-//       }
-//     }
-//   } else {
+exports.updateDoctorInCharge = function (req, res) {
 
-//   }
-//   let queryP = {userId: patientId, role: 'patient'}
-//   Alluser.updateOne(queryP, upObj, function (err, upPatient) {
-
-//   })
-// }
+}
 
 // 患者端使用的方法
 // 面诊申请：修改面诊计数，新建面诊表数据

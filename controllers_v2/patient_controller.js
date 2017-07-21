@@ -224,11 +224,13 @@ exports.getMyFavoriteDoctors = function (req, res) {
   let limitUrl = ''
   let skipUrl = ''
 
-  if (limit !== 0) {
+  if (limit > 0) {
     limitUrl = 'limit=' + String(limit)
-  }
-  if (skip !== 0) {
-    skipUrl = 'skip=' + String(skip + limit)
+    if (skip >= 0) {
+      skipUrl = 'skip=' + String(skip + limit)
+    } else {
+      return res.json({results: 'skip,limit输入错误'})
+    }
   }
   if (tokenUrl !== '' || limitUrl !== '' || skipUrl !== '') {
     _Url = _Url + '?'
@@ -252,7 +254,7 @@ exports.getMyFavoriteDoctors = function (req, res) {
     if (item.doctors.length === 0) {
       return res.json({results: '未关注任何医生！'})
     }
-    res.json({results: item.doctors.slice(skip, limit + skip), nexturl: nexturl})
+    res.json({results: item.doctors.slice(skip + 1, limit + skip + 1), nexturl: nexturl})
   }, opts, fields, populate)
 }
 
