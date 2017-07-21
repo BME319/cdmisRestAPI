@@ -473,7 +473,7 @@ exports.reviewPatientInCharge = function (req, res, next) {
       return res.json({result: '请填写rejectReason!'})
     }
   }
-  let doctorId = req.session.doctorId
+  let doctorId = req.session.userId
   let queryD = {userId: doctorId, role: 'doctor'}
   Alluser.getOne(queryD, function (err, itemD) {
     if (err) {
@@ -484,6 +484,7 @@ exports.reviewPatientInCharge = function (req, res, next) {
     }
     let doctorObjectId = itemD._id
     let queryP = {userId: patientId, role: 'patient'}
+    console.log(queryP)
     Alluser.getOne(queryP, function (err, itemP) {
       if (err) {
         return res.status(500).send(err)
@@ -505,12 +506,11 @@ exports.reviewPatientInCharge = function (req, res, next) {
           return res.status(500).send(err)
         }
         if (pull.n === 0) {
-          return res.json({results: '找不到对象'})
+          return res.json({results: '找不到该医生'})
         } else if (pull.nModified !== 1) {
-          return res.json({results: '提取患者失败'})
+          return res.json({results: '该患者未申请主管医生服务'})
         } else {
-          // return res.json({results: '提取患者成功'})
-          console.log(pull)
+          return res.json({results: '提取患者成功'})
           // let pushObj = {
           //   patientsInCharge: {
           //     patientId: patientObjectId
@@ -749,15 +749,17 @@ exports.requestDoctorInCharge = function (req, res, next) {
           return res.json({result: '已申请主管医生，请等待审核!'})
         } else if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
           // return res.json({result: '当前已有主管医生!'})
-          let currentDoctorInCharge = doctorsInChargeList[i].doctorId
+          let currentDoctorInCharge = doctorsInChargeList[i]
           let upObjPD = {
-            doctorsInCharge: {
-              doctorId: currentDoctorInCharge,
-              invalidFlag: 2,
-              firstTime: doctorsInChargeList[i].firstTime
+            $pull: {
+              doctorsInCharge: {
+                doctorId: currentDoctorInCharge,
+                invalidFlag: 2,
+                firstTime: doctorsInChargeList[i].firstTime
+              }
             }
           }
-          Alluser.updateOne(queryP, upObjPD, function (err, upPatient) {
+          Alluser.update(queryP, upObjPD, function (err, upPatient) {
             if (err) {
               return res.status(500).send(err)
             }
@@ -769,17 +771,19 @@ exports.requestDoctorInCharge = function (req, res, next) {
               // return res.json({result: '解绑主管医生成功!'})
               let queryD = {doctorId: currentDoctorInCharge}
               let upObjDP = {
-                patientsInCharge: {
-                  patientId: upPatient._id,
-                  invalidFlag: 2,
-                  firstTime: doctorsInChargeList[i].firstTime
+                $pull: {
+                  patientsInCharge: {
+                    patientId: upPatient._id,
+                    invalidFlag: 2,
+                    firstTime: doctorsInChargeList[i].firstTime
+                  }
                 }
               }
               DpRelation.update(queryD, upObjDP, function (err, upRelation) {
                 if (err) {
                   return res.status(422).send(err)
                 }
-                if (upPatient.n === 0) {
+                if (upRelation.n === 0) {
                   return res.json({result: '找不到对象!'})
                 } else if (upRelation.nModified !== 1) {
                   return res.json({result: '解绑主管患者失败'})
@@ -845,7 +849,7 @@ exports.addPatientInCharge = function (req, res) {
             return res.status(422).send(err)
           }
           if (upRelation.nModified === 0) {
-            return res.json({result: '未关注成功！请检查输入是否符合要求！'})
+            return res.json({result: '未申请成功！请检查输入是否符合要求！'})
           } else if (upRelation.nModified === 1) {
             return res.json({result: '申请成功，请等待审核！', results: upRelation})
           }
