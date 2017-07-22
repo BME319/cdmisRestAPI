@@ -42,6 +42,8 @@ exports.insertOrder = function (req, res, next) {
         trueMoney = doctor.charge2 * 100
       } else if (req.body.class === '03') {
         trueMoney = doctor.charge2 * 100 - doctor.charge1 * 100
+      } else if (req.body.class === '04') { // 主管医生
+        trueMoney = doctor.charge4 * 100 - doctor.charge4 * 100
       } else {
         return res.status(403).send('服务类型不存在!')
       }
