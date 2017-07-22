@@ -1,6 +1,6 @@
 var Alluser = require('../models/alluser')
 var DpRelation = require('../models/dpRelation')
-
+var Team = require('../models/team')
 // 获取某位医生的服务开启状态及收费情况
 // 根据医生ID获取服务开启状态 2017-07-14 GY
 exports.getServices = function (req, res) {
@@ -112,7 +112,19 @@ exports.changeServiceStatus = function (req, res) {
         if (upitem === null) {
           return res.status(404).json({results: '找不到对象'})
         } else {
-          return res.json({results: upitem})
+          if (serviceType !== 'service6') {
+            return res.json({results: upitem})
+          } else {
+            let query = {$or: [{sponsorId: req.session.userId}, {'members.userId': req.session.userId}]}
+            let opts = ''
+            let fields = {'_id': 0, 'revisionInfo': 0}
+            Team.getSome(query, function (err, items) {
+              if (err) {
+                return res.status(500).send(err)
+              }
+              res.json({currentStatus: upitem, teams: items})
+            }, opts, fields)
+          }
         }
       }, opts)
     }
