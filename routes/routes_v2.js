@@ -280,7 +280,7 @@ module.exports = function (app, webEntry, acl) {
    *       401:
    *         description: 令牌验证错误
    *       500:
-   *         description: 错误信息 
+   *         description: 错误信息
    */
   app.get(version + '/token/refresh', tokenManager.verifyToken(), aclChecking.Checking(acl), tokenManager.refreshToken)
 
@@ -472,10 +472,65 @@ module.exports = function (app, webEntry, acl) {
    *       description:
    *         type: string
    *       invalidFlag:
-   *         type: integer    
+   *         type: integer
    */
   app.get(version + '/dict/typeOne', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeOneCtrl.getCategory)
-  
+  /**
+   * @swagger
+   * /dict/district:
+   *   get:
+   *     tags:
+   *       - 字典
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: level
+   *         in: query
+   *         type: integer
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: district
+   *         in: query
+   *         type: string
+   *       - name: name
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回地区信息
+   *         schema:
+   *            type: object
+   *            $ref: '#/definitions/DistrictResult'
+   * definition:
+   *   DistrictResult:
+   *     type: object
+   *     properties:
+   *       results:
+   *         type: object
+   *         $ref: '#/definitions/District'
+   *   District:
+   *     type: object
+   *     properties:
+   *       code:
+   *         type: string
+   *       province:
+   *         type: string
+   *       city:
+   *         type: string
+   *       district:
+   *         type: string
+   *       name:
+   *         type: string
+   *       level:
+   *         integer
+   */
   app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl), dictDistrictCtrl.getDistrict)
   /**
    * @swagger
@@ -502,7 +557,35 @@ module.exports = function (app, webEntry, acl) {
    *       200:
    *         description: 返回医院信息
    *         schema:
-   *         
+   *           type: object
+   *           $ref: '#/definitions/HospitalResult'
+   * definition:
+   *   HospitalResult:
+   *     type: object
+   *     properties:
+   *       results:
+   *         type: object
+   *         $ref: '#/definitions/Hospital'
+   *   Hospital:
+   *     type: object
+   *     properties:
+   *       locatiopnCode:
+   *         type: string
+   *       hospitalCode:
+   *         type: string
+   *       hospitalName:
+   *         type: string
+   *       province:
+   *         type: string
+   *       city:
+   *         type: string
+   *       district:
+   *         type: string
+   *       alias:
+   *         type: string
+   *       inputCode:
+   *         type: string
+   *     
    */
   app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl), dictHospitalCtrl.getHospital)
 
@@ -574,36 +657,40 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    */
   app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.bindingDevice)
+  /**
+   * @swagger
+   * /devicedata/BPDevice/debinding:
+   */
   app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.debindingDevice)
   app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.receiveBloodPressure)
   app.get(version + '/devicedata/devices', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.getDeviceInfo)
 
   // wechat
-  app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.settingConfig)
+  app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.settingConfig)
   // 获取用户基本信息
   app.get(version + '/wechat/getUserInfo', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.getuserinfo)
   app.get(version + '/wechat/gettokenbycode', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken)
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
-  // 输入：微信用户授权的code 商户系统生成的订单号 
-  app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign)
-  // 订单支付结果回调 
+  // 输入：微信用户授权的code 商户系统生成的订单号
+  app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
+  // 订单支付结果回调
   app.post(version + '/wechat/payResult', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.payResult)
-  // 查询订单   orderNo 
-  app.get(version + '/wechat/getWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.getWechatOrder)
-  // 关闭订单   orderNo 
-  app.get(version + '/wechat/closeWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.closeWechatOrder)
-  
+  // 查询订单   orderNo
+  app.get(version + '/wechat/getWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.getWechatOrder)
+  // 关闭订单   orderNo
+  app.get(version + '/wechat/closeWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.closeWechatOrder)
+
   // app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund)
   // 退款接口
   app.post(version + '/wechat/refund', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
   // 退款查询
   app.post('/wechat/refundquery', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
   // 消息模板
-  app.post(version + '/wechat/messageTemplate',  tokenManager.verifyToken(), aclChecking.Checking(acl),wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate)
+  app.post(version + '/wechat/messageTemplate', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
   // 下载
-  app.get(version + '/wechat/download', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.download)
+  app.get(version + '/wechat/download', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.download)
   // 创建永久二维码
-  app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
+  app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
 
   // 接收微信服务器的post请求
   app.post(version + '/wechat', wechatCtrl.receiveTextMessage)
@@ -611,9 +698,9 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/wechat', wechatCtrl.getServerSignature)
 
   // 自定义菜单
-  app.post(version + '/wechat/createCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createCustomMenu)
-  app.get(version + '/wechat/getCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.getCustomMenu)
-  app.get(version + '/wechat/deleteCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.deleteCustomMenu)
+  app.post(version + '/wechat/createCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createCustomMenu)
+  app.get(version + '/wechat/getCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.getCustomMenu)
+  app.get(version + '/wechat/deleteCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.deleteCustomMenu)
 
   // 版本信息
   /**
@@ -678,7 +765,7 @@ module.exports = function (app, webEntry, acl) {
    *       status:
    *         type: integer
    *       msg:
-   *         type: string  
+   *         type: string
    *   VersionInput:
    *     type: object
    *     properties:
@@ -689,7 +776,7 @@ module.exports = function (app, webEntry, acl) {
    *       content:
    *         type；string
    *       token:
-   *         type: string    
+   *         type: string
    */
   app.get(version + '/version', tokenManager.verifyToken(), versionCtrl.getVersionInfo)
   app.post(version + '/version', tokenManager.verifyToken(), getNoMid.getNo(10), versionCtrl.insertVersionInfo)
@@ -722,7 +809,7 @@ module.exports = function (app, webEntry, acl) {
    *           type: object
    *           $ref: '#/definitions/Param'
    *       403:
-   *         description: 输入错误        
+   *         description: 输入错误
    * /devicedata/niaodaifu/data:
    *   post:
    *     tags:
@@ -736,7 +823,7 @@ module.exports = function (app, webEntry, acl) {
    *         required: true
    *         schema:
    *           type: object
-   *           $ref: '#/definitions/NiaoReq'   
+   *           $ref: '#/definitions/NiaoReq'
    *     responses:
    *       200:
    *         description: 返回成功状态
@@ -794,7 +881,9 @@ module.exports = function (app, webEntry, acl) {
 
   // department
   app.get(version + '/department/district', departmentCtrl.getDistrict)
-
-
+  app.get(version + '/department/department', departmentCtrl.getDepartment)
+  app.get(version + '/department/doctorlist', departmentCtrl.getDoctorList)
+  app.post(version + '/department/updatedistrict', departmentCtrl.updateDistrict)
+  app.post(version + '/department/updatedepartment', departmentCtrl.updateDepartment)
+  app.post(version + '/department/delete', departmentCtrl.deleteRecord)
 }
-
