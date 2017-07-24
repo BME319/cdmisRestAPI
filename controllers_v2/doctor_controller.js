@@ -862,7 +862,7 @@ function sortVIPpinyin (a, b) {
   }
   return flag
 }
-
+// 2017-07-22 lgf 修改checkDoctor
 exports.checkDoctor = function (req, res, next) {
   if (req.query.doctorId == null || req.query.doctorId === '' || req.query.doctorId === undefined) {
     if (req.body.doctorId == null || req.body.doctorId === '' || req.body.doctorId === undefined) {
@@ -873,8 +873,8 @@ exports.checkDoctor = function (req, res, next) {
   } else {
     req.doctorId = req.query.doctorId
   }
-  var query = {userId: req.doctorId}
-  Doctor.getOne(query, function (err, item) {
+  var query = {userId: req.doctorId, role: 'doctor'}
+  Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
