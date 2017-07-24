@@ -3,29 +3,24 @@ var mongoose = require('mongoose')
 
 var departmentSchema = new mongoose.Schema({
   district: String,
-  zymanager: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'alluser'
-  },
   portleader: [
     {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'alluser'
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'alluser'
     }
   ],
-  departinfo: [
+  department: String,
+  hospital: String,
+  departLeader: [
     {
-      hospital: String,
-      departLeader: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'alluser'
-      },
-      doctors: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'alluser'
-        }
-      ]
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'alluser'
+    }
+  ],
+  doctors: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'alluser'
     }
   ]
 })
@@ -47,7 +42,7 @@ Department.prototype.save = function (callback) {
   })
 }
 
-Department.getOne = function (query, callback, opts, fields, populate) {
+Department.getOne = function (query, fields, callback, populate, opts) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
@@ -63,10 +58,11 @@ Department.getOne = function (query, callback, opts, fields, populate) {
     })
 }
 
-Department.getSome = function (query, callback, opts, fields, populate) {
+Department.getSome = function (query, fields, callback, populate, opts) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
+  // var _populate2 = populate2 || ''
   departmentModel
     .find(query, _fields, options)
     .populate(_populate)
@@ -74,6 +70,7 @@ Department.getSome = function (query, callback, opts, fields, populate) {
       if (err) {
         return callback(err)
       }
+      console.log(departmentInfos)
       callback(null, departmentInfos)
     })
 }
