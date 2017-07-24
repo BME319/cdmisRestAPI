@@ -123,7 +123,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/services', tokenManager.verifyToken(), serviceCtrl.getServices)
   /** YQC 17-07-20
    * @swagger
-   * /services/status:
+   * /api/v2/services/status:
    *   post:
    *     tags:
    *     - "services"
@@ -215,7 +215,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/services/status', tokenManager.verifyToken(), serviceCtrl.changeServiceStatus)
   /** YQC 17-07-20
    * @swagger
-   * /services/charge:
+   * /api/v2/services/charge:
    *   post:
    *     tags:
    *     - "services"
@@ -319,7 +319,7 @@ module.exports = function (app, webEntry, acl) {
   // comment - debug complete 2017-07-17
   /** YQC 17-07-20
    * @swagger
-   * /comment/commentsByDoc:
+   * /api/v2/comment/commentsByDoc:
    *   get:
    *     tags:
    *     - "comment"
@@ -355,7 +355,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), commentCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
   /** YQC 17-07-20
    * @swagger
-   * /comment/commentsByCounsel:
+   * /api/v2/comment/commentsByCounsel:
    *   get:
    *     tags:
    *     - "comment"
@@ -482,7 +482,7 @@ module.exports = function (app, webEntry, acl) {
   // 医生端 获取排班信息 2017-07-19
   /** YQC 17-07-20
    * @swagger
-   * /services/mySchedules:
+   * /api/v2/services/mySchedules:
    *   get:
    *     tags:
    *     - "services"
@@ -810,24 +810,41 @@ module.exports = function (app, webEntry, acl) {
  *           type: object
  *           required:
  *             - token
+ *             - doctorId
+ *             - type
+ *             - money
+ *             - status
  *           properties:
  *             token:
  *               type: string
+ *             doctorId:
+ *               type: string
+ *             type:
+ *               type: string
+ *             money:
+ *               type: number
+ *             status:
+ *               type: number
  *     responses:
  *       200:
  *         description: success
  *         schema:
  *           type: object
  *           required:
- *             - accountInfo
+ *             - n
+ *             - nModified
+ *             - ok
  *           properties:
- *             accountInfo:
- *               type: object
- *               $ref: '#/definitions/AccountInfo'
+ *             n:
+ *               type: number
+ *             nModified:
+ *               type: number
+ *             ok:
+ *               type: number
  *       500:
  *         description: Server internal error
  */
-  app.post(version + '/expense/doctor', tokenManager.verifyToken(), doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  app.post(version + '/expense/doctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
  /**
  * @swagger
  * /api/v2/expense/records:
@@ -2424,7 +2441,7 @@ module.exports = function (app, webEntry, acl) {
 
   /**
    * @swagger
-   * definitions:
+   * definition:
    *   Comment:
    *     type: object
    *     properties:
