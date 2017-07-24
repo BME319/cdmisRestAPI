@@ -849,9 +849,13 @@ exports.autoRefundQuery = function (req, res) {
   Order.getSome(query, function (err, orderItems) {
     if (err) { console.log('getOrderItemErr') }
     // console.log(orderItems)
-    for (let i = 0; i < orderItems.length; i++) { orderNos[i] = orderItems[i].orderNo }
-    console.log(orderNos)
-    refundQuery(0, 0)
+    if (orderItems.length > 0) {
+      for (let i = 0; i < orderItems.length; i++) { orderNos[i] = orderItems[i].orderNo }
+      console.log(orderNos)
+      refundQuery(0, 0)
+    } else {
+      console.log('auto_refund_query_success')
+    }
   })
 }
 
