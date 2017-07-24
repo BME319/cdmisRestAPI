@@ -4,6 +4,7 @@ var Department = require('../models/department')
 exports.getDistrict = function (req, res) {
   let district = req.query.district || ''
   let query
+  // 若district为空，返回所有地区信息；若不为空，返回该地区信息
   if (district !== '') {
     query = {district: district}
   } else {
@@ -25,9 +26,11 @@ exports.getDistrict = function (req, res) {
   }, populate)
 }
 
+// 返回地区、地区负责人、科室、医院、科室负责人
 exports.getDepartment = function (req, res) {
   let district = req.query.district || ''
   let query
+  // 若district为空，返回所有科室信息；若不为空，返回该地区的科室信息
   if (district !== '') {
     query = {district: district}
   } else {
@@ -46,6 +49,7 @@ exports.getDepartment = function (req, res) {
   }, populate)
 }
 
+// 输入地区、科室、医院，获取医生列表
 exports.getDoctorList = function (req, res) {
   let district = req.query.district || ''
   let department = req.query.department || ''
@@ -77,6 +81,7 @@ exports.getDoctorList = function (req, res) {
   }
 }
 
+// 更新地区信息
 exports.updateDistrict = function (req, res) {
   let district = req.body.district || ''
   let hospital = req.body.hospital || ''
@@ -102,11 +107,11 @@ exports.updateDistrict = function (req, res) {
   }
 }
 
+// 输入科室、医院、地区，要更新的内容，更新科室信息
 exports.updateDepartment = function (req, res) {
   let district = req.body.district || ''
   let hospital = req.body.hospital || ''
   let department = req.body.department || ''
-  // let newhospital = req.body.new.newhospital || ''
   let newdepartment = req.body.new.newdepartment || ''
   let newdepartLeader = req.body.new.newdepartLeader || ''
   let newdoctors = req.body.new.newdoctors || ''
@@ -141,6 +146,7 @@ exports.updateDepartment = function (req, res) {
   }
 }
 
+// 删除记录
 exports.deleteRecord = function (req, res) {
   let district = req.body.district || ''
   let hospital = req.body.hospital || ''
