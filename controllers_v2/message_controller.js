@@ -22,7 +22,7 @@ exports.getMessages = function (req, res) {
   var query
   query = {userId: userId}
 
-  if (type !== '' && type !== undefined) {
+  if (type !== null && type !== '' && type !== undefined) {
     query['type'] = type
   }
 
@@ -80,7 +80,7 @@ exports.changeMessageStatus = function (req, res) {
 }
 
 exports.insertMessage = function (req, res) {
-  if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) { // insurance传入，不用修改
+  if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) { // insurance传入，不用修改，消息接收方为患者
     return res.json({result: '请填写userId'})
   }
   if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
@@ -95,24 +95,24 @@ exports.insertMessage = function (req, res) {
     type: req.body.type,
     readOrNot: readOrNot
   }
-  if (req.body.sendBy !== null && req.body.sendBy !== '') {
+  if (req.body.sendBy !== null && req.body.sendBy !== '' && req.body.sendBy !== undefined) {
     messageData['sendBy'] = req.body.sendBy
   } else {
     // 默认发送者为系统
     messageData['sendBy'] = 'System'
   }
-  if (req.body.time !== null && req.body.time !== '') {
+  if (req.body.time !== null && req.body.time !== '' && req.body.time !== undefined) {
     messageData['time'] = new Date(req.body.time)
   } else {
     messageData['time'] = new Date()
   }
-  if (req.body.title !== null) {
+  if (req.body.title !== null && req.body.title !== '' && req.body.title !== undefined) {
     messageData['title'] = req.body.title
   }
-  if (req.body.description !== null) {
+  if (req.body.description !== null && req.body.description !== '' && req.body.description !== undefined) {
     messageData['description'] = req.body.description
   }
-  if (req.body.url !== null) {
+  if (req.body.url !== null && req.body.url !== '' && req.body.url !== undefined) {
     messageData['url'] = req.body.url
   }
   // return res.json({messageData:messageData})
