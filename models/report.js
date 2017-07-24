@@ -16,8 +16,8 @@ var reportSchema = new mongoose.Schema({
   average2: Number, // 平均值2
   max2: Number, // 最大值2
   min2: Number, // 最小值2
-  outOfRangeTimes: Number, // 超出范围次数1
-  outOfRangeTime: [{ time: Date }], // 超出范围时间1
+  outOfRangeTimes1: Number, // 超出范围次数1
+  outOfRangeTime1: [{ time: Date }], // 超出范围时间1
   outOfRangeTimes2: Number, // 超出范围次数2
   outOfRangeTime2: [{ time: Date }], // 超出范围时间2
   recommendValue1: Number, // 建议值1

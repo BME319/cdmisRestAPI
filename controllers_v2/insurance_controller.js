@@ -1,5 +1,6 @@
 // var config = require('../config')
 var InsuranceMsg = require('../models/insuranceMsg')
+var Alluser = require('../models/alluser')
 
 // 更新或插入保险消息 ,医生向患者推送 2017-04-18 GY
 exports.updateInsuranceMsg = function (req, res, next) {
@@ -10,6 +11,7 @@ exports.updateInsuranceMsg = function (req, res, next) {
   if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
     return res.json({resutl: '请填写patientId'})
   }
+
   if (req.body.insuranceId === null || req.body.insuranceId === '' || req.body.insuranceId === undefined) {
     return res.json({resutl: '请填写insuranceId'})
   }
@@ -47,7 +49,7 @@ exports.updateInsuranceMsg = function (req, res, next) {
       }
     }
   }
-
+  // console.log(query)
   InsuranceMsg.update(query, upObj, function (err, upinsurance) {
     if (err) {
       return res.status(422).send(err.message)

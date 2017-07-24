@@ -16,14 +16,11 @@ exports.getNews = function (req, res) {
   var userId = req.session.userId
   var type = req.query.type  // type为选填,不填type = undefined
   // console.log(type)
-  // if (userId === null || userId === '') {     // 重复？
-  //   return res.json({result: '请填写userId!'})
-  // }
 
   // 查询所有与用户相关的消息记录，并按照时间降序排列
   var query = {'$or': [{userId: userId}, {sendBy: userId}]}
 
-  if (type !== '' && type !== undefined) {
+  if (type !== null && type !== '' && type !== undefined) {
     query['type'] = type
   }
 
@@ -38,7 +35,7 @@ exports.getNews = function (req, res) {
   }, opts)
 }
 
-// 通过消息状态获取消息
+// 通过消息状态获取消息,用户为消息接收方
 exports.getNewsByReadOrNot = function (req, res) {
   // if (req.query.userId === null || req.query.userId === '') {
   // if (req.session.userId === null || req.session.userId === '') {
@@ -52,17 +49,14 @@ exports.getNewsByReadOrNot = function (req, res) {
   var userId = req.session.userId
   // var userRole = req.query.userRole // 可以直接从session中获取role
   var userRole = req.session.role
-  console.log(userRole)
+  // console.log(userRole)
   // var userRole = req.session.role
   var type = req.query.type
   var _readOrNot = req.query.readOrNot
-  // if (userId === null || userId === '') {
-  //   return res.json({result: '请填写userId!'})
-  // }
 
   var query = {}
 
-  if (type !== '' && type !== undefined) {
+  if (type !== null && type !== '' && type !== undefined) {
     query['type'] = type
     if (type === 'chat') {
       query = {'$or': [{type: 11}, {type: 12}, {type: 13}]}
@@ -244,7 +238,7 @@ function insertOneNews (userId, sendBy, req, res) {
     }
   })
 }
-// 发送消息
+// 发送消息，用户为发送方,userId为接收方
 exports.insertNews = function (req, res) {
   if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) {
   // if (req.session.userId === null || req.session.userId === '' || req.session.userId === undefined) {
@@ -296,7 +290,7 @@ exports.insertTeamNews = function (req, res) {
   // var sendBy = req.body.sendBy
   var sendBy = req.session.userId
   req.body.readOrNot = 1
-  insertOneNews(userId, sendBy, req, res)
+  insertOneNews(userId, sendBy, req, res) // 用户发送消息记录
   req.body.readOrNot = 0
   var TeamId = userId
   var query = {
@@ -337,7 +331,7 @@ exports.insertTeamNews = function (req, res) {
             DocId = Doctors[i].userId
             // if (DocId !== req.body.sendBy) {
             if (DocId !== sendBy) {
-              insertOneNews(DocId, userId, req)
+              insertOneNews(DocId, userId, req, res)
             }
           }
         }

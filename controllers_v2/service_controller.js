@@ -97,7 +97,16 @@ exports.getServices = function (req, res) {
     if (doctorItem === null) {
       return res.status(404).json({results: '找不到对象'})
     } else {
-      return res.json({results: doctorItem})
+      // return res.json({results: doctorItem})
+      let query = {$or: [{sponsorId: doctorId}, {'members.userId': doctorId}]}
+      let opts = ''
+      let fields = {_id: 0, teamId: 1, name: 1, sponsorName: 1}
+      Team.getSome(query, function (err, items) {
+        if (err) {
+          return res.status(500).send(err)
+        }
+        res.json({results: doctorItem, teams: items})
+      }, opts, fields)
     }
   }, opts, fields)
 }
@@ -179,7 +188,7 @@ exports.changeServiceStatus = function (req, res) {
           } else {
             let query = {$or: [{sponsorId: req.session.userId}, {'members.userId': req.session.userId}]}
             let opts = ''
-            let fields = {'_id': 0, 'revisionInfo': 0}
+            let fields = {_id: 0, teamId: 1, name: 1, sponsorName: 1}
             Team.getSome(query, function (err, items) {
               if (err) {
                 return res.status(500).send(err)
