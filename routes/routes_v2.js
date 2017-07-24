@@ -395,16 +395,17 @@ module.exports = function (app, webEntry, acl) {
   // compliance - debug complete 2017-07-17
   app.get(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
   app.post(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
-  // vitalSign 2017-07-14
-  app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
-  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
+  // vitalSign 2017-07-14  - debug complete 2017-07-24
+  app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
+  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
   // counsel 2017-07-17 debug 1-
-  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getDoctorObject, counselCtrl.getCounsels)
+  // 医生获取问诊信息
+  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getCounsels)
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay)
   app.get(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
   app.post(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
   app.post(version + '/counsel/type', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
-  app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
+  app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
   // communication 2017-07-14
   app.get(version + '/communication/counselReport', tokenManager.verifyToken(), communicationCtrl.getCounselReport)
   // app.post(version + '/communication/newTeam', tokenManager.verifyToken(), getNoMid.getNo(4), communicationCtrl.newTeam)
@@ -1105,8 +1106,6 @@ module.exports = function (app, webEntry, acl) {
   // department
   // app.get(version + '/department/district', departmentCtrl.getDistrict)
 
-
-
   /**
    * @swagger
    * definitions:
@@ -1200,6 +1199,4 @@ module.exports = function (app, webEntry, acl) {
    *           - "0"
    *           - "1"
    */
-
 }
-

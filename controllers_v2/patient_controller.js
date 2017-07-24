@@ -167,7 +167,7 @@ exports.getDoctorLists = function (req, res) {
 // 通过patient表中userId返回PatientObject 2017-03-30 GY
 // 修改：增加判断不存在ID情况 2017-04-05 GY
 exports.getPatientObject = function (req, res, next) {
-  let patientId = req.sesion.userId
+  let patientId = req.query.userId
   if (patientId == null || patientId === '') {
     return res.json({result: '请填写userId!'})
   }

@@ -518,8 +518,7 @@ exports.getPatientsToReview = function (req, res) {
       if (err) {
         return res.status(500).send(err)
       }
-      let listToFilter = itemR.patientsInCharge
-      console.log(listToFilter)
+      let listToFilter = itemR.patientsInCharge || []
       let patientsList = []
       for (let i = 0; i < listToFilter.length; i++) {
         console.log(Number(listToFilter[i].invalidFlag))
@@ -572,7 +571,7 @@ exports.reviewPatientInCharge = function (req, res, next) {
       if (itemP == null) {
         return res.json({result: '不存在的患者ID!'})
       }
-      let doctorsInChargeList = itemP.doctorsInCharge
+      let doctorsInChargeList = itemP.doctorsInCharge || []
       let currentDoctorInCharge
       for (let i = 0; i < doctorsInChargeList.length; i++) {
         if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
@@ -704,20 +703,29 @@ exports.getDoctorsInCharge = function (req, res) {
   let queryP = {userId: patientId, role: 'patient'}
   let opts = ''
   let fields = {'_id': 0, 'doctorsInCharge': 1}
+  let populate = {path: 'doctors.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
+  let doctorInCharge
+
   Alluser.getOne(queryP, function (err, itemP) {
     if (err) {
       return res.status(500).send(err)
     }
-    let doctorsInChargeList = itemP.doctorsInCharge
+    let doctorsInChargeList = itemP.doctorsInCharge || []
     for (let i = 0; i < doctorsInChargeList.length; i++) {
       if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
         return res.json({message: '已申请主管医生，请等待审核!'})
       } else if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
-        return res.json({message: '当前已有主管医生!'})
+        for (let j = 0; j < itemP.doctorsInChargeList.length; i++) {
+          if (itemP.doctors[i].invalidFlag === 0) {
+            doctorInCharge = doctorsInChargeList[i]
+            break
+          }
+        }
+        return res.json({message: '当前已有主管医生!', results: doctorInCharge})
       }
     }
     res.json({message: '当前无主管医生且无申请!'})
-  }, opts, fields)
+  }, opts, fields, populate)
 }
 
 // 2017-07-20 YQC
@@ -732,7 +740,7 @@ exports.getMyDoctorInCharge = function (req, res, next) {
     if (itemP === null) {
       return res.json({message: '找不到患者!'})
     }
-    let doctorsInChargeList = itemP.doctorsInCharge
+    let doctorsInChargeList = itemP.doctorsInCharge || []
     let doctorInCharge = null
     for (let i = 0; i < doctorsInChargeList.length; i++) {
       if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
@@ -810,7 +818,7 @@ exports.getPatientInCharge = function (req, res, next) {
     if (itemR === null) {
       return res.json({message: '找不到医生!'})
     }
-    let patientsInChargeList = itemR.patientsInCharge
+    let patientsInChargeList = itemR.patientsInCharge || []
     let patientInCharge = null
     for (let i = 0; i < patientsInChargeList.length; i++) {
       if (String(patientsInChargeList[i].patientId) === String(patientId) & Number(patientsInChargeList[i].invalidFlag) === 1) {
@@ -958,7 +966,7 @@ exports.requestDoctorInCharge = function (req, res, next) {
       if (itemP === null) {
         return res.json({results: '患者不存在'})
       }
-      let doctorsInChargeList = itemP.doctorsInCharge || {}
+      let doctorsInChargeList = itemP.doctorsInCharge || []
       for (let i = 0; i < doctorsInChargeList.length; i++) {
         if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
           return res.json({result: '已申请主管医生，请等待审核!'})
