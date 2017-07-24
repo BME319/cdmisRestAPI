@@ -105,7 +105,7 @@ exports.getServices = function (req, res) {
         if (err) {
           return res.status(500).send(err)
         }
-        res.json({currentStatus: doctorItem, teams: items})
+        res.json({results: doctorItem, teams: items})
       }, opts, fields)
     }
   }, opts, fields)
