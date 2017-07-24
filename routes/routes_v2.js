@@ -390,8 +390,19 @@ module.exports = function (app, webEntry, acl) {
    */
   app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
   // advice - debug complete 2017-07-17
-  app.get(version + '/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
-  app.post(version + '/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
+  /**
+   * @swagger
+   * /advice/advices:
+   *  get:
+   *    tags:
+   *    - "advice"
+   *    summary: "Finds advices by advisorId"
+   *    description: ""
+   *    operationId: "advices"
+
+   */
+  app.get(version + '/advice/advices', tokenManager.verifyToken(), adviceCtrl.getAdvice)
+  app.post(version + '/advice/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
   // compliance - debug complete 2017-07-17
   app.get(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
   app.post(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)

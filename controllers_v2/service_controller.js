@@ -712,8 +712,7 @@ exports.getDoctorsInCharge = function (req, res) {
   let queryP = {userId: patientId, role: 'patient'}
   let opts = ''
   let fields = {'_id': 0, 'doctorsInCharge': 1}
-  let populate = {path: 'doctors.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
-  let doctorInCharge
+  let populate = {path: 'doctorsInCharge.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
 
   Alluser.getOne(queryP, function (err, itemP) {
     if (err) {
@@ -724,13 +723,7 @@ exports.getDoctorsInCharge = function (req, res) {
       if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
         return res.json({message: '已申请主管医生，请等待审核!'})
       } else if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
-        for (let j = 0; j < itemP.doctorsInChargeList.length; i++) {
-          if (itemP.doctors[i].invalidFlag === 0) {
-            doctorInCharge = doctorsInChargeList[i]
-            break
-          }
-        }
-        return res.json({message: '当前已有主管医生!', results: doctorInCharge})
+        return res.json({message: '当前已有主管医生!', results: doctorsInChargeList[i]})
       }
     }
     res.json({message: '当前无主管医生且无申请!'})
