@@ -2,7 +2,7 @@
 var mongoose = require('mongoose')
 
 var vitalSignSchema = new mongoose.Schema({
-  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'patient'},
+  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   type: String,
   code: String,
   date: Date,   // YYYY-MM-DD
