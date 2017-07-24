@@ -10,9 +10,22 @@ var labtestImportSchema = new mongoose.Schema({
     // GFR肾小球滤过率, ml/min
     // ALB血白蛋白, g/L
     // PRO尿蛋白, mg/d
-    enum: ['SCr', 'GFR', 'ALB', 'PRO']
+    // LEU白细胞
+    // NIT亚硝酸盐
+    // UBG尿胆原
+    // PH酸碱度
+    // ERY潜血
+    // SG比重值
+    // BIL胆红素
+    // VC抗坏血酸
+    // KET酮体
+    // GLU葡萄糖
+    // HB血红蛋白
+    enum: ['SCr', 'GFR', 'ALB', 'PRO', 'LEU', 'NIT', 'UBG', 'PH', 'ERY', 'SG', 'BIL', 'VC', 'KET', 'GLU', 'HB']
   },
   value: Number,
+  valueStr: String,
+  status: Number,
   unit: String,
   importer: {
     type: mongoose.Schema.Types.ObjectId,
@@ -106,6 +119,15 @@ LabtestImport.update = function (query, obj, callback, opts, populate) {
       }
       callback(null, uplabtestImport)
     })
+}
+
+LabtestImport.create = function (query, callback) {
+  labtestImportModel.create(query, function (err, uplabtestImport) {
+    if (err) {
+        return callback(err)
+    }
+    callback(null, uplabtestImport)
+  })
 }
 
 LabtestImport.remove = function (query, callback) {

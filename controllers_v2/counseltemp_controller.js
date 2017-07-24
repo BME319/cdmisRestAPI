@@ -26,6 +26,7 @@ exports.getSessionObject = function (req, res, next) {
     }
   })
 }
+
 // 获取患者ID对象 2017-07-15 GY
 exports.getPatientObject = function (req, res, next) {
   let patientId = req.body.patientId || req.query.patientId || null
@@ -82,31 +83,31 @@ exports.saveQuestionaire = function (req, res, next) {
   }
 
   var counselData = {
-    counselId: req.newId, 
-    patientId: req.session._id, 
-    doctorId: req.body.doctorObject._id, 
+    counselId: req.newId,
+    patientId: req.session._id,
+    doctorId: req.body.doctorObject._id,
     type: type,
     time: new Date(),
     status: 1,
-		// topic: req.body.topic,
-		// content: req.body.content,
-		// title: req.body.title,
+    // topic: req.body.topic,
+    // content: req.body.content,
+    // title: req.body.title,
     sickTime: req.body.sickTime,
-		// visited: req.body.visited,
+    // visited: req.body.visited,
     symptom: req.body.symptom,
     symptomPhotoUrl: req.body.symptomPhotoUrl,
-		// description: req.body.description,
-		// drugs: req.body.drugs,
-		// history: req.body.history,
-    help: req.body.help//, 
-		// comment: req.body.comment,
+    // description: req.body.description,
+    // drugs: req.body.drugs,
+    // history: req.body.history,
+    help: req.body.help // ,
+    // comment: req.body.comment,
 
-		// revisionInfo:{
-		// 	operationTime:new Date(),
-		// 	userId:"gy",
-		// 	userName:"gy",
-		// 	terminalIP:"10.12.43.32"
-		// }
+    // revisionInfo:{
+    //   operationTime:new Date(),
+    //   userId:"gy",
+    //   userName:"gy",
+    //   terminalIP:"10.12.43.32"
+    // }
   }
   if (req.body.hospital != null && req.body.hospital != '') {
     counselData['hospital'] = req.body.hospital
@@ -138,13 +139,13 @@ exports.saveQuestionaire = function (req, res, next) {
 
 // 实现自动转发 暂未实现socket功能 2017-07-15 GY
 exports.counselAutoRelay = function (req, res) {
-  function add00(m) {
-    return m < 10 ? '00'+m : (m < 100 ? '0'+m : m)
+  function add00 (m) {
+    return m < 10 ? '00' + m : (m < 100 ? '0' + m : m)
   }
-  function add0(m) {
-    return m < 10 ? '0'+m : m
+  function add0 (m) {
+    return m < 10 ? '0' + m : m
   }
-  function relayOne(index) {
+  function relayOne (index) {
     let now = new Date()
     let y = now.getFullYear()
     let m = now.getMonth() + 1
@@ -169,8 +170,8 @@ exports.counselAutoRelay = function (req, res) {
         } else {
           if (teamErrFlag || consultationErrFlag || communicationErrFlag || newsErrFlag) {
             return res.status(206).json({
-              results: '新建成功', 
-              results: req.body.counselInfo, 
+              result: '新建成功',
+              results: req.body.counselInfo,
               message: '医生设置了自动转发但在发消息时出现错误'
             })
           } else if (teamEmptyFlag.length !== 0) {
@@ -179,9 +180,9 @@ exports.counselAutoRelay = function (req, res) {
               if (teamEmptyFlag[i]) emptyTeams.push(teamIds[i])
             }
             return res.status(206).json({
-              results: '新建成功', 
-              results: req.body.counselInfo, 
-              message: '医生设置了自动转发但部分转发目标不存在', 
+              result: '新建成功',
+              results: req.body.counselInfo,
+              message: '医生设置了自动转发但部分转发目标不存在',
               messageDetail: emptyTeams
             })
           } else {
@@ -196,7 +197,7 @@ exports.counselAutoRelay = function (req, res) {
           diseaseInfo: req.body.counselInfo._id,
           teamId: teamitem._id,
           time: now,
-          status:1
+          status: 1
         }
         let newConsultation = new Consultation(consultationData)
         newConsultation.save(function (err, consultationInfo) {
@@ -205,13 +206,13 @@ exports.counselAutoRelay = function (req, res) {
           }
           // 生成咨询时，医生与患者页面的卡片消息模板
           let msgContent = {
-            counsel: req.body.counselInfo, 
-            type: 'card', 
-            counselId: req.body.counselInfo.counselId, 
-            patientId: req.session.userId, 
-            patientName: req.body.patientObject.name, 
-            doctorId: req.body.doctorObject.userId, 
-            fromId: req.session.userId, 
+            counsel: req.body.counselInfo,
+            type: 'card',
+            counselId: req.body.counselInfo.counselId,
+            patientId: req.session.userId,
+            patientName: req.body.patientObject.name,
+            doctorId: req.body.doctorObject.userId,
+            fromId: req.session.userId,
             targetId: req.body.doctorObject.userId
           }
           // 转发时需要生成的卡片消息模板
@@ -219,27 +220,27 @@ exports.counselAutoRelay = function (req, res) {
           msgContent.targetId = teamitem.teamId
           msgContent.fromId = req.body.doctorObject.userId
           let msgJson = {
-            clientType: 'doctor', 
-            contentType: 'custom', 
-            fromID: req.body.doctorObject.userId, 
-            fromName: req.body.doctorObject.name, 
-            targetID: teamitem.teamId, 
-            teamId: teamitem.teamId, 
-            targetName: teamitem.name, 
-            targetType: 'group', 
-            status: 'send_going', 
-            newsType: '13', 
-            targetRole: 'doctor', 
-            createTimeInMillis: Date.now(), 
+            clientType: 'doctor',
+            contentType: 'custom',
+            fromID: req.body.doctorObject.userId,
+            fromName: req.body.doctorObject.name,
+            targetID: teamitem.teamId,
+            teamId: teamitem.teamId,
+            targetName: teamitem.name,
+            targetType: 'group',
+            status: 'send_going',
+            newsType: '13',
+            targetRole: 'doctor',
+            createTimeInMillis: Date.now(),
             content: msgContent
           }
           let communicationData = {
-            messageNo: messageNo, 
-            messageType: 2, 
-            sendBy: req.body.doctorObject.userId, 
-            receiver: teamitem.teamId, 
-            sendDateTime: msgJson.createTimeInMillis, 
-            content: msgJson, 
+            messageNo: messageNo,
+            messageType: 2,
+            sendBy: req.body.doctorObject.userId,
+            receiver: teamitem.teamId,
+            sendDateTime: msgJson.createTimeInMillis,
+            content: msgJson,
             newsType: msgJson.newsType
           }
           let newCommunication = new Communication(communicationData)
@@ -248,22 +249,22 @@ exports.counselAutoRelay = function (req, res) {
               communicationErrFlag = 1
             }
             let newsData = {
-              messageId: communicationData.messageNo, 
-              userId: communicationData.receiver, 
-              userRole: 'doctor', 
-              sendBy: req.body.doctorObject.userId, 
-              readOrNot: 0, 
-              type: '13', 
-              time: now, 
-              title: teamitem.name, 
-              description: '[会诊消息]', 
+              messageId: communicationData.messageNo,
+              userId: communicationData.receiver,
+              userRole: 'doctor',
+              sendBy: req.body.doctorObject.userId,
+              readOrNot: 0,
+              type: '13',
+              time: now,
+              title: teamitem.name,
+              description: '[会诊消息]',
               url: JSON.stringify(msgJson)
             }
             // 需要插入news表卧槽好多我先调已经存在的接口好了
             request({
-              url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v1/new/teamNews' + '?token=' + req.query.token || req.body.token, 
-              method: 'POST', 
-              body: newsData, 
+              url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v1/new/teamNews' + '?token=' + req.query.token || req.body.token,
+              method: 'POST',
+              body: newsData,
               json: true
             }, function (err, response) {
               if (err) {
@@ -274,8 +275,8 @@ exports.counselAutoRelay = function (req, res) {
               } else {
                 if (teamErrFlag || consultationErrFlag || communicationErrFlag || newsErrFlag) {
                   return res.status(206).json({
-                    results: '新建成功', 
-                    results: req.body.counselInfo, 
+                    result: '新建成功',
+                    results: req.body.counselInfo,
                     message: '医生设置了自动转发但在发消息时出现错误'
                   })
                 } else if (teamEmptyFlag.length !== 0) {
@@ -284,9 +285,9 @@ exports.counselAutoRelay = function (req, res) {
                     if (teamEmptyFlag[i]) emptyTeams.push(teamIds[i])
                   }
                   return res.status(206).json({
-                    results: '新建成功', 
-                    results: req.body.counselInfo, 
-                    message: '医生设置了自动转发但部分转发目标不存在', 
+                    result: '新建成功',
+                    results: req.body.counselInfo,
+                    message: '医生设置了自动转发但部分转发目标不存在',
                     messageDetail: emptyTeams
                   })
                 } else {
@@ -298,8 +299,6 @@ exports.counselAutoRelay = function (req, res) {
         })
       }
     })
-
-    
   }
 
   let teamIds = req.body.relayTarget
@@ -310,12 +309,12 @@ exports.counselAutoRelay = function (req, res) {
   let newsErrFlag = 0
   // team空标记
   let teamEmptyFlag = []
-  // 
+  //
 
   if (teamIds.length === 0) {
     return res.status(206).json({
-      result: '新建成功', 
-      results: req.body.counselInfo, 
+      result: '新建成功',
+      results: req.body.counselInfo,
       message: '医生设置了自动转发但没有设置转发目标'
     })
   }

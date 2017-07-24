@@ -3,24 +3,26 @@ var Message = require('../models/message')
 
 // 根据类型查询消息链接 2017-04-05 GY
 exports.getMessages = function (req, res) {
-  if (req.query.userId === null || req.query.userId === '') {
-    return res.json({result: '请填写userId'})
-  }
+  // if (req.query.userId === null || req.query.userId === '') {
+  // if (req.session.userId === null || req.session.userId === '') {
+  //   return res.json({result: '请填写userId'})
+  // }
   // if (req.query.type === null || req.query.type === '') {
   //  return res.json({resutl: '请填写type'});
   // }
 
-  var userId = req.query.userId
-  var type = req.query.type
+  // var userId = req.query.userId
+  var userId = req.session.userId
+  var type = req.query.type  // 选填
 
-  if (userId === null || userId === '') {
+  if (userId === null || userId === '' || userId === undefined) {
     return res.json({result: '请填写userId!'})
   }
 
   var query
   query = {userId: userId}
 
-  if (type !== '' && type !== undefined) {
+  if (type !== null && type !== '' && type !== undefined) {
     query['type'] = type
   }
 
@@ -37,15 +39,17 @@ exports.getMessages = function (req, res) {
 
 // 根据userId修改某种类型消息的已读状态 GY 2017-04-15
 exports.changeMessageStatus = function (req, res) {
-  if (req.body.userId === null || req.body.userId === '') {
-    return res.json({result: '请填写userId'})
-  }
-  if (req.body.type === null || req.body.type === '') {
+  // if (req.body.userId === null || req.body.userId === '') {
+  // if (req.session.userId === null || req.session.userId === '') {
+  //   return res.json({result: '请填写userId'})
+  // }
+  if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
     return res.json({resutl: '请填写type'})
   }
 
   var query = {
-    userId: req.body.userId,
+    // userId: req.body.userId,
+    userId: req.session.userId,
     type: req.body.type
   }
 
@@ -76,10 +80,10 @@ exports.changeMessageStatus = function (req, res) {
 }
 
 exports.insertMessage = function (req, res) {
-  if (req.body.userId === null || req.body.userId === '') {
+  if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) { // insurance传入，不用修改，消息接收方为患者
     return res.json({result: '请填写userId'})
   }
-  if (req.body.type === null || req.body.type === '') {
+  if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
     return res.json({resutl: '请填写type'})
   }
   var readOrNot = 0
@@ -91,24 +95,24 @@ exports.insertMessage = function (req, res) {
     type: req.body.type,
     readOrNot: readOrNot
   }
-  if (req.body.sendBy !== null && req.body.sendBy !== '') {
+  if (req.body.sendBy !== null && req.body.sendBy !== '' && req.body.sendBy !== undefined) {
     messageData['sendBy'] = req.body.sendBy
   } else {
     // 默认发送者为系统
     messageData['sendBy'] = 'System'
   }
-  if (req.body.time !== null && req.body.time !== '') {
+  if (req.body.time !== null && req.body.time !== '' && req.body.time !== undefined) {
     messageData['time'] = new Date(req.body.time)
   } else {
     messageData['time'] = new Date()
   }
-  if (req.body.title !== null) {
+  if (req.body.title !== null && req.body.title !== '' && req.body.title !== undefined) {
     messageData['title'] = req.body.title
   }
-  if (req.body.description !== null) {
+  if (req.body.description !== null && req.body.description !== '' && req.body.description !== undefined) {
     messageData['description'] = req.body.description
   }
-  if (req.body.url !== null) {
+  if (req.body.url !== null && req.body.url !== '' && req.body.url !== undefined) {
     messageData['url'] = req.body.url
   }
   // return res.json({messageData:messageData})

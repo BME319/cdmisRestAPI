@@ -55,6 +55,7 @@ var wxApis = {
 
 // var wxApiUserObject = config.wxDeveloperConfig.zdyyszbzx;
 
+// 根据角色获取AppId
 exports.chooseAppId = function (req, res, next) {
   var role = req.query.role || req.body.role
   // console.log("test1");
@@ -79,17 +80,25 @@ exports.chooseAppId = function (req, res, next) {
   }
 }
 
+// 加密签名signature检验
+// 验证消息的确来自微信服务器
+// 验证成功，原样返回echostr参数内容，则接入生效
 exports.getServerSignature = function (req, res) {
+  // signature微信加密签名，timestamp时间戳，nonce随机数，echostr随机字符串
   var signature = req.query.signature
   var timestamp = req.query.timestamp
   var nonce = req.query.nonce
   var token = config.getServerSignatureTOKEN
   var echostr = req.query.echostr
 
+  // 将token、timestamp、nonce三个参数进行字典序排序
   var sha1Gen = crypto.createHash('sha1')
-  var input = [token, timestamp, nonce].sort().join('')  // .sort()对数组元素进行字典排序, .join('')必须加参数空字符''
+  // .sort()对数组元素进行字典排序, .join('')必须加参数空字符''
+  var input = [token, timestamp, nonce].sort().join('')
+  // 将三个参数字符串拼接成一个字符串进行sha1加密
   var sha1 = sha1Gen.update(input).digest('hex')
 
+  // 若sha1与signature相等，返回echostr；否则返回400错误
   if (sha1 === signature) {
     res.status(200).send(echostr)
   } else {
@@ -192,7 +201,8 @@ exports.settingConfig = function (req, res) {
   }})
 }
 
-exports.gettokenbycode = function (req, res, next) { // 获取用户信息的access_token
+// 获取用户信息的access_token
+exports.gettokenbycode = function (req, res, next) {
   var paramObject = req.query || {}
 
   var code = paramObject.code
@@ -211,15 +221,16 @@ exports.gettokenbycode = function (req, res, next) { // 获取用户信息的acc
 
     console.log(body)
     var wechatData = {
-      access_token: body.access_token, // 获取用户信息的access_token
+      access_token: body.access_token,
+      // express_in为凭证有效时间
       expires_in: body.expires_in,
       refresh_token: body.refresh_token,
       openid: body.openid,
+      // scope用户授权的作用域
       scope: body.scope,
       unionid: body.unionid
-            // api_type: 1
     }
-            // console.log(wechatData);
+    // 如果网页授权作用域为snsapi_base,返回wechatData；否则进行下一步
     if (wechatData.scope === 'snsapi_base') {
       return res.json({results: wechatData})
     } else if (wechatData.scope === 'snsapi_userinfo') {
@@ -230,13 +241,12 @@ exports.gettokenbycode = function (req, res, next) { // 获取用户信息的acc
     } else {
       req.wechatData = wechatData
       req.state = state
-            // console.log('else');
-
       next()
     }
   })
 }
 
+// 返回token信息
 exports.returntoken = function (req, res) {
   return res.json({result: req.wechatData})
 }
@@ -265,9 +275,10 @@ exports.returntoken = function (req, res) {
 //   })
 // }
 
-exports.verifyaccess_token = function (req, res, next) { // 获取用户信息的access_token
+// 验证token
+exports.verifyaccess_token = function (req, res, next) {
   var openid = req.query.openid
-  var accessToken = req.query.access_token// 获取用户信息的access_token
+  var accessToken = req.query.access_token
 
   var apiUrl = wxApis.verifyaccess_token + '?access_token=' + accessToken + '&openid=' + openid
 
@@ -277,12 +288,13 @@ exports.verifyaccess_token = function (req, res, next) { // 获取用户信息�
     json: true
   }, function (err, response, body) {
     var wechatData = {
-      access_token: body.access_token, // 获取用户信息的access_token
+      access_token: body.access_token,
       expires_in: body.expires_in,
       refresh_token: body.refresh_token,
       openid: body.openid,
       scope: body.scope
     }
+    // errcode为0，表示验证成功
     if (body.errcode === 0) {
       res.json(wechatData)
       next()
@@ -292,9 +304,11 @@ exports.verifyaccess_token = function (req, res, next) { // 获取用户信息�
   })
 }
 
+// 获取用户信息
+// 返回openid,nickname,sex,province,city,country,headimgurl,privilege,unionid
 exports.getuserinfo = function (req, res) {
   var openid = req.wechatData.openid
-  var accessToken = req.wechatData.access_token// 获取用户信息的access_token
+  var accessToken = req.wechatData.access_token
 
   var apiUrl = wxApis.getuserinfo + '?access_token=' + accessToken + '&openid=' + openid + '&lang=zh_CN'
 
@@ -351,7 +365,7 @@ exports.addOrder = function (req, res, next) {
     body: req.body.body_description,    // 商品描述
     attach: orderObject.attach,    // 附加数据   state
 
-    out_trade_no: outTradeNo + '-' + commonFunc.getRandomSn(4),   // 商户订单号
+    out_trade_no: outTradeNo,   // 商户订单号
 
     total_fee: totalFee,   // 标价金额
     // spbill_create_ip: req.body.ip,   // 终端IP
@@ -711,7 +725,6 @@ exports.refundMessage = function (req, res) {
       return res.json({results: req.refundData})
     })
   })
-
 }
 
 // 查询退款
@@ -764,7 +777,7 @@ exports.autoRefundQuery = function (req, res) {
   let orderNos = []
   let wxApiUserObject = [config.wxDeveloperConfig.ssgj, config.wxDeveloperConfig.appssgj]
   // console.log(wxApiUserObject)
-  function refundQuery(orderNosIndex, rolesIndex) {
+  function refundQuery (orderNosIndex, rolesIndex) {
     let paramData = {
       appid: wxApiUserObject[rolesIndex].appid,   // 公众账号ID
       mch_id: wxApiUserObject[rolesIndex].merchantid,   // 商户号
@@ -803,7 +816,7 @@ exports.autoRefundQuery = function (req, res) {
           // 修改数据库中订单状态
           let queryOrder = {orderNo: orderNos[orderNosIndex]}
           let upObj = {
-            paystatus: 9, 
+            paystatus: 9,
             refundScuTime: new Date(jsondata.xml.refund_success_time_0)
           }
           Order.updateOne(queryOrder, upObj, function (err, uporder) {
@@ -831,15 +844,12 @@ exports.autoRefundQuery = function (req, res) {
         }
       }
     })
-
   }
 
   Order.getSome(query, function (err, orderItems) {
-    if (err) 
-      console.log('getOrderItemErr')
+    if (err) { console.log('getOrderItemErr') }
     // console.log(orderItems)
-    for (let i = 0; i < orderItems.length; i++) 
-      orderNos[i] = orderItems[i].orderNo
+    for (let i = 0; i < orderItems.length; i++) { orderNos[i] = orderItems[i].orderNo }
     console.log(orderNos)
     refundQuery(0, 0)
   })

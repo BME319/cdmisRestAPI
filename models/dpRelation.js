@@ -2,35 +2,35 @@
 var mongoose = require('mongoose')
 
 var dpRelationSchema = new mongoose.Schema({
-  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
+  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   patients: [
     {
       _id: 0,
-      patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'patient'},
+      patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       labels: [String],
       dpRelationTime: Date
     }
   ],
   patientsInCharge: [
     {
-      _id:0,
+      _id: 0,
       patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       labels: [String],
-      dpRelationTime: Date, 
+      dpRelationTime: Date,
       // 历史、当前、待审核、已拒绝
-      invalidFlag: Number, 
-      rejectReason: String, 
-      // 时长数字类型以秒为单位
-      length: Number, 
+      invalidFlag: Number,
+      rejectReason: String,
+      // 时长数字类型以月为单位
+      length: Number,
       // 有效的起止时间
-      start: Date, 
+      start: Date,
       end: Date
     }
-  ], 
+  ],
   doctors: [
     {
       _id: 0,
-      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
+      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       lastTalkTime: Date
     }
   ],

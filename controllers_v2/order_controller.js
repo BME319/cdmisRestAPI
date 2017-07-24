@@ -1,8 +1,10 @@
 // var config = require('../config')
-var Doctor = require('../models/doctor')
+// var Doctor = require('../models/doctor')
 var Order = require('../models/order')
+var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
 
+// 获取订单信息
 exports.getOrder = function (req, res) {
   var _orderNo = req.query.orderNo
   var query = {orderNo: _orderNo}
@@ -17,14 +19,15 @@ exports.getOrder = function (req, res) {
 
 exports.insertOrder = function (req, res, next) {
   var money = req.body.money || null
-  if (money === null || money === '') {
+  if (money === null || money === '' || money === undefined) {
     return res.status(403).send('invalid input')
   }
 
   var query = {
     userId: req.body.notes
   }
-  Doctor.getOne(query, function (err, doctor) {
+  // Doctor.getOne(query, function (err, doctor) {
+  Alluser.getOne(query, function (err, doctor) {
     if (err) {
             // console.log(err);
       return res.status(500).send('服务器错误, 用户查询失败!')
@@ -39,6 +42,8 @@ exports.insertOrder = function (req, res, next) {
         trueMoney = doctor.charge2 * 100
       } else if (req.body.class === '03') {
         trueMoney = doctor.charge2 * 100 - doctor.charge1 * 100
+      } else if (req.body.class === '04') { // 主管医生
+        trueMoney = doctor.charge4 * 100 - doctor.charge4 * 100
       } else {
         return res.status(403).send('服务类型不存在!')
       }
@@ -84,6 +89,7 @@ exports.insertOrder = function (req, res, next) {
   })
 }
 
+// 更新订单信息
 exports.updateOrder = function (req, res) {
   var query = {orderNo: req.body.orderNo}
   var upObj = {
