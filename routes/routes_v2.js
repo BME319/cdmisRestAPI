@@ -993,12 +993,146 @@ module.exports = function (app, webEntry, acl) {
   // 患者端 获取主管医生信息 2017-07-20
   app.get(version + '/patient/myDoctorsInCharge', tokenManager.verifyToken(), serviceCtrl.getDoctorsInCharge)
   // 患者端 删除主管医生 2017-07-20
+  /** YQC 2017-07-25
+   * @swagger
+   * /patient/cancelDoctorInCharge:
+   *   post:
+   *     tags:
+   *     - "patient"
+   *     summary: "Cancel the service of Doctor-In-Charge"
+   *     description: ""
+   *     operationId: "cancelDoctorInCharge"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/patient/cancelDoctorInCharge', tokenManager.verifyToken(), serviceCtrl.getMyDoctorInCharge, serviceCtrl.deleteDoctorInCharge, serviceCtrl.getPatientInCharge, serviceCtrl.deletePatientInCharge)
   // 患者端 判断关系 2017-07-21
+  /** YQC 2017-07-25
+   * @swagger
+   * /services/relation:
+   *   get:
+   *     tags:
+   *     - "services"
+   *     summary: "Finds the relaton between a patient and a doctor"
+   *     description: "Define whether they are favorate doctor/patient or doctor/patient in charge"
+   *     operationId: "relation"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token of the user."
+   *       required: true
+   *       type: "string"
+   *     - name: "doctorId"
+   *       in: "query"
+   *       description: "The userId of the doctor to be queried."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             DIC:
+   *               type: number
+   *               enum:
+   *                 - "0"
+   *                 - "1"
+   *               description: "1表示患者与医生之间为主管／被主管的关系，0则不是"
+   *             FD:
+   *               type: number
+   *               enum:
+   *                 - "0"
+   *                 - "1"
+   *               description: "1表示患者与医生之间为关注／被关注的关系，0则不是"
+   */
   app.get(version + '/services/relation', tokenManager.verifyToken(), serviceCtrl.relation)
   // 医生端 获取主管医生待审核请求列表 2017-07-19
+  /** YQC 2017-07-25
+   * @swagger
+   * /doctor/myPatientsToReview:
+   *   get:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Finds all patients demanding the service of supervising doctor from the doctor"
+   *     description: ""
+   *     operationId: "myPatientsToReview"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token of the user."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/PatientToReview'
+   *             numberToReview:
+   *               type: number
+   */
   app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
   // 医生端 审核主管患者 2017-07-21
+  /** YQC 2017-07-25
+   * @swagger
+   * /doctor/PatientInCharge:
+   *   post:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Review the application from a patient demanding the service of supervising doctor"
+   *     description: ""
+   *     operationId: "PatientInCharge"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "reviewResult"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           reviewResult:
+   *             type: "string"
+   *             enum:
+   *               - "consent"
+   *               - "reject"
+   *           rejectReason:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/doctor/PatientInCharge', tokenManager.verifyToken(), serviceCtrl.reviewPatientInCharge, serviceCtrl.updateDoctorInCharge)
   // 医生端 获取排班（工作排班与面诊加号排班）信息 2017-07-19
   /** YQC 17-07-20
@@ -2751,7 +2885,6 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *       inputCode:
    *         type: string
-   *     
    */
   app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl), dictHospitalCtrl.getHospital)
 
@@ -3214,5 +3347,42 @@ module.exports = function (app, webEntry, acl) {
    *               description: "血压用"
    *       unit:
    *         type: string
+   *   PatientToReview:
+   *     type: object
+   *     properties:
+   *       dpRelationTime:
+   *         type: string
+   *         format: date-time
+   *       invalidFlag:
+   *         type: number
+   *         enum:
+   *           - "0"
+   *           - "1"
+   *           - "2"
+   *           - "3"
+   *         description: "0为待审核，1为当前主管，2为历史主管，3为申请拒绝"
+   *       length:
+   *         type: number
+   *         description: "单位为月"
+   *       patientId:
+   *         type: object
+   *         properties:
+   *           userId:
+   *             type: string
+   *           photoUrl:
+   *             type: string
+   *           name:
+   *             type: string
+   *           gender:
+   *             type: number
+   *           birthday:
+   *             type: string
+   *             format: date-time
+   *           class:
+   *             type: string
+   *           class_info:
+   *             type: array
+   *             items:
+   *               type: string
    */
 }
