@@ -983,14 +983,183 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.editAliPayAccount)
   // 患者端 关注医生 2017-07-18
-  app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), patientCtrl.bindingDoctor, patientCtrl.bindingPatient)
+  /** YQC 2017-07-25
+   * @swagger
+   * /patient/favoriteDoctor:
+   *   post:
+   *     tags:
+   *     - "patient"
+   *     summary: "Follow a Doctor."
+   *     description: ""
+   *     operationId: "favoriteDoctor"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "doctorId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           doctorId:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), patientCtrl.bindingFavoriteDoctor, patientCtrl.bindingFavoritePatient)
   // 患者端 取关医生 2017-07-21
-  app.post(version + '/patient/unfollowFavoriteDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.debindingPatient)
+  /** YQC 2017-07-25
+   * @swagger
+   * /patient/unfollowFavoriteDoctor:
+   *   post:
+   *     tags:
+   *     - "patient"
+   *     summary: "Unfollow a certain Favorite Doctor."
+   *     description: ""
+   *     operationId: "unfollowFavoriteDoctor"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "doctorId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           doctorId:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/patient/unfollowFavoriteDoctor', tokenManager.verifyToken(), patientCtrl.debindingFavoriteDoctor, patientCtrl.debindingFavoritePatient)
   // 患者端 获取关注医生列表 2017-07-19
+  /** YQC 2017-07-25
+   * @swagger
+   * /patient/myFavoriteDoctors:
+   *   get:
+   *     tags:
+   *     - "patient"
+   *     summary: "Finds the list of FavoriteDoctors, with the function of skip and limit.（未完成）"
+   *     description: ""
+   *     operationId: "myFavoriteDoctors"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token of the user."
+   *       required: true
+   *       type: "string"
+   *     - name: "skip"
+   *       in: "query"
+   *       description: "跳过显示."
+   *       required: false
+   *       type: "number"
+   *     - name: "limit"
+   *       in: "query"
+   *       description: "限制显示."
+   *       required: false
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 FavoriteDoctors:
+   *                   type: array
+   *                   items:
+   *                     FavoriteDoctor:
+   *                       type: object
+   *             nexurl:
+   *               type: string
+   *               description: "下一页显示的请求路径"
+   *       404:
+   *         description: "UserId not found."
+   */
   app.get(version + '/patient/myFavoriteDoctors', tokenManager.verifyToken(), patientCtrl.getMyFavoriteDoctors)
   // 患者端 申请主管医生 2017-07-18
+  /** YQC 2017-07-25
+   * @swagger
+   * /patient/doctorInCharge:
+   *   post:
+   *     tags:
+   *     - "patient"
+   *     summary: "Post(with deleting current doctor-in-charge) a request to a doctor for service of doctor-in-charge"
+   *     description: ""
+   *     operationId: "doctorInCharge"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "doctorId"
+   *           - "chargeDuration"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           doctorId:
+   *             type: "string"
+   *           chargeDuration:
+   *             type: "string"
+   *             description: "单位为月"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge)
   // 患者端 获取主管医生信息 2017-07-20
+  /** YQC 2017-07-25
+   * @swagger
+   * /patient/myDoctorsInCharge:
+   *   get:
+   *     tags:
+   *     - "patient"
+   *     summary: "Finds the doctor-in-charge status, if there's any, of a patient.（未完成）"
+   *     description: ""
+   *     operationId: "myDoctorsInCharge"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token of the user."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 DoctorInCharge:
+   *                   type: object
+   *       404:
+   *         description: "UserId not found."
+   */
   app.get(version + '/patient/myDoctorsInCharge', tokenManager.verifyToken(), serviceCtrl.getDoctorsInCharge)
   // 患者端 删除主管医生 2017-07-20
   /** YQC 2017-07-25

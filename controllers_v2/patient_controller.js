@@ -995,7 +995,7 @@ exports.bindingPatient = function (req, res, next) {
 }
 
 // 绑定关注医生 在alluser表patient_info部分doctors字段添加记录
-exports.bindingDoctor = function (req, res, next) {
+exports.bindingFavoriteDoctor = function (req, res, next) {
   // var patientId = req.body.patientId || null
   let patientId = req.session.userId
   let doctorId = req.body.doctorId || null
@@ -1044,7 +1044,7 @@ exports.bindingDoctor = function (req, res, next) {
 }
 
 // DpRelation表中医生绑定患者
-exports.bindingPatient = function (req, res) {
+exports.bindingFavoritePatient = function (req, res) {
   let doctorObjectId = req.body.doctorObjectId
   let patientObjectId = req.body.patientObjectId
   let dpRelationTime = req.body.dpRelationTime || null
@@ -1096,7 +1096,7 @@ exports.bindingPatient = function (req, res) {
 }
 
 // 解绑关注医生 在alluser表patient_info部分doctors字段添加记录
-exports.debindingDoctor = function (req, res, next) {
+exports.debindingFavoriteDoctor = function (req, res, next) {
   // var patientId = req.body.patientId || null
   let patientId = req.session.userId
   let doctorId = req.body.doctorId || null
@@ -1156,7 +1156,7 @@ exports.debindingDoctor = function (req, res, next) {
 }
 
 // DpRelation表中医生绑定患者
-exports.debindingPatient = function (req, res) {
+exports.debindingFavoritePatient = function (req, res) {
   let doctorObjectId = req.body.doctorObjectId
   let patientObjectId = req.body.patientObjectId
   let query = {doctorId: doctorObjectId}
