@@ -390,24 +390,245 @@ module.exports = function (app, webEntry, acl) {
    */
   app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
   // advice - debug complete 2017-07-17
-  /**
+  /** YQC 17-07-24
    * @swagger
    * /advice/advices:
-   *  get:
-   *    tags:
-   *    - "advice"
-   *    summary: "Finds advices by advisorId"
-   *    description: ""
-   *    operationId: "advices"
-
+   *   get:
+   *     tags:
+   *     - "advice"
+   *     summary: "Finds advices by advisorId"
+   *     description: ""
+   *     operationId: "advices"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "advisorId"
+   *       in: "query"
+   *       description: "UserId of the advisor to be queried."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Advice'
+   *       404:
+   *         description: "AdvisorId not found."
    */
   app.get(version + '/advice/advices', tokenManager.verifyToken(), adviceCtrl.getAdvice)
+  /** YQC 17-07-24
+   * @swagger
+   * /advice/advice:
+   *   post:
+   *     tags:
+   *     - "advice"
+   *     summary: "Post an advice to the developer"
+   *     description: ""
+   *     operationId: "advice"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "topic"
+   *           - "content"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           topic:
+   *             type: "string"
+   *           content:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Advice'
+   */
   app.post(version + '/advice/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
   // compliance - debug complete 2017-07-17
-  app.get(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
-  app.post(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
+  /** YQC 17-07-24
+   * @swagger
+   * /compliance/compliance:
+   *   get:
+   *     tags:
+   *     - "compliance"
+   *     summary: "Finds compliances by userId"
+   *     description: ""
+   *     operationId: "compliances"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "userId"
+   *       in: "query"
+   *       description: "UserId to be queried."
+   *       required: false
+   *       type: "string"
+   *     - name: "date"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *       format: date-time
+   *     - name: "type"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     - name: "code"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Compliance'
+   *       404:
+   *         description: "UserId not found."
+   */
+  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
+  /** YQC 17-07-24
+   * @swagger
+   * /compliance/compliances:
+   *   post:
+   *     tags:
+   *     - "compliance"
+   *     summary: "update an compliance status"
+   *     description: ""
+   *     operationId: "compliance"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "date"
+   *           - "type"
+   *           - "code"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           date:
+   *             type: "string"
+   *             format: date-time
+   *           type:
+   *             type: "string"
+   *           status:
+   *             type: "number"
+   *           description:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/compliance/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
   // vitalSign 2017-07-14  - debug complete 2017-07-24
+  /** YQC 17-07-24
+   * @swagger
+   * /vitalSign/vitalSigns:
+   *   get:
+   *     tags:
+   *     - "vitalSign"
+   *     summary: "Finds vitalSigns by userId of certain patient"
+   *     description: ""
+   *     operationId: "vitalSigns"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "PatientId"
+   *       in: "query"
+   *       description: "UserId to be queried."
+   *       required: true
+   *       type: "string"
+   *     - name: "type"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/VitalSign'
+   *       404:
+   *         description: "UserId not found."
+   */
   app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
+  /** YQC 17-07-24
+   * @swagger
+   * /vitalSign/vitalSigns:
+   *   post:
+   *     tags:
+   *     - "vitalSign"
+   *     summary: "Post/Update an vitalSign status"
+   *     description: ""
+   *     operationId: "vitalSigns"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "date"
+   *           - "type"
+   *           - "code"
+   *           - "unit"
+   *           - "datatime"
+   *           - "datavalue"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           date:
+   *             type: "string"
+   *             format: date-time
+   *           type:
+   *             type: "string"
+   *           code:
+   *             type: "number"
+   *           unit:
+   *             type: "string"
+   *           datatime:
+   *             type: "string"
+   *             format: date-time
+   *           datavalue:
+   *             type: "number"
+   *           datavalue2:
+   *             type: "number"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
   // counsel 2017-07-17 debug 1-
   // 医生获取问诊信息
@@ -2634,5 +2855,65 @@ module.exports = function (app, webEntry, acl) {
    *         enum:
    *           - "0"
    *           - "1"
+   *   Advice:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       role:
+   *         type: string
+   *         enum:
+   *           - "doctor"
+   *           - "patient"
+   *       time:
+   *         type: string
+   *         format: date-time
+   *       topic:
+   *         type: string
+   *       content:
+   *         type: string
+   *   Compliance:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       type:
+   *         type: string
+   *       code:
+   *         type: string
+   *       date:
+   *         type: string
+   *         format: date-time
+   *       status:
+   *         type: number
+   *       description:
+   *         type: string
+   *   VitalSign:
+   *     type: object
+   *     properties:
+   *       patientId:
+   *         type: string
+   *       type:
+   *         type: string
+   *       code:
+   *         type: string
+   *       date:
+   *         type: string
+   *         format: date-time
+   *       data:
+   *         type: array
+   *         items:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *               format: date-time
+   *             value:
+   *                type: string
+   *             value2:
+   *               type: string
+   *               description: "血压用"
+   *       unit:
+   *         type: string
    */
 }

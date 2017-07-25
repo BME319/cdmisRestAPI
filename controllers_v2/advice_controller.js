@@ -22,11 +22,11 @@ exports.getAdvice = function (req, res) {
       query = {}
     }
     // 调用建议获取函数Advice.getSome，不出错则返回相应建议内容
-    Advice.getSome(query, function (err, item) {
+    Advice.getSome(query, function (err, items) {
       if (err) {
         return res.status(500).send(err)
       }
-      res.json({results: item})
+      res.json({results: items})
     })
   })
 }
