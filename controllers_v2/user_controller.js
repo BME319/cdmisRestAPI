@@ -693,7 +693,7 @@ exports.login = function (req, res) {
             }
 
                         // 2017-06-07GY调试
-            console.log('login_success')
+            // console.log('login_success')
 
             res.json({results: results})
           })
@@ -743,7 +743,7 @@ exports.getUserID = function (req, res) {
     if (item === null) {
       res.json({results: 1, mesg: "User doesn't Exist!"})
     } else {
-      console.log(item)
+      // console.log(item)
       res.json({results: 0, UserId: item.userId, phoneNo: item.phoneNo, roles: item.role, openId: item.openId, mesg: 'Get UserId Success!'})
     }
   })
