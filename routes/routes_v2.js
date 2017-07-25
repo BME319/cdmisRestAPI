@@ -983,7 +983,7 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.editAliPayAccount)
   // 患者端 关注医生 2017-07-18
-  /** YQC 2017-07-25
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
    * /patient/favoriteDoctor:
    *   post:
@@ -1014,7 +1014,7 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), patientCtrl.bindingFavoriteDoctor, patientCtrl.bindingFavoritePatient)
   // 患者端 取关医生 2017-07-21
-  /** YQC 2017-07-25
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
    * /patient/unfollowFavoriteDoctor:
    *   post:
@@ -1045,7 +1045,7 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/patient/unfollowFavoriteDoctor', tokenManager.verifyToken(), patientCtrl.debindingFavoriteDoctor, patientCtrl.debindingFavoritePatient)
   // 患者端 获取关注医生列表 2017-07-19
-  /** YQC 2017-07-25
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
    * /patient/myFavoriteDoctors:
    *   get:
@@ -1092,9 +1092,9 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "UserId not found."
    */
-  app.get(version + '/patient/myFavoriteDoctors', tokenManager.verifyToken(), patientCtrl.getMyFavoriteDoctors)
+  app.get(version + '/patient/myFavoriteDoctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getMyFavoriteDoctors)
   // 患者端 申请主管医生 2017-07-18
-  /** YQC 2017-07-25
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
    * /patient/doctorInCharge:
    *   post:
@@ -1127,9 +1127,9 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge)
+  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge)
   // 患者端 获取主管医生信息 2017-07-20
-  /** YQC 2017-07-25
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
    * /patient/myDoctorsInCharge:
    *   get:
@@ -1160,9 +1160,9 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "UserId not found."
    */
-  app.get(version + '/patient/myDoctorsInCharge', tokenManager.verifyToken(), serviceCtrl.getDoctorsInCharge)
+  app.get(version + '/patient/myDoctorsInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getDoctorsInCharge)
   // 患者端 删除主管医生 2017-07-20
-  /** YQC 2017-07-25
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
    * /patient/cancelDoctorInCharge:
    *   post:
@@ -1188,9 +1188,9 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/cancelDoctorInCharge', tokenManager.verifyToken(), serviceCtrl.getMyDoctorInCharge, serviceCtrl.deleteDoctorInCharge, serviceCtrl.getPatientInCharge, serviceCtrl.deletePatientInCharge)
+  app.post(version + '/patient/cancelDoctorInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getMyDoctorInCharge, serviceCtrl.deleteDoctorInCharge, serviceCtrl.getPatientInCharge, serviceCtrl.deletePatientInCharge)
   // 患者端 判断关系 2017-07-21
-  /** YQC 2017-07-25
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
    * /services/relation:
    *   get:
@@ -1231,9 +1231,9 @@ module.exports = function (app, webEntry, acl) {
    *                 - "1"
    *               description: "1表示患者与医生之间为关注／被关注的关系，0则不是"
    */
-  app.get(version + '/services/relation', tokenManager.verifyToken(), serviceCtrl.relation)
+  app.get(version + '/services/relation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.relation)
   // 医生端 获取主管医生待审核请求列表 2017-07-19
-  /** YQC 2017-07-25
+  /** YQC annotation 2017-07-25  - acl 2017-07-25 医生
    * @swagger
    * /doctor/myPatientsToReview:
    *   get:
@@ -1263,9 +1263,9 @@ module.exports = function (app, webEntry, acl) {
    *             numberToReview:
    *               type: number
    */
-  app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
+  app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getPatientsToReview)
   // 医生端 审核主管患者 2017-07-21
-  /** YQC 2017-07-25
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
    * /doctor/PatientInCharge:
    *   post:
@@ -1302,9 +1302,9 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/doctor/PatientInCharge', tokenManager.verifyToken(), serviceCtrl.reviewPatientInCharge, serviceCtrl.updateDoctorInCharge)
+  app.post(version + '/doctor/PatientInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.reviewPatientInCharge, serviceCtrl.updateDoctorInCharge)
   // 医生端 获取排班（工作排班与面诊加号排班）信息 2017-07-19
-  /** YQC 17-07-20
+  /** YQC annotation 2017-07-20 - acl 2017-07-25 医生
    * @swagger
    * /api/v2/services/mySchedules:
    *   get:
@@ -1343,7 +1343,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "Doctor not found."
    */
-  app.get(version + '/services/mySchedules', tokenManager.verifyToken(), serviceCtrl.getMySchedules)
+  app.get(version + '/services/mySchedules', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getMySchedules)
 
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
