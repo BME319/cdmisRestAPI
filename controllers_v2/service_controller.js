@@ -420,7 +420,7 @@ exports.deleteServiceSchedule = function (req, res) {
 }
 // 获取排班信息 2017-07-19 YQC
 // 承接session.userId；输出相应医生的面诊排班信息
-exports.getServiceSchedules = function (req, res) {
+exports.getMySchedules = function (req, res) {
   // 查询条件
   let doctorId = req.session.userId
   let query = {userId: doctorId}

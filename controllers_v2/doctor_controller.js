@@ -824,7 +824,7 @@ exports.getSuspendTime = function (req, res) {
 exports.getDocNum = function (req, res) {
   // 查询条件
   var query = {role: 'doctor'}
-  Alluser.count(query, function (err, item) {
+  Alluser.countSome(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -1112,7 +1112,7 @@ exports.getPatientByDate = function (req, res) {
 // 修改用户支付宝账号 2017-06-16 GY
 // 注释 医生修改绑定的支付宝账号信息 输入，aliPayAccount，输出，支付宝账号更新
 exports.editAliPayAccount = function (req, res) {
-  let query = {userId: req.session.userId}
+  let query = {userId: req.session.userId, role: 'doctor'}
   let upObj = {aliPayAccount: req.body.aliPayAccount}
   let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
 
@@ -1124,10 +1124,10 @@ exports.editAliPayAccount = function (req, res) {
   }, opts)
 }
 
-// 获取用户支付宝账号 2017-06-16 GY
-// 注释 医生获取自己绑定的支付宝账号信息 承接session.userId；输出，支付宝账号信息
+// 获取医生支付宝账号 2017-06-16 GY
+// 注释 医生获取自己绑定的支付宝账号信息 输入userId；输出，支付宝账号信息
 exports.getAliPayAccount = function (req, res) {
-  let query = {userId: req.session.userId}
+  let query = {userId: req.query.userId, role: 'doctor'}
 
   Alluser.getOne(query, function (err, item) {
     if (err) {
@@ -1137,7 +1137,7 @@ exports.getAliPayAccount = function (req, res) {
       return res.status(400).send('不存在的医生')
     } else {
       if (item.aliPayAccount === undefined) {
-        return res.json({results: ''})
+        return res.json({results: '未绑定支付宝账号'})
       } else {
         return res.json({results: item.aliPayAccount})
       }

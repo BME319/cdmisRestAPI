@@ -662,12 +662,14 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
   // patient 2017-07-17
   app.get(version + '/patient/detail', tokenManager.verifyToken(), patientCtrl.getPatientDetail)
+  app.post(version + '/patient/detail', tokenManager.verifyToken(), patientCtrl.newPatientDetail)
+
   app.get(version + '/patient/doctors', tokenManager.verifyToken(), patientCtrl.getDoctorLists)
   app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), patientCtrl.getMyDoctor)
-  // app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.getMyDoctor)
+
   app.get(version + '/patient/counselRecords', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.getCounselRecords)
-  app.post(version + '/patient/detail', tokenManager.verifyToken(), patientCtrl.checkPatientId, patientCtrl.newPatientDetail)
   app.post(version + '/patient/editDetail', tokenManager.verifyToken(), patientCtrl.editPatientDetail)
+
   app.post(version + '/patient/diagnosis', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
   // bindingMyDoctor改为关注医生
   // app.post(version + '/patient/bindingMyDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
@@ -685,14 +687,300 @@ module.exports = function (app, webEntry, acl) {
   // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
   app.post(version + '/doctor/editDetail', tokenManager.verifyToken(), doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember)
   app.get(version + '/doctor/myRecentDoctors', doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList)
+  /** YQC 2017-07-25
+   * @swagger
+   * /doctor/schedule:
+   *   post:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Post/Update an schedule of a doctor"
+   *     description: ""
+   *     operationId: "schedule"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "day"
+   *           - "time"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           day:
+   *             type: "string"
+   *             description: "排班日期(星期数)"
+   *             enum:
+   *               - "Mon"
+   *               - "Tue"
+   *               - "Wed"
+   *               - "Thur"
+   *               - "Fri"
+   *               - "Sat"
+   *               - "Sun"
+   *           time:
+   *             type: "string"
+   *             description: "排班上下午"
+   *             enum:
+   *               - "Morning"
+   *               - "Afternoon"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/doctor/schedule', tokenManager.verifyToken(), doctorCtrl.insertSchedule)
+  /** YQC 2017-07-25
+   * @swagger
+   * /doctor/deleteSchedule:
+   *   post:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Delete an schedule of a doctor"
+   *     description: ""
+   *     operationId: "deleteSchedule"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "day"
+   *           - "time"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           day:
+   *             type: "string"
+   *             description: "排班日期(星期数)"
+   *             enum:
+   *               - "Mon"
+   *               - "Tue"
+   *               - "Wed"
+   *               - "Thur"
+   *               - "Fri"
+   *               - "Sat"
+   *               - "Sun"
+   *           time:
+   *             type: "string"
+   *             description: "排班上下午"
+   *             enum:
+   *               - "Morning"
+   *               - "Afternoon"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/doctor/deleteSchedule', tokenManager.verifyToken(), doctorCtrl.deleteSchedule)
+  // 获取排班（与面诊排班整合）
   app.get(version + '/doctor/schedules', tokenManager.verifyToken(), doctorCtrl.getSchedules)
+  /** YQC 2017-07-25
+   * @swagger
+   * /doctor/suspendTime:
+   *   post:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Post/Update an suspend time of a doctor"
+   *     description: ""
+   *     operationId: "suspendTime"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "start"
+   *           - "end"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           start:
+   *             type: "string"
+   *             format: date-time
+   *           end:
+   *             type: "string"
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/doctor/suspendTime', tokenManager.verifyToken(), doctorCtrl.insertSuspendTime)
+  /** YQC 2017-07-25
+   * @swagger
+   * /doctor/deleteSuspendTime:
+   *   post:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Delete an suspend time of a doctor"
+   *     description: ""
+   *     operationId: "deleteSuspendTime"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "start"
+   *           - "end"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           start:
+   *             type: "string"
+   *             format: date-time
+   *           end:
+   *             type: "string"
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/doctor/deleteSuspendTime', tokenManager.verifyToken(), doctorCtrl.deleteSuspendTime)
+  /** YQC 17-07-20
+   * @swagger
+   * /doctor/suspendTime:
+   *   get:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Finds suspendTimes of certain doctor"
+   *     description: ""
+   *     operationId: "suspendTime"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 serviceSuspendTime:
+   *                   description: "面诊加号服务停诊信息"
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/SuspendTime'
+   *                 suspendTime:
+   *                   description: "工作停诊信息"
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/SuspendTime'
+   *       404:
+   *         description: "Doctor not found."
+   */
   app.get(version + '/doctor/suspendTime', tokenManager.verifyToken(), doctorCtrl.getSuspendTime)
+  /** YQC 2017-07-25
+   * @swagger
+   * /doctor/numbers:
+   *   get:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Finds the total number of registered doctors"
+   *     description: ""
+   *     operationId: "numbers"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token of the user."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: number
+   */
   app.get(version + '/doctor/numbers', tokenManager.verifyToken(), doctorCtrl.getDocNum)
+  /** YQC 2017-07-25
+   * @swagger
+   * /doctor/AliPayAccount:
+   *   get:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Finds AliPayAccount by userId of certain doctor"
+   *     description: ""
+   *     operationId: "AliPayAccount"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "userId"
+   *       in: "query"
+   *       description: "UserId of the doctor to be queried."
+   *       required: true
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token of the user."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: string
+   *       404:
+   *         description: "UserId not found."
+   */
   app.get(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.getAliPayAccount)
+  /** YQC 2017-07-25
+   * @swagger
+   * /doctor/AliPayAccount:
+   *   post:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Post/Update an AliPayAccount of a doctor"
+   *     description: ""
+   *     operationId: "AliPayAccount"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "aliPayAccount"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           aliPayAccount:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), doctorCtrl.editAliPayAccount)
   // 患者端 关注医生 2017-07-18
   app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), patientCtrl.bindingDoctor, patientCtrl.bindingPatient)
@@ -712,7 +1000,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), serviceCtrl.getPatientsToReview)
   // 医生端 审核主管患者 2017-07-21
   app.post(version + '/doctor/PatientInCharge', tokenManager.verifyToken(), serviceCtrl.reviewPatientInCharge, serviceCtrl.updateDoctorInCharge)
-  // 医生端 获取排班信息 2017-07-19
+  // 医生端 获取排班（工作排班与面诊加号排班）信息 2017-07-19
   /** YQC 17-07-20
    * @swagger
    * /services/mySchedules:
@@ -740,17 +1028,19 @@ module.exports = function (app, webEntry, acl) {
    *               type: object
    *               properties:
    *                 serviceSchedules:
+   *                   description: "面诊加号服务排班信息"
    *                   type: "array"
    *                   items:
    *                     $ref: '#/definitions/ServiceSchedule'
    *                 Schedules:
+   *                   description: "工作排班信息"
    *                   type: "array"
    *                   items:
    *                     $ref: '#/definitions/Schedule'
    *       404:
    *         description: "Doctor not found."
    */
-  app.get(version + '/services/mySchedules', tokenManager.verifyToken(), serviceCtrl.getServiceSchedules)
+  app.get(version + '/services/mySchedules', tokenManager.verifyToken(), serviceCtrl.getMySchedules)
 
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
@@ -2838,6 +3128,15 @@ module.exports = function (app, webEntry, acl) {
    *         enum:
    *           - "0"
    *           - "1"
+   *   SuspendTime:
+   *     type: object
+   *     properties:
+   *       start:
+   *         type: string
+   *         format: date-time
+   *       end:
+   *         type: string
+   *         format: date-time
    *   Advice:
    *     type: object
    *     properties:
