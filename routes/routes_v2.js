@@ -58,7 +58,7 @@ module.exports = function (app, webEntry, acl) {
   // csq
   app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
   app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
-  app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclChecking.Checking(acl), aclsettingCtrl.userRoles(acl))
+  app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl))
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl))
 
   app.get(version + '/acl/roleUsers', tokenManager.verifyToken(), aclsettingCtrl.roleUsers(acl))
@@ -2157,7 +2157,7 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: 错误信息
    */
-  app.get(version + '/token/refresh', tokenManager.verifyToken(), aclChecking.Checking(acl), tokenManager.refreshToken)
+  app.get(version + '/token/refresh', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), tokenManager.refreshToken)
 
   // dict
   // 2017-07-24测试 权限：admin
@@ -2224,7 +2224,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: integer
 
    */
-  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeTwoCtrl.getCategory)
+  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeTwoCtrl.getCategory)
   // 2017-07-24测试 权限：admin
   /**
    * @swagger
@@ -2290,7 +2290,7 @@ module.exports = function (app, webEntry, acl) {
    *       invalidFlag:
    *         type: integer
    */
-  app.get(version + '/dict/typeTwo/codes', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeTwoCtrl.getTypes)
+  app.get(version + '/dict/typeTwo/codes', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeTwoCtrl.getTypes)
   // 2017-07-24测试 权限：admin
   /**
    * @swagger
@@ -2344,7 +2344,7 @@ module.exports = function (app, webEntry, acl) {
    *       invalidFlag:
    *         type: integer
    */
-  app.get(version + '/dict/typeOne', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeOneCtrl.getCategory)
+  app.get(version + '/dict/typeOne', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeOneCtrl.getCategory)
   // 2017-07-24测试 权限：admin
   /**
    * @swagger
@@ -2403,7 +2403,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: integer
    */
 
-  app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl), dictDistrictCtrl.getDistrict)
+  app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictDistrictCtrl.getDistrict)
   // 2017-07-24测试 权限：admin
   /**
    * @swagger
@@ -2463,7 +2463,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *     
    */
-  app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl), dictHospitalCtrl.getHospital)
+  app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictHospitalCtrl.getHospital)
 
   // devicedata
   // 2017-07-24测试 权限：patient
@@ -2535,7 +2535,7 @@ module.exports = function (app, webEntry, acl) {
    *       validateDate:
    *         type: string
    */
-  app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.bindingDevice)
+  app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.bindingDevice)
   // 2017-07-24测试 权限：patient
   /**
    * @swagger
@@ -2569,12 +2569,12 @@ module.exports = function (app, webEntry, acl) {
    *        imei:
    *          type: string
    */
-  app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.debindingDevice)
+  app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.debindingDevice)
   /**
    * 
    */
-  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.receiveBloodPressure)
-  app.get(version + '/devicedata/devices', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.getDeviceInfo)
+  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.receiveBloodPressure)
+  app.get(version + '/devicedata/devices', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.getDeviceInfo)
 
   // wechat
   app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.settingConfig)
@@ -2824,12 +2824,12 @@ module.exports = function (app, webEntry, acl) {
    *                   items:
    *                     type: string
    */
-  app.get(version + '/department/district', tokenManager.verifyToken(), departmentCtrl.getDistrict)
-  app.get(version + '/department/department', tokenManager.verifyToken(), departmentCtrl.getDepartment)
-  app.get(version + '/department/doctorlist', tokenManager.verifyToken(), departmentCtrl.getDoctorList)
-  app.post(version + '/department/updatedistrict', tokenManager.verifyToken(), departmentCtrl.updateDistrict)
-  app.post(version + '/department/updatedepartment', tokenManager.verifyToken(), departmentCtrl.updateDepartment)
-  app.post(version + '/department/delete', tokenManager.verifyToken(), departmentCtrl.deleteRecord)
+  app.get(version + '/department/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDistrict)
+  app.get(version + '/department/department', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDepartment)
+  app.get(version + '/department/doctorlist', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDoctorList)
+  app.post(version + '/department/updatedistrict', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDistrict)
+  app.post(version + '/department/updatedepartment', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDepartment)
+  app.post(version + '/department/delete', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.deleteRecord)
 
   /**
    * @swagger
