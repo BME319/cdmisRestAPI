@@ -27,11 +27,13 @@ exports.Checking = function (acl, numPathComponents, userId, actions) {
     }
 
     url = req.originalUrl.split('?')[0]
+    // console.log('************* 1 ****************')
+    // console.log(url)
 
     if (!numPathComponents) {
       resource = url
     } else {
-      resource = url.split('/').slice(3, numPathComponents + 1).join('/')
+      resource = url.split('/').slice(3, numPathComponents + 3).join('/')
     }
 
     if (!_actions) {
@@ -39,6 +41,12 @@ exports.Checking = function (acl, numPathComponents, userId, actions) {
     }
 
     acl.logger ? acl.logger.debug('Requesting ' + _actions + ' on ' + resource + ' by user ' + _userId) : null
+    // console.log('************* 2 ****************')
+    // console.log(_userId)
+    // console.log('************* 3 ****************')
+    // console.log(resource)
+    // console.log('************* 4 ****************')
+    // console.log(_actions)
 
     acl.isAllowed(_userId, resource, _actions, function (err, allowed) {
       if (err) {

@@ -164,6 +164,7 @@ exports.saveLabtest = function (req, res) {
   if (req.body.insertTime === null || req.body.insertTime === '' || req.body.insertTime === undefined) {
     return res.status(412).json({results: '请输入图片上传时间insertTime'});
   }
+  console.log(req.session)
   if (req.session.role.indexOf('health') === -1) {
     return res.status(401).json({results: '没有权限'});
   }

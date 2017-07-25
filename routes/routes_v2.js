@@ -58,7 +58,7 @@ module.exports = function (app, webEntry, acl) {
   // csq
   app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
   app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
-  app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclChecking.Checking(acl), aclsettingCtrl.userRoles(acl))
+  app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl))
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl))
 
   app.get(version + '/acl/roleUsers', tokenManager.verifyToken(), aclsettingCtrl.roleUsers(acl))
@@ -123,7 +123,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/services', tokenManager.verifyToken(), serviceCtrl.getServices)
   /** YQC 17-07-20
    * @swagger
-   * /services/status:
+   * /api/v2/services/status:
    *   post:
    *     tags:
    *     - "services"
@@ -215,7 +215,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/services/status', tokenManager.verifyToken(), serviceCtrl.changeServiceStatus)
   /** YQC 17-07-20
    * @swagger
-   * /services/charge:
+   * /api/v2/services/charge:
    *   post:
    *     tags:
    *     - "services"
@@ -319,7 +319,7 @@ module.exports = function (app, webEntry, acl) {
   // comment - debug complete 2017-07-17
   /** YQC 17-07-20
    * @swagger
-   * /comment/commentsByDoc:
+   * /api/v2/comment/commentsByDoc:
    *   get:
    *     tags:
    *     - "comment"
@@ -355,7 +355,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), commentCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
   /** YQC 17-07-20
    * @swagger
-   * /comment/commentsByCounsel:
+   * /api/v2/comment/commentsByCounsel:
    *   get:
    *     tags:
    *     - "comment"
@@ -390,21 +390,254 @@ module.exports = function (app, webEntry, acl) {
    */
   app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
   // advice - debug complete 2017-07-17
-  app.get(version + '/advice', tokenManager.verifyToken(), adviceCtrl.getAdvice)
-  app.post(version + '/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
+  /** YQC 17-07-24
+   * @swagger
+   * /advice/advices:
+   *   get:
+   *     tags:
+   *     - "advice"
+   *     summary: "Finds advices by advisorId"
+   *     description: ""
+   *     operationId: "advices"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "advisorId"
+   *       in: "query"
+   *       description: "UserId of the advisor to be queried."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Advice'
+   *       404:
+   *         description: "AdvisorId not found."
+   */
+  app.get(version + '/advice/advices', tokenManager.verifyToken(), adviceCtrl.getAdvice)
+  /** YQC 17-07-24
+   * @swagger
+   * /advice/advice:
+   *   post:
+   *     tags:
+   *     - "advice"
+   *     summary: "Post an advice to the developer"
+   *     description: ""
+   *     operationId: "advice"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "topic"
+   *           - "content"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           topic:
+   *             type: "string"
+   *           content:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Advice'
+   */
+  app.post(version + '/advice/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
   // compliance - debug complete 2017-07-17
-  app.get(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
-  app.post(version + '/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
-  // vitalSign 2017-07-14
-  app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
-  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
+  /** YQC 17-07-24
+   * @swagger
+   * /compliance/compliance:
+   *   get:
+   *     tags:
+   *     - "compliance"
+   *     summary: "Finds compliances by userId"
+   *     description: ""
+   *     operationId: "compliances"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "userId"
+   *       in: "query"
+   *       description: "UserId to be queried."
+   *       required: false
+   *       type: "string"
+   *     - name: "date"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *       format: date-time
+   *     - name: "type"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     - name: "code"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Compliance'
+   *       404:
+   *         description: "UserId not found."
+   */
+  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
+  /** YQC 17-07-24
+   * @swagger
+   * /compliance/compliances:
+   *   post:
+   *     tags:
+   *     - "compliance"
+   *     summary: "update an compliance status"
+   *     description: ""
+   *     operationId: "compliance"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "date"
+   *           - "type"
+   *           - "code"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           date:
+   *             type: "string"
+   *             format: date-time
+   *           type:
+   *             type: "string"
+   *           status:
+   *             type: "number"
+   *           description:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/compliance/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
+  // vitalSign 2017-07-14  - debug complete 2017-07-24
+  /** YQC 17-07-24
+   * @swagger
+   * /vitalSign/vitalSigns:
+   *   get:
+   *     tags:
+   *     - "vitalSign"
+   *     summary: "Finds vitalSigns by userId of certain patient"
+   *     description: ""
+   *     operationId: "vitalSigns"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "PatientId"
+   *       in: "query"
+   *       description: "UserId to be queried."
+   *       required: true
+   *       type: "string"
+   *     - name: "type"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/VitalSign'
+   *       404:
+   *         description: "UserId not found."
+   */
+  app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
+  /** YQC 17-07-24
+   * @swagger
+   * /vitalSign/vitalSigns:
+   *   post:
+   *     tags:
+   *     - "vitalSign"
+   *     summary: "Post/Update an vitalSign status"
+   *     description: ""
+   *     operationId: "vitalSigns"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "date"
+   *           - "type"
+   *           - "code"
+   *           - "unit"
+   *           - "datatime"
+   *           - "datavalue"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           date:
+   *             type: "string"
+   *             format: date-time
+   *           type:
+   *             type: "string"
+   *           code:
+   *             type: "number"
+   *           unit:
+   *             type: "string"
+   *           datatime:
+   *             type: "string"
+   *             format: date-time
+   *           datavalue:
+   *             type: "number"
+   *           datavalue2:
+   *             type: "number"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
   // counsel 2017-07-17 debug 1-
-  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getDoctorObject, counselCtrl.getCounsels)
+  // 医生获取问诊信息
+  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getCounsels)
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay)
   app.get(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
   app.post(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
   app.post(version + '/counsel/type', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
-  app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
+  app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
   // communication 2017-07-14
   app.get(version + '/communication/counselReport', tokenManager.verifyToken(), communicationCtrl.getCounselReport)
   // app.post(version + '/communication/newTeam', tokenManager.verifyToken(), getNoMid.getNo(4), communicationCtrl.newTeam)
@@ -482,7 +715,7 @@ module.exports = function (app, webEntry, acl) {
   // 医生端 获取排班信息 2017-07-19
   /** YQC 17-07-20
    * @swagger
-   * /services/mySchedules:
+   * /api/v2/services/mySchedules:
    *   get:
    *     tags:
    *     - "services"
@@ -810,24 +1043,41 @@ module.exports = function (app, webEntry, acl) {
  *           type: object
  *           required:
  *             - token
+ *             - doctorId
+ *             - type
+ *             - money
+ *             - status
  *           properties:
  *             token:
  *               type: string
+ *             doctorId:
+ *               type: string
+ *             type:
+ *               type: string
+ *             money:
+ *               type: number
+ *             status:
+ *               type: number
  *     responses:
  *       200:
  *         description: success
  *         schema:
  *           type: object
  *           required:
- *             - accountInfo
+ *             - n
+ *             - nModified
+ *             - ok
  *           properties:
- *             accountInfo:
- *               type: object
- *               $ref: '#/definitions/AccountInfo'
+ *             n:
+ *               type: number
+ *             nModified:
+ *               type: number
+ *             ok:
+ *               type: number
  *       500:
  *         description: Server internal error
  */
-  app.post(version + '/expense/doctor', tokenManager.verifyToken(), doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  app.post(version + '/expense/doctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
  /**
  * @swagger
  * /api/v2/expense/records:
@@ -1907,9 +2157,10 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: 错误信息
    */
-  app.get(version + '/token/refresh', tokenManager.verifyToken(), aclChecking.Checking(acl), tokenManager.refreshToken)
+  app.get(version + '/token/refresh', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), tokenManager.refreshToken)
 
   // dict
+  // 2017-07-24测试 权限：admin
   /**
    * @swagger
    * /dict/typeTwo:
@@ -1950,8 +2201,6 @@ module.exports = function (app, webEntry, acl) {
    *   DictTwoContent:
    *     type: object
    *     properties:
-   *       _id:
-   *         type: string
    *       type:
    *         type: string
    *       typeName:
@@ -1963,8 +2212,6 @@ module.exports = function (app, webEntry, acl) {
    *   DictTwoDetail:
    *     type: object
    *     properties:
-   *       _id:
-   *         type: string
    *       code:
    *         type: string
    *       name:
@@ -1977,7 +2224,8 @@ module.exports = function (app, webEntry, acl) {
    *         type: integer
 
    */
-  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeTwoCtrl.getCategory)
+  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeTwoCtrl.getCategory)
+  // 2017-07-24测试 权限：admin
   /**
    * @swagger
    * /dict/typeTwo/codes:
@@ -2020,8 +2268,6 @@ module.exports = function (app, webEntry, acl) {
    *   Content:
    *     type: object
    *     properties:
-   *       _id:
-   *         type: string
    *       type:
    *         type: string
    *       typeName:
@@ -2033,8 +2279,6 @@ module.exports = function (app, webEntry, acl) {
    *   Detail:
    *     type: object
    *     properties:
-   *       _id:
-   *         type: string
    *       code:
    *         type: string
    *       name:
@@ -2046,7 +2290,8 @@ module.exports = function (app, webEntry, acl) {
    *       invalidFlag:
    *         type: integer
    */
-  app.get(version + '/dict/typeTwo/codes', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeTwoCtrl.getTypes)
+  app.get(version + '/dict/typeTwo/codes', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeTwoCtrl.getTypes)
+  // 2017-07-24测试 权限：admin
   /**
    * @swagger
    * /dict/typeOne:
@@ -2099,7 +2344,8 @@ module.exports = function (app, webEntry, acl) {
    *       invalidFlag:
    *         type: integer
    */
-  app.get(version + '/dict/typeOne', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeOneCtrl.getCategory)
+  app.get(version + '/dict/typeOne', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeOneCtrl.getCategory)
+  // 2017-07-24测试 权限：admin
   /**
    * @swagger
    * /dict/district:
@@ -2154,10 +2400,11 @@ module.exports = function (app, webEntry, acl) {
    *       name:
    *         type: string
    *       level:
-   *         integer
+   *         type: integer
    */
 
-  app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl), dictDistrictCtrl.getDistrict)
+  app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictDistrictCtrl.getDistrict)
+  // 2017-07-24测试 权限：admin
   /**
    * @swagger
    * /dict/hospital:
@@ -2176,7 +2423,10 @@ module.exports = function (app, webEntry, acl) {
    *       - name: province
    *         in: query
    *         type: string
-   *       - city:
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: token
    *         in: query
    *         type: string
    *     responses:
@@ -2213,9 +2463,10 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *
    */
-  app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl), dictHospitalCtrl.getHospital)
+  app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictHospitalCtrl.getHospital)
 
   // devicedata
+  // 2017-07-24测试 权限：patient
   /**
    * @swagger
    * /devicedata/BPDevice/binding:
@@ -2252,6 +2503,8 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *       twoDimensionalCode:
    *         type: string
+   *       token:
+   *         type: string
    *   BindingResult:
    *     type: object
    *     properties:
@@ -2282,14 +2535,46 @@ module.exports = function (app, webEntry, acl) {
    *       validateDate:
    *         type: string
    */
-  app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.bindingDevice)
+  app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.bindingDevice)
+  // 2017-07-24测试 权限：patient
   /**
    * @swagger
    * /devicedata/BPDevice/debinding:
+   *   post:
+   *     tags:
+   *       - 血压计
+   *     description: 解绑血压计
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Debinding'
+   *     responses:
+   *       200:
+   *         decription: 解绑成功
+   * definition:
+   *    Debinding:
+   *      type: object
+   *      properties:
+   *        userId:
+   *          type: string
+   *        appId:
+   *          type: string
+   *        sn:
+   *          type: string
+   *        imei:
+   *          type: string
    */
-  app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.debindingDevice)
-  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.receiveBloodPressure)
-  app.get(version + '/devicedata/devices', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.getDeviceInfo)
+  app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.debindingDevice)
+  /**
+   *
+   */
+  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.receiveBloodPressure)
+  app.get(version + '/devicedata/devices', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.getDeviceInfo)
 
   // wechat
   app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.settingConfig)
@@ -2298,7 +2583,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/wechat/gettokenbycode', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken)
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
   // 输入：微信用户授权的code 商户系统生成的订单号
-  app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
+  app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
   // 订单支付结果回调
   app.post(version + '/wechat/payResult', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.payResult)
   // 查询订单   orderNo
@@ -2506,16 +2791,50 @@ module.exports = function (app, webEntry, acl) {
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
 
   // department
-  app.get(version + '/department/district', departmentCtrl.getDistrict)
-  app.get(version + '/department/department', departmentCtrl.getDepartment)
-  app.get(version + '/department/doctorlist', departmentCtrl.getDoctorList)
-  app.post(version + '/department/updatedistrict', departmentCtrl.updateDistrict)
-  app.post(version + '/department/updatedepartment', departmentCtrl.updateDepartment)
-  app.post(version + '/department/delete', departmentCtrl.deleteRecord)
 
   /**
    * @swagger
-   * definitions:
+   * /department/district:
+   *   get:
+   *     tags:
+   *       - 科室表
+   *     description: 获取地区信息
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: district
+   *         description: 地区名
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回地区和地区负责人
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 district:
+   *                   type: string
+   *                 portleader:
+   *                   type: array
+   *                   items:
+   *                     type: string
+   */
+  app.get(version + '/department/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDistrict)
+  app.get(version + '/department/department', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDepartment)
+  app.get(version + '/department/doctorlist', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDoctorList)
+  app.post(version + '/department/updatedistrict', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDistrict)
+  app.post(version + '/department/updatedepartment', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDepartment)
+  app.post(version + '/department/delete', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.deleteRecord)
+
+  /**
+   * @swagger
+   * definition:
    *   Comment:
    *     type: object
    *     properties:
@@ -2605,5 +2924,65 @@ module.exports = function (app, webEntry, acl) {
    *         enum:
    *           - "0"
    *           - "1"
+   *   Advice:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       role:
+   *         type: string
+   *         enum:
+   *           - "doctor"
+   *           - "patient"
+   *       time:
+   *         type: string
+   *         format: date-time
+   *       topic:
+   *         type: string
+   *       content:
+   *         type: string
+   *   Compliance:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       type:
+   *         type: string
+   *       code:
+   *         type: string
+   *       date:
+   *         type: string
+   *         format: date-time
+   *       status:
+   *         type: number
+   *       description:
+   *         type: string
+   *   VitalSign:
+   *     type: object
+   *     properties:
+   *       patientId:
+   *         type: string
+   *       type:
+   *         type: string
+   *       code:
+   *         type: string
+   *       date:
+   *         type: string
+   *         format: date-time
+   *       data:
+   *         type: array
+   *         items:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *               format: date-time
+   *             value:
+   *                type: string
+   *             value2:
+   *               type: string
+   *               description: "血压用"
+   *       unit:
+   *         type: string
    */
 }

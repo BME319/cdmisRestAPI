@@ -920,9 +920,16 @@ exports.getPatientList = function (req, res) {
     _skip = 0
   }
   let opts = ''
-  let fields = {'_id': 0, 'patients.patientId': 1, 'patients.dpRelationTime': 1}
+  let fields = {
+    '_id': 0,
+    'patients.patientId': 1,
+    'patients.dpRelationTime': 1,
+    'patientsInCharge.patientId': 1,
+    'patientsInCharge.dpRelationTime': 1,
+    'patientsInCharge.invalidFlag': 1
+  }
   // 通过子表查询主表，定义主表查询路径及输出内容
-  let populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0}}
+  let populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
   // if(_name!=""&&_name!=undefined){
 
   // }
@@ -931,7 +938,7 @@ exports.getPatientList = function (req, res) {
   if (_name) {
     populate['match'] = {'name': nameReg}
   }
-  console.log(populate)
+  // console.log(populate)
   // console.log(query);
   DpRelation.getOne(query, function (err, item) {
     if (err) {
@@ -940,13 +947,13 @@ exports.getPatientList = function (req, res) {
     if (item == null) {
     // return res.json({result:'请先与其他医生或患者建立联系!'});
       var dpRelationData = {
-        doctorId: req.body.doctorObject._id,
-        revisionInfo: {
-          operationTime: new Date(),
-          userId: 'gy',
-          userName: 'gy',
-          terminalIP: '10.12.43.32'
-        }
+        doctorId: req.body.doctorObject._id // ,
+        // revisionInfo: {
+        //   operationTime: new Date(),
+        //   userId: 'gy',
+        //   userName: 'gy',
+        //   terminalIP: '10.12.43.32'
+        // }
       }
       // return res.json({result:dpRelationData});
       var newDpRelation = new DpRelation(dpRelationData)
@@ -958,25 +965,24 @@ exports.getPatientList = function (req, res) {
       })
       return res.json({results: {patients: []}})
     } else {
-      var patients = []
+      let patients = []
         // console.log(item);
         // item.patients=item.patients.sort(sortVIPpinyin);
-
-      for (var i = 0; i < item.patients.length; i++) {
-        // console.log(item.patients[i]);
-        if (item.patients[i].dpRelationTime === null || item.patients[i].dpRelationTime === '' || item.patients[i].dpRelationTime === undefined) {
-          item.patients[i].dpRelationTime = new Date('2017-05-15')
+      let patientsList = item.patients || []
+      for (let i = 0; i < patientsList.length; i++) {
+        let patientI = patientsList[i]
+        if (patientI.dpRelationTime === null || patientI.dpRelationTime === '' || patientI.dpRelationTime === undefined) {
+          patientI.dpRelationTime = new Date('2017-05-15')
         }
-        // if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
-        if (item.patients[i].patientId !== null) {
+        if (patientI.patientId !== null) {
           if (_skip > 0) {
             _skip--
           } else {
             if (_limit === null) {
-              patients.push(item.patients[i])
+              patients.push(patientI)
             } else {
               if (_limit > 0) {
-                patients.push(item.patients[i])
+                patients.push(patientI)
                 _limit--
               }
             }
@@ -984,12 +990,37 @@ exports.getPatientList = function (req, res) {
         }
       }
       patients = patients.sort(sortVIPpinyin)
-      let item1 = {'patients': patients}
 
-      // 2017-06-07GY调试用
-      // console.log({method:'getPatientList', resultCount:patients.length});
-
-      res.json({results: item1})
+      let populate2 = {path: 'patientsInCharge.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
+      DpRelation.getOne(query, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        let patientsInCharge = []
+        let patientsInChargeList = item.patientsInCharge || []
+        for (let j = 0; j < patientsInChargeList.length; j++) {
+          if (patientsInChargeList[j].dpRelationTime === null || patientsInChargeList[j].dpRelationTime === '' || patientsInChargeList[j].dpRelationTime === undefined) {
+            patientsInChargeList[j].dpRelationTime = new Date('2017-05-15')
+          }
+          if (patientsInChargeList[j].patientId !== null) {
+            if (_skip > 0) {
+              _skip--
+            } else {
+              if (_limit === null && Number(patientsInChargeList[j].invalidFlag) === 1) {
+                patientsInCharge.push(patientsInChargeList[j])
+              } else {
+                if (_limit > 0 && Number(patientsInChargeList[j].invalidFlag) === 1) {
+                  patientsInCharge.push(patientsInChargeList[j])
+                  _limit--
+                }
+              }
+            }
+          }
+        }
+        patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
+        let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+        res.json({results: item1})
+      }, opts, fields, populate2)
     }
   }, opts, fields, populate)
   // });

@@ -3,8 +3,8 @@ var mongoose = require('mongoose')
 
 var counselSchema = new mongoose.Schema({
   counselId: {type: String, unique: true},
-  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
-  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'patient'},
+  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   type: Number,
   time: Date,
   status: Number,
