@@ -58,7 +58,7 @@ module.exports = function (app, webEntry, acl) {
   // csq
   app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
   app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
-  app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclChecking.Checking(acl), aclsettingCtrl.userRoles(acl))
+  app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl))
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl))
 
   app.get(version + '/acl/roleUsers', tokenManager.verifyToken(), aclsettingCtrl.roleUsers(acl))
@@ -2157,9 +2157,10 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: 错误信息
    */
-  app.get(version + '/token/refresh', tokenManager.verifyToken(), aclChecking.Checking(acl), tokenManager.refreshToken)
+  app.get(version + '/token/refresh', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), tokenManager.refreshToken)
 
   // dict
+  // 2017-07-24测试 权限：admin
   /**
    * @swagger
    * /dict/typeTwo:
@@ -2200,8 +2201,6 @@ module.exports = function (app, webEntry, acl) {
    *   DictTwoContent:
    *     type: object
    *     properties:
-   *       _id:
-   *         type: string
    *       type:
    *         type: string
    *       typeName:
@@ -2213,8 +2212,6 @@ module.exports = function (app, webEntry, acl) {
    *   DictTwoDetail:
    *     type: object
    *     properties:
-   *       _id:
-   *         type: string
    *       code:
    *         type: string
    *       name:
@@ -2227,7 +2224,8 @@ module.exports = function (app, webEntry, acl) {
    *         type: integer
 
    */
-  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeTwoCtrl.getCategory)
+  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeTwoCtrl.getCategory)
+  // 2017-07-24测试 权限：admin
   /**
    * @swagger
    * /dict/typeTwo/codes:
@@ -2270,8 +2268,6 @@ module.exports = function (app, webEntry, acl) {
    *   Content:
    *     type: object
    *     properties:
-   *       _id:
-   *         type: string
    *       type:
    *         type: string
    *       typeName:
@@ -2283,8 +2279,6 @@ module.exports = function (app, webEntry, acl) {
    *   Detail:
    *     type: object
    *     properties:
-   *       _id:
-   *         type: string
    *       code:
    *         type: string
    *       name:
@@ -2296,7 +2290,8 @@ module.exports = function (app, webEntry, acl) {
    *       invalidFlag:
    *         type: integer
    */
-  app.get(version + '/dict/typeTwo/codes', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeTwoCtrl.getTypes)
+  app.get(version + '/dict/typeTwo/codes', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeTwoCtrl.getTypes)
+  // 2017-07-24测试 权限：admin
   /**
    * @swagger
    * /dict/typeOne:
@@ -2349,7 +2344,8 @@ module.exports = function (app, webEntry, acl) {
    *       invalidFlag:
    *         type: integer
    */
-  app.get(version + '/dict/typeOne', tokenManager.verifyToken(), aclChecking.Checking(acl), dictTypeOneCtrl.getCategory)
+  app.get(version + '/dict/typeOne', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeOneCtrl.getCategory)
+  // 2017-07-24测试 权限：admin
   /**
    * @swagger
    * /dict/district:
@@ -2404,10 +2400,11 @@ module.exports = function (app, webEntry, acl) {
    *       name:
    *         type: string
    *       level:
-   *         integer
+   *         type: integer
    */
 
-  app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl), dictDistrictCtrl.getDistrict)
+  app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictDistrictCtrl.getDistrict)
+  // 2017-07-24测试 权限：admin
   /**
    * @swagger
    * /dict/hospital:
@@ -2426,7 +2423,10 @@ module.exports = function (app, webEntry, acl) {
    *       - name: province
    *         in: query
    *         type: string
-   *       - city:
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: token
    *         in: query
    *         type: string
    *     responses:
@@ -2463,9 +2463,10 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *     
    */
-  app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl), dictHospitalCtrl.getHospital)
+  app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictHospitalCtrl.getHospital)
 
   // devicedata
+  // 2017-07-24测试 权限：patient
   /**
    * @swagger
    * /devicedata/BPDevice/binding:
@@ -2502,6 +2503,8 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *       twoDimensionalCode:
    *         type: string
+   *       token:
+   *         type: string
    *   BindingResult:
    *     type: object
    *     properties:
@@ -2532,14 +2535,46 @@ module.exports = function (app, webEntry, acl) {
    *       validateDate:
    *         type: string
    */
-  app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.bindingDevice)
+  app.post(version + '/devicedata/BPDevice/binding', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.bindingDevice)
+  // 2017-07-24测试 权限：patient
   /**
    * @swagger
    * /devicedata/BPDevice/debinding:
+   *   post:
+   *     tags:
+   *       - 血压计
+   *     description: 解绑血压计
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Debinding'
+   *     responses:
+   *       200:
+   *         decription: 解绑成功
+   * definition:
+   *    Debinding:
+   *      type: object
+   *      properties:
+   *        userId:
+   *          type: string
+   *        appId:
+   *          type: string
+   *        sn:
+   *          type: string
+   *        imei:
+   *          type: string
    */
-  app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.debindingDevice)
-  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.receiveBloodPressure)
-  app.get(version + '/devicedata/devices', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.getDeviceInfo)
+  app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.debindingDevice)
+  /**
+   * 
+   */
+  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.receiveBloodPressure)
+  app.get(version + '/devicedata/devices', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.getDeviceInfo)
 
   // wechat
   app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.settingConfig)
@@ -2756,12 +2791,45 @@ module.exports = function (app, webEntry, acl) {
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
 
   // department
-  app.get(version + '/department/district', departmentCtrl.getDistrict)
-  app.get(version + '/department/department', departmentCtrl.getDepartment)
-  app.get(version + '/department/doctorlist', departmentCtrl.getDoctorList)
-  app.post(version + '/department/updatedistrict', departmentCtrl.updateDistrict)
-  app.post(version + '/department/updatedepartment', departmentCtrl.updateDepartment)
-  app.post(version + '/department/delete', departmentCtrl.deleteRecord)
+  /**
+   * @swagger
+   * /department/district:
+   *   get:
+   *     tags:
+   *       - 科室表
+   *     description: 获取地区信息
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: district
+   *         description: 地区名
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回地区和地区负责人
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 district:
+   *                   type: string
+   *                 portleader:
+   *                   type: array
+   *                   items:
+   *                     type: string
+   */
+  app.get(version + '/department/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDistrict)
+  app.get(version + '/department/department', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDepartment)
+  app.get(version + '/department/doctorlist', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDoctorList)
+  app.post(version + '/department/updatedistrict', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDistrict)
+  app.post(version + '/department/updatedepartment', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDepartment)
+  app.post(version + '/department/delete', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.deleteRecord)
 
   /**
    * @swagger

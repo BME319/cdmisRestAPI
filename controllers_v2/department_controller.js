@@ -84,7 +84,6 @@ exports.getDoctorList = function (req, res) {
 // 更新地区信息
 exports.updateDistrict = function (req, res) {
   let district = req.body.district || ''
-  let hospital = req.body.hospital || ''
   let newdistrict = req.body.new.newdistrict || ''
   let newportleader = req.body.new.newportleader || ''
   if (district === null || district === '') {
@@ -103,13 +102,14 @@ exports.updateDistrict = function (req, res) {
       res.status(500).send(err.errmsg)
     }
     res.json('更新成功')
-  }, {upsert: true})
+  }, {upsert: true, multi: true})
   }
 }
 
 // 输入科室、医院、地区，要更新的内容，更新科室信息
 exports.updateDepartment = function (req, res) {
   let district = req.body.district || ''
+  let portleader = req.body.portleader || ''
   let hospital = req.body.hospital || ''
   let department = req.body.department || ''
   let newdepartment = req.body.new.newdepartment || ''
@@ -122,27 +122,46 @@ exports.updateDepartment = function (req, res) {
   } else if (district === '') {
     res.status(400).send('请输入地区')
   } else {
-    let query = {
-      department: department,
-      hospital: hospital,
+    let query1 = {
       district: district
     }
+    let query = {}
     let obj = {}
-    if (newdepartment !== '') {
-      obj['department'] = newdepartment
-    }
-    if (newdepartLeader !== '') {
-      obj['departLeader'] = newdepartLeader
-    }
-    if (newdoctors !== '') {
-      obj['doctors'] = newdoctors
-    }
-    Department.update(query, obj, function (err, Info) {
-    if (err) {
-      res.status(500).send(err.errmsg)
-    }
-    res.json('更新成功')
-  }, {upsert: true})
+    Department.getSome(query1, null, function (err, Info) {
+      if (err){
+        res.status(500).send(err)
+      }
+      console.log('Info' + Info[0].department)
+      if (Info[0].department !== undefined) {
+        query = {
+          department: department,
+          hospital: hospital,
+          portleader: portleader,
+          district: district
+        }
+      } else {
+        query = {
+          district: district
+        }
+        obj['department'] = department
+        obj['hospital'] = hospital
+      }
+      if (newdepartment !== '') {
+        obj['department'] = newdepartment
+      }
+      if (newdepartLeader !== '') {
+        obj['departLeader'] = newdepartLeader
+      }
+      if (newdoctors !== '') {
+        obj['doctors'] = newdoctors
+      }
+      Department.update(query, obj, function (err, Info) {
+      if (err) {
+        res.status(500).send(err.errmsg)
+      }
+      res.json('更新成功')
+    }, {upsert: true})
+    })
   }
 }
 
