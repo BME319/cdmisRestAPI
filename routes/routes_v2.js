@@ -316,8 +316,8 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay)
 
   // YQC
-  // comment - debug complete 2017-07-17
-  /** YQC 17-07-20
+  // comment
+  /** YQC annotation 2017-07-20 - debug complete 2017-07-17 - acl 2017-07-25 患者获取医生评价
    * @swagger
    * /api/v2/comment/commentsByDoc:
    *   get:
@@ -336,7 +336,7 @@ module.exports = function (app, webEntry, acl) {
    *       type: "string"
    *     - name: "userId"
    *       in: "query"
-   *       description: "Some Doctor's userId."
+   *       description: "The userId of the Doctor to be queried."
    *       required: true
    *       type: "string"
    *     responses:
@@ -352,8 +352,8 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "Doctor's userId not found."
    */
-  app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), commentCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
-  /** YQC 17-07-20
+  app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), commentCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
+  /** YQC annotation 2017-07-20 - debug complete 2017-07-17 - acl 2017-07-25 患者获取咨询问诊评价
    * @swagger
    * /api/v2/comment/commentsByCounsel:
    *   get:
@@ -388,9 +388,9 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "CounselId not found."
    */
-  app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), commentCtrl.getCommentsByCounselId)
-  // advice - debug complete 2017-07-17
-  /** YQC 17-07-24
+  app.get(version + '/comment/commentsByCounsel', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), commentCtrl.getCommentsByCounselId)
+  // advice
+  /** YQC annotation 17-07-24 - debug complete 2017-07-17 - acl 2017-07-25 管理员获取建议
    * @swagger
    * /advice/advices:
    *   get:
@@ -420,8 +420,8 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "AdvisorId not found."
    */
-  app.get(version + '/advice/advices', tokenManager.verifyToken(), adviceCtrl.getAdvice)
-  /** YQC 17-07-24
+  app.get(version + '/advice/advices', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), adviceCtrl.getAdvice)
+  /** YQC annotation 17-07-24 - debug complete 2017-07-17 - acl 2017-07-25 用户（患者／医生）提建议
    * @swagger
    * /advice/advice:
    *   post:
@@ -460,7 +460,7 @@ module.exports = function (app, webEntry, acl) {
    *               items:
    *                 $ref: '#/definitions/Advice'
    */
-  app.post(version + '/advice/advice', tokenManager.verifyToken(), adviceCtrl.postAdvice)
+  app.post(version + '/advice/advice', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), adviceCtrl.postAdvice)
   // compliance - debug complete 2017-07-17
   /** YQC 17-07-24
    * @swagger
