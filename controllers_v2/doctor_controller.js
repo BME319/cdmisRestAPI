@@ -772,10 +772,10 @@ exports.deleteSuspendTime = function (req, res) {
   let _start = req.body.start || null
   let _end = req.body.end || null
   if (_start == null) {
-    return res.json({msg: 'Please input service-suspension start time!'})
+    return res.json({msg: 'Please input work-suspension start time!'})
   }
   if (_end == null) {
-    return res.json({msg: 'Please input service-suspension end time!'})
+    return res.json({msg: 'Please input work-suspension end time!'})
   }
   let query = {userId: doctorId, role: 'doctor'}
   var upObj = {
@@ -804,12 +804,12 @@ exports.deleteSuspendTime = function (req, res) {
 // 患者或医生获取医生停诊信息 输入userId（医生），输出结果，相应医生的停诊信息
 exports.getSuspendTime = function (req, res) {
   // 查询条件
-  let doctorId = req.query.userId
+  let doctorId = req.session.userId
   let query = {userId: doctorId, role: 'doctor'}
   var opts = ''
-  var fields = {'_id': 0, 'suspendTime': 1}
+  var fields = {'_id': 0, 'suspendTime': 1, 'serviceSuspendTime': 1}
 
-  Doctor.getOne(query, function (err, item) {
+  Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
