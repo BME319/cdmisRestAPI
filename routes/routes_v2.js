@@ -2211,7 +2211,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *       inputCode:
    *         type: string
-   *     
+   *
    */
   app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl), dictHospitalCtrl.getHospital)
 
@@ -2513,8 +2513,6 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/department/updatedepartment', departmentCtrl.updateDepartment)
   app.post(version + '/department/delete', departmentCtrl.deleteRecord)
 
-
-
   /**
    * @swagger
    * definitions:
@@ -2608,5 +2606,4 @@ module.exports = function (app, webEntry, acl) {
    *           - "0"
    *           - "1"
    */
-
 }
