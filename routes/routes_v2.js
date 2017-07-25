@@ -1259,12 +1259,12 @@ module.exports = function (app, webEntry, acl) {
    *                   items:
    *                     type: string
    */
-  app.get(version + '/department/district', tokenManager.verifyToken(), aclChecking.Checking(acl), departmentCtrl.getDistrict)
-  app.get(version + '/department/department', tokenManager.verifyToken(), aclChecking.Checking(acl), departmentCtrl.getDepartment)
-  app.get(version + '/department/doctorlist', tokenManager.verifyToken(), aclChecking.Checking(acl), departmentCtrl.getDoctorList)
-  app.post(version + '/department/updatedistrict', tokenManager.verifyToken(), aclChecking.Checking(acl), departmentCtrl.updateDistrict)
-  app.post(version + '/department/updatedepartment', tokenManager.verifyToken(), aclChecking.Checking(acl), departmentCtrl.updateDepartment)
-  app.post(version + '/department/delete', tokenManager.verifyToken(), aclChecking.Checking(acl), departmentCtrl.deleteRecord)
+  app.get(version + '/department/district', tokenManager.verifyToken(), departmentCtrl.getDistrict)
+  app.get(version + '/department/department', tokenManager.verifyToken(), departmentCtrl.getDepartment)
+  app.get(version + '/department/doctorlist', tokenManager.verifyToken(), departmentCtrl.getDoctorList)
+  app.post(version + '/department/updatedistrict', tokenManager.verifyToken(), departmentCtrl.updateDistrict)
+  app.post(version + '/department/updatedepartment', tokenManager.verifyToken(), departmentCtrl.updateDepartment)
+  app.post(version + '/department/delete', tokenManager.verifyToken(), departmentCtrl.deleteRecord)
 
 
 

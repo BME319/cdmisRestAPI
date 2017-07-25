@@ -102,13 +102,14 @@ exports.updateDistrict = function (req, res) {
       res.status(500).send(err.errmsg)
     }
     res.json('更新成功')
-  }, {upsert: true})
+  }, {upsert: true, multi: true})
   }
 }
 
 // 输入科室、医院、地区，要更新的内容，更新科室信息
 exports.updateDepartment = function (req, res) {
   let district = req.body.district || ''
+  let portleader = req.body.portleader || ''
   let hospital = req.body.hospital || ''
   let department = req.body.department || ''
   let newdepartment = req.body.new.newdepartment || ''
@@ -130,10 +131,12 @@ exports.updateDepartment = function (req, res) {
       if (err){
         res.status(500).send(err)
       }
-      if (Info.length > 1) {
+      console.log('Info' + Info[0].department)
+      if (Info[0].department !== undefined) {
         query = {
           department: department,
           hospital: hospital,
+          portleader: portleader,
           district: district
         }
       } else {
