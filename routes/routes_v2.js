@@ -49,6 +49,7 @@ var loadCtrl = require('../controllers_v2/load_controller')
 var messageCtrl = require('../controllers_v2/message_controller')
 var newsCtrl = require('../controllers_v2/news_controller')
 var departmentCtrl = require('../controllers_v2/department_controller')
+var reportCtrl = require('../controllers_v2/report_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -102,6 +103,10 @@ module.exports = function (app, webEntry, acl) {
 
   app.post(version + '/expense/rechargeDoctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
   app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
+
+  app.get(version + '/report', tokenManager.verifyToken(), alluserCtrl.checkPatient, reportCtrl.getReport)
+  app.post(version + '/report', tokenManager.verifyToken(), reportCtrl.updateReport)
+
   // gy
   // review
   app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo)
@@ -2204,19 +2209,19 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/devicedata/devices', tokenManager.verifyToken(), aclChecking.Checking(acl), devicedataCtrl.getDeviceInfo)
 
   // wechat
-  app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.settingConfig)
+  app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.settingConfig)
   // 获取用户基本信息
   app.get(version + '/wechat/getUserInfo', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.getuserinfo)
   app.get(version + '/wechat/gettokenbycode', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken)
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
   // 输入：微信用户授权的code 商户系统生成的订单号
-  app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign)
+  app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
   // 订单支付结果回调
   app.post(version + '/wechat/payResult', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.payResult)
   // 查询订单   orderNo
-  app.get(version + '/wechat/getWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.getWechatOrder)
+  app.get(version + '/wechat/getWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.getWechatOrder)
   // 关闭订单   orderNo
-  app.get(version + '/wechat/closeWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.closeWechatOrder)
+  app.get(version + '/wechat/closeWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.closeWechatOrder)
 
   // app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund)
   // 退款接口
@@ -2224,11 +2229,11 @@ module.exports = function (app, webEntry, acl) {
   // 退款查询
   app.post('/wechat/refundquery', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
   // 消息模板
-  app.post(version + '/wechat/messageTemplate',  tokenManager.verifyToken(), aclChecking.Checking(acl),wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate)
+  app.post(version + '/wechat/messageTemplate', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
   // 下载
-  app.get(version + '/wechat/download', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.download)
+  app.get(version + '/wechat/download', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.download)
   // 创建永久二维码
-  app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
+  app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
 
   // 接收微信服务器的post请求
   app.post(version + '/wechat', wechatCtrl.receiveTextMessage)
@@ -2236,9 +2241,9 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/wechat', wechatCtrl.getServerSignature)
 
   // 自定义菜单
-  app.post(version + '/wechat/createCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createCustomMenu)
-  app.get(version + '/wechat/getCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.getCustomMenu)
-  app.get(version + '/wechat/deleteCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.deleteCustomMenu)
+  app.post(version + '/wechat/createCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createCustomMenu)
+  app.get(version + '/wechat/getCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.getCustomMenu)
+  app.get(version + '/wechat/deleteCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.deleteCustomMenu)
 
   // 版本信息
   /**
@@ -2303,7 +2308,7 @@ module.exports = function (app, webEntry, acl) {
    *       status:
    *         type: integer
    *       msg:
-   *         type: string  
+   *         type: string
    *   VersionInput:
    *     type: object
    *     properties:
@@ -2314,7 +2319,7 @@ module.exports = function (app, webEntry, acl) {
    *       content:
    *         type；string
    *       token:
-   *         type: string    
+   *         type: string
    */
   app.get(version + '/version', tokenManager.verifyToken(), versionCtrl.getVersionInfo)
   app.post(version + '/version', tokenManager.verifyToken(), getNoMid.getNo(10), versionCtrl.insertVersionInfo)
@@ -2347,7 +2352,7 @@ module.exports = function (app, webEntry, acl) {
    *           type: object
    *           $ref: '#/definitions/Param'
    *       403:
-   *         description: 输入错误        
+   *         description: 输入错误
    * /devicedata/niaodaifu/data:
    *   post:
    *     tags:
@@ -2361,7 +2366,7 @@ module.exports = function (app, webEntry, acl) {
    *         required: true
    *         schema:
    *           type: object
-   *           $ref: '#/definitions/NiaoReq'   
+   *           $ref: '#/definitions/NiaoReq'
    *     responses:
    *       200:
    *         description: 返回成功状态
@@ -2419,8 +2424,6 @@ module.exports = function (app, webEntry, acl) {
 
   // department
   // app.get(version + '/department/district', departmentCtrl.getDistrict)
-
-
 
   /**
    * @swagger
@@ -2515,6 +2518,4 @@ module.exports = function (app, webEntry, acl) {
    *           - "0"
    *           - "1"
    */
-
 }
-
