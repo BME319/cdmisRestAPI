@@ -372,7 +372,7 @@ exports.addOrder = function (req, res, next) {
     spbill_create_ip: commonFunc.getClientIp(req),   // 终端IP
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
-    notify_url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/payResult',   // 通知地址
+    notify_url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/payResult',   // 通知地址
     trade_type: req.body.trade_type    // 交易类型
     // openid: req.body.openid    // 用户标识
   }
@@ -799,6 +799,7 @@ exports.autoRefundQuery = function (req, res) {
     }, function (err, response, body) {
       if (err) {
         console.log(err)
+        console.log('debug_label_2')
         if (rolesIndex < wxApiUserObject.length - 1) {
           refundQuery(orderNosIndex, ++rolesIndex)
         } else if (orderNosIndex < orderNos.length - 1) {
@@ -822,6 +823,7 @@ exports.autoRefundQuery = function (req, res) {
           Order.updateOne(queryOrder, upObj, function (err, uporder) {
             if (err) {
               console.log(err)
+              console.log('debug_label_3')
             }
             if (rolesIndex < wxApiUserObject.length - 1) {
               refundQuery(orderNosIndex, ++rolesIndex)
@@ -834,6 +836,7 @@ exports.autoRefundQuery = function (req, res) {
         } else {
           // return res.status(404).json({results: jsondata.xml})
           console.log(jsondata.xml)
+          console.log('debug_label_1')
           if (rolesIndex < wxApiUserObject.length - 1) {
             refundQuery(orderNosIndex, ++rolesIndex)
           } else if (orderNosIndex < orderNos.length - 1) {
@@ -849,9 +852,13 @@ exports.autoRefundQuery = function (req, res) {
   Order.getSome(query, function (err, orderItems) {
     if (err) { console.log('getOrderItemErr') }
     // console.log(orderItems)
-    for (let i = 0; i < orderItems.length; i++) { orderNos[i] = orderItems[i].orderNo }
-    console.log(orderNos)
-    refundQuery(0, 0)
+    if (orderItems.length > 0) {
+      for (let i = 0; i < orderItems.length; i++) { orderNos[i] = orderItems[i].orderNo }
+      console.log(orderNos)
+      refundQuery(0, 0)
+    } else {
+      console.log('auto_refund_query_success')
+    }
   })
 }
 
@@ -1119,7 +1126,7 @@ exports.receiveTextMessage = function (req, res) {
                 }
 
                 request({
-                  url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                  url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                   method: 'POST',
                   body: template,
                   json: true

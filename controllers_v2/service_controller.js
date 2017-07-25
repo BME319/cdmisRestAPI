@@ -1,6 +1,67 @@
 var Alluser = require('../models/alluser')
 var DpRelation = require('../models/dpRelation')
 var Team = require('../models/team')
+
+// 获取对象 2017-07-22 YQC
+// 获取用户对象
+exports.getSessionObject = function (req, res, next) {
+  let query = {userId: req.session.userId}
+  Alluser.getOne(query, function (err, user) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (user === null) {
+      return res.status(404).json({results: '找不到用户'})
+    } else if (req.session.role === 'patient') {
+      req.patientObject = user
+      next()
+    } else if (req.session.role === 'doctor') {
+      req.doctorObject = user
+      next()
+    } else {
+      return res.status(400).json({results: '登录角色不是医生或患者'})
+    }
+  })
+}
+// 获取患者ID对象
+exports.getPatientObject = function (req, res, next) {
+  let patientId = req.body.patientId || req.query.patientId || null
+  if (patientId === null) {
+    return res.status(412).json({results: '请填写patientId'})
+  }
+  let query = {userId: patientId, role: 'patient'}
+  Alluser.getOne(query, function (err, patient) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (patient === null) {
+      return res.status(404).json({results: '找不到患者'})
+    } else {
+      req.patientObject = patient
+      next()
+    }
+  })
+}
+// 获取医生ID对象
+exports.getDoctorObject = function (req, res, next) {
+  let doctorId = req.body.doctorId || req.query.doctorId || null
+  if (doctorId === null) {
+    return res.status(412).json({results: '请填写doctorId'})
+  }
+  let query = {userId: doctorId, role: 'doctor'}
+  Alluser.getOne(query, function (err, doctor) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (doctor === null) {
+      return res.status(404).json({results: '找不到医生'})
+    } else {
+      req.doctorObject = doctor
+      next()
+    }
+  })
+}
+
 // 获取某位医生的服务开启状态及收费情况
 // 根据医生ID获取服务开启状态 2017-07-14 GY
 exports.getServices = function (req, res) {
@@ -36,7 +97,16 @@ exports.getServices = function (req, res) {
     if (doctorItem === null) {
       return res.status(404).json({results: '找不到对象'})
     } else {
-      return res.json({results: doctorItem})
+      // return res.json({results: doctorItem})
+      let query = {$or: [{sponsorId: doctorId}, {'members.userId': doctorId}]}
+      let opts = ''
+      let fields = {_id: 0, teamId: 1, name: 1, sponsorName: 1}
+      Team.getSome(query, function (err, items) {
+        if (err) {
+          return res.status(500).send(err)
+        }
+        res.json({results: doctorItem, teams: items})
+      }, opts, fields)
     }
   }, opts, fields)
 }
@@ -44,7 +114,8 @@ exports.getServices = function (req, res) {
 
 // 医生端使用的方法：开放修改及设置权限
 // 修改服务开启状态 2017-07-14 GY
-// 承接session.userId，输入修改的服务状态type
+// 修改开启自动转发功能时的输出，增加所在队伍信息 2017-07-22 YQC
+// 承接session.userId，输入修改的服务状态type，输出修改状态（和所在队伍信息）
 exports.changeServiceStatus = function (req, res) {
   let query = {
     userId: req.session.userId
@@ -117,7 +188,7 @@ exports.changeServiceStatus = function (req, res) {
           } else {
             let query = {$or: [{sponsorId: req.session.userId}, {'members.userId': req.session.userId}]}
             let opts = ''
-            let fields = {'_id': 0, 'revisionInfo': 0}
+            let fields = {_id: 0, teamId: 1, name: 1, sponsorName: 1}
             Team.getSome(query, function (err, items) {
               if (err) {
                 return res.status(500).send(err)
@@ -434,7 +505,7 @@ exports.deleteServiceSuspend = function (req, res) {
 // 输入：code；修改内容：personalDiag.status, time
 
 // 主管医生服务相关
-// 获取申请主管医生服务的患者列表
+// 获取申请主管医生服务的患者列表 2017-07-19 YQC
 exports.getPatientsToReview = function (req, res) {
   let doctorId = req.session.userId
   let queryD = {userId: doctorId, role: 'doctor'}
@@ -451,13 +522,12 @@ exports.getPatientsToReview = function (req, res) {
     let queryR = {doctorId: doctorObjectId}
     let opts = ''
     let fields = {'_id': 0, 'patientsInCharge': 1}
-    let populate = {path: 'patientsInCharge.patientId', select: {'photoUrl': 1, 'name': 1, 'gender': 1, 'birthday': 1, 'class': 1, 'class_info': 1}}
+    let populate = {path: 'patientsInCharge.patientId', select: {'_id': 0, 'userId': 1, 'photoUrl': 1, 'name': 1, 'gender': 1, 'birthday': 1, 'class': 1, 'class_info': 1}}
     DpRelation.getOne(queryR, function (err, itemR) {
       if (err) {
         return res.status(500).send(err)
       }
-      let listToFilter = itemR.patientsInCharge
-      console.log(listToFilter)
+      let listToFilter = itemR.patientsInCharge || []
       let patientsList = []
       for (let i = 0; i < listToFilter.length; i++) {
         console.log(Number(listToFilter[i].invalidFlag))
@@ -475,7 +545,7 @@ exports.getPatientsToReview = function (req, res) {
 }
 // 通过或拒绝主管医生申请：patient, dpRelation表数据修改
 // 输入：患者ID；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
-
+// 2017-07-21 YQC
 exports.reviewPatientInCharge = function (req, res, next) {
   let patientId = req.body.patientId || null
   let reviewResult = req.body.reviewResult || null
@@ -510,7 +580,7 @@ exports.reviewPatientInCharge = function (req, res, next) {
       if (itemP == null) {
         return res.json({result: '不存在的患者ID!'})
       }
-      let doctorsInChargeList = itemP.doctorsInCharge
+      let doctorsInChargeList = itemP.doctorsInCharge || []
       let currentDoctorInCharge
       for (let i = 0; i < doctorsInChargeList.length; i++) {
         if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
@@ -642,20 +712,22 @@ exports.getDoctorsInCharge = function (req, res) {
   let queryP = {userId: patientId, role: 'patient'}
   let opts = ''
   let fields = {'_id': 0, 'doctorsInCharge': 1}
+  let populate = {path: 'doctorsInCharge.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
+
   Alluser.getOne(queryP, function (err, itemP) {
     if (err) {
       return res.status(500).send(err)
     }
-    let doctorsInChargeList = itemP.doctorsInCharge
+    let doctorsInChargeList = itemP.doctorsInCharge || []
     for (let i = 0; i < doctorsInChargeList.length; i++) {
       if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
         return res.json({message: '已申请主管医生，请等待审核!'})
       } else if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
-        return res.json({message: '当前已有主管医生!'})
+        return res.json({message: '当前已有主管医生!', results: doctorsInChargeList[i]})
       }
     }
     res.json({message: '当前无主管医生且无申请!'})
-  }, opts, fields)
+  }, opts, fields, populate)
 }
 
 // 2017-07-20 YQC
@@ -667,7 +739,10 @@ exports.getMyDoctorInCharge = function (req, res, next) {
     if (err) {
       return res.status(500).send(err)
     }
-    let doctorsInChargeList = itemP.doctorsInCharge
+    if (itemP === null) {
+      return res.json({message: '找不到患者!'})
+    }
+    let doctorsInChargeList = itemP.doctorsInCharge || []
     let doctorInCharge = null
     for (let i = 0; i < doctorsInChargeList.length; i++) {
       if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
@@ -742,7 +817,10 @@ exports.getPatientInCharge = function (req, res, next) {
     if (err) {
       return res.status(500).send(err)
     }
-    let patientsInChargeList = itemR.patientsInCharge
+    if (itemR === null) {
+      return res.json({message: '找不到医生!'})
+    }
+    let patientsInChargeList = itemR.patientsInCharge || []
     let patientInCharge = null
     for (let i = 0; i < patientsInChargeList.length; i++) {
       if (String(patientsInChargeList[i].patientId) === String(patientId) & Number(patientsInChargeList[i].invalidFlag) === 1) {
@@ -829,7 +907,6 @@ exports.relation = function (req, res) {
     let DICRelation
     let FDRelation
     Alluser.getOne(queryPDIC, function (err, itemPDIC) {
-      console.log(itemPDIC)
       if (err) {
         return res.status(500).send(err)
       } else if (itemPDIC === null) {
@@ -843,7 +920,6 @@ exports.relation = function (req, res) {
         doctors: {$elemMatch: {doctorId: doctorObjectId}}
       }
       Alluser.getOne(queryPFD, function (err, itemPFD) {
-        console.log(itemPFD)
         if (err) {
           return res.status(500).send(err)
         } else if (itemPFD === null) {
@@ -892,7 +968,7 @@ exports.requestDoctorInCharge = function (req, res, next) {
       if (itemP === null) {
         return res.json({results: '患者不存在'})
       }
-      let doctorsInChargeList = itemP.doctorsInCharge || {}
+      let doctorsInChargeList = itemP.doctorsInCharge || []
       for (let i = 0; i < doctorsInChargeList.length; i++) {
         if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
           return res.json({result: '已申请主管医生，请等待审核!'})
