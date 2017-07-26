@@ -676,24 +676,154 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/patient/changeVIP', tokenManager.verifyToken(), patientCtrl.changeVIP)
   app.post(version + '/patient/wechatPhotoUrl', tokenManager.verifyToken(), patientCtrl.wechatPhotoUrl)
   // doctor_Info
-  app.post(version + '/doctor/detail', tokenManager.verifyToken(), doctorCtrl.insertDocBasic)
-  // 需要查询class字典表（待定） ？？？这是啥
-  app.get(version + '/doctor/myPatients', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getPatientList)
-  app.get(version + '/doctor/myPatientsByDate', doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
+   * @swagger
+   * /doctor/detail:
+   *   post:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Post a basic file of a doctor"
+   *     description: ""
+   *     operationId: "detail"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           certificatePhotoUrl:
+   *             type: "string"
+   *           practisingPhotoUrl:
+   *             type: "string"
+   *           photoUrl:
+   *             type: "string"
+   *           birthday:
+   *             type: "string"
+   *             format: date-time
+   *           gender:
+   *             type: "number"
+   *           IDNo:
+   *             type: "string"
+   *           province:
+   *             type: "string"
+   *           city:
+   *             type: "string"
+   *           district:
+   *             type: "string"
+   *           workUnit:
+   *             type: "string"
+   *           title:
+   *             type: "string"
+   *           job:
+   *             type: "string"
+   *           department:
+   *             type: "string"
+   *           major:
+   *             type: "string"
+   *           description:
+   *             type: "string"
+   *           charge1:
+   *             type: "number"
+   *           charge2:
+   *             type: "number"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/doctor/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.insertDocBasic)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
+   * @swagger
+   * /doctor/myPatients:
+   *   get:
+   *     tags:
+   *     - "doctor"
+   *     summary: "获取我的主管患者和关注患者（未完成）"
+   *     description: ""
+   *     operationId: "myPatients"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 patients:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Patient'
+   *                 patientsInCharge:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Patient'
+   *       404:
+   *         description: "Doctor not found."
+   */
+  app.get(version + '/doctor/myPatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientList)
+  app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
   app.get(version + '/doctor/detail', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
   app.get(version + '/doctor/myTeams', tokenManager.verifyToken(), doctorCtrl.getTeams)
   app.get(version + '/doctor/teamPatients', tokenManager.verifyToken(), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
   // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
   app.post(version + '/doctor/editDetail', tokenManager.verifyToken(), doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember)
-  app.get(version + '/doctor/myRecentDoctors', doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
+   * @swagger
+   * /doctor/myRecentDoctors:
+   *   get:
+   *     tags:
+   *     - "doctor"
+   *     summary: "获取最近交流过的医生列表（未完成）"
+   *     description: ""
+   *     operationId: "myRecentDoctors"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 doctors:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/RecentDoctor'
+   *       404:
+   *         description: "Doctor not found."
+   */
+  app.get(version + '/doctor/myRecentDoctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getRecentDoctorList)
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
    * /doctor/schedule:
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Post/Update an schedule of a doctor"
+   *     summary: "Post/Update a schedule of a doctor"
    *     description: ""
    *     operationId: "schedule"
    *     produces:
@@ -739,7 +869,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Delete an schedule of a doctor"
+   *     summary: "Delete a schedule of a doctor"
    *     description: ""
    *     operationId: "deleteSchedule"
    *     produces:
@@ -787,7 +917,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Post/Update an suspend time of a doctor"
+   *     summary: "Post/Update a suspend time of a doctor"
    *     description: ""
    *     operationId: "suspendTime"
    *     produces:
@@ -822,7 +952,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Delete an suspend time of a doctor"
+   *     summary: "Delete a suspend time of a doctor"
    *     description: ""
    *     operationId: "deleteSuspendTime"
    *     produces:
@@ -3553,5 +3683,13 @@ module.exports = function (app, webEntry, acl) {
    *             type: array
    *             items:
    *               type: string
+   *   RecentDoctor:
+   *     type: object
+   *     properties:
+   *       lastTalkTime:
+   *         type: string
+   *         format: date-time
+   *       doctorId:
+   *         type: object
    */
 }

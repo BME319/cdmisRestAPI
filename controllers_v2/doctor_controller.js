@@ -633,7 +633,7 @@ exports.getRecentDoctorList = function (req, res) {
         }
       // return res.json({result: '暂无患者2!'});
       })
-      return res.json({results: {patients: []}})
+      return res.json({results: {doctors: []}})
     }
     res.json({results: item.doctors.sort(sortTime)})
   }, opts, fields, populate)
