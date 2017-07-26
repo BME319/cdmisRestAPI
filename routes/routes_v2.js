@@ -123,7 +123,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/services', tokenManager.verifyToken(), serviceCtrl.getServices)
   /** YQC 17-07-20
    * @swagger
-   * /api/v2/services/status:
+   * /services/status:
    *   post:
    *     tags:
    *     - "services"
@@ -215,7 +215,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/services/status', tokenManager.verifyToken(), serviceCtrl.changeServiceStatus)
   /** YQC 17-07-20
    * @swagger
-   * /api/v2/services/charge:
+   * /services/charge:
    *   post:
    *     tags:
    *     - "services"
@@ -319,7 +319,7 @@ module.exports = function (app, webEntry, acl) {
   // comment
   /** YQC annotation 2017-07-20 - debug complete 2017-07-17 - acl 2017-07-25 患者获取医生评价
    * @swagger
-   * /api/v2/comment/commentsByDoc:
+   * /comment/commentsByDoc:
    *   get:
    *     tags:
    *     - "comment"
@@ -355,7 +355,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/comment/commentsByDoc', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), commentCtrl.getDoctorObject, commentCtrl.getCommentsByDoc)
   /** YQC annotation 2017-07-20 - debug complete 2017-07-17 - acl 2017-07-25 患者获取咨询问诊评价
    * @swagger
-   * /api/v2/comment/commentsByCounsel:
+   * /comment/commentsByCounsel:
    *   get:
    *     tags:
    *     - "comment"
@@ -392,7 +392,7 @@ module.exports = function (app, webEntry, acl) {
   // advice
   /** YQC annotation 17-07-24 - debug complete 2017-07-17 - acl 2017-07-25 管理员获取建议
    * @swagger
-   * /api/v2/advice/advices:
+   * /advice/advices:
    *   get:
    *     tags:
    *     - "advice"
@@ -423,7 +423,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/advice/advices', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), adviceCtrl.getAdvice)
   /** YQC annotation 17-07-24 - debug complete 2017-07-17 - acl 2017-07-25 用户（患者／医生）提建议
    * @swagger
-   * /api/v2/advice/advice:
+   * /advice/advice:
    *   post:
    *     tags:
    *     - "advice"
@@ -464,7 +464,7 @@ module.exports = function (app, webEntry, acl) {
   // compliance - debug complete 2017-07-17
   /** YQC 17-07-24
    * @swagger
-   * /api/v2/compliance/compliance:
+   * /compliance/compliance:
    *   get:
    *     tags:
    *     - "compliance"
@@ -508,7 +508,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/compliance/compliances', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
   /** YQC 17-07-24
    * @swagger
-   * /api/v2/compliance/compliances:
+   * /compliance/compliances:
    *   post:
    *     tags:
    *     - "compliance"
@@ -548,7 +548,7 @@ module.exports = function (app, webEntry, acl) {
   // vitalSign 2017-07-14  - debug complete 2017-07-24
   /** YQC 17-07-24
    * @swagger
-   * /api/v2/vitalSign/vitalSigns:
+   * /vitalSign/vitalSigns:
    *   get:
    *     tags:
    *     - "vitalSign"
@@ -583,7 +583,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
   /** YQC 17-07-24
    * @swagger
-   * /api/v2/vitalSign/vitalSigns:
+   * /vitalSign/vitalSigns:
    *   post:
    *     tags:
    *     - "vitalSign"
@@ -678,7 +678,7 @@ module.exports = function (app, webEntry, acl) {
   // doctor_Info
   /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
    * @swagger
-   * /api/v2/doctor/detail:
+   * /doctor/detail:
    *   post:
    *     tags:
    *     - "doctor"
@@ -740,7 +740,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/doctor/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.insertDocBasic)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
    * @swagger
-   * /api/v2/doctor/myPatients:
+   * /doctor/myPatients:
    *   get:
    *     tags:
    *     - "doctor"
@@ -785,7 +785,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/doctor/editDetail', tokenManager.verifyToken(), doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
    * @swagger
-   * /api/v2/doctor/myRecentDoctors:
+   * /doctor/myRecentDoctors:
    *   get:
    *     tags:
    *     - "doctor"
@@ -819,7 +819,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctor/myRecentDoctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getRecentDoctorList)
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
-   * /api/v2/doctor/schedule:
+   * /doctor/schedule:
    *   post:
    *     tags:
    *     - "doctor"
@@ -865,7 +865,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/doctor/schedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.insertSchedule)
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
-   * /api/v2/doctor/deleteSchedule:
+   * /doctor/deleteSchedule:
    *   post:
    *     tags:
    *     - "doctor"
@@ -913,7 +913,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctor/schedules', tokenManager.verifyToken(), doctorCtrl.getSchedules)
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
-   * /api/v2/doctor/suspendTime:
+   * /doctor/suspendTime:
    *   post:
    *     tags:
    *     - "doctor"
@@ -948,7 +948,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/doctor/suspendTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.insertSuspendTime)
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
-   * /api/v2/doctor/deleteSuspendTime:
+   * /doctor/deleteSuspendTime:
    *   post:
    *     tags:
    *     - "doctor"
@@ -983,7 +983,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/doctor/deleteSuspendTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.deleteSuspendTime)
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
-   * /api/v2/doctor/suspendTime:
+   * /doctor/suspendTime:
    *   get:
    *     tags:
    *     - "doctor"
@@ -1023,7 +1023,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctor/suspendTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSuspendTime)
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生／患者／管理员
    * @swagger
-   * /api/v2/doctor/numbers:
+   * /doctor/numbers:
    *   get:
    *     tags:
    *     - "doctor"
@@ -1050,7 +1050,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctor/numbers', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getDocNum)
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
-   * /api/v2/doctor/AliPayAccount:
+   * /doctor/AliPayAccount:
    *   get:
    *     tags:
    *     - "doctor"
@@ -1084,7 +1084,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getAliPayAccount)
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
-   * /api/v2/doctor/AliPayAccount:
+   * /doctor/AliPayAccount:
    *   post:
    *     tags:
    *     - "doctor"
@@ -1115,7 +1115,7 @@ module.exports = function (app, webEntry, acl) {
   // 患者端 关注医生 2017-07-18
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
-   * /api/v2/patient/favoriteDoctor:
+   * /patient/favoriteDoctor:
    *   post:
    *     tags:
    *     - "patient"
@@ -1146,7 +1146,7 @@ module.exports = function (app, webEntry, acl) {
   // 患者端 取关医生 2017-07-21
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
-   * /api/v2/patient/unfollowFavoriteDoctor:
+   * /patient/unfollowFavoriteDoctor:
    *   post:
    *     tags:
    *     - "patient"
@@ -1177,7 +1177,7 @@ module.exports = function (app, webEntry, acl) {
   // 患者端 获取关注医生列表 2017-07-19
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
-   * /api/v2/patient/myFavoriteDoctors:
+   * /patient/myFavoriteDoctors:
    *   get:
    *     tags:
    *     - "patient"
@@ -1226,7 +1226,7 @@ module.exports = function (app, webEntry, acl) {
   // 患者端 申请主管医生 2017-07-18
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
-   * /api/v2/patient/doctorInCharge:
+   * /patient/doctorInCharge:
    *   post:
    *     tags:
    *     - "patient"
@@ -1261,7 +1261,7 @@ module.exports = function (app, webEntry, acl) {
   // 患者端 获取主管医生信息 2017-07-20
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
-   * /api/v2/patient/myDoctorsInCharge:
+   * /patient/myDoctorsInCharge:
    *   get:
    *     tags:
    *     - "patient"
@@ -1294,7 +1294,7 @@ module.exports = function (app, webEntry, acl) {
   // 患者端 删除主管医生 2017-07-20
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
-   * /api/v2/patient/cancelDoctorInCharge:
+   * /patient/cancelDoctorInCharge:
    *   post:
    *     tags:
    *     - "patient"
@@ -1322,7 +1322,7 @@ module.exports = function (app, webEntry, acl) {
   // 患者端 判断关系 2017-07-21
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
-   * /api/v2/services/relation:
+   * /services/relation:
    *   get:
    *     tags:
    *     - "services"
@@ -1365,7 +1365,7 @@ module.exports = function (app, webEntry, acl) {
   // 医生端 获取主管医生待审核请求列表 2017-07-19
   /** YQC annotation 2017-07-25  - acl 2017-07-25 医生
    * @swagger
-   * /api/v2/doctor/myPatientsToReview:
+   * /doctor/myPatientsToReview:
    *   get:
    *     tags:
    *     - "doctor"
@@ -1397,7 +1397,7 @@ module.exports = function (app, webEntry, acl) {
   // 医生端 审核主管患者 2017-07-21
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
-   * /api/v2/doctor/PatientInCharge:
+   * /doctor/PatientInCharge:
    *   post:
    *     tags:
    *     - "doctor"
