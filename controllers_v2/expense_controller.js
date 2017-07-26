@@ -144,6 +144,7 @@ exports.rechargeDoctor = function (req, res) {
                 return res.status(500).send(err.errmsg)
               }
               if (item1 === null) {
+                // 无历史消费记录，新建
                 var accountData = {
                   userId: _did,
                   money: _money
@@ -157,6 +158,7 @@ exports.rechargeDoctor = function (req, res) {
                   }
                 })
               } else {
+                // 有历史消费记录，更新
                 var _money1 = _money + item1.money
                 var upObj = {
                   $set: {money: _money1}

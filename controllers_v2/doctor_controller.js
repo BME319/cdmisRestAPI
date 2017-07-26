@@ -633,7 +633,7 @@ exports.getRecentDoctorList = function (req, res) {
         }
       // return res.json({result: '暂无患者2!'});
       })
-      return res.json({results: {patients: []}})
+      return res.json({results: {doctors: []}})
     }
     res.json({results: item.doctors.sort(sortTime)})
   }, opts, fields, populate)
@@ -772,10 +772,10 @@ exports.deleteSuspendTime = function (req, res) {
   let _start = req.body.start || null
   let _end = req.body.end || null
   if (_start == null) {
-    return res.json({msg: 'Please input service-suspension start time!'})
+    return res.json({msg: 'Please input work-suspension start time!'})
   }
   if (_end == null) {
-    return res.json({msg: 'Please input service-suspension end time!'})
+    return res.json({msg: 'Please input work-suspension end time!'})
   }
   let query = {userId: doctorId, role: 'doctor'}
   var upObj = {
@@ -804,12 +804,12 @@ exports.deleteSuspendTime = function (req, res) {
 // 患者或医生获取医生停诊信息 输入userId（医生），输出结果，相应医生的停诊信息
 exports.getSuspendTime = function (req, res) {
   // 查询条件
-  let doctorId = req.query.userId
+  let doctorId = req.session.userId
   let query = {userId: doctorId, role: 'doctor'}
   var opts = ''
-  var fields = {'_id': 0, 'suspendTime': 1}
+  var fields = {'_id': 0, 'suspendTime': 1, 'serviceSuspendTime': 1}
 
-  Doctor.getOne(query, function (err, item) {
+  Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -824,7 +824,7 @@ exports.getSuspendTime = function (req, res) {
 exports.getDocNum = function (req, res) {
   // 查询条件
   var query = {role: 'doctor'}
-  Alluser.count(query, function (err, item) {
+  Alluser.countSome(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -920,9 +920,16 @@ exports.getPatientList = function (req, res) {
     _skip = 0
   }
   let opts = ''
-  let fields = {'_id': 0, 'patients.patientId': 1, 'patients.dpRelationTime': 1}
+  let fields = {
+    '_id': 0,
+    'patients.patientId': 1,
+    'patients.dpRelationTime': 1,
+    'patientsInCharge.patientId': 1,
+    'patientsInCharge.dpRelationTime': 1,
+    'patientsInCharge.invalidFlag': 1
+  }
   // 通过子表查询主表，定义主表查询路径及输出内容
-  let populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0}}
+  let populate = {path: 'patients.patientId patientsInCharge.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
   // if(_name!=""&&_name!=undefined){
 
   // }
@@ -931,7 +938,7 @@ exports.getPatientList = function (req, res) {
   if (_name) {
     populate['match'] = {'name': nameReg}
   }
-  console.log(populate)
+  // console.log(populate)
   // console.log(query);
   DpRelation.getOne(query, function (err, item) {
     if (err) {
@@ -940,13 +947,13 @@ exports.getPatientList = function (req, res) {
     if (item == null) {
     // return res.json({result:'请先与其他医生或患者建立联系!'});
       var dpRelationData = {
-        doctorId: req.body.doctorObject._id,
-        revisionInfo: {
-          operationTime: new Date(),
-          userId: 'gy',
-          userName: 'gy',
-          terminalIP: '10.12.43.32'
-        }
+        doctorId: req.body.doctorObject._id // ,
+        // revisionInfo: {
+        //   operationTime: new Date(),
+        //   userId: 'gy',
+        //   userName: 'gy',
+        //   terminalIP: '10.12.43.32'
+        // }
       }
       // return res.json({result:dpRelationData});
       var newDpRelation = new DpRelation(dpRelationData)
@@ -958,25 +965,24 @@ exports.getPatientList = function (req, res) {
       })
       return res.json({results: {patients: []}})
     } else {
-      var patients = []
+      let patients = []
         // console.log(item);
         // item.patients=item.patients.sort(sortVIPpinyin);
-
-      for (var i = 0; i < item.patients.length; i++) {
-        // console.log(item.patients[i]);
-        if (item.patients[i].dpRelationTime === null || item.patients[i].dpRelationTime === '' || item.patients[i].dpRelationTime === undefined) {
-          item.patients[i].dpRelationTime = new Date('2017-05-15')
+      let patientsList = item.patients || []
+      for (let i = 0; i < patientsList.length; i++) {
+        let patientI = patientsList[i]
+        if (patientI.dpRelationTime === null || patientI.dpRelationTime === '' || patientI.dpRelationTime === undefined) {
+          patientI.dpRelationTime = new Date('2017-05-15')
         }
-        // if((item.patients[i].patientId!=null)&&(item.patients[i].patientId.name==_name||_name===""||_name==undefined)){
-        if (item.patients[i].patientId !== null) {
+        if (patientI.patientId !== null) {
           if (_skip > 0) {
             _skip--
           } else {
             if (_limit === null) {
-              patients.push(item.patients[i])
+              patients.push(patientI)
             } else {
               if (_limit > 0) {
-                patients.push(item.patients[i])
+                patients.push(patientI)
                 _limit--
               }
             }
@@ -984,11 +990,30 @@ exports.getPatientList = function (req, res) {
         }
       }
       patients = patients.sort(sortVIPpinyin)
-      let item1 = {'patients': patients}
 
-      // 2017-06-07GY调试用
-      // console.log({method:'getPatientList', resultCount:patients.length});
-
+      let patientsInCharge = []
+      let patientsInChargeList = item.patientsInCharge || []
+      for (let j = 0; j < patientsInChargeList.length; j++) {
+        if (patientsInChargeList[j].dpRelationTime === null || patientsInChargeList[j].dpRelationTime === '' || patientsInChargeList[j].dpRelationTime === undefined) {
+          patientsInChargeList[j].dpRelationTime = new Date('2017-05-15')
+        }
+        if (patientsInChargeList[j].patientId !== null) {
+          if (_skip > 0) {
+            _skip--
+          } else {
+            if (_limit === null && Number(patientsInChargeList[j].invalidFlag) === 1) {
+              patientsInCharge.push(patientsInChargeList[j])
+            } else {
+              if (_limit > 0 && Number(patientsInChargeList[j].invalidFlag) === 1) {
+                patientsInCharge.push(patientsInChargeList[j])
+                _limit--
+              }
+            }
+          }
+        }
+      }
+      patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
+      let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
       res.json({results: item1})
     }
   }, opts, fields, populate)
@@ -1081,7 +1106,7 @@ exports.getPatientByDate = function (req, res) {
 // 修改用户支付宝账号 2017-06-16 GY
 // 注释 医生修改绑定的支付宝账号信息 输入，aliPayAccount，输出，支付宝账号更新
 exports.editAliPayAccount = function (req, res) {
-  let query = {userId: req.session.userId}
+  let query = {userId: req.session.userId, role: 'doctor'}
   let upObj = {aliPayAccount: req.body.aliPayAccount}
   let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
 
@@ -1093,10 +1118,10 @@ exports.editAliPayAccount = function (req, res) {
   }, opts)
 }
 
-// 获取用户支付宝账号 2017-06-16 GY
-// 注释 医生获取自己绑定的支付宝账号信息 承接session.userId；输出，支付宝账号信息
+// 获取医生支付宝账号 2017-06-16 GY
+// 注释 医生获取自己绑定的支付宝账号信息 输入userId；输出，支付宝账号信息
 exports.getAliPayAccount = function (req, res) {
-  let query = {userId: req.session.userId}
+  let query = {userId: req.query.userId, role: 'doctor'}
 
   Alluser.getOne(query, function (err, item) {
     if (err) {
@@ -1106,7 +1131,7 @@ exports.getAliPayAccount = function (req, res) {
       return res.status(400).send('不存在的医生')
     } else {
       if (item.aliPayAccount === undefined) {
-        return res.json({results: ''})
+        return res.json({results: '未绑定支付宝账号'})
       } else {
         return res.json({results: item.aliPayAccount})
       }

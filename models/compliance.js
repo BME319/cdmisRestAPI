@@ -7,7 +7,6 @@ var complianceSchema = new mongoose.Schema({
   date: Date,
   status: Number,
   description: String
-
 })
 
 var ComplianceModel = mongoose.model('compliance', complianceSchema)

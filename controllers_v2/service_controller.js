@@ -97,7 +97,16 @@ exports.getServices = function (req, res) {
     if (doctorItem === null) {
       return res.status(404).json({results: '找不到对象'})
     } else {
-      return res.json({results: doctorItem})
+      // return res.json({results: doctorItem})
+      let query = {$or: [{sponsorId: doctorId}, {'members.userId': doctorId}]}
+      let opts = ''
+      let fields = {_id: 0, teamId: 1, name: 1, sponsorName: 1}
+      Team.getSome(query, function (err, items) {
+        if (err) {
+          return res.status(500).send(err)
+        }
+        res.json({results: doctorItem, teams: items})
+      }, opts, fields)
     }
   }, opts, fields)
 }
@@ -179,7 +188,7 @@ exports.changeServiceStatus = function (req, res) {
           } else {
             let query = {$or: [{sponsorId: req.session.userId}, {'members.userId': req.session.userId}]}
             let opts = ''
-            let fields = {'_id': 0, 'revisionInfo': 0}
+            let fields = {_id: 0, teamId: 1, name: 1, sponsorName: 1}
             Team.getSome(query, function (err, items) {
               if (err) {
                 return res.status(500).send(err)
@@ -411,7 +420,7 @@ exports.deleteServiceSchedule = function (req, res) {
 }
 // 获取排班信息 2017-07-19 YQC
 // 承接session.userId；输出相应医生的面诊排班信息
-exports.getServiceSchedules = function (req, res) {
+exports.getMySchedules = function (req, res) {
   // 查询条件
   let doctorId = req.session.userId
   let query = {userId: doctorId}
@@ -518,8 +527,7 @@ exports.getPatientsToReview = function (req, res) {
       if (err) {
         return res.status(500).send(err)
       }
-      let listToFilter = itemR.patientsInCharge
-      console.log(listToFilter)
+      let listToFilter = itemR.patientsInCharge || []
       let patientsList = []
       for (let i = 0; i < listToFilter.length; i++) {
         console.log(Number(listToFilter[i].invalidFlag))
@@ -572,7 +580,7 @@ exports.reviewPatientInCharge = function (req, res, next) {
       if (itemP == null) {
         return res.json({result: '不存在的患者ID!'})
       }
-      let doctorsInChargeList = itemP.doctorsInCharge
+      let doctorsInChargeList = itemP.doctorsInCharge || []
       let currentDoctorInCharge
       for (let i = 0; i < doctorsInChargeList.length; i++) {
         if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
@@ -704,20 +712,22 @@ exports.getDoctorsInCharge = function (req, res) {
   let queryP = {userId: patientId, role: 'patient'}
   let opts = ''
   let fields = {'_id': 0, 'doctorsInCharge': 1}
+  let populate = {path: 'doctorsInCharge.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
+
   Alluser.getOne(queryP, function (err, itemP) {
     if (err) {
       return res.status(500).send(err)
     }
-    let doctorsInChargeList = itemP.doctorsInCharge
+    let doctorsInChargeList = itemP.doctorsInCharge || []
     for (let i = 0; i < doctorsInChargeList.length; i++) {
       if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
         return res.json({message: '已申请主管医生，请等待审核!'})
       } else if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
-        return res.json({message: '当前已有主管医生!'})
+        return res.json({message: '当前已有主管医生!', results: doctorsInChargeList[i]})
       }
     }
     res.json({message: '当前无主管医生且无申请!'})
-  }, opts, fields)
+  }, opts, fields, populate)
 }
 
 // 2017-07-20 YQC
@@ -732,7 +742,7 @@ exports.getMyDoctorInCharge = function (req, res, next) {
     if (itemP === null) {
       return res.json({message: '找不到患者!'})
     }
-    let doctorsInChargeList = itemP.doctorsInCharge
+    let doctorsInChargeList = itemP.doctorsInCharge || []
     let doctorInCharge = null
     for (let i = 0; i < doctorsInChargeList.length; i++) {
       if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
@@ -810,7 +820,7 @@ exports.getPatientInCharge = function (req, res, next) {
     if (itemR === null) {
       return res.json({message: '找不到医生!'})
     }
-    let patientsInChargeList = itemR.patientsInCharge
+    let patientsInChargeList = itemR.patientsInCharge || []
     let patientInCharge = null
     for (let i = 0; i < patientsInChargeList.length; i++) {
       if (String(patientsInChargeList[i].patientId) === String(patientId) & Number(patientsInChargeList[i].invalidFlag) === 1) {
@@ -958,7 +968,7 @@ exports.requestDoctorInCharge = function (req, res, next) {
       if (itemP === null) {
         return res.json({results: '患者不存在'})
       }
-      let doctorsInChargeList = itemP.doctorsInCharge || {}
+      let doctorsInChargeList = itemP.doctorsInCharge || []
       for (let i = 0; i < doctorsInChargeList.length; i++) {
         if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
           return res.json({result: '已申请主管医生，请等待审核!'})
@@ -1013,6 +1023,18 @@ exports.requestDoctorInCharge = function (req, res, next) {
           return res.json({results: '找不到该患者'})
         } else if (upPatient.nModified !== 0) {
           // return res.json({results: '添加主管医生成功'})
+          Alluser.getOne(queryP, function (err, patient) {
+            if (err) {
+              return res.status(500).send(err)
+            } else {
+              for (let nodic = 0; nodic < patient.doctorsInCharge.length; nodic++) {
+                let dic = patient.doctorsInCharge[nodic]
+                if (dic.invalidFlag === 0) {
+                  req.body.docInChaObject = dic._id
+                }
+              }
+            }
+          })
           req.body.doctorObjectId = doctorObjectId
           req.body.patientObjectId = itemP._id
           next()
@@ -1022,7 +1044,7 @@ exports.requestDoctorInCharge = function (req, res, next) {
   })
 }
 
-exports.addPatientInCharge = function (req, res) {
+exports.addPatientInCharge = function (req, res, next) {
   let doctorObjectId = req.body.doctorObjectId
   let patientObjectId = req.body.patientObjectId
   let dpRelationTime = req.body.dpRelationTime || null
@@ -1061,14 +1083,16 @@ exports.addPatientInCharge = function (req, res) {
           } else if (upRelation2.nModified === 0) {
             return res.json({result: '未申请成功！请检查输入是否符合要求！'})
           } else if (upRelation2.nModified === 1) {
-            return res.json({result: '申请成功，请等待审核！', results: upRelation2})
+            // return res.json({result: '申请成功，请等待审核！', results: upRelation2})
+            next()
           }
         })
       })
     } else if (upRelation1.nModified === 0) {
       return res.json({result: '未申请成功！请检查输入是否符合要求！'})
     } else if (upRelation1.nModified === 1) {
-      return res.json({result: '申请成功，请等待审核！', results: upRelation1})
+      // return res.json({result: '申请成功，请等待审核！', results: upRelation1})
+      next()
     }
   }, {new: true})
 }

@@ -137,7 +137,7 @@ var alluserSchema = new mongoose.Schema({
   // 主管医生字段
   doctorsInCharge: [
     {
-      _id: 0,
+      // _id: 0,
       doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       firstTime: Date,
       // 历史2、当前1、待审核0，被拒3

@@ -407,7 +407,7 @@ exports.getAlluserList = function (role) {
     }
         // 通过子表查询主表，定义主表查询路径及输出内容
         // var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
-    console.log(query)
+    // console.log(query)
     Alluser.getSome(query, function (err, userlist) {
       if (err) {
         return res.status(500).send(err.errmsg)
@@ -506,7 +506,7 @@ exports.countAlluserList = function (req, res) {
   }
         // 通过子表查询主表，定义主表查询路径及输出内容
         // var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
-  console.log(query)
+  // console.log(query)
   Alluser.countSome(query, function (err, userlist) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -894,7 +894,7 @@ exports.checkBinding = function (req, res, next) {
             }
                         // console.log(jsondata);
             request({
-              url: 'http://' + webEntry.domain + ':4050/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
+              url: 'http://' + webEntry.domain + ':4060/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
               method: 'POST',
               body: jsondata,
               json: true
@@ -1035,7 +1035,7 @@ exports.login = function (req, res) {
             }
 
                         // 2017-06-07GY调试
-            console.log('login_success')
+            // console.log('login_success')
 
             res.json({results: results})
           })
@@ -1085,7 +1085,7 @@ exports.getAlluserID = function (req, res) {
     if (item === null) {
       res.json({results: 1, mesg: "Alluser doesn't Exist!"})
     } else {
-      console.log(item)
+      // console.log(item)
       res.json({results: 0, AlluserId: item.userId, phoneNo: item.phoneNo, roles: item.role, openId: item.openId, mesg: 'Get AlluserId Success!'})
     }
   })
@@ -1139,7 +1139,7 @@ exports.sendSMS = function (req, res) {
     param = _reason
     JSONData = J6 + '"' + Jsonstring1 + '"' + ':' + '{' + '"' + Jsonstring2 + '"' + ':' + '"' + appId + '"' + ',' + '"' + Jsonstring3 + '"' + ':' + '"' + param + '"' + ',' + '"' + Jsonstring4 + '"' + ':' + '"' + tplId + '"' + ',' + '"' + Jsonstring5 + '"' + ':' + '"' + _mobile + '"' + '}' + '}' + '}'
   }
-  console.log(JSONData)
+  // console.log(JSONData)
   var query = {'Expire': {'$lte': now.getTime()}}
   Sms.remove(query, function (err, item) {
     if (err) {
@@ -1211,7 +1211,7 @@ exports.sendSMS = function (req, res) {
               response.on('end', function () {
                                 // console.log("### end ##");
                 // var json = eval('(' + resdata + ')')
-                console.log(resdata)
+                // console.log(resdata)
                 var json = evil(resdata)
                 code = json.resp.respCode
                 if (code === '000000') {
