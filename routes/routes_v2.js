@@ -49,6 +49,7 @@ var loadCtrl = require('../controllers_v2/load_controller')
 var messageCtrl = require('../controllers_v2/message_controller')
 var newsCtrl = require('../controllers_v2/news_controller')
 var departmentCtrl = require('../controllers_v2/department_controller')
+var doctorMonitorCtrl = require('../controllers_v2/doctorMonitor_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -2830,6 +2831,10 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/department/updatedistrict', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDistrict)
   app.post(version + '/department/updatedepartment', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDepartment)
   app.post(version + '/department/delete', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.deleteRecord)
+
+  // 医生数据监控
+  app.get(version + '/doctormonitor/distribution', doctorMonitorCtrl.getDistribution)
+  app.get(version + '/doctormonitor/linegraph', doctorMonitorCtrl.getLinegraph)
 
   /**
    * @swagger
