@@ -3,6 +3,9 @@ var mongoose = require('mongoose')
 
 var orderSchema = new mongoose.Schema({
   userId: String, // {type: mongoose.Schema.Types.ObjectId, ref:'user'},
+  userObject: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  doctorObject: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  // doctorName: String,
   orderNo: String,
   ordertime: Date,
   money: Number,
@@ -16,7 +19,13 @@ var orderSchema = new mongoose.Schema({
   paytime: Date,
   refundNo: String, // 退款单号
   refundAppTime: Date, // 退款申请时间
-  refundSucTime: Date // 退款成功时间
+  refundSucTime: Date, // 退款成功时间
+  patientName: String,
+
+  // time: Date,
+  type: String,
+  conselObject: {type: mongoose.Schema.Types.ObjectId, ref: 'counsel'},
+  perDiagObject: {type: mongoose.Schema.Types.ObjectId, ref: 'personalDiag'}
 })
 
 var orderModel = mongoose.model('order', orderSchema)
