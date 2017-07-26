@@ -778,9 +778,63 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Doctor not found."
    */
   app.get(version + '/doctor/myPatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientList)
+  // myPatientsByDate应该可以和myPatients整合吧。待定
   app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
   app.get(version + '/doctor/detail', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
+   * @swagger
+   * /doctor/myTeams:
+   *   get:
+   *     tags:
+   *     - "doctor"
+   *     summary: "获取医生（我）所在的团队"
+   *     description: ""
+   *     operationId: "myTeams"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 members:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamMember'
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   *       404:
+   *         description: "Doctor not found."
+   */
   app.get(version + '/doctor/myTeams', tokenManager.verifyToken(), doctorCtrl.getTeams)
   app.get(version + '/doctor/teamPatients', tokenManager.verifyToken(), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
   // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
@@ -1247,6 +1301,7 @@ module.exports = function (app, webEntry, acl) {
    *           - "token"
    *           - "doctorId"
    *           - "chargeDuration"
+   *           - "orderNo"
    *         properties:
    *           token:
    *             type: "string"
@@ -1255,11 +1310,13 @@ module.exports = function (app, webEntry, acl) {
    *           chargeDuration:
    *             type: "string"
    *             description: "单位为月"
+   *           orderNo:
+   *             type: "string"
    *     responses:
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge)
+  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge, orderCtrl.updateOrder)
   // 患者端 获取主管医生信息 2017-07-20
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
@@ -3762,5 +3819,14 @@ module.exports = function (app, webEntry, acl) {
    *         format: date-time
    *       doctorId:
    *         type: object
+   *   TeamMember:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       photoUrl:
+   *         type: string
    */
 }
