@@ -3293,7 +3293,7 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/devicedata/BPDevice/debinding', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.debindingDevice)
   /**
-   * 
+   *
    */
   app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.receiveBloodPressure)
   app.get(version + '/devicedata/devices', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), devicedataCtrl.getDeviceInfo)
@@ -3513,6 +3513,7 @@ module.exports = function (app, webEntry, acl) {
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
 
   // department
+
   /**
    * @swagger
    * /department/district:
