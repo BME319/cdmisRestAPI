@@ -305,11 +305,11 @@ exports.getCounselRecords = function (req, res) {
   // 通过子表查询主表，定义主表查询路径及输出内容
   var populate = {path: 'doctorId', select: {'_id': 0, 'userId': 1, 'name': 1, 'photoUrl': 1}}
 
-  Counsel.getSome(query, function (err, item) {
+  Counsel.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
     }
-    res.json({results: item})
+    res.json({results: items})
   }, opts, fields, populate)
 }
 
@@ -473,10 +473,7 @@ exports.newPatientDetail = function (req, res) {
 
 // 修改患者个人信息 2017-04-06 GY
 exports.editPatientDetail = function (req, res) {
-  let patientId = req.body.patientId || null
-  if (patientId == null) {
-    return res.json({result: '请填写userId!'})
-  }
+  let patientId = req.session.userId
   let query = {
     userId: patientId,
     role: 'patient'
@@ -995,7 +992,7 @@ exports.bindingPatient = function (req, res, next) {
 }
 
 // 绑定关注医生 在alluser表patient_info部分doctors字段添加记录
-exports.bindingDoctor = function (req, res, next) {
+exports.bindingFavoriteDoctor = function (req, res, next) {
   // var patientId = req.body.patientId || null
   let patientId = req.session.userId
   let doctorId = req.body.doctorId || null
@@ -1044,7 +1041,7 @@ exports.bindingDoctor = function (req, res, next) {
 }
 
 // DpRelation表中医生绑定患者
-exports.bindingPatient = function (req, res) {
+exports.bindingFavoritePatient = function (req, res) {
   let doctorObjectId = req.body.doctorObjectId
   let patientObjectId = req.body.patientObjectId
   let dpRelationTime = req.body.dpRelationTime || null
@@ -1096,7 +1093,7 @@ exports.bindingPatient = function (req, res) {
 }
 
 // 解绑关注医生 在alluser表patient_info部分doctors字段添加记录
-exports.debindingDoctor = function (req, res, next) {
+exports.debindingFavoriteDoctor = function (req, res, next) {
   // var patientId = req.body.patientId || null
   let patientId = req.session.userId
   let doctorId = req.body.doctorId || null
@@ -1156,7 +1153,7 @@ exports.debindingDoctor = function (req, res, next) {
 }
 
 // DpRelation表中医生绑定患者
-exports.debindingPatient = function (req, res) {
+exports.debindingFavoritePatient = function (req, res) {
   let doctorObjectId = req.body.doctorObjectId
   let patientObjectId = req.body.patientObjectId
   let query = {doctorId: doctorObjectId}

@@ -420,7 +420,7 @@ exports.deleteServiceSchedule = function (req, res) {
 }
 // 获取排班信息 2017-07-19 YQC
 // 承接session.userId；输出相应医生的面诊排班信息
-exports.getServiceSchedules = function (req, res) {
+exports.getMySchedules = function (req, res) {
   // 查询条件
   let doctorId = req.session.userId
   let query = {userId: doctorId}
@@ -1023,6 +1023,18 @@ exports.requestDoctorInCharge = function (req, res, next) {
           return res.json({results: '找不到该患者'})
         } else if (upPatient.nModified !== 0) {
           // return res.json({results: '添加主管医生成功'})
+          Alluser.getOne(queryP, function (err, patient) {
+            if (err) {
+              return res.status(500).send(err)
+            } else {
+              for (let nodic = 0; nodic < patient.doctorsInCharge.length; nodic++) {
+                let dic = patient.doctorsInCharge[nodic]
+                if (dic.invalidFlag === 0) {
+                  req.body.docInChaObject = dic._id
+                }
+              }
+            }
+          })
           req.body.doctorObjectId = doctorObjectId
           req.body.patientObjectId = itemP._id
           next()
@@ -1032,7 +1044,7 @@ exports.requestDoctorInCharge = function (req, res, next) {
   })
 }
 
-exports.addPatientInCharge = function (req, res) {
+exports.addPatientInCharge = function (req, res, next) {
   let doctorObjectId = req.body.doctorObjectId
   let patientObjectId = req.body.patientObjectId
   let dpRelationTime = req.body.dpRelationTime || null
@@ -1071,14 +1083,16 @@ exports.addPatientInCharge = function (req, res) {
           } else if (upRelation2.nModified === 0) {
             return res.json({result: '未申请成功！请检查输入是否符合要求！'})
           } else if (upRelation2.nModified === 1) {
-            return res.json({result: '申请成功，请等待审核！', results: upRelation2})
+            // return res.json({result: '申请成功，请等待审核！', results: upRelation2})
+            next()
           }
         })
       })
     } else if (upRelation1.nModified === 0) {
       return res.json({result: '未申请成功！请检查输入是否符合要求！'})
     } else if (upRelation1.nModified === 1) {
-      return res.json({result: '申请成功，请等待审核！', results: upRelation1})
+      // return res.json({result: '申请成功，请等待审核！', results: upRelation1})
+      next()
     }
   }, {new: true})
 }
