@@ -305,11 +305,11 @@ exports.getCounselRecords = function (req, res) {
   // 通过子表查询主表，定义主表查询路径及输出内容
   var populate = {path: 'doctorId', select: {'_id': 0, 'userId': 1, 'name': 1, 'photoUrl': 1}}
 
-  Counsel.getSome(query, function (err, item) {
+  Counsel.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
     }
-    res.json({results: item})
+    res.json({results: items})
   }, opts, fields, populate)
 }
 
@@ -473,10 +473,7 @@ exports.newPatientDetail = function (req, res) {
 
 // 修改患者个人信息 2017-04-06 GY
 exports.editPatientDetail = function (req, res) {
-  let patientId = req.body.patientId || null
-  if (patientId == null) {
-    return res.json({result: '请填写userId!'})
-  }
+  let patientId = req.session.userId
   let query = {
     userId: patientId,
     role: 'patient'

@@ -661,20 +661,388 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getUserTask)
   app.post(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
   // patient 2017-07-17
-  app.get(version + '/patient/detail', tokenManager.verifyToken(), patientCtrl.getPatientDetail)
-  app.post(version + '/patient/detail', tokenManager.verifyToken(), patientCtrl.newPatientDetail)
-
-  app.get(version + '/patient/doctors', tokenManager.verifyToken(), patientCtrl.getDoctorLists)
-  app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), patientCtrl.getMyDoctor)
-
-  app.get(version + '/patient/counselRecords', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.getCounselRecords)
-  app.post(version + '/patient/editDetail', tokenManager.verifyToken(), patientCtrl.editPatientDetail)
-
-  app.post(version + '/patient/diagnosis', tokenManager.verifyToken(), patientCtrl.getSessionObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
+  app.get(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getPatientDetail)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
+   * @swagger
+   * /patient/detail:
+   *   post:
+   *     tags:
+   *     - "patient"
+   *     summary: "Post a new personal file details of a patient"
+   *     description: ""
+   *     operationId: "detail"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           name:
+   *             type: "string"
+   *           photoUrl:
+   *             type: "string"
+   *           birthday:
+   *             type: "string"
+   *             format: date-time
+   *           gender:
+   *             type: "number"
+   *           IDNo:
+   *             type: "string"
+   *           height:
+   *             type: "number"
+   *           weight:
+   *             type: "number"
+   *           occupation:
+   *             type: "string"
+   *           bloodType:
+   *             type: "string"
+   *           nation:
+   *             type: "string"
+   *           province:
+   *             type: "string"
+   *           city:
+   *             type: "string"
+   *           class:
+   *             type: "string"
+   *           class_info:
+   *             type: "string"
+   *           operationTime:
+   *             type: "string"
+   *             format: date-time
+   *           hypertension:
+   *             type: "number"
+   *           allergic:
+   *             type: "string"
+   *           lastVisit:
+   *             type: object
+   *             properties:
+   *               time:
+   *                 type: "string"
+   *                 format: date-time
+   *               hospital:
+   *                 type: "string"
+   *               diagnosis:
+   *                 type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.newPatientDetail)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
+   * @swagger
+   * /patient/doctors:
+   *   get:
+   *     tags:
+   *     - "patient"
+   *     summary: "获取所有医生的列表（可分页／条件／模糊查询）（未完成）"
+   *     description: ""
+   *     operationId: "doctors"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       type: "string"
+   *     - name: "district"
+   *       in: "query"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 doctor:
+   *                   type: "object"
+   */
+  app.get(version + '/patient/doctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getDoctorLists)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
+   * @swagger
+   * /patient/myDoctors:
+   *   get:
+   *     tags:
+   *     - "patient"
+   *     summary: "获取当前的主管医生（未完成）"
+   *     description: ""
+   *     operationId: "myDoctors"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 doctor:
+   *                   type: "object"
+   */
+  app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getMyDoctor)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
+   * @swagger
+   * /patient/counselRecords:
+   *   get:
+   *     tags:
+   *     - "patient"
+   *     summary: "获取咨询记录"
+   *     description: ""
+   *     operationId: "counselRecords"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 CounselRecord:
+   *                   type: "object"
+   *                   properties:
+   *                     time:
+   *                       type: "string"
+   *                       format: data-time
+   *                     messages:
+   *                       type: "string"
+   *                     doctorId:
+   *                       type: "object"
+   *                       properties:
+   *                         userId:
+   *                           type: "string"
+   *                         name:
+   *                           type: "string"
+   *                         photoUrl:
+   *                           type: "string"
+   */
+  app.get(version + '/patient/counselRecords', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getSessionObject, patientCtrl.getCounselRecords)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
+   * @swagger
+   * /patient/editDetail:
+   *   post:
+   *     tags:
+   *     - "patient"
+   *     summary: "Edit personal file details of a patient"
+   *     description: ""
+   *     operationId: "editDetail"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           name:
+   *             type: "string"
+   *           photoUrl:
+   *             type: "string"
+   *           birthday:
+   *             type: "string"
+   *             format: date-time
+   *           gender:
+   *             type: "number"
+   *           IDNo:
+   *             type: "string"
+   *           height:
+   *             type: "number"
+   *           weight:
+   *             type: "number"
+   *           occupation:
+   *             type: "string"
+   *           bloodType:
+   *             type: "string"
+   *           nation:
+   *             type: "string"
+   *           province:
+   *             type: "string"
+   *           city:
+   *             type: "string"
+   *           class:
+   *             type: "string"
+   *           class_info:
+   *             type: "string"
+   *           operationTime:
+   *             type: "string"
+   *             format: date-time
+   *           hypertension:
+   *             type: "number"
+   *           allergic:
+   *             type: "string"
+   *           lastVisit:
+   *             type: object
+   *             properties:
+   *               time:
+   *                 type: "string"
+   *                 format: date-time
+   *               hospital:
+   *                 type: "string"
+   *               diagnosis:
+   *                 type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/patient/editDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.editPatientDetail)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
+   * @swagger
+   * /patient/diagnosis:
+   *   post:
+   *     tags:
+   *     - "patient"
+   *     summary: "Post a diagnosis of a patient"
+   *     description: ""
+   *     operationId: "diagnosis"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           diagname:
+   *             type: "string"
+   *           diagProgress:
+   *             type: "string"
+   *           diagContent:
+   *             type: "string"
+   *           diagTime:
+   *             type: "string"
+   *             format: date-time
+   *           diagOperationTime:
+   *             type: "string"
+   *             format: date-time
+   *           diagHypertension:
+   *             type: "number"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/patient/diagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getSessionObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
   // bindingMyDoctor改为关注医生
   // app.post(version + '/patient/bindingMyDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
-  app.post(version + '/patient/changeVIP', tokenManager.verifyToken(), patientCtrl.changeVIP)
-  app.post(version + '/patient/wechatPhotoUrl', tokenManager.verifyToken(), patientCtrl.wechatPhotoUrl)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 管理员
+   * @swagger
+   * /patient/changeVIP:
+   *   post:
+   *     tags:
+   *     - "patient"
+   *     summary: "Change the VIP status of a patient"
+   *     description: ""
+   *     operationId: "changeVIP"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "userId"
+   *           - "VIP"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           VIP:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/patient/changeVIP', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.changeVIP)
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
+   * @swagger
+   * /patient/wechatPhotoUrl:
+   *   post:
+   *     tags:
+   *     - "patient"
+   *     summary: "患者头像不存在时自动使用微信头像"
+   *     description: ""
+   *     operationId: "wechatPhotoUrl"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "wechatPhotoUrl"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           wechatPhotoUrl:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/patient/wechatPhotoUrl', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.wechatPhotoUrl)
   // doctor_Info
   /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
    * @swagger
