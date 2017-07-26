@@ -767,11 +767,13 @@ module.exports = function (app, webEntry, acl) {
    *                 patients:
    *                   type: "array"
    *                   items:
-   *                     $ref: '#/definitions/Patient'
+   *                     Patient:
+   *                       type: object
    *                 patientsInCharge:
    *                   type: "array"
    *                   items:
-   *                     $ref: '#/definitions/Patient'
+   *                     Patient:
+   *                       type: object
    *       404:
    *         description: "Doctor not found."
    */
@@ -1436,7 +1438,7 @@ module.exports = function (app, webEntry, acl) {
   // 医生端 获取排班（工作排班与面诊加号排班）信息 2017-07-19
   /** YQC annotation 2017-07-20 - acl 2017-07-25 医生
    * @swagger
-   * /api/v2/services/mySchedules:
+   * /services/mySchedules:
    *   get:
    *     tags:
    *     - "services"
