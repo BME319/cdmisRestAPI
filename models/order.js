@@ -3,9 +3,11 @@ var mongoose = require('mongoose')
 
 var orderSchema = new mongoose.Schema({
   userId: String, // {type: mongoose.Schema.Types.ObjectId, ref:'user'},
-  userObject: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-  doctorObject: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-  // doctorName: String,
+  patientName: String,
+  doctorId: String,
+  doctorName: String,
+  // userObject: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  // doctorObject: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   orderNo: String,
   ordertime: Date,
   money: Number,
@@ -20,10 +22,11 @@ var orderSchema = new mongoose.Schema({
   refundNo: String, // 退款单号
   refundAppTime: Date, // 退款申请时间
   refundSucTime: Date, // 退款成功时间
-  patientName: String,
+  // patientName: String,
 
   // time: Date,
   type: String,
+  docInChaObject: {type: mongoose.Schema.Types.ObjectId, ref: 'doctorsInCharge'},
   conselObject: {type: mongoose.Schema.Types.ObjectId, ref: 'counsel'},
   perDiagObject: {type: mongoose.Schema.Types.ObjectId, ref: 'personalDiag'}
 })
