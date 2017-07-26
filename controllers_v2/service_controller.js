@@ -1,6 +1,7 @@
 var Alluser = require('../models/alluser')
 var DpRelation = require('../models/dpRelation')
 var Team = require('../models/team')
+var PersionalDiag = require('../models/personalDiag')
 
 // 获取对象 2017-07-22 YQC
 // 获取用户对象
@@ -16,7 +17,7 @@ exports.getSessionObject = function (req, res, next) {
       req.patientObject = user
       next()
     } else if (req.session.role === 'doctor') {
-      req.doctorObject = user
+      req.body.doctorObject = user
       next()
     } else {
       return res.status(400).json({results: '登录角色不是医生或患者'})
@@ -37,7 +38,7 @@ exports.getPatientObject = function (req, res, next) {
     if (patient === null) {
       return res.status(404).json({results: '找不到患者'})
     } else {
-      req.patientObject = patient
+      req.body.patientObject = patient
       next()
     }
   })
@@ -56,7 +57,7 @@ exports.getDoctorObject = function (req, res, next) {
     if (doctor === null) {
       return res.status(404).json({results: '找不到医生'})
     } else {
-      req.doctorObject = doctor
+      req.body.doctorObject = doctor
       next()
     }
   })
@@ -704,7 +705,61 @@ exports.updateDoctorInCharge = function (req, res) {
 // 面诊申请：修改面诊计数，新建面诊表数据
 // 输入：医生ID和day, time 修改内容：alluser.serviceSchedules.count+1, new personalDiag
 // 返回：personalDiag.code, endTime
+exports.updatePDCapacity = function (req, res, next) {
+  let doctorId = req.body.doctorId || null
+  let bookingDay = new Date(req.body.day) || null
+  let bookingTime = Number(req.body.time) || null
+  if (doctorId === null || bookingDay === null || bookingTime === null) {
+    return res.json({results: '请检查doctorId,day,time输入完整'})
+  }
+  let queryD = {userId: doctorId, role: 'doctor', $elemMatch: {day: bookingDay, time: bookingTime}}
+  let upDoc = {
+    $inc: {
+      'serviceSchedules.$.count': 1
+    }
+  }
+  Alluser.update(queryD, upDoc, function (err, upDoc) {
+    if (err) {
+      return res.status(500).send(err)
+    } else if (upDoc.n === 0) {
+      return res.json({results: '找不到医生'})
+    } else if (upDoc.nModified === 0) {
+      return res.json({results: '面诊数量未更新成功，请检查输入'})
+    } else if (upDoc.nModified !== 0) {
+      // return res.json({results: '面诊数量更新成功'})
+      next()
+    }
+  })
+}
 
+exports.newPersonalDiag = function (req, res, next) {
+  let doctorObjectId = req.body.doctorObject._id
+  let patientObjectId = req.body.patientObject._id
+  let bookingDay = new Date(req.body.day)
+  // 创建验证码
+  let code
+
+  let PDData = {
+    diagId: req.newId,
+    doctorId: doctorObjectId,
+    patientId: patientObjectId,
+    code: code,
+    creatTime: new Date(),
+    endTime: bookingDay.day + 1, // 需要计算
+    status: 0 // 0: 未开始，1: 已完成，2: 未进行自动结束
+  }
+  var newPersonalDiag = new PersionalDiag(PDData)
+  newPersonalDiag.save(function (err, PDInfo) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    } else {
+      // res.json({result: '新建成功', newResults: PDInfo})
+      req.body.personalDiagObject = PDInfo
+      console(req.body.personalDiagObject)
+      next()
+    }
+  })
+}
 // 2017-07-20 YQC
 // 获取患者的主管医生服务的状态
 exports.getDoctorsInCharge = function (req, res) {
