@@ -983,7 +983,6 @@ exports.getMassTargets = function (req, res, next) {
         default: 
           break
       }
-      // return res.json({results: targets})
       if (targets.length === 0) {
         return res.status(404).json({results: '无有效群发目标'})
       } else {
@@ -1065,8 +1064,6 @@ exports.massCommunication = function (req, res, next) {
       }
     }
   }
-  
-  // return res.json({result:uparr})
 
   Communication.create(communicationDatas, function (err, cmuInfos) {
     if (err) {
