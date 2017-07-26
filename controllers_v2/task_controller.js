@@ -64,7 +64,13 @@ exports.updateStatus = function (req, res) {
         }
         if (flag === 1) { break }
       }
-      var upObj = {$set: {task: item.task}}
+      // modified by GY 2017-07-26 added `date`
+      var upObj = {
+        $set: {
+          task: item.task, 
+          date: new Date()
+        }
+      }
 
       Task.updateOne(query, upObj, function (err, task) {
         if (err) {
@@ -109,7 +115,13 @@ exports.updateStartTime = function (req, res) {
       }
       if (flag === 1) { break }
     }
-    var upObj = {$set: {task: item.task}}
+    // modified by GY 2017-07-26 added `date`
+    var upObj = {
+      $set: {
+        task: item.task, 
+        date: new Date()
+      }
+    }
 
     Task.updateOne(query, upObj, function (err, task) {
       if (err) {
@@ -166,7 +178,8 @@ exports.insertTaskModel = function (req, res) {
     userId: req.body.userId,
     sortNo: req.body.sortNo,
     name: task.name,
-    date: task.date,
+    // modified by GY 2017-07-26 modified `date` as new Date()
+    date: new Date(),
     description: task.description,
     invalidFlag: task.invalidFlag,
     task: task.task
@@ -309,6 +322,9 @@ exports.updateContent = function (req, res) {
         type: req.body.type,
         details: typeNew
       }
+    }, 
+    $set: {
+      date: new Date()
     }
   }
   // return res.json({query: query, upObj: upObj});
