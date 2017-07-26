@@ -1552,6 +1552,9 @@ exports.changerole = function (req, res) {
   })
 }
 exports.checkPatient = function (req, res, next) {
+  if (req.session.role === 'patient') {
+    return next()
+  }
   if (req.query.patientId === null || req.query.patientId === '' || req.query.patientId === undefined) {
     if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
       return res.json({result: '请填写patientId!'})
@@ -1575,6 +1578,9 @@ exports.checkPatient = function (req, res, next) {
 }
 
 exports.checkDoctor = function (req, res, next) {
+  if (req.session.role === 'doctor') {
+    return next()
+  }
   if (req.query.doctorId === null || req.query.doctorId === '' || req.query.doctorId === undefined) {
     if (req.body.doctorId === null || req.body.doctorId === '' || req.body.doctorId === undefined) {
       return res.json({result: '请填写doctorId!'})
