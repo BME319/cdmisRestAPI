@@ -1,20 +1,20 @@
 var mongoose = require('mongoose')
 
 var personalDiagSchema = new mongoose.Schema({
-  diagId: String, 
-  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'}, 
-  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'}, 
-  code: String, 
+  diagId: String,
+  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  code: String,
   creatTime: Date,
   // 过期时间
   endTime: Date,
   // 面诊确认时间
-  time: Date, 
+  time: Date,
   // 0: 未开始，1: 已完成，2: 未进行自动结束
   status: {type: Number, default: 0}
 })
 
-var personalDiagModel = mongoose.model('personalDiag', personalDiagSchema)
+var PersonalDiagModel = mongoose.model('personalDiag', personalDiagSchema)
 
 function PersonalDiag (personalDiag) {
   this.personalDiag = personalDiag
@@ -22,7 +22,7 @@ function PersonalDiag (personalDiag) {
 
 PersonalDiag.prototype.save = function (callback) {
   var personalDiag = this.personalDiag
-  var newPersonalDiag = new personalDiagModel(personalDiag)
+  var newPersonalDiag = new PersonalDiagModel(personalDiag)
   newPersonalDiag.save(function (err, personalDiagItem) {
     if (err) {
       return callback(err)
@@ -36,7 +36,7 @@ PersonalDiag.getOne = function (query, callback, opts, fields, populate) {
   var _fields = fields || null
   var _populate = populate || ''
 
-  personalDiagModel
+  PersonalDiagModel
   .findOne(query, _fields, options)
   .populate(_populate)
   .exec(function (err, personalDiagInfo) {
@@ -51,7 +51,7 @@ PersonalDiag.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
-  personalDiagModel
+  PersonalDiagModel
   .find(query, _fields, options)
   .populate(_populate)
   .exec(function (err, personalDiags) {
@@ -66,14 +66,14 @@ PersonalDiag.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  personalDiagModel
+  PersonalDiagModel
   .findOneAndUpdate(query, obj, options)
   .populate(_populate)
-  .exec(function (err, uppersonalDiag) {
+  .exec(function (err, upPersonalDiag) {
     if (err) {
       return callback(err)
     }
-    callback(null, uppersonalDiag)
+    callback(null, upPersonalDiag)
   })
 }
 
@@ -81,19 +81,19 @@ PersonalDiag.update = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  personalDiagModel
+  PersonalDiagModel
     .update(query, obj, options)
     .populate(_populate)
-    .exec(function (err, uppersonalDiag) {
+    .exec(function (err, upPersonalDiag) {
       if (err) {
         return callback(err)
       }
-      callback(null, uppersonalDiag)
+      callback(null, upPersonalDiag)
     })
 }
 
 PersonalDiag.count = function (query, callback) {
-  personalDiagModel
+  PersonalDiagModel
   .count(query)
   .count(function (err, total) {
     if (err) {

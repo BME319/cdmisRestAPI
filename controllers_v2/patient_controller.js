@@ -167,7 +167,7 @@ exports.getDoctorLists = function (req, res) {
 // 通过patient表中userId返回PatientObject 2017-03-30 GY
 // 修改：增加判断不存在ID情况 2017-04-05 GY
 exports.getPatientObject = function (req, res, next) {
-  let patientId = req.sesion.userId
+  let patientId = req.query.userId
   if (patientId == null || patientId === '') {
     return res.json({result: '请填写userId!'})
   }
@@ -263,32 +263,34 @@ exports.getMyFavoriteDoctors = function (req, res) {
 // 获取患者的所有医生 2017-03-30 GY
 // 2017-04-05 GY 修改：按照要求更换查询表
 exports.getMyDoctor = function (req, res) {
-  if (req.session.userId == null || req.query.userId === '') {
-    return res.json({result: '请填写userId!'})
-  }
   // 查询条件
   // var patientObject = req.body.patientObject;
-  var _patientId = req.session.userId
-  var query = {userId: _patientId}
+  let _patientId = req.session.userId
+  let query = {userId: _patientId}
 
-  var opts = ''
-  var fields = {'_id': 0, 'doctors': 1}
+  let opts = ''
+  let fields = {'_id': 0, 'doctorsInCharge': 1}
   // 通过子表查询主表，定义主表查询路径及输出内容
-  var ret = {}
-  var populate = {path: 'doctors.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
+  let populate = {path: 'doctorsInCharge.doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
 
   Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-      // console.log(item.doctors.length)
-    for (var i = 0; i < item.doctors.length; i++) {
-      if (item.doctors[i].invalidFlag === 0) {
-        ret = item.doctors[i]
+    // console.log(item.doctors.length)
+    let doctorsInChargeList = item.doctorsInCharge || []
+    let currentDocInCharge
+    for (let i = 0; i < doctorsInChargeList.length; i++) {
+      if (doctorsInChargeList[i].invalidFlag === 1) {
+        currentDocInCharge = doctorsInChargeList[i]
         break
       }
     }
-    res.json({results: ret})
+    if (currentDocInCharge === undefined) {
+      return res.json({results: '当前无主管医生'})
+    } else {
+      res.json({results: currentDocInCharge})
+    }
   }, opts, fields, populate)
 }
 
