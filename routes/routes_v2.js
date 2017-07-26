@@ -420,6 +420,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
   app.post(version + '/communication/communication', tokenManager.verifyToken(), getNoMid.getNo(8), communicationCtrl.postCommunication)
   app.get(version + '/communication/communication', tokenManager.verifyToken(), communicationCtrl.getCommunication)
+  app.post(version + '/communication/massToPatient', tokenManager.verifyToken(), communicationCtrl.getMassTargets, communicationCtrl.massCommunication)
   // task 2017-07-14
   app.get(version + '/tasks', tokenManager.verifyToken(), taskCtrl.getTasks)
   app.post(version + '/tasks/status', tokenManager.verifyToken(), taskCtrl.updateStatus)

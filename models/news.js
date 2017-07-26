@@ -93,4 +93,14 @@ News.update = function (query, obj, callback, opts, populate) {
     })
 }
 
+News.bulkWrite = function (ops, callback, opt) {
+  var options = opt || {}
+  newsModel.bulkWrite(ops, options, function (err, newsInfo) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, newsInfo)
+  })
+}
+
 module.exports = News

@@ -9,6 +9,7 @@ var Patient = require('../models/patient')
 var Doctor = require('../models/doctor')
 var Consultation = require('../models/consultation')
 var DpRelation = require('../models/dpRelation')
+var News = require('../models/news')
 // var commonFunc = require('../middlewares/commonFunc')
 var request = require('request')
 
@@ -925,4 +926,159 @@ exports.timeconfirmation = function (req, res) {
       return res.json({'result': 'finish'})
     }
   })
+}
+
+// 患者群体教育 向患者群发 2017-07-26 GY
+// 查询所有目标的userId
+exports.getMassTargets = function (req, res, next) {
+  let content = req.body.content || null
+  if (content === null) {
+    return res.status(412).json({results: '群发内容不能为空'})
+  } else if (!(content.createTimeInMillis && content.newsType)) {
+    return res.status(412).json({results: '不合规则的content'})
+  }
+  let target = req.body.target || null
+  if (target === null) {
+    return res.status(412).json({results: '群发目标不能为空'})
+  }
+  let query = {doctorId: req.session._id}
+  let opts = {}
+  let fields = {}
+  let populate = {path: 'patients.patientId patientsInCharge.patientId', select: {_id: 0, userId: 1, name: 1}}
+  DpRelation.getOne(query, function (err, doctorItem) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (doctorItem === null) {
+      return res.status(404).json({results: '暂无关注或主管的患者'})
+    } else {
+      let targets = []
+      switch (target) {
+        case 'FOLLOW': 
+          for (let i = 0; i < doctorItem.patients.length; i++) {
+            if (doctorItem.patients[i].patientId !== null) {
+              targets[i] = doctorItem.patients[i].patientId
+            }
+          }
+          break
+        case 'INCHARGE':
+          for (let i = 0; i < doctorItem.patientsInCharge.length; i++) {
+            if (doctorItem.patientsInCharge[i].patientId !== null) {
+              targets[i] = doctorItem.patientsInCharge[i].patientId
+            }
+          }
+          break
+        case 'ALL':
+          for (let i = 0; i < doctorItem.patients.length; i++) {
+            if (doctorItem.patients[i].patientId !== null) {
+              targets[i] = doctorItem.patients[i].patientId
+            }
+          }
+          for (let j = 0; j < doctorItem.patientsInCharge.length; j++) {
+            if (doctorItem.patientsInCharge[j].patientId !== null) {
+              targets[i + j] = doctorItem.patientsInCharge[j].patientId
+            }
+          }
+          break
+        default: 
+          break
+      }
+      // return res.json({results: targets})
+      if (targets.length === 0) {
+        return res.status(404).json({results: '无有效群发目标'})
+      } else {
+        req.massTarget = targets
+        next()
+      }
+    }
+  }, opts, fields, populate)
+}
+// 构建并写入communication, news表数据
+exports.massCommunication = function (req, res, next) {  
+  function add00 (m) {
+    return m < 10 ? '00' + m : (m < 100 ? '0' + m : m)
+  }
+  function add0 (m) {
+    return m < 10 ? '0' + m : m
+  }
+  let now = new Date()
+  let y = now.getFullYear()
+  let m = now.getMonth() + 1
+  let d = now.getDate()
+  let h = now.getHours()
+  let mm = now.getMinutes()
+  let s = now.getMilliseconds()
+
+  let communicationDatas = []
+  let content = []
+
+  for (let i = 0; i < req.massTarget.length; i++) {
+    let massId = 'CMUM' + req.session.userId + y + add0(m) + add0(d) + add0(h) + add0(mm) + add00(s) + add00(i)
+    
+    content[i] = JSON.parse(JSON.stringify(req.body.content))
+    content[i].targetID = req.massTarget[i].userId
+    content[i].targetName = req.massTarget[i].name
+    content[i].fromID = req.session.userId
+
+    let communicationData = {
+      messageNo: massId, 
+      messageType: 1, 
+      sendBy: req.session.userId, 
+      receiver: req.massTarget[i].userId, 
+      sendDateTime: content[i].createTimeInMillis, 
+      content: content[i], 
+      newsType: content[i].newsType
+    }
+
+    communicationDatas[i] = communicationData
+  }
+
+  let uparr = []
+  let msgType = communicationDatas[0].content.content.contentType
+  let desc = ''
+  switch(msgType){
+        case 'text':desc = communicationDatas[0].content.content.text;break;
+        case 'image':desc='[图片]';break;
+        case 'voice':desc='[语音]';break;
+        // case 'card':desc = isSingle?'[咨询消息]':'[会诊消息]';break;
+        // case 'contact':desc='[联系人名片]';break;
+        // case 'endl':desc='[咨询结束]';break;
+        default:break;
+    }
+
+  for (let i = 0; i < req.massTarget.length; i++) {
+
+    uparr[i] = {
+      updateOne: {
+        filter: {
+          userId: req.massTarget[i].userId, 
+          userRole: 'patient', 
+          sendBy: req.session.userId
+        }, 
+        update: {
+          type: 11, 
+          description: desc, 
+          readOrNot: 0, 
+          messageId: communicationDatas[i].messageNo
+        }, 
+        upsert: true
+      }
+    }
+  }
+  
+  // return res.json({result:uparr})
+
+  Communication.create(communicationDatas, function (err, cmuInfos) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    News.bulkWrite(uparr, function (err, newsInfo) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      // return res.json ({result: newsInfo})
+      return res.json({results: '群发成功', content: cmuInfos[0].content.content})
+    })
+  })
+
 }
