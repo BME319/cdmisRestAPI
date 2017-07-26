@@ -929,7 +929,7 @@ exports.getPatientList = function (req, res) {
     'patientsInCharge.invalidFlag': 1
   }
   // 通过子表查询主表，定义主表查询路径及输出内容
-  let populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
+  let populate = {path: 'patients.patientId patientsInCharge.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
   // if(_name!=""&&_name!=undefined){
 
   // }
@@ -991,36 +991,30 @@ exports.getPatientList = function (req, res) {
       }
       patients = patients.sort(sortVIPpinyin)
 
-      let populate2 = {path: 'patientsInCharge.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
-      DpRelation.getOne(query, function (err, item) {
-        if (err) {
-          return res.status(500).send(err.errmsg)
+      let patientsInCharge = []
+      let patientsInChargeList = item.patientsInCharge || []
+      for (let j = 0; j < patientsInChargeList.length; j++) {
+        if (patientsInChargeList[j].dpRelationTime === null || patientsInChargeList[j].dpRelationTime === '' || patientsInChargeList[j].dpRelationTime === undefined) {
+          patientsInChargeList[j].dpRelationTime = new Date('2017-05-15')
         }
-        let patientsInCharge = []
-        let patientsInChargeList = item.patientsInCharge || []
-        for (let j = 0; j < patientsInChargeList.length; j++) {
-          if (patientsInChargeList[j].dpRelationTime === null || patientsInChargeList[j].dpRelationTime === '' || patientsInChargeList[j].dpRelationTime === undefined) {
-            patientsInChargeList[j].dpRelationTime = new Date('2017-05-15')
-          }
-          if (patientsInChargeList[j].patientId !== null) {
-            if (_skip > 0) {
-              _skip--
+        if (patientsInChargeList[j].patientId !== null) {
+          if (_skip > 0) {
+            _skip--
+          } else {
+            if (_limit === null && Number(patientsInChargeList[j].invalidFlag) === 1) {
+              patientsInCharge.push(patientsInChargeList[j])
             } else {
-              if (_limit === null && Number(patientsInChargeList[j].invalidFlag) === 1) {
+              if (_limit > 0 && Number(patientsInChargeList[j].invalidFlag) === 1) {
                 patientsInCharge.push(patientsInChargeList[j])
-              } else {
-                if (_limit > 0 && Number(patientsInChargeList[j].invalidFlag) === 1) {
-                  patientsInCharge.push(patientsInChargeList[j])
-                  _limit--
-                }
+                _limit--
               }
             }
           }
         }
-        patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
-        let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
-        res.json({results: item1})
-      }, opts, fields, populate2)
+      }
+      patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
+      let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+      res.json({results: item1})
     }
   }, opts, fields, populate)
   // });
