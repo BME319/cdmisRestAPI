@@ -789,117 +789,120 @@ exports.newPersonalDiag = function (req, res, next) {
   })
 }
 
+exports.getAvailablePD = function (req, res) {
+
+}
 // 2017-07-18 YQC
 // 主管医生申请：patient, dpRelation表数据修改
 // 输入：医生ID和购买时长；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
-exports.requestDoctorInCharge = function (req, res, next) {
-  // var patientId = req.body.patientId || null
-  let patientId = req.session.userId
-  let doctorId = req.body.doctorId || null
-  let chargeDuration = req.body.chargeDuration || null
-  // if (patientId == null) {
-  //   return res.json({result: '请填写patientId!'})
-  // }
-  if (doctorId == null) {
-    return res.json({result: '请填写doctorId!'})
-  }
-  if (chargeDuration == null) {
-    return res.json({result: '请填写chargeDuration!'})
-  }
-  let queryD = {userId: doctorId, role: 'doctor'}
-  Alluser.getOne(queryD, function (err, itemD) {
-    if (err) {
-      return res.status(500).send(err)
-    }
-    if (itemD == null) {
-      return res.json({result: '不存在的医生ID!'})
-    }
+// exports.requestDoctorInCharge = function (req, res, next) {
+//   // var patientId = req.body.patientId || null
+//   let patientId = req.session.userId
+//   let doctorId = req.body.doctorId || null
+//   let chargeDuration = req.body.chargeDuration || null
+//   // if (patientId == null) {
+//   //   return res.json({result: '请填写patientId!'})
+//   // }
+//   if (doctorId == null) {
+//     return res.json({result: '请填写doctorId!'})
+//   }
+//   if (chargeDuration == null) {
+//     return res.json({result: '请填写chargeDuration!'})
+//   }
+//   let queryD = {userId: doctorId, role: 'doctor'}
+//   Alluser.getOne(queryD, function (err, itemD) {
+//     if (err) {
+//       return res.status(500).send(err)
+//     }
+//     if (itemD == null) {
+//       return res.json({result: '不存在的医生ID!'})
+//     }
 
-    let doctorObjectId = itemD._id
-    let queryP = {userId: patientId, role: 'patient'}
-    Alluser.getOne(queryP, function (err, itemP) {
-      if (err) {
-        return res.status(500).send(err)
-      }
-      if (itemP === null) {
-        return res.json({results: '患者不存在'})
-      }
-      let doctorsInChargeList = itemP.doctorsInCharge || []
-      for (let i = 0; i < doctorsInChargeList.length; i++) {
-        if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
-          return res.json({result: '已申请主管医生，请等待审核!'})
-        } else if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
-          // return res.json({result: '当前已有主管医生!'})
-          let currentDoctorInCharge = doctorsInChargeList[i]
-          if (String(currentDoctorInCharge.doctorId) === String(doctorObjectId)) {
-            return res.json({result: '申请医生对象已是主管医生!'})
-          } else {
-            // return res.json({result: '申请医生对象不是当前的主管医生!'})
-            let queryR = {doctorId: currentDoctorInCharge.doctorId, patientsInCharge: {$elemMatch: {patientId: itemP._id, invalidFlag: 1}}}
-            let upObjR = {
-              $set: {
-                'patientsInCharge.$.invalidFlag': 2
-              }
-            }
-            DpRelation.update(queryR, upObjR, function (err, upRelation) {
-              if (err) {
-                return res.status(500).send(err)
-              } else if (upRelation.n === 0) {
-                return res.json({results: '找不到该医生'})
-              } else if (upRelation.nModified === 1) {
-                // return res.json({results: '删除主管患者成功'})
-                let queryP = {_id: itemP._id, doctorsInCharge: {$elemMatch: {doctorId: currentDoctorInCharge.doctorId, invalidFlag: 1}}}
-                let upObjP = {
-                  $set: {
-                    'doctorsInCharge.$.invalidFlag': 2
-                  }
-                }
-                Alluser.update(queryP, upObjP, function (err, upP) {
-                  if (err) {
-                    return res.status(500).send(err)
-                  } else if (upP.n === 0) {
-                    return res.json({results: '找不到该患者'})
-                  }
-                  // } else if (upP.nModified === 1) {
-                  //   // return res.json({results: '删除主管医生成功'})
-                  // }
-                })
-              }
-            })
-          }
-        }
-      }
-      let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0, length: chargeDuration}
-      doctorsInChargeList.push(doctorNew)
-      let upObj = {$set: {doctorsInCharge: doctorsInChargeList}}
-      Alluser.updateOne(queryP, upObj, function (err, upPatient) {
-        if (err) {
-          return res.status(500).send(err)
-        } else if (upPatient.n === 0) {
-          return res.json({results: '找不到该患者'})
-        } else if (upPatient.nModified !== 0) {
-          // return res.json({results: '添加主管医生成功'})
-          Alluser.getOne(queryP, function (err, patient) {
-            if (err) {
-              return res.status(500).send(err)
-            } else {
-              for (let nodic = 0; nodic < patient.doctorsInCharge.length; nodic++) {
-                let dic = patient.doctorsInCharge[nodic]
-                if (dic.invalidFlag === 0) {
-                  req.body.docInChaObject = dic._id
-                  req.body.patientId = req.session.userId
-                }
-              }
-            }
-          })
-          req.body.doctorObjectId = doctorObjectId
-          req.body.patientObjectId = itemP._id
-          next()
-        }
-      })
-    })
-  })
-}
+//     let doctorObjectId = itemD._id
+//     let queryP = {userId: patientId, role: 'patient'}
+//     Alluser.getOne(queryP, function (err, itemP) {
+//       if (err) {
+//         return res.status(500).send(err)
+//       }
+//       if (itemP === null) {
+//         return res.json({results: '患者不存在'})
+//       }
+//       let doctorsInChargeList = itemP.doctorsInCharge || []
+//       for (let i = 0; i < doctorsInChargeList.length; i++) {
+//         if (Number(doctorsInChargeList[i].invalidFlag) === 0) {
+//           return res.json({result: '已申请主管医生，请等待审核!'})
+//         } else if (Number(doctorsInChargeList[i].invalidFlag) === 1) {
+//           // return res.json({result: '当前已有主管医生!'})
+//           let currentDoctorInCharge = doctorsInChargeList[i]
+//           if (String(currentDoctorInCharge.doctorId) === String(doctorObjectId)) {
+//             return res.json({result: '申请医生对象已是主管医生!'})
+//           } else {
+//             // return res.json({result: '申请医生对象不是当前的主管医生!'})
+//             let queryR = {doctorId: currentDoctorInCharge.doctorId, patientsInCharge: {$elemMatch: {patientId: itemP._id, invalidFlag: 1}}}
+//             let upObjR = {
+//               $set: {
+//                 'patientsInCharge.$.invalidFlag': 2
+//               }
+//             }
+//             DpRelation.update(queryR, upObjR, function (err, upRelation) {
+//               if (err) {
+//                 return res.status(500).send(err)
+//               } else if (upRelation.n === 0) {
+//                 return res.json({results: '找不到该医生'})
+//               } else if (upRelation.nModified === 1) {
+//                 // return res.json({results: '删除主管患者成功'})
+//                 let queryP = {_id: itemP._id, doctorsInCharge: {$elemMatch: {doctorId: currentDoctorInCharge.doctorId, invalidFlag: 1}}}
+//                 let upObjP = {
+//                   $set: {
+//                     'doctorsInCharge.$.invalidFlag': 2
+//                   }
+//                 }
+//                 Alluser.update(queryP, upObjP, function (err, upP) {
+//                   if (err) {
+//                     return res.status(500).send(err)
+//                   } else if (upP.n === 0) {
+//                     return res.json({results: '找不到该患者'})
+//                   }
+//                   // } else if (upP.nModified === 1) {
+//                   //   // return res.json({results: '删除主管医生成功'})
+//                   // }
+//                 })
+//               }
+//             })
+//           }
+//         }
+//       }
+//       let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0, length: chargeDuration}
+//       doctorsInChargeList.push(doctorNew)
+//       let upObj = {$set: {doctorsInCharge: doctorsInChargeList}}
+//       Alluser.updateOne(queryP, upObj, function (err, upPatient) {
+//         if (err) {
+//           return res.status(500).send(err)
+//         } else if (upPatient.n === 0) {
+//           return res.json({results: '找不到该患者'})
+//         } else if (upPatient.nModified !== 0) {
+//           // return res.json({results: '添加主管医生成功'})
+//           Alluser.getOne(queryP, function (err, patient) {
+//             if (err) {
+//               return res.status(500).send(err)
+//             } else {
+//               for (let nodic = 0; nodic < patient.doctorsInCharge.length; nodic++) {
+//                 let dic = patient.doctorsInCharge[nodic]
+//                 if (dic.invalidFlag === 0) {
+//                   req.body.docInChaObject = dic._id
+//                   req.body.patientId = req.session.userId
+//                 }
+//               }
+//             }
+//           })
+//           req.body.doctorObjectId = doctorObjectId
+//           req.body.patientObjectId = itemP._id
+//           next()
+//         }
+//       })
+//     })
+//   })
+// }
 
 exports.addDoctorInCharge = function (req, res, next) {
   let doctorObjectId = req.body.doctorObject._id
@@ -925,7 +928,7 @@ exports.addDoctorInCharge = function (req, res, next) {
     let doctorInCharge = {
       patientId: patientObjectId,
       doctorId: doctorObjectId,
-      firstTime: new Date(),
+      dpRelationTime: new Date(),
       invalidFlag: 0,
       length: chargeDuration
     }
@@ -935,7 +938,7 @@ exports.addDoctorInCharge = function (req, res, next) {
         return res.status(500).send(err)
       } else {
         // return res.json({message: '新建成功', results: doctorInChargeInfo})
-        req.body.dpRelationTime = doctorInChargeInfo.firstTime
+        req.body.dpRelationTime = doctorInChargeInfo.dpRelationTime
         req.body.docInChaObject = doctorInChargeInfo
         req.body.patientId = req.session.userId
         req.body.type = 4
