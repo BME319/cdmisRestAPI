@@ -789,6 +789,9 @@ exports.newPersonalDiag = function (req, res, next) {
   })
 }
 
+exports.getAvailablePD = function (req, res) {
+
+}
 // 2017-07-18 YQC
 // 主管医生申请：patient, dpRelation表数据修改
 // 输入：医生ID和购买时长；修改内容：alluser.doctorsInCharge, dpRelation.patientsInCharge
@@ -925,7 +928,7 @@ exports.addDoctorInCharge = function (req, res, next) {
     let doctorInCharge = {
       patientId: patientObjectId,
       doctorId: doctorObjectId,
-      firstTime: new Date(),
+      dpRelationTime: new Date(),
       invalidFlag: 0,
       length: chargeDuration
     }
@@ -935,7 +938,7 @@ exports.addDoctorInCharge = function (req, res, next) {
         return res.status(500).send(err)
       } else {
         // return res.json({message: '新建成功', results: doctorInChargeInfo})
-        req.body.dpRelationTime = doctorInChargeInfo.firstTime
+        req.body.dpRelationTime = doctorInChargeInfo.dpRelationTime
         req.body.docInChaObject = doctorInChargeInfo
         req.body.patientId = req.session.userId
         req.body.type = 4

@@ -1009,12 +1009,12 @@ exports.getPatientList = function (req, res) {
 // 是不是可以和getPatientList合并？？？
 exports.getPatientByDate = function (req, res) {
   // 查询条件
-  var doctorObject = req.body.doctorObject
-  var query = {doctorId: doctorObject._id}
+  let doctorObject = req.body.doctorObject
+  let query = {doctorId: doctorObject._id}
 
   // 模糊搜索GY
-  var _name = req.query.name
-  var date
+  let _name = req.query.name
+  let date
   if (req.query.date !== null && req.query.date !== '') {
     date = new Date(req.query.date)
     date = commonFunc.convertToFormatDate(date)
@@ -1023,10 +1023,10 @@ exports.getPatientByDate = function (req, res) {
   }
   // return res.json({result:date});
 
-  var opts = ''
-  var fields = {'_id': 0, 'patients': 1}
+  let opts = ''
+  let fields = {'_id': 0, 'patients': 1}
   // 通过子表查询主表，定义主表查询路径及输出内容
-  var populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0}}
+  let populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
 
   if (_name) {
     populate['match'] = {'name': new RegExp(_name)}
@@ -1035,9 +1035,7 @@ exports.getPatientByDate = function (req, res) {
   DpRelation.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
-    }
-
-    if (item == null) {
+    } else if (item == null) {
     // return res.json({result:'请先与其他医生或患者建立联系!'});
       var dpRelationData = {
         doctorId: req.body.doctorObject._id,
@@ -1059,9 +1057,8 @@ exports.getPatientByDate = function (req, res) {
       return res.json({result: '暂无患者!'})
     }
 
-    var patientsitem = []
-    var dpTimeFormat = null
-    var j = 0
+    let patients = []
+    let dpTimeFormat = null
     if (item.patients.length === 0) {
       return res.json({result: '暂无患者!'})
     } else if (item.patients.length !== 0) {
@@ -1072,19 +1069,37 @@ exports.getPatientByDate = function (req, res) {
           }
           dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime)
           if (dpTimeFormat === date) {
-            patientsitem[j] = item.patients[i]
-            j++
+            patients.push(item.patients[i])
           }
         }
       }
+      patients = patients.sort(sortVIPpinyin)
 
-      patientsitem = patientsitem.sort(sortVIPpinyin)
+      let patientsInCharge = []
+      let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+      let queryDIC = {doctorId: doctorObject._id, invalidFlag: 1}
+      let fieldsDIC = {patientId: 1, dpRelationTime: 1, start: 1}
+      let populateDIC = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
+      DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (itemsDIC.length === 0) {
+          return res.json({results: item1})
+        } else {
+          for (var j = itemsDIC.length - 1; j >= 0; j--) {
+            if (itemsDIC[j].patientId !== null) {
+              dpTimeFormat = commonFunc.convertToFormatDate(itemsDIC[j].start)
+              if (dpTimeFormat === date) {
+                patientsInCharge.push(itemsDIC[j])
+              }
+            }
+          }
+          patientsInCharge = itemsDIC.sort(sortVIPpinyin)
+          item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+          return res.json({results: item1})
+        }
+      }, opts, fieldsDIC, populateDIC)
     }
-
-      // 2017-06-07GY调试用
-      // console.log({method:'getPatientByDate', resultCount:patientsitem.length});
-
-    res.json({results2: patientsitem})
   }, opts, fields, populate)
 }
 
