@@ -160,8 +160,6 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/counsel/changeType',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType);
   app.post(version + '/counsel/insertCommentScore', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
 
-
-
   //patient_Info
   app.get(version + '/patient/getPatientDetail',  patientCtrl.getPatientDetail);
 
