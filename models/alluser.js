@@ -58,7 +58,7 @@ var alluserSchema = new mongoose.Schema({
   serviceSchedules: [
     {
       _id: 0,
-      // 结构 “YYYY-MM-DD-1"（某日上午）或“YYYY-MM-DD-2"（某日下午）
+      // 添加预约时段字段 结构 “YYYY-MM-DD-1"（某日上午）或“YYYY-MM-DD-2"（某日下午）YQC 2017-07-27
       bookingPeriod: String,
       day: String,
       time: {type: String, enum: ['Morning', 'Afternoon']},

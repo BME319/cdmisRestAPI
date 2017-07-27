@@ -1968,7 +1968,46 @@ module.exports = function (app, webEntry, acl) {
    */
   app.get(version + '/services/mySchedules', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getMySchedules)
   // 患者端 获取医生面诊余量 权限-患者
-  // 患者端 申请面诊 权限-患者
+  // 患者端 预约面诊 2017-07-27 YQC
+  /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
+   * @swagger
+   * /services/personalDiagnosis:
+   *   post:
+   *     tags:
+   *     - "services"
+   *     summary: "Book a personal Diagnosis service of a doctor"
+   *     description: ""
+   *     operationId: "personalDiagnosis"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "doctorId"
+   *           - "day"
+   *           - "time"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           doctorId:
+   *             type: "string"
+   *           day:
+   *             type: "string"
+   *             format: "YYYY-MM-DD"
+   *           time:
+   *             type: "string"
+   *             enum:
+   *               - "Morning"
+   *               - "Afternoon"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.updatePDCapacityDown, serviceCtrl.newPersonalDiag, orderCtrl.getOrderNo, orderCtrl.updateOrder)
   // 患者端 我的面诊服务
   // 医生端 获取预约面诊患者
