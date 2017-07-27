@@ -3350,7 +3350,7 @@ module.exports = function (app, webEntry, acl) {
  *       500:
  *         description: Server internal error
  */
-  app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), reportCtrl.getVitalSigns)
+  app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns)
 
   // jyf
   // 刷新token
