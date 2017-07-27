@@ -1212,8 +1212,51 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Doctor not found."
    */
   app.get(version + '/doctor/myPatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientList)
-  // myPatientsByDate应该可以和myPatients整合吧。待定
-  app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
+  /** YQC annotation 2017-07-27 - acl 2017-07-27 医生
+   * @swagger
+   * /doctor/myPatientsByDate:
+   *   get:
+   *     tags:
+   *     - "doctor"
+   *     summary: "按日获取我的主管患者和关注患者（未完成）"
+   *     description: ""
+   *     operationId: "myPatientsByDate"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "date"
+   *       in: "query"
+   *       description: "查询日期，不填写则获取当日列表"
+   *       required: false
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 patients:
+   *                   type: "array"
+   *                   items:
+   *                     Patient:
+   *                       type: object
+   *                 patientsInCharge:
+   *                   type: "array"
+   *                   items:
+   *                     Patient:
+   *                       type: object
+   *       404:
+   *         description: "Doctor not found."
+   */
+  app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
   app.get(version + '/doctor/detail', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
@@ -1965,6 +2008,52 @@ module.exports = function (app, webEntry, acl) {
    */
   app.get(version + '/services/mySchedules', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getMySchedules)
   // 患者端 获取医生面诊余量 权限-患者
+  /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
+   * @swagger
+   * /services/availablePD:
+   *   get:
+   *     tags:
+   *     - "services"
+   *     summary: "Finds infos of available personalDiag within 2 weeks"
+   *     description: ""
+   *     operationId: "availablePD"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "doctorId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 PersonalDiags:
+   *                   description: "某医生两周内的面诊加号服务信息"
+   *                   type: "array"
+   *                   items:
+   *                     PersonalDiag:
+   *                     type: object
+   *                     properties:
+   *                       day:
+   *                         type: string
+   *                       time:
+   *                         type: string
+   *                       margin:
+   *                         type: number
+   *                         description: "某时段剩余可预约数量"
+   */
+  app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getAvailablePD)
   // 患者端 预约面诊 2017-07-27 YQC
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
