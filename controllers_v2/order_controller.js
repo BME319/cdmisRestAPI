@@ -61,7 +61,7 @@ exports.getOrder = function (req, res) {
     var skip = Number(req.query.skip)
 
   // limit为分页显示个数，skip为跳过历史记录的个数，sort按时间降序排列
-    var opts = {limit: limit, skip: skip, sort: '-time'}
+    var opts = {limit: limit, skip: skip, sort: '-ordertime'}
 
     var _Url = ''
     var limitUrl = ''
