@@ -2198,7 +2198,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/account/accountInfo', tokenManager.verifyToken(), accountCtrl.getAccountInfo)
  /**
  * @swagger
- * /api/v2/account/counts:
+ * /account/counts:
  *   get:
  *     operationId: getCounts
  *     tags:
@@ -2235,7 +2235,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/account/counts', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts)
  /**
  * @swagger
- * /api/v2/account/counts:
+ * /account/counts:
  *   post:
  *     operationId: modifyCounts
  *     tags:
@@ -2282,7 +2282,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/account/counts', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts)
  /**
  * @swagger
- * /api/v2/account/freeTime:
+ * /account/freeTime:
  *   post:
  *     operationId: updateFreeTime
  *     tags:
@@ -2318,7 +2318,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/account/freeTime', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
  /**
  * @swagger
- * /api/v2/account/countsRespective:
+ * /account/countsRespective:
  *   get:
  *     operationId: getCountsRespective
  *     tags:
@@ -2374,7 +2374,7 @@ module.exports = function (app, webEntry, acl) {
  */
  /**
  * @swagger
- * /api/v2/expense/doctor:
+ * /expense/doctor:
  *   post:
  *     operationId: rechargeDoctor
  *     tags:
@@ -2427,7 +2427,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/expense/doctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
  /**
  * @swagger
- * /api/v2/expense/records:
+ * /expense/records:
  *   get:
  *     operationId: getRecords
  *     tags:
@@ -2550,7 +2550,7 @@ module.exports = function (app, webEntry, acl) {
  */
  /**
  * @swagger
- * /api/v2/healthInfo/healthInfos:
+ * /healthInfo/healthInfos:
  *   get:
  *     operationId: getAllHealthInfo
  *     tags:
@@ -2577,7 +2577,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)
  /**
  * @swagger
- * /api/v2/healthInfo/healthDetail:
+ * /healthInfo/healthDetail:
  *   get:
  *     operationId: getHealthDetail
  *     tags:
@@ -2609,7 +2609,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.getHealthDetail)
  /**
  * @swagger
- * /api/v2/healthInfo/healthInfo:
+ * /healthInfo/healthInfo:
  *   post:
  *     operationId: insertHealthInfo
  *     tags:
@@ -2659,7 +2659,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), healthInfoCtrl.insertHealthInfo)
  /**
  * @swagger
- * /api/v2/healthInfo/healthDetail:
+ * /healthInfo/healthDetail:
  *   post:
  *     operationId: modifyHealthDetail
  *     tags:
@@ -2712,7 +2712,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.modifyHealthDetail)
  /**
  * @swagger
- * /api/v2/healthInfo/deleteHealthDetail:
+ * /healthInfo/deleteHealthDetail:
  *   post:
  *     operationId: deleteHealthDetail
  *     tags:
@@ -2801,7 +2801,7 @@ module.exports = function (app, webEntry, acl) {
  */
 /**
  * @swagger
- * /api/v2/insurance/message:
+ * /insurance/message:
  *   post:
  *     operationId: insertInsuranceMessage
  *     tags:
@@ -2864,7 +2864,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/insurance/message', tokenManager.verifyToken(), patientCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
  /**
  * @swagger
- * /api/v2/insurance/message:
+ * /insurance/message:
  *   get:
  *     operationId: getInsuranceMessage
  *     tags:
@@ -2895,7 +2895,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/insurance/message', tokenManager.verifyToken(), doctorCtrl.checkDoctor, insuranceCtrl.getInsMsg)
  /**
  * @swagger
- * /api/v2/insurance/prefer:
+ * /insurance/prefer:
  *   post:
  *     operationId: setInsurancePrefer
  *     tags:
@@ -2927,7 +2927,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.setPrefer)
  /**
  * @swagger
- * /api/v2/insurance/prefer:
+ * /insurance/prefer:
  *   get:
  *     operationId: getInsurancePrefer
  *     tags:
@@ -2978,7 +2978,7 @@ module.exports = function (app, webEntry, acl) {
  */
  /**
  * @swagger
- * /api/v2/message/messages:
+ * /message/messages:
  *   get:
  *     operationId: getMessages
  *     tags:
@@ -3009,7 +3009,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/message/messages', tokenManager.verifyToken(), messageCtrl.getMessages)
  /**
  * @swagger
- * /api/v2/message/status:
+ * /message/status:
  *   post:
  *     operationId: changeMessageStatus
  *     tags:
@@ -3043,7 +3043,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/message/status', tokenManager.verifyToken(), messageCtrl.changeMessageStatus)
  /**
  * @swagger
- * /api/v2/message/message:
+ * /message/message:
  *   post:
  *     operationId: insertMessage
  *     tags:
@@ -3143,7 +3143,7 @@ module.exports = function (app, webEntry, acl) {
  */
  /**
  * @swagger
- * /api/v2/order/order:
+ * /order/order:
  *   post:
  *     operationId: updateOrder
  *     tags:
@@ -3182,7 +3182,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/order/order', tokenManager.verifyToken(), orderCtrl.updateOrder)
  /**
  * @swagger
- * /api/v2/order/order:
+ * /order/order:
  *   get:
  *     operationId: getOrder
  *     tags:
@@ -3215,7 +3215,7 @@ module.exports = function (app, webEntry, acl) {
   // load
  /**
  * @swagger
- * /api/v2/upload:
+ * /upload:
  *   post:
  *     operationId: upload
  *     tags:
@@ -3287,7 +3287,7 @@ module.exports = function (app, webEntry, acl) {
  */
  /**
  * @swagger
- * /api/v2/new/news:
+ * /new/news:
  *   get:
  *     operationId: getNews
  *     tags:
@@ -3318,7 +3318,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/new/news', tokenManager.verifyToken(), newsCtrl.getNews)
  /**
  * @swagger
- * /api/v2/new/newsByReadOrNot:
+ * /new/newsByReadOrNot:
  *   get:
  *     operationId: getNewsByReadOrNot
  *     tags:
@@ -3354,7 +3354,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), newsCtrl.getNewsByReadOrNot)
  /**
  * @swagger
- * /api/v2/new/news:
+ * /new/news:
  *   post:
  *     operationId: insertNews
  *     tags:
@@ -3421,7 +3421,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/new/news', tokenManager.verifyToken(), newsCtrl.insertNews)
   /**
  * @swagger
- * /api/v2/new/teamNews:
+ * /new/teamNews:
  *   post:
  *     operationId: insertTeamNews
  *     tags:
@@ -3480,6 +3480,67 @@ module.exports = function (app, webEntry, acl) {
  *         description: Server internal error
  */
   app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
+ /**
+ * @swagger
+ * definition:
+ *   Results:
+ *     type: object
+ *     properties:
+ *       data:
+ *         type: array
+ *         item:
+ *           type: number
+ *       recordTime:
+ *         type: array
+ *         item:
+ *           type: date
+ */
+ /**
+ * @swagger
+ * /report/vitalSigns:
+ *   get:
+ *     operationId: getVitalSigns
+ *     tags:
+ *       - Report
+ *     description: 获取患者当前周月季年的测量记录
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: token
+ *         description: 授权信息
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: time
+ *         description: 患者请求查询的时间
+ *         in: query
+ *         required: true
+ *         type: date
+ *       - name: type
+ *         description: 任务类型
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: code
+ *         description: 检测项目
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: showType
+ *         description: 绘制图表类型
+ *         in: query
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: 返回相应数据和记录时间
+ *         schema:
+ *           type: object
+ *           $ref: '#/definitions/Results'
+ *       500:
+ *         description: Server internal error
+ */
+  app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns)
 
   // jyf
   // 刷新token
