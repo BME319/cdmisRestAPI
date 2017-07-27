@@ -1094,7 +1094,7 @@ exports.getPatientByDate = function (req, res) {
               }
             }
           }
-          patientsInCharge = itemsDIC.sort(sortVIPpinyin)
+          patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
           item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
           return res.json({results: item1})
         }

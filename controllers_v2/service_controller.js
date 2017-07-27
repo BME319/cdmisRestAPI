@@ -797,7 +797,7 @@ exports.getAvailablePD = function (req, res) {
   let twoWeeksLater = new Date(today)
   twoWeeksLater.setDate(twoWeeksLater.getDate() + 14)
 
-  let query = {userId: doctorId, role: 'doctor', 'serviceSchedules.day': {$and: [{day: {$gte: today}}, {day: {$lte: twoWeeksLater}}]}}
+  let query = {userId: doctorId, role: 'doctor', $and: [{'serviceSchedules.day': {$gte: today}}, {'serviceSchedules.day': {$lte: twoWeeksLater}}]}
   Alluser.getOne(query, function (err, itemD) {
     if (err) {
       return res.status(500).send(err)
