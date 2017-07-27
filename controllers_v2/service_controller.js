@@ -14,7 +14,7 @@ exports.getSessionObject = function (req, res, next) {
     if (user === null) {
       return res.status(404).json({results: '找不到用户'})
     } else if (req.session.role === 'patient') {
-      req.patientObject = user
+      req.body.patientObject = user
       next()
     } else if (req.session.role === 'doctor') {
       req.body.doctorObject = user
@@ -349,6 +349,13 @@ exports.setServiceSchedule = function (req, res) {
   if (day === null || time === null || total === null) {
     return res.status(412).json({results: '请输入day, time, count'})
   } else {
+    // 添加预约时段字段 YQC 2017-07-27
+    let bookingPeriod = day
+    if (time === 'Morning') {
+      bookingPeriod = String(bookingPeriod + '-1')
+    } else if (time === 'Morning') {
+      bookingPeriod = String(bookingPeriod + '-2')
+    }
     pullObj = {
       $pull: {
         serviceSchedules: {
@@ -360,6 +367,7 @@ exports.setServiceSchedule = function (req, res) {
     pushObj = {
       $push: {
         serviceSchedules: {
+          bookingPeriod: bookingPeriod,
           day: day,
           time: time,
           total: total
@@ -705,58 +713,130 @@ exports.updateDoctorInCharge = function (req, res) {
 // 面诊申请：修改面诊计数，新建面诊表数据
 // 输入：医生ID和day, time 修改内容：alluser.serviceSchedules.count+1, new personalDiag
 // 返回：personalDiag.code, endTime
-exports.updatePDCapacity = function (req, res, next) {
+exports.updatePDCapacityDown = function (req, res, next) {
   let doctorId = req.body.doctorId || null
-  let bookingDay = new Date(req.body.day) || null
-  let bookingTime = Number(req.body.time) || null
+  let bookingDay = req.body.day || null
+  let bookingTime = req.body.time || null
   if (doctorId === null || bookingDay === null || bookingTime === null) {
     return res.json({results: '请检查doctorId,day,time输入完整'})
   }
-  let queryD = {userId: doctorId, role: 'doctor', $elemMatch: {day: bookingDay, time: bookingTime}}
-  let upDoc = {
-    $inc: {
-      'serviceSchedules.$.count': 1
-    }
+  let bookingPeriod = bookingDay
+  if (bookingTime === 'Morning') {
+    bookingPeriod = String(bookingPeriod + '-1')
+  } else if (bookingTime === 'Morning') {
+    bookingPeriod = String(bookingPeriod + '-2')
   }
-  Alluser.update(queryD, upDoc, function (err, upDoc) {
+  let queryD = {userId: doctorId, role: 'doctor', 'serviceSchedules.bookingPeriod': bookingPeriod}
+  let fieldsD = {_id: 0, serviceSchedules: 1}
+  Alluser.getOne(queryD, function (err, itemD) {
     if (err) {
       return res.status(500).send(err)
-    } else if (upDoc.n === 0) {
-      return res.json({results: '找不到医生'})
-    } else if (upDoc.nModified === 0) {
-      return res.json({results: '面诊数量未更新成功，请检查输入'})
-    } else if (upDoc.nModified !== 0) {
-      // return res.json({results: '面诊数量更新成功'})
-      next()
+    } else if (itemD === null) {
+      return res.json({results: '该医生该时段面诊服务未开放'})
+    } else {
+      // return res.send(itemD)
+      let serviceSchedulesList = itemD.serviceSchedules || []
+      let serviceSchedule = null
+      for (let i = 0; i < serviceSchedulesList.length; i++) {
+        if (String(serviceSchedulesList[i].day) === String(bookingDay) && String(serviceSchedulesList[i].time) === String(bookingTime)) {
+          serviceSchedule = serviceSchedulesList[i]
+          break
+        }
+      }
+      let count = serviceSchedule.count || 0
+      let total = serviceSchedule.total || 0
+      if (count < total) { // 存在余量，可预约面诊
+        // let queryD2 = {userId: doctorId, role: 'doctor', serviceSchedules: {$elemMatch: {day: bookingDay, time: bookingTime}}}
+        let upDoc = {
+          $inc: {
+            'serviceSchedules.$.count': 1
+          }
+        }
+        console.log(queryD, upDoc)
+        Alluser.update(queryD, upDoc, function (err, upDoctor) { // 占个号
+          if (err) {
+            return res.status(500).send(err)
+          } else if (upDoctor.nModified === 0) {
+            return res.json({results: '面诊数量未更新成功，请检查输入'})
+          } else if (upDoctor.nModified !== 0) {
+            // return res.json({results: '面诊数量更新成功'})
+            next()
+          }
+        })
+      } else { // 可预约面诊数量为零
+        return res.json({results: '该时段预约已满，请更换预约时间'})
+      }
     }
-  })
+  }, fieldsD)
 }
 
 exports.newPersonalDiag = function (req, res, next) {
   let doctorObjectId = req.body.doctorObject._id
   let patientObjectId = req.body.patientObject._id
-  let bookingDay = new Date(req.body.day)
-  // 创建验证码
-  let code
-
-  let PDData = {
-    diagId: req.newId,
-    doctorId: doctorObjectId,
-    patientId: patientObjectId,
-    code: code,
-    creatTime: new Date(),
-    endTime: bookingDay.day + 1, // 需要计算
-    status: 0 // 0: 未开始，1: 已完成，2: 未进行自动结束
+  let bookingDay = req.body.day
+  let bookingTime = req.body.time
+  let bookingPeriod = bookingDay
+  if (bookingTime === 'Morning') {
+    bookingPeriod = String(bookingPeriod + '-1')
+  } else if (bookingTime === 'Morning') {
+    bookingPeriod = String(bookingPeriod + '-2')
   }
-  var newPersonalDiag = new PersionalDiag(PDData)
-  newPersonalDiag.save(function (err, PDInfo) {
+  let queryPD = {doctorId: doctorObjectId, patientId: patientObjectId, bookingDay: bookingDay, bookingPeriod: bookingTime}
+  PersionalDiag.getOne(queryPD, function (err, itemPD) {
     if (err) {
       return res.status(500).send(err.errmsg)
-    } else {
-      // res.json({result: '新建成功', newResults: PDInfo})
-      req.body.personalDiagObject = PDInfo
-      console(req.body.personalDiagObject)
-      next()
+    } else if (itemPD === null) { // 新建面诊预约
+      // 截止时间为预约日期第二天的中午
+      let endTime = new Date(bookingDay)
+      endTime.setDate(endTime.getDate() + 1)
+      endTime.setHours(endTime.getHours() + 12)
+      // 创建验证码
+      let random = Math.random()
+      let min = 100000
+      let max = 1000000
+      let code = Math.floor(min + (max - min) * random)
+
+      let PDData = {
+        diagId: req.newId,
+        doctorId: doctorObjectId,
+        patientId: patientObjectId,
+        bookingPeriod: bookingPeriod,
+        code: code,
+        creatTime: new Date(),
+        endTime: endTime,
+        status: 0 // 0: 未开始，1: 已完成，2: 未进行自动结束
+      }
+      var newPersonalDiag = new PersionalDiag(PDData)
+      newPersonalDiag.save(function (err, PDInfo) {
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          // res.json({result: '新建成功', newResults: PDInfo})
+          req.body.personalDiagObject = PDInfo
+          // return res.json({results: '预约成功'})
+          req.body.perDiagObject = PDInfo
+          next()
+        }
+      })
+    } else { // 已有面诊撤回面诊数量占位
+      let doctorId = req.body.doctorId
+      let queryD = {userId: doctorId, role: 'doctor', 'serviceSchedules.bookingPeriod': bookingPeriod}
+      let upDoc = {
+        $inc: {
+          'serviceSchedules.$.count': -1
+        }
+      }
+      Alluser.update(queryD, upDoc, function (err, upDoctor) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (upDoctor.n === 0) {
+          return res.json({results: '找不到医生'})
+        } else if (upDoctor.nModified === 0) {
+          return res.json({results: '面诊数量未更新成功，请检查输入'})
+        } else if (upDoctor.nModified !== 0) {
+          return res.json({results: '当前时段已预约该医生'})
+        }
+      })
     }
   })
 }

@@ -5,6 +5,8 @@ var personalDiagSchema = new mongoose.Schema({
   doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   code: String,
+  // 添加预约时段字段 结构 “YYYY-MM-DD-1"（某日上午）或“YYYY-MM-DD-2"（某日下午）YQC 2017-07-27
+  bookingPeriod: String,
   creatTime: Date,
   // 过期时间
   endTime: Date,

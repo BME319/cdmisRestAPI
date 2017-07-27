@@ -1750,7 +1750,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge, orderCtrl.updateOrder)
+  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.requestDoctorInCharge, serviceCtrl.addPatientInCharge, orderCtrl.getOrderNo, orderCtrl.updateOrder)
   // 患者端 获取主管医生信息 2017-07-20
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
@@ -1969,7 +1969,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/services/mySchedules', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getMySchedules)
   // 患者端 获取医生面诊余量 权限-患者
   // 患者端 申请面诊 权限-患者
-  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.updatePDCapacity, serviceCtrl.newPersonalDiag, orderCtrl.updateOrder)
+  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.updatePDCapacityDown, serviceCtrl.newPersonalDiag, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  // 患者端 我的面诊服务
   // 医生端 获取预约面诊患者
   // 医生端 确认面诊服务
 
