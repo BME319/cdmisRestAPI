@@ -791,8 +791,13 @@ exports.newPersonalDiag = function (req, res, next) {
 
 exports.getAvailablePD = function (req, res) {
   let doctorId = req.query.doctorId
-  let today = new Date()
-  let query = {userId: doctorId, role: 'doctor'}
+  let today = new Date(new Date().toDateString())
+  let tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  let twoWeeksLater = new Date(today)
+  twoWeeksLater.setDate(twoWeeksLater.getDate() + 14)
+
+  let query = {userId: doctorId, role: 'doctor', 'serviceSchedules.day': {$and: [{day: {$gte: today}}, {day: {$lte: twoWeeksLater}}]}}
   Alluser.getOne(query, function (err, itemD) {
     if (err) {
       return res.status(500).send(err)
@@ -800,7 +805,7 @@ exports.getAvailablePD = function (req, res) {
       if (itemD === null) {
         return res.json({results: '医生不存在'})
       } else {
-
+        return res.json({results: 'itemD'})
       }
     }
   })
