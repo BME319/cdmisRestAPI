@@ -10,6 +10,7 @@ var User = require('../models/user')
 var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
 var pinyin = require('pinyin')
+var DoctorsInCharge = require('../models/doctorsInCharge')
 
 // //根据userId查询医生信息 2017-03-28 GY
 // exports.getDoctor = function(req, res) {
@@ -923,23 +924,15 @@ exports.getPatientList = function (req, res) {
   let fields = {
     '_id': 0,
     'patients.patientId': 1,
-    'patients.dpRelationTime': 1,
-    'patientsInCharge.patientId': 1,
-    'patientsInCharge.dpRelationTime': 1,
-    'patientsInCharge.invalidFlag': 1
+    'patients.dpRelationTime': 1
   }
   // 通过子表查询主表，定义主表查询路径及输出内容
-  let populate = {path: 'patients.patientId patientsInCharge.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
-  // if(_name!=""&&_name!=undefined){
-
-  // }
+  let populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
   // 模糊搜索
   let nameReg = new RegExp(_name)
   if (_name) {
     populate['match'] = {'name': nameReg}
   }
-  // console.log(populate)
-  // console.log(query);
   DpRelation.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -992,29 +985,21 @@ exports.getPatientList = function (req, res) {
       patients = patients.sort(sortVIPpinyin)
 
       let patientsInCharge = []
-      let patientsInChargeList = item.patientsInCharge || []
-      for (let j = 0; j < patientsInChargeList.length; j++) {
-        if (patientsInChargeList[j].dpRelationTime === null || patientsInChargeList[j].dpRelationTime === '' || patientsInChargeList[j].dpRelationTime === undefined) {
-          patientsInChargeList[j].dpRelationTime = new Date('2017-05-15')
-        }
-        if (patientsInChargeList[j].patientId !== null) {
-          if (_skip > 0) {
-            _skip--
-          } else {
-            if (_limit === null && Number(patientsInChargeList[j].invalidFlag) === 1) {
-              patientsInCharge.push(patientsInChargeList[j])
-            } else {
-              if (_limit > 0 && Number(patientsInChargeList[j].invalidFlag) === 1) {
-                patientsInCharge.push(patientsInChargeList[j])
-                _limit--
-              }
-            }
-          }
-        }
-      }
-      patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
       let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
-      res.json({results: item1})
+      let queryDIC = {doctorId: doctorObject._id, invalidFlag: 1}
+      let fieldsDIC = {patientId: 1, dpRelationTime: 1}
+      let populateDIC = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
+      DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (itemsDIC.length === 0) {
+          return res.json({results: item1})
+        } else {
+          patientsInCharge = itemsDIC.sort(sortVIPpinyin)
+          item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+          return res.json({results: item1})
+        }
+      }, opts, fieldsDIC, populateDIC)
     }
   }, opts, fields, populate)
   // });
