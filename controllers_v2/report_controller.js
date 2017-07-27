@@ -1,3 +1,5 @@
+// import parallel from 'async/parallel'
+var async = require('async')
 var Report = require('../models/report')
 var Compliance = require('../models/compliance')
 
@@ -155,7 +157,7 @@ exports.updateReport = function (req, res) {
   })
 }
 
-// lgf 获取实时体征记录
+// 获取患者当前周月季年的测量记录 2017-07-26 lgf
 exports.getVitalSigns = function (req, res) {
   var userRole = req.session.role
   var userId = req.session.userId
@@ -165,25 +167,26 @@ exports.getVitalSigns = function (req, res) {
   var code = req.query.code || null
   var showType = req.query.showType || null // 周月季年
   var query = {}
+  var query2 = {}
   if (showType !== null && showType !== '') {
     let startTime
     let startTimeTemp
     let currentTime = new Date(timeTemp)
     // console.log(currentTime)
     if (timeTemp !== null && timeTemp !== '') {
-      if (showType === '周') {
+      if (showType === 'week') {
         let currentTimeDay = currentTime.getDay()
         console.log(currentTimeDay)
         startTimeTemp = new Date(currentTime - (currentTimeDay - 1) * 24 * 3600 * 1000)
         startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '08', '00', '00')  // 本周一零点
       }
-      if (showType === '月') {
+      if (showType === 'month') {
         startTimeTemp = new Date(currentTime)
         startTimeTemp.setDate(1)
         console.log(startTimeTemp.getDate())
         startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '08', '00', '00')
       }
-      if (showType === '季') {
+      if (showType === 'season') {
         let startTimeTempY = currentTime.getFullYear()
         let startTimeTempM = currentTime.getMonth()
         let startTimeTempD = currentTime.getDate()
@@ -191,7 +194,7 @@ exports.getVitalSigns = function (req, res) {
         startTime = new Date(startTimeTempY, startTimeTempM, startTimeTempD, '08', '00', '00')
         startTime.setDate(1)
       }
-      if (showType === '年') {
+      if (showType === 'year') {
         startTime = new Date(currentTime)
         startTime.setMonth(0)
         startTime.setDate(1)
@@ -202,21 +205,28 @@ exports.getVitalSigns = function (req, res) {
     query = {
       'date': {$gte: startTime, $lt: currentTime} // >= <
     }
+    query2 = {
+      'date': {$gte: startTime, $lt: currentTime} // >= <
+    }
   }
   if (userRole === 'patient') {
     query['userId'] = userId
+    query2['userId'] = userId
   } else {
     if (patientId !== null && patientId !== '') {
       query['userId'] = patientId
+      query2['userId'] = patientId
     } else {
       return res.json({result: '请填写patientId!'})
     }
   }
   if (type !== null && type !== '') {
     query['type'] = type
+    query2['type'] = type
   }
   if (code !== null && code !== '') {
     query['code'] = code
+    query2['code'] = code
   }
   // console.log(query)
   var opts = {'sort': '+date'}
@@ -234,17 +244,17 @@ exports.getVitalSigns = function (req, res) {
         return res.status(500).send(err.errmsg)
       }
       // console.log(items)
-      let weekBP = []
+      let dataBP = []
       let recordTimeTemp = []
       for (let i = 0; i < items.length; i++) {
-        weekBP.push(items[i])
+        dataBP.push(items[i])
       }
-      let weekSBP = []         // 收缩压 SBP
-      let weekDBP = []         // 舒张压 DBP
+      let dataSBP = []         // 收缩压 SBP
+      let dataDBP = []         // 舒张压 DBP
       // 记录不为空
-      if (weekBP.length !== 0) {
-        for (let n = 0; n < weekBP.length; n++) {
-          let str = weekBP[n].description
+      if (dataBP.length !== 0) {
+        for (let n = 0; n < dataBP.length; n++) {
+          let str = dataBP[n].description
         // 一条记录中有多次测量数据
           let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
           let strArr2 = str.split(',')
@@ -254,16 +264,16 @@ exports.getVitalSigns = function (req, res) {
           } else {
             strArr = strArr2
           }
-          // print(weekBP[n].description)
+          // print(dataBP[n].description)
           // print('strArr.length', strArr.length)
           for (let k = 0; k < strArr.length; k++) {
-            weekSBP.push(Number(strArr[k].substr(0, str.indexOf('/'))))
-            weekDBP.push(Number(strArr[k].substr(str.indexOf('/') + 1)))
-            recordTimeTemp.push(new Date(weekBP[n].date))
+            dataSBP.push(Number(strArr[k].substr(0, str.indexOf('/'))))
+            dataDBP.push(Number(strArr[k].substr(str.indexOf('/') + 1)))
+            recordTimeTemp.push(new Date(dataBP[n].date))
           }
         }
       }
-      let dateAndTime = {weekSBP, weekDBP, recordTimeTemp}
+      let dateAndTime = {dataSBP, dataDBP, recordTimeTemp}
       res.json({results: dateAndTime})
     }, opts, fields)
   } else if (code === 'PeritonealDialysis') {
@@ -277,177 +287,140 @@ exports.getVitalSigns = function (req, res) {
     let dataPVTemp = []
     let recordTimeTemp = []
     let recordTimeAll = []
-    Compliance.getSome(query, function (err, items) {
+
+    // 读取尿量
+    query2.code = 'Vol'
+    let recordTimeTemp1 = []
+    let recordTimeAll1 = []
+    console.log(query)
+    console.log(query2)
+
+    async.parallel([
+      Compliance.getSome(query, function (err, items) {
+        console.log('1')
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        // console.log(items)
+        for (let i = 0; i < items.length; i++) {
+          dataUF.push(items[i])
+        }
+        // 记录不为空
+        if (dataUF.length !== 0) {
+          for (let n = 0; n < dataUF.length; n++) {
+            let str = dataUF[n].description
+            // 一条记录中有多次测量数据
+            let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
+            let strArr2 = str.split(',')
+            let strArr
+            if (strArr1.length >= strArr2.length) {
+              strArr = strArr1
+            } else {
+              strArr = strArr2
+            }
+            for (let k = 0; k < strArr.length; k++) {
+              dataUFTemp.push(Number(strArr[k]))
+              recordTimeTemp.push(new Date(dataUF[n].date))
+            }
+          }
+          // console.log('recordTimeTemp', recordTimeTemp)
+          if (recordTimeTemp.length === 1) {
+            dataUFAll.push(dataUFTemp[0])
+            recordTimeAll.push(recordTimeTemp[0])
+          } else {
+            let recordTime = new Date(recordTimeTemp[0])
+            let tempUF = 0
+            for (let n = 0; n < recordTimeTemp.length; n++) {
+              if (recordTimeTemp[n].getTime() === recordTime.getTime()) {  // 时间的比较
+                tempUF += dataUFTemp[n]
+              } else {
+                dataUFAll.push(tempUF)
+                recordTimeAll.push(recordTime)
+                tempUF = dataUFTemp[n]
+              }
+              recordTime = new Date(recordTimeTemp[n])
+              // console.log('tempUF', tempUF)
+              // console.log(dataUFAll)
+              // console.log(recordTime)
+              // console.log(recordTimeAll)
+            }
+            dataUFAll.push(tempUF)
+            recordTimeAll.push(recordTime)
+          }
+        }
+        console.log('dataUFAll1', dataUFAll)
+        console.log('recordTimeAll', recordTimeAll)
+        let UFdate = {dataUFAll, recordTimeAll}
+        // res.json({results: UFdate})
+      }, opts, fields),
+      Compliance.getSome(query2, function (err, items) {
+        console.log('2')
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        // console.log(items)
+        for (let i = 0; i < items.length; i++) {
+          dataVol.push(items[i])
+        }
+        // 记录不为空
+        if (dataVol.length !== 0) {
+          for (let n = 0; n < dataVol.length; n++) {
+            let str = dataVol[n].description
+          // 一条记录中有多次测量数据
+            let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
+            let strArr2 = str.split(',')
+            let strArr
+            if (strArr1.length >= strArr2.length) {
+              strArr = strArr1
+            } else {
+              strArr = strArr2
+            }
+            for (let k = 0; k < strArr.length; k++) {
+              dataVolTemp.push(Number(strArr[k]))
+              recordTimeTemp1.push(new Date(dataVol[n].date))
+            }
+          }
+          // console.log('dataVolTemp', dataVolTemp)
+          // console.log('recordTimeTemp1', recordTimeTemp1)
+          if (recordTimeTemp1.length === 1) {
+            dataVolAll.push(dataVolTemp[0])
+            recordTimeAll1.push(recordTimeTemp1[0])
+          } else {
+            let recordTime = new Date(recordTimeTemp1[0])
+            let tempVol = 0
+            for (let n = 0; n < recordTimeTemp1.length; n++) {
+              if (recordTimeTemp1[n].getTime() === recordTime.getTime()) {  // 时间的比较
+                tempVol += dataVolTemp[n]
+              } else {
+                dataVolAll.push(tempVol)
+                recordTimeAll1.push(recordTime)
+                tempVol = dataVolTemp[n]
+              }
+              recordTime = new Date(recordTimeTemp1[n])
+              // console.log('tempVol', tempVol)
+              // console.log(dataVolAll)
+              // console.log(recordTime)
+              // console.log(recordTimeAll1)
+            }
+            dataVolAll.push(tempVol)
+            recordTimeAll1.push(recordTime)
+          }
+        }
+        console.log('dataVolAll', dataVolAll)
+        console.log('recordTimeAll1', recordTimeAll1)
+        let VolDate = {dataVolAll, recordTimeAll1}
+        // res.json({results: VolDate})
+      }, opts, fields)
+    ], function (err, results) {
       if (err) {
         return res.status(500).send(err.errmsg)
+      } else {
+        console.log('results', results)
       }
-      // console.log(items)
-      for (let i = 0; i < items.length; i++) {
-        dataUF.push(items[i])
-      }
-      // 记录不为空
-      if (dataUF.length !== 0) {
-        for (let n = 0; n < dataUF.length; n++) {
-          let str = dataUF[n].description
-          // 一条记录中有多次测量数据
-          let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
-          let strArr2 = str.split(',')
-          let strArr
-          if (strArr1.length >= strArr2.length) {
-            strArr = strArr1
-          } else {
-            strArr = strArr2
-          }
-          for (let k = 0; k < strArr.length; k++) {
-            dataUFTemp.push(Number(strArr[k]))
-            recordTimeTemp.push(new Date(dataUF[n].date))
-          }
-        }
-        // console.log('recordTimeTemp', recordTimeTemp)
-        if (recordTimeTemp.length === 1) {
-          dataUFAll.push(dataUFTemp[0])
-          recordTimeAll.push(recordTimeTemp[0])
-        } else {
-          let recordTime = new Date(recordTimeTemp[0])
-          let tempUF = 0
-          for (let n = 0; n < recordTimeTemp.length; n++) {
-            if (recordTimeTemp[n].getTime() === recordTime.getTime()) {  // 时间的比较
-              tempUF += dataUFTemp[n]
-            } else {
-              dataUFAll.push(tempUF)
-              recordTimeAll.push(recordTime)
-              tempUF = dataUFTemp[n]
-            }
-            recordTime = new Date(recordTimeTemp[n])
-            // console.log('tempUF', tempUF)
-            // console.log(dataUFAll)
-            // console.log(recordTime)
-            // console.log(recordTimeAll)
-          }
-          dataUFAll.push(tempUF)
-          recordTimeAll.push(recordTime)
-        }
-      }
-      console.log('dataUFAll1', dataUFAll)
-      let UFdate = {dataUFAll, recordTimeAll}
-      res.json({results: UFdate})
-
-      // 读取尿量
-      // query.code = 'Vol'
-      // for (let p = 0; p < dataUFAll.length; p++) {
-      //   let time1 = new Date(recordTimeAll[p])
-      //   console.log('time1', time1)
-      //   let startTime = new Date(time1.getFullYear(), time1.getMonth(), time1.getDate(), '08', '00', '00')
-      //   console.log('startTime', startTime)
-      //   let endTime = new Date(time1.getFullYear(), time1.getMonth(), time1.getDate(), '31', '59', '59')
-      //   console.log('endTime', endTime)
-      //   query.date = {$gte: startTime, $lt: endTime} // >= <
-      //   console.log('query', query)
-
-      //   Compliance.getSome(query, function (err, items1) {
-      //     if (err) {
-      //       return res.status(500).send(err.errmsg)
-      //     }
-      //     console.log('items1', items1)
-      //     for (let i = 0; i < items1.length; i++) {
-      //       dataVol.push(items1[i])
-      //     }
-      //     console.log('dataVol', dataVol)
-      //     // 记录不为空
-      //     if (dataVol.length !== 0) {
-      //       for (let n = 0; n < dataVol.length; n++) {
-      //         let str = dataVol[n].description
-      //         // 一条记录中有多次测量数据
-      //         let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
-      //         let strArr2 = str.split(',')
-      //         let strArr
-      //         if (strArr1.length >= strArr2.length) {
-      //           strArr = strArr1
-      //         } else {
-      //           strArr = strArr2
-      //         }
-      //         for (let k = 0; k < strArr.length; k++) {
-      //           dataVolTemp.push(Number(strArr[k]))
-      //         }
-      //       }
-      //       console.log('dataVolTemp', dataVolTemp)
-      //       let tempVol = 0
-      //       for (let n = 0; n < dataVolTemp.length; n++) {
-      //         tempVol += dataVolTemp[n]
-      //       }
-      //       dataVolAll.push(tempVol)
-      //     }
-      //     dataPV.push = dataUFAll[p] + dataVolAll[p]
-      //   }, opts, fields)
+      // for (let i = 0; i < Things.length; i++) {
+      //   Things[i]
       // }
-      // console.log('dataPV', dataPV)
-      // res.json({results: {dataPV, recordTimeAll}})
-    }, opts, fields)
-    // console.log('dataUFAll2', dataUFAll)
-    // 读取尿量
-    // query.code = 'Vol'
-    // let recordTimeTemp1 = []
-    // let recordTimeAll1 = []
-    // console.log(query)
-    // Compliance.getSome(query, function (err, items) {
-    //   if (err) {
-    //     return res.status(500).send(err.errmsg)
-    //   }
-    //   console.log(items)
-    //   for (let i = 0; i < items.length; i++) {
-    //     dataVol.push(items[i])
-    //   }
-    //   // 记录不为空
-    //   if (dataVol.length !== 0) {
-    //     for (let n = 0; n < dataVol.length; n++) {
-    //       let str = dataVol[n].description
-    //     // 一条记录中有多次测量数据
-    //       let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
-    //       let strArr2 = str.split(',')
-    //       let strArr
-    //       if (strArr1.length >= strArr2.length) {
-    //         strArr = strArr1
-    //       } else {
-    //         strArr = strArr2
-    //       }
-    //       for (let k = 0; k < strArr.length; k++) {
-    //         dataVolTemp.push(Number(strArr[k]))
-    //         recordTimeTemp1.push(new Date(dataVol[n].date))
-    //       }
-    //     }
-    //     console.log('dataVolTemp', dataVolTemp)
-    //     console.log('recordTimeTemp1', recordTimeTemp1)
-
-    //     if (recordTimeTemp1.length === 1) {
-    //       dataVolAll.push(dataVolTemp[0])
-    //       recordTimeAll1.push(recordTimeTemp1[0])
-    //     } else {
-    //       let recordTime = new Date(recordTimeTemp1[0])
-    //       let tempVol = 0
-    //       for (let n = 0; n < recordTimeTemp1.length; n++) {
-    //         if (recordTimeTemp1[n].getTime() === recordTime.getTime()) {  // 时间的比较
-    //           tempVol += dataVolTemp[n]
-    //         } else {
-    //           dataVolAll.push(tempVol)
-    //           recordTimeAll1.push(recordTime)
-    //           tempVol = dataVolTemp[n]
-    //         }
-    //         recordTime = new Date(recordTimeTemp1[n])
-    //         // console.log('tempVol', tempVol)
-    //         // console.log(dataVolAll)
-    //         // console.log(recordTime)
-    //         // console.log(recordTimeAll1)
-    //       }
-    //       dataVolAll.push(tempVol)
-    //       recordTimeAll1.push(recordTime)
-    //     }
-    //   }
-    //   let VolDate = {dataVolAll, recordTimeAll1}
-    //   // res.json({results: VolDate})
-    // }, opts, fields)
-    // for (var i = 0; i < Things.length; i++) {
-    //   Things[i]
-    // }
+    })
   } else {
     Compliance.getSome(query, function (err, items) {
       if (err) {
