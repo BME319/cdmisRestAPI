@@ -790,7 +790,20 @@ exports.newPersonalDiag = function (req, res, next) {
 }
 
 exports.getAvailablePD = function (req, res) {
+  let doctorId = req.query.doctorId
+  let today = new Date()
+  let query = {userId: doctorId, role: 'doctor'}
+  Alluser.getOne(query, function (err, itemD) {
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      if (itemD === null) {
+        return res.json({results: '医生不存在'})
+      } else {
 
+      }
+    }
+  })
 }
 // 2017-07-18 YQC
 // 主管医生申请：patient, dpRelation表数据修改
@@ -1010,19 +1023,19 @@ exports.getDoctorsInCharge = function (req, res) {
   let fields = {'_id': 0}
   let populate = {path: 'doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
 
-  DoctorsInCharge.getSome(queryDIC, function (err, itemDIC) {
+  DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
     if (err) {
       return res.status(500).send(err)
-    } else if (itemDIC.length !== 0) {
-      for (let i = 0; i < itemDIC.length; i++) {
-        if (Number(itemDIC[i].invalidFlag) === 0) {
+    } else if (itemsDIC.length !== 0) {
+      for (let i = 0; i < itemsDIC.length; i++) {
+        if (Number(itemsDIC[i].invalidFlag) === 0) {
           return res.json({message: '已申请主管医生，请等待审核!'})
-        } else if (Number(itemDIC[i].invalidFlag) === 1) {
-          return res.json({message: '当前已有主管医生!', results: itemDIC[i]})
+        } else if (Number(itemsDIC[i].invalidFlag) === 1) {
+          return res.json({message: '当前已有主管医生!', results: itemsDIC[i]})
         }
       }
-      res.json({message: '当前无主管医生且无申请!'})
     }
+    res.json({message: '当前无主管医生且无申请!'})
   }, opts, fields, populate)
 }
 
