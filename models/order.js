@@ -25,7 +25,8 @@ var orderSchema = new mongoose.Schema({
   // patientName: String,
 
   // time: Date,
-  type: String,
+  type: Number,
+  freeFlag: Number,
   docInChaObject: {type: mongoose.Schema.Types.ObjectId, ref: 'doctorsInCharge'},
   conselObject: {type: mongoose.Schema.Types.ObjectId, ref: 'counsel'},
   perDiagObject: {type: mongoose.Schema.Types.ObjectId, ref: 'personalDiag'}

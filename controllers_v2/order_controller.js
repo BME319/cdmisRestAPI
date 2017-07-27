@@ -96,6 +96,37 @@ exports.getOrder = function (req, res) {
   }, opts, fields, populate)
 }
 
+exports.getOrderNo = function (req, res, next) {
+  var doctorId = req.body.doctorId || null
+  var patientId = req.body.patientId || null
+  var paystatus = Number(2)
+  var type = req.body.type || null
+  if (type !== null) {
+    type = Number(type)
+  }
+  // var _orderNo = req.query.orderNo || null
+  if (doctorId === null || patientId === null) {
+    return res.json({result: 1, msg: '请输入doctorId、patientId'})
+  }
+  var query = {userId: patientId, doctorId: doctorId, paystatus: paystatus, type: type}
+  if (type === 1 || type === 2 || type === 3 || type === 6) {
+    query['conselObject'] = {$exists: false}
+  }
+  if (type === 4) {
+    query['docInChaObject'] = {$exists: false}
+  }
+  if (type === 5) {
+    query['perDiagObject'] = {$exists: false}
+  }
+  Order.getSome(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    req.body.orderNo = item.orderNo
+    next()
+  })
+}
+
 exports.insertOrder = function (req, res, next) {
   var money = req.body.money || null
   if (money === null || money === '') {
@@ -105,6 +136,12 @@ exports.insertOrder = function (req, res, next) {
   if (type === null || type === '') {
     return res.status(403).send('invalid input type')
   }
+  type = Number(type)
+  var freeFlag = req.body.freeFlag || null
+  if (freeFlag === null || freeFlag === '') {
+    return res.status(403).send('invalid input freeFlag')
+  }
+  freeFlag = Number(freeFlag)
   var query = {
     userId: req.body.doctorId
   }
@@ -155,6 +192,7 @@ exports.insertOrder = function (req, res, next) {
                     // paystatus:req.body.paystatus,
           paystatus: paystatus,   // req.body.paystatus,
           type: type,
+          freeFlag: freeFlag,
           paytime: new Date(req.body.paytime)
         }
 
