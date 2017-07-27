@@ -271,7 +271,8 @@ exports.chat = function (io, socket) {
         var nickname = data.user_name,
 
             user_id = data.user_id,
-            client = data.client;
+            client = data.client,
+            socket.client = data.client;
         
         // socket.id = user_id;
         
@@ -342,8 +343,20 @@ exports.chat = function (io, socket) {
 
         count -= 1; 
         var id = socket.id
-        delete userServer[id]
-        delete userList[id]
+        if(socket.client = 'doctor') {
+           delete userAppDoctorServer[id]  
+        }
+        else if(socket.client = 'patient') {
+           delete userAppPatientServer[id]  
+        }
+        else if(socket.client = 'wechatdoctor') {
+           delete userWechatDoctorServer[id]  
+        }
+        else if(socket.client = 'wechatpatient') {
+           delete userWechatPatientServer[id] 
+        }
+        
+        //delete userList[id]
         // console.log(id);
         // console.log(Object.keys(userServer));
         // io.emit('onlineCount',freeList)
