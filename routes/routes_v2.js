@@ -106,6 +106,8 @@ module.exports = function (app, webEntry, acl) {
 
   app.get(version + '/report', tokenManager.verifyToken(), alluserCtrl.checkPatient, reportCtrl.getReport)
   app.post(version + '/report', tokenManager.verifyToken(), reportCtrl.updateReport)
+  // lgf
+  app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), reportCtrl.getVitalSigns)
 
   // gy
   // review
