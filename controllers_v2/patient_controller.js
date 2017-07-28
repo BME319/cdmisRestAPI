@@ -16,7 +16,7 @@ var VitalSign = require('../models/vitalSign')
 // 患者查询自身详细信息
 // 注释 承接session.userId；输出患者信息，最新体重和最新诊断
 exports.getPatientDetail = function (req, res) {
-  let userId = req.session.userId || null
+  let userId = req.query.userId || null
   if (userId == null) {
     return res.json({result: '请填写userId!'})
   }
@@ -473,7 +473,7 @@ exports.newPatientDetail = function (req, res) {
 
 // 修改患者个人信息 2017-04-06 GY
 exports.editPatientDetail = function (req, res) {
-  let patientId = req.session.userId
+  let patientId = req.body.patientId
   let query = {
     userId: patientId,
     role: 'patient'

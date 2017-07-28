@@ -316,7 +316,8 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/charge', tokenManager.verifyToken(), serviceCtrl.setCharge)
   app.post(version + '/services/relayTarget', tokenManager.verifyToken(), serviceCtrl.setRelayTarget)
-  app.post(version + '/services/setSchedule', tokenManager.verifyToken(), serviceCtrl.setServiceSchedule)
+  // YQC 2017-07-28 添加面诊余量更新函数 添加未来十四天内的面诊余量记录
+  app.post(version + '/services/setSchedule', tokenManager.verifyToken(), serviceCtrl.setServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2)
   app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule)
   app.post(version + '/services/setSuspend', tokenManager.verifyToken(), serviceCtrl.setServiceSuspend)
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), serviceCtrl.deleteServiceSuspend)
@@ -554,7 +555,7 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/compliance/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
   // vitalSign 2017-07-14  - debug complete 2017-07-24
-  /** YQC 17-07-24
+  /** YQC 17-07-24 - acl 2017-07-28 医生/患者
    * @swagger
    * /vitalSign/vitalSigns:
    *   get:
@@ -566,6 +567,11 @@ module.exports = function (app, webEntry, acl) {
    *     produces:
    *     - "application/json"
    *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token of the user."
+   *       required: true
+   *       type: "string"
    *     - name: "PatientId"
    *       in: "query"
    *       description: "UserId to be queried."
@@ -588,8 +594,8 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "UserId not found."
    */
-  app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
-  /** YQC 17-07-24
+  app.get(version + '/vitalSign/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSigns)
+  /** YQC 17-07-24  - acl 2017-07-28 患者
    * @swagger
    * /vitalSign/vitalSigns:
    *   post:
@@ -637,7 +643,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
+  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
   // counsel 2017-07-17 debug 1-
   // 医生获取问诊信息
   app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getCounsels)
@@ -666,10 +672,59 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/tasks/status', tokenManager.verifyToken(), taskCtrl.updateStatus)
   app.post(version + '/tasks/time', tokenManager.verifyToken(), taskCtrl.updateStartTime)
   app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
-  app.get(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getUserTask)
+  /** YQC annotation 2017-07-27 - acl 2017-07-26 患者 - acl 2017-07-28 医生
+   * @swagger
+   * /tasks/task:
+   *   get:
+   *     tags:
+   *     - "tasks"
+   *     summary: "获取患者任务"
+   *     description: ""
+   *     operationId: "task"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "userId"
+   *       in: "query"
+   *       description: "userId of a patient."
+   *       required: true
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userId:
+   *                   type: "string"
+   *                 sortNo:
+   *                   type: "number"
+   *                 name:
+   *                   type: "string"
+   *                 date:
+   *                   type: "string"
+   *                   format: "date-time"
+   *                 description:
+   *                   type: "string"
+   *                 invalidFlag:
+   *                   type: "number"
+   *                 task:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Task'
+   */
+  app.get(version + '/tasks/task', tokenManager.verifyToken(), tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getUserTask)
   app.post(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
   // patient 2017-07-17
-  /** YQC annotation 2017-07-27 - acl 2017-07-26 患者
+  /** YQC annotation 2017-07-27 - acl 2017-07-26 患者 - acl 2017-07-28 医生
    * @swagger
    * /patient/detail:
    *   get:
@@ -681,6 +736,11 @@ module.exports = function (app, webEntry, acl) {
    *     produces:
    *     - "application/json"
    *     parameters:
+   *     - name: "userId"
+   *       in: "query"
+   *       description: "userId of a patient."
+   *       required: true
+   *       type: "string"
    *     - name: "token"
    *       in: "query"
    *       description: "Token."
@@ -853,7 +913,7 @@ module.exports = function (app, webEntry, acl) {
    *                   type: "object"
    */
   app.get(version + '/patient/doctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getDoctorLists)
-  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者 【弃用，和myDoctorsIncharge重复】
    * @swagger
    * /patient/myDoctors:
    *   get:
@@ -947,8 +1007,11 @@ module.exports = function (app, webEntry, acl) {
    *         type: object
    *         required:
    *           - "token"
+   *           - "patientId"
    *         properties:
    *           token:
+   *             type: "string"
+   *           patientId:
    *             type: "string"
    *           name:
    *             type: "string"
@@ -1001,7 +1064,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/patient/editDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.editPatientDetail)
-  /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 医生/患者
    * @swagger
    * /patient/diagnosis:
    *   post:
@@ -2008,7 +2071,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Doctor not found."
    */
   app.get(version + '/services/mySchedules', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getMySchedules)
-  // 患者端 获取医生面诊余量 权限-患者
+  // 患者端 获取医生面诊余量 权限-患者 2017-07-28 YQC
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
    * /services/availablePD:
@@ -2096,8 +2159,10 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.updatePDCapacityDown, serviceCtrl.newPersonalDiag, orderCtrl.getOrderNo, orderCtrl.updateOrder)
-  // 患者端 我的面诊服务
-  // 医生端 获取预约面诊患者
+  // 患者端 取消面诊服务（至少提前三天
+  // 患者端 我的面诊服务 根据面诊状态获取面诊服务列表 不填写status则返回全部面诊服务列表 还未添加分页显示
+  app.get(version + '/services/myPD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getMyPD)
+  // 医生端 获取预约面诊患者列表
   // 医生端 确认面诊服务
 
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
@@ -4470,5 +4535,39 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *       photoUrl:
    *         type: string
+   *   Task:
+   *     type: object
+   *     properties:
+   *       type:
+   *         type: string
+   *       details:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/TaskDetail'
+   *   TaskDetail:
+   *     type: object
+   *     properties:
+   *       code:
+   *         type: string
+   *       instruction:
+   *         type: string
+   *       content:
+   *         type: string
+   *       startTime:
+   *         type: string
+   *         format: "date-time"
+   *       endTime:
+   *         type: string
+   *         format: "date-time"
+   *       times:
+   *         type: number
+   *       timesUnits:
+   *         type: string
+   *       frequencyTimes:
+   *         type: number
+   *       frequencyUnits:
+   *         type: string
+   *       status:
+   *         type: number
    */
 }
