@@ -207,7 +207,7 @@ exports.insertOrder = function (req, res, next) {
           paystatus: paystatus,   // req.body.paystatus,
           type: type,
           freeFlag: freeFlag,
-          paytime: new Date(req.body.paytime)
+          paytime: new Date()
         }
 
         var newOrder = new Order(orderData)
