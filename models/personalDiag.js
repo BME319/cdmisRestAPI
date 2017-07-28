@@ -4,16 +4,15 @@ var personalDiagSchema = new mongoose.Schema({
   diagId: String,
   doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-  code: String,
-  // 添加预约时段字段 结构 “YYYY-MM-DD-1"（某日上午）或“YYYY-MM-DD-2"（某日下午）YQC 2017-07-27
-  bookingPeriod: String,
+  code: String, // 验证码
+  // // 添加预约时段字段 结构 “YYYY-MM-DD-1"（某日上午）或“YYYY-MM-DD-2"（某日下午）YQC 2017-07-27
+  // bookingPeriod: String,
+  bookingDay: Date,
+  bookingTime: {type: String, enum: ['Morning', 'Afternoon']},
   creatTime: Date,
-  // 过期时间
-  endTime: Date,
-  // 面诊确认时间
-  time: Date,
-  // 0: 未开始，1: 已完成，2: 未进行自动结束
-  status: {type: Number, default: 0}
+  endTime: Date, // 过期时间
+  time: Date, // 面诊确认时间
+  status: {type: Number, default: 0, enum: [0, 1, 2]} // 0: 未开始，1: 已完成，2: 未进行自动结束
 })
 
 var PersonalDiagModel = mongoose.model('personalDiag', personalDiagSchema)
