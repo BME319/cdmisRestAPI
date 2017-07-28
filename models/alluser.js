@@ -291,4 +291,17 @@ Alluser.update = function (query, obj, callback, opts, populate) {
     })
 }
 
+Alluser.aggregate = function (array, callback) {
+  let _array = array || []
+  alluserModel
+    .aggregate(_array)
+    .exec(function (err, results) {
+      if (err) {
+        return callback(err)
+      }
+      console.log(results)
+      callback(null, results)
+    })
+}
+
 module.exports = Alluser
