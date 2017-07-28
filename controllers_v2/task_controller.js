@@ -367,7 +367,7 @@ exports.remindChangeTask = function () {
   function sendMessage (taskItems, index) {
     let queryP = {userId: taskItems[index].userId}
     // 调试用输出
-    console.log({patientId: queryP.userId})
+    // console.log({patientId: queryP.userId})
     let doctorInchargeid = ''
     Alluser.getOne(queryP, function (err, patientItem) {
       if (err) {
@@ -406,7 +406,7 @@ exports.remindChangeTask = function () {
               nextOrEnd(taskItems, index)
             } else {
               // 调试用输出
-              console.log({doctorId: doctorItem.userId})
+              // console.log({doctorId: doctorItem.userId})
               // 构建message表和news表数据结构
               let messageId = 'MR' + y + add0(m) + add0(d) + queryP.userId
               let title = '主管患者任务方案调整提醒'
@@ -444,7 +444,7 @@ exports.remindChangeTask = function () {
                   nextOrEnd(taskItems, index)
                 } else {
                   // 调试用输出
-                  console.log(messageInfo)
+                  // console.log(messageInfo)
                   News.update(queryN, upNews, function (err, upNewsRes) {
                     if (err) {
                       let warningNews = queryP.userId + '_`s_doctor_news_not_sent'
@@ -453,7 +453,7 @@ exports.remindChangeTask = function () {
                       nextOrEnd(taskItems, index)
                     } else {
                       // 调试用输出
-                      console.log(upNews)
+                      // console.log(upNews)
                       nextOrEnd(taskItems, index)
                     }
                   }, newsOpts)
