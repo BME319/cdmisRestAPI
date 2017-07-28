@@ -1,5 +1,4 @@
 var Alluser = require('../models/alluser')
-var mongoose = require('mongoose')
 var Counselautochangestatus = require('../models/counselautochangestatus')
 var Order = require('../models/order')
 
@@ -14,6 +13,7 @@ exports.getDistribution = function (req, res) {
     res.status(400).send('请输入结束时间')
   } else {
     let array = [
+      {$match: {role: 'doctor'}},
       {$match: {creationTime: {$gt: new Date(startTime), $lt: new Date(endTime)}}}
     ]
     if (province === '') {
@@ -45,16 +45,6 @@ exports.getDistribution = function (req, res) {
         }
       )
     }
-    console.log(array)
-    // array = [
-    //   {$match: {creationTime: {$gt: new Date(startTime), $lt: new Date(endTime)}}},
-    //   {
-    //     $group: {
-    //       _id: "$province",
-    //       count: {$sum: 1}
-    //     }
-    //   }
-    // ]
     Alluser.aggregate(array, function (err, results) {
       if (err) {
         res.status(500).send(err.errmsg)
@@ -75,6 +65,7 @@ exports.getLinegraph = function (req, res) {
     res.status(400).send('请输入结束时间')
   } else {
     let array = [
+      {$match: {role: 'doctor'}},
       {$match: {creationTime: {$gt: new Date(startTime), $lt: new Date(endTime)}}},
       {
         $group: {
@@ -113,7 +104,7 @@ exports.getWorkload = function (req, res) {
   let city = req.query.city || ''
   let date = req.query.date || ''
   let startdate = new Date(date)
-  let enddate = new Date((startdate/1000+86400)*1000)
+  let enddate = new Date((startdate / 1000 + 86400) * 1000)
 
   let array = [
     // 角色为医生的用户
@@ -128,7 +119,7 @@ exports.getWorkload = function (req, res) {
       }
     },
     // 将dp数组的元素拆分
-    {$unwind: { path: "$dp", preserveNullAndEmptyArrays: true }},
+    {$unwind: { path: '$dp', preserveNullAndEmptyArrays: true }},
     // 根据医生id进行group，每个医生只保留一条记录
     {
       $group: {
@@ -170,15 +161,15 @@ exports.getWorkload = function (req, res) {
         userId: '$userId',
         dpinfo: '$dpinfo',
         dpinfotoday: {
-          $filter:{
-            input: "$dpinfo",
-            as: "dpinfo",
-            cond: { 
-              $and:[
-                {$gte: ["$$dpinfo.dpRelationTime", startdate]},
-                {$lt: ["$$dpinfo.dpRelationTime", enddate]},
-                {$ne: ["$$dpinfo.dpRelationTime", null]},
-                {$ne: ["$$dpinfo.dpRelationTime", undefined]}
+          $filter: {
+            input: '$dpinfo',
+            as: 'dpinfo',
+            cond: {
+              $and: [
+                {$gte: ['$$dpinfo.dpRelationTime', startdate]},
+                {$lt: ['$$dpinfo.dpRelationTime', enddate]},
+                {$ne: ['$$dpinfo.dpRelationTime', null]},
+                {$ne: ['$$dpinfo.dpRelationTime', undefined]}
               ]
               // $lte: [ "$$dpinfo.dpRelationTime", new Date('2017-07-21') ]
             }
@@ -220,15 +211,15 @@ exports.getWorkload = function (req, res) {
         counttoday: '$counttoday',
         open: '$open',
         opentoday: {
-          $filter:{
-            input: "$open",
-            as: "open",
-            cond: { 
-              $and:[
-                {$gte: ["$$open.time", startdate]},
-                {$lt: ["$$open.time", enddate]},
-                {$ne: ["$$open.time", null]},
-                {$ne: ["$$open.time", undefined]}
+          $filter: {
+            input: '$open',
+            as: 'open',
+            cond: {
+              $and: [
+                {$gte: ['$$open.time', startdate]},
+                {$lt: ['$$open.time', enddate]},
+                {$ne: ['$$open.time', null]},
+                {$ne: ['$$open.time', undefined]}
               ]
               // $lte: [ "$$dpinfo.dpRelationTime", new Date('2017-07-21') ]
             }
@@ -324,8 +315,8 @@ exports.getWorkload = function (req, res) {
           $filter: {
             input: '$counsel',
             as: 'counsel',
-            cond: { 
-              $and:[
+            cond: {
+              $and: [
                 {$eq: ['$$counsel.status', 0]},
                 {$eq: ['$$counsel.type', 1]},
                 {$gte: ['$$counsel.time', startdate]},
@@ -338,8 +329,8 @@ exports.getWorkload = function (req, res) {
           $filter: {
             input: '$counsel',
             as: 'counsel',
-            cond: { 
-              $and:[
+            cond: {
+              $and: [
                 {$eq: ['$$counsel.status', 0]},
                 {$eq: ['$$counsel.type', 2]},
                 {$gte: ['$$counsel.time', startdate]},
@@ -352,8 +343,8 @@ exports.getWorkload = function (req, res) {
           $filter: {
             input: '$counsel',
             as: 'counsel',
-            cond: { 
-              $and:[
+            cond: {
+              $and: [
                 {$eq: ['$$counsel.status', 0]},
                 {$eq: ['$$counsel.type', 3]},
                 {$gte: ['$$counsel.time', startdate]},
@@ -366,8 +357,8 @@ exports.getWorkload = function (req, res) {
           $filter: {
             input: '$counsel',
             as: 'counsel',
-            cond: { 
-              $and:[
+            cond: {
+              $and: [
                 {$eq: ['$$counsel.status', 0]},
                 {$eq: ['$$counsel.type', 6]},
                 {$gte: ['$$counsel.time', startdate]},
@@ -409,15 +400,15 @@ exports.getWorkload = function (req, res) {
     array.push({$match: {province: province}})
   } else if (province !== '' && city !== '') {
     array.push({$match: {province: province, city: city}})
-  }  
+  }
 
   Alluser.aggregate(array, function (err, results) {
-      if (err) {
-        res.status(500).send(err.errmsg)
-      }
-      console.log(results)
-      res.json({results: results})
-    })
+    if (err) {
+      res.status(500).send(err.errmsg)
+    }
+    console.log(results)
+    res.json({results: results})
+  })
 }
 
 exports.getCounseltimeout = function (req, res) {
@@ -425,14 +416,14 @@ exports.getCounseltimeout = function (req, res) {
   let city = req.query.city || ''
   let date = req.query.date || ''
   let startdate = new Date(date)
-  let enddate = new Date((startdate/1000+86400)*1000)
+  let enddate = new Date((startdate / 1000 + 86400) * 1000)
 
-  let array= [
+  let array = [
     {$match: {endTime: {$gte: startdate, $lt: enddate}}},
     {
       $group: {
         _id: '$doctorId',
-        count: {$sum: 1}     
+        count: {$sum: 1}
       }
     },
     {
@@ -453,7 +444,7 @@ exports.getCounseltimeout = function (req, res) {
         'doctorinfo.workUnit': 1
       }
     },
-    {$unwind: { path: "$doctorinfo", preserveNullAndEmptyArrays: true }},
+    {$unwind: { path: '$doctorinfo', preserveNullAndEmptyArrays: true }},
     {
       $project: {
         '_id': 1,
@@ -480,11 +471,10 @@ exports.getCounseltimeout = function (req, res) {
   })
 }
 
-
 exports.getDepartmentCounsel = function (req, res) {
   let date = req.query.date || ''
   let startdate = new Date(date)
-  let enddate = new Date((startdate/1000+86400)*1000)
+  let enddate = new Date((startdate / 1000 + 86400) * 1000)
 
   let array = [
     {$match: {endTime: {$gte: startdate, $lt: enddate}}},
@@ -513,9 +503,9 @@ exports.getDepartmentCounsel = function (req, res) {
         as: 'leadername'
       }
     },
-    {$unwind: {path: "$patientname", preserveNullAndEmptyArrays: true }},
-    {$unwind: {path: "$doctorname", preserveNullAndEmptyArrays: true }},
-    {$unwind: {path: "$leadername", preserveNullAndEmptyArrays: true }},
+    {$unwind: {path: '$patientname', preserveNullAndEmptyArrays: true}},
+    {$unwind: {path: '$doctorname', preserveNullAndEmptyArrays: true}},
+    {$unwind: {path: '$leadername', preserveNullAndEmptyArrays: true}},
     {
       $project: {
         patientId: '$patientId',
@@ -529,7 +519,7 @@ exports.getDepartmentCounsel = function (req, res) {
     {
       $group: {
         _id: {leaderId: '$departLeader', leadername: '$leadername'},
-        record: {$push:{doctorId: '$doctorId', doctorname: '$doctorname', patientId: '$patientId', patientname: '$patientname', time: '$time'}}
+        record: {$push: {doctorId: '$doctorId', doctorname: '$doctorname', patientId: '$patientId', patientname: '$patientname', time: '$time'}}
       }
     }
   ]
@@ -578,12 +568,12 @@ exports.getScore = function (req, res) {
   }
 
   Alluser.aggregate(array, function (err, results) {
-      if (err) {
-        res.status(500).send(err.errmsg)
-      }
-      console.log(results)
-      res.json({results: results})
-    })
+    if (err) {
+      res.status(500).send(err.errmsg)
+    }
+    console.log(results)
+    res.json({results: results})
+  })
 }
 
 exports.getOrder = function (req, res) {
@@ -606,13 +596,13 @@ exports.getOrder = function (req, res) {
           as: 'doctorinfo'
         }
       },
-      {$unwind: {path: "$doctorinfo", preserveNullAndEmptyArrays: true }},
+      {$unwind: {path: '$doctorinfo', preserveNullAndEmptyArrays: true}},
       {
         $project: {
           'userId': 1,
           'patientName': 1,
           'doctorId': 1,
-          'doctorName':1,
+          'doctorName': 1,
           'orderNo': 1,
           'paytime': 1,
           'type': 1,
