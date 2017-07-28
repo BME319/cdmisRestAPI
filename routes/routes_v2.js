@@ -53,6 +53,7 @@ var doctorMonitorCtrl = require('../controllers_v2/doctorMonitor_controller')
 var reportCtrl = require('../controllers_v2/report_controller')
 var personalDiagCtrl = require('../controllers_v2/personalDiag_controller')
 var doctorsInChargeCtrl = require('../controllers_v2/doctorsInCharge_controller')
+var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -4254,6 +4255,12 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctormonitor/departmentcounsel', doctorMonitorCtrl.getDepartmentCounsel)
   app.get(version + '/doctormonitor/score', doctorMonitorCtrl.getScore)
   app.get(version + '/doctormonitor/order', doctorMonitorCtrl.getOrder)
+
+  // 患者数据监控
+  app.get(version + '/patientmonitor/distribution', patientMonitorCtrl.getDistribution)
+  app.get(version + '/patientmonitor/linegraph', patientMonitorCtrl.getLinegraph)
+  app.get(version + '/patientmonitor/insurance', patientMonitorCtrl.getInsurance)
+  app.get(version + '/patientmonitor/patientsbyclass', patientMonitorCtrl.getPatientsByClass)
 
   /**
    * @swagger
