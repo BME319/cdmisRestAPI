@@ -207,12 +207,13 @@ exports.insertOrder = function (req, res, next) {
           paystatus: paystatus,   // req.body.paystatus,
           type: type,
           freeFlag: freeFlag,
-          paytime: new Date(req.body.paytime)
+          paytime: new Date()
         }
 
         var newOrder = new Order(orderData)
         newOrder.save(function (err, item) {
           if (err) {
+            // console.log(err)
             return res.status(500).send(err.errmsg)
           }
                     // res.json({results: item});
