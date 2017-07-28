@@ -123,5 +123,9 @@ try {
 
 // 定时任务相关 testing 2017-07-16 GY
 var schedule = require('node-schedule')
+// 自动扫描退款申请的订单，调用退款查询接口，如果退款成功修改订单状态 2017-07-16 GY
 var wechatCtrl = require('./controllers_v2/wechat_controller')
 schedule.scheduleJob('0 0 * * * *', wechatCtrl.autoRefundQuery)
+// 自动扫描所有任务方案，3个月以上无操作时，提醒对应主管医生调整方案 2017-07-26 GY
+var taskCtrl = require('./controllers_v2/task_controller')
+schedule.scheduleJob('30 0 8 * * *', taskCtrl.remindChangeTask)
