@@ -2835,6 +2835,11 @@ module.exports = function (app, webEntry, acl) {
   // 医生数据监控
   app.get(version + '/doctormonitor/distribution', doctorMonitorCtrl.getDistribution)
   app.get(version + '/doctormonitor/linegraph', doctorMonitorCtrl.getLinegraph)
+  app.get(version + '/doctormonitor/workload', doctorMonitorCtrl.getWorkload)
+  app.get(version + '/doctormonitor/counseltimeout', doctorMonitorCtrl.getCounseltimeout)
+  app.get(version + '/doctormonitor/departmentcounsel', doctorMonitorCtrl.getDepartmentCounsel)
+  app.get(version + '/doctormonitor/score', doctorMonitorCtrl.getScore)
+  app.get(version + '/doctormonitor/order', doctorMonitorCtrl.getOrder)
 
   /**
    * @swagger

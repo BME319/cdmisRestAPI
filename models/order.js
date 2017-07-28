@@ -102,4 +102,17 @@ Order.removeOne = function (query, callback, opts) {
   })
 }
 
+Order.aggregate = function (array, callback) {
+  let _array = array || []
+  orderModel  
+    .aggregate(_array)
+    .exec(function (err, results) {
+      if (err) {
+        return callback(err)
+      }
+      console.log(results)
+      callback(null, results)
+    })
+}
+
 module.exports = Order
