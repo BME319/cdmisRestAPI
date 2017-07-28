@@ -49,13 +49,10 @@ var loadCtrl = require('../controllers_v2/load_controller')
 var messageCtrl = require('../controllers_v2/message_controller')
 var newsCtrl = require('../controllers_v2/news_controller')
 var departmentCtrl = require('../controllers_v2/department_controller')
-<<<<<<< HEAD
 var doctorMonitorCtrl = require('../controllers_v2/doctorMonitor_controller')
-=======
 var reportCtrl = require('../controllers_v2/report_controller')
 var personalDiagCtrl = require('../controllers_v2/personalDiag_controller')
 var doctorsInChargeCtrl = require('../controllers_v2/doctorsInCharge_controller')
->>>>>>> cdmis/develop
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
