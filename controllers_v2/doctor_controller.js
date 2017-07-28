@@ -1015,13 +1015,13 @@ exports.getPatientByDate = function (req, res) {
   // 模糊搜索GY
   let _name = req.query.name
   let date
-  if (req.query.date !== null && req.query.date !== '') {
+  if (req.query.date !== null && req.query.date !== '' && req.query.date !== undefined) {
     date = new Date(req.query.date)
     date = commonFunc.convertToFormatDate(date)
   } else {
     date = commonFunc.getNowFormatDate()
   }
-  // return res.json({result:date});
+  // return res.json({result:date})
 
   let opts = ''
   let fields = {'_id': 0, 'patients': 1}
@@ -1094,7 +1094,7 @@ exports.getPatientByDate = function (req, res) {
               }
             }
           }
-          patientsInCharge = itemsDIC.sort(sortVIPpinyin)
+          patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
           item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
           return res.json({results: item1})
         }
