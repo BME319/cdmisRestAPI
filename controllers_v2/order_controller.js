@@ -137,8 +137,8 @@ exports.insertOrder = function (req, res, next) {
     return res.status(403).send('invalid input type')
   }
   type = Number(type)
-  var freeFlag = req.body.freeFlag || null
-  if (freeFlag === null || freeFlag === '') {
+  var freeFlag = req.body.freeFlag
+  if (freeFlag === null || freeFlag === '' || freeFlag === undefined) {
     return res.status(403).send('invalid input freeFlag')
   }
   freeFlag = Number(freeFlag)
