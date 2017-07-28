@@ -92,4 +92,17 @@ InsuranceMsg.update = function (query, obj, callback, opts, populate) {
     })
 }
 
+InsuranceMsg.aggregate = function (array, callback) {
+  let _array = array || []
+  insuranceMsgModel  
+    .aggregate(_array)
+    .exec(function (err, results) {
+      if (err) {
+        return callback(err)
+      }
+      console.log(results)
+      callback(null, results)
+    })
+}
+
 module.exports = InsuranceMsg
