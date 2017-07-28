@@ -49,6 +49,7 @@ var loadCtrl = require('../controllers_v2/load_controller')
 var messageCtrl = require('../controllers_v2/message_controller')
 var newsCtrl = require('../controllers_v2/news_controller')
 var departmentCtrl = require('../controllers_v2/department_controller')
+var doctorMonitorCtrl = require('../controllers_v2/doctorMonitor_controller')
 var reportCtrl = require('../controllers_v2/report_controller')
 var personalDiagCtrl = require('../controllers_v2/personalDiag_controller')
 var doctorsInChargeCtrl = require('../controllers_v2/doctorsInCharge_controller')
@@ -4244,6 +4245,15 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/department/updatedistrict', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDistrict)
   app.post(version + '/department/updatedepartment', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDepartment)
   app.post(version + '/department/delete', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.deleteRecord)
+
+  // 医生数据监控
+  app.get(version + '/doctormonitor/distribution', doctorMonitorCtrl.getDistribution)
+  app.get(version + '/doctormonitor/linegraph', doctorMonitorCtrl.getLinegraph)
+  app.get(version + '/doctormonitor/workload', doctorMonitorCtrl.getWorkload)
+  app.get(version + '/doctormonitor/counseltimeout', doctorMonitorCtrl.getCounseltimeout)
+  app.get(version + '/doctormonitor/departmentcounsel', doctorMonitorCtrl.getDepartmentCounsel)
+  app.get(version + '/doctormonitor/score', doctorMonitorCtrl.getScore)
+  app.get(version + '/doctormonitor/order', doctorMonitorCtrl.getOrder)
 
   /**
    * @swagger
