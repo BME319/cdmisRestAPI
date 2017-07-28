@@ -672,7 +672,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/tasks/status', tokenManager.verifyToken(), taskCtrl.updateStatus)
   app.post(version + '/tasks/time', tokenManager.verifyToken(), taskCtrl.updateStartTime)
   app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
-  /** YQC annotation 2017-07-27 - acl 2017-07-26 患者 - acl 2017-07-28 医生
+  /** YQC annotation 2017-07-28 - acl 2017-07-28 患者/医生
    * @swagger
    * /tasks/task:
    *   get:
@@ -722,7 +722,63 @@ module.exports = function (app, webEntry, acl) {
    *                     $ref: '#/definitions/Task'
    */
   app.get(version + '/tasks/task', tokenManager.verifyToken(), tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getUserTask)
-  app.post(version + '/tasks/task', tokenManager.verifyToken(), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
+  /** YQC annotation 2017-07-28 - acl 2017-07-28 医生
+   * @swagger
+   * /tasks/task:
+   *   post:
+   *     tags:
+   *     - "tasks"
+   *     summary: "Update the content of a task for a patient"
+   *     description: ""
+   *     operationId: "task"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "userId"
+   *           - "type"
+   *           - "code"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           type:
+   *             type: "string"
+   *           code:
+   *             type: "string"
+   *             format: date-time
+   *           instruction:
+   *             type: "number"
+   *           content:
+   *             type: string
+   *           startTime:
+   *             type: string
+   *             format: "date-time"
+   *           endTime:
+   *             type: string
+   *             format: "date-time"
+   *           times:
+   *             type: number
+   *           timesUnits:
+   *             type: string
+   *           frequencyTimes:
+   *             type: number
+   *           frequencyUnits:
+   *             type: string
+   *           status:
+   *             type: number
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/tasks/task', tokenManager.verifyToken(), tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
   // patient 2017-07-17
   /** YQC annotation 2017-07-27 - acl 2017-07-26 患者 - acl 2017-07-28 医生
    * @swagger
