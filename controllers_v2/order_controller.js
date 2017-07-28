@@ -2,29 +2,148 @@
 // var Doctor = require('../models/doctor')
 var Order = require('../models/order')
 var Alluser = require('../models/alluser')
-var commonFunc = require('../middlewares/commonFunc')
+var Account = require('../models/account')
+var webEntry = require('../settings').webEntry
+// var commonFunc = require('../middlewares/commonFunc')
 
 // 获取订单信息
 exports.getOrder = function (req, res) {
-  var _orderNo = req.query.orderNo
-  var query = {orderNo: _orderNo}
+  var _orderNo = req.query.orderNo || null
+  // console.log(_orderNo)
+  var query = {}
+  var populate = [{path: 'conselObject', select: 'status -_id'}, {path: 'perDiagObject', select: 'status code -_id'}, {path: 'docInChaObject', select: 'invalidFlag -_id'}]
+  if (_orderNo !== null && _orderNo !== '') {
+    query['orderNo'] = _orderNo
+  } else {
+    var role = req.session.role
+    var userId = req.session.userId
 
-  Order.getOne(query, function (err, item) {
+    var fields
+    var userIdUrl = 'token=' + req.token
+
+    var patientName = req.query.patientName || null
+    var doctorName = req.query.doctorName || null
+    var time = req.query.time || null
+    var money = req.query.money || null
+    var type = req.query.type || null
+    // var status = req.query.status || null
+
+    if (role === 'patient') {
+      query = {userId: userId}
+    // field设定是否显示相应列
+      fields = {'_id': 0, 'doctorId': 0, 'patientName': 0, 'userId': 0}
+    // userIdUrl = 'patientId=' + userId
+    }
+    if (role === 'doctor') {
+      query = {doctorId: userId}
+      fields = {'_id': 0, 'doctorId': 0, 'doctorName': 0, 'userId': 0}
+    // userIdUrl = 'doctorId=' + userId
+    }
+    if (patientName !== '' && patientName !== null) {
+      query['patientName'] = { $regex: patientName }
+    }
+    if (doctorName !== '' && doctorName !== null) {
+      query['doctorName'] = { $regex: doctorName }
+    }
+    if (time !== '' && time !== null) {
+      query['paytime'] = time
+    }
+    if (money !== '' && money !== null) {
+      query['money'] = money
+    }
+    if (type !== '' && type !== null) {
+      query['type'] = type
+    }
+    // if (status !== '' && status !== null) {
+    //   query['status'] = status
+    // }
+    var limit = Number(req.query.limit)
+    var skip = Number(req.query.skip)
+
+  // limit为分页显示个数，skip为跳过历史记录的个数，sort按时间降序排列
+    var opts = {limit: limit, skip: skip, sort: '-ordertime'}
+
+    var _Url = ''
+    var limitUrl = ''
+    var skipUrl = ''
+
+    if (limit !== null && limit !== undefined) {
+      limitUrl = 'limit=' + String(limit)
+    }
+    if (skip !== null && skip !== undefined) {
+      skipUrl = 'skip=' + String(skip + limit)
+    }
+    if (userIdUrl !== '' || limitUrl !== '' || skipUrl !== '') {
+      _Url = _Url + '?'
+      if (userIdUrl !== '') {
+        _Url = _Url + userIdUrl + '&'
+      }
+      if (limitUrl !== '') {
+        _Url = _Url + limitUrl + '&'
+      }
+      if (skipUrl !== '') {
+        _Url = _Url + skipUrl + '&'
+      }
+      _Url = _Url.substr(0, _Url.length - 1)
+    }
+    var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/order/order' + _Url
+  }
+  Order.getSome(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    res.json({results: item})
+    res.json({results: item, nexturl: nexturl})
+  }, opts, fields, populate)
+}
+
+exports.getOrderNo = function (req, res, next) {
+  var doctorId = req.body.doctorId || null
+  var patientId = req.body.patientId || null
+  var paystatus = Number(2)
+  var type = req.body.type || null
+  if (type !== null) {
+    type = Number(type)
+  }
+  // var _orderNo = req.query.orderNo || null
+  if (doctorId === null || patientId === null) {
+    return res.json({result: 1, msg: '请输入doctorId、patientId'})
+  }
+  var query = {userId: patientId, doctorId: doctorId, paystatus: paystatus, type: type}
+  if (type === 1 || type === 2 || type === 3 || type === 6) {
+    query['conselObject'] = {$exists: false}
+  }
+  if (type === 4) {
+    query['docInChaObject'] = {$exists: false}
+  }
+  if (type === 5) {
+    query['perDiagObject'] = {$exists: false}
+  }
+  Order.getSome(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    req.body.orderNo = item.orderNo
+    next()
   })
 }
 
 exports.insertOrder = function (req, res, next) {
   var money = req.body.money || null
-  if (money === null || money === '' || money === undefined) {
-    return res.status(403).send('invalid input')
+  if (money === null || money === '') {
+    return res.status(403).send('invalid input money')
   }
-
+  var type = req.body.type || null
+  if (type === null || type === '') {
+    return res.status(403).send('invalid input type')
+  }
+  type = Number(type)
+  var freeFlag = req.body.freeFlag || null
+  if (freeFlag === null || freeFlag === '') {
+    return res.status(403).send('invalid input freeFlag')
+  }
+  freeFlag = Number(freeFlag)
   var query = {
-    userId: req.body.notes
+    userId: req.body.doctorId
   }
   // Doctor.getOne(query, function (err, doctor) {
   Alluser.getOne(query, function (err, doctor) {
@@ -71,7 +190,11 @@ exports.insertOrder = function (req, res, next) {
           paystatus = 0
         }
         var orderData = {
-          userId: req.body.userId,
+          userId: req.session.userId,
+          patientName: req.userObject.name,
+          // userObject: req.userObject._id,
+          doctorId: req.body.doctorId,
+          doctorName: req.doctorObject.name,
           orderNo: req.newId, // req.body.orderNo,
           ordertime: new Date(),
           money: money,
@@ -82,6 +205,8 @@ exports.insertOrder = function (req, res, next) {
           },
                     // paystatus:req.body.paystatus,
           paystatus: paystatus,   // req.body.paystatus,
+          type: type,
+          freeFlag: freeFlag,
           paytime: new Date(req.body.paytime)
         }
 
@@ -106,15 +231,70 @@ exports.insertOrder = function (req, res, next) {
 // 更新订单信息
 exports.updateOrder = function (req, res) {
   var query = {orderNo: req.body.orderNo}
-  var upObj = {
-    paystatus: req.body.paystatus,
-    paytime: new Date(req.body.paytime)
+  var paystatus = req.body.paystatus || null
+  var docInChaObject = req.body.docInChaObject || null
+  var conselObject = req.body.conselObject || null
+  var perDiagObject = req.body.perDiagObject || null
+  var upObj = {}
+  if (paystatus !== '' && paystatus !== null) {
+    paystatus = Number(paystatus)
+    upObj['paystatus'] = paystatus
+    upObj['paytime'] = new Date(req.body.paytime)
+  }
+  if (docInChaObject !== '' && docInChaObject !== null) {
+    upObj['docInChaObject'] = docInChaObject
+  }
+  if (conselObject !== '' && conselObject !== null) {
+    upObj['conselObject'] = conselObject
+  }
+  if (perDiagObject !== '' && perDiagObject !== null) {
+    upObj['perDiagObject'] = perDiagObject
   }
   Order.updateOne(query, {$set: upObj}, function (err, item) {
     if (err) {
       return res.status(500).send(err)
     }
-    res.json({results: item, msg: 'success!'})
+    if (paystatus === 2) {
+      var query1 = {
+        userId: item.doctorId
+      }
+      Account.getOne(query1, function (err, item1) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item1 === null) {
+          var accountData = {
+            userId: item.doctorId,
+            money: item.money
+          }
+          var newAccount = new Account(accountData)
+          newAccount.save(function (err, accountInfo) {
+            if (err) {
+              return res.status(500).send(err.errmsg)
+            } else {
+              res.json({result: 'success!'})
+            }
+          })
+        } else {
+          var _money1 = item.money + item1.money
+          var upObj = {
+            $set: {money: _money1}
+          }
+          Account.update(query1, upObj, function (err, upaccount) {
+            if (err) {
+              return res.status(500).send(err.errmsg)
+            }
+            if (upaccount.nModified === 0) {
+              return res.json({result: '请获取账户信息确认是否修改成功'})
+            } else if (upaccount.nModified !== 0) {
+              return res.json({result: '修改成功', updateResult: upaccount})
+            }
+          })
+        }
+      })
+    } else {
+      res.json({results: item, msg: 'success!'})
+    }
   })
 }
 

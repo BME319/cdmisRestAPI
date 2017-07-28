@@ -1217,7 +1217,7 @@ exports.sendSMS = function (req, res) {
                 if (code === '000000') {
                   res.json({results: 0, mesg: "Alluser doesn't Exist!"})
                 } else {
-                  res.json({results: 2, ErrorCode: code})
+                  res.json({results: 1, mesg: {'ErrorCode': code}})
                 }
                                 // console.log(json.resp.respCode);
               })
@@ -1552,6 +1552,9 @@ exports.changerole = function (req, res) {
   })
 }
 exports.checkPatient = function (req, res, next) {
+  if (req.session.role === 'patient') {
+    return next()
+  }
   if (req.query.patientId === null || req.query.patientId === '' || req.query.patientId === undefined) {
     if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
       return res.json({result: '请填写patientId!'})
@@ -1575,6 +1578,9 @@ exports.checkPatient = function (req, res, next) {
 }
 
 exports.checkDoctor = function (req, res, next) {
+  if (req.session.role === 'doctor') {
+    return next()
+  }
   if (req.query.doctorId === null || req.query.doctorId === '' || req.query.doctorId === undefined) {
     if (req.body.doctorId === null || req.body.doctorId === '' || req.body.doctorId === undefined) {
       return res.json({result: '请填写doctorId!'})
@@ -1594,5 +1600,67 @@ exports.checkDoctor = function (req, res, next) {
     } else {
       next()
     }
+  })
+}
+
+exports.getAlluserObject = function (req, res, next) {
+  var userId = req.session.userId
+  var query = {
+    userId: userId
+  }
+  Alluser.getOne(query, function (err, user) {
+    if (err) {
+      console.log(err)
+      return res.status(500).send('服务器错误, 用户查询失败!')
+    }
+    if (user === null) {
+      return res.json({result: '不存在的用户ID！'})
+    }
+    req.userObject = user
+    next()
+  })
+}
+
+exports.getPatientObject = function (req, res, next) {
+  var patientId = req.query.patientId || req.body.patientId || null
+  if (patientId === null || patientId === '') {
+    return res.json({result: '请填写patientId!'})
+  }
+  var query = {
+    userId: patientId,
+    role: 'patient'
+  }
+  Alluser.getOne(query, function (err, patient) {
+    if (err) {
+      console.log(err)
+      return res.status(500).send('服务器错误, 用户查询失败!')
+    }
+    if (patient == null) {
+      return res.json({result: '不存在的患者ID！'})
+    }
+    req.patientObject = patient
+    next()
+  })
+}
+
+exports.getDoctorObject = function (req, res, next) {
+  var doctorId = req.query.doctorId || req.body.doctorId || null
+  if (doctorId === null || doctorId === '') {
+    return res.json({result: '请填写doctorId!'})
+  }
+  var query = {
+    userId: doctorId,
+    role: 'doctor'
+  }
+  Alluser.getOne(query, function (err, doctor) {
+    if (err) {
+      console.log(err)
+      return res.status(500).send('服务器错误, 用户查询失败!')
+    }
+    if (doctor == null) {
+      return res.json({result: '不存在的医生ID！'})
+    }
+    req.doctorObject = doctor
+    next()
   })
 }

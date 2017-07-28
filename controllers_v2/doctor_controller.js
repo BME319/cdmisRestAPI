@@ -10,6 +10,7 @@ var User = require('../models/user')
 var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
 var pinyin = require('pinyin')
+var DoctorsInCharge = require('../models/doctorsInCharge')
 
 // //根据userId查询医生信息 2017-03-28 GY
 // exports.getDoctor = function(req, res) {
@@ -633,7 +634,7 @@ exports.getRecentDoctorList = function (req, res) {
         }
       // return res.json({result: '暂无患者2!'});
       })
-      return res.json({results: {patients: []}})
+      return res.json({results: {doctors: []}})
     }
     res.json({results: item.doctors.sort(sortTime)})
   }, opts, fields, populate)
@@ -772,10 +773,10 @@ exports.deleteSuspendTime = function (req, res) {
   let _start = req.body.start || null
   let _end = req.body.end || null
   if (_start == null) {
-    return res.json({msg: 'Please input service-suspension start time!'})
+    return res.json({msg: 'Please input work-suspension start time!'})
   }
   if (_end == null) {
-    return res.json({msg: 'Please input service-suspension end time!'})
+    return res.json({msg: 'Please input work-suspension end time!'})
   }
   let query = {userId: doctorId, role: 'doctor'}
   var upObj = {
@@ -804,12 +805,12 @@ exports.deleteSuspendTime = function (req, res) {
 // 患者或医生获取医生停诊信息 输入userId（医生），输出结果，相应医生的停诊信息
 exports.getSuspendTime = function (req, res) {
   // 查询条件
-  let doctorId = req.query.userId
+  let doctorId = req.session.userId
   let query = {userId: doctorId, role: 'doctor'}
   var opts = ''
-  var fields = {'_id': 0, 'suspendTime': 1}
+  var fields = {'_id': 0, 'suspendTime': 1, 'serviceSuspendTime': 1}
 
-  Doctor.getOne(query, function (err, item) {
+  Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -824,7 +825,7 @@ exports.getSuspendTime = function (req, res) {
 exports.getDocNum = function (req, res) {
   // 查询条件
   var query = {role: 'doctor'}
-  Alluser.count(query, function (err, item) {
+  Alluser.countSome(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -923,23 +924,15 @@ exports.getPatientList = function (req, res) {
   let fields = {
     '_id': 0,
     'patients.patientId': 1,
-    'patients.dpRelationTime': 1,
-    'patientsInCharge.patientId': 1,
-    'patientsInCharge.dpRelationTime': 1,
-    'patientsInCharge.invalidFlag': 1
+    'patients.dpRelationTime': 1
   }
   // 通过子表查询主表，定义主表查询路径及输出内容
   let populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
-  // if(_name!=""&&_name!=undefined){
-
-  // }
   // 模糊搜索
   let nameReg = new RegExp(_name)
   if (_name) {
     populate['match'] = {'name': nameReg}
   }
-  // console.log(populate)
-  // console.log(query);
   DpRelation.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -991,36 +984,22 @@ exports.getPatientList = function (req, res) {
       }
       patients = patients.sort(sortVIPpinyin)
 
-      let populate2 = {path: 'patientsInCharge.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
-      DpRelation.getOne(query, function (err, item) {
+      let patientsInCharge = []
+      let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+      let queryDIC = {doctorId: doctorObject._id, invalidFlag: 1}
+      let fieldsDIC = {patientId: 1, dpRelationTime: 1}
+      let populateDIC = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
+      DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
         if (err) {
-          return res.status(500).send(err.errmsg)
+          return res.status(500).send(err)
+        } else if (itemsDIC.length === 0) {
+          return res.json({results: item1})
+        } else {
+          patientsInCharge = itemsDIC.sort(sortVIPpinyin)
+          item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+          return res.json({results: item1})
         }
-        let patientsInCharge = []
-        let patientsInChargeList = item.patientsInCharge || []
-        for (let j = 0; j < patientsInChargeList.length; j++) {
-          if (patientsInChargeList[j].dpRelationTime === null || patientsInChargeList[j].dpRelationTime === '' || patientsInChargeList[j].dpRelationTime === undefined) {
-            patientsInChargeList[j].dpRelationTime = new Date('2017-05-15')
-          }
-          if (patientsInChargeList[j].patientId !== null) {
-            if (_skip > 0) {
-              _skip--
-            } else {
-              if (_limit === null && Number(patientsInChargeList[j].invalidFlag) === 1) {
-                patientsInCharge.push(patientsInChargeList[j])
-              } else {
-                if (_limit > 0 && Number(patientsInChargeList[j].invalidFlag) === 1) {
-                  patientsInCharge.push(patientsInChargeList[j])
-                  _limit--
-                }
-              }
-            }
-          }
-        }
-        patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
-        let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
-        res.json({results: item1})
-      }, opts, fields, populate2)
+      }, opts, fieldsDIC, populateDIC)
     }
   }, opts, fields, populate)
   // });
@@ -1030,12 +1009,12 @@ exports.getPatientList = function (req, res) {
 // 是不是可以和getPatientList合并？？？
 exports.getPatientByDate = function (req, res) {
   // 查询条件
-  var doctorObject = req.body.doctorObject
-  var query = {doctorId: doctorObject._id}
+  let doctorObject = req.body.doctorObject
+  let query = {doctorId: doctorObject._id}
 
   // 模糊搜索GY
-  var _name = req.query.name
-  var date
+  let _name = req.query.name
+  let date
   if (req.query.date !== null && req.query.date !== '') {
     date = new Date(req.query.date)
     date = commonFunc.convertToFormatDate(date)
@@ -1044,10 +1023,10 @@ exports.getPatientByDate = function (req, res) {
   }
   // return res.json({result:date});
 
-  var opts = ''
-  var fields = {'_id': 0, 'patients': 1}
+  let opts = ''
+  let fields = {'_id': 0, 'patients': 1}
   // 通过子表查询主表，定义主表查询路径及输出内容
-  var populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0}}
+  let populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
 
   if (_name) {
     populate['match'] = {'name': new RegExp(_name)}
@@ -1056,9 +1035,7 @@ exports.getPatientByDate = function (req, res) {
   DpRelation.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
-    }
-
-    if (item == null) {
+    } else if (item == null) {
     // return res.json({result:'请先与其他医生或患者建立联系!'});
       var dpRelationData = {
         doctorId: req.body.doctorObject._id,
@@ -1080,9 +1057,8 @@ exports.getPatientByDate = function (req, res) {
       return res.json({result: '暂无患者!'})
     }
 
-    var patientsitem = []
-    var dpTimeFormat = null
-    var j = 0
+    let patients = []
+    let dpTimeFormat = null
     if (item.patients.length === 0) {
       return res.json({result: '暂无患者!'})
     } else if (item.patients.length !== 0) {
@@ -1093,26 +1069,44 @@ exports.getPatientByDate = function (req, res) {
           }
           dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime)
           if (dpTimeFormat === date) {
-            patientsitem[j] = item.patients[i]
-            j++
+            patients.push(item.patients[i])
           }
         }
       }
+      patients = patients.sort(sortVIPpinyin)
 
-      patientsitem = patientsitem.sort(sortVIPpinyin)
+      let patientsInCharge = []
+      let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+      let queryDIC = {doctorId: doctorObject._id, invalidFlag: 1}
+      let fieldsDIC = {patientId: 1, dpRelationTime: 1, start: 1}
+      let populateDIC = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
+      DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (itemsDIC.length === 0) {
+          return res.json({results: item1})
+        } else {
+          for (var j = itemsDIC.length - 1; j >= 0; j--) {
+            if (itemsDIC[j].patientId !== null) {
+              dpTimeFormat = commonFunc.convertToFormatDate(itemsDIC[j].start)
+              if (dpTimeFormat === date) {
+                patientsInCharge.push(itemsDIC[j])
+              }
+            }
+          }
+          patientsInCharge = itemsDIC.sort(sortVIPpinyin)
+          item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+          return res.json({results: item1})
+        }
+      }, opts, fieldsDIC, populateDIC)
     }
-
-      // 2017-06-07GY调试用
-      // console.log({method:'getPatientByDate', resultCount:patientsitem.length});
-
-    res.json({results2: patientsitem})
   }, opts, fields, populate)
 }
 
 // 修改用户支付宝账号 2017-06-16 GY
 // 注释 医生修改绑定的支付宝账号信息 输入，aliPayAccount，输出，支付宝账号更新
 exports.editAliPayAccount = function (req, res) {
-  let query = {userId: req.session.userId}
+  let query = {userId: req.session.userId, role: 'doctor'}
   let upObj = {aliPayAccount: req.body.aliPayAccount}
   let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
 
@@ -1124,10 +1118,10 @@ exports.editAliPayAccount = function (req, res) {
   }, opts)
 }
 
-// 获取用户支付宝账号 2017-06-16 GY
-// 注释 医生获取自己绑定的支付宝账号信息 承接session.userId；输出，支付宝账号信息
+// 获取医生支付宝账号 2017-06-16 GY
+// 注释 医生获取自己绑定的支付宝账号信息 输入userId；输出，支付宝账号信息
 exports.getAliPayAccount = function (req, res) {
-  let query = {userId: req.session.userId}
+  let query = {userId: req.query.userId, role: 'doctor'}
 
   Alluser.getOne(query, function (err, item) {
     if (err) {
@@ -1137,7 +1131,7 @@ exports.getAliPayAccount = function (req, res) {
       return res.status(400).send('不存在的医生')
     } else {
       if (item.aliPayAccount === undefined) {
-        return res.json({results: ''})
+        return res.json({results: '未绑定支付宝账号'})
       } else {
         return res.json({results: item.aliPayAccount})
       }

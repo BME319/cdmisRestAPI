@@ -58,10 +58,12 @@ var alluserSchema = new mongoose.Schema({
   serviceSchedules: [
     {
       _id: 0,
+      // 添加预约时段字段 结构 “YYYY-MM-DD-1"（某日上午）或“YYYY-MM-DD-2"（某日下午）YQC 2017-07-27
+      bookingPeriod: String,
       day: String,
-      time: String,
+      time: {type: String, enum: ['Morning', 'Afternoon']},
       // 已用的面诊计数，可用的面诊计数需要用total-count
-      count: Number,
+      count: {type: Number, default: 0},
       // 医生可以设置的面诊计数总数
       total: Number
     }
@@ -137,7 +139,7 @@ var alluserSchema = new mongoose.Schema({
   // 主管医生字段
   doctorsInCharge: [
     {
-      _id: 0,
+      // _id: 0,
       doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       firstTime: Date,
       // 历史2、当前1、待审核0，被拒3
