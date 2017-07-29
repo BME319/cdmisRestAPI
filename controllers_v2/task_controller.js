@@ -185,11 +185,11 @@ exports.insertTaskModel = function (req, res) {
 // 注释 根据userId获取任务 输入，session.id；输出，用户任务
 exports.getUserTask = function (req, res) {
   // var userId = 'Admin';
-  var query = {userId: req.session.userId}
+  var query = {userId: req.query.userId}
 
   Task.getOne(query, function (err, task) {
     if (err) {
-      return res.status(500).send(err.errmsg)
+      return res.status(500).send(err)
     }
     res.json({result: task})
   })

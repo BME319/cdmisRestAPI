@@ -4,7 +4,7 @@ var mongoose = require('mongoose')
 var doctorsInChargeSchema = new mongoose.Schema({
   patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-  firstTime: Date,
+  dpRelationTime: Date,
   // 历史2、当前1、待审核0、被拒3
   invalidFlag: Number,
   rejectReason: String,

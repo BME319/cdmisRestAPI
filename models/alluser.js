@@ -55,17 +55,28 @@ var alluserSchema = new mongoose.Schema({
   counselStatus3: {type: Number, default: 1},
   counselStatus4: {type: Number, default: 1},
   counselStatus5: {type: Number, default: 1},
+  // 医生设置的面诊排班（模板）（医生设置）
   serviceSchedules: [
     {
       _id: 0,
-      // 添加预约时段字段 结构 “YYYY-MM-DD-1"（某日上午）或“YYYY-MM-DD-2"（某日下午）YQC 2017-07-27
-      bookingPeriod: String,
-      day: String,
+      // // 添加预约时段字段 结构 “YYYY-MM-DD-1"（某日上午）或“YYYY-MM-DD-2"（某日下午）YQC 2017-07-27
+      // bookingPeriod: String,
+      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sta', 'Sun']},
       time: {type: String, enum: ['Morning', 'Afternoon']},
-      // 已用的面诊计数，可用的面诊计数需要用total-count
-      count: {type: Number, default: 0},
       // 医生可以设置的面诊计数总数
       total: Number
+    }
+  ],
+  // 周期更新医生可预约的的面诊时间（患者查看）
+  availablePDs: [
+    {
+      _id: 0,
+      availableDay: Date,
+      availableTime: {type: String, enum: ['Morning', 'Afternoon']},
+      // 医生已设置的面诊总数
+      total: Number,
+      // 已被预约的面诊计数，可用的面诊计数需要用total-count
+      count: {type: Number, default: 0}
     }
   ],
   serviceSuspendTime: [
@@ -277,6 +288,19 @@ Alluser.update = function (query, obj, callback, opts, populate) {
         return callback(err)
       }
       callback(null, upalluser)
+    })
+}
+
+Alluser.aggregate = function (array, callback) {
+  let _array = array || []
+  alluserModel
+    .aggregate(_array)
+    .exec(function (err, results) {
+      if (err) {
+        return callback(err)
+      }
+      console.log(results)
+      callback(null, results)
     })
 }
 
