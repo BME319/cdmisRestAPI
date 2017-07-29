@@ -318,10 +318,83 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/services/charge', tokenManager.verifyToken(), serviceCtrl.setCharge)
   app.post(version + '/services/relayTarget', tokenManager.verifyToken(), serviceCtrl.setRelayTarget)
   // YQC 2017-07-28 添加面诊余量更新函数 添加未来十四天内的面诊余量记录
-  app.post(version + '/services/setSchedule', tokenManager.verifyToken(), serviceCtrl.setServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2)
+  /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
+   * @swagger
+   * /services/setSchedule:
+   *   post:
+   *     tags:
+   *     - "services"
+   *     summary: "For a doctor, set a Personal Diagnosis service schedule"
+   *     description: ""
+   *     operationId: "setSchedule"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "day"
+   *           - "time"
+   *           - "total"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           day:
+   *             type: "string"
+   *             format: "YYYY-MM-DD"
+   *           time:
+   *             type: "string"
+   *             enum:
+   *               - "Morning"
+   *               - "Afternoon"
+   *           total:
+   *             type: "number"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/services/setSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2)
   app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule)
   // YQC 2017-07-29 医生设置面诊停诊 将可预约面诊和已预约面诊取消 已预约的取消未实现通知患者和退款
-  app.post(version + '/services/setSuspend', tokenManager.verifyToken(), serviceCtrl.getSessionObject, serviceCtrl.setServiceSuspend, serviceCtrl.suspendAvailablePds, serviceCtrl.cancelBookedPds)
+  /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
+   * @swagger
+   * /services/setSuspend:
+   *   post:
+   *     tags:
+   *     - "services"
+   *     summary: "For a doctor, set a Personal Diagnosis service suspension"
+   *     description: ""
+   *     operationId: "setSuspend"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "start"
+   *           - "end"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           start:
+   *             type: "string"
+   *             format: "YYYY-MM-DD"
+   *           end:
+   *             type: "string"
+   *             format: "YYYY-MM-DD"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/services/setSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.setServiceSuspend, serviceCtrl.suspendAvailablePds, serviceCtrl.cancelBookedPds)
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), serviceCtrl.deleteServiceSuspend)
   // 咨询问卷填写(新增自动转发功能)
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay)
