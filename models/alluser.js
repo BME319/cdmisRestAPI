@@ -76,7 +76,8 @@ var alluserSchema = new mongoose.Schema({
       // 医生已设置的面诊总数
       total: Number,
       // 已被预约的面诊计数，可用的面诊计数需要用total-count
-      count: {type: Number, default: 0}
+      count: {type: Number, default: 0},
+      invalidFlag: {type: Number, default: 0} // 是否停诊
     }
   ],
   serviceSuspendTime: [
