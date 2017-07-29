@@ -413,7 +413,7 @@ exports.getDaysToUpdate = function (req, res, next) {
     case 'Wed':
       nextDayNo = 3
       break
-    case 'Thur':
+    case 'Thu':
       nextDayNo = 4
       break
     case 'Fri':

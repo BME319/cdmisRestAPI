@@ -135,3 +135,7 @@ try {
 var schedule = require('node-schedule')
 var wechatCtrl = require('./controllers_v2/wechat_controller')
 schedule.scheduleJob('0 0 * * * *', wechatCtrl.autoRefundQuery)
+
+var personalDiagCtrl = require('./controllers_v2/personalDiag_controller')
+// 每天更新医生的availablePDs
+schedule.scheduleJob('0 0 0 * * *', personalDiagCtrl.autoAvailablePD)

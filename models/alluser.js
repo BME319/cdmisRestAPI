@@ -61,7 +61,7 @@ var alluserSchema = new mongoose.Schema({
       _id: 0,
       // // 添加预约时段字段 结构 “YYYY-MM-DD-1"（某日上午）或“YYYY-MM-DD-2"（某日下午）YQC 2017-07-27
       // bookingPeriod: String,
-      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sta', 'Sun']},
+      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta', 'Sun']},
       time: {type: String, enum: ['Morning', 'Afternoon']},
       // 医生可以设置的面诊计数总数
       total: Number
