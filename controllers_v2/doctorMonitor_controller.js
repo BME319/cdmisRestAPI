@@ -370,6 +370,79 @@ exports.getWorkload = function (req, res) {
       }
     },
     {
+      $lookup: {
+        from: 'personaldiags',
+        localField: '_id',
+        foreignField: 'doctorId',
+        as: 'personaldiag'
+      }
+    },
+    {
+      $lookup: {
+        from: 'doctorsincharges',
+        localField: '_id',
+        foreignField: 'doctorId',
+        as: 'doctorsincharge'
+      }
+    },
+    {
+      $project: {
+        _id: '$_id',
+        'name': 1,
+        'province': 1,
+        'city': 1,
+        'hospital': 1,
+        userId: '$userId',
+        count: '$count',
+        counttoday: '$counttoday',
+        open: '$open',
+        opentoday: '$opentoday',
+        'consultation': 1,
+        'consultationtoday': 1,
+        'communication': 1,
+        'communicationtoday': 1,
+        'c2c': 1,
+        'c2ctoday': 1,
+        'urgentcon': 1,
+        'urgentcontoday': 1,
+        personaldiag: {
+          $filter: {
+            input: '$personaldiag',
+            as: 'personaldiag',
+            cond: {
+              $eq: ['$$personaldiag.status', 0],
+            }
+          }
+        },
+        'doctorsincharge': 1,
+        personaldiagtoday: {
+          $filter: {
+            input: '$personaldiag',
+            as: 'personaldiag',
+            cond: {
+              $and: [
+                {$eq: ['$$personaldiag.status', 0]},
+                {$gte: ['$$personaldiag.bookingDay', startdate]},
+                {$lt: ['$$personaldiag.bookingDay', enddate]}
+              ]
+            }
+          }
+        },
+        doctorsinchargetoday: {
+          $filter: {
+            input: '$doctorsincharge',
+            as: 'doctorsincharge',
+            cond: {
+              $and: [
+                {$gte: ['$$doctorsincharge.dpRelationTime', startdate]},
+                {$lt: ['$$doctorsincharge.dpRelationTime', enddate]}
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
       $project: {
         _id: '$_id',
         'name': 1,
@@ -388,7 +461,11 @@ exports.getWorkload = function (req, res) {
         c2c: {$size: '$c2c'},
         c2ctoday: {$size: '$c2ctoday'},
         urgentcon: {$size: '$urgentcon'},
-        urgentcontoday: {$size: '$urgentcontoday'}
+        urgentcontoday: {$size: '$urgentcontoday'},
+        personaldiag: {$size: '$personaldiag'},
+        personaldiagtoday: {$size: '$personaldiagtoday'},
+        doctorsincharge: {$size: '$doctorsincharge'},
+        doctorsinchargetoday: {$size: '$doctorsinchargetoday'}
       }
     }
     // {
