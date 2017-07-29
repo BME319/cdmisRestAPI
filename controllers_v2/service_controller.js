@@ -919,7 +919,7 @@ exports.newPersonalDiag = function (req, res, next) {
   // } else if (bookingTime === 'Morning') {
   //   bookingPeriod = String(bookingPeriod + '-2')
   // }
-  let queryPD = {doctorId: doctorObjectId, patientId: patientObjectId, bookingDay: bookingDay, bookingTime: bookingTime}
+  let queryPD = {doctorId: doctorObjectId, patientId: patientObjectId, bookingDay: bookingDay, bookingTime: bookingTime, status: 0}
   PersionalDiag.getOne(queryPD, function (err, itemPD) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -1041,7 +1041,7 @@ exports.getMyPDs = function (req, res) {
 }
 
 // 患者取消预约
-exports.cancelMyPD = function (req, res) {
+exports.cancelMyPD = function (req, res, next) {
   let diagId = req.body.diagId || null
   if (diagId === null) {
     return res.json({results: '请输入diagId'})
@@ -1067,12 +1067,39 @@ exports.cancelMyPD = function (req, res) {
           } else if (upItem.nModified === 0) {
             return res.json({results: '取消失败'})
           } else {
-            return res.json({results: '取消成功'})
+            // return res.json({results: '取消成功'})
+            req.body.PDInfo = item
+            next()
           }
         })
       }
     }
   })
+}
+
+exports.updatePDCapacityUp = function (req, res) {
+  let doctorObjectId = req.body.PDInfo.doctorId
+  let bookingDay = req.body.PDInfo.bookingDay
+  let bookingTime = req.body.PDInfo.bookingTime
+
+  let queryD = {_id: doctorObjectId, availablePDs: {$elemMatch: {$and: [{availableDay: bookingDay}, {availableTime: bookingTime}]}}}
+  let upDoc = {
+    $inc: {
+      'availablePDs.$.count': -1
+    }
+  }
+  let opts = {fields: {_id: 0, availablePDs: 1}}
+  // console.log(queryD, upDoc)
+  Alluser.update(queryD, upDoc, function (err, upDoctor) { // 占个号
+    if (err) {
+      return res.status(500).send(err)
+    } else if (upDoctor.nModified === 0) {
+      return res.json({results: '面诊数量未更新成功，请检查输入'})
+    } else if (upDoctor.nModified !== 0) {
+      // return res.json({results: '面诊数量更新成功'})
+      return res.json({results: '取消成功'})
+    }
+  }, opts)
 }
 
 // 2017-07-18 YQC

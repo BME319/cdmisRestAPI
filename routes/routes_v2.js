@@ -2176,7 +2176,7 @@ module.exports = function (app, webEntry, acl) {
    *                         description: "某时段剩余可预约数量"
    */
   app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getAvailablePD)
-  // 患者端 预约面诊 2017-07-27 YQC
+  // 患者端 预约面诊 2017-07-27 YQC 生成了验证码但是验证码的发送还未实现
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
    * /services/personalDiagnosis:
@@ -2247,7 +2247,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/cancelMyPD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.cancelMyPD)
+  app.post(version + '/services/cancelMyPD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.cancelMyPD, serviceCtrl.updatePDCapacityUp)
   // 患者端 我的面诊服务 根据面诊状态获取面诊服务列表 不填写status则返回全部面诊服务列表 还未添加分页显示
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者
    * @swagger
