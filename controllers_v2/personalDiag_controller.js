@@ -23,7 +23,15 @@ exports.autoAvailablePD = function (req, res) {
       } else {
         for (let i = 0; i < items.length; i++) { // 遍历所有当天需要新增面诊的医生
           let itemDoc = items[i]
-          let sSDoc = itemDoc.serviceSchedules
+          let sTDoc = itemDoc.serviceSuspendTime || []
+          let invalidFlag = 0
+          for (let k = 0; k < sTDoc.length; k++) { // 停诊判断
+            if (sTDoc[k].start <= twoWeeksLater && sTDoc[k].end > twoWeeksLater) {
+              invalidFlag = 1
+              break
+            }
+          }
+          let sSDoc = itemDoc.serviceSchedules || []
           // let timeToUpdate = []
           for (let j = 0; j < sSDoc.length; j++) { // 遍历当天的上午／下午
             if (sSDoc[j].day === todayNo) {
@@ -35,7 +43,8 @@ exports.autoAvailablePD = function (req, res) {
                   availablePDs: {
                     availableTime: sSDoc[j].time,
                     availableDay: twoWeeksLater,
-                    total: sSDoc[j].total
+                    total: sSDoc[j].total,
+                    invalidFlag: invalidFlag
                   }
                 }
               }
