@@ -2330,7 +2330,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "services"
-   *     summary: "Finds infos of already booked personalDiag for a patient（注释未完成）"
+   *     summary: "Finds infos of already booked personalDiag for a patient"
    *     description: ""
    *     operationId: "myPD"
    *     produces:
@@ -2352,24 +2352,23 @@ module.exports = function (app, webEntry, acl) {
    *           type: object
    *           properties:
    *             results:
-   *               type: object
-   *               properties:
-   *                 PersonalDiags:
-   *                   description: "患者已预约的面诊服务列表"
-   *                   type: "array"
-   *                   items:
-   *                     PersonalDiag:
-   *                     type: object
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/PersonalDiagInfoForPat'
+   *       500:
+   *         description: "Internal Server Error"
+   *       404:
+   *         description: "PDs Not Found"
    */
   app.get(version + '/services/myPD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getMyPDs)
-  // 医生端 获取预约面诊患者列表 根据面诊状态获取面诊服务列表 不填写status则返回全部面诊服务列表 还未添加分页显示
+  // 医生端 获取预约面诊患者列表 还未添加分页显示
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者
    * @swagger
    * /services/myPDpatients:
    *   get:
    *     tags:
    *     - "services"
-   *     summary: "Finds booked personalDiag List for a doctor（注释未完成）"
+   *     summary: "Finds booked personalDiag List for a doctor"
    *     description: ""
    *     operationId: "myPDpatients"
    *     produces:
@@ -2377,13 +2376,34 @@ module.exports = function (app, webEntry, acl) {
    *     parameters:
    *     - name: "token"
    *       in: "query"
-   *       description: "Token."
+   *       description: "医生的token"
    *       required: true
    *       type: "string"
    *     - name: "status"
    *       in: "query"
+   *       description: "要查询的面诊服务状态类型，不填写status则返回未开始的面诊服务列表,0: 未开始，1: 已完成，2: 未进行自动结束，3: 患者取消，4: 医生停诊或取消"
    *       required: false
    *       type: "number"
+   *       enum:
+   *         - "0"
+   *         - "1"
+   *         - "2"
+   *         - "3"
+   *         - "4"
+   *     - name: "day"
+   *       in: "query"
+   *       description: "要查询的面诊日期，不填写则返回所有面诊服务列表，格式为YYYY-MM-DD"
+   *       required: false
+   *       type: "string"
+   *       format: "YYYY-MM-DD"
+   *     - name: "time"
+   *       in: "query"
+   *       description: "要查询的面诊日期时段，不填写则返回所有时段面诊服务列表"
+   *       required: false
+   *       type: "string"
+   *       enum:
+   *         - "Morning"
+   *         - "Afternoon"
    *     responses:
    *       200:
    *         description: "Operation success."
@@ -2391,14 +2411,13 @@ module.exports = function (app, webEntry, acl) {
    *           type: object
    *           properties:
    *             results:
-   *               type: object
-   *               properties:
-   *                 PersonalDiags:
-   *                   description: "患者已预约的面诊服务列表"
-   *                   type: "array"
-   *                   items:
-   *                     PersonalDiag:
-   *                     type: object
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/PersonalDiagInfoForDoc'
+   *       500:
+   *         description: "Internal Server Error"
+   *       404:
+   *         description: "PDs Not Found"
    */
   app.get(version + '/services/myPDpatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getPDPatients)
   // 医生端 确认面诊服务
@@ -2408,7 +2427,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "For a doctor, confirm a Personal Diagnosis service with a code"
+   *     summary: "For a doctor, confirm a Personal Diagnosis service with a code from a patient"
    *     description: ""
    *     operationId: "PDConfirmation"
    *     produces:
@@ -2428,8 +2447,10 @@ module.exports = function (app, webEntry, acl) {
    *         properties:
    *           token:
    *             type: "string"
+   *             description: "医生的token"
    *           patientId:
    *             type: "string"
+   *             description: "要确认的患者的userId"
    *           day:
    *             type: "string"
    *             format: "YYYY-MM-DD"
@@ -2440,9 +2461,22 @@ module.exports = function (app, webEntry, acl) {
    *               - "Afternoon"
    *           code:
    *             type: "string"
+   *             description: "患者提供的验证码"
    *     responses:
-   *      200:
-   *         description: "Operation success."
+   *       200:
+   *         description: "Confirmation Success"
+   *       412:
+   *         description: "Please Check Input of day, time, code/patientId"
+   *       406:
+   *         description: "Wrong Code"
+   *       500:
+   *         description: "Internal Server Error"
+   *       400:
+   *         description: "Role of the User is neither a doctor nor a patient"
+   *       404:
+   *         description: "PD/Patient/User Not Found"
+   *       304:
+   *         description: "Not Modified"
    */
   app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getPatientObject, serviceCtrl.confirmPD)
 
@@ -4856,5 +4890,146 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *       status:
    *         type: number
+   *   PersonalDiagInfoForDoc:
+   *     type: object
+   *     properties:
+   *       diagId:
+   *         type: "string"
+   *       patientId:
+   *         type: object
+   *         $ref: '#/definitions/Patient'
+   *       bookingDay:
+   *         type: "string"
+   *         format: "date-time"
+   *       bookingTime:
+   *         type: "string"
+   *         enum:
+   *           - "Morning"
+   *           - "Afternoon"
+   *       creatTime:
+   *         type: "string"
+   *         format: "date-time"
+   *       endTime:
+   *         type: "string"
+   *         format: "date-time"
+   *       status:
+   *         type: "number"
+   *   PersonalDiagInfoForPat:
+   *     type: object
+   *     properties:
+   *       diagId:
+   *         type: "string"
+   *       doctorId:
+   *         type: object
+   *         $ref: '#/definitions/Doctor'
+   *       bookingDay:
+   *         type: "string"
+   *         format: "date-time"
+   *       bookingTime:
+   *         type: "string"
+   *         enum:
+   *           - "Morning"
+   *           - "Afternoon"
+   *       creatTime:
+   *         type: "string"
+   *         format: "date-time"
+   *       endTime:
+   *         type: "string"
+   *         format: "date-time"
+   *       status:
+   *         type: "number"
+   *   Doctor:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       birthday:
+   *         type: string
+   *         format: "date-time"
+   *       gender:
+   *         type: number
+   *         enum:
+   *           - "1"
+   *           - "2"
+   *       phoneNo:
+   *         type: string
+   *       photoUrl:
+   *         type: string
+   *   Patient:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       birthday:
+   *         type: string
+   *         format: "date-time"
+   *       gender:
+   *         type: number
+   *         enum:
+   *           - "1"
+   *           - "2"
+   *       phoneNo:
+   *         type: string
+   *       photoUrl:
+   *         type: string
+   *       height:
+   *         type: string
+   *       weight:
+   *         type: string
+   *       occupation:
+   *         type: string
+   *       bloodType:
+   *         type: number
+   *       address:
+   *         type: object
+   *         properties:
+   *           nation:
+   *             type: string
+   *           province:
+   *             type: string
+   *           city:
+   *             type: string
+   *       class:
+   *         type: string
+   *       class_info:
+   *         type: array
+   *         items:
+   *           type: string
+   *       operationTime:
+   *         type: string
+   *       VIP:
+   *         type: number
+   *       hypertension:
+   *         type: number
+   *       allergic:
+   *         type: string
+   *       diagnosisInfo:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/DiagnosisInfo'
+   *   DiagnosisInfo:
+   *     type: object
+   *     properties:
+   *       name:
+   *         type: string
+   *       time:
+   *         type: string
+   *         format: date-time
+   *       hypertension:
+   *         type: number
+   *       progress:
+   *         type: string
+   *       operationTime:
+   *         type: string
+   *         format: date-time
+   *       content:
+   *         type: string
+   *       doctor:
+   *         type: object
+   *         $ref: '#/definitions/Doctor'
    */
 }

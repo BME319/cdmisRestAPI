@@ -7,7 +7,7 @@ var Alluser = require('../models/alluser')
 
 // 每日更新所有医生两周后当天的面诊可预约 YQC 2017-07-29 // 还需添加停诊判断
 exports.autoAvailablePD = function (req, res) {
-  // console.log(new Date())
+  console.log(new Date())
   let today = new Date(new Date().toDateString())
   let twoWeeksLater = new Date(today)
   twoWeeksLater.setDate(twoWeeksLater.getDate() + 14)
@@ -21,11 +21,11 @@ exports.autoAvailablePD = function (req, res) {
       if (items.length === 0) {
         console.log('auto_available_personal_diagnosis_update_complete-0')
       } else {
-        for (let i = 0; i < items.length; i++) {
+        for (let i = 0; i < items.length; i++) { // 遍历所有当天需要新增面诊的医生
           let itemDoc = items[i]
           let sSDoc = itemDoc.serviceSchedules
           // let timeToUpdate = []
-          for (let j = 0; j < sSDoc.length; j++) {
+          for (let j = 0; j < sSDoc.length; j++) { // 遍历当天的上午／下午
             if (sSDoc[j].day === todayNo) {
               // timeToUpdate.push(sSDoc[j].time)
               let doctorId = itemDoc.userId
