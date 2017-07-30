@@ -5,7 +5,7 @@ var Alluser = require('../models/alluser')
 //   console.log(new Date())
 // }
 
-// 每日更新所有医生两周后当天的面诊可预约 YQC 2017-07-29 // 还需添加停诊判断
+// 每日更新所有医生两周后当天的面诊可预约 YQC 2017-07-29
 exports.autoAvailablePD = function (req, res) {
   console.log(new Date())
   let today = new Date(new Date().toDateString())
