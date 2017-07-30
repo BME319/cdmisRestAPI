@@ -1,4 +1,4 @@
-// var PersonalDiag = require('../models/personalDiag')
+var PersonalDiag = require('../models/personalDiag')
 var Alluser = require('../models/alluser')
 
 // exports.test = function () {
@@ -53,6 +53,24 @@ exports.autoAvailablePD = function (req, res) {
         }
         console.log('auto_available_personal_diagnosis_update_complete-all')
       }
+    }
+  })
+}
+
+// 每日更新过期面诊PD 退款相关需求待确认
+exports.autoOverduePD = function (req, res) {
+  console.log(new Date())
+  let today = new Date(new Date().toDateString())
+  let middleOfToday = new Date(today)
+  middleOfToday.setHours(today.getHours() + 12)
+  console.log(middleOfToday)
+  let query = {endTime: {$lte: middleOfToday}, status: 0}
+  let upObj = {$set: {status: 2}}
+  PersonalDiag.update(query, upObj, function (err, upItems) {
+    if (err) {
+      console.log(err)
+    } else {
+      console.log(upItems.n + ' Entries Found, and ' + upItems.nModified + ' Entries Modified.')
     }
   })
 }
