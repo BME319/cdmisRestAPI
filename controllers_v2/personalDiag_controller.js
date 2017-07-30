@@ -81,5 +81,5 @@ exports.autoOverduePD = function (req, res) {
     } else {
       console.log(upItems.n + ' Entries Found, and ' + upItems.nModified + ' Entries Modified.')
     }
-  })
+  }, {multi: true})
 }
