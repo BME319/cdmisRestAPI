@@ -718,17 +718,21 @@ exports.deleteServiceSuspend = function (req, res) {
 // 确认收到面诊：personalDiag表修改
 // 输入：code；修改内容：personalDiag.status, time
 exports.confirmPD = function (req, res) {
-  let doctorObjectId = req.body.doctorObject._id
-  let patientObjectId = req.body.patientObject._id
-  let bookingDay = new Date(new Date(req.body.day).toDateString()) || null
-  let bookingTime = req.body.time || null
+  // let doctorObjectId = req.body.doctorObject._id
+  // let patientObjectId = req.body.patientObject._id
+  // let bookingDay = new Date(new Date(req.body.day).toDateString()) || null
+  // let bookingTime = req.body.time || null
+  let diagId = req.body.diagId || null
   let code = req.body.code || null
-  if (bookingDay === null || bookingTime === null || code === null) {
-    return res.status(412).send('Please Check Input of day, time, code')
+  // if (bookingDay === null || bookingTime === null || code === null) {
+  //   return res.status(412).send('Please Check Input of day, time, code')
+  // }
+  if (diagId === null || code === null) {
+    return res.status(412).send('Please Check Input of diagId, code')
   }
 
-  let query = {patientId: patientObjectId, doctorId: doctorObjectId, bookingDay: bookingDay, bookingTime: bookingTime}
-  console.log(query)
+  // let query = {patientId: patientObjectId, doctorId: doctorObjectId, bookingDay: bookingDay, bookingTime: bookingTime}
+  let query = {diagId: diagId}
   PersionalDiag.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
@@ -1078,7 +1082,7 @@ exports.getAvailablePD = function (req, res) {
       return res.status(500).send(err)
     } else {
       if (itemD === null) {
-        return res.json({results: '医生不存在或未来两周内无面诊排班'})
+        return res.status(404).send('PD Not Found')
       } else {
         let availablePDsList = itemD.availablePDs || []
         let availablePDsArray = []
@@ -1095,7 +1099,7 @@ exports.getAvailablePD = function (req, res) {
           objTemp['margin'] = availablePDsArray[j].total - availablePDsArray[j].count
           returns.push(objTemp)
         }
-        return res.json({results: returns})
+        return res.status(200).json({results: returns})
       }
     }
   }, opts, fields)
@@ -1134,7 +1138,7 @@ exports.getMyPDs = function (req, res) {
 exports.cancelMyPD = function (req, res, next) {
   let diagId = req.body.diagId || null
   if (diagId === null) {
-    return res.json({results: '请输入diagId'})
+    return res.status(412).send('Please Check Input of diagId')
   }
   let query = {diagId: diagId}
   PersionalDiag.getOne(query, function (err, item) {
@@ -1146,16 +1150,16 @@ exports.cancelMyPD = function (req, res, next) {
       let threeDaysLater = new Date(today)
       threeDaysLater.setDate(today.getDate() + 3)
       if (threeDaysLater >= bookingDay) {
-        return res.json({results: '超过可取消时间'})
+        return res.status(406).send('Exceeds the Time Limit')
       } else {
         let upObj = {$set: {status: 3}}
         PersionalDiag.update(query, upObj, function (err, upItem) {
           if (err) {
             return res.status(500).send(err)
           } else if (upItem.n === 0) {
-            return res.json({results: '无面诊记录'})
+            return res.status(404).send('PD Not Found')
           } else if (upItem.nModified === 0) {
-            return res.json({results: '取消失败'})
+            return res.status(304).send('Not Modified')
           } else {
             // return res.json({results: '取消成功'})
             req.body.PDInfo = item
@@ -1184,10 +1188,10 @@ exports.updatePDCapacityUp = function (req, res) {
     if (err) {
       return res.status(500).send(err)
     } else if (upDoctor.nModified === 0) {
-      return res.json({results: '面诊数量未更新成功，请检查输入'})
+      return res.status(304).send('Not Modified')
     } else if (upDoctor.nModified !== 0) {
       // return res.json({results: '面诊数量更新成功'})
-      return res.json({results: '取消成功'})
+      return res.status(201).send('Cancel Success')
     }
   }, opts)
 }

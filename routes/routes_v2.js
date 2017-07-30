@@ -2233,22 +2233,27 @@ module.exports = function (app, webEntry, acl) {
    *           type: object
    *           properties:
    *             results:
-   *               type: object
-   *               properties:
-   *                 PersonalDiags:
-   *                   description: "某医生两周内的面诊加号服务信息"
-   *                   type: "array"
-   *                   items:
-   *                     PersonalDiag:
-   *                     type: object
-   *                     properties:
-   *                       day:
-   *                         type: string
-   *                       time:
-   *                         type: string
-   *                       margin:
-   *                         type: number
-   *                         description: "某时段剩余可预约数量"
+   *               description: "某医生两周内的面诊加号服务信息"
+   *               type: "array"
+   *               items:
+   *                 PersonalDiag:
+   *                 type: object
+   *                 properties:
+   *                   day:
+   *                     type: string
+   *                     format: "YYYYMMDD"
+   *                   time:
+   *                     type: string
+   *                     enum:
+   *                       - "Morning"
+   *                       - "Afternoon"
+   *                   margin:
+   *                     type: number
+   *                     description: "某时段剩余可预约数量"
+   *       500:
+   *         description: "Internal Server Error"
+   *       404:
+   *         description: "PD Not Found"
    */
   app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getAvailablePD)
   // 患者端 预约面诊 2017-07-27 YQC 生成了验证码但是验证码的发送还未实现
@@ -2288,7 +2293,7 @@ module.exports = function (app, webEntry, acl) {
    *               - "Morning"
    *               - "Afternoon"
    *     responses:
-   *      200:
+   *       200:
    *         description: "Operation success."
    */
   app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.updatePDCapacityDown, serviceCtrl.newPersonalDiag, orderCtrl.getOrderNo, orderCtrl.updateOrder)
@@ -2316,14 +2321,26 @@ module.exports = function (app, webEntry, acl) {
    *         properties:
    *           token:
    *             type: "string"
+   *             description: "医生的token"
    *           diagId:
    *             type: "string"
+   *             description: "要确认的面诊ID"
    *     responses:
-   *      200:
-   *         description: "Operation success."
+   *       201:
+   *         description: "Cancel Success"
+   *       304:
+   *         description: "Not Modified"
+   *       500:
+   *         description: "Internal Server Error"
+   *       404:
+   *         description: "PD Not Found"
+   *       406:
+   *         description: "Exceeds the Time Limit"
+   *       412:
+   *         description: "Please Check Input of diagId"
    */
   app.post(version + '/services/cancelMyPD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.cancelMyPD, serviceCtrl.updatePDCapacityUp)
-  // 患者端 我的面诊服务 根据面诊状态获取面诊服务列表 不填写status则返回全部面诊服务列表 还未添加分页显示
+  // 患者端 我的面诊服务列表 还未添加分页显示
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者
    * @swagger
    * /services/myPD:
@@ -2338,13 +2355,34 @@ module.exports = function (app, webEntry, acl) {
    *     parameters:
    *     - name: "token"
    *       in: "query"
-   *       description: "Token."
+   *       description: "患者的token"
    *       required: true
    *       type: "string"
    *     - name: "status"
    *       in: "query"
+   *       description: "要查询的面诊服务状态类型，不填写status则返回未开始的面诊服务列表,0: 未开始，1: 已完成，2: 未进行自动结束，3: 患者取消，4: 医生停诊或取消"
    *       required: false
    *       type: "number"
+   *       enum:
+   *         - "0"
+   *         - "1"
+   *         - "2"
+   *         - "3"
+   *         - "4"
+   *     - name: "day"
+   *       in: "query"
+   *       description: "要查询的面诊日期，不填写则返回所有面诊服务列表，格式为YYYY-MM-DD"
+   *       required: false
+   *       type: "string"
+   *       format: "YYYY-MM-DD"
+   *     - name: "time"
+   *       in: "query"
+   *       description: "要查询的面诊日期时段，不填写则返回所有时段面诊服务列表"
+   *       required: false
+   *       type: "string"
+   *       enum:
+   *         - "Morning"
+   *         - "Afternoon"
    *     responses:
    *       200:
    *         description: "Operation success."
@@ -2440,45 +2478,33 @@ module.exports = function (app, webEntry, acl) {
    *         type: object
    *         required:
    *           - "token"
-   *           - "patientId"
-   *           - "day"
-   *           - "time"
+   *           - "diagId"
    *           - "code"
    *         properties:
    *           token:
    *             type: "string"
    *             description: "医生的token"
-   *           patientId:
+   *           diagId:
    *             type: "string"
-   *             description: "要确认的患者的userId"
-   *           day:
-   *             type: "string"
-   *             format: "YYYY-MM-DD"
-   *           time:
-   *             type: "string"
-   *             enum:
-   *               - "Morning"
-   *               - "Afternoon"
+   *             description: "要确认的面诊ID"
    *           code:
    *             type: "string"
    *             description: "患者提供的验证码"
    *     responses:
-   *       200:
+   *       201:
    *         description: "Confirmation Success"
    *       412:
-   *         description: "Please Check Input of day, time, code/patientId"
+   *         description: "Please Check Input of diagId, code"
    *       406:
    *         description: "Wrong Code"
    *       500:
    *         description: "Internal Server Error"
-   *       400:
-   *         description: "Role of the User is neither a doctor nor a patient"
    *       404:
-   *         description: "PD/Patient/User Not Found"
+   *         description: "PD Not Found"
    *       304:
    *         description: "Not Modified"
    */
-  app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getPatientObject, serviceCtrl.confirmPD)
+  app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.confirmPD)
 
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
