@@ -43,26 +43,24 @@ exports.getDoctorObject = function (req, res, next) {
 // 注释 输入，status，type，name，skip，limit，承接doctorObject；输出，问诊信息
 exports.getCounsels = function (req, res) {
   // 查询条件
+  console.log(req.body.doctorObject)
   let _doctorId = req.body.doctorObject._id || null
   let _status = req.query.status || null
   let _type = req.query.type || null
   let _name = req.query.name || null
   let _skip = req.query.skip || null
   let _limit = req.query.limit || null
-  let query
+  let query = {doctorId: _doctorId}
 
   if (_skip === null) {
     _skip = 0
   }
   // type和status可以为空
-  if (_type == null && _status != null) {
-    query = {doctorId: _doctorId, status: _status}
-  } else if (_type != null && _status == null) {
-    query = {doctorId: _doctorId, type: _type}
-  } else if (_type == null && _status == null) {
-    query = {doctorId: _doctorId}
-  } else {
-    query = {doctorId: _doctorId, status: _status, type: _type}
+  if (_status != null) {
+    query['_status'] = _status
+  }
+  if (_type != null) {
+    query['_type'] = _type
   }
   // if(_name!=""&&_name!=undefined){
   //   query["patientId.name"]=_name;
@@ -79,7 +77,7 @@ exports.getCounsels = function (req, res) {
   if (_name) {
     populate['match'] = {'name': nameReg}
   }
-  console.log(populate)
+  // console.log(populate)
   Counsel.getSome(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)

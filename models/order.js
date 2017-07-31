@@ -3,6 +3,11 @@ var mongoose = require('mongoose')
 
 var orderSchema = new mongoose.Schema({
   userId: String, // {type: mongoose.Schema.Types.ObjectId, ref:'user'},
+  patientName: String,
+  doctorId: String,
+  doctorName: String,
+  // userObject: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  // doctorObject: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   orderNo: String,
   ordertime: Date,
   money: Number,
@@ -16,7 +21,15 @@ var orderSchema = new mongoose.Schema({
   paytime: Date,
   refundNo: String, // 退款单号
   refundAppTime: Date, // 退款申请时间
-  refundSucTime: Date // 退款成功时间
+  refundSucTime: Date, // 退款成功时间
+  // patientName: String,
+
+  // time: Date,
+  type: Number,
+  freeFlag: Number,
+  docInChaObject: {type: mongoose.Schema.Types.ObjectId, ref: 'doctorsInCharge'},
+  conselObject: {type: mongoose.Schema.Types.ObjectId, ref: 'counsel'},
+  perDiagObject: {type: mongoose.Schema.Types.ObjectId, ref: 'personalDiag'}
 })
 
 var orderModel = mongoose.model('order', orderSchema)
@@ -100,6 +113,19 @@ Order.removeOne = function (query, callback, opts) {
     }
     callback(null, orderss)
   })
+}
+
+Order.aggregate = function (array, callback) {
+  let _array = array || []
+  orderModel  
+    .aggregate(_array)
+    .exec(function (err, results) {
+      if (err) {
+        return callback(err)
+      }
+      console.log(results)
+      callback(null, results)
+    })
 }
 
 module.exports = Order

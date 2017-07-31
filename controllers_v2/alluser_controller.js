@@ -407,7 +407,7 @@ exports.getAlluserList = function (role) {
     }
         // 通过子表查询主表，定义主表查询路径及输出内容
         // var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
-    console.log(query)
+    // console.log(query)
     Alluser.getSome(query, function (err, userlist) {
       if (err) {
         return res.status(500).send(err.errmsg)
@@ -506,7 +506,7 @@ exports.countAlluserList = function (req, res) {
   }
         // 通过子表查询主表，定义主表查询路径及输出内容
         // var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
-  console.log(query)
+  // console.log(query)
   Alluser.countSome(query, function (err, userlist) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -894,7 +894,7 @@ exports.checkBinding = function (req, res, next) {
             }
                         // console.log(jsondata);
             request({
-              url: 'http://' + webEntry.domain + ':4050/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
+              url: 'http://' + webEntry.domain + ':4060/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
               method: 'POST',
               body: jsondata,
               json: true
@@ -1035,7 +1035,7 @@ exports.login = function (req, res) {
             }
 
                         // 2017-06-07GY调试
-            console.log('login_success')
+            // console.log('login_success')
 
             res.json({results: results})
           })
@@ -1085,7 +1085,7 @@ exports.getAlluserID = function (req, res) {
     if (item === null) {
       res.json({results: 1, mesg: "Alluser doesn't Exist!"})
     } else {
-      console.log(item)
+      // console.log(item)
       res.json({results: 0, AlluserId: item.userId, phoneNo: item.phoneNo, roles: item.role, openId: item.openId, mesg: 'Get AlluserId Success!'})
     }
   })
@@ -1139,7 +1139,7 @@ exports.sendSMS = function (req, res) {
     param = _reason
     JSONData = J6 + '"' + Jsonstring1 + '"' + ':' + '{' + '"' + Jsonstring2 + '"' + ':' + '"' + appId + '"' + ',' + '"' + Jsonstring3 + '"' + ':' + '"' + param + '"' + ',' + '"' + Jsonstring4 + '"' + ':' + '"' + tplId + '"' + ',' + '"' + Jsonstring5 + '"' + ':' + '"' + _mobile + '"' + '}' + '}' + '}'
   }
-  console.log(JSONData)
+  // console.log(JSONData)
   var query = {'Expire': {'$lte': now.getTime()}}
   Sms.remove(query, function (err, item) {
     if (err) {
@@ -1211,13 +1211,13 @@ exports.sendSMS = function (req, res) {
               response.on('end', function () {
                                 // console.log("### end ##");
                 // var json = eval('(' + resdata + ')')
-                console.log(resdata)
+                // console.log(resdata)
                 var json = evil(resdata)
                 code = json.resp.respCode
                 if (code === '000000') {
                   res.json({results: 0, mesg: "Alluser doesn't Exist!"})
                 } else {
-                  res.json({results: 2, ErrorCode: code})
+                  res.json({results: 1, mesg: {'ErrorCode': code}})
                 }
                                 // console.log(json.resp.respCode);
               })
@@ -1552,6 +1552,9 @@ exports.changerole = function (req, res) {
   })
 }
 exports.checkPatient = function (req, res, next) {
+  if (req.session.role === 'patient') {
+    return next()
+  }
   if (req.query.patientId === null || req.query.patientId === '' || req.query.patientId === undefined) {
     if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
       return res.json({result: '请填写patientId!'})
@@ -1575,6 +1578,9 @@ exports.checkPatient = function (req, res, next) {
 }
 
 exports.checkDoctor = function (req, res, next) {
+  if (req.session.role === 'doctor') {
+    return next()
+  }
   if (req.query.doctorId === null || req.query.doctorId === '' || req.query.doctorId === undefined) {
     if (req.body.doctorId === null || req.body.doctorId === '' || req.body.doctorId === undefined) {
       return res.json({result: '请填写doctorId!'})
@@ -1594,5 +1600,67 @@ exports.checkDoctor = function (req, res, next) {
     } else {
       next()
     }
+  })
+}
+
+exports.getAlluserObject = function (req, res, next) {
+  var userId = req.session.userId
+  var query = {
+    userId: userId
+  }
+  Alluser.getOne(query, function (err, user) {
+    if (err) {
+      console.log(err)
+      return res.status(500).send('服务器错误, 用户查询失败!')
+    }
+    if (user === null) {
+      return res.json({result: '不存在的用户ID！'})
+    }
+    req.userObject = user
+    next()
+  })
+}
+
+exports.getPatientObject = function (req, res, next) {
+  var patientId = req.query.patientId || req.body.patientId || null
+  if (patientId === null || patientId === '') {
+    return res.json({result: '请填写patientId!'})
+  }
+  var query = {
+    userId: patientId,
+    role: 'patient'
+  }
+  Alluser.getOne(query, function (err, patient) {
+    if (err) {
+      console.log(err)
+      return res.status(500).send('服务器错误, 用户查询失败!')
+    }
+    if (patient == null) {
+      return res.json({result: '不存在的患者ID！'})
+    }
+    req.patientObject = patient
+    next()
+  })
+}
+
+exports.getDoctorObject = function (req, res, next) {
+  var doctorId = req.query.doctorId || req.body.doctorId || null
+  if (doctorId === null || doctorId === '') {
+    return res.json({result: '请填写doctorId!'})
+  }
+  var query = {
+    userId: doctorId,
+    role: 'doctor'
+  }
+  Alluser.getOne(query, function (err, doctor) {
+    if (err) {
+      console.log(err)
+      return res.status(500).send('服务器错误, 用户查询失败!')
+    }
+    if (doctor == null) {
+      return res.json({result: '不存在的医生ID！'})
+    }
+    req.doctorObject = doctor
+    next()
   })
 }

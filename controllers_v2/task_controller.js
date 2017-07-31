@@ -5,14 +5,14 @@ var Alluser = require('../models/alluser')
 var Message = require('../models/message')
 var News = require('../models/news')
 
-// 注释 获取任务模版 输入，userId，sortNo（可选）；输出，返回任务模版
+// 注释 获取多项任务(模版) 输入，userId（未输入则获取模版），sortNo（可选）；输出，返回多项任务（模版）
 exports.getTasks = function (req, res) {
   var userId = req.query.userId
   var query = {userId: userId}
 
   Task.getSome(query, function (err, tasks) {
     if (err) {
-      return res.status(500).send(err.errmsg)
+      return res.status(500).send(err)
     }
     // 未输入userId则为管理员
     if (tasks.length === 0) {
@@ -27,13 +27,14 @@ exports.getTasks = function (req, res) {
     Task.getSome(query, function (err, tasks) {
       if (err) {
         return res.status(500).send(err.errmsg)
+      } else {
+        return res.json({results: tasks})
       }
-
-      res.json({results: tasks})
     })
   })
 }
-// 注释 用户修改自有某一任务的状态 输入，session.userId,sortNo,type,code,status;输出，修改相应任务状态
+
+// 注释 用户修改某一任务的状态 输入，session.userId,sortNo,type,code,status;输出，修改相应任务状态
 exports.updateStatus = function (req, res) {
   var userId = req.session.userId
   var sortNo = req.body.sortNo
@@ -200,11 +201,11 @@ exports.insertTaskModel = function (req, res) {
 // 注释 根据userId获取任务 输入，session.id；输出，用户任务
 exports.getUserTask = function (req, res) {
   // var userId = 'Admin';
-  var query = {userId: req.session.userId}
+  var query = {userId: req.query.userId}
 
   Task.getOne(query, function (err, task) {
     if (err) {
-      return res.status(500).send(err.errmsg)
+      return res.status(500).send(err)
     }
     res.json({result: task})
   })

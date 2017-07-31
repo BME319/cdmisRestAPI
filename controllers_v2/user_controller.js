@@ -552,7 +552,7 @@ exports.checkBinding = function (req, res, next) {
             }
                         // console.log(jsondata);
             request({
-              url: 'http://' + webEntry.domain + ':4050/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
+              url: 'http://' + webEntry.domain + ':4060/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
               method: 'POST',
               body: jsondata,
               json: true
@@ -659,6 +659,7 @@ exports.login = function (req, res) {
           var userPayload = {
             _id: user._id,
             userId: user.userId,
+            name: user.name,
             role: role,
             exp: Date.now() + config.TOKEN_EXPIRATION * 1000
           }
@@ -693,7 +694,7 @@ exports.login = function (req, res) {
             }
 
                         // 2017-06-07GY调试
-            console.log('login_success')
+            // console.log('login_success')
 
             res.json({results: results})
           })
@@ -743,7 +744,7 @@ exports.getUserID = function (req, res) {
     if (item === null) {
       res.json({results: 1, mesg: "User doesn't Exist!"})
     } else {
-      console.log(item)
+      // console.log(item)
       res.json({results: 0, UserId: item.userId, phoneNo: item.phoneNo, roles: item.role, openId: item.openId, mesg: 'Get UserId Success!'})
     }
   })

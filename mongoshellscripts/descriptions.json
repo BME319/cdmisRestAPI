@@ -1,0 +1,11 @@
+[
+  {
+    "name": "schedule_develop.js",
+    "descriptions": "咨询自动结束"
+
+  },
+  {
+    "name": "allstopcounsel.js",
+    "descriptions": "获取所有结束的咨询信息"
+  }
+]
