@@ -133,11 +133,17 @@ try {
 
 // 定时任务相关 testing 2017-07-16 GY
 var schedule = require('node-schedule')
+// 自动扫描退款申请的订单，调用退款查询接口，如果退款成功修改订单状态 2017-07-16 GY
 var wechatCtrl = require('./controllers_v2/wechat_controller')
 schedule.scheduleJob('0 0 * * * *', wechatCtrl.autoRefundQuery)
+
+// 自动扫描所有任务方案，3个月以上无操作时，提醒对应主管医生调整方案 2017-07-26 GY
+var taskCtrl = require('./controllers_v2/task_controller')
+schedule.scheduleJob('30 0 8 * * *', taskCtrl.remindChangeTask)
 
 var personalDiagCtrl = require('./controllers_v2/personalDiag_controller')
 // 每天00:01更新医生的可预约面诊availablePDs
 schedule.scheduleJob('0 1 0 * * *', personalDiagCtrl.autoAvailablePD)
 // 每日12:01自动更新过期面诊PD 待需求确认
 schedule.scheduleJob('0 1 12 * * *', personalDiagCtrl.autoOverduePD)
+
