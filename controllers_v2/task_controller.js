@@ -1,6 +1,9 @@
 // 注释 2017-07-14 YQC
 // var config = require('../config')
 var Task = require('../models/task')
+var Alluser = require('../models/alluser')
+var Message = require('../models/message')
+var News = require('../models/news')
 
 // 注释 获取多项任务(模版) 输入，userId（未输入则获取模版），sortNo（可选）；输出，返回多项任务（模版）
 exports.getTasks = function (req, res) {
@@ -65,7 +68,13 @@ exports.updateStatus = function (req, res) {
         }
         if (flag === 1) { break }
       }
-      var upObj = {$set: {task: item.task}}
+      // modified by GY 2017-07-26 added `date`
+      var upObj = {
+        $set: {
+          task: item.task, 
+          date: new Date()
+        }
+      }
 
       Task.updateOne(query, upObj, function (err, task) {
         if (err) {
@@ -110,7 +119,13 @@ exports.updateStartTime = function (req, res) {
       }
       if (flag === 1) { break }
     }
-    var upObj = {$set: {task: item.task}}
+    // modified by GY 2017-07-26 added `date`
+    var upObj = {
+      $set: {
+        task: item.task, 
+        date: new Date()
+      }
+    }
 
     Task.updateOne(query, upObj, function (err, task) {
       if (err) {
@@ -167,7 +182,8 @@ exports.insertTaskModel = function (req, res) {
     userId: req.body.userId,
     sortNo: req.body.sortNo,
     name: task.name,
-    date: task.date,
+    // modified by GY 2017-07-26 modified `date` as new Date()
+    date: new Date(),
     description: task.description,
     invalidFlag: task.invalidFlag,
     task: task.task
@@ -310,6 +326,9 @@ exports.updateContent = function (req, res) {
         type: req.body.type,
         details: typeNew
       }
+    }, 
+    $set: {
+      date: new Date()
     }
   }
   // return res.json({query: query, upObj: upObj});
@@ -322,4 +341,147 @@ exports.updateContent = function (req, res) {
       return res.json({result: '更新成功', results: uptask})
     }
   }, {new: true})
+}
+
+// 取3个月以上无操作的数据，提醒主管医生为其调整方案 2017-07-26 GY 
+exports.remindChangeTask = function () {
+  // 设定时间线为当前的90天前
+  let now = new Date()
+
+  function add0 (m) {
+    return m < 10 ? '0' + m : m
+  }
+  let y = now.getFullYear()
+  let m = now.getMonth() + 1
+  let d = now.getDate()
+
+  let timeline = now - 1000*60*60*24*90
+
+  function nextOrEnd (taskItems, index) {
+    if (index < taskItems.length-1) {
+      sendMessage(taskItems, ++index)
+    } else {
+      console.log('auto_remind_change_task_success')
+    }
+  }
+
+  function sendMessage (taskItems, index) {
+    let queryP = {userId: taskItems[index].userId}
+    // 调试用输出
+    // console.log({patientId: queryP.userId})
+    let doctorInchargeid = ''
+    Alluser.getOne(queryP, function (err, patientItem) {
+      if (err) {
+        let warningGetPatient = queryP.userId + '_querying_error'
+        console.log(warningGetPatient)
+        console.log(err)
+        nextOrEnd(taskItems, index)
+      } else if (patientItem === null) {
+        let warningPatientNotFound = queryP.userId + '_not_found'
+        console.log(warningPatientNotFound)
+        nextOrEnd(taskItems, index)
+      } else {
+        let flag = 0
+        for (let i = patientItem.doctorsInCharge.length - 1; i > 0; i--) {
+          if (patientItem.doctorsInCharge[i].invalidFlag === 1) {
+            doctorInchargeid = patientItem.doctorsInCharge[i].doctorId
+            break
+          }
+          flag++
+        }
+        if (flag === patientItem.doctorsInCharge.length || doctorInchargeid === '') {
+          let warningDoctorNotFound = queryP.userId + '_no_doctor_in_charge_avaliable'
+          console.log(warningDoctorNotFound)
+          nextOrEnd(taskItems, index)
+        } else {
+          let queryD = {_id: doctorInchargeid}
+          Alluser.getOne(queryD, function (err, doctorItem) {
+            if (err) {
+              let warningGetDoctor = queryP.userId + '_`s_doctor_querying_error'
+              console.log(warningGetDoctor)
+              console.log(err)
+              nextOrEnd(taskItems, index)
+            } else if (doctorItem === null) {
+              let warningDoctorItemNotFound = queryP.userId + '_`s_doctor_item_not_found'
+              console.log(warningDoctorItemNotFound)
+              nextOrEnd(taskItems, index)
+            } else {
+              // 调试用输出
+              // console.log({doctorId: doctorItem.userId})
+              // 构建message表和news表数据结构
+              let messageId = 'MR' + y + add0(m) + add0(d) + queryP.userId
+              let title = '主管患者任务方案调整提醒'
+              let description = '您的患者_' + patientItem.name + '_的任务方案已经90天未更新，请前往方案定制处调整方案'
+              let messageData = {
+                messageId: messageId, 
+                userId: doctorItem.userId, 
+                sendBy: 'System', 
+                readOrNot: 0, 
+                type: 7, 
+                time: now, 
+                title: title, 
+                description: description
+              }
+              let queryN = {
+                userId: doctorItem.userId, 
+                userRole: 'doctor', 
+                sendBy: 'System', 
+                type: 7
+              }
+              let upNews = {
+                messageId: messageId, 
+                readOrNot: 0, 
+                time: now, 
+                title: title, 
+                description: description
+              }
+              let newsOpts = {upsert: true}
+              let newMessage = new Message(messageData)
+              newMessage.save(function (err, messageInfo) {
+                if (err) {
+                  let warningMessage = queryP.userId + '_`s_doctor_message_not_received'
+                  console.log(warningMessage)
+                  console.log(err)
+                  nextOrEnd(taskItems, index)
+                } else {
+                  // 调试用输出
+                  // console.log(messageInfo)
+                  News.update(queryN, upNews, function (err, upNewsRes) {
+                    if (err) {
+                      let warningNews = queryP.userId + '_`s_doctor_news_not_sent'
+                      console.log(warningNews)
+                      console.log(err)
+                      nextOrEnd(taskItems, index)
+                    } else {
+                      // 调试用输出
+                      // console.log(upNews)
+                      nextOrEnd(taskItems, index)
+                    }
+                  }, newsOpts)
+                }
+              })
+            }
+          })
+        }
+      }
+    })
+  }
+
+  // console.log(new Date())
+  // console.log(new Date(timeline))
+  let queryT = {
+    date: {$lte: timeline}
+  }
+  Task.getSome(queryT, function (err, taskItems) {
+    if (err) {
+      console.log('task_querying_error')
+      console.log('need_to_contact_admin')
+      console.log(err)
+    } else {
+      sendMessage(taskItems, 0)
+    }
+    // console.log(taskItems)
+    // console.log(taskItems[0].userId)
+    // console.log('auto_remind_change_task_success')
+  })
 }
