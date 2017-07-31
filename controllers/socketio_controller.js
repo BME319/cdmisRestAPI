@@ -3,6 +3,7 @@ var request = require('request');
 var webEntry = require('../settings').webEntry;
 
 var wechatCtrl = require('../controllers/wechat_controller');
+var commonFunc = require('../middlewares/commonFunc');
 
 var userWechatServer = {};
 var userWechatList = {};
@@ -54,7 +55,7 @@ function messageSaveSend(data, url,sender){
 
 
     // save data
-    var url = 'http://' + webEntry.domain + ':4050/api/v1/communication/communication';
+    var url = 'http://' + webEntry.domain + ':4060/api/v1/communication/communication';
     var jsondata = {
         messageType: messageType,
         sendBy:sendBy,
@@ -165,8 +166,8 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
     else{           // 群聊
         // console.log(receiver);
         request({
-            // url: 'http://' + webEntry.domain + ':4050/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
-            url: 'http://' + webEntry.domain + ':4050/api/v1/communication/team?teamId=' + data.msg.teamId,
+            // url: 'http://' + webEntry.domain + ':4060/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
+            url: 'http://' + webEntry.domain + ':4060/api/v1/communication/team?teamId=' + data.msg.teamId,
             method: 'GET',
             json:true
         }, function(err, response){
@@ -203,7 +204,7 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                     }
                     if(!online){       // 用户不在线
                         // custom card 群发
-                        if(data.msg.contentType == 'custom' && data.msg.content.type == 'card'){
+                        if(data.msg.contentType === 'custom' && data.msg.content.type === 'card'  || (data.msg.contentType === 'text' || data.msg.contentType === 'image' || data.msg.contentType === 'voice' )){
 
                             // console.log('in');
                             var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.content.consultationId +'_'+data.msg.teamId + "&#wechat_redirect";
@@ -228,11 +229,11 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                                             "color": "#173177"
                                         },
                                         "keyword3": {
-                                            "value": data.msg.content.help, //问题描述
+                                            "value": data.msg.content.counsel.help, //问题描述
                                             "color": "#173177"
                                         },
                                         "keyword4": {
-                                            "value": data.msg.content.time, //提交时间
+                                            "value": commonFunc.getNowFormatSecondMinus(new Date(data.msg.content.counsel.time)), //提交时间
                                             "color": "#173177"
                                         },
 
@@ -246,8 +247,8 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
 
                             // groupSend(data);
                             request({
-                                // url: 'http://'+ webEntry.domain +':4050/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
-                                url: 'http://'+ webEntry.domain +':4050/api/v1/wechat/messageTemplate',
+                                // url: 'http://'+ webEntry.domain +':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                                url: 'http://'+ webEntry.domain +':4060/api/v1/wechat/messageTemplate',
                                 method: 'POST',
                                 body: template,
                                 json:true
@@ -319,8 +320,8 @@ exports.chat = function (io, socket) {
             userWechatPatientList[user_id] = nickname;
         }
         else{
-            console.log('newUser not match');
-            console.log(data);
+            // console.log('newUser not match');
+            // console.log(data);
             // do
         }
         
@@ -381,7 +382,7 @@ exports.chat = function (io, socket) {
         var role = data.role;
         // var toUserId = data.to;
         
-        var url = 'http://'+ webEntry.domain +':4050/api/v1/wechat/download';
+        var url = 'http://'+ webEntry.domain +':4060/api/v1/wechat/download';
 
         if(clientType != 'doctor' && clientType!= 'patient' &&(contentType == 'image' || contentType == 'voice')){           // image voice
             var mediaId = data.msg.content.mediaId;
@@ -441,3 +442,18 @@ exports.otherRoom = function (io) {
 };
 
 
+dateFormat = function (fmt) { //author: meizz 
+    var o = {
+        "M+": this.getMonth() + 1, //月份 
+        "d+": this.getDate(), //日 
+        "h+": this.getHours(), //小时 
+        "m+": this.getMinutes(), //分 
+        "s+": this.getSeconds(), //秒 
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+        "S": this.getMilliseconds() //毫秒 
+    };
+    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o)
+    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    return fmt;
+}

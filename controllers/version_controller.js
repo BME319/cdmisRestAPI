@@ -20,18 +20,21 @@ exports.getVersionInfo = function(req, res) {
 	    	}
 	    	res.json({results:  {status:0, msg: items}});
 	    });
-    }
-    else{
+  }
+  else{
     	var opts = { sort: '-_id' };
     	query = {versionType: versionType};
+    	// console.log(query);
     	Version.getSome(query, function(err, items) {
-			if (err) {
+    		if (err) {
 	      		return res.status(500).send(err.errmsg);
 	    	}
-	    	if(items == null){
+	    	// console.log(items);
+	    	if(items.length == 0){
 	    		return res.status(400).send('版本号不存在');
 	    	}
 	    	else{
+	    		// console.log(items[0]);
 	    		if(items[0].versionName == versionName){
 		    		res.json({results: {status:0, msg: 'latest'}});
 		    	}

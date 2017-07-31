@@ -11,7 +11,8 @@ var commonFunc = {
 	        req.socket.remoteAddress ||
 	        req.connection.socket.remoteAddress || '';
 	    if(ip.split(',').length > 0){
-	        ip = ip.split(',')[0]
+	        // ip = ip.split(',')[0].split(':')[3]
+	        ip = ip.split(',')[0].split(':').pop()
 	    }
 	    return ip;
 	},
@@ -85,6 +86,43 @@ var commonFunc = {
 		var date = new Date();
 		//默认东8区时间
 		// date.setHours(date.getHours() + 8);
+
+		function add0(m) {
+			return m < 10 ? '0'+m : m
+		}
+		var y = date.getFullYear();
+		var m = date.getMonth() + 1;
+		var d = date.getDate();
+		var formatDate = y + '-' + add0(m) + '-' + add0(d);
+
+		//yyyy-mm-dd
+		return formatDate;
+	},
+	getNowFormatSecondMinus: function() {
+		//函数功能：用于将new Date()生成的0时区时间转成东八区时间字符串形式
+		var date = new Date();
+		//默认东8区时间
+		date.setHours(date.getHours());
+
+		function add0(m) {
+			return m < 10 ? '0'+m : m
+		}
+		var y = date.getFullYear();
+		var m = date.getMonth() + 1;
+		var d = date.getDate();
+		var h = date.getHours();
+		var mm = date.getMinutes();
+		var s = date.getSeconds();
+		var formatSecond = y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s);
+
+		//yyyy-mm-dd hh:mm:ss
+		return formatSecond;
+	}, 
+	getNowDateMinus: function() {
+		//函数功能：用于将new Date()生成的0时区时间转成东八区时间字符串形式
+		var date = new Date();
+		//默认东8区时间
+		date.setHours(date.getHours() - 16);
 
 		function add0(m) {
 			return m < 10 ? '0'+m : m

@@ -1,4 +1,5 @@
 var	config = require('../config'),
+    Doctor = require('../models/doctor'), 
 	Order = require('../models/order');
 var commonFunc = require('../middlewares/commonFunc');
 
@@ -15,33 +16,80 @@ exports.getOrder = function(req, res) {
 }
 
 exports.insertOrder = function(req, res, next) {
-    var money = req.body.money || null;
-    if(money === null || money == '' || money == 0){
+    var money = req.body.money;
+   
+    if(money == null || money === '' || money == 'undefined'){
+        console.log('in');
         return res.status(403).send('invalid input');
     }
-    var orderData = {
-        userId: req.body.userId,
-        orderNo: req.newId,//req.body.orderNo,
-        ordertime:new Date(),
-        money: money,
-        goodsInfo:{
-            class:req.body.class,
-            name:req.body.name,
-            notes:req.body.notes
-        },
-        // paystatus:req.body.paystatus,
-        paystatus: 0,   // req.body.paystatus,
-        paytime:new Date(req.body.paytime)
-    };
 
-    var newOrder = new Order(orderData);
-    newOrder.save(function(err, item) {
+    var query = { 
+        userId: req.body.notes
+    };
+    Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            return res.status(500).send(err.errmsg);
+            // console.log(err);
+            return res.status(500).send('服务器错误, 用户查询失败!');
         }
-        // res.json({results: item});
-        req.orderObject = item;
-        next();
+        if (doctor == null) {
+            return res.json({result:'不存在的医生ID！'});
+        }
+        else{
+            var true_money;
+            if(req.body.class == '01'){
+                true_money = doctor.charge1 * 100;
+            }
+            else if(req.body.class == '02'){
+                true_money = doctor.charge2 * 100;
+            }
+            else if(req.body.class == '03'){
+                true_money = doctor.charge2 * 100 - doctor.charge1 * 100;
+            }
+            else{
+                return res.status(403).send('服务类型不存在!');
+            }
+            if(money != true_money){
+                return res.status(403).send('服务费用不匹配!');
+            }
+            else{
+                var paystatus;
+                if(true_money == 0){
+                    paystatus = 2;
+                }
+                else{
+                    paystatus = 0;
+                }
+                var orderData = {
+                    userId: req.body.userId,
+                    orderNo: req.newId,//req.body.orderNo,
+                    ordertime:new Date(),
+                    money: money,
+                    goodsInfo:{
+                        class:req.body.class,
+                        name:req.body.name,
+                        notes:req.body.notes
+                    },
+                    // paystatus:req.body.paystatus,
+                    paystatus: paystatus,   // req.body.paystatus,
+                    paytime: new Date(req.body.paytime)
+                };
+
+                var newOrder = new Order(orderData);
+                newOrder.save(function(err, item) {
+                    if (err) {
+                        return res.status(500).send(err.errmsg);
+                    }
+                    // res.json({results: item});
+                    if(true_money == 0){
+                        return res.json({results:{ status:1,msg:"支付金额为0，无需进行支付"}})
+                    }
+                    else{
+                        req.orderObject = item;
+                        next();
+                    }
+                });
+            }
+        }
     });
 }
 
@@ -68,6 +116,7 @@ exports.checkPayStatus = function (type) {
             if (err) {
                 return res.status(500).send(err);
             }
+            console.log(item)
             if (item === null) {
                 return res.status(400).send('不存在的订单');
             }

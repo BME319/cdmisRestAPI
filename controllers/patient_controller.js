@@ -186,7 +186,7 @@ exports.getPatientObject = function (req, res, next) {
     };
     Patient.getOne(query, function (err, patient) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (patient == null) {
@@ -260,7 +260,7 @@ exports.checkPatientId = function (req, res, next) {
     };
     Patient.getOne(query, function (err, patient) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (patient != null) {
@@ -532,7 +532,7 @@ exports.getDoctorObject = function (req, res, next) {
     };
     Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            console.log(err);
+            // console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (doctor == null) {
@@ -676,7 +676,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 	else{
 		if (_dId.substr(0,1) == 'h'){
 			var queryH = {TDCurl:_dId};
-			console.log(_dId);
+			// console.log(_dId);
 			User.getOne(queryH, function(err, item) {
 				if (err) {
 					return res.status(500).send(err)
@@ -691,7 +691,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 					};
 					Doctor.getOne(queryD, function (err, doctor) {
 						if (err) {
-							console.log(err);
+							// console.log(err);
 							return res.status(500).send('服务器错误, 用户查询失败!');
 						}
 						if (doctor == null) {
@@ -703,7 +703,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 						};
 						Patient.getOne(query, function (err, patient) {
 							if (err) {
-								console.log(err);
+								// console.log(err);
 								return res.status(500).send('服务器错误, 用户查询失败!');
 							}
 							if (patient == null) {
@@ -748,7 +748,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 			};
 			Doctor.getOne(queryD, function (err, doctor) {
 				if (err) {
-					console.log(err);
+					// console.log(err);
 					return res.status(500).send('服务器错误, 用户查询失败!');
 				}
 				if (doctor == null) {
@@ -760,7 +760,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 				};
 				Patient.getOne(query, function (err, patient) {
 					if (err) {
-						console.log(err);
+						// console.log(err);
 						return res.status(500).send('服务器错误, 用户查询失败!');
 					}
 					if (patient == null) {
@@ -806,6 +806,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 }
 //3. DpRelation表中医生绑定患者
 exports.bindingPatient = function(req, res, next) {
+	console.log("heng")
 	var doctorId = req.body.doctor_id;
 	var patientId = req.body.patient_id;
 	if (req.body.dpRelationTime == null || req.body.dpRelationTime == '') {
@@ -857,6 +858,7 @@ exports.bindingPatient = function(req, res, next) {
 						// return res.json({result:'修改成功', results: updpRelation, flag:'0'});
 						req.body.userId = req.body.doctorId;
 						req.body.role = 'doctor';
+						console.log(new Date())
 						req.body.postdata = {
 
   							"template_id":"F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M",
@@ -872,7 +874,8 @@ exports.bindingPatient = function(req, res, next) {
                        				"color":"#173177"
                    				},
                    				"keyword2": {
-                       				"value":commonFunc.getNowFormatSecond(),//添加的时间
+                       				// "value":commonFunc.getNowDateMinus(),//添加的时间
+                       				"value": commonFunc.getNowFormatSecondMinus(),//添加的时间             				
                        				"color":"#173177"
                    				},
                    				"remark":{
@@ -908,7 +911,7 @@ exports.bindingPatient = function(req, res, next) {
                        	"color":"#173177"
                    	},
                    	"keyword2": {
-                       	"value":commonFunc.getNowFormatSecond(),//添加的时间
+                       	"value": commonFunc.getNowFormatSecondMinus(),//添加的时间
                        	"color":"#173177"
                    	},
                    	"remark":{

@@ -78,7 +78,7 @@ exports.getCompliance = function (req, res, next) {
     };
     Compliance.getOne(query, function(err, complianceitem){
       if (err) {
-        console.log(err);
+        // console.log(err);
         return res.status(500).send('查询失败');
       }
 

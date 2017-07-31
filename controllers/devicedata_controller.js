@@ -7,6 +7,7 @@ var	request = require('request'),
 	Device = require('../models/device');
 
 exports.bindingDevice = function(req, res){
+    console.log("in 111");
 	var userId = req.body.userId || null;
 	var appId = req.body.appId || null;
 	var twoDimensionalCode = req.body.twoDimensionalCode || null;
@@ -14,7 +15,7 @@ exports.bindingDevice = function(req, res){
 	if(userId === null || userId === '' || appId === null || appId === '' || twoDimensionalCode === null || twoDimensionalCode === '' ){
 		return res.status(400).send('invalid input');     
 	}
-   
+
     request({
         method: 'POST',
         url: config.third_party_data.bloodpressure.get_device_url,
@@ -23,6 +24,8 @@ exports.bindingDevice = function(req, res){
         if(err){
             return res.status(500).send(err.errmsg);     
         }
+        console.log(config.third_party_data.bloodpressure.get_device_url);
+        console.log(body);
         body = JSON.parse(body);  
         if(body.errorCode == 0){
         	// save device info
@@ -36,17 +39,50 @@ exports.bindingDevice = function(req, res){
 		        deviceType: 'sphygmomanometer',
 		        deviceName: '血压计',
 		        deviceInfo: body.deviceInfo
-		      };
-		      var newDevice = new Device(deviceData);
+		    };
+		    var newDevice = new Device(deviceData);
 		      newDevice.save(function(err, Info) {
 		        if (err) {
                     if(err.code == 11000){
                         // 403   （禁止） 服务器拒绝请求。
-                        return res.status(403).send('duplication key');
+                        // return res.status(403).send('duplication key');
+                        Device.getOne({deviceId: deviceId}, function(err, item) {
+                            if (err) {
+                                return res.status(500).send(err.errmsg);
+                            }
+                            if(item){
+                                // res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
+                                // console.log('null');
+                                // res.json(results);
+                                Patient.getOne({userId: item.userId}, function(err, patient) {
+                                    if (err) {
+                                        return res.status(500).send(err.errmsg);
+                                    }
+                                    if(patient){
+                                        res.json({results: patient.name });
+                                    }
+                                    else{
+                                        res.json({results: '患者不存在' });
+                                    }
+                                    // res.json({results: patient.name + '已绑定该设备'});
+                                    
+                                });
+                            }
+                            else{
+                                // res.json({results: '该设备已被绑定'});
+                                res.json({results: ''});
+                            }
+                        })
                     }
-		            return res.status(500).send(err.errmsg);
+                    else{
+                        return res.status(500).send(err.errmsg);
+                    }
+		            
 		        }
-		        res.json({results: body});
+                else{
+                    res.json({results: body});
+                }
+		        
 		      });
         	
         }
@@ -108,7 +144,7 @@ exports.debindingDevice = function(req, res){
 }
 
 exports.receiveBloodPressure = function(req, res){
-  console.log("receiveBloodPressure"); 
+  // console.log("receiveBloodPressure"); 
   // var res_data = req.body;
   // console.log(res_data);
 
@@ -130,7 +166,7 @@ exports.receiveBloodPressure = function(req, res){
   Device.getOne(query, function(err, item) {
     if (err) {
         // return res.status(500).send(err.errmsg);
-        console.log('err');
+        // console.log('err');
         res.json(results);
     }
     if(item == null){
@@ -140,7 +176,7 @@ exports.receiveBloodPressure = function(req, res){
     }
     else{
       var userId = item.userId;
-      console.log(userId);
+      // console.log(userId);
       var querypatient = { 
     		userId: userId
     	};
@@ -148,12 +184,12 @@ exports.receiveBloodPressure = function(req, res){
     	Patient.getOne(querypatient, function (err, patient) {
         	if (err) {
             	// return res.status(500).send(err.errmsg);
-              console.log('err2');
+              // console.log('err2');
             	res.json(results);
         	}
         	if (patient == null) {
         		// return res.status(400).send('user not exist');
-            console.log('null2');
+            // console.log('null2');
         		res.json(results);
         	}
         	else {
@@ -210,8 +246,8 @@ function saveBPdata(patient, req, results, res){
             }
         }
     };
-    console.log(query);
-    console.log(upObj);
+    // console.log(query);
+    // console.log(upObj);
 
     VitalSign.update(query, upObj, function(err, updata) {
         if (err){
@@ -251,7 +287,7 @@ function saveBPdata(patient, req, results, res){
                 // return res.status(422).send(err.message);
                 res.json(results);
             }
-            console.log(updata);
+            // console.log(updata);
             
             if (err){
                 // return res.status(422).send(err.message);
@@ -331,7 +367,7 @@ function saveBPdata(patient, req, results, res){
                             results.code = 1;
                             results.status = 'success';
                             results.msg = '提交成功';
-                            console.log('提交成功');
+                            // console.log('提交成功');
                             res.json(results);  
                         })
                     }
