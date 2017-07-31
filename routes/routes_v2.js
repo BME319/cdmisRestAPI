@@ -2502,9 +2502,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: "PDs Not Found"
    */
   app.get(version + '/services/myPDpatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getPDPatients)
+
   // 医生端 确认面诊服务
   /** YQC annotation 2017-07-28 - acl 2017-07-28 医生
-
    * @swagger
    * /services/PDConfirmation:
    *   post:
