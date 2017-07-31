@@ -29,7 +29,8 @@ exports.getReport = function (req, res) {
   if (modify !== null && modify !== '') {
     modify = Number(modify)
   } else {
-    return res.json({result: '请填写modify!'})
+    modify = 0
+    // return res.json({result: '请填写modify!'})
   }
   if (timeTemp !== null && timeTemp !== '') {
     let currentTime = new Date(timeTemp)
@@ -102,15 +103,15 @@ exports.getReport = function (req, res) {
     return res.json({result: '请填写itemType!'})
   }
   var opts = {} // 'sort': '-time'
-  console.log(query)
+  // console.log(query)
   Report.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
     if (items === null) {
-      return res.json({result: '不存在该段时间的报告!'})
-    } else {
       // console.log('items', items)
+      return res.json({results: '不存在该段时间的报告!'})
+    } else {
       return res.json({results: items})
     }
   }, opts)
@@ -249,7 +250,8 @@ exports.getVitalSigns = function (req, res, next) {
   if (modify !== null && modify !== '') {
     modify = Number(modify)
   } else {
-    return res.json({result: '请填写modify!'})
+    modify = 0  // 默认查询当前
+    // return res.json({result: '请填写modify!'})
   }
   if (showType !== null && showType !== '') {
     if (timeTemp !== null && timeTemp !== '') {
@@ -365,7 +367,10 @@ exports.getVitalSigns = function (req, res, next) {
             }
           }
         }
-        let dateAndTime = {dataSBP, dataDBP, recordTimeTemp}
+        let data1 = dataSBP
+        let data2 = dataDBP
+        let dateAndTime = {data1, data2, recordTimeTemp}
+        // let dateAndTime = {dataSBP, dataDBP, recordTimeTemp}
         return res.json({results: dateAndTime})
       }, opts, fields)
     } else {
@@ -513,7 +518,10 @@ exports.getVitalSigns = function (req, res, next) {
               }
             }
           }
-          return res.json({results: { dataUFAll, dataPV, recordTimeAll }})
+          let data1 = dataUFAll
+          let data2 = dataPV
+          return res.json({results: { data1, data2, recordTimeAll }})
+          // return res.json({results: { dataUFAll, dataPV, recordTimeAll }})
         }
       })
     } else {
@@ -553,8 +561,9 @@ exports.getVitalSigns = function (req, res, next) {
             }
           }
         }
-        let dateAndTime = {dataTemp, recordTimeTemp}
-        return res.json({results: dateAndTime})
+        let data1 = dataTemp
+        return res.json({results: {data1, recordTimeTemp}})
+        // return res.json({results: dateAndTime})
       }, opts, fields)
     } else {
       next()
