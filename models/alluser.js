@@ -59,31 +59,27 @@ var alluserSchema = new mongoose.Schema({
   serviceSchedules: [
     {
       _id: 0,
-      // // 添加预约时段字段 结构 “YYYY-MM-DD-1"（某日上午）或“YYYY-MM-DD-2"（某日下午）YQC 2017-07-27
-      // bookingPeriod: String,
-      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sta', 'Sun']},
+      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta', 'Sun']},
       time: {type: String, enum: ['Morning', 'Afternoon']},
-      // 医生可以设置的面诊计数总数
-      total: Number
+      total: Number // 医生可以设置的某时段面诊总数
     }
   ],
   // 周期更新医生可预约的的面诊时间（患者查看）
   availablePDs: [
     {
       _id: 0,
-      availableDay: Date,
-      availableTime: {type: String, enum: ['Morning', 'Afternoon']},
-      // 医生已设置的面诊总数
-      total: Number,
-      // 已被预约的面诊计数，可用的面诊计数需要用total-count
-      count: {type: Number, default: 0}
+      availableDay: Date, // 可预约日期，数据存储为东八区当日零点
+      availableTime: {type: String, enum: ['Morning', 'Afternoon']}, // 可预约时段
+      total: Number, // 医生已设置的某时段面诊总数
+      count: {type: Number, default: 0}, // 已被预约的面诊计数，可用的面诊计数需要用total-count
+      invalidFlag: {type: Number, default: 0, enum: [0, 1]} // 是否停诊
     }
   ],
   serviceSuspendTime: [
     {
       _id: 0,
-      start: Date,
-      end: Date
+      start: Date, // 停诊起始日，数据存储为东八区当日零点
+      end: Date // 停诊截止日，数据存储为东八区当日23:59:59
     }
   ],
   charge1: {type: Number, default: 30},
