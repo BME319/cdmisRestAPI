@@ -14,7 +14,7 @@ exports.getSessionObject = function (req, res, next) {
       return res.status(500).send(err)
     }
     if (user === null) {
-      return res.status(404).json({results: '找不到用户'})
+      return res.status(404).send('User Not Found')
     } else if (req.session.role === 'patient') {
       req.body.patientObject = user
       next()
@@ -22,7 +22,7 @@ exports.getSessionObject = function (req, res, next) {
       req.body.doctorObject = user
       next()
     } else {
-      return res.status(400).json({results: '登录角色不是医生或患者'})
+      return res.status(400).send('Role of the User is neither a doctor nor a patient')
     }
   })
 }
@@ -30,7 +30,7 @@ exports.getSessionObject = function (req, res, next) {
 exports.getPatientObject = function (req, res, next) {
   let patientId = req.body.patientId || req.query.patientId || null
   if (patientId === null) {
-    return res.status(412).json({results: '请填写patientId'})
+    return res.status(412).send('Please Check Input of patientId')
   }
   let query = {userId: patientId, role: 'patient'}
   Alluser.getOne(query, function (err, patient) {
@@ -38,7 +38,7 @@ exports.getPatientObject = function (req, res, next) {
       return res.status(500).send(err)
     }
     if (patient === null) {
-      return res.status(404).json({results: '找不到患者'})
+      return res.status(404).send('Patient Not Found')
     } else {
       req.body.patientObject = patient
       next()
@@ -349,7 +349,7 @@ exports.setServiceSchedule = function (req, res, next) {
   let pullObj = {}
   let pushObj = {}
   if (day === null || time === null || total === null) {
-    return res.status(412).json({results: '请输入day, time, count'})
+    return res.status(412).json({results: '请输入day, time, total'})
   } else {
     // // 添加预约时段字段 YQC 2017-07-27
     // let bookingPeriod = day
@@ -398,7 +398,7 @@ exports.setServiceSchedule = function (req, res, next) {
     }
   })
 }
-
+// YQC 2017-07-28
 exports.getDaysToUpdate = function (req, res, next) {
   let day = req.body.day || null
   let today = new Date(new Date().toDateString())
@@ -413,7 +413,7 @@ exports.getDaysToUpdate = function (req, res, next) {
     case 'Wed':
       nextDayNo = 3
       break
-    case 'Thur':
+    case 'Thu':
       nextDayNo = 4
       break
     case 'Fri':
@@ -445,7 +445,7 @@ exports.getDaysToUpdate = function (req, res, next) {
   req.body.nnmd = nextNextModDay
   next()
 }
-
+// YQC 2017-07-28
 exports.updateAvailablePD1 = function (req, res, next) {
   let nextModDay = new Date(req.body.nmd)
   let time = req.body.time || null
@@ -485,7 +485,7 @@ exports.updateAvailablePD1 = function (req, res, next) {
     }
   })
 }
-
+// YQC 2017-07-28
 exports.updateAvailablePD2 = function (req, res) {
   let nextNextModDay = new Date(req.body.nnmd)
   let time = req.body.time || null
@@ -580,41 +580,116 @@ exports.getMySchedules = function (req, res) {
 }
 
 // 设置面诊停诊时间 2017-07-15 GY
-exports.setServiceSuspend = function (req, res) {
+exports.setServiceSuspend = function (req, res, next) {
   let query = {userId: req.session.userId}
   let start = req.body.start || null
   let end = req.body.end || null
+  let today = new Date(new Date().toDateString())
+  let startOfStart = new Date(new Date(start).toDateString())
+  let endOfEnd = new Date(end)
+  endOfEnd.setDate(endOfEnd.getDate() + 1)
+  endOfEnd = new Date(endOfEnd.toDateString())
+  endOfEnd.setMilliseconds(endOfEnd.getMilliseconds() - 1)
   let upObj = {}
   if (start === null || end === null) {
     return res.status(412).json({results: '请输入start, end'})
-  } else if ((new Date(start) - new Date(end)) > 0) {
+  } else if ((startOfStart - endOfEnd) > 0 || (startOfStart - today) < 0) {
     return res.status(400).json({results: '请确认停诊时间'})
   } else {
     upObj = {
       $addToSet: {
         serviceSuspendTime: {
-          start: new Date(start),
-          end: new Date(end)
+          start: startOfStart,
+          end: endOfEnd
         }
       }
     }
   }
-  Alluser.update(query, upObj, function (err, upsus) {
+  Alluser.update(query, upObj, function (err, upSus) {
     if (err) {
       return res.status(500).send(err)
-    }
-    if (upsus.n === 0) {
+    } else if (upSus.n === 0) {
       return res.status(404).json({results: '找不到对象'})
+    } else if (upSus.nModified === 0) {
+      return res.json({results: '该时段已停诊'})
     } else {
-      return res.json({results: '修改成功'})
+      // return res.json({results: '停诊时间添加成功'})
+      req.body.startOfStart = startOfStart
+      req.body.endOfEnd = endOfEnd
+      next()
     }
   })
 }
+// 停诊状态更新
+exports.suspendAvailablePds = function (req, res, next) {
+  let startOfStart = req.body.startOfStart
+  let endOfEnd = req.body.endOfEnd
+  let doctorId = req.session.userId
+  let query = {userId: doctorId, availablePDs: {$elemMatch: {$and: [{availableDay: {$gte: startOfStart}}, {availableDay: {$lt: endOfEnd}}]}}}
+  Alluser.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    } else if (item === null) {
+      // return res.status(404).json({results: '找不到对象'})
+      return res.json({results: '停诊时间添加成功'})
+    } else {
+      let aPDList = item.availablePDs
+      for (let i = 0; i < aPDList.length; i++) {
+        if (aPDList[i].availableDay >= startOfStart && aPDList[i].availableDay < endOfEnd) {
+          aPDList[i]['invalidFlag'] = 1
+        }
+      }
+      // return res.json({results: aPDList})
+      let upObj = {
+        $set: {
+          availablePDs: aPDList
+        }
+      }
+      Alluser.update(query, upObj, function (err, upItem) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (upItem.nModified === 0) {
+          return res.json({results: '停诊状态更新失败'})
+        } else {
+          // return res.json({results: '停诊状态更新成功'})
+          next()
+        }
+      })
+    }
+  })
+}
+// 已预约面诊取消
+exports.cancelBookedPds = function (req, res) {
+  let startOfStart = req.body.startOfStart
+  let endOfEnd = req.body.endOfEnd
+  let doctorObjectId = req.body.doctorObject._id
+  let query = {doctorId: doctorObjectId, $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]}
+  let upObj = {
+    $set: {
+      status: 4
+    }
+  }
+  let opts = {multi: true}
+  PersionalDiag.update(query, upObj, function (err, upItems) {
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      // return res.status(404).json({results: '找不到对象'})
+      return res.json({result: '停诊时间添加成功', results: upItems})
+    }
+  }, opts)
+}
+
 // 删除面诊停诊时间 2017-07-15 GY
 exports.deleteServiceSuspend = function (req, res) {
   let query = {userId: req.session.userId}
   let start = req.body.start || null
   let end = req.body.end || null
+  let startOfStart = new Date(new Date(start).toDateString())
+  let endOfEnd = new Date(end)
+  endOfEnd.setDate(endOfEnd.getDate() + 1)
+  endOfEnd = new Date(endOfEnd.toDateString())
+  endOfEnd.setMilliseconds(endOfEnd.getMilliseconds() - 1)
   let pullObj = {}
   if (start === null || end === null) {
     return res.status(412).json({results: '请输入start, end'})
@@ -622,8 +697,8 @@ exports.deleteServiceSuspend = function (req, res) {
     pullObj = {
       $pull: {
         serviceSuspendTime: {
-          start: new Date(start),
-          end: new Date(end)
+          start: startOfStart,
+          end: endOfEnd
         }
       }
     }
@@ -631,18 +706,85 @@ exports.deleteServiceSuspend = function (req, res) {
   Alluser.update(query, pullObj, function (err, pullres) {
     if (err) {
       return res.status(500).send(err)
-    }
-    if (pullres.n === 0) {
+    } else if (pullres.n === 0) {
       return res.status(404).json({results: '找不到对象'})
-    } else if (pullres.n !== 0 && pullres.nModified === 0) {
+    } else if (pullres.nModified === 0) {
       return res.status(404).json({results: '未设置的停诊时间'})
     } else {
-      return res.json({results: '修改成功'})
+      return res.json({results: '停诊时间删除成功'})
     }
   })
 }
 // 确认收到面诊：personalDiag表修改
 // 输入：code；修改内容：personalDiag.status, time
+exports.confirmPD = function (req, res) {
+  // let doctorObjectId = req.body.doctorObject._id
+  // let patientObjectId = req.body.patientObject._id
+  // let bookingDay = new Date(new Date(req.body.day).toDateString()) || null
+  // let bookingTime = req.body.time || null
+  let diagId = req.body.diagId || null
+  let code = req.body.code || null
+  // if (bookingDay === null || bookingTime === null || code === null) {
+  //   return res.status(412).send('Please Check Input of day, time, code')
+  // }
+  if (diagId === null || code === null) {
+    return res.status(412).send('Please Check Input of diagId, code')
+  }
+
+  // let query = {patientId: patientObjectId, doctorId: doctorObjectId, bookingDay: bookingDay, bookingTime: bookingTime}
+  let query = {diagId: diagId}
+  PersionalDiag.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      if (item === null) {
+        return res.status(404).send('PD Not Found')
+      } else if (item.code !== code) {
+        return res.status(406).send('Wrong Code')
+      } else {
+        let upObj = {$set: {status: 1}}
+        PersionalDiag.update(query, upObj, function (err, upItem) {
+          if (err) {
+            return res.status(500).send(err)
+          } else if (upItem.nModified === 0) {
+            return res.status(304).send('Not Modified')
+          } else {
+            return res.status(201).send('Confirmation Success')
+          }
+        })
+      }
+    }
+  })
+}
+
+exports.getPDPatients = function (req, res) {
+  let doctorObjectId = req.body.doctorObject._id
+  let queryDay = req.query.day || null
+  let queryTime = req.query.time || null
+  let status = Number(req.query.status || null)
+  let queryPD = {doctorId: doctorObjectId}
+  let opts = ''
+  let fields = {_id: 0, doctorId: 0, code: 0}
+  let populate = {path: 'patientId', select: {_id: 0, doctorsInCharge: 0, doctors: 0, schedules: 0, serviceSchedules: 0, availablePDs: 0}}
+  if (status === 0 || status === 1 || status === 2 || status === 3 || status === 4) {
+    queryPD.status = status
+  }
+  if (queryDay !== null) {
+    queryPD.bookingDay = new Date(new Date(queryDay).toDateString())
+  }
+  if (queryTime !== null) {
+    queryPD.bookingTime = new Date(new Date(queryTime).toDateString())
+  }
+  PersionalDiag.getSome(queryPD, function (err, items) {
+    if (err) {
+      return res.status(500).send(err)
+    } else if (items.length === 0) {
+      return res.status(404).send('PDs Not Found')
+    } else {
+      return res.status(200).json({results: items})
+    }
+  }, opts, fields, populate)
+}
 
 // 主管医生服务相关
 // 获取申请主管医生服务的患者列表 2017-07-19 YQC
@@ -793,7 +935,11 @@ exports.updateDoctorInCharge = function (req, res) {
 // 返回：personalDiag.code, endTime
 exports.updatePDCapacityDown = function (req, res, next) {
   let doctorId = req.body.doctorId || null
+  let today = new Date(new Date().toDateString())
   let bookingDay = new Date(new Date(req.body.day).toDateString()) || null
+  if (bookingDay < today) {
+    return res.json({results: '请检查day'})
+  }
   let bookingTime = req.body.time || null
   if (doctorId === null || bookingDay === null || bookingTime === null) {
     return res.json({results: '请检查doctorId,day,time输入完整'})
@@ -859,7 +1005,7 @@ exports.newPersonalDiag = function (req, res, next) {
   // } else if (bookingTime === 'Morning') {
   //   bookingPeriod = String(bookingPeriod + '-2')
   // }
-  let queryPD = {doctorId: doctorObjectId, patientId: patientObjectId, bookingDay: bookingDay, bookingTime: bookingTime}
+  let queryPD = {doctorId: doctorObjectId, patientId: patientObjectId, bookingDay: bookingDay, bookingTime: bookingTime, status: 0}
   PersionalDiag.getOne(queryPD, function (err, itemPD) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -921,13 +1067,14 @@ exports.newPersonalDiag = function (req, res, next) {
   })
 }
 
+// 患者获取某医生可预约面诊
 exports.getAvailablePD = function (req, res) {
   let doctorId = req.query.doctorId
   let today = new Date(new Date().toDateString())
   let twoWeeksLater = new Date(today)
   twoWeeksLater.setDate(twoWeeksLater.getDate() + 14)
 
-  let query = {userId: doctorId, $and: [{'availablePDs.availableDay': {$gte: today}}, {'availablePDs.availableDay': {$lte: twoWeeksLater}}]}
+  let query = {userId: doctorId, $and: [{'availablePDs.availableDay': {$gte: today}}, {'availablePDs.availableDay': {$lte: twoWeeksLater}}, {'availablePDs.invalidFlag': 0}]}
   let opts = ''
   let fields = {_id: 0, availablePDs: 1}
   Alluser.getOne(query, function (err, itemD) {
@@ -935,7 +1082,7 @@ exports.getAvailablePD = function (req, res) {
       return res.status(500).send(err)
     } else {
       if (itemD === null) {
-        return res.json({results: '医生不存在或未来两周内无面诊排班'})
+        return res.status(404).send('PD Not Found')
       } else {
         let availablePDsList = itemD.availablePDs || []
         let availablePDsArray = []
@@ -952,28 +1099,101 @@ exports.getAvailablePD = function (req, res) {
           objTemp['margin'] = availablePDsArray[j].total - availablePDsArray[j].count
           returns.push(objTemp)
         }
-        return res.json({results: returns})
+        return res.status(200).json({results: returns})
       }
     }
   }, opts, fields)
 }
-
-exports.getMyPD = function (req, res) {
+// 患者查看已预约的面诊信息
+exports.getMyPDs = function (req, res) {
   let patientObjectId = req.body.patientObject._id
-  let status = Number(req.query.status)
+  let queryDay = req.query.day || null
+  let queryTime = req.query.time || null
+  let status = Number(req.query.status || null)
   let queryPD = {patientId: patientObjectId}
+  let opts = ''
+  let fields = {_id: 0, patientId: 0}
+  let populate = {path: 'doctorId', select: {_id: 0, doctorsInCharge: 0, doctors: 0, teams: 0, schedules: 0, serviceSchedules: 0, availablePDs: 0}}
   if (status === 0 || status === 1 || status === 2) {
     queryPD.status = status
+  }
+  if (queryDay !== null) {
+    queryPD.bookingDay = new Date(new Date(queryDay).toDateString())
+  }
+  if (queryTime !== null) {
+    queryPD.bookingTime = new Date(new Date(queryTime).toDateString())
   }
   PersionalDiag.getSome(queryPD, function (err, items) {
     if (err) {
       return res.status(500).send(err)
     } else if (items.length === 0) {
-      return res.json({results: '无面诊记录'})
+      return res.status(404).send('PDs Not Found')
     } else {
-      return res.json({results: items})
+      return res.status(200).json({results: items})
+    }
+  }, opts, fields, populate)
+}
+
+// 患者取消预约
+exports.cancelMyPD = function (req, res, next) {
+  let diagId = req.body.diagId || null
+  if (diagId === null) {
+    return res.status(412).send('Please Check Input of diagId')
+  }
+  let query = {diagId: diagId}
+  PersionalDiag.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      let bookingDay = new Date(item.bookingDay)
+      let today = new Date(new Date().toDateString())
+      let threeDaysLater = new Date(today)
+      threeDaysLater.setDate(today.getDate() + 3)
+      if (threeDaysLater >= bookingDay) {
+        return res.status(406).send('Exceeds the Time Limit')
+      } else {
+        let upObj = {$set: {status: 3}}
+        PersionalDiag.update(query, upObj, function (err, upItem) {
+          if (err) {
+            return res.status(500).send(err)
+          } else if (upItem.n === 0) {
+            return res.status(404).send('PD Not Found')
+          } else if (upItem.nModified === 0) {
+            return res.status(304).send('Not Modified')
+          } else {
+            // return res.json({results: '取消成功'})
+            req.body.PDInfo = item
+            next()
+          }
+        })
+      }
     }
   })
+}
+
+exports.updatePDCapacityUp = function (req, res) {
+  let doctorObjectId = req.body.PDInfo.doctorId
+  let bookingDay = req.body.PDInfo.bookingDay
+  let bookingTime = req.body.PDInfo.bookingTime
+
+  let queryD = {_id: doctorObjectId, availablePDs: {$elemMatch: {$and: [{availableDay: bookingDay}, {availableTime: bookingTime}]}}}
+  let upDoc = {
+    $inc: {
+      'availablePDs.$.count': -1
+    }
+  }
+  let opts = {fields: {_id: 0, availablePDs: 1}}
+  // console.log(queryD, upDoc)
+  Alluser.update(queryD, upDoc, function (err, upDoctor) { // 占个号
+    if (err) {
+      return res.status(500).send(err)
+    } else if (upDoctor.nModified === 0) {
+      return res.status(304).send('Not Modified')
+    } else if (upDoctor.nModified !== 0) {
+      // return res.json({results: '面诊数量更新成功'})
+      return res.status(201).send('Cancel Success')
+    }
+  }, opts)
 }
 
 // 2017-07-18 YQC

@@ -473,7 +473,15 @@ exports.newPatientDetail = function (req, res) {
 
 // 修改患者个人信息 2017-04-06 GY
 exports.editPatientDetail = function (req, res) {
-  let patientId = req.body.patientId
+  let patientId
+  if (req.session.role === 'doctor') {
+    patientId = req.body.patientId || null
+    if (patientId === null) {
+      return res.json({results: '请填写patientId!'})
+    }
+  } else if (req.session.role === 'patient') {
+    patientId = req.session.userId
+  }
   let query = {
     userId: patientId,
     role: 'patient'
@@ -626,8 +634,14 @@ exports.getDoctorObject = function (req, res, next) {
 } // 弃用
 
 exports.insertDiagnosis = function (req, res, next) {
-  if (req.body.patientId == null || req.body.patientId === '') {
-    return res.json({result: '请填写patientId!'})
+  let patientId
+  if (req.session.role === 'doctor') {
+    patientId = req.body.patientId || null
+    if (patientId === null) {
+      return res.json({results: '请填写patientId!'})
+    }
+  } else if (req.session.role === 'patient') {
+    patientId = req.session.userId
   }
   let query = {
     userId: req.body.patientId,
