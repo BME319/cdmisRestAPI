@@ -2,6 +2,7 @@
 var async = require('async')
 var Report = require('../models/report')
 var Compliance = require('../models/compliance')
+var Alluser = require('../models/alluser')
 
 // 获取报表 2017-07-24 wf  修改 2017-07-28 lgf
 exports.getReport = function (req, res) {
@@ -102,19 +103,24 @@ exports.getReport = function (req, res) {
   } else {
     return res.json({result: '请填写itemType!'})
   }
+  var fields = {}
   var opts = {} // 'sort': '-time'
+  var populate = {'path': 'patientId', 'select': 'class'}
   // console.log(query)
-  Report.getSome(query, function (err, items) {
+  Report.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (items === null) {
+    if (item === null) {
       // console.log('items', items)
       return res.json({results: '不存在该段时间的报告!'})
     } else {
-      return res.json({results: items})
+      let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
+      if (item.patientId.class === 'class_5') { flag.flagVA = true }
+      if (item.patientId.class === 'class_6') { flag.flagPD = true }
+      return res.json({results: {item, flag}})
     }
-  }, opts)
+  }, opts, fields, populate)
 }
 // y医生更新报表 2017-07-24 wf
 // 不想更新多条时务必确保patientId、type、time、itemType有输入
@@ -331,48 +337,65 @@ exports.getVitalSigns = function (req, res, next) {
     'status': 0,
     '__v': 0
   }
+  let query3 = {
+    'userId': userId,
+    'role': userRole
+  }
   if (code === 'BloodPressure') {
     if (modify === 0) {
-      Compliance.getSome(query, function (err, items) {
+      async.parallel({
+        one: function (callback) {
+          Alluser.getOne(query3, function (err, item) {
+            callback(err, item)
+          })
+        },
+        two: function (callback) {
+          Compliance.getSome(query, function (err, items) {
+            callback(err, items)
+          }, opts, fields)
+        }
+      }, function (err, results) {
         if (err) {
           return res.status(500).send(err.errmsg)
-        }
-        // console.log(items)
-        let dataBP = []
-        let recordTimeTemp = []
-        for (let i = 0; i < items.length; i++) {
-          dataBP.push(items[i])
-        }
-        let dataSBP = []         // 收缩压 SBP
-        let dataDBP = []         // 舒张压 DBP
-        // 记录不为空
-        if (dataBP.length !== 0) {
-          for (let n = 0; n < dataBP.length; n++) {
-            let str = dataBP[n].description
-          // 一条记录中有多次测量数据
-            let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
-            let strArr2 = str.split(',')
-            let strArr
-            if (strArr1.length >= strArr2.length) {
-              strArr = strArr1
-            } else {
-              strArr = strArr2
-            }
-            // print(dataBP[n].description)
-            // print('strArr.length', strArr.length)
-            for (let k = 0; k < strArr.length; k++) {
-              dataSBP.push(Number(strArr[k].substr(0, str.indexOf('/'))))
-              dataDBP.push(Number(strArr[k].substr(str.indexOf('/') + 1)))
-              recordTimeTemp.push(new Date(dataBP[n].date))
+        } else {
+          // console.log(items)
+          let dataBP = []
+          let recordTimeTemp = []
+          for (let i = 0; i < results.two.length; i++) {
+            dataBP.push(results.two[i])
+          }
+          let dataSBP = []         // 收缩压 SBP
+          let dataDBP = []         // 舒张压 DBP
+          // 记录不为空
+          if (dataBP.length !== 0) {
+            for (let n = 0; n < dataBP.length; n++) {
+              let str = dataBP[n].description
+            // 一条记录中有多次测量数据
+              let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
+              let strArr2 = str.split(',')
+              let strArr
+              if (strArr1.length >= strArr2.length) {
+                strArr = strArr1
+              } else {
+                strArr = strArr2
+              }
+              // print(dataBP[n].description)
+              // print('strArr.length', strArr.length)
+              for (let k = 0; k < strArr.length; k++) {
+                dataSBP.push(Number(strArr[k].substr(0, str.indexOf('/'))))
+                dataDBP.push(Number(strArr[k].substr(str.indexOf('/') + 1)))
+                recordTimeTemp.push(new Date(dataBP[n].date))
+              }
             }
           }
+          let data1 = dataSBP
+          let data2 = dataDBP
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
+          if (results.class === 'class_5') { flag.flagVA = true }
+          if (results.class === 'class_6') { flag.flagPD = true }
+          return res.json({results: {item: {data1, data2, recordTimeTemp}, flag}})
         }
-        let data1 = dataSBP
-        let data2 = dataDBP
-        let dateAndTime = {data1, data2, recordTimeTemp}
-        // let dateAndTime = {dataSBP, dataDBP, recordTimeTemp}
-        return res.json({results: dateAndTime})
-      }, opts, fields)
+      })
     } else {
       next()
     }
@@ -396,6 +419,11 @@ exports.getVitalSigns = function (req, res, next) {
       // console.log(query2)
       // 并行数据流
       async.parallel({
+        one: function (callback) {
+          Alluser.getOne(query3, function (err, item) {
+            callback(err, item)
+          })
+        },
         originDataUF: function (callback) {
           Compliance.getSome(query, function (err, items) {
             callback(err, items)
@@ -520,8 +548,10 @@ exports.getVitalSigns = function (req, res, next) {
           }
           let data1 = dataUFAll
           let data2 = dataPV
-          return res.json({results: { data1, data2, recordTimeAll }})
-          // return res.json({results: { dataUFAll, dataPV, recordTimeAll }})
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
+          if (results.class === 'class_5') { flag.flagVA = true }
+          if (results.class === 'class_6') { flag.flagPD = true }
+          return res.json({results: {item: {data1, data2, recordTimeAll}, flag}})
         }
       })
     } else {
@@ -529,42 +559,55 @@ exports.getVitalSigns = function (req, res, next) {
     }
   } else {
     if (modify === 0) {
-      Compliance.getSome(query, function (err, items) {
+      async.parallel({
+        one: function (callback) {
+          Alluser.getOne(query3, function (err, item) {
+            callback(err, item)
+          })
+        },
+        two: function (callback) {
+          Compliance.getSome(query, function (err, items) {
+            callback(err, items)
+          }, opts, fields)
+        }
+      }, function (err, results) {
         if (err) {
           return res.status(500).send(err.errmsg)
-        }
-        // console.log(items)
-        let data = []
-        let recordTimeTemp = []
-        for (let i = 0; i < items.length; i++) {
-          data.push(items[i])
-        }
-        let dataTemp = []
-        // 记录不为空
-        if (data.length !== 0) {
-          for (let n = 0; n < data.length; n++) {
-            let str = data[n].description
-          // 一条记录中有多次测量数据
-            let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
-            let strArr2 = str.split(',')
-            let strArr
-            if (strArr1.length >= strArr2.length) {
-              strArr = strArr1
-            } else {
-              strArr = strArr2
-            }
-            // print(data[n].description)
-            // print('strArr.length', strArr.length)
-            for (let k = 0; k < strArr.length; k++) {
-              dataTemp.push(Number(strArr[k]))
-              recordTimeTemp.push(new Date(data[n].date))
+        } else {
+          let data = []
+          let recordTimeTemp = []
+          for (let i = 0; i < results.two.length; i++) {
+            data.push(results.two[i])
+          }
+          let dataTemp = []
+          // 记录不为空
+          if (data.length !== 0) {
+            for (let n = 0; n < data.length; n++) {
+              let str = data[n].description
+            // 一条记录中有多次测量数据
+              let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
+              let strArr2 = str.split(',')
+              let strArr
+              if (strArr1.length >= strArr2.length) {
+                strArr = strArr1
+              } else {
+                strArr = strArr2
+              }
+              // print(data[n].description)
+              // print('strArr.length', strArr.length)
+              for (let k = 0; k < strArr.length; k++) {
+                dataTemp.push(Number(strArr[k]))
+                recordTimeTemp.push(new Date(data[n].date))
+              }
             }
           }
+          let data1 = dataTemp
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
+          if (results.class === 'class_5') { flag.flagVA = true }
+          if (results.class === 'class_6') { flag.flagPD = true }
+          return res.json({results: {item: {data1, recordTimeTemp}, flag}})
         }
-        let data1 = dataTemp
-        return res.json({results: {data1, recordTimeTemp}})
-        // return res.json({results: dateAndTime})
-      }, opts, fields)
+      })
     } else {
       next()
     }
