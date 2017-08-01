@@ -811,13 +811,13 @@ exports.messageTemplate = function(req, res) {
           }
           var messageOpenId;
           if(role == 'doctor'){
-            messageOpenId = item.MessageOpenId.doctorWechat;
+            messageOpenId = item.MessageOpenId.doctorWechat || null;
           }
           else if(role == 'patient'){
-            messageOpenId = item.MessageOpenId.patientWechat;
+            messageOpenId = item.MessageOpenId.patientWechat || null;
           }
           else if(role == 'test'){
-            messageOpenId = item.MessageOpenId.test;
+            messageOpenId = item.MessageOpenId.test || null;
           }
     
           if(messageOpenId === null){
@@ -826,6 +826,8 @@ exports.messageTemplate = function(req, res) {
             res.json({results:{"errcode" : 0,"errmsg" : "ok"}});
           }
           else{
+            console.log(item.phoneNo)
+            console.log(messageOpenId)
             var jsondata = {};
             jsondata = req.body.postdata;
             jsondata.touser = messageOpenId;
