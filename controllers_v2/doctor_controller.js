@@ -989,6 +989,9 @@ exports.getPatientList = function (req, res) {
       let queryDIC = {doctorId: doctorObject._id, invalidFlag: 1}
       let fieldsDIC = {patientId: 1, dpRelationTime: 1}
       let populateDIC = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
+      if (_name) {
+        populateDIC['match'] = {'name': nameReg}
+      }
       DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
         if (err) {
           return res.status(500).send(err)
@@ -1013,23 +1016,23 @@ exports.getPatientByDate = function (req, res) {
   let query = {doctorId: doctorObject._id}
 
   // 模糊搜索GY
-  let _name = req.query.name
+  let _name = req.query.name || null
   let date
-  if (req.query.date !== null && req.query.date !== '') {
+  if (req.query.date !== null && req.query.date !== '' && req.query.date !== undefined) {
     date = new Date(req.query.date)
     date = commonFunc.convertToFormatDate(date)
   } else {
     date = commonFunc.getNowFormatDate()
   }
-  // return res.json({result:date});
+  // return res.json({result:date})
 
   let opts = ''
   let fields = {'_id': 0, 'patients': 1}
   // 通过子表查询主表，定义主表查询路径及输出内容
   let populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
-
+  let nameReg = new RegExp(_name)
   if (_name) {
-    populate['match'] = {'name': new RegExp(_name)}
+    populate['match'] = {'name': nameReg}
   }
 
   DpRelation.getOne(query, function (err, item) {
@@ -1080,6 +1083,9 @@ exports.getPatientByDate = function (req, res) {
       let queryDIC = {doctorId: doctorObject._id, invalidFlag: 1}
       let fieldsDIC = {patientId: 1, dpRelationTime: 1, start: 1}
       let populateDIC = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
+      if (_name) {
+        populateDIC['match'] = {'name': nameReg}
+      }
       DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
         if (err) {
           return res.status(500).send(err)
@@ -1094,7 +1100,7 @@ exports.getPatientByDate = function (req, res) {
               }
             }
           }
-          patientsInCharge = itemsDIC.sort(sortVIPpinyin)
+          patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
           item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
           return res.json({results: item1})
         }

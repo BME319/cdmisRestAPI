@@ -137,8 +137,8 @@ exports.insertOrder = function (req, res, next) {
     return res.status(403).send('invalid input type')
   }
   type = Number(type)
-  var freeFlag = req.body.freeFlag || null
-  if (freeFlag === null || freeFlag === '') {
+  var freeFlag = req.body.freeFlag
+  if (freeFlag === null || freeFlag === '' || freeFlag === undefined) {
     return res.status(403).send('invalid input freeFlag')
   }
   freeFlag = Number(freeFlag)
@@ -207,12 +207,13 @@ exports.insertOrder = function (req, res, next) {
           paystatus: paystatus,   // req.body.paystatus,
           type: type,
           freeFlag: freeFlag,
-          paytime: new Date(req.body.paytime)
+          paytime: new Date()
         }
 
         var newOrder = new Order(orderData)
         newOrder.save(function (err, item) {
           if (err) {
+            // console.log(err)
             return res.status(500).send(err.errmsg)
           }
                     // res.json({results: item});

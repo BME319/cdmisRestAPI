@@ -92,4 +92,13 @@ Communication.update = function (query, obj, callback, opts, populate) {
     })
 }
 
+Communication.create = function (docs, callback) {
+  CommunicationModel.create(docs, function (err, communicationInfos) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, communicationInfos)
+  })
+}
+
 module.exports = Communication

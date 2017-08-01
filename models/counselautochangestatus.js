@@ -1,29 +1,29 @@
 var mongoose = require('mongoose')
 
 var counselautochangestatusSchema = new mongoose.Schema({
-    counselId: String,
-    patientId: {
+  counselId: String,
+  patientId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'alluser'
+  },
+  doctorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'alluser'
+  },
+  time: Date,
+  sickTime: String,
+  symptom: String,
+  help: String,
+  hospital: String,
+  visitDate: Date,
+  diagnosis: String,
+  departLeader: [
+    {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'alluser'
-    },
-    doctorId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'alluser'
-    },
-    time: Date,
-    sickTime: String,
-    symptom: String,
-    help: String,
-    hospital: String,
-    visitDate: Date,
-    diagnosis: String,
-    departLeader: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'alluser'    
-      }
-    ],
-    endTime: Date
+    }
+  ],
+  endTime: Date
 })
 
 var counselautochangestatusModel = mongoose.model('counselautochangestatus', counselautochangestatusSchema)
@@ -61,7 +61,6 @@ Counselautochangestatus.aggregate = function (array, callback) {
 }
 
 Counselautochangestatus.getOne = function (query, callback) {
-
   counselautochangestatusModel
     .findOne(query)
     .exec(function (err, results) {
