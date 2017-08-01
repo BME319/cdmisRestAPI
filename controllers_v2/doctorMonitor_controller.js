@@ -67,9 +67,15 @@ exports.getLinegraph = function (req, res) {
     let array = [
       {$match: {role: 'doctor'}},
       {$match: {creationTime: {$gt: new Date(startTime), $lt: new Date(endTime)}}},
+      // {$sort: {creationTime: 1}},
+      {
+        $project: {
+          creationTime: { $dateToString: { format: "%Y-%m-%d", date: "$creationTime" } },
+        }
+      },
       {
         $group: {
-          _id: {year: {$year: '$creationTime'}, month: {$month: '$creationTime'}, day: {$dayOfMonth: '$creationTime'}},
+          _id: '$creationTime',
           count: {$sum: 1}
         }
       }
