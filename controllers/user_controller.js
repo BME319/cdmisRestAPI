@@ -476,7 +476,7 @@ exports.setOpenIdRes = function(req, res){
 exports.openIdLoginTest = function(req, res,next) {
 
     //2017-06-07GY调试
-    console.log('openIdLoginTest_in');
+    // console.log('openIdLoginTest_in');
 
     var username = req.body.username;
     if (username === '' ) {
@@ -497,7 +497,7 @@ exports.openIdLoginTest = function(req, res,next) {
         req.openIdFlag=openIdFlag;
 
         //2017-06-07GY调试
-        console.log('openIdLoginTest_out');
+        // console.log('openIdLoginTest_out');
 
         next();
     });
@@ -560,8 +560,7 @@ exports.checkBinding = function(req, res,next) {
                                 }
 
                                 //2017-06-07GY调试
-
-                                console.log('checkBinding_out1');
+                                // console.log('checkBinding_out1');
 
                                 next();
                             })
@@ -585,8 +584,7 @@ exports.checkBinding = function(req, res,next) {
                         // }
 
                         //2017-06-07GY调试
-
-                        console.log('checkBinding_out22');
+                        // console.log('checkBinding_out22');
 
                         next();
                       
@@ -636,7 +634,7 @@ exports.login = function(req, res) {
         if(item==null){
 
             //2017-06-07GY调试
-            console.log('login_err_user_not_exist');
+            // console.log('login_err_user_not_exist');
 
             res.json({results: 1,mesg:"User doesn't Exist!"});
         }
@@ -705,7 +703,7 @@ exports.login = function(req, res) {
                         };
 
                         //2017-06-07GY调试
-                        console.log('login_success');
+                        // console.log('login_success');
 
                         res.json({results: results});
                     });
@@ -879,7 +877,8 @@ exports.sendSMS = function(req, res) {
                             		res.json({results: 0,mesg:"User doesn't Exist!"});
                         		}
                         		else{
-                            		res.json({results: 2,ErrorCode: code});
+                            		// res.json({results: 2,ErrorCode: code});
+                                    res.json({results: 1, mesg: {'ErrorCode': code}})
                         		}
                                 // console.log(json.resp.respCode);
                             });
