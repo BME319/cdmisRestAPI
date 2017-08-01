@@ -3313,7 +3313,7 @@ module.exports = function (app, webEntry, acl) {
  *       422:
  *         description: Unsuccessfully modified
  */
-  app.post(version + '/insurance/message', tokenManager.verifyToken(), patientCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
+  app.post(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
  /**
  * @swagger
  * /insurance/message:
@@ -3344,7 +3344,7 @@ module.exports = function (app, webEntry, acl) {
  *       500:
  *         description: Server internal error
  */
-  app.get(version + '/insurance/message', tokenManager.verifyToken(), doctorCtrl.checkDoctor, insuranceCtrl.getInsMsg)
+  app.get(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkDoctor, insuranceCtrl.getInsMsg)
  /**
  * @swagger
  * /insurance/prefer:
