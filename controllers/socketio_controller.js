@@ -196,7 +196,7 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                         // custom card 群发
                         if(data.msg.contentType === 'custom' && data.msg.content.type === 'card'  || (data.msg.contentType === 'text' || data.msg.contentType === 'image' || data.msg.contentType === 'voice' )){
 
-                            // console.log('in');
+                            console.log('in');
                             var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.content.consultationId +'_'+data.msg.teamId + "&#wechat_redirect";
 
                             var template = {
@@ -244,6 +244,7 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                                 json:true
 
                             }, function(err, response, body){
+                                console.log(body)
 
                                 // if (!err && response.statusCode == 200) {   
                                 //     res.json({results:body});
