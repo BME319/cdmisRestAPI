@@ -165,18 +165,18 @@ exports.insertOrder = function (req, res, next) {
         // 咨询升级问诊
         trueMoney = doctor.charge2 * 100 - doctor.charge1 * 100
       } else if (req.body.class === '04') {
-        // 加急咨询
-        trueMoney = doctor.charge3 * 100
-      } else if (req.body.class === '05') {
         // 主管医生
         let month = req.body.month || 0
         if (month === 0) {
           return res.json({result: '购买主管医生的服务时间输入错误！'})
         }
         trueMoney = doctor.charge4 * 100 * month
-      } else if (req.body.class === '06') {
+      } else if (req.body.class === '05') {
         // 面诊
         trueMoney = doctor.charge5 * 100
+      } else if (req.body.class === '06') {
+        // 加急咨询
+        trueMoney = doctor.charge3 * 100
       } else {
         return res.status(403).send('服务类型不存在!')
       }
