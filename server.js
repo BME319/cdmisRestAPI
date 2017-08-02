@@ -148,5 +148,5 @@ schedule.scheduleJob('0 1 0 * * *', personalDiagCtrl.autoAvailablePD)
 schedule.scheduleJob('0 1 12 * * *', personalDiagCtrl.autoOverduePD)
 
 var CounseltimeoutCtrl = require('./controllers_v2/counseltimeout_controller')
-schedule.scheduleJob('0 5 8 * * *', CounseltimeoutCtrl.autoCounselNews)
+schedule.scheduleJob('0 0 8 * * *', CounseltimeoutCtrl.autoCounselNews)
 
