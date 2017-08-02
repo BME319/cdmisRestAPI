@@ -22,11 +22,11 @@ exports.getAdvice = function (req, res) {
       query = {}
     }
     // 调用建议获取函数Advice.getSome，不出错则返回相应建议内容
-    Advice.getSome(query, function (err, item) {
+    Advice.getSome(query, function (err, items) {
       if (err) {
         return res.status(500).send(err)
       }
-      res.json({results: item})
+      res.json({results: items})
     })
   })
 }
@@ -49,21 +49,30 @@ exports.postAdvice = function (req, res) {
     } else if (item.role.indexOf(role) === -1) {
       return res.json({result: '用户与角色不匹配!'})
     } else {
-      let adviceData = {
-        userId: req.session.userId,
-        role: req.session.role,
-        time: commonFunc.getNowFormatSecond(),
-        topic: req.body.topic,
-        content: req.body.content
-      }
-
-      // 将建议内容保存
-      var newAdvice = new Advice(adviceData)
-      newAdvice.save(function (err, adviceInfo) {
+      let queryA = {userId: req.session.userId, topic: req.body.topic, content: req.body.content}
+      Advice.getOne(queryA, function (err, item) {
         if (err) {
           return res.status(500).send(err)
+        } else if (item === null) {
+          let adviceData = {
+            userId: req.session.userId,
+            role: req.session.role,
+            time: commonFunc.getNowFormatSecond(),
+            topic: req.body.topic,
+            content: req.body.content
+          }
+
+          // 将建议内容保存
+          var newAdvice = new Advice(adviceData)
+          newAdvice.save(function (err, adviceInfo) {
+            if (err) {
+              return res.status(500).send(err)
+            }
+            res.json({result: '新建成功', newResults: adviceInfo})
+          })
+        } else {
+          return res.json({results: '该建议已存在'})
         }
-        res.json({result: '新建成功', newResults: adviceInfo})
       })
     }
   })

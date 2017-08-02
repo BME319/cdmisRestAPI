@@ -57,8 +57,8 @@ app.use(log4js.useLog())
 
 // 跨域访问
 app.all('*', function (req, res, next) {
-  var domain = req.headers.origin
-  if (config.Access_Control_Allow_Origin.indexOf(domain) > -1) {
+  var domain = req.headers.origin || null
+  if(domain !== null){
     res.setHeader('Access-Control-Allow-Origin', domain)
     res.setHeader('Access-Control-Allow-Credentials', true)
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT')
@@ -68,6 +68,16 @@ app.all('*', function (req, res, next) {
     res.setHeader('Pragma', 'no-cache') // HTTP 1.0.
     res.setHeader('Expires', '0') // Proxies.
   }
+  // if (config.Access_Control_Allow_Origin.indexOf(domain) > -1) {
+    // res.setHeader('Access-Control-Allow-Origin', domain)
+    // res.setHeader('Access-Control-Allow-Credentials', true)
+    // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT')
+    // res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Authorization')
+
+    // res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate') // HTTP 1.1.
+    // res.setHeader('Pragma', 'no-cache') // HTTP 1.0.
+    // res.setHeader('Expires', '0') // Proxies.
+  // }
   if (req.method === 'OPTIONS') return res.sendStatus(200)
   next()
 })
@@ -123,5 +133,17 @@ try {
 
 // 定时任务相关 testing 2017-07-16 GY
 var schedule = require('node-schedule')
+// 自动扫描退款申请的订单，调用退款查询接口，如果退款成功修改订单状态 2017-07-16 GY
 var wechatCtrl = require('./controllers_v2/wechat_controller')
 schedule.scheduleJob('0 0 * * * *', wechatCtrl.autoRefundQuery)
+
+// 自动扫描所有任务方案，3个月以上无操作时，提醒对应主管医生调整方案 2017-07-26 GY
+var taskCtrl = require('./controllers_v2/task_controller')
+schedule.scheduleJob('30 0 8 * * *', taskCtrl.remindChangeTask)
+
+var personalDiagCtrl = require('./controllers_v2/personalDiag_controller')
+// 每天00:01更新医生的可预约面诊availablePDs
+schedule.scheduleJob('0 1 0 * * *', personalDiagCtrl.autoAvailablePD)
+// 每日12:01自动更新过期面诊PD 待需求确认
+schedule.scheduleJob('0 1 12 * * *', personalDiagCtrl.autoOverduePD)
+

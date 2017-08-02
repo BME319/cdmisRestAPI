@@ -2,10 +2,10 @@
 var mongoose = require('mongoose')
 
 var reportSchema = new mongoose.Schema({
-  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'}, // alluser._id
   userId: String,
-  type: String, // 报表类型：周报，月报，季报，年报
-  time: String, // 报表时间： 周，2017年1月第2周：201701_02；月，2017年1月：201701；季，2017年第1季：2017_1;年，2017年：2017
+  type: String, // 报表类型：周报，月报，季报，年报 week month season year
+  time: String, // 报表时间： 周，2017年1月第2周：201701_2；月，2017年1月：201701；季，2017年第1季：2017_1;年，2017年：2017
   itemType: String, // 血压，体重，尿量，体温，(血糖，用药)，心率，血管通路，腹透，浮肿，化验，医生报告
   recordDays: Number, // 记录天数
   recordTimes: Number, // 记录次数
@@ -35,11 +35,15 @@ var reportSchema = new mongoose.Schema({
   changeRatioBMI: Number, // BMI增比 %
   drugRegimen: String, // 用药方案
   drugConcentration: Number, // 药物浓度
+  data1: [], // 历史数据记录1
+  data2: [], // 历史数据记录2
+  recordTime: [Date], // 历史数据记录时间
   bestControlMonth: Number, // 控制最佳月份 季年报
   worstControlMonth: Number, // 控制最差月份 季年报
   mostCompleteRecordMonth: Number, // 记录最完整月份 季年报
   worstCompleteRecordMonth: Number, // 记录最差月份 季年报
   doctorReport: String, // 医生报告
+  doctorComment: String, // 医生点评 季年报
   labTest: String, // 化验_周报月报文本
   labTestArray: [], // 化验_季报年报检查项目数组
   labTestNewItem: String // 化验_建议新增项目

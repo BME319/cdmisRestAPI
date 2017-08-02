@@ -2,7 +2,14 @@
 var mongoose = require('mongoose')
 
 var doctorsInChargeSchema = new mongoose.Schema({
-
+  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  dpRelationTime: Date, // 患者申请主管医生服务的时间
+  invalidFlag: Number, // 服务状态，待审核0、当前1、历史2、被拒3
+  rejectReason: String, // 医生拒绝的理由
+  length: Number, // 服务时长，以月为单位
+  start: Date, // 服务起始时间，即医生通过患者申请时刻
+  end: Date // 服务截止时间
 })
 
 var DoctorsInChargeModel = mongoose.model('doctorsInCharge', doctorsInChargeSchema)

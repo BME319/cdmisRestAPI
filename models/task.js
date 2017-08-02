@@ -4,7 +4,7 @@ var taskSchema = new mongoose.Schema({
   userId: String,
   sortNo: Number,
   name: String,
-  date: Date,
+  date: {type: Date, index: true},
   description: String,
   invalidFlag: Number,
   task: [

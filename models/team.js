@@ -1,130 +1,127 @@
 
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 var teamSchema = new mongoose.Schema({
-  teamId: {type:String, unique:true},  
-  name: String, 
-  sponsorId: String, 
-  sponsorName: String, 
-  sponsorPhoto: String, 
-  photoAddress: String, 
+  teamId: {type: String, unique: true},
+  name: String,
+  sponsorId: String,
+  sponsorName: String,
+  sponsorPhoto: String,
+  photoAddress: String,
   members: [
     {
-      userId: {type:String, unique:true}, 
-      name: String, 
-      photoUrl: String, 
-      _id:0
+      userId: {type: String, unique: true},
+      name: String,
+      photoUrl: String,
+      _id: 0
     }
-  ], 
-  time: Date, 
-  description: String, 
-  number: {type:Number, default:1}, 
-  revisionInfo:{
-  operationTime:Date,
-  userId:String,
-  userName:String,
-  terminalIP:String
+  ],
+  time: Date,
+  description: String,
+  number: {type: Number, default: 1},
+  revisionInfo: {
+    operationTime: Date,
+    userId: String,
+    userName: String,
+    terminalIP: String
   }
-});
+})
 
+var TeamModel = mongoose.model('team', teamSchema)
 
-var teamModel = mongoose.model('team', teamSchema);
-
-function Team(team) {
-  this.team = team;
+function Team (team) {
+  this.team = team
 }
 
-Team.prototype.save = function(callback) {
-  var team = this.team;
-  var newTeam = new teamModel(team);
-  newTeam.save(function(err, teamItem) {
-  if (err) {
-  return callback(err);
-  }
-  callback(null, teamItem);
-  });
+Team.prototype.save = function (callback) {
+  var team = this.team
+  var newTeam = new TeamModel(team)
+  newTeam.save(function (err, teamItem) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, teamItem)
+  })
 }
 
-Team.getOne = function(query, callback, opts, fields, populate) {
-  var options = opts || {};
-  var _fields = fields || null;
-  var _populate = populate || '';
+Team.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
 
-  teamModel
+  TeamModel
   .findOne(query, _fields, options)
   .populate(_populate)
-  .exec(function(err, teamInfo) {
-  if(err){
-  return callback(err);
-  }
-  callback(null, teamInfo);
-  });
-};
+  .exec(function (err, teamInfo) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, teamInfo)
+  })
+}
 
-
-Team.getSome = function(query, callback, opts, fields, populate) {
-  var options = opts || {};
-  var _fields = fields || null;
-  var _populate = populate || '';
-  teamModel
+Team.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
+  TeamModel
   .find(query, _fields, options)
   .populate(_populate)
-  .exec(function(err, teams) {
-  if(err) {
-  return callback(err);
-  }
-  callback(null, teams);
-  });
-};
+  .exec(function (err, teams) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, teams)
+  })
+}
 
-Team.updateOne = function(query, obj, callback, opts, populate) {
-  var options = opts || {};
-  var _populate = populate || '';
+Team.updateOne = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var _populate = populate || ''
 
-  teamModel
+  TeamModel
   .findOneAndUpdate(query, obj, options)
   .populate(_populate)
-  .exec(function(err, upteam) {
-  if(err){
-  return callback(err);
-  }
-  callback(null, upteam);
-  });
-};
+  .exec(function (err, upteam) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, upteam)
+  })
+}
 
 Team.update = function (query, obj, callback, opts, populate) {
-  var options = opts || {};
-  var _populate = populate || '';
+  var options = opts || {}
+  var _populate = populate || ''
 
-  teamModel
+  TeamModel
     .update(query, obj, options)
-    .populate(_populate) 
+    .populate(_populate)
     .exec(function (err, team) {
       if (err) {
-        return callback(err);
+        return callback(err)
       }
-    callback(null, team);
-  });
-};
-Team.remove = function(query, callback) {
-  teamModel
+      callback(null, team)
+    })
+}
+Team.remove = function (query, callback) {
+  TeamModel
   .remove(query)
-  .exec(function(err) {
-  callback(err);
-  });
+  .exec(function (err) {
+    callback(err)
+  })
+}
 
-};
+Team.removeOne = function (query, callback, opts) {
+  var options = opts || {}
 
-Team.removeOne = function(query, callback, opts) {
-  var options = opts || {};
+  TeamModel
+  .findOneAndRemove(query, options, function (err, teamItem) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, teamItem)
+  })
+}
 
-  teamModel
-  .findOneAndRemove(query, options, function(err, teamItem) {
-  if (err) {
-  return callback(err);
-  }
-  callback(null, teamItem);
-  });
-};
-
-module.exports = Team;
+module.exports = Team
