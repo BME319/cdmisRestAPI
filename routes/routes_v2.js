@@ -54,7 +54,8 @@ var reportCtrl = require('../controllers_v2/report_controller')
 var personalDiagCtrl = require('../controllers_v2/personalDiag_controller')
 var doctorsInChargeCtrl = require('../controllers_v2/doctorsInCharge_controller')
 var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
-var CounseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
+var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
+var forumCtrl = require('../controllers_v2/forum_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -4713,7 +4714,14 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/patientmonitor/insurance', patientMonitorCtrl.getInsurance)
   app.get(version + '/patientmonitor/patientsbyclass', patientMonitorCtrl.getPatientsByClass)
 
-  app.get(version + '/departmentcounsel', CounseltimeoutCtrl.getDepartmentCounsel)
+  // 科室超时未回复查询
+  app.get(version + '/departmentcounsel', counseltimeoutCtrl.getDepartmentCounsel)
+
+  // 论坛
+  app.get(version + '/forum/allposts', tokenManager.verifyToken(), forumCtrl.getAllposts)
+  app.get(version + '/forum/mycollection', tokenManager.verifyToken(), forumCtrl.getMycollection)
+  app.get(version + '/forum/myposts', tokenManager.verifyToken(), forumCtrl.getMyposts)
+  app.post(version + '/forum/posting', tokenManager.verifyToken(), getNoMid.getNo(13), forumCtrl.forumPosting)
 
   /**
    * @swagger
