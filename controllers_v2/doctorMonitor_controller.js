@@ -554,66 +554,6 @@ exports.getCounseltimeout = function (req, res) {
   })
 }
 
-exports.getDepartmentCounsel = function (req, res) {
-  let date = req.query.date || ''
-  let startdate = new Date(date)
-  let enddate = new Date((startdate / 1000 + 86400) * 1000)
-
-  let array = [
-    {$match: {endTime: {$gte: startdate, $lt: enddate}}},
-    {$unwind: '$departLeader'},
-    {
-      $lookup: {
-        from: 'allusers',
-        localField: 'doctorId',
-        foreignField: '_id',
-        as: 'doctorname'
-      }
-    },
-    {
-      $lookup: {
-        from: 'allusers',
-        localField: 'patientId',
-        foreignField: '_id',
-        as: 'patientname'
-      }
-    },
-    {
-      $lookup: {
-        from: 'allusers',
-        localField: 'departLeader',
-        foreignField: '_id',
-        as: 'leadername'
-      }
-    },
-    {$unwind: {path: '$patientname', preserveNullAndEmptyArrays: true}},
-    {$unwind: {path: '$doctorname', preserveNullAndEmptyArrays: true}},
-    {$unwind: {path: '$leadername', preserveNullAndEmptyArrays: true}},
-    {
-      $project: {
-        patientId: '$patientId',
-        patientname: '$patientname.name',
-        doctorId: '$doctorId',
-        doctorname: '$doctorname.name',
-        departLeader: '$departLeader',
-        leadername: '$leadername.name'
-      }
-    },
-    {
-      $group: {
-        _id: {leaderId: '$departLeader', leadername: '$leadername'},
-        record: {$push: {doctorId: '$doctorId', doctorname: '$doctorname', patientId: '$patientId', patientname: '$patientname', time: '$time'}}
-      }
-    }
-  ]
-  Counselautochangestatus.aggregate(array, function (err, results) {
-    if (err) {
-      res.status(500).send(err.errmsg)
-    }
-    res.json({results: results})
-  })
-}
-
 exports.getScore = function (req, res) {
   let province = req.query.province || ''
   let city = req.query.city || ''
