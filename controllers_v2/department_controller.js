@@ -211,7 +211,7 @@ exports.deleteRecord = function (req, res) {
     if(err){
       res.status(500).send(err)
     }
-    res.send('删除成功')
+    res.json('删除成功')
   })
 }
 function distinct (data) {
@@ -226,3 +226,4 @@ function distinct (data) {
   }
   return arr
 }
+

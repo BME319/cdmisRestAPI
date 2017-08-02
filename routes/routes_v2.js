@@ -54,6 +54,7 @@ var reportCtrl = require('../controllers_v2/report_controller')
 var personalDiagCtrl = require('../controllers_v2/personalDiag_controller')
 var doctorsInChargeCtrl = require('../controllers_v2/doctorsInCharge_controller')
 var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
+var CounseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -4702,7 +4703,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctormonitor/linegraph', doctorMonitorCtrl.getLinegraph)
   app.get(version + '/doctormonitor/workload', doctorMonitorCtrl.getWorkload)
   app.get(version + '/doctormonitor/counseltimeout', doctorMonitorCtrl.getCounseltimeout)
-  app.get(version + '/doctormonitor/departmentcounsel', doctorMonitorCtrl.getDepartmentCounsel)
+  // app.get(version + '/doctormonitor/departmentcounsel', doctorMonitorCtrl.getDepartmentCounsel)
   app.get(version + '/doctormonitor/score', doctorMonitorCtrl.getScore)
   app.get(version + '/doctormonitor/order', doctorMonitorCtrl.getOrder)
 
@@ -4711,6 +4712,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/patientmonitor/linegraph', patientMonitorCtrl.getLinegraph)
   app.get(version + '/patientmonitor/insurance', patientMonitorCtrl.getInsurance)
   app.get(version + '/patientmonitor/patientsbyclass', patientMonitorCtrl.getPatientsByClass)
+
+  app.get(version + '/departmentcounsel', CounseltimeoutCtrl.getDepartmentCounsel)
 
   /**
    * @swagger
