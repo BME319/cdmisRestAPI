@@ -499,6 +499,9 @@ exports.updateAvailablePD1 = function (req, res, next) {
           }
         }
       }
+      if (req.body.nextSuspend) {
+        pushObj11.$push.availablePDs.suspendFlag = 1
+      }
       Alluser.update(queryD11, pushObj11, function (err, upDoc11) {
         if (err) {
           return res.status(500).send(err)
@@ -554,6 +557,9 @@ exports.updateAvailablePD2 = function (req, res, next) {
             place: place
           }
         }
+      }
+      if (req.body.nextNextSuspend) {
+        pushObj21.$push.availablePDs.suspendFlag = 1
       }
       Alluser.update(queryD21, pushObj21, function (err, upDoc21) {
         if (err) {
@@ -722,20 +728,37 @@ exports.cancelBookedPds = function (req, res) {
   if (req.body.suspendFlag) {
     let startOfStart = req.body.startOfStart
     let endOfEnd = req.body.endOfEnd
-    if (new Date(startOfStart) - new Date() > 86400000) {
+    let now = new Date()
+    let today = new Date(now.toDateString())
+    let tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    let endOfTomorrow = new Date(tomorrow)
+    endOfTomorrow.setDate(endOfTomorrow.getDate() + 1)
+    endOfTomorrow = new Date(endOfTomorrow.toDateString())
+    endOfTomorrow.setMilliseconds(endOfTomorrow.getMilliseconds() - 1)
+    if (new Date(startOfStart) - now > 86400000) {
       query = {
         doctorId: doctorObjectId,
         status: 0,
         $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
       }
     } else {
-      let nextDaySoS = new Date(startOfStart)
-      nextDaySoS.setDate(nextDaySoS.getDate() + 1)
       query = {
         doctorId: doctorObjectId,
         status: 0,
-        $and: [{bookingDay: {$gte: nextDaySoS}}, {bookingDay: {$lt: endOfEnd}}]
+        $and: [{bookingDay: {$gte: endOfTomorrow}}, {bookingDay: {$lt: endOfEnd}}]
       }
+      let queryPD = {$and: [{bookingDay: {$gte: today}}, {bookingDay: {$lte: endOfTomorrow}}], doctorId: doctorObjectId, status: 0}
+      let upObjPD = {$set: {status: 6}}
+      PersionalDiag.update(queryPD, upObjPD, function (err, upItemsPD) { // 一天内停诊人工处理
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          if (upItemsPD.n !== upItemsPD.nModified) {
+            return res.json({result: '停诊时间添加失败', results: upItemsPD})
+          }
+        }
+      }, {multi: true})
     }
   } else {
     query = {
