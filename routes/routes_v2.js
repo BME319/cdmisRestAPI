@@ -54,7 +54,7 @@ var reportCtrl = require('../controllers_v2/report_controller')
 var personalDiagCtrl = require('../controllers_v2/personalDiag_controller')
 var doctorsInChargeCtrl = require('../controllers_v2/doctorsInCharge_controller')
 var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
-var CounseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
+var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
 var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 var forumCtrl = require('../controllers_v2/forum_controller')
 
@@ -362,7 +362,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/services/setSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2)
-  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, serviceCtrl.cancelBookedPds)
+  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.deleteServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, serviceCtrl.cancelBookedPds)
   // YQC 2017-07-29 医生设置面诊停诊 将可预约面诊和已预约面诊取消 已预约的取消未实现通知患者和退款
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
    * @swagger

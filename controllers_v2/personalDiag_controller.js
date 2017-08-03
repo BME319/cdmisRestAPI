@@ -24,10 +24,10 @@ exports.autoAvailablePD = function (req, res) {
         for (let i = 0; i < items.length; i++) { // 遍历所有当天需要新增面诊的医生
           let itemDoc = items[i]
           let sTDoc = itemDoc.serviceSuspendTime || []
-          let invalidFlag = 0
+          let suspendFlag = 0
           for (let k = 0; k < sTDoc.length; k++) { // 停诊判断
             if (sTDoc[k].start <= twoWeeksLater && sTDoc[k].end > twoWeeksLater) {
-              invalidFlag = 1
+              suspendFlag = 1
               break
             }
           }
@@ -44,7 +44,7 @@ exports.autoAvailablePD = function (req, res) {
                     availableTime: sSDoc[j].time,
                     availableDay: twoWeeksLater,
                     total: sSDoc[j].total,
-                    invalidFlag: invalidFlag
+                    suspendFlag: suspendFlag
                   }
                 }
               }
@@ -66,13 +66,12 @@ exports.autoAvailablePD = function (req, res) {
   })
 }
 
-// 每日更新过期面诊PD 退款相关需求待确认
+// 每日核销过期面诊PD
 exports.autoOverduePD = function (req, res) {
   console.log(new Date())
   let today = new Date(new Date().toDateString())
   let middleOfToday = new Date(today)
   middleOfToday.setHours(today.getHours() + 12)
-  console.log(middleOfToday)
   let query = {endTime: {$lte: middleOfToday}, status: 0}
   let upObj = {$set: {status: 2}}
   PersonalDiag.update(query, upObj, function (err, upItems) {
