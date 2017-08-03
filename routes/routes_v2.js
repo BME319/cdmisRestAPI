@@ -54,7 +54,7 @@ var reportCtrl = require('../controllers_v2/report_controller')
 var personalDiagCtrl = require('../controllers_v2/personalDiag_controller')
 var doctorsInChargeCtrl = require('../controllers_v2/doctorsInCharge_controller')
 var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
-var CounseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
+var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
 var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 var forumCtrl = require('../controllers_v2/forum_controller')
 
