@@ -1,6 +1,5 @@
 
 var mongoose = require('mongoose')
-var Reply = require('../models/reply')
 
 var forumSchema = new mongoose.Schema({
   postId: String,
@@ -16,7 +15,17 @@ var forumSchema = new mongoose.Schema({
   skimNum: Number,
   likesNum: Number,
   replyCount: Number,
-  replies: [],
+  replies: [
+    {
+      commentId: String,
+      userId: String,
+      userName: String,
+      time: Date,
+      depth: Number,
+      content: String,
+      at: String
+    }
+  ],
   favoritesNum: Number,
   transferNum: Number,
   // 1为匿名

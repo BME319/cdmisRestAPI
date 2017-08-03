@@ -4722,6 +4722,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/forum/mycollection', tokenManager.verifyToken(), forumCtrl.getMycollection)
   app.get(version + '/forum/myposts', tokenManager.verifyToken(), forumCtrl.getMyposts)
   app.post(version + '/forum/posting', tokenManager.verifyToken(), getNoMid.getNo(13), forumCtrl.forumPosting)
+  app.post(version + '/forum/comment', tokenManager.verifyToken(), getNoMid.getNo(14), forumCtrl.forumComment)
+  app.post(version + '/forum/reply', tokenManager.verifyToken(), forumCtrl.forumReply)
 
   /**
    * @swagger
