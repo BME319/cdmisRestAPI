@@ -53,6 +53,7 @@ exports.changeMessageStatus = function (req, res) {
     userId: req.session.userId
   }
 
+
   // 允许使用messageId修改一条消息的已读未读状态
   let messageId = req.body.messageId || null
   if (messageId !== null) {

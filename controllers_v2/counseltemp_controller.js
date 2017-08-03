@@ -79,7 +79,7 @@ exports.getDoctorObject = function (req, res, next) {
 exports.saveQuestionaire = function (req, res, next) {
   let type = req.body.type || null
   if (type === null) {
-    return res.json({result: '请填写type,咨询=1,问诊=2'})
+    return res.json({result: '请填写type,咨询=1,问诊=2,加急咨询=6'})
   }
 
   var counselData = {

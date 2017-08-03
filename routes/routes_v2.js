@@ -4048,7 +4048,7 @@ module.exports = function (app, webEntry, acl) {
    * /token/refresh:
    *   get:
    *     tags:
-   *       - 刷新token
+   *       - token refresh
    *     produces:
    *       - application/json
    *     parameters:
@@ -4073,7 +4073,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/typeTwo:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4138,7 +4138,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/typeTwo/codes:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4204,7 +4204,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/typeOne:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4258,7 +4258,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/district:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4317,7 +4317,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/hospital:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4378,7 +4378,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/BPDevice/binding:
    *   post:
    *     tags:
-   *       - 血压计
+   *       - BPDevice
    *     description: 绑定血压计
    *     produces:
    *       - application/json
@@ -4448,7 +4448,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/BPDevice/debinding:
    *   post:
    *     tags:
-   *       - 血压计
+   *       - BPDevice
    *     description: 解绑血压计
    *     produces:
    *       - application/json
@@ -4610,7 +4610,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/niaodaifu/loginparam:
    *   get:
    *     tags:
-   *       - 尿大夫
+   *       - niaodaifu
    *     description: 获取登录参数
    *     produces:
    *       - application/json
@@ -4636,7 +4636,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/niaodaifu/data:
    *   post:
    *     tags:
-   *       - 尿大夫
+   *       - niaodaifu
    *     description: 接收检测数据
    *     produces:
    *       - application/json
@@ -4709,7 +4709,7 @@ module.exports = function (app, webEntry, acl) {
    * /department/district:
    *   get:
    *     tags:
-   *       - 科室表
+   *       - department
    *     description: 获取地区信息
    *     produces:
    *       - application/json
@@ -4766,9 +4766,14 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/forum/allposts', tokenManager.verifyToken(), forumCtrl.getAllposts)
   app.get(version + '/forum/mycollection', tokenManager.verifyToken(), forumCtrl.getMycollection)
   app.get(version + '/forum/myposts', tokenManager.verifyToken(), forumCtrl.getMyposts)
+  app.get(version + '/forum/postcontent', tokenManager.verifyToken(), forumCtrl.getPostContent)
   app.post(version + '/forum/posting', tokenManager.verifyToken(), getNoMid.getNo(13), forumCtrl.forumPosting)
   app.post(version + '/forum/comment', tokenManager.verifyToken(), getNoMid.getNo(14), forumCtrl.forumComment)
-  app.post(version + '/forum/reply', tokenManager.verifyToken(), forumCtrl.forumReply)
+  app.post(version + '/forum/reply', tokenManager.verifyToken(), getNoMid.getNo(15), forumCtrl.forumReply)
+  app.post(version + '/forum/favorite', tokenManager.verifyToken(), forumCtrl.forumFavorite)
+  app.post(version + '/forum/deletepost', tokenManager.verifyToken(), forumCtrl.deletePost)
+  app.post(version + '/forum/deletecomment', tokenManager.verifyToken(), forumCtrl.deleteComment)
+  app.post(version + '/forum/deletefavorite', tokenManager.verifyToken(), forumCtrl.deleteFavorite)
 
   /**
    * @swagger
