@@ -43,14 +43,25 @@ exports.changeMessageStatus = function (req, res) {
   // if (req.session.userId === null || req.session.userId === '') {
   //   return res.json({result: '请填写userId'})
   // }
-  if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
-    return res.json({resutl: '请填写type'})
+
+  // var query = {
+  //   // userId: req.body.userId,
+  //   userId: req.session.userId,
+  //   type: req.body.type
+  // }
+  let query = {
+    userId: req.session.userId
   }
 
-  var query = {
-    // userId: req.body.userId,
-    userId: req.session.userId,
-    type: req.body.type
+  // 允许使用messageId修改一条消息的已读未读状态
+  let messageId = req.body.messageId || null
+  if (messageId !== null) {
+    query['messageId'] = messageId
+  } else {
+    if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
+      return res.json({resutl: '请填写type'})
+    }
+    query['type'] = req.body.type
   }
 
   var upObj = {

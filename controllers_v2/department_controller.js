@@ -52,6 +52,8 @@ exports.getDepartment = function (req, res) {
   }
   if (department !== '') {
     query['department'] = {$regex: department}
+  } else {
+    query['department'] = {$ne:null}
   }
   if (hospital !== '') {
     query['hospital'] = {$regex: hospital}
