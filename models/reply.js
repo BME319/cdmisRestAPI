@@ -2,18 +2,13 @@
 var mongoose = require('mongoose')
 
 var replySchema = new mongoose.Schema({
+  commentId: String,
+  userId: String,
   userName: String,
-  subject: String,
   time: Date,
   depth: Number,
   content: String,
-  replies: [],
-  revisionInfo: {
-    operationTime: Date,
-    userId: String,
-    userName: String,
-    terminalIP: String
-  }
+  at: String
 })
 
 var replyModel = mongoose.model('reply', replySchema)
