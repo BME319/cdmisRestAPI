@@ -6,7 +6,10 @@ var forumSchema = new mongoose.Schema({
   type: Number,
   board: Number,
   status: Number,
-  sponsorId: String,
+  sponsorId: {
+    type: String,
+    ref: 'alluser'
+  },
   sponsorName: String,
   title: String,
   subject: String,
@@ -18,6 +21,7 @@ var forumSchema = new mongoose.Schema({
   replies: [
     {
       commentId: String,
+      replyId: String,
       userId: String,
       userName: String,
       time: Date,
@@ -104,6 +108,18 @@ Forum.aggregate = function (array, callback) {
         return callback(err)
       }
       console.log(results)
+      callback(null, results)
+    })
+}
+
+Forum.removeOne = function (query, callback, opts) {
+  var options = opts || {}
+
+  forumModel
+    .findOneAndRemove(query, options, function (err, results) {
+      if (err) {
+        return callback(err)
+      }
       callback(null, results)
     })
 }
