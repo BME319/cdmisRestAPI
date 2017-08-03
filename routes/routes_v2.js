@@ -19,7 +19,7 @@ var aclChecking = require('../middlewares/aclChecking')
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
 var niaodaifuCtrl = require('../controllers_v2/niaodaifu_controller')
 var alluserCtrl = require('../controllers_v2/alluser_controller')
-var devicedataCtrl = require('../controllers/devicedata_controller')
+var devicedataCtrl = require('../controllers_v2/devicedata_controller')
 var reviewCtrl = require('../controllers_v2/review_controller')
 var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
 var serviceCtrl = require('../controllers_v2/service_controller')
@@ -54,6 +54,10 @@ var reportCtrl = require('../controllers_v2/report_controller')
 var personalDiagCtrl = require('../controllers_v2/personalDiag_controller')
 var doctorsInChargeCtrl = require('../controllers_v2/doctorsInCharge_controller')
 var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
+var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
+var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
+var forumCtrl = require('../controllers_v2/forum_controller')
+
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -358,7 +362,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/services/setSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2)
-  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule)
+  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, serviceCtrl.cancelBookedPds)
   // YQC 2017-07-29 医生设置面诊停诊 将可预约面诊和已预约面诊取消 已预约的取消未实现通知患者和退款
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
    * @swagger
@@ -2299,7 +2303,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "PD Not Found"
    */
-  app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getAvailablePD)
+  app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.getAvailablePD, serviceCtrl.sortAndTagPDs)
   // 患者端 预约面诊 2017-07-27 YQC 生成了验证码但是验证码的发送还未实现
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
@@ -3313,7 +3317,7 @@ module.exports = function (app, webEntry, acl) {
  *       422:
  *         description: Unsuccessfully modified
  */
-  app.post(version + '/insurance/message', tokenManager.verifyToken(), patientCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
+  app.post(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
  /**
  * @swagger
  * /insurance/message:
@@ -3344,7 +3348,7 @@ module.exports = function (app, webEntry, acl) {
  *       500:
  *         description: Server internal error
  */
-  app.get(version + '/insurance/message', tokenManager.verifyToken(), doctorCtrl.checkDoctor, insuranceCtrl.getInsMsg)
+  app.get(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkDoctor, insuranceCtrl.getInsMsg)
  /**
  * @swagger
  * /insurance/prefer:
@@ -3954,7 +3958,7 @@ module.exports = function (app, webEntry, acl) {
  *     operationId: getVitalSigns
  *     tags:
  *       - Report
- *     description: 获取患者当前周月季年的测量记录
+ *     description: 获取患者当前和历史周月季年的测量记录
  *     produces:
  *       - application/json
  *     parameters:
@@ -3993,6 +3997,49 @@ module.exports = function (app, webEntry, acl) {
  *         description: Server internal error
  */
   app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns, reportCtrl.getReport)
+  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
+  /**
+   * @swagger
+   * definition:
+   *   Patient:
+   *     type: object
+   *     properties:
+   *       patientId:
+   *         type: string
+   *       dpRelationTime:
+   *         type: date
+   *   Data:
+   *     type: array
+   *     item:
+   *       type: object
+   *       $ref: '#/definitions/Patient'
+  */
+  /**
+   * @swagger
+   * /nurse/patientsList:
+   *   get:
+   *     operationId: getInsurancePatientsList
+   *     tags:
+   *       - Nurse
+   *     description: 获取护士推送保险信息的患者列表
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: 授权信息
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回相应患者列表
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Data'
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/nurse/patientsList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserObject, nurseInsuranceWorkCtrl.getInsurancePatientsList)
 
   // jyf
   // 刷新token
@@ -4001,7 +4048,7 @@ module.exports = function (app, webEntry, acl) {
    * /token/refresh:
    *   get:
    *     tags:
-   *       - 刷新token
+   *       - token refresh
    *     produces:
    *       - application/json
    *     parameters:
@@ -4026,7 +4073,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/typeTwo:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4091,7 +4138,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/typeTwo/codes:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4157,7 +4204,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/typeOne:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4211,7 +4258,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/district:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4270,7 +4317,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/hospital:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4331,7 +4378,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/BPDevice/binding:
    *   post:
    *     tags:
-   *       - 血压计
+   *       - BPDevice
    *     description: 绑定血压计
    *     produces:
    *       - application/json
@@ -4401,7 +4448,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/BPDevice/debinding:
    *   post:
    *     tags:
-   *       - 血压计
+   *       - BPDevice
    *     description: 解绑血压计
    *     produces:
    *       - application/json
@@ -4563,7 +4610,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/niaodaifu/loginparam:
    *   get:
    *     tags:
-   *       - 尿大夫
+   *       - niaodaifu
    *     description: 获取登录参数
    *     produces:
    *       - application/json
@@ -4589,7 +4636,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/niaodaifu/data:
    *   post:
    *     tags:
-   *       - 尿大夫
+   *       - niaodaifu
    *     description: 接收检测数据
    *     produces:
    *       - application/json
@@ -4662,7 +4709,7 @@ module.exports = function (app, webEntry, acl) {
    * /department/district:
    *   get:
    *     tags:
-   *       - 科室表
+   *       - department
    *     description: 获取地区信息
    *     produces:
    *       - application/json
@@ -4702,7 +4749,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctormonitor/linegraph', doctorMonitorCtrl.getLinegraph)
   app.get(version + '/doctormonitor/workload', doctorMonitorCtrl.getWorkload)
   app.get(version + '/doctormonitor/counseltimeout', doctorMonitorCtrl.getCounseltimeout)
-  app.get(version + '/doctormonitor/departmentcounsel', doctorMonitorCtrl.getDepartmentCounsel)
+  // app.get(version + '/doctormonitor/departmentcounsel', doctorMonitorCtrl.getDepartmentCounsel)
   app.get(version + '/doctormonitor/score', doctorMonitorCtrl.getScore)
   app.get(version + '/doctormonitor/order', doctorMonitorCtrl.getOrder)
 
@@ -4711,6 +4758,22 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/patientmonitor/linegraph', patientMonitorCtrl.getLinegraph)
   app.get(version + '/patientmonitor/insurance', patientMonitorCtrl.getInsurance)
   app.get(version + '/patientmonitor/patientsbyclass', patientMonitorCtrl.getPatientsByClass)
+
+  // 科室超时未回复查询
+  app.get(version + '/departmentcounsel', counseltimeoutCtrl.getDepartmentCounsel)
+
+  // 论坛
+  app.get(version + '/forum/allposts', tokenManager.verifyToken(), forumCtrl.getAllposts)
+  app.get(version + '/forum/mycollection', tokenManager.verifyToken(), forumCtrl.getMycollection)
+  app.get(version + '/forum/myposts', tokenManager.verifyToken(), forumCtrl.getMyposts)
+  app.get(version + '/forum/postcontent', tokenManager.verifyToken(), forumCtrl.getPostContent)
+  app.post(version + '/forum/posting', tokenManager.verifyToken(), getNoMid.getNo(13), forumCtrl.forumPosting)
+  app.post(version + '/forum/comment', tokenManager.verifyToken(), getNoMid.getNo(14), forumCtrl.forumComment)
+  app.post(version + '/forum/reply', tokenManager.verifyToken(), getNoMid.getNo(15), forumCtrl.forumReply)
+  app.post(version + '/forum/favorite', tokenManager.verifyToken(), forumCtrl.forumFavorite)
+  app.post(version + '/forum/deletepost', tokenManager.verifyToken(), forumCtrl.deletePost)
+  app.post(version + '/forum/deletecomment', tokenManager.verifyToken(), forumCtrl.deleteComment)
+  app.post(version + '/forum/deletefavorite', tokenManager.verifyToken(), forumCtrl.deleteFavorite)
 
   /**
    * @swagger

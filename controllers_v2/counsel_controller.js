@@ -520,12 +520,21 @@ exports.getStatus = function (req, res, next) {
 // 注释 更改问诊类型 输入，type，changetype，counselId；输出，更新成功或失败
 exports.changeCounselType = function (req, res) {
   // 若类型为1 更改类型标识为True 写入查询和更新参数 否则返回错误
-  if (req.body.type === 1 && req.body.changeType === 'true') {
+  if (req.body.type === 1 && req.body.changeType === 'type3') {
+    // type3 咨询转问诊
     var query = {
       counselId: req.body.counselId
     }
     var upObj = {
       type: 3
+    }
+  } else if (req.body.type === 1 && req.body.changeType === 'type7') {
+    // type7 咨询转加急咨询
+    var query = {
+      counselId: req.body.counselId
+    }
+    var upObj = {
+      type: 7
     }
   } else {
     return res.json({result: '不可更改的类型!'})

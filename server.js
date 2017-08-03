@@ -147,3 +147,6 @@ schedule.scheduleJob('0 1 0 * * *', personalDiagCtrl.autoAvailablePD)
 // 每日12:01自动更新过期面诊PD 待需求确认
 schedule.scheduleJob('0 1 12 * * *', personalDiagCtrl.autoOverduePD)
 
+var CounseltimeoutCtrl = require('./controllers_v2/counseltimeout_controller')
+schedule.scheduleJob('0 0 8 * * *', CounseltimeoutCtrl.autoCounselNews)
+
