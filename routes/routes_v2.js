@@ -54,8 +54,10 @@ var reportCtrl = require('../controllers_v2/report_controller')
 var personalDiagCtrl = require('../controllers_v2/personalDiag_controller')
 var doctorsInChargeCtrl = require('../controllers_v2/doctorsInCharge_controller')
 var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
-var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
+var CounseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
+var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 var forumCtrl = require('../controllers_v2/forum_controller')
+
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -3315,7 +3317,7 @@ module.exports = function (app, webEntry, acl) {
  *       422:
  *         description: Unsuccessfully modified
  */
-  app.post(version + '/insurance/message', tokenManager.verifyToken(), patientCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
+  app.post(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
  /**
  * @swagger
  * /insurance/message:
@@ -3346,7 +3348,7 @@ module.exports = function (app, webEntry, acl) {
  *       500:
  *         description: Server internal error
  */
-  app.get(version + '/insurance/message', tokenManager.verifyToken(), doctorCtrl.checkDoctor, insuranceCtrl.getInsMsg)
+  app.get(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkDoctor, insuranceCtrl.getInsMsg)
  /**
  * @swagger
  * /insurance/prefer:
@@ -3956,7 +3958,7 @@ module.exports = function (app, webEntry, acl) {
  *     operationId: getVitalSigns
  *     tags:
  *       - Report
- *     description: 获取患者当前周月季年的测量记录
+ *     description: 获取患者当前和历史周月季年的测量记录
  *     produces:
  *       - application/json
  *     parameters:
@@ -3995,6 +3997,49 @@ module.exports = function (app, webEntry, acl) {
  *         description: Server internal error
  */
   app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns, reportCtrl.getReport)
+  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
+  /**
+   * @swagger
+   * definition:
+   *   Patient:
+   *     type: object
+   *     properties:
+   *       patientId:
+   *         type: string
+   *       dpRelationTime:
+   *         type: date
+   *   Data:
+   *     type: array
+   *     item:
+   *       type: object
+   *       $ref: '#/definitions/Patient'
+  */
+  /**
+   * @swagger
+   * /nurse/patientsList:
+   *   get:
+   *     operationId: getInsurancePatientsList
+   *     tags:
+   *       - Nurse
+   *     description: 获取护士推送保险信息的患者列表
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: 授权信息
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回相应患者列表
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Data'
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/nurse/patientsList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserObject, nurseInsuranceWorkCtrl.getInsurancePatientsList)
 
   // jyf
   // 刷新token

@@ -390,10 +390,11 @@ exports.getVitalSigns = function (req, res, next) {
           }
           let data1 = dataSBP
           let data2 = dataDBP
+          let recordTime = recordTimeTemp
           let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
           if (results.class === 'class_5') { flag.flagVA = true }
           if (results.class === 'class_6') { flag.flagPD = true }
-          return res.json({results: {item: {data1, data2, recordTimeTemp}, flag}})
+          return res.json({results: {item: {data1, data2, recordTime}, flag}})
         }
       })
     } else {
@@ -548,10 +549,11 @@ exports.getVitalSigns = function (req, res, next) {
           }
           let data1 = dataUFAll
           let data2 = dataPV
+          let recordTime = recordTimeAll
           let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
           if (results.class === 'class_5') { flag.flagVA = true }
           if (results.class === 'class_6') { flag.flagPD = true }
-          return res.json({results: {item: {data1, data2, recordTimeAll}, flag}})
+          return res.json({results: {item: {data1, data2, recordTime}, flag}})
         }
       })
     } else {
@@ -602,10 +604,11 @@ exports.getVitalSigns = function (req, res, next) {
             }
           }
           let data1 = dataTemp
+          let recordTime = recordTimeTemp
           let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
           if (results.class === 'class_5') { flag.flagVA = true }
           if (results.class === 'class_6') { flag.flagPD = true }
-          return res.json({results: {item: {data1, recordTimeTemp}, flag}})
+          return res.json({results: {item: {data1, recordTime}, flag}})
         }
       })
     } else {
