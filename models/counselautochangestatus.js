@@ -23,7 +23,10 @@ var counselautochangestatusSchema = new mongoose.Schema({
       ref: 'alluser'
     }
   ],
-  endTime: Date
+  endTime: Date,
+  type: Number,
+  // 超时类型：1为超过24小时，2为超过18小时
+  timeouttype: Number
 })
 
 var counselautochangestatusModel = mongoose.model('counselautochangestatus', counselautochangestatusSchema)
