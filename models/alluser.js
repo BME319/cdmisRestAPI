@@ -61,7 +61,8 @@ var alluserSchema = new mongoose.Schema({
       _id: 0,
       day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta', 'Sun']},
       time: {type: String, enum: ['Morning', 'Afternoon']},
-      total: Number // 医生可以设置的某时段面诊总数
+      total: Number, // 医生可以设置的某时段面诊总数
+      place: String
     }
   ],
   // 周期更新医生可预约的的面诊时间（患者查看）
@@ -72,7 +73,9 @@ var alluserSchema = new mongoose.Schema({
       availableTime: {type: String, enum: ['Morning', 'Afternoon']}, // 可预约时段
       total: Number, // 医生已设置的某时段面诊总数
       count: {type: Number, default: 0}, // 已被预约的面诊计数，可用的面诊计数需要用total-count
-      invalidFlag: {type: Number, default: 0, enum: [0, 1]} // 是否停诊
+      invalidFlag: {type: Number, default: 0, enum: [0, 1]}, // 是否删除
+      suspendFlag: {type: Number, default: 0, enum: [0, 1]}, // 是否停诊
+      place: String
     }
   ],
   serviceSuspendTime: [
