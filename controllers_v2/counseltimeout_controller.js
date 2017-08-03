@@ -50,7 +50,7 @@ exports.autoCounselNews = function (req, res) {
         let newData = {
           userId: results[i]._id,
           messageId: 'M' + nowstr + i,
-          readOrNot: 1,
+          readOrNot: 0,
           userRole: 'doctor',
           type: 14,
           time: enddate,
