@@ -10,7 +10,7 @@ var personalDiagSchema = new mongoose.Schema({
   creatTime: Date, // 预约操作时间
   endTime: Date, // 面诊过期时间
   time: Date, // 面诊确认时间
-  status: {type: Number, default: 0, enum: [0, 1, 2, 3, 4]} // 面诊状态 0: 未开始，1: 已完成，2: 未进行自动结束，3: 患者取消，4: 医生停诊或取消
+  status: {type: Number, default: 0, enum: [0, 1, 2, 3, 4]} // 面诊状态 0: 待核销，1: 医生完成核销，2: 过期自动核销，3: 患者取消，直接退款，4: 医生停诊或取消，直接退款，5: 患者申请取消，等待人工处理，6: 医生停诊，等待人工处理
 })
 
 var PersonalDiagModel = mongoose.model('personalDiag', personalDiagSchema)

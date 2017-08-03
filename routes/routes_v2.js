@@ -359,7 +359,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/services/setSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2)
-  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule)
+  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, serviceCtrl.cancelBookedPds)
   // YQC 2017-07-29 医生设置面诊停诊 将可预约面诊和已预约面诊取消 已预约的取消未实现通知患者和退款
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
    * @swagger
@@ -2300,7 +2300,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "PD Not Found"
    */
-  app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getAvailablePD)
+  app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.getAvailablePD, serviceCtrl.sortAndTagPDs)
   // 患者端 预约面诊 2017-07-27 YQC 生成了验证码但是验证码的发送还未实现
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
