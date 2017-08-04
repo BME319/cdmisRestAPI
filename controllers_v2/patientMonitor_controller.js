@@ -12,10 +12,12 @@ exports.getDistribution = function (req, res) {
   } else if (endTime === '') {
     res.status(400).send('请输入结束时间')
   } else {
-
+    startTime = new Date(startTime)
+    endTime = new Date(endTime)
+    endTime = new Date((endTime / 1000 + 86400) * 1000)
     let array = [
       {$match: {role: 'patient'}},
-      {$match: {creationTime: {$gt: new Date(startTime), $lt: new Date(endTime)}}},
+      {$match: {creationTime: {$gte: startTime, $lt: endTime}}},
       {
         $project: {
             '_id': 1,
@@ -108,9 +110,12 @@ exports.getLinegraph = function (req, res) {
   } else if (endTime === '') {
     res.status(400).send('请输入结束时间')
   } else {
+    startTime = new Date(startTime)
+    endTime = new Date(endTime)
+    endTime = new Date((endTime / 1000 + 86400) * 1000)
     let array = [
       {$match: {role: 'patient'}},
-      {$match: {creationTime: {$gt: new Date(startTime), $lt: new Date(endTime)}}},
+      {$match: {creationTime: {$gte: startTime, $lt: endTime}}},
       {
         $project: {
             '_id': 1,
@@ -150,7 +155,7 @@ exports.getLinegraph = function (req, res) {
       {
         $project: {
           '_id': 1,
-          'creationTime': 1,
+          creationTime: { $dateToString: { format: "%Y-%m-%d", date: "$creationTime" } },
           province: {$ifNull: ['$provinceinfo.name', '未知']},
           city: {$ifNull: ['$cityinfo.name', '未知']},
           district: {$ifNull: ['$districtinfo.name', '未知']}
@@ -161,7 +166,7 @@ exports.getLinegraph = function (req, res) {
       array.push(
         {
         $group: {
-          _id: {year: {$year: '$creationTime'}, month: {$month: '$creationTime'}, day: {$dayOfMonth: '$creationTime'}},
+          _id: '$creationTime',
           count: {$sum: 1}
         }
       })
@@ -170,7 +175,7 @@ exports.getLinegraph = function (req, res) {
         {$match: {province: province}},
         {
           $group: {
-          _id: {year: {$year: '$creationTime'}, month: {$month: '$creationTime'}, day: {$dayOfMonth: '$creationTime'}},
+          _id: '$creationTime',
           count: {$sum: 1}
           }
         }
@@ -181,7 +186,7 @@ exports.getLinegraph = function (req, res) {
         {$match: {city: city}},
         {
           $group: {
-          _id: {year: {$year: '$creationTime'}, month: {$month: '$creationTime'}, day: {$dayOfMonth: '$creationTime'}},
+          _id: '$creationTime',
           count: {$sum: 1}
           }
         }
@@ -243,6 +248,8 @@ exports.getInsurance = function (req, res) {
           'time': 1,
           patientname: '$patientinfo.name',
           patientphone: '$patientinfo.phoneNo',
+          patientuserId: '$patientinfo.userId',
+          doctoruserId: '$doctorinfo.userId',
           doctorname: '$doctorinfo.name',
           doctorphone: '$doctorinfo.phoneNo',
           province: '$doctorinfo.province',
@@ -266,39 +273,91 @@ exports.getInsurance = function (req, res) {
 }
 
 exports.getPatientsByClass = function (req, res) {
-  let classNo = req.query.classNo
+  let classNo = req.query.classNo || ''
   let array = [
-    {$match: {class: classNo, role: 'patient'}},
+    {$match: {role: 'patient'}},
     {
       $project: {
         '_id': 1,
         'name': 1,
         'creationTime': 1,
         'class':1,
-        content: '$diagnosisInfo.content',
-        doctor: '$doctors.doctorId'
+        'userId': 1,
+        'class': 1,
+        content: '$diagnosisInfo.content'
+      }
+    },
+    {
+      $lookup: {
+        from: 'doctorsincharges',
+        localField: '_id',
+        foreignField: 'patientId',
+        as: 'doctorsincharge'
+      }
+    },
+    {
+      $project: {
+        '_id': 1,
+        'name': 1,
+        'creationTime': 1,
+        'class':1,
+        'userId': 1,
+        'content': 1,
+        'class': 1,
+        doctorsincharge: {
+          $filter: {
+              input: '$doctorsincharge',
+              as: 'doctorsincharge',
+              cond: {$eq: ['$$doctorsincharge.invalidFlag', 1]},
+          }
+        }
+      }
+    },
+    {$unwind: {path: '$doctorsincharge', preserveNullAndEmptyArrays: true}},
+    {
+      $project: {
+        '_id': 1,
+        'name': 1,
+        'creationTime': 1,
+        'class':1,
+        'userId': 1,
+        'content': 1,
+        'class': 1,
+        doctorsincharge: '$doctorsincharge.doctorId'
       }
     },
     {
       $lookup: {
         from: 'allusers',
-        localField: 'doctor',
+        localField: 'doctorsincharge',
         foreignField: '_id',
-        as: 'docotorinfo'
+        as: 'doctorinfo'
       }
     },
+    {$unwind: {path: '$doctorinfo', preserveNullAndEmptyArrays: true}},
     {
       $project: {
         '_id': 1,
         'name': 1,
         'creationTime': 1,
         'class':1,
+        'userId': 1,
         'content': 1,
-        'doctor': 1,
-        doctorname: '$docotorinfo.name'
+        'class': 1,
+        'doctorsincharge': 1,
+        doctorname: '$doctorinfo.name',
+        doctorhospital: '$doctorinfo.workUnit'
       }
     }
   ]
+
+  if (classNo !== ''){
+    array.splice(
+      0,
+      0,
+      {$match: {class: classNo}}
+    )
+  }
   Alluser.aggregate(array, function (err, results) {
       if (err) {
         res.status(500).send(err.errmsg)
