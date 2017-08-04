@@ -349,7 +349,14 @@ module.exports = function (app, webEntry, acl) {
    *             type: "string"
    *           day:
    *             type: "string"
-   *             format: "YYYY-MM-DD"
+   *             enum:
+   *               - "Mon"
+   *               - "Tue"
+   *               - "Wed"
+   *               - "Thu"
+   *               - "Fri"
+   *               - "Sat"
+   *               - "Sun"
    *           time:
    *             type: "string"
    *             enum:
@@ -362,6 +369,49 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/services/setSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2)
+  /** YQC annotation 2017-08-04 - acl 2017-08-03 医生
+   * @swagger
+   * /services/deleteSchedule:
+   *   post:
+   *     tags:
+   *     - "services"
+   *     summary: "For a doctor, delete a Personal Diagnosis service schedule"
+   *     description: ""
+   *     operationId: "deleteSchedule"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "day"
+   *           - "time"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           day:
+   *             type: "string"
+   *             enum:
+   *               - "Mon"
+   *               - "Tue"
+   *               - "Wed"
+   *               - "Thu"
+   *               - "Fri"
+   *               - "Sat"
+   *               - "Sun"
+   *           time:
+   *             type: "string"
+   *             enum:
+   *               - "Morning"
+   *               - "Afternoon"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.deleteServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, serviceCtrl.cancelBookedPds)
   // YQC 2017-07-29 医生设置面诊停诊 将可预约面诊和已预约面诊取消 已预约的取消未实现通知患者和退款
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
@@ -399,6 +449,40 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/services/setSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.setServiceSuspend, serviceCtrl.suspendAvailablePds, serviceCtrl.cancelBookedPds)
+  /** YQC annotation 2017-08-04 - acl 2017-08-03 医生
+   * @swagger
+   * /services/deleteSuspend:
+   *   post:
+   *     tags:
+   *     - "services"
+   *     summary: "For a doctor, delete a Personal Diagnosis service suspension"
+   *     description: ""
+   *     operationId: "deleteSuspend"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "start"
+   *           - "end"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           start:
+   *             type: "string"
+   *             format: "YYYY-MM-DD"
+   *           end:
+   *             type: "string"
+   *             format: "YYYY-MM-DD"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.deleteServiceSuspend)
   // 咨询问卷填写(新增自动转发功能)
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay)
@@ -508,7 +592,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "AdvisorId not found."
    */
-  app.get(version + '/advice/advices', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), adviceCtrl.getAdvice)
+  app.get(version + '/advice/advices', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), adviceCtrl.getAdvice)
   /** YQC annotation 17-07-24 - debug complete 2017-07-17 - acl 2017-07-25 用户（患者／医生）提建议
    * @swagger
    * /advice/advice:
@@ -548,9 +632,9 @@ module.exports = function (app, webEntry, acl) {
    *               items:
    *                 $ref: '#/definitions/Advice'
    */
-  app.post(version + '/advice/advice', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), adviceCtrl.postAdvice)
+  app.post(version + '/advice/advice', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), adviceCtrl.postAdvice)
   // compliance - debug complete 2017-07-17
-  /** YQC 17-07-24
+  /** YQC 17-07-24 - acl 2017-08-04 医生，患者，管理员
    * @swagger
    * /compliance/compliance:
    *   get:
@@ -562,6 +646,10 @@ module.exports = function (app, webEntry, acl) {
    *     produces:
    *     - "application/json"
    *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
    *     - name: "userId"
    *       in: "query"
    *       description: "UserId to be queried."
@@ -590,11 +678,9 @@ module.exports = function (app, webEntry, acl) {
    *               type: array
    *               items:
    *                 $ref: '#/definitions/Compliance'
-   *       404:
-   *         description: "UserId not found."
    */
-  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), complianceCtrl.getComplianceByDay)
-  /** YQC 17-07-24
+  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getComplianceByDay)
+  /** YQC 17-07-24 - acl 2017-08-04 患者
    * @swagger
    * /compliance/compliances:
    *   post:
@@ -632,7 +718,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/compliance/compliance', tokenManager.verifyToken(), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
+  app.post(version + '/compliance/compliance', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
   // vitalSign 2017-07-14  - debug complete 2017-07-24
   /** YQC 17-07-24 - acl 2017-07-28 医生/患者
    * @swagger
@@ -722,7 +808,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
+  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
   // counsel 2017-07-17 debug 1-
   // 医生获取问诊信息
   app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getCounsels)
@@ -746,7 +832,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
   app.post(version + '/communication/communication', tokenManager.verifyToken(), getNoMid.getNo(8), communicationCtrl.postCommunication)
   app.get(version + '/communication/communication', tokenManager.verifyToken(), communicationCtrl.getCommunication)
-   /** GY 2017-07-28
+  /** GY 2017-07-28
    * @swagger
    * /communication/massToPatient:
    *   post:

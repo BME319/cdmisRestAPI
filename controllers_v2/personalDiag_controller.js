@@ -66,7 +66,7 @@ exports.autoAvailablePD = function (req, res) {
   })
 }
 
-// 每日核销过期面诊PD
+// 每日核销过期面诊PD 给医生账户充值待实现
 exports.autoOverduePD = function (req, res) {
   console.log(new Date())
   let today = new Date(new Date().toDateString())
