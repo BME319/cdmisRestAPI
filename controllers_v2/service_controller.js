@@ -1298,8 +1298,6 @@ exports.getMyPDs = function (req, res) {
   PersionalDiag.getSome(queryPD, function (err, items) {
     if (err) {
       return res.status(500).send(err)
-    } else if (items.length === 0) {
-      return res.status(404).send('PDs Not Found')
     } else {
       return res.status(200).json({results: items})
     }
