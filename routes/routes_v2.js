@@ -4240,66 +4240,69 @@ module.exports = function (app, webEntry, acl) {
   */
   app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
 
-  /**
-   * @swagger
-   * definition:
-   *   Results:
-   *     type: object
-   *     properties:
-   *       data:
-   *         type: array
-   *         item:
-   *           type: number
-   *       recordTime:
-   *         type: array
-   *         item:
-   *           type: date
-  */
-  /**
-   * @swagger
-   * /report/vitalSigns:
-   *   get:
-   *     operationId: getVitalSigns
-   *     tags:
-   *       - Report
-   *     description: 获取患者当前和历史周月季年的测量记录
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: 授权信息
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: time
-   *         description: 患者请求查询的时间
-   *         in: query
-   *         required: true
-   *         type: date
-   *       - name: type
-   *         description: 任务类型
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: code
-   *         description: 检测项目
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: showType
-   *         description: 绘制图表类型
-   *         in: query
-   *         required: true
-   *         type: string
-   *     responses:
-   *       200:
-   *         description: 返回相应数据和记录时间
-   *         schema:
-   *           type: object
-   *           $ref: '#/definitions/Results'
-   *       500:
-   *         description: Server internal error
-  */
+
+ /**
+ * @swagger
+ * definition:
+ *   Results:
+ *     type: object
+ *     properties:
+ *       data:
+ *         type: array
+ *         items:
+ *           type: number
+ *       recordTime:
+ *         type: array
+ *         items:
+ *           type: date
+ */
+ /**
+ * @swagger
+ * /report/vitalSigns:
+ *   get:
+ *     operationId: getVitalSigns
+ *     tags:
+ *       - Report
+ *     description: 获取患者当前和历史周月季年的测量记录
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: token
+ *         description: 授权信息
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: time
+ *         description: 患者请求查询的时间
+ *         in: query
+ *         required: true
+ *         type: date
+ *       - name: type
+ *         description: 任务类型
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: code
+ *         description: 检测项目
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: showType
+ *         description: 绘制图表类型
+ *         in: query
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: 返回相应数据和记录时间
+ *         schema:
+ *           type: object
+ *           $ref: '#/definitions/Results'
+ *       500:
+ *         description: Server internal error
+ */
+
+
   app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns, reportCtrl.getReport)
   app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
   /**
