@@ -5,10 +5,22 @@ var webEntry = require('../settings').webEntry;
 var wechatCtrl = require('../controllers/wechat_controller');
 var commonFunc = require('../middlewares/commonFunc');
 
-var userServer = {};
+var userWechatServer = {};
+var userWechatList = {};
+var userAppServer = {};
+var userAppList = {};
+
+var userWechatPatientServer = {};
+var userWechatPatientList = {};
+
+var userWechatDoctorServer = {};
+var userWechatDoctorList = {};
+var userAppPatientServer = {};
+var userAppPatientList = {};
+var userAppDoctorServer = {};
+var userAppDoctorList = {};
 var userList = {};
 var count = 0;
-
 
 function Arrayremove(array,name){
     var len = array.length;
@@ -19,7 +31,6 @@ function Arrayremove(array,name){
         }
     }
 }
-
 
 function messageSaveSend(data, url,sender){
 
@@ -196,7 +207,7 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                         // custom card 群发
                         if(data.msg.contentType === 'custom' && data.msg.content.type === 'card'  || (data.msg.contentType === 'text' || data.msg.contentType === 'image' || data.msg.contentType === 'voice' )){
 
-                            console.log('in');
+                            // console.log('in');
                             var actionUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_" +data.msg.content.consultationId +'_'+data.msg.teamId + "&#wechat_redirect";
 
                             var template = {
@@ -244,7 +255,7 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                                 json:true
 
                             }, function(err, response, body){
-                                console.log(body)
+                                // console.log(body)
 
                                 // if (!err && response.statusCode == 200) {   
                                 //     res.json({results:body});
@@ -273,7 +284,7 @@ exports.chat = function (io, socket) {
 
             user_id = data.user_id,
             client = data.client;
-        
+        // console.log(data)
         // socket.id = user_id;
         
         if(client == 'doctor'){
@@ -337,14 +348,31 @@ exports.chat = function (io, socket) {
         // console.log('newUser: ' +data.user_id);
         // console.log(Object.keys(userServer));
     })
-    socket.on('disconnect',function(){ //用户注销登陆执行内容
+    socket.on('disconnect',function(data){ //用户注销登陆执行内容
 
         // console.log('disconnect');
 
-        count -= 1; 
         var id = socket.id
-        delete userServer[id]
-        delete userList[id]
+        if(data.client == 'doctor'){
+            delete userAppDoctorServer[id]
+            delete userAppDoctorList[id]
+        }
+        else if(data.client == 'patient'){
+            delete userAppPatientServer[id]
+            delete userAppPatientList[id]
+        }
+        else if(data.client == 'wechatdoctor'){
+            delete userWechatDoctorServer[id]
+            delete userWechatDoctorList[id] 
+        }
+        else if(data.client == 'wechatpatient'){
+            delete userWechatPatientServer[id]
+            delete userWechatPatientList[id] 
+        }
+        else{
+            // do
+        }
+        
         // console.log(id);
         // console.log(Object.keys(userServer));
         // io.emit('onlineCount',freeList)
@@ -353,6 +381,22 @@ exports.chat = function (io, socket) {
         // console.log('disconnect: ' + id);
         // console.log(Object.keys(userServer));
     })
+    // socket.on('disconnect',function(){ //用户注销登陆执行内容
+
+    //     // console.log('disconnect');
+
+    //     count -= 1; 
+    //     var id = socket.id
+    //     delete userServer[id]
+    //     delete userList[id]
+    //     // console.log(id);
+    //     // console.log(Object.keys(userServer));
+    //     // io.emit('onlineCount',freeList)
+    //     // io.emit('offline',{id:id})
+    //     // io.emit('addCount', count)
+    //     // console.log('disconnect: ' + id);
+    //     // console.log(Object.keys(userServer));
+    // })
 
     socket.on('message', function(data){
         // console.log('message by: '+data.msg.fromName );

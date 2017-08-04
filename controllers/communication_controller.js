@@ -744,7 +744,7 @@ exports.getCommunication = function(req, res) {
 			// };
 			query['newsType'] = newsType;
 		}
-		console.log(query);
+		// console.log(query);
 
 		Communication.getSome(query, function(err, items) {
 			if (err) {
@@ -864,7 +864,7 @@ exports.addcontenttime = function (req, res) {
 					// console.log(err);
 				}
 				else if (item === null) {
-					console.log('item_of_null');
+					// console.log('item_of_null');
 					// console.log(i);
 				}
 				else if (item.content.createTimeInMillis === undefined) {
@@ -897,7 +897,7 @@ exports.timeconfirmation = function (req, res) {
 	var flag = 0;
 	Communication.getSome(query, function (err, items) {
 		if (err) {
-			console.log(err);
+			// console.log(err);
 		}
 		for (let i = 0; i < items.length; i ++) {
 			if (!(items[i].content.time)) {

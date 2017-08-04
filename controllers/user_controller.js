@@ -295,18 +295,24 @@ exports.insertUser = function(req, res) {
     });
 }
 exports.registerTest = function(req, res,next) {
-    var _phoneNo = req.query.phoneNo
-    var _password = req.query.password
-    var _role = req.query.role
+    var _phoneNo = req.query.phoneNo || req.body.phoneNo
+    var _password = req.query.password || req.body.password
+    var _role = req.query.role || req.body.role
     var query = {phoneNo:_phoneNo};
     // var _userNo = req.newId
+    console.log("***************************** registerTest: role ****************************************")
+    console.log(_role)
     User.getOne(query, function(err, item) {
         if (err) {
             return res.status(500).send(err.errmsg);
         }
         if(item!=null){
+            console.log("***************************** registerTest: query1 ****************************************")
             var query1 = {phoneNo:_phoneNo,role: _role};
+            console.log(query1)
             User.getOne(query1, function(err, item1) {
+                console.log("***************************** registerTest: item1 ****************************************")
+                console.log(item1)
                 if (err) {
                     return res.status(500).send(err.errmsg);
                 }
@@ -318,23 +324,46 @@ exports.registerTest = function(req, res,next) {
                         if (err) {
                             return res.status(500).send(err.errmsg);
                         }
-                        res.json({results: 0,userNo:item.userId,mesg:"User Register Success!"});
+                        if (_role == 'patient') {
+                            var PatientData = {
+                                userId: item2.userId
+                            }
+                            console.log("***************************** registerTest: patientdata ****************************************")
+                            console.log(PatientData)
+                            var newPatient = new Patient(PatientData);
+                            newPatient.save(function(err, patientInfo) {
+                                if (err) {
+                                    return res.status(500).send(err.errmsg);
+                                }
+                                console.log("***************************** registerTest: patientInfo ****************************************")
+                                console.log(patientInfo)
+                                res.json({results: 0,userNo:item2.userId,mesg:"User Register Success!"});
+                            });
+                        }
+                        else{
+                            res.json({results: 0,userNo:item2.userId,mesg:"User Register Success!"});
+                        }   
                     });
                 }
             });
         }
         else{
+            console.log("***************************** registerTest: not exit ****************************************")
+            console.log("not exist")
             next();
         }
   
     });
 }
 exports.register = function(req, res) {
-    var _phoneNo = req.query.phoneNo
-    var _password = req.query.password
-    var _role = req.query.role
+    var _phoneNo = req.query.phoneNo || req.body.phoneNo
+    var _password = req.query.password || req.body.password
+    var _role = req.query.role || req.body.role
     // var query = {phoneNo:_phoneNo};
     var _userNo = req.newId
+
+    console.log("***************************** register: role ****************************************")
+    console.log(_role)
 
     var userData = {
         phoneNo:_phoneNo,
@@ -347,18 +376,26 @@ exports.register = function(req, res) {
         if (err) {
             return res.status(500).send(err.errmsg);
         }
-        // if (_role == 'patient') {
-        //     var PatientData = {
-        //         userId: _userNo
-        //     }
-        //     var newPatient = new Patient(PatientData);
-        //     newPatient.save(function(err, patientInfo) {
-        //         if (err) {
-        //             return res.status(500).send(err.errmsg);
-        //         }
-        //     });
-        // }
-        res.json({results: 0,userNo:_userNo,mesg:"User Register Success!"});
+        if (_role == 'patient') {
+            var PatientData = {
+                userId: _userNo
+            }
+            console.log("***************************** register: patientdata ****************************************")
+            console.log(PatientData)
+            var newPatient = new Patient(PatientData);
+            newPatient.save(function(err, patientInfo) {
+                if (err) {
+                    return res.status(500).send(err.errmsg);
+                }
+                console.log("***************************** register: patientInfo ****************************************")
+                console.log(patientInfo)
+                res.json({results: 0,userNo:_userNo,mesg:"User Register Success!"});
+            });
+        }
+        else{
+            res.json({results: 0,userNo:_userNo,mesg:"User Register Success!"});
+        }
+        
     });
 }
 // exports.registerWithOpenIdTest = function(req, res,next) {
@@ -476,6 +513,7 @@ exports.setOpenIdRes = function(req, res){
 exports.openIdLoginTest = function(req, res,next) {
 
     //2017-06-07GY调试
+    // console.log("*************************** loginTest ********************************");
     // console.log('openIdLoginTest_in');
 
     var username = req.body.username;
@@ -508,6 +546,7 @@ exports.checkBinding = function(req, res,next) {
     // console.log('checkBinding_in');
 
     var username = req.body.username;
+    // console.log("*************************** login: username ********************************");
     // console.log(username);
     var query = {
         $or: [
@@ -526,6 +565,7 @@ exports.checkBinding = function(req, res,next) {
             if(item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null ||item.MessageOpenId.test != null) ){
                 // openId 存在
                 var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test};
+                // console.log("*************************** query ********************************");
                 // console.log(query);
                 OpenIdTmp.getOne(query, function(err, item1) {
                     if (err) {
@@ -542,6 +582,7 @@ exports.checkBinding = function(req, res,next) {
                             doctorId: item1.doctorUserId,
                             dpRelationTime: Date()
                         };
+                        // console.log("*************************** login : jsondata ********************************");
                         // console.log(jsondata);
                         request({
                           url: 'http://' + webEntry.domain + ':4060/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
@@ -594,7 +635,7 @@ exports.checkBinding = function(req, res,next) {
             else{
 
                 //2017-06-07GY调试
-                console.log('checkBinding_out');
+                // console.log('checkBinding_out');
 
                 next();
             }
@@ -602,7 +643,7 @@ exports.checkBinding = function(req, res,next) {
         else{
 
             //2017-06-07GY调试
-            console.log('checkBinding_err_user_not_exist');
+            // console.log('checkBinding_err_user_not_exist');
 
             res.json({results: 1,mesg:"User doesn't Exist!"});
         }
