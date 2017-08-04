@@ -1375,8 +1375,6 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/patient/diagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
-  // bindingMyDoctor改为关注医生
-  // app.post(version + '/patient/bindingMyDoctor', tokenManager.verifyToken(), patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 管理员
    * @swagger
    * /patient/changeVIP:
@@ -1590,7 +1588,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
   app.get(version + '/doctor/detail', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
-  /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
+  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生
    * @swagger
    * /doctor/myTeams:
    *   get:
@@ -1640,13 +1638,111 @@ module.exports = function (app, webEntry, acl) {
    *                 number:
    *                   type: "number"
    *                   default: "1"
-   *       404:
-   *         description: "Doctor not found."
    */
-  app.get(version + '/doctor/myTeams', tokenManager.verifyToken(), doctorCtrl.getTeams)
-  app.get(version + '/doctor/teamPatients', tokenManager.verifyToken(), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
+  app.get(version + '/doctor/myTeams', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getTeams)
+  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生
+   * @swagger
+   * /doctor/teamPatients:
+   *   get:
+   *     tags:
+   *     - "doctor"
+   *     summary: "获取医生所在的团队的患者"
+   *     description: ""
+   *     operationId: "teamPatients"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "teamId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     - name: "status"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 consultations:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Consultation'
+   */
+  app.get(version + '/doctor/teamPatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
   // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
-  app.post(version + '/doctor/editDetail', tokenManager.verifyToken(), doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember)
+  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生
+   * @swagger
+   * /doctor/editDetail:
+   *   post:
+   *     tags:
+   *     - "doctor"
+   *     summary: "Edit a basic file of a doctor"
+   *     description: ""
+   *     operationId: "editDetail"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           certificatePhotoUrl:
+   *             type: "string"
+   *           practisingPhotoUrl:
+   *             type: "string"
+   *           photoUrl:
+   *             type: "string"
+   *           birthday:
+   *             type: "string"
+   *             format: date-time
+   *           gender:
+   *             type: "number"
+   *           IDNo:
+   *             type: "string"
+   *           province:
+   *             type: "string"
+   *           city:
+   *             type: "string"
+   *           district:
+   *             type: "string"
+   *           workUnit:
+   *             type: "string"
+   *           title:
+   *             type: "string"
+   *           job:
+   *             type: "string"
+   *           department:
+   *             type: "string"
+   *           major:
+   *             type: "string"
+   *           description:
+   *             type: "string"
+   *           charge1:
+   *             type: "number"
+   *           charge2:
+   *             type: "number"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/doctor/editDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
    * @swagger
    * /doctor/myRecentDoctors:
@@ -4030,11 +4126,11 @@ module.exports = function (app, webEntry, acl) {
  *     properties:
  *       data:
  *         type: array
- *         item:
+ *         items:
  *           type: number
  *       recordTime:
  *         type: array
- *         item:
+ *         items:
  *           type: date
  */
  /**
@@ -4861,7 +4957,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/forum/deletecomment', tokenManager.verifyToken(), forumCtrl.deleteComment)
   app.post(version + '/forum/deletefavorite', tokenManager.verifyToken(), forumCtrl.deleteFavorite)
 
-  /**
+  /** YQC definitions
    * @swagger
    * definition:
    *   Comment:
@@ -5251,5 +5347,96 @@ module.exports = function (app, webEntry, acl) {
    *       doctor:
    *         type: object
    *         $ref: '#/definitions/Doctor'
+   *   Consultation:
+   *     type: object
+   *     properties:
+   *       consultationId:
+   *         type: string
+   *       sponsorId:
+   *         type: string
+   *       patientId:
+   *         type: object
+   *         $ref: '#/definitions/Patient'
+   *       time:
+   *         type: string
+   *         format: date-time
+   *       diseaseInfo:
+   *         type: object
+   *         $ref: '#/definitions/Counsel'
+   *       status:
+   *         type: number
+   *       messages:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/MessageInCounsel'
+   *       conclusion:
+   *         type: string
+   *       teamId:
+   *         type: string
+   *   Counsel:
+   *     type: object
+   *     properties:
+   *       counselId:
+   *         type: string
+   *       doctorId:
+   *         type: string
+   *       patientId:
+   *         type: string
+   *       type:
+   *         type: number
+   *       time:
+   *         type: string
+   *         format: date-time
+   *       status:
+   *         type: number
+   *       topic:
+   *         type: string
+   *       content:
+   *         type: string
+   *       title:
+   *         type: string
+   *       sickTime:
+   *         type: string
+   *       visited:
+   *         type: number
+   *       hospital:
+   *         type: string
+   *       visitDate:
+   *         type: string
+   *         format: date-time
+   *       diagnosis:
+   *         type: string
+   *       diagnosisPhotoUrl:
+   *         type: array
+   *         items:
+   *           type: string
+   *       symptom:
+   *         type: string
+   *       symptomPhotoUrl:
+   *         type: array
+   *         items:
+   *           type: string
+   *       descirption:
+   *         type: string
+   *       help:
+   *         type: string
+   *       comment:
+   *         type: string
+   *       messages:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/MessageInCounsel'
+   *   MessageInCounsel:
+   *     type: object
+   *     properties:
+   *       sender:
+   *         type: string
+   *       receiver:
+   *         type: string
+   *       time:
+   *         type: string
+   *         format: date-time
+   *       content:
+   *         type: string
    */
 }
