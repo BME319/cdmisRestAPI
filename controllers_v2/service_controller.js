@@ -911,8 +911,6 @@ exports.getPDPatients = function (req, res) {
   PersionalDiag.getSome(queryPD, function (err, items) {
     if (err) {
       return res.status(500).send(err)
-    } else if (items.length === 0) {
-      return res.status(404).send('PDs Not Found')
     } else {
       return res.status(200).json({results: items})
     }
@@ -1232,6 +1230,7 @@ exports.getAvailablePD = function (req, res, next) {
           objTemp['availableTime'] = availablePDsArray[j].availableTime
           objTemp['suspendFlag'] = availablePDsArray[j].suspendFlag
           objTemp['margin'] = availablePDsArray[j].total - availablePDsArray[j].count
+          objTemp['place'] = availablePDsArray[j].place
           returns.push(objTemp)
         }
         req.body.returns = returns
@@ -1286,7 +1285,7 @@ exports.getMyPDs = function (req, res) {
   let opts = ''
   let fields = {_id: 0, patientId: 0}
   let populate = {path: 'doctorId', select: {_id: 0, doctorsInCharge: 0, doctors: 0, teams: 0, schedules: 0, serviceSchedules: 0, availablePDs: 0}}
-  if (status === 0 || status === 1 || status === 2) {
+  if (status === 0 || status === 1 || status === 2 || status === 3 || status === 4) {
     queryPD.status = status
   }
   if (queryDay !== null) {
@@ -1298,6 +1297,8 @@ exports.getMyPDs = function (req, res) {
   PersionalDiag.getSome(queryPD, function (err, items) {
     if (err) {
       return res.status(500).send(err)
+    } else if (items.length === 0) {
+      return res.status(404).send('PDs Not Found')
     } else {
       return res.status(200).json({results: items})
     }
