@@ -2553,13 +2553,6 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.confirmPD)
 
-  app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
-  app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
-  // app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
-
-  // 退款接口
-  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
-
   // lgf
   // account
  /**
@@ -4700,19 +4693,19 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/department/delete', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.deleteRecord)
 
   // 医生数据监控
-  app.get(version + '/doctormonitor/distribution', doctorMonitorCtrl.getDistribution)
-  app.get(version + '/doctormonitor/linegraph', doctorMonitorCtrl.getLinegraph)
-  app.get(version + '/doctormonitor/workload', doctorMonitorCtrl.getWorkload)
-  app.get(version + '/doctormonitor/counseltimeout', doctorMonitorCtrl.getCounseltimeout)
-  // app.get(version + '/doctormonitor/departmentcounsel', doctorMonitorCtrl.getDepartmentCounsel)
-  app.get(version + '/doctormonitor/score', doctorMonitorCtrl.getScore)
-  app.get(version + '/doctormonitor/order', doctorMonitorCtrl.getOrder)
+  app.get(version + '/doctormonitor/distribution', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getDistribution)
+  app.get(version + '/doctormonitor/linegraph', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getLinegraph)
+  app.get(version + '/doctormonitor/workload', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getWorkload)
+  app.get(version + '/doctormonitor/counseltimeout', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getCounseltimeout)
+  app.get(version + '/doctormonitor/score', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getScore)
+  app.get(version + '/doctormonitor/comment', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getComment)
+  app.get(version + '/doctormonitor/order', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getOrder)
 
   // 患者数据监控
-  app.get(version + '/patientmonitor/distribution', patientMonitorCtrl.getDistribution)
-  app.get(version + '/patientmonitor/linegraph', patientMonitorCtrl.getLinegraph)
-  app.get(version + '/patientmonitor/insurance', patientMonitorCtrl.getInsurance)
-  app.get(version + '/patientmonitor/patientsbyclass', patientMonitorCtrl.getPatientsByClass)
+  app.get(version + '/patientmonitor/distribution', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), patientMonitorCtrl.getDistribution)
+  app.get(version + '/patientmonitor/linegraph', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), patientMonitorCtrl.getLinegraph)
+  app.get(version + '/patientmonitor/insurance', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), patientMonitorCtrl.getInsurance)
+  app.get(version + '/patientmonitor/patientsbyclass', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), patientMonitorCtrl.getPatientsByClass)
 
   // 科室超时未回复查询
   app.get(version + '/departmentcounsel', counseltimeoutCtrl.getDepartmentCounsel)

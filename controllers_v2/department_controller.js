@@ -138,7 +138,7 @@ exports.updateDistrict = function (req, res) {
 // 输入科室、医院、地区，要更新的内容，更新科室信息
 exports.updateDepartment = function (req, res) {
   let district = req.body.district || ''
-  let portleader = req.body.portleader || ''
+  // let portleader = req.body.portleader || ''
   let hospital = req.body.hospital || ''
   let department = req.body.department || ''
   let newdepartment = req.body.new.newdepartment || ''
@@ -165,7 +165,7 @@ exports.updateDepartment = function (req, res) {
         query = {
           department: department,
           hospital: hospital,
-          portleader: portleader,
+          // portleader: portleader,
           district: district
         }
       } else {
