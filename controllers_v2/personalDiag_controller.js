@@ -44,7 +44,8 @@ exports.autoAvailablePD = function (req, res) {
                     availableTime: sSDoc[j].time,
                     availableDay: twoWeeksLater,
                     total: sSDoc[j].total,
-                    suspendFlag: suspendFlag
+                    suspendFlag: suspendFlag,
+                    place: sSDoc[j].place
                   }
                 }
               }
@@ -82,3 +83,8 @@ exports.autoOverduePD = function (req, res) {
     }
   }, {multi: true})
 }
+
+// 发送面诊预约成功短信，包含验证码，预约时间地点等信息
+// exports.successMessage = function (req, res) {
+
+// }
