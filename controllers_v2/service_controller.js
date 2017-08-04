@@ -437,7 +437,25 @@ exports.getDaysToUpdate = function (req, res, next) {
   }
   req.body.nmd = nextModDay
   req.body.nnmd = nextNextModDay
-  next()
+  let query = {userId: req.session.userId, role: 'doctor'}
+  Alluser.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    } else if (req.body.deleteFlag) {
+      next()
+    } else {
+      let serviceSuspendTime = item.serviceSuspendTime || []
+      for (let i = 0; i < serviceSuspendTime.length; i++) {
+        if (serviceSuspendTime[i].start <= nextModDay && serviceSuspendTime[i].end > nextModDay) {
+          req.body.nextSuspend = 1
+        }
+        if (serviceSuspendTime[i].start <= nextNextModDay && serviceSuspendTime[i].end > nextNextModDay) {
+          req.body.nextNextSuspend = 1
+        }
+      }
+      next()
+    }
+  })
 }
 // YQC 2017-07-28
 exports.updateAvailablePD1 = function (req, res, next) {
@@ -461,6 +479,9 @@ exports.updateAvailablePD1 = function (req, res, next) {
         'availablePDs.$.invalidFlag': 0
       }
     }
+    if (req.body.nextSuspend) {
+      upObjD1.$set['availablePDs.$.suspendFlag'] = 1
+    }
   }
   Alluser.update(queryD1, upObjD1, function (err, upDoc1) {
     if (err) {
@@ -477,6 +498,9 @@ exports.updateAvailablePD1 = function (req, res, next) {
             place: place
           }
         }
+      }
+      if (req.body.nextSuspend) {
+        pushObj11.$push.availablePDs.suspendFlag = 1
       }
       Alluser.update(queryD11, pushObj11, function (err, upDoc11) {
         if (err) {
@@ -514,6 +538,9 @@ exports.updateAvailablePD2 = function (req, res, next) {
         'availablePDs.$.invalidFlag': 0
       }
     }
+    if (req.body.nextNextSuspend) {
+      upObjD2.$set['availablePDs.$.suspendFlag'] = 1
+    }
   }
   Alluser.update(queryD2, upObjD2, function (err, upDoc2) {
     if (err) {
@@ -530,6 +557,9 @@ exports.updateAvailablePD2 = function (req, res, next) {
             place: place
           }
         }
+      }
+      if (req.body.nextNextSuspend) {
+        pushObj21.$push.availablePDs.suspendFlag = 1
       }
       Alluser.update(queryD21, pushObj21, function (err, upDoc21) {
         if (err) {
@@ -698,14 +728,41 @@ exports.cancelBookedPds = function (req, res) {
   if (req.body.suspendFlag) {
     let startOfStart = req.body.startOfStart
     let endOfEnd = req.body.endOfEnd
-    query = {
-      doctorId: doctorObjectId,
-      status: 0,
-      $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
+    let now = new Date()
+    let today = new Date(now.toDateString())
+    let tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    let endOfTomorrow = new Date(tomorrow)
+    endOfTomorrow.setDate(endOfTomorrow.getDate() + 1)
+    endOfTomorrow = new Date(endOfTomorrow.toDateString())
+    endOfTomorrow.setMilliseconds(endOfTomorrow.getMilliseconds() - 1)
+    if (new Date(startOfStart) - now > 86400000) {
+      query = {
+        doctorId: doctorObjectId,
+        status: 0,
+        $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
+      }
+    } else {
+      query = {
+        doctorId: doctorObjectId,
+        status: 0,
+        $and: [{bookingDay: {$gte: endOfTomorrow}}, {bookingDay: {$lt: endOfEnd}}]
+      }
+      let queryPD = {$and: [{bookingDay: {$gte: today}}, {bookingDay: {$lte: endOfTomorrow}}], doctorId: doctorObjectId, status: 0}
+      let upObjPD = {$set: {status: 6}}
+      PersionalDiag.update(queryPD, upObjPD, function (err, upItemsPD) { // 一天内停诊人工处理
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          if (upItemsPD.n !== upItemsPD.nModified) {
+            return res.json({result: '停诊时间添加失败', results: upItemsPD})
+          }
+        }
+      }, {multi: true})
     }
   } else {
     query = {
-      doctorId: req.body.doctorObject._id,
+      doctorId: doctorObjectId,
       status: 0,
       $or: [{bookingDay: req.body.nmd}, {bookingDay: req.body.nnmd}],
       bookingTime: req.body.time
@@ -1241,8 +1298,6 @@ exports.getMyPDs = function (req, res) {
   PersionalDiag.getSome(queryPD, function (err, items) {
     if (err) {
       return res.status(500).send(err)
-    } else if (items.length === 0) {
-      return res.status(404).send('PDs Not Found')
     } else {
       return res.status(200).json({results: items})
     }
@@ -1261,18 +1316,25 @@ exports.cancelMyPD = function (req, res, next) {
       return res.status(500).send(err)
     } else {
       let bookingDay = new Date(item.bookingDay)
-      let today = new Date(new Date().toDateString())
-      let threeDaysLater = new Date(today)
-      threeDaysLater.setDate(today.getDate() + 3)
-      if (threeDaysLater >= bookingDay) {
-        return res.status(406).send('Exceeds the Time Limit')
-      } else {
+      let sixInBD = new Date(bookingDay)
+      sixInBD.setHours(sixInBD.getHours() + 6)
+      if (new Date() >= sixInBD) { // 申请退款
+        // return res.status(406).send('Exceeds the Time Limit')
+        let upObj = {$set: {status: 5}}
+        PersionalDiag.update(query, upObj, function (err, upItem) {
+          if (err) {
+            return res.status(500).send(err)
+          } else if (upItem.nModified === 0) {
+            return res.status(304).send('Not Modified')
+          } else {
+            return res.status(201).send('Cancel Request Received')
+          }
+        })
+      } else { // 直接退款
         let upObj = {$set: {status: 3}}
         PersionalDiag.update(query, upObj, function (err, upItem) {
           if (err) {
             return res.status(500).send(err)
-          } else if (upItem.n === 0) {
-            return res.status(404).send('PD Not Found')
           } else if (upItem.nModified === 0) {
             return res.status(304).send('Not Modified')
           } else {
@@ -1298,8 +1360,7 @@ exports.updatePDCapacityUp = function (req, res) {
     }
   }
   let opts = {fields: {_id: 0, availablePDs: 1}}
-  // console.log(queryD, upDoc)
-  Alluser.update(queryD, upDoc, function (err, upDoctor) { // 占个号
+  Alluser.update(queryD, upDoc, function (err, upDoctor) {
     if (err) {
       return res.status(500).send(err)
     } else if (upDoctor.nModified === 0) {
