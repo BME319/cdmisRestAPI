@@ -133,8 +133,86 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/labtestImport/countByStatus', tokenManager.verifyToken(), labtestImportCtrl.countByStatus)
 
   // doctor_services
-  app.get(version + '/services', tokenManager.verifyToken(), serviceCtrl.getServices)
-  /** YQC 17-07-20
+  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生
+   * @swagger
+   * /services:
+   *   get:
+   *     tags:
+   *     - "services"
+   *     summary: "服务开启状态及收费情况，并返回团队信息"
+   *     description: ""
+   *     operationId: "services"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userId:
+   *                   type: "string"
+   *                 counselStatus1:
+   *                   type: "number"
+   *                 counselStatus2:
+   *                   type: "number"
+   *                 counselStatus3:
+   *                   type: "number"
+   *                 counselStatus4:
+   *                   type: "number"
+   *                 counselStatus5:
+   *                   type: "number"
+   *                 charge1:
+   *                   type: "number"
+   *                 charge2:
+   *                   type: "number"
+   *                 charge3:
+   *                   type: "number"
+   *                 charge4:
+   *                   type: "number"
+   *                 charge5:
+   *                   type: "number"
+   *                 serviceSchedules:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/ServiceSchedule'
+   *                 serviceSuspendTime:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/ServiceSuspend'
+   *                 autoRelay:
+   *                   type: "number"
+   *                 relayTarget:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamTarget'
+   *             teams:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   teamId:
+   *                     type: string
+   *                   name:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   */
+  app.get(version + '/services', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), serviceCtrl.getServices)
+  /** YQC 17-07-20 - acl 2017-08-04 医生
    * @swagger
    * /services/status:
    *   post:
@@ -225,8 +303,8 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "Doctor's userId not found."
    */
-  app.post(version + '/services/status', tokenManager.verifyToken(), serviceCtrl.changeServiceStatus)
-  /** YQC 17-07-20
+  app.post(version + '/services/status', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.changeServiceStatus)
+  /** YQC 17-07-20 - acl 2017-08-04 医生
    * @swagger
    * /services/charge:
    *   post:
@@ -319,7 +397,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "Doctor's userId not found."
    */
-  app.post(version + '/services/charge', tokenManager.verifyToken(), serviceCtrl.setCharge)
+  app.post(version + '/services/charge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setCharge)
   app.post(version + '/services/relayTarget', tokenManager.verifyToken(), serviceCtrl.setRelayTarget)
   // YQC 2017-07-28 添加面诊余量更新函数 添加未来十四天内的面诊余量记录
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
@@ -930,7 +1008,7 @@ module.exports = function (app, webEntry, acl) {
    *                   items:
    *                     $ref: '#/definitions/Task'
    */
-  app.get(version + '/tasks/task', tokenManager.verifyToken(), tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getUserTask)
+  app.get(version + '/tasks/task', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getUserTask)
   /** YQC annotation 2017-07-28 - acl 2017-07-28 医生
    * @swagger
    * /tasks/task:
@@ -987,7 +1065,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/tasks/task', tokenManager.verifyToken(), tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
+  app.post(version + '/tasks/task', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
   // patient 2017-07-17
   /** YQC annotation 2017-07-27 - acl 2017-07-26 患者 - acl 2017-07-28 医生
    * @swagger
@@ -1587,7 +1665,48 @@ module.exports = function (app, webEntry, acl) {
    */
   app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
-  app.get(version + '/doctor/detail', tokenManager.verifyToken(), doctorCtrl.getSessionObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
+  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生
+   * @swagger
+   * /doctor/detail:
+   *   get:
+   *     tags:
+   *     - "doctor"
+   *     summary: "获取医生（我）详情"
+   *     description: ""
+   *     operationId: "detail"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 n:
+   *                   type: number
+   *                 nModified:
+   *                   type: number
+   *                 ok:
+   *                   type: number
+   *             TDCticket:
+   *               type: string
+   *             comments:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Comment'
+   *             nexturl:
+   *               type: string
+   */
+  app.get(version + '/doctor/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
   /** YQC annotation 2017-07-26 - acl 2017-08-04 医生
    * @swagger
    * /doctor/myTeams:
@@ -1870,7 +1989,7 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/doctor/deleteSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.deleteSchedule)
   // 获取排班（与面诊排班整合）
-  app.get(version + '/doctor/schedules', tokenManager.verifyToken(), doctorCtrl.getSchedules)
+  // app.get(version + '/doctor/schedules', tokenManager.verifyToken(), doctorCtrl.getSchedules)
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
    * /doctor/suspendTime:
