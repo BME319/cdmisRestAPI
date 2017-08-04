@@ -3950,7 +3950,7 @@ module.exports = function (app, webEntry, acl) {
    *           type: number
    *       recordTime:
    *         type: array
-   *         item:
+   *         items:
    *           type: date
   */
   /**
@@ -3999,6 +3999,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: Server internal error
   */
   app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns, reportCtrl.getReport)
+  app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, reportCtrl.updateReport)
   app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
   /**
    * @swagger
