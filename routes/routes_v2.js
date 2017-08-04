@@ -361,7 +361,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/services/setSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2)
-  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule)
+  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), serviceCtrl.deleteServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, serviceCtrl.cancelBookedPds)
   // YQC 2017-07-29 医生设置面诊停诊 将可预约面诊和已预约面诊取消 已预约的取消未实现通知患者和退款
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
    * @swagger
@@ -2302,7 +2302,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "PD Not Found"
    */
-  app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getAvailablePD)
+  app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.getAvailablePD, serviceCtrl.sortAndTagPDs)
   // 患者端 预约面诊 2017-07-27 YQC 生成了验证码但是验证码的发送还未实现
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
@@ -4050,7 +4050,7 @@ module.exports = function (app, webEntry, acl) {
    * /token/refresh:
    *   get:
    *     tags:
-   *       - 刷新token
+   *       - token refresh
    *     produces:
    *       - application/json
    *     parameters:
@@ -4075,7 +4075,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/typeTwo:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4140,7 +4140,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/typeTwo/codes:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4206,7 +4206,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/typeOne:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4260,7 +4260,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/district:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4319,7 +4319,7 @@ module.exports = function (app, webEntry, acl) {
    * /dict/hospital:
    *   get:
    *     tags:
-   *       - 字典
+   *       - dictionary
    *     produces:
    *       - application/json
    *     parameters:
@@ -4380,7 +4380,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/BPDevice/binding:
    *   post:
    *     tags:
-   *       - 血压计
+   *       - BPDevice
    *     description: 绑定血压计
    *     produces:
    *       - application/json
@@ -4450,7 +4450,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/BPDevice/debinding:
    *   post:
    *     tags:
-   *       - 血压计
+   *       - BPDevice
    *     description: 解绑血压计
    *     produces:
    *       - application/json
@@ -4612,7 +4612,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/niaodaifu/loginparam:
    *   get:
    *     tags:
-   *       - 尿大夫
+   *       - niaodaifu
    *     description: 获取登录参数
    *     produces:
    *       - application/json
@@ -4638,7 +4638,7 @@ module.exports = function (app, webEntry, acl) {
    * /devicedata/niaodaifu/data:
    *   post:
    *     tags:
-   *       - 尿大夫
+   *       - niaodaifu
    *     description: 接收检测数据
    *     produces:
    *       - application/json
@@ -4711,7 +4711,7 @@ module.exports = function (app, webEntry, acl) {
    * /department/district:
    *   get:
    *     tags:
-   *       - 科室表
+   *       - department
    *     description: 获取地区信息
    *     produces:
    *       - application/json
@@ -4768,9 +4768,14 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/forum/allposts', tokenManager.verifyToken(), forumCtrl.getAllposts)
   app.get(version + '/forum/mycollection', tokenManager.verifyToken(), forumCtrl.getMycollection)
   app.get(version + '/forum/myposts', tokenManager.verifyToken(), forumCtrl.getMyposts)
+  app.get(version + '/forum/postcontent', tokenManager.verifyToken(), forumCtrl.getPostContent)
   app.post(version + '/forum/posting', tokenManager.verifyToken(), getNoMid.getNo(13), forumCtrl.forumPosting)
   app.post(version + '/forum/comment', tokenManager.verifyToken(), getNoMid.getNo(14), forumCtrl.forumComment)
-  app.post(version + '/forum/reply', tokenManager.verifyToken(), forumCtrl.forumReply)
+  app.post(version + '/forum/reply', tokenManager.verifyToken(), getNoMid.getNo(15), forumCtrl.forumReply)
+  app.post(version + '/forum/favorite', tokenManager.verifyToken(), forumCtrl.forumFavorite)
+  app.post(version + '/forum/deletepost', tokenManager.verifyToken(), forumCtrl.deletePost)
+  app.post(version + '/forum/deletecomment', tokenManager.verifyToken(), forumCtrl.deleteComment)
+  app.post(version + '/forum/deletefavorite', tokenManager.verifyToken(), forumCtrl.deleteFavorite)
 
   /**
    * @swagger
