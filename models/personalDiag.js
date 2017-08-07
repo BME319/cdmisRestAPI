@@ -7,6 +7,7 @@ var personalDiagSchema = new mongoose.Schema({
   code: String, // 验证码
   bookingDay: Date, // 预约日期，数据存储为东八区当日零点
   bookingTime: {type: String, enum: ['Morning', 'Afternoon']}, // 面诊预约时间段
+  place: String, // 面诊地点
   creatTime: Date, // 预约操作时间
   endTime: Date, // 面诊过期时间
   time: Date, // 面诊确认时间
