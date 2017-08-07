@@ -160,12 +160,13 @@ exports.updateDepartment = function (req, res) {
       if (err){
         res.status(500).send(err)
       }
+      portleader = Info[0].portleader
       console.log('Info' + Info[0].department)
       if (Info[0].department !== undefined) {
         query = {
           department: department,
           hospital: hospital,
-          // portleader: portleader,
+          portleader: portleader,
           district: district
         }
       } else {
@@ -184,12 +185,15 @@ exports.updateDepartment = function (req, res) {
       if (newdoctors !== '') {
         obj['doctors'] = newdoctors
       }
-      Department.update(query, obj, function (err, Info) {
-      if (err) {
-        res.status(500).send(err.errmsg)
+      obj = {
+        $set: obj
       }
-      res.json('更新成功')
-    }, {upsert: true})
+      Department.update(query, obj, function (err, Info) {
+        if (err) {
+          res.status(500).send(err.errmsg)
+        }
+        res.json('更新成功')
+      }, {upsert: true})
     })
   }
 }
