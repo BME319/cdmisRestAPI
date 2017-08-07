@@ -4232,6 +4232,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: Server internal error
   */
   app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
+
   /**
    * @swagger
    * definition:
@@ -5672,6 +5673,7 @@ module.exports = function (app, webEntry, acl) {
   */
   app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
 
+
   /**
    * @swagger
    * definition:
@@ -5732,6 +5734,7 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: Server internal error
   */
+
   app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns, reportCtrl.getReport)
   app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
   /**

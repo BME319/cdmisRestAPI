@@ -40,13 +40,17 @@ exports.error = function (req, res, next) {
     console.log('test domain')
     // console.log(err)
     // console.log(req)
-    // log.error(err)
-    log.error({
-      methodName: req.name,
-      error: err,
-      args: req.query || req.body,
-      user: req.session
-    })
+    log.error('= ------------------------------------------------------------')
+    log.error(err)
+    log.error(req.url)
+    log.error(req.query || req.body)
+    log.error(req.session)
+    // log.error({
+    //   methodName: req.name,
+    //   error: err,
+    //   args: req.query || req.body,
+    //   user: req.session
+    // })
 
     // fs.appendFile('./logs/log.txt', err, 'utf8', function (appendErr) {
     //   if (appendErr) {
