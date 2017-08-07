@@ -12,6 +12,7 @@
   "dependencies": {
     "acl": "^0.4.10",
     "body-parser": "^1.17.1",
+    "bunyan": "^1.8.12",
     "crypto": "0.0.3",
     "express": "^4.15.2",
     "https": "^1.0.0",
