@@ -118,7 +118,7 @@ exports.getOrderNo = function (req, res, next) {
   if (type === 5) {
     query['perDiagObject'] = {$exists: false}
   }
-  Order.getSome(query, function (err, item) {
+  Order.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }

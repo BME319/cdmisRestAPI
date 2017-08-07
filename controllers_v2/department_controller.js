@@ -138,7 +138,7 @@ exports.updateDistrict = function (req, res) {
 // 输入科室、医院、地区，要更新的内容，更新科室信息
 exports.updateDepartment = function (req, res) {
   let district = req.body.district || ''
-  let portleader = req.body.portleader || ''
+  // let portleader = req.body.portleader || ''
   let hospital = req.body.hospital || ''
   let department = req.body.department || ''
   let newdepartment = req.body.new.newdepartment || ''
@@ -160,6 +160,7 @@ exports.updateDepartment = function (req, res) {
       if (err){
         res.status(500).send(err)
       }
+      portleader = Info[0].portleader
       console.log('Info' + Info[0].department)
       if (Info[0].department !== undefined) {
         query = {
@@ -184,12 +185,15 @@ exports.updateDepartment = function (req, res) {
       if (newdoctors !== '') {
         obj['doctors'] = newdoctors
       }
-      Department.update(query, obj, function (err, Info) {
-      if (err) {
-        res.status(500).send(err.errmsg)
+      obj = {
+        $set: obj
       }
-      res.json('更新成功')
-    }, {upsert: true})
+      Department.update(query, obj, function (err, Info) {
+        if (err) {
+          res.status(500).send(err.errmsg)
+        }
+        res.json('更新成功')
+      }, {upsert: true})
     })
   }
 }

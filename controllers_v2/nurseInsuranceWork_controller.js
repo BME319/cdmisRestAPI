@@ -9,10 +9,19 @@ exports.getInsurancePatientsList = function (req, res) {
   var query = {
     'doctorId': nurseId
   }
-  let opts = {}
+  let opts = {'sort': '-patients.dpRelationTime'}
   let fields = {}
   let populate = {
-    'path': 'patientId'
+    'path': 'patients.patientId',
+    'select': {
+      'userId': 1,
+      'name': 1,
+      'photoUrl': 1,
+      'gender': 1,
+      'class': 1,
+      'birthday': 1,
+      '_id': 0
+    }
   }
   DpRelation.getOne(query, function (err, item) {
     if (err) {
@@ -22,7 +31,11 @@ exports.getInsurancePatientsList = function (req, res) {
     if (item === null) {
       return res.json({data: {}, msg: '该护士无绑定患者！', code: 1})
     } else {
-      return res.json({data: item.patients, msg: '获取患者列表成功！', code: 1})
+      let rows = item.patients
+      rows.sort(function (a, b) {
+        return Date.parse(b.dpRelationTime) - Date.parse(a.dpRelationTime) // 时间降序
+      })
+      return res.json({data: rows, msg: '获取患者列表成功！', code: 1})
     }
   }, opts, fields, populate)
 }
