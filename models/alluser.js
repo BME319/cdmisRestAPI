@@ -145,22 +145,22 @@ var alluserSchema = new mongoose.Schema({
       invalidFlag: Number
     }
   ],
-  // 主管医生字段
-  doctorsInCharge: [
-    {
-      // _id: 0,
-      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-      firstTime: Date,
-      // 历史2、当前1、待审核0，被拒3
-      invalidFlag: Number,
-      rejectReason: String,
-      // 时长数字类型以秒为单位
-      length: Number,
-      // 有效的起止时间
-      start: Date,
-      end: Date
-    }
-  ],
+  // 主管医生字段 改用doctorsInCharge表
+  // doctorsInCharge: [
+  //   {
+  //     // _id: 0,
+  //     doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  //     firstTime: Date,
+  //     // 历史2、当前1、待审核0，被拒3
+  //     invalidFlag: Number,
+  //     rejectReason: String,
+  //     // 时长数字类型以秒为单位
+  //     length: Number,
+  //     // 有效的起止时间
+  //     start: Date,
+  //     end: Date
+  //   }
+  // ],
   diagnosisInfo: [
     {
       _id: 0,

@@ -1,6 +1,7 @@
 // var config = require('../config')
 var InsuranceMsg = require('../models/insuranceMsg')
-var Alluser = require('../models/alluser')
+// var Alluser = require('../models/alluser')
+var Policy = require('../models/policy')
 
 // 更新或插入保险消息 ,医生向患者推送 2017-04-18 GY
 exports.updateInsuranceMsg = function (req, res, next) {
@@ -150,6 +151,7 @@ exports.getInsMsg = function (req, res) {
 }
 
 // 设置保险购买意向
+// 添加新建policy条目 2017-08-07 YQC
 exports.setPrefer = function (req, res) {
   var preference = {
     status: req.body.status,
@@ -163,12 +165,44 @@ exports.setPrefer = function (req, res) {
   InsuranceMsg.update(query, { $set: {preference: preference} }, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
+    } else {
+      let queryP = {
+        patientId: req.body.patientObject._id
+      }
+      Policy.getSome(queryP, function (err, items) {
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          let inProcessNo = 0
+          for (let policyItem in items) {
+            if (items[policyItem].status === 1 || items[policyItem].status === 2 || items[policyItem].status === 0) {
+              inProcessNo = inProcessNo + 1
+            }
+          }
+          if (inProcessNo !== 0) {
+            return res.json({msg: '已设置意向，请等候保险专员联系'})
+          } else {
+            var policyData = {
+              patientId: req.body.patientObject._id,
+              status: 0,
+              followUps: [{
+                time: new Date(),
+                type: 0,
+                content: '该患者设置了保险购买意向，请尽快分配保险专员进行沟通联系。'
+              }]
+            }
+            var newPolicy = new Policy(policyData)
+            newPolicy.save(function (err, PInfo) {
+              if (err) {
+                return res.status(500).send(err)
+              } else {
+                return res.json({msg: '设置意向成功，请等候保险专员联系'})
+              }
+            })
+          }
+        }
+      })
     }
-        // if(item === null){
-        //  return res.status(400).send('Patient do not exist!');
-        // }
-        // console.log(item);
-    res.json({results: 'success'})
   }, {upsert: true})
 }
 
