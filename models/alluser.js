@@ -73,7 +73,6 @@ var alluserSchema = new mongoose.Schema({
       availableTime: {type: String, enum: ['Morning', 'Afternoon']}, // 可预约时段
       total: Number, // 医生已设置的某时段面诊总数
       count: {type: Number, default: 0}, // 已被预约的面诊计数，可用的面诊计数需要用total-count
-      invalidFlag: {type: Number, default: 0, enum: [0, 1]}, // 是否删除
       suspendFlag: {type: Number, default: 0, enum: [0, 1]}, // 是否停诊
       place: String
     }
@@ -259,7 +258,7 @@ Alluser.countSome = function (query, callback) {
       callback(null, allusers)
     })
 }
- 
+
 Alluser.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
