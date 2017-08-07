@@ -58,7 +58,7 @@ app.use(log4js.useLog())
 // 跨域访问
 app.all('*', function (req, res, next) {
   var domain = req.headers.origin || null
-  if(domain !== null){
+  if (domain !== null) {
     res.setHeader('Access-Control-Allow-Origin', domain)
     res.setHeader('Access-Control-Allow-Credentials', true)
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT')
@@ -144,6 +144,7 @@ schedule.scheduleJob('30 0 8 * * *', taskCtrl.remindChangeTask)
 var personalDiagCtrl = require('./controllers_v2/personalDiag_controller')
 // 每天00:01更新医生的可预约面诊availablePDs 2017-08-03 YQC
 schedule.scheduleJob('0 1 0 * * *', personalDiagCtrl.autoAvailablePD)
+
 // 每日23:30自动更新过期面诊PD YQC
 schedule.scheduleJob('0 30 23 * * *', personalDiagCtrl.autoOverduePD)
 
