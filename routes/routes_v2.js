@@ -14,6 +14,7 @@ var Wechat = require('../models/wechat')
 var getNoMid = require('../middlewares/getNoMid')
 var tokenManager = require('../middlewares/tokenManager')
 var aclChecking = require('../middlewares/aclChecking')
+var errorHandler = require('../middlewares/errorHandler')
 
 // controllers
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
@@ -58,14 +59,13 @@ var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
 var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 var forumCtrl = require('../controllers_v2/forum_controller')
 
-
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
   //   res.send("Server Root");
   // });
 
   // csq
-  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
+  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), errorHandler.error, alluserCtrl.changerole)
   app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
   app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl))
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl))
@@ -95,7 +95,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/alluser/adminList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(6))
   app.post(version + '/alluser/alluser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList)
 
-  app.post(version + '/alluser/register', alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
+  app.post(version + '/alluser/register', errorHandler.error, alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
   app.post(version + '/alluser/cancelUser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.cancelAlluser)
   app.post(version + '/alluser/unionid', tokenManager.verifyToken(), alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
   app.post(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
@@ -4131,7 +4131,8 @@ module.exports = function (app, webEntry, acl) {
    *         type: integer
 
    */
-  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeTwoCtrl.getCategory)
+  // app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), errorHandler.error, dictTypeTwoCtrl.getCategory)
+  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), errorHandler.error, dictTypeTwoCtrl.getCategory)
   // 2017-07-24测试 权限：admin
   /**
    * @swagger
@@ -5166,4 +5167,6 @@ module.exports = function (app, webEntry, acl) {
    *         type: object
    *         $ref: '#/definitions/Doctor'
    */
+
+  app.get(version + '/dict/typeTwoTest', errorHandler.error, dictTypeTwoCtrl.getCategoryTest)
 }

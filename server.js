@@ -58,7 +58,7 @@ app.use(log4js.useLog())
 // 跨域访问
 app.all('*', function (req, res, next) {
   var domain = req.headers.origin || null
-  if(domain !== null){
+  if (domain !== null) {
     res.setHeader('Access-Control-Allow-Origin', domain)
     res.setHeader('Access-Control-Allow-Credentials', true)
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT')
@@ -149,4 +149,3 @@ schedule.scheduleJob('0 1 12 * * *', personalDiagCtrl.autoOverduePD)
 
 var CounseltimeoutCtrl = require('./controllers_v2/counseltimeout_controller')
 schedule.scheduleJob('0 0 8 * * *', CounseltimeoutCtrl.autoCounselNews)
-
