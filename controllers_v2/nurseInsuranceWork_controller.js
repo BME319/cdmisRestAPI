@@ -27,34 +27,6 @@ exports.getInsurancePatientsList = function (req, res) {
   }, opts, fields, populate)
 }
 
-// 插入护士推送保险信息  2017-08-01 lgf
-// exports.updateInsuranceWork = function (req, res, next) {
-//   var nurseId = req.session.userId
-//   var patientId = req.userObject._id
-//   var time
-//   if (req.body.time === null || req.body.time === '' || req.body.time === undefined) {
-//     time = new Date()
-//   } else {
-//     time = new Date(req.body.time)
-//   }
-//   var query = {
-//     'nurseId': nurseId,
-//     'patientId': patientId
-//   }
-//   var upObj = {
-//     $set: {
-//       'time': time
-//     }
-//   }
-//   NurseInsuranceWork.update(query, upObj, function (err, upInsuranceWork) {
-//     if (err) {
-//       return res.status(500).send(err.message)
-//     } else {
-//       return res.json({results: upInsuranceWork})
-//     }
-//   })
-// }
-
 // 查询临时绑定关系
 exports.checkBinding = function (req, res, next) {
   var nurseId = req.session.userId
@@ -78,12 +50,12 @@ exports.checkBinding = function (req, res, next) {
           if (item1 !== null) {
             req.body.patientId = item1.doctorUserId   // 患者端 患者扫医生，绑定医生； 护士端 护士扫患者，绑定患者
             req.body.nurseObjectId = item._id
-            req.body.dpRelationTime = Date()
+            req.body.dpRelationTime = new Date(item1.time)
             req.body.nurseOpenId = item.openId
             // console.log('item1', item1)
             next()
           } else {
-            return res.json('无临时绑定数据！')
+            return res.json('无临时绑定数据，扫码失败！')
           }
         })
       } else {
@@ -110,17 +82,19 @@ exports.bindingPatient = function (req, res, next) {
       return res.status(422).send(err.message)
     }
     // console.log('item', item)
-    console.log('patientId', patientId)
+    // console.log('patientId', patientId)
     if (item !== null) {
       var patientsList = item.patients
       console.log('patientsList', patientsList)
       for (let i = 0; i < patientsList.length; i++) {
         if (String(patientsList[i].patientId) === String(patientId)) {
-          return res.json({data: {}, msg: '已绑定过该患者!', code: 0})
-          // next()
+          req.isBinding = 1 // 是否绑定过该患者的标志，1表示已绑定过 0表示未绑定过
+          // return res.json({data: {}, msg: '已绑定过该患者!', code: 0})
+          return next()
         }
       }
     }
+    // console.log('req.isBinding', req.isBinding)
     var upObj = {
       $push: {
         patients: {
@@ -133,10 +107,11 @@ exports.bindingPatient = function (req, res, next) {
       if (err) {
         return res.status(422).send(err.message)
       } else {
+        req.isBinding = 0
+        console.log('req.isBinding2', req.isBinding)
         next()
         // return res.json({msg: '绑定患者成功！', results: updpRelation, code: 1})
       }
-      // return res.json({result:updpRelation})
     }, {upsert: true})
   })
 }
@@ -151,6 +126,10 @@ exports.deleteOpenIdTmp = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    return res.json({data: {}, msg: '绑定患者成功！删除临时数据成功!', code: 1})
+    if (req.isBinding) {
+      return res.json({data: {}, msg: '已绑定过该患者!', code: 0})
+    } else {
+      return res.json({data: {}, msg: '绑定患者成功！', code: 1})
+    }
   })
 }
