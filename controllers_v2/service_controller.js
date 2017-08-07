@@ -1100,6 +1100,7 @@ exports.updatePDCapacityDown = function (req, res, next) {
       }
       let count = availablePD.count || 0
       let total = availablePD.total || 0
+      req.body.place = availablePD.place
       if (count < total) { // 存在余量，可预约面诊
         // let queryD2 = {userId: doctorId, role: 'doctor', serviceSchedules: {$elemMatch: {day: bookingDay, time: bookingTime}}}
         let upDoc = {
@@ -1172,6 +1173,8 @@ exports.newPersonalDiag = function (req, res, next) {
           req.body.perDiagObject = pDInfo._id
           req.body.patientId = req.session.userId
           req.body.type = 5
+          req.body.code = code
+          req.body.smsType = 5
           next()
         }
       })
@@ -1260,6 +1263,31 @@ exports.sortAndTagPDs = function (req, res) {
           if (String(itemsPD[i].bookingDay) === String(new Date(new Date(returns[k].availableDay).toDateString())) && itemsPD[i].bookingTime === returns[k].availableTime) {
             returns[k]['diagId'] = itemsPD[i].diagId
           }
+        }
+      }
+    }
+    let period = ['Morning', 'Afternoon']
+    for (let ii = today; ii <= twoWeeksLater; ii.setDate(ii.getDate() + 1)) {
+      for (let kk in period) {
+        let flag = Number
+        for (let jj = 0; jj < returns.length; jj++) {
+          flag = 0
+          // console.log(new Date(returns[jj].availableDay).toDateString(), ii.toDateString())
+          // console.log(returns[jj].availableTime, period[kk])
+          if (new Date(returns[jj].availableDay).toDateString() === ii.toDateString() & returns[jj].availableTime === period[kk]) {
+            flag = 1
+            break
+          }
+        }
+
+        let objTemp = {}
+        if (flag === 0) {
+          let dayTemp = commonFunc.convertToFormatDate(new Date(ii))
+          objTemp['availableDay'] = dayTemp.slice(0, 4) + '-' + dayTemp.slice(4, 6) + '-' + dayTemp.slice(6, 8)
+          objTemp['availableTime'] = period[kk]
+          objTemp['margin'] = 0
+          returns.push(objTemp)
+          console.log(ii, period[kk], flag, objTemp)
         }
       }
     }
