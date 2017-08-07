@@ -14,6 +14,7 @@ var Wechat = require('../models/wechat')
 var getNoMid = require('../middlewares/getNoMid')
 var tokenManager = require('../middlewares/tokenManager')
 var aclChecking = require('../middlewares/aclChecking')
+var errorHandler = require('../middlewares/errorHandler')
 
 // controllers
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
@@ -64,7 +65,7 @@ module.exports = function (app, webEntry, acl) {
   // });
 
   // csq
-  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
+  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), errorHandler.error, alluserCtrl.changerole)
   app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
   app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl))
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl))
@@ -94,7 +95,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/alluser/adminList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(6))
   app.post(version + '/alluser/alluser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList)
 
-  app.post(version + '/alluser/register', alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
+  app.post(version + '/alluser/register', errorHandler.error, alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
   app.post(version + '/alluser/cancelUser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.cancelAlluser)
   app.post(version + '/alluser/unionid', tokenManager.verifyToken(), alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
   app.post(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
@@ -4294,6 +4295,1445 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns, reportCtrl.getReport)
   app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, reportCtrl.updateReport)
   app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
+
+  /**
+   * @swagger
+   * definition:
+   *   Times:
+   *     type: object
+   *     properties:
+   *       count:
+   *         type: number
+   *       doctorId:
+   *         type: string
+   *   IncomeRecords:
+   *     type: object
+   *     properties:
+   *       time:
+   *         type: date
+   *       money:
+   *         type: number
+   *       from:
+   *         type: string
+   *   RechargeRecords:
+   *     type: object
+   *     properties:
+   *       time:
+   *         type: date
+   *       money:
+   *         type: number
+   *       title:
+   *         type: string
+   *   ExpenseRecords:
+   *     type: object
+   *     properties:
+   *       time:
+   *         type: date
+   *       type:
+   *         type: number
+   *       money:
+   *         type: number
+   *       title:
+   *         type: string
+   *   AccountInfo:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       freeTimes:
+   *         type: number
+   *         default: 3
+   *       incomeRecords:
+   *         type: array
+   *         $ref: '#/definitions/IncomeRecords'
+   *       rechargeRecords:
+   *         type: array
+   *         $ref: '#/definitions/RechargeRecords'
+   *       expenseRecords:
+   *         type: array
+   *         $ref: '#/definitions/ExpenseRecords'
+   *       times:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/Times'
+  */
+  /**
+   * @swagger
+   * /account/accountInfo:
+   *   get:
+   *     operationId: getAccountInfo
+   *     tags:
+   *       - AccountInfo
+   *     description: Get All AccountInfo
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: AccountInfo List
+   *         schema:
+   *           type: array
+   *           items:
+   *             $ref: '#/definitions/AccountInfo'
+   *       500:
+   *         description: Server internal error
+  */
+  // 权限 患者
+  app.get(version + '/account/accountInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.getAccountInfo)
+  /**
+   * @swagger
+   * /account/counts:
+   *   get:
+   *     operationId: getCounts
+   *     tags:
+   *       - AccountInfo
+   *     description: Get Counts
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: doctorId
+   *         description: Optional Item
+   *         in: query
+   *         required: false
+   *         type : string
+   *     responses:
+   *       200:
+   *         schema:
+   *           type: object
+   *           required:
+   *             - freeTimes
+   *             - count
+   *           properties:
+   *             freeTimes:
+   *               type: number
+   *             count:
+   *               type: number
+   *       500:
+   *         description: Server internal error
+  */
+  // 权限 患者
+  app.get(version + '/account/counts', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts)
+  /**
+   * @swagger
+   * /account/counts:
+   *   post:
+   *     operationId: modifyCounts
+   *     tags:
+   *       - AccountInfo
+   *     description: Modify Counts
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - doctorId
+   *             - modify
+   *           properties:
+   *             token:
+   *               type: string
+   *             doctorId:
+   *               type: string
+   *             modify:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           required:
+   *             - n
+   *             - nModified
+   *             - ok
+   *           properties:
+   *             n:
+   *               type: number
+   *             nModified:
+   *               type: number
+   *             ok:
+   *               type: number
+   *       500:
+   *         description: Server internal error
+  */
+  // 权限 患者
+  app.post(version + '/account/counts', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts)
+  /**
+   * @swagger
+   * /account/freeTime:
+   *   post:
+   *     operationId: updateFreeTime
+   *     tags:
+   *       - AccountInfo
+   *     description: Update FreeTime
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *           properties:
+   *             token:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           required:
+   *             - accountInfo
+   *           properties:
+   *             accountInfo:
+   *               type: object
+   *               $ref: '#/definitions/AccountInfo'
+   *       500:
+   *         description: Server internal error
+  */
+  app.post(version + '/account/freeTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
+  /**
+   * @swagger
+   * /account/countsRespective:
+   *   get:
+   *     operationId: getCountsRespective
+   *     tags:
+   *       - AccountInfo
+   *     description: Get Counts Respective
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         schema:
+   *           type: object
+   *           required:
+   *             - count1
+   *             - count2
+   *           properties:
+   *             count1:
+   *               type: number
+   *             count2:
+   *               type: number
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
+
+  // expense
+  /**
+   * @swagger
+   * definition:
+   *   Expense:
+   *     properties:
+   *       patientId:
+   *         type: number
+   *       patientName:
+   *         type: string
+   *       doctorId:
+   *         type: string
+   *       doctorName:
+   *         type: string
+   *       time:
+   *         type: date
+   *       money:
+   *         type: number
+   *       type:
+   *         type: string
+   *       status:
+   *         type: number
+  */
+  /**
+   * @swagger
+   * /expense/doctor:
+   *   post:
+   *     operationId: rechargeDoctor
+   *     tags:
+   *       - Expense
+   *     description: Recharge Doctor
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - doctorId
+   *             - type
+   *             - money
+   *             - status
+   *           properties:
+   *             token:
+   *               type: string
+   *             doctorId:
+   *               type: string
+   *             type:
+   *               type: string
+   *             money:
+   *               type: number
+   *             status:
+   *               type: number
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           required:
+   *             - n
+   *             - nModified
+   *             - ok
+   *           properties:
+   *             n:
+   *               type: number
+   *             nModified:
+   *               type: number
+   *             ok:
+   *               type: number
+   *       500:
+   *         description: Server internal error
+  */
+  app.post(version + '/expense/doctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  /**
+   * @swagger
+   * /expense/records:
+   *   get:
+   *     operationId: getRecords
+   *     tags:
+   *       - Expense
+   *     description: Get Expense Records
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: patientId
+   *         description: patientId
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: patientName
+   *         description: patientName
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: doctorId
+   *         description: doctorId
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: doctorName
+   *         description: doctorName
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: time
+   *         description: time
+   *         in: query
+   *         required: true
+   *         type: date
+   *       - name: money
+   *         description: money
+   *         in: query
+   *         required: true
+   *         type: number
+   *       - name: type
+   *         description: type
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: status
+   *         description: status
+   *         in: query
+   *         required: false
+   *         type: number
+   *       - name: limit
+   *         description: limit
+   *         in: query
+   *         required: true
+   *         type: number
+   *       - name: skip
+   *         description: skip
+   *         in: query
+   *         required: true
+   *         type: number
+   *     responses:
+   *       200:
+   *         schema:
+   *           type: object
+   *           required:
+   *             - expense
+   *             - nexturl
+   *           properties:
+   *             expense:
+   *               type: object
+   *               $ref: '#/definitions/Expense'
+   *             nexturl:
+   *               type: string
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
+
+  // healthInfo
+  /**
+   * @swagger
+   * definition:
+   *   Url:
+   *     type: object
+   *     properties:
+   *       photoId:
+   *         type: string
+   *       photo:
+   *         type: string
+   *       photoType:
+   *         type: string
+   *       status:
+   *         type: number
+   *   HealthInfo:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       type:
+   *         type: string
+   *       insertTime:
+   *         type: date
+   *       time:
+   *         type: date
+   *       label:
+   *         type: string
+   *       description:
+   *         type: string
+   *       comments:
+   *         type: string
+   *       importStatus:
+   *         type: number
+   *       url:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/Url'
+  */
+  /**
+   * @swagger
+   * /healthInfo/healthInfos:
+   *   get:
+   *     operationId: getAllHealthInfo
+   *     tags:
+   *       - HealthInfo
+   *     description: Get All HealthInfo
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: HealthInfo List
+   *         schema:
+   *           type: array
+   *           items:
+   *             $ref: '#/definitions/HealthInfo'
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)
+  /**
+   * @swagger
+   * /healthInfo/healthDetail:
+   *   get:
+   *     operationId: getHealthDetail
+   *     tags:
+   *       - HealthInfo
+   *     description: Get Health Detail
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: insertTime
+   *         description: insert time
+   *         in: query
+   *         required: true
+   *         type: date
+   *     responses:
+   *       200:
+   *         description: HealthInfo List
+   *         schema:
+   *           type: array
+   *           items:
+   *             $ref: '#/definitions/HealthInfo'
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.getHealthDetail)
+  /**
+   * @swagger
+   * /healthInfo/healthInfo:
+   *   post:
+   *     operationId: insertHealthInfo
+   *     tags:
+   *       - HealthInfo
+   *     description: Insert HealthInfo
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - type
+   *             - time
+   *             - label
+   *             - url
+   *             - description
+   *             - comments
+   *           properties:
+   *             token:
+   *               type: string
+   *             type:
+   *               type: string
+   *             time:
+   *               type: date
+   *             label:
+   *               type: string
+   *             url:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Url'
+   *             description:
+   *               type: string
+   *             comments:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: success
+   *       412:
+   *         description: The server does not meet one of the prerequisites set by the requester in the request
+   *       404:
+   *         description: The server could not find the requested page
+  */
+  app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), healthInfoCtrl.insertHealthInfo)
+  /**
+   * @swagger
+   * /healthInfo/healthDetail:
+   *   post:
+   *     operationId: modifyHealthDetail
+   *     tags:
+   *       - HealthInfo
+   *     description: Modify HealthDetail
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - type
+   *             - time
+   *             - insertTime
+   *             - label
+   *             - url
+   *             - description
+   *             - comments
+   *           properties:
+   *             token:
+   *               type: string
+   *             type:
+   *               type: string
+   *             time:
+   *               type: date
+   *             insertTime:
+   *               type: date
+   *             label:
+   *               type: string
+   *             url:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Url'
+   *             description:
+   *               type: string
+   *             comments:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: success
+   *       412:
+   *         description: The server does not meet one of the prerequisites set by the requester in the request
+   *       404:
+   *         description: The server could not find the requested page
+  */
+  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.modifyHealthDetail)
+  /**
+   * @swagger
+   * /healthInfo/deleteHealthDetail:
+   *   post:
+   *     operationId: deleteHealthDetail
+   *     tags:
+   *       - HealthInfo
+   *     description: Delete a Health Detail
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - insertTime
+   *           properties:
+   *             token:
+   *               type: string
+   *             insertTime:
+   *               type: date
+   *     responses:
+   *       200:
+   *         description: success
+   *       500:
+   *         description: Server internal error
+  */
+  app.post(version + '/healthInfo/deleteHealthDetail', tokenManager.verifyToken(), healthInfoCtrl.deleteHealthDetail)
+
+  // insurance
+  /**
+   * @swagger
+   * definition:
+   *   Preference:
+   *     type: object
+   *     properties:
+   *       status:
+   *         type: number
+   *       time:
+   *         type: date
+   *   InsuranceMsg:
+   *     type: object
+   *     properties:
+   *       insuranceId:
+   *         type: string
+   *       time:
+   *         type: Date
+   *       description:
+   *         type: string
+   *   insMsg:
+   *     type: object
+   *     properties:
+   *       doctorId:
+   *         type: string
+   *       patientId:
+   *         type: string
+   *       preference:
+   *         $ref: '#/definitions/Preference'
+   *       count:
+   *         type: number
+   *       insuranceMsg:
+   *         type: array
+   *         items:
+   *           $ref: '#/definitions/InsuranceMsg'
+   *   Message:
+   *     type: object
+   *     properties:
+   *       messageId:
+   *         type: string
+   *       userId:
+   *         type: string
+   *       type:
+   *         type: number
+   *       readOrNot:
+   *         type: number
+   *       sendBy:
+   *         type: string
+   *       time:
+   *         type: date
+   *       title:
+   *         type: string
+   *       description:
+   *         type: string
+   *       url:
+   *         type: string
+  */
+  /**
+   * @swagger
+   * /insurance/message:
+   *   post:
+   *     operationId: insertInsuranceMessage
+   *     tags:
+   *       - Insurance
+   *     description: Insert Insurance Message
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - patientId
+   *             - insuranceId
+   *             - time
+   *             - insdescription
+   *             - title
+   *             - description
+   *             - url
+   *           properties:
+   *             token:
+   *               type: string
+   *             patientId:
+   *               type: string
+   *             insuranceId:
+   *               type: stirng
+   *             time:
+   *               type: date
+   *             insdescription:
+   *               type: string
+   *             title:
+   *               type: string
+   *             description:
+   *               type: string
+   *             url:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: New insurance success
+   *         schema:
+   *           type: object
+   *           required:
+   *             - insMsg
+   *             - message
+   *           properties:
+   *             insMsg:
+   *               type: object
+   *               $ref: '#/definitions/insMsg'
+   *             message:
+   *               type: object
+   *               $ref: '#/definitions/Message'
+   *       500:
+   *         description: Server internal error
+   *       422:
+   *         description: Unsuccessfully modified
+  */
+  app.post(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
+  /**
+   * @swagger
+   * /insurance/message:
+   *   get:
+   *     operationId: getInsuranceMessage
+   *     tags:
+   *       - Insurance
+   *     description: Returns Insurance Message
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: doctorId
+   *         description: doctorId
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: description of insurances
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/insMsg'
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkDoctor, insuranceCtrl.getInsMsg)
+  /**
+   * @swagger
+   * /insurance/prefer:
+   *   post:
+   *     operationId: setInsurancePrefer
+   *     tags:
+   *       - Insurance
+   *     description: Set Insurance Prefer
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - status
+   *             - date
+   *           properties:
+   *             token:
+   *               type: string
+   *             status:
+   *               type: number
+   *             date:
+   *               type: date
+   *     responses:
+   *       200:
+   *         description: success
+  */
+  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.setPrefer)
+  /**
+   * @swagger
+   * /insurance/prefer:
+   *   get:
+   *     operationId: getInsurancePrefer
+   *     tags:
+   *       - Insurance
+   *     description: Return Insurance Message
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: description of insurances
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/insMsg'
+  */
+  app.get(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.getPrefer)
+
+  // message
+  /**
+   * @swagger
+   * definition:
+   *   Message:
+   *     type: object
+   *     properties:
+   *       messageId:
+   *         type: string
+   *       userId:
+   *         type: string
+   *       type:
+   *         type: number
+   *       readOrNot:
+   *         type: number
+   *       sendBy:
+   *         type: string
+   *       time:
+   *         type: date
+   *       title:
+   *         type: string
+   *       description:
+   *         type: string
+   *       url:
+   *         type: string
+  */
+  /**
+   * @swagger
+   * /message/messages:
+   *   get:
+   *     operationId: getMessages
+   *     tags:
+   *       - Message
+   *     description: Get All Messages
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: type
+   *         description: messageType (Optional Item)
+   *         in: query
+   *         required: false
+   *         type: number
+   *     responses:
+   *       200:
+   *         description: list of messages
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Message'
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/message/messages', tokenManager.verifyToken(), messageCtrl.getMessages)
+  /**
+   * @swagger
+   * /message/status:
+   *   post:
+   *     operationId: changeMessageStatus
+   *     tags:
+   *       - Message
+   *     description: Change MessageStatus
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - type
+   *             - readOrNot
+   *           properties:
+   *             token:
+   *               type: string
+   *             type:
+   *               type: number
+   *             readOrNot:
+   *               type: number
+   *     responses:
+   *       200:
+   *         description: success
+   *       422:
+   *         description: Unsuccessfully modified
+  */
+  app.post(version + '/message/status', tokenManager.verifyToken(), messageCtrl.changeMessageStatus)
+  /**
+   * @swagger
+   * /message/message:
+   *   post:
+   *     operationId: insertMessage
+   *     tags:
+   *       - Message
+   *     description: Insert Message
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - type
+   *             - userId
+   *             - sendBy
+   *             - time
+   *             - title
+   *             - description
+   *             - url
+   *           properties:
+   *             token:
+   *               type: string
+   *             userId:
+   *               type: string
+   *             type:
+   *               type: number
+   *             sendBy:
+   *               type: string
+   *             time:
+   *               type: date
+   *             title:
+   *               type: string
+   *             description:
+   *               type: string
+   *             url:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           required:
+   *             - insMsg
+   *             - message
+   *           properties:
+   *             insMsg:
+   *               type: object
+   *               $ref: '#/definitions/insMsg'
+   *             message:
+   *               type: object
+   *               $ref: '#/definitions/Message'
+   *       422:
+   *         description: Unsuccessfully modified
+  */
+  app.post(version + '/message/message', tokenManager.verifyToken(), getNoMid.getNo(6), messageCtrl.insertMessage)
+
+  // order
+  /**
+   * @swagger
+   * definition:
+   *   GoodsInfo:
+   *     type: object
+   *     properties:
+   *       class:
+   *         type: string
+   *       name:
+   *         type: string
+   *       notes:
+   *         type: string
+   *   Order:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       orderNo:
+   *         type: string
+   *       ordertime:
+   *         type: date
+   *       money:
+   *         type: number
+   *       goodsInfo:
+   *         type: object
+   *         $ref: '#/definitions/GoodsInfo'
+   *       paystatus:
+   *         type: number
+   *       paytime:
+   *         type: date
+   *       refundNo:
+   *         type: number
+   *       refundAppTime:
+   *         type: date
+   *       refundSucTime:
+   *         type: date
+  */
+  /**
+   * @swagger
+   * /order/order:
+   *   post:
+   *     operationId: updateOrder
+   *     tags:
+   *       - Order
+   *     description: Update Order
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - type
+   *             - readOrNot
+   *           properties:
+   *             token:
+   *               type: string
+   *             type:
+   *               type: number
+   *             readOrNot:
+   *               type: number
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Order'
+   *       500:
+   *         description: Server internal error
+  */
+
+  // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
+  app.post(version + '/order/order', tokenManager.verifyToken(), orderCtrl.updateOrder)
+  /**
+   * @swagger
+   * /order/order:
+   *   get:
+   *     operationId: getOrder
+   *     tags:
+   *       - Order
+   *     description: Get Order
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: orderNo
+   *         description: order number
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: order information
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Order'
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/order/order', tokenManager.verifyToken(), orderCtrl.getOrder)
+
+  // load
+  /**
+   * @swagger
+   * /upload:
+   *   post:
+   *     operationId: upload
+   *     tags:
+   *       - Upload
+   *     description: Upload Photo
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - file
+   *           properties:
+   *             token:
+   *               type: string
+   *             file:
+   *               type: string
+   *     responses:
+   *       200:
+   *         schema:
+   *           type: object
+   *           required:
+   *             - ret_code
+   *             - filepath
+   *             - path_resized
+   *           properties:
+   *             ret_code:
+   *               type: string
+   *             filepath:
+   *               type: string
+   *             path_resized:
+   *               type: string
+   *       500:
+   *         description: Server internal error
+  */
+  app.post(version + '/upload', tokenManager.verifyToken(), loadCtrl.uploadphoto(), loadCtrl.upload)
+
+  // news
+  /**
+   * @swagger
+   * definition:
+   *   News:
+   *     type: object
+   *     properties:
+   *       messageId:
+   *         type: string
+   *       userId:
+   *         type: string
+   *       userRole:
+   *         type: string
+   *       type:
+   *         type: number
+   *       readOrNot:
+   *         type: number
+   *       sendBy:
+   *         type: string
+   *       time:
+   *         type: date
+   *       title:
+   *         type: string
+   *       description:
+   *         type: string
+   *       url:
+   *         type: string
+  */
+  /**
+   * @swagger
+   * /new/news:
+   *   get:
+   *     operationId: getNews
+   *     tags:
+   *       - News
+   *     description: Get News
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: type
+   *         description: newsType (Optional Item)
+   *         in: query
+   *         required: false
+   *         type: number
+   *     responses:
+   *       200:
+   *         description: list of news
+   *         schema:
+   *           type: array
+   *           $ref: '#/definitions/News'
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/new/news', tokenManager.verifyToken(), newsCtrl.getNews)
+  /**
+   * @swagger
+   * /new/newsByReadOrNot:
+   *   get:
+   *     operationId: getNewsByReadOrNot
+   *     tags:
+   *       - News
+   *     description: Get News By ReadOrNot
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: authorization message
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: type
+   *         description: newsType (Optional Item)
+   *         in: query
+   *         required: false
+   *         type: number
+   *       - name: readOrNot
+   *         description: news readOrNot flag 1:read 0:not
+   *         in: query
+   *         required: true
+   *         type: number
+   *     responses:
+   *       200:
+   *         description: list of news
+   *         schema:
+   *           type: array
+   *           $ref: '#/definitions/News'
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), newsCtrl.getNewsByReadOrNot)
+  /**
+   * @swagger
+   * /new/news:
+   *   post:
+   *     operationId: insertNews
+   *     tags:
+   *       - News
+   *     description: Insert News
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - type
+   *             - userId
+   *             - readOrNot
+   *             - title
+   *             - description
+   *             - url
+   *             - userRole
+   *             - messageId
+   *           properties:
+   *             token:
+   *               type: string
+   *             userId:
+   *               type: string
+   *             type:
+   *               type: number
+   *             readOrNot:
+   *               type: number
+   *             title:
+   *               type: string
+   *             description:
+   *               type: string
+   *             url:
+   *               type: string
+   *             userRole:
+   *               type: string
+   *             messageId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           required:
+   *             - n
+   *             - nModified
+   *             - ok
+   *           properties:
+   *             n:
+   *               type: number
+   *             nModified:
+   *               type: number
+   *             ok:
+   *               type: number
+   *       422:
+   *         description: Unsuccessfully modified
+   *       500:
+   *         description: Server internal error
+  */
+  app.post(version + '/new/news', tokenManager.verifyToken(), newsCtrl.insertNews)
+  /**
+   * @swagger
+   * /new/teamNews:
+   *   post:
+   *     operationId: insertTeamNews
+   *     tags:
+   *       - News
+   *     description: Insert Team News
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - type
+   *             - userId
+   *             - title
+   *             - description
+   *             - url
+   *             - messageId
+   *           properties:
+   *             token:
+   *               type: string
+   *             userId:
+   *               type: string
+   *             type:
+   *               type: number
+   *             title:
+   *               type: string
+   *             description:
+   *               type: string
+   *             url:
+   *               type: string
+   *             messageId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           required:
+   *             - n
+   *             - nModified
+   *             - ok
+   *           properties:
+   *             n:
+   *               type: number
+   *             nModified:
+   *               type: number
+   *             ok:
+   *               type: number
+   *       422:
+   *         description: Unsuccessfully modified
+   *       500:
+   *         description: Server internal error
+  */
+  app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
+
+  /**
+   * @swagger
+   * definition:
+   *   Results:
+   *     type: object
+   *     properties:
+   *       data:
+   *         type: array
+   *         item:
+   *           type: number
+   *       recordTime:
+   *         type: array
+   *         item:
+   *           type: date
+  */
+  /**
+   * @swagger
+   * /report/vitalSigns:
+   *   get:
+   *     operationId: getVitalSigns
+   *     tags:
+   *       - Report
+   *     description: 获取患者当前和历史周月季年的测量记录
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: 授权信息
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: time
+   *         description: 患者请求查询的时间
+   *         in: query
+   *         required: true
+   *         type: date
+   *       - name: type
+   *         description: 任务类型
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: code
+   *         description: 检测项目
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: showType
+   *         description: 绘制图表类型
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回相应数据和记录时间
+   *         schema:
+   *           type: object
+   *           $ref: '#/definitions/Results'
+   *       500:
+   *         description: Server internal error
+  */
+  app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns, reportCtrl.getReport)
+  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
   /**
    * @swagger
    * definition:
@@ -4427,7 +5867,8 @@ module.exports = function (app, webEntry, acl) {
    *         type: integer
 
    */
-  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeTwoCtrl.getCategory)
+  // app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), errorHandler.error, dictTypeTwoCtrl.getCategory)
+  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), errorHandler.error, dictTypeTwoCtrl.getCategory)
   // 2017-07-24测试 权限：admin
   /**
    * @swagger
@@ -5553,4 +6994,6 @@ module.exports = function (app, webEntry, acl) {
    *       content:
    *         type: string
    */
+
+  app.get(version + '/dict/typeTwoTest', errorHandler.error, dictTypeTwoCtrl.getCategoryTest)
 }
