@@ -107,8 +107,11 @@ exports.updateStartTime = function(req, res) {
 	Task.getOne(query, function(err, item) {
     	if (err) {
         	return res.status(500).send(err.errmsg);
-      	}
-      	flag = 0;
+        }
+      if (item === null) {
+        return res.status(404).json({results:'该用户暂无任务'})
+      } else {
+        flag = 0;
       	// res.json({results: item});
       	// console.log(item.task);
       	for(var i =0; i < item.task.length; i++)
@@ -140,6 +143,8 @@ exports.updateStartTime = function(req, res) {
     		res.json({results: 0});
 	
 		});
+      }
+      	
 
   	});
 	
