@@ -115,10 +115,14 @@ exports.getReport = function (req, res) {
       // console.log('items', items)
       return res.json({results: '不存在该段时间的报告!'})
     } else {
-      let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
-      if (item.patientId.class === 'class_5') { flag.flagVA = true }
-      if (item.patientId.class === 'class_6') { flag.flagPD = true }
-      return res.json({results: {item, flag}})
+      let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+      if (item.patientId.class === null || item.patientId.class === '' || item.patientId.class === undefined) {
+        return res.json({results: '请填写患者肾病类型!'})
+      } else {
+        if (item.patientId.class === 'class_5') { flag.flagVA = true }
+        if (item.patientId.class === 'class_6') { flag.flagPD = true }
+        return res.json({results: {item, flag}})
+      }
     }
   }, opts, fields, populate)
 }
@@ -392,8 +396,8 @@ exports.getVitalSigns = function (req, res, next) {
     '__v': 0
   }
   let query3 = {
-    'userId': userId,
-    'role': userRole
+    'userId': patientId || userId,
+    'role': 'patient'
   }
   if (code === 'BloodPressure') {
     if (modify === 0) {
@@ -411,6 +415,9 @@ exports.getVitalSigns = function (req, res, next) {
       }, function (err, results) {
         if (err) {
           return res.status(500).send(err.errmsg)
+        }
+        if (results.one === null) {
+          return res.json({results: '不存在的患者ID!'})
         } else {
           // console.log(items)
           let dataBP = []
@@ -445,14 +452,27 @@ exports.getVitalSigns = function (req, res, next) {
           let data1 = dataSBP
           let data2 = dataDBP
           let recordTime = recordTimeTemp
-          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
-          if (results.class === 'class_5') { flag.flagVA = true }
-          if (results.class === 'class_6') { flag.flagPD = true }
-          return res.json({results: {item: {data1, data2, recordTime}, flag}})
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+          if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+            return res.json({results: '请填写患者肾病类型!'})
+          } else {
+            if (results.one.class === 'class_5') { flag.flagVA = true }
+            if (results.one.class === 'class_6') { flag.flagPD = true }
+            return res.json({results: {item: {data1, data2, recordTime}, flag}})
+          }
         }
       })
     } else {
-      next()
+      Alluser.getOne(query3, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
+        }
+      })
     }
   } else if (code === 'PeritonealDialysis') {
     if (modify === 0) {
@@ -492,6 +512,9 @@ exports.getVitalSigns = function (req, res, next) {
       }, function (err, results) {
         if (err) {
           return res.status(500).send(err.errmsg)
+        }
+        if (results.one === null) {
+          return res.json({results: '不存在的患者ID!'})
         } else {
           // console.log(results.originDataUF)
           // console.log(results.originDataVol)
@@ -604,14 +627,27 @@ exports.getVitalSigns = function (req, res, next) {
           let data1 = dataUFAll
           let data2 = dataPV
           let recordTime = recordTimeAll
-          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
-          if (results.class === 'class_5') { flag.flagVA = true }
-          if (results.class === 'class_6') { flag.flagPD = true }
-          return res.json({results: {item: {data1, data2, recordTime}, flag}})
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+          if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+            return res.json({results: '请填写患者肾病类型!'})
+          } else {
+            if (results.one.class === 'class_5') { flag.flagVA = true }
+            if (results.one.class === 'class_6') { flag.flagPD = true }
+            return res.json({results: {item: {data1, data2, recordTime}, flag}})
+          }
         }
       })
     } else {
-      next()
+      Alluser.getOne(query3, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
+        }
+      })
     }
   } else {
     if (modify === 0) {
@@ -629,6 +665,9 @@ exports.getVitalSigns = function (req, res, next) {
       }, function (err, results) {
         if (err) {
           return res.status(500).send(err.errmsg)
+        }
+        if (results.one === null) {
+          return res.json({results: '不存在的患者ID!'})
         } else {
           let data = []
           let recordTimeTemp = []
@@ -659,14 +698,27 @@ exports.getVitalSigns = function (req, res, next) {
           }
           let data1 = dataTemp
           let recordTime = recordTimeTemp
-          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
-          if (results.class === 'class_5') { flag.flagVA = true }
-          if (results.class === 'class_6') { flag.flagPD = true }
-          return res.json({results: {item: {data1, recordTime}, flag}})
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+          if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+            return res.json({results: '请填写患者肾病类型!'})
+          } else {
+            if (results.one.class === 'class_5') { flag.flagVA = true }
+            if (results.one.class === 'class_6') { flag.flagPD = true }
+            return res.json({results: {item: {data1, recordTime}, flag}})
+          }
         }
       })
     } else {
-      next()
+      Alluser.getOne(query3, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
+        }
+      })
     }
   }
 }
