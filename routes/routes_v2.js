@@ -2646,7 +2646,7 @@ module.exports = function (app, webEntry, acl) {
    *       200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, personalDiagCtrl.updatePDCapacityDown, personalDiagCtrl.newPersonalDiag, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, personalDiagCtrl.updatePDCapacityDown, personalDiagCtrl.newPersonalDiag, alluserCtrl.successMessage)
   // 患者端 取消面诊服务 还没有和order退款连起来
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger

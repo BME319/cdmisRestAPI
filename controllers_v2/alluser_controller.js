@@ -1001,7 +1001,7 @@ exports.login = function (req, res) {
           var userPayload = {
             _id: user._id,
             userId: user.userId,
-            name: user.name, 
+            name: user.name,
             role: role,
             exp: Date.now() + config.TOKEN_EXPIRATION * 1000
           }
@@ -1664,4 +1664,66 @@ exports.getDoctorObject = function (req, res, next) {
     req.doctorObject = doctor
     next()
   })
+}
+
+exports.successMessage = function (req, res) {
+  let token = '86cf8733b80a31fd7deb7b3147a226d0'
+  let accountSid = '43b82098fcec135770091f446f6b7367'
+  let appId = 'af8afab59dd04001a4b5b37bcc419ec3'
+  let templateId = '112436'
+
+  let now = new Date()
+  let mobile = req.body.patientObject.phoneNo || null
+  let doctorName = req.body.doctorObject.name || null
+  let bookingDay = req.body.day || null
+  let bookingTime = req.body.time || null
+  let PDPlace = req.body.place || null
+  let confirmCode = req.body.code || null
+  let PDTime
+  if (bookingTime === 'Morning') {
+    PDTime = bookingDay.slice(0, 4) + '-' + bookingDay.slice(5, 7) + '-' + bookingDay.slice(8, 10) + '上午'
+  } else {
+    PDTime = bookingDay.slice(0, 4) + '-' + bookingDay.slice(5, 7) + '-' + bookingDay.slice(8, 10) + '下午'
+  }
+  let param = doctorName + ',' + PDTime + ',' + PDPlace + ',' + confirmCode
+
+  let JSONData = '{' + '"' + 'templateSMS' + '"' + ':' + '{' + '"' + 'appId' + '"' + ':' + '"' + appId + '"' + ',' + '"' + 'param' + '"' + ':' + '"' + param + '"' + ',' + '"' + 'templateId' + '"' + ':' + '"' + templateId + '"' + ',' + '"' + 'to' + '"' + ':' + '"' + mobile + '"' + '}' + '}'
+  let timestamp = now.getFullYear() + commonFunc.paddNum(now.getMonth() + 1) + commonFunc.paddNum(now.getDate()) + now.getHours() + now.getMinutes() + now.getSeconds()
+  let md5 = crypto.createHash('md5').update(accountSid + token + timestamp).digest('hex').toUpperCase()
+  let authorization = Base64.encode(accountSid + ':' + timestamp)
+  // let bytes = commonFunc.stringToBytes(JSONData)
+  let options = {
+    hostname: 'api.ucpaas.com',
+    path: '/2014-06-30/Accounts/' + accountSid + '/Messages/templateSMS?sig=' + md5,
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      // 'Content-Length': bytes.length,
+      'Content-Type': 'application/json;charset=utf-8',
+      'Authorization': authorization
+    }
+  }
+  let code = 1
+  let requests = https.request(options, function (response) {
+    let resdata = ''
+    response.on('data', function (chunk) {
+      resdata += chunk
+    })
+    response.on('end', function () {
+      let json = evil(resdata)
+      code = json.resp.respCode
+      if (code === '000000') {
+        res.json({results: 0, mesg: 'Booking Success and Message Sent!'})
+      } else {
+        res.json({results: 1, mesg: {'ErrorCode': code}})
+      }
+    })
+  })
+
+  requests.on('error', function (err) {
+    console.log(err.message)
+  })
+  requests.write(JSONData)
+  requests.end()
+  // next()
 }
