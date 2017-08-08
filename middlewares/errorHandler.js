@@ -78,6 +78,9 @@ exports.insertLog = function (req, res) {
   var webState = req.body.webState
   var userProxy = req.body.userProxy
 
+  // var data = 'method: ' + method + "\n"
+  // data = data + 'apiUrl: ' + apiUrl + '\n' + 'args: ' + args + '\n' + 'user: ' + user + '\n' + 'role: ' + role + '\n' + 'ip: ' + ip + '\n' + 'webState: ' + webState + '\n' + 'userProxy: ' + userProxy + '\n' + 'err: ' + errStack + '\n'
+
   var data = {
     method: method,
     apiUrl: apiUrl,
@@ -87,10 +90,11 @@ exports.insertLog = function (req, res) {
     ip: ip,
     webState: webState,
     userProxy: userProxy,
+    time: new Date(),
     err: errStack
   }
 
-  fs.appendFile('./logs/log4front.txt', data, 'utf8', function (appendErr) {
+  fs.appendFile('./logs/log4front.json', JSON.stringify(data, null, 4), 'utf8', function (appendErr) {
     if (appendErr) {
       console.log(appendErr)
     }
