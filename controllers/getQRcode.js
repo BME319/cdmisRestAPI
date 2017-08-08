@@ -56,7 +56,7 @@ exports.saveAllTDCticket = function(req, res) {
         }
     };
     request({
-        url: 'http://' + '121.196.221.44:4060/' + 'wechat/createTDCticket',
+        url: 'http://' + '121.196.221.44:4050/' + 'wechat/createTDCticket',
         method: 'POST',
         body: jsondata,
         json: true
@@ -92,7 +92,7 @@ exports.saveAllTDCticket = function(req, res) {
   //     // console.log(req.body.count)
 
   //   request({
-  //       url: 'http://' + '121.196.221.44:4060/' + 'wechat/createTDCticket',
+  //       url: 'http://' + '121.196.221.44:4050/' + 'wechat/createTDCticket',
   //       method: 'POST',
   //       body: jsondata,
   //       json: true
