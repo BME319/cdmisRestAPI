@@ -87,4 +87,17 @@ Comment.updateOne = function (query, obj, callback, opts, populate) {
     })
 }
 
+Comment.aggregate = function (array, callback) {
+  let _array = array || []
+  CommentModel
+    .aggregate(_array)
+    .exec(function (err, results) {
+      if (err) {
+        return callback(err)
+      }
+      console.log(results)
+      callback(null, results)
+    })
+}
+
 module.exports = Comment

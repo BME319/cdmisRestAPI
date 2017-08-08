@@ -2,6 +2,7 @@
 var async = require('async')
 var Report = require('../models/report')
 var Compliance = require('../models/compliance')
+var Alluser = require('../models/alluser')
 
 // 获取报表 2017-07-24 wf  修改 2017-07-28 lgf
 exports.getReport = function (req, res) {
@@ -29,7 +30,8 @@ exports.getReport = function (req, res) {
   if (modify !== null && modify !== '') {
     modify = Number(modify)
   } else {
-    return res.json({result: '请填写modify!'})
+    modify = 0
+    // return res.json({result: '请填写modify!'})
   }
   if (timeTemp !== null && timeTemp !== '') {
     let currentTime = new Date(timeTemp)
@@ -101,21 +103,30 @@ exports.getReport = function (req, res) {
   } else {
     return res.json({result: '请填写itemType!'})
   }
+  var fields = {}
   var opts = {} // 'sort': '-time'
-  console.log(query)
-  Report.getSome(query, function (err, items) {
+  var populate = {'path': 'patientId', 'select': 'class'}
+  // console.log(query)
+  Report.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (items === null) {
-      return res.json({result: '不存在该段时间的报告!'})
-    } else {
+    if (item === null) {
       // console.log('items', items)
-      return res.json({results: items})
+      return res.json({results: '不存在该段时间的报告!'})
+    } else {
+      let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+      if (item.patientId.class === null || item.patientId.class === '' || item.patientId.class === undefined) {
+        return res.json({results: '请填写患者肾病类型!'})
+      } else {
+        if (item.patientId.class === 'class_5') { flag.flagVA = true }
+        if (item.patientId.class === 'class_6') { flag.flagPD = true }
+        return res.json({results: {item, flag}})
+      }
     }
-  }, opts)
+  }, opts, fields, populate)
 }
-// y医生更新报表 2017-07-24 wf
+// 医生更新报表 2017-07-24 wf  修改 2017-08-04 lgf
 // 不想更新多条时务必确保patientId、type、time、itemType有输入
 exports.updateReport = function (req, res) {
   var userRole = req.session.role
@@ -123,115 +134,169 @@ exports.updateReport = function (req, res) {
   var patientId = req.body.patientId || null
   var type = req.body.type || null
   var time = req.body.time || null
-  var itemType = req.body.itemType || null
-
-  var recommendValue1 = req.body.recommendValue1 || null
-  var recommendValue2 = req.body.recommendValue2 || null
-  var recommendValue3 = req.body.recommendValue3 || null
-  var recommendValue4 = req.body.recommendValue4 || null
-  var recommendValue11 = req.body.recommendValue11 || null
-  var recommendValue12 = req.body.recommendValue12 || null
-  var recommendValue13 = req.body.recommendValue13 || null
-  var recommendValue14 = req.body.recommendValue14 || null
-
-  var labTestNewItem = req.body.labTestNewItem || null
-  var labTest = req.body.labTest || null
-  var doctorReport = req.body.doctorReport || null
+  var data = req.body.data || null
+  // var labTestNewItem = req.body.labTestNewItem || null
+  // var labTest = req.body.labTest || null
+  // var doctorReport = req.body.doctorReport || null
   // reportType 0-正常 1-信息缺失 2-异常 3-修改
   var reportType = req.body.reportType || null
-  var query = {}
-  if (userRole === 'patient') {
-    return res.status(405).send('not authorized')
-  } else {
-    if (patientId !== null && patientId !== '') {
-      query['userId'] = patientId
-    }
+  // var recommendValue1 = req.body.recommendValue1 || null
+  // var recommendValue2 = req.body.recommendValue2 || null
+  // var recommendValue3 = req.body.recommendValue3 || null
+  // var recommendValue4 = req.body.recommendValue4 || null
+  // if (labTestNewItem !== null && labTestNewItem !== '') {
+  //   upData['labTestNewItem'] = labTestNewItem
+  // }
+  if (data === null || data === '') {
+    return res.json({result: '请填写医生建议!'})
   }
-  // console.log(req.body.patientId)
-  // console.log(query)
-  if (type !== null && type !== '') {
-    query['type'] = type
-  }
-  if (time !== null && time !== '') {
-    query['time'] = time
-  }
-  if (itemType !== null && itemType !== '') {
-    query['itemType'] = itemType
-  }
-  var upData = {}
-  if (recommendValue1 !== null && recommendValue1 !== '') {
-    upData['recommendValue1'] = recommendValue1
-  }
-  if (recommendValue2 !== null && recommendValue2 !== '') {
-    upData['recommendValue2'] = recommendValue2
-  }
-  if (recommendValue3 !== null && recommendValue3 !== '') {
-    upData['recommendValue3'] = recommendValue3
-  }
-  if (recommendValue4 !== null && recommendValue4 !== '') {
-    upData['recommendValue4'] = recommendValue4
-  }
-  if (recommendValue11 !== null && recommendValue11 !== '') {
-    upData['recommendValue11'] = recommendValue11
-  }
-  if (recommendValue12 !== null && recommendValue12 !== '') {
-    upData['recommendValue12'] = recommendValue12
-  }
-  if (recommendValue13 !== null && recommendValue13 !== '') {
-    upData['recommendValue13'] = recommendValue13
-  }
-  if (recommendValue14 !== null && recommendValue14 !== '') {
-    upData['recommendValue14'] = recommendValue14
-  }
-  if (labTestNewItem !== null && labTestNewItem !== '') {
-    upData['labTestNewItem'] = labTestNewItem
-  }
-  if (reportType !== null && reportType !== '') {
-    reportType = Number(reportType)
-    if (reportType === 0) {
-      upData['labTest'] = '本周行血常规、尿常规、肝肾功能、血脂等检查未见明显异常'
-      upData['doctorReport'] = '本周血压、体重、尿量、体温、血糖等控制良好，记录完整。建议下周控制血压、体重、血糖范围。建议用药方案调整为／请继续目前用药，定时记录生命体征及用药情况。下次门诊就诊时间建议为****-**-**'
-    }
-    if (reportType === 1) {
-      upData['labTest'] = '本周未行血常规、尿常规、肝肾功能、血脂等检查'
-      upData['doctorReport'] = '本周血压、体重、尿量、体温、血糖记录不完整（低于一周2天），请及时记录。建议下周控制血压、体重、血糖范围，建议用药方案调整为／请继续目前用药，定时记录生命体征及用药情况。下次门诊就诊时间建议为****-**-**'
-    }
-    if (reportType === 2) {
-      upData['labTest'] = '本周行血常规、尿常规、肝肾功能、血脂等检查，提示肾功能、血红蛋白异常，（具体数值），请及时咨询医生或门诊就诊'
-      upData['doctorReport'] = '本周发生高血压／少尿／体重过重／高血糖XX次。建议下周控制血压、体重、血糖范围。建议用药方案调整为／请继续目前用药，定时记录生命体征及用药情况。下次门诊就诊时间建议为****-**-**'
-    }
-    if (reportType === 3) {
-      if (labTest !== null && labTest !== '') {
-        upData['labTest'] = labTest
-      }
-      if (doctorReport !== null && doctorReport !== '') {
-        upData['doctorReport'] = doctorReport
+  for (let i = 0; i < data.length; i++) {
+    let query = {}
+    if (userRole === 'patient') {
+      return res.status(405).send('not authorized')
+    } else {
+      if (patientId !== null && patientId !== '') {
+        query['userId'] = patientId
+      } else {
+        return res.json({result: '请填写patientId!'})
       }
     }
-  }
-  console.log(upData)
-  Report.update(query, upData, function (err, upmessage) {
-    if (err) {
-      if (res !== undefined) {
-        return res.status(422).send(err.message)
-      }
+    if (type !== null && type !== '') {
+      query['type'] = type
     }
-    if (upmessage.n !== 0 && upmessage.nModified === 0) {
-      if (res !== undefined) {
-        return res.json({result: '未修改！请检查修改目标是否与原来一致！', results: upmessage})
-      }
+    if (time !== null && time !== '') {
+      query['time'] = time
     }
-    if (upmessage.n !== 0 && upmessage.nModified !== 0) {
-      if (upmessage.n === upmessage.nModified) {
+    let upData = {}
+    let recommendValue11 = -1
+    let recommendValue12 = -1
+    let recommendValue13 = -1
+    let recommendValue14 = -1
+    let doctorReport = ''
+    let doctorComment = ''
+    switch (data[i].itemType) {
+      case 'BloodPressure':
+        recommendValue11 = Number(data[i].recommendValue11)
+        recommendValue12 = Number(data[i].recommendValue12)
+        recommendValue13 = Number(data[i].recommendValue13)
+        recommendValue14 = Number(data[i].recommendValue14)
+        if (type === 'week') { doctorReport = '建议下周控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
+        if (type === 'month') { doctorReport = '建议下月控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
+        if (type === 'season') { doctorReport = '建议下一季度控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
+        if (type === 'year') { doctorReport = '建议下一年控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
+        break
+      case 'Weight':
+        recommendValue11 = Number(data[i].recommendValue11)
+        recommendValue12 = Number(data[i].recommendValue12)
+        if (type === 'week') { doctorReport = '建议下周控制体重范围' + recommendValue11 + '-' + recommendValue12 }
+        if (type === 'month') { doctorReport = '建议下月控制体重范围' + recommendValue11 + '-' + recommendValue12 }
+        if (type === 'season') { doctorReport = '建议下一季度控制体重范围' + recommendValue11 + '-' + recommendValue12 }
+        if (type === 'year') { doctorReport = '建议下一年控制体重范围' + recommendValue11 + '-' + recommendValue12 }
+        break
+      case 'Vol':
+        recommendValue11 = Number(data[i].recommendValue11)
+        break
+      case 'Temperature':
+        recommendValue11 = Number(data[i].recommendValue11)
+        break
+      case 'HeartRate':
+        recommendValue11 = Number(data[i].recommendValue11)
+        recommendValue12 = Number(data[i].recommendValue12)
+        if (type === 'week') { doctorReport = '建议下周控制心率范围' + recommendValue11 + '-' + recommendValue12 }
+        if (type === 'month') { doctorReport = '建议下月控制心率范围' + recommendValue11 + '-' + recommendValue12 }
+        if (type === 'season') { doctorReport = '建议下一季度控制心率范围' + recommendValue11 + '-' + recommendValue12 }
+        if (type === 'year') { doctorReport = '建议下一年控制心率范围' + recommendValue11 + '-' + recommendValue12 }
+        break
+      case 'PeritonealDialysis':
+        recommendValue11 = Number(data[i].recommendValue11)
+        recommendValue12 = Number(data[i].recommendValue12)
+        if (type === 'week') { doctorReport = '建议下周控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
+        if (type === 'month') { doctorReport = '建议下月控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
+        if (type === 'season') { doctorReport = '建议下一季度控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
+        if (type === 'year') { doctorReport = '建议下一年控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
+        break
+      case 'LabTest':
+        if (type === 'week') { upData['labTest'] = data[i].labTest }
+        if (type === 'month') { upData['labTest'] = data[i].labTest }
+        if (type === 'season') { upData['doctorReport'] = '建议增加检测' + data[i].labTestNewItem }
+        if (type === 'year') { upData['doctorReport'] = '建议增加检测' + data[i].labTestNewItem }
+        break
+      case 'DoctorReport':
+        doctorReport = data[i].doctorReport || null
+        if (doctorReport === null || doctorReport === '') {
+          return res.json({result: '请填写医生报告!'})
+        }
+        break
+      default:
+        return res.json({result: '请填写正确的测量项目名称!'})
+    }
+    query['itemType'] = data[i].itemType
+    if (recommendValue11 !== -1) {
+      upData['recommendValue11'] = recommendValue11
+    }
+    if (recommendValue12 !== -1) {
+      upData['recommendValue12'] = recommendValue12
+    }
+    if (recommendValue13 !== -1) {
+      upData['recommendValue13'] = recommendValue13
+    }
+    if (recommendValue14 !== -1) {
+      upData['recommendValue14'] = recommendValue14
+    }
+    if (doctorReport !== '') {
+      upData['doctorReport'] = doctorReport
+    }
+    console.log(query)
+    console.log(upData)
+    Report.update(query, upData, function (err, upmessage) {
+      if (err) {
         if (res !== undefined) {
-          return res.json({result: '全部更新成功', results: upmessage})
+          return res.status(422).send(err.message)
         }
       }
-      if (res !== undefined) {
-        return res.json({result: '未全部更新！', results: upmessage})
+      if (i === (data.length - 1)) {  // data内的数据全部更新完再输出结果
+        if (upmessage.n !== 0 && upmessage.nModified === 0) {
+          if (res !== undefined) {
+            return res.json({msg: '未修改！请检查修改目标是否与原来一致！', data: upmessage, code: 0})
+          }
+        }
+        if (upmessage.n !== 0 && upmessage.nModified !== 0) {
+          if (upmessage.n === upmessage.nModified) {
+            if (res !== undefined) {
+              return res.json({msg: '全部更新成功', data: upmessage, code: 1})
+            }
+          }
+          if (res !== undefined) {
+            return res.json({msg: '未全部更新！', data: upmessage, code: 0})
+          }
+        }
       }
-    }
-  })
+    }, {upsert: true})
+  }
+
+  // if (reportType !== null && reportType !== '') {
+  //   reportType = Number(reportType)
+  //   if (reportType === 0) {
+  //     upData['labTest'] = '本周行血常规、尿常规、肝肾功能、血脂等检查未见明显异常'
+  //     upData['doctorReport'] = '本周血压、体重、尿量、体温、血糖等控制良好，记录完整。建议下周控制血压、体重、血糖范围。建议用药方案调整为／请继续目前用药，定时记录生命体征及用药情况。下次门诊就诊时间建议为****-**-**'
+  //   }
+  //   if (reportType === 1) {
+  //     upData['labTest'] = '本周未行血常规、尿常规、肝肾功能、血脂等检查'
+  //     upData['doctorReport'] = '本周血压、体重、尿量、体温、血糖记录不完整（低于一周2天），请及时记录。建议下周控制血压、体重、血糖范围，建议用药方案调整为／请继续目前用药，定时记录生命体征及用药情况。下次门诊就诊时间建议为****-**-**'
+  //   }
+  //   if (reportType === 2) {
+  //     upData['labTest'] = '本周行血常规、尿常规、肝肾功能、血脂等检查，提示肾功能、血红蛋白异常，（具体数值），请及时咨询医生或门诊就诊'
+  //     upData['doctorReport'] = '本周发生高血压／少尿／体重过重／高血糖XX次。建议下周控制血压、体重、血糖范围。建议用药方案调整为／请继续目前用药，定时记录生命体征及用药情况。下次门诊就诊时间建议为****-**-**'
+  //   }
+  //   if (reportType === 3) {
+  //     if (labTest !== null && labTest !== '') {
+  //       upData['labTest'] = labTest
+  //     }
+  //     if (doctorReport !== null && doctorReport !== '') {
+  //       upData['doctorReport'] = doctorReport
+  //     }
+  //   }
+  // }
 }
 
 // 获取患者当前周月季年的测量记录 2017-07-26 lgf
@@ -249,7 +314,8 @@ exports.getVitalSigns = function (req, res, next) {
   if (modify !== null && modify !== '') {
     modify = Number(modify)
   } else {
-    return res.json({result: '请填写modify!'})
+    modify = 0  // 默认查询当前
+    // return res.json({result: '请填写modify!'})
   }
   if (showType !== null && showType !== '') {
     if (timeTemp !== null && timeTemp !== '') {
@@ -329,47 +395,84 @@ exports.getVitalSigns = function (req, res, next) {
     'status': 0,
     '__v': 0
   }
+  let query3 = {
+    'userId': patientId || userId,
+    'role': 'patient'
+  }
   if (code === 'BloodPressure') {
     if (modify === 0) {
-      Compliance.getSome(query, function (err, items) {
+      async.parallel({
+        one: function (callback) {
+          Alluser.getOne(query3, function (err, item) {
+            callback(err, item)
+          })
+        },
+        two: function (callback) {
+          Compliance.getSome(query, function (err, items) {
+            callback(err, items)
+          }, opts, fields)
+        }
+      }, function (err, results) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
-        // console.log(items)
-        let dataBP = []
-        let recordTimeTemp = []
-        for (let i = 0; i < items.length; i++) {
-          dataBP.push(items[i])
-        }
-        let dataSBP = []         // 收缩压 SBP
-        let dataDBP = []         // 舒张压 DBP
-        // 记录不为空
-        if (dataBP.length !== 0) {
-          for (let n = 0; n < dataBP.length; n++) {
-            let str = dataBP[n].description
-          // 一条记录中有多次测量数据
-            let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
-            let strArr2 = str.split(',')
-            let strArr
-            if (strArr1.length >= strArr2.length) {
-              strArr = strArr1
-            } else {
-              strArr = strArr2
-            }
-            // print(dataBP[n].description)
-            // print('strArr.length', strArr.length)
-            for (let k = 0; k < strArr.length; k++) {
-              dataSBP.push(Number(strArr[k].substr(0, str.indexOf('/'))))
-              dataDBP.push(Number(strArr[k].substr(str.indexOf('/') + 1)))
-              recordTimeTemp.push(new Date(dataBP[n].date))
+        if (results.one === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          // console.log(items)
+          let dataBP = []
+          let recordTimeTemp = []
+          for (let i = 0; i < results.two.length; i++) {
+            dataBP.push(results.two[i])
+          }
+          let dataSBP = []         // 收缩压 SBP
+          let dataDBP = []         // 舒张压 DBP
+          // 记录不为空
+          if (dataBP.length !== 0) {
+            for (let n = 0; n < dataBP.length; n++) {
+              let str = dataBP[n].description
+            // 一条记录中有多次测量数据
+              let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
+              let strArr2 = str.split(',')
+              let strArr
+              if (strArr1.length >= strArr2.length) {
+                strArr = strArr1
+              } else {
+                strArr = strArr2
+              }
+              // print(dataBP[n].description)
+              // print('strArr.length', strArr.length)
+              for (let k = 0; k < strArr.length; k++) {
+                dataSBP.push(Number(strArr[k].substr(0, str.indexOf('/'))))
+                dataDBP.push(Number(strArr[k].substr(str.indexOf('/') + 1)))
+                recordTimeTemp.push(new Date(dataBP[n].date))
+              }
             }
           }
+          let data1 = dataSBP
+          let data2 = dataDBP
+          let recordTime = recordTimeTemp
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+          if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+            return res.json({results: '请填写患者肾病类型!'})
+          } else {
+            if (results.one.class === 'class_5') { flag.flagVA = true }
+            if (results.one.class === 'class_6') { flag.flagPD = true }
+            return res.json({results: {item: {data1, data2, recordTime}, flag}})
+          }
         }
-        let dateAndTime = {dataSBP, dataDBP, recordTimeTemp}
-        return res.json({results: dateAndTime})
-      }, opts, fields)
+      })
     } else {
-      next()
+      Alluser.getOne(query3, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
+        }
+      })
     }
   } else if (code === 'PeritonealDialysis') {
     if (modify === 0) {
@@ -391,6 +494,11 @@ exports.getVitalSigns = function (req, res, next) {
       // console.log(query2)
       // 并行数据流
       async.parallel({
+        one: function (callback) {
+          Alluser.getOne(query3, function (err, item) {
+            callback(err, item)
+          })
+        },
         originDataUF: function (callback) {
           Compliance.getSome(query, function (err, items) {
             callback(err, items)
@@ -404,6 +512,9 @@ exports.getVitalSigns = function (req, res, next) {
       }, function (err, results) {
         if (err) {
           return res.status(500).send(err.errmsg)
+        }
+        if (results.one === null) {
+          return res.json({results: '不存在的患者ID!'})
         } else {
           // console.log(results.originDataUF)
           // console.log(results.originDataVol)
@@ -513,51 +624,101 @@ exports.getVitalSigns = function (req, res, next) {
               }
             }
           }
-          return res.json({results: { dataUFAll, dataPV, recordTimeAll }})
+          let data1 = dataUFAll
+          let data2 = dataPV
+          let recordTime = recordTimeAll
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+          if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+            return res.json({results: '请填写患者肾病类型!'})
+          } else {
+            if (results.one.class === 'class_5') { flag.flagVA = true }
+            if (results.one.class === 'class_6') { flag.flagPD = true }
+            return res.json({results: {item: {data1, data2, recordTime}, flag}})
+          }
         }
       })
     } else {
-      next()
-    }
-  } else {
-    if (modify === 0) {
-      Compliance.getSome(query, function (err, items) {
+      Alluser.getOne(query3, function (err, item) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
-        // console.log(items)
-        let data = []
-        let recordTimeTemp = []
-        for (let i = 0; i < items.length; i++) {
-          data.push(items[i])
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
         }
-        let dataTemp = []
-        // 记录不为空
-        if (data.length !== 0) {
-          for (let n = 0; n < data.length; n++) {
-            let str = data[n].description
-          // 一条记录中有多次测量数据
-            let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
-            let strArr2 = str.split(',')
-            let strArr
-            if (strArr1.length >= strArr2.length) {
-              strArr = strArr1
-            } else {
-              strArr = strArr2
-            }
-            // print(data[n].description)
-            // print('strArr.length', strArr.length)
-            for (let k = 0; k < strArr.length; k++) {
-              dataTemp.push(Number(strArr[k]))
-              recordTimeTemp.push(new Date(data[n].date))
+      })
+    }
+  } else {
+    if (modify === 0) {
+      async.parallel({
+        one: function (callback) {
+          Alluser.getOne(query3, function (err, item) {
+            callback(err, item)
+          })
+        },
+        two: function (callback) {
+          Compliance.getSome(query, function (err, items) {
+            callback(err, items)
+          }, opts, fields)
+        }
+      }, function (err, results) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (results.one === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          let data = []
+          let recordTimeTemp = []
+          for (let i = 0; i < results.two.length; i++) {
+            data.push(results.two[i])
+          }
+          let dataTemp = []
+          // 记录不为空
+          if (data.length !== 0) {
+            for (let n = 0; n < data.length; n++) {
+              let str = data[n].description
+            // 一条记录中有多次测量数据
+              let strArr1 = str.split('，')  // 逗号的格式，可能中文和英文都要添加判断
+              let strArr2 = str.split(',')
+              let strArr
+              if (strArr1.length >= strArr2.length) {
+                strArr = strArr1
+              } else {
+                strArr = strArr2
+              }
+              // print(data[n].description)
+              // print('strArr.length', strArr.length)
+              for (let k = 0; k < strArr.length; k++) {
+                dataTemp.push(Number(strArr[k]))
+                recordTimeTemp.push(new Date(data[n].date))
+              }
             }
           }
+          let data1 = dataTemp
+          let recordTime = recordTimeTemp
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+          if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+            return res.json({results: '请填写患者肾病类型!'})
+          } else {
+            if (results.one.class === 'class_5') { flag.flagVA = true }
+            if (results.one.class === 'class_6') { flag.flagPD = true }
+            return res.json({results: {item: {data1, recordTime}, flag}})
+          }
         }
-        let dateAndTime = {dataTemp, recordTimeTemp}
-        return res.json({results: dateAndTime})
-      }, opts, fields)
+      })
     } else {
-      next()
+      Alluser.getOne(query3, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
+        }
+      })
     }
   }
 }

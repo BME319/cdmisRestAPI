@@ -42,8 +42,8 @@ var reportSchema = new mongoose.Schema({
   worstControlMonth: Number, // 控制最差月份 季年报
   mostCompleteRecordMonth: Number, // 记录最完整月份 季年报
   worstCompleteRecordMonth: Number, // 记录最差月份 季年报
-  bestAndWorst: String, // 医生评定最佳和最差月份
   doctorReport: String, // 医生报告
+  doctorComment: String, // 医生点评 季年报
   labTest: String, // 化验_周报月报文本
   labTestArray: [], // 化验_季报年报检查项目数组
   labTestNewItem: String // 化验_建议新增项目

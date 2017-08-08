@@ -61,7 +61,8 @@ var alluserSchema = new mongoose.Schema({
       _id: 0,
       day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta', 'Sun']},
       time: {type: String, enum: ['Morning', 'Afternoon']},
-      total: Number // 医生可以设置的某时段面诊总数
+      total: Number, // 医生可以设置的某时段面诊总数
+      place: String
     }
   ],
   // 周期更新医生可预约的的面诊时间（患者查看）
@@ -72,7 +73,8 @@ var alluserSchema = new mongoose.Schema({
       availableTime: {type: String, enum: ['Morning', 'Afternoon']}, // 可预约时段
       total: Number, // 医生已设置的某时段面诊总数
       count: {type: Number, default: 0}, // 已被预约的面诊计数，可用的面诊计数需要用total-count
-      invalidFlag: {type: Number, default: 0, enum: [0, 1]} // 是否停诊
+      suspendFlag: {type: Number, default: 0, enum: [0, 1]}, // 是否停诊
+      place: String
     }
   ],
   serviceSuspendTime: [
@@ -143,22 +145,22 @@ var alluserSchema = new mongoose.Schema({
       invalidFlag: Number
     }
   ],
-  // 主管医生字段
-  doctorsInCharge: [
-    {
-      // _id: 0,
-      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-      firstTime: Date,
-      // 历史2、当前1、待审核0，被拒3
-      invalidFlag: Number,
-      rejectReason: String,
-      // 时长数字类型以秒为单位
-      length: Number,
-      // 有效的起止时间
-      start: Date,
-      end: Date
-    }
-  ],
+  // 主管医生字段 改用doctorsInCharge表
+  // doctorsInCharge: [
+  //   {
+  //     // _id: 0,
+  //     doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  //     firstTime: Date,
+  //     // 历史2、当前1、待审核0，被拒3
+  //     invalidFlag: Number,
+  //     rejectReason: String,
+  //     // 时长数字类型以秒为单位
+  //     length: Number,
+  //     // 有效的起止时间
+  //     start: Date,
+  //     end: Date
+  //   }
+  // ],
   diagnosisInfo: [
     {
       _id: 0,
@@ -256,7 +258,7 @@ Alluser.countSome = function (query, callback) {
       callback(null, allusers)
     })
 }
- 
+
 Alluser.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''

@@ -1,28 +1,39 @@
 
 var mongoose = require('mongoose')
-var Reply = require('../models/reply')
 
 var forumSchema = new mongoose.Schema({
   postId: String,
   type: Number,
   board: Number,
   status: Number,
-  sponsorId: String,
+  sponsorId: {
+    type: String,
+    ref: 'alluser'
+  },
   sponsorName: String,
   title: String,
   subject: String,
   time: Date,
   content: [],
-  hits: Number,
-  praises: Number,
+  skimNum: Number,
+  likesNum: Number,
   replyCount: Number,
-  replies: [Reply],
-  revisionInfo: {
-    operationTime: Date,
-    userId: String,
-    userName: String,
-    terminalIP: String
-  }
+  replies: [
+    {
+      commentId: String,
+      replyId: String,
+      userId: String,
+      userName: String,
+      time: Date,
+      depth: Number,
+      content: String,
+      at: String
+    }
+  ],
+  favoritesNum: Number,
+  transferNum: Number,
+  // 1为匿名
+  anonymous: Number
 })
 
 var forumModel = mongoose.model('forum', forumSchema)
@@ -86,6 +97,31 @@ Forum.updateOne = function (query, obj, callback, opts, populate) {
     }
     callback(null, upforum)
   })
+}
+
+Forum.aggregate = function (array, callback) {
+  let _array = array || []
+  forumModel
+    .aggregate(_array)
+    .exec(function (err, results) {
+      if (err) {
+        return callback(err)
+      }
+      console.log(results)
+      callback(null, results)
+    })
+}
+
+Forum.removeOne = function (query, callback, opts) {
+  var options = opts || {}
+
+  forumModel
+    .findOneAndRemove(query, options, function (err, results) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, results)
+    })
 }
 
 module.exports = Forum

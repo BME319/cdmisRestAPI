@@ -1,20 +1,26 @@
 var Department = require('../models/department')
+var Alluser = require('../models/alluser')
 
 // 返回地区、地区负责人
 exports.getDistrict = function (req, res) {
   let district = req.query.district || ''
-  let query
+  let portleader = req.query.portleader || ''
+  let limit = Number(req.query.limit)
+  let skip = Number(req.query.skip)
+  let opts = {limit: limit, skip: skip, sort: '_id'}
+  let query = {}
   // 若district为空，返回所有地区信息；若不为空，返回该地区信息
   if (district !== '') {
-    query = {district: district}
-  } else {
-    query = null
+    query['district'] = {$regex: district}
+  } 
+  if (portleader !== '') {
+    query['portleader'] = portleader
   }
   let fields = {district: 1, portleader: 1}
   let populate = [
     {
       path: 'portleader',
-      select: 'name'
+      select: {'name': 1, 'userId': 1}
     }
   ]
   Department.getSome(query, fields, function (err, Info) {
@@ -23,30 +29,49 @@ exports.getDistrict = function (req, res) {
     }
     Info = distinct(Info)
     res.json({results: Info})
-  }, populate)
+  }, populate, opts)
 }
 
 // 返回地区、地区负责人、科室、医院、科室负责人
 exports.getDepartment = function (req, res) {
   let district = req.query.district || ''
-  let query
+  let portleader = req.query.portleader || ''
+  let department = req.query.department || ''
+  let hospital = req.query.hospital || ''
+  let departLeader = req.query.departLeader || ''
+  let limit = Number(req.query.limit)
+  let skip = Number(req.query.skip)
+  let opts = {limit: limit, skip: skip, sort: '_id'}
+  let query = {}
   // 若district为空，返回所有科室信息；若不为空，返回该地区的科室信息
   if (district !== '') {
-    query = {district: district}
+    query['district'] = {$regex: district}
+  }
+  if (portleader !== '') {
+    query['portleader'] = portleader
+  }
+  if (department !== '') {
+    query['department'] = {$regex: department}
   } else {
-    query = null
+    query['department'] = {$ne:null}
+  }
+  if (hospital !== '') {
+    query['hospital'] = {$regex: hospital}
+  }
+  if (departLeader !== '') {
+    query['departLeader'] = departLeader
   }
   let fields = {district: 1, portleader: 1, department: 1, hospital: 1, departLeader: 1}
   let populate = {
     path: 'portleader departLeader',
-    select: 'name'
+    select: {'name': 1, 'userId': 1}
   }
   Department.getSome(query, fields, function (err, Info) {
     if (err) {
       res.status(500).send(err.errmsg)
     }
     res.json({results: Info})
-  }, populate)
+  }, populate, opts)
 }
 
 // 输入地区、科室、医院，获取医生列表
@@ -54,6 +79,9 @@ exports.getDoctorList = function (req, res) {
   let district = req.query.district || ''
   let department = req.query.department || ''
   let hospital = req.query.hospital || ''
+  let limit = Number(req.query.limit)
+  let skip = Number(req.query.skip)
+  let opts = {limit: limit, skip: skip, sort: '_id'}
   if (district === '') {
     res.status(400).send('请输入地区')
   } else if (department === '') {
@@ -70,14 +98,14 @@ exports.getDoctorList = function (req, res) {
     let fields = {district: 1, portleader: 1, department: 1, hospital: 1, departLeader: 1, doctors: 1}
     let populate = {
       path: 'portleader departLeader doctors',
-      select: 'name'
+      select: {'name': 1, 'userId': 1}
     }
     Department.getOne(query, fields, function (err, Info) {
       if (err) {
         res.status(500).send(err)
       }
       res.json({results: Info.doctors})
-    }, populate)
+    }, populate, opts)
   }
 }
 
@@ -91,11 +119,12 @@ exports.updateDistrict = function (req, res) {
   } else {
     let query = {district: district}
     let obj = {}
-    if (newportleader !== '') {
-      obj['portleader'] = newportleader
-    }
     if (newdistrict !== '') {
       obj['district'] = newdistrict
+    }
+    if (newportleader !== '') {
+
+      obj['portleader'] = newportleader
     }
     Department.update(query, obj, function (err, Info) {
     if (err) {
@@ -109,7 +138,7 @@ exports.updateDistrict = function (req, res) {
 // 输入科室、医院、地区，要更新的内容，更新科室信息
 exports.updateDepartment = function (req, res) {
   let district = req.body.district || ''
-  let portleader = req.body.portleader || ''
+  // let portleader = req.body.portleader || ''
   let hospital = req.body.hospital || ''
   let department = req.body.department || ''
   let newdepartment = req.body.new.newdepartment || ''
@@ -131,6 +160,7 @@ exports.updateDepartment = function (req, res) {
       if (err){
         res.status(500).send(err)
       }
+      portleader = Info[0].portleader
       console.log('Info' + Info[0].department)
       if (Info[0].department !== undefined) {
         query = {
@@ -155,12 +185,15 @@ exports.updateDepartment = function (req, res) {
       if (newdoctors !== '') {
         obj['doctors'] = newdoctors
       }
-      Department.update(query, obj, function (err, Info) {
-      if (err) {
-        res.status(500).send(err.errmsg)
+      obj = {
+        $set: obj
       }
-      res.json('更新成功')
-    }, {upsert: true})
+      Department.update(query, obj, function (err, Info) {
+        if (err) {
+          res.status(500).send(err.errmsg)
+        }
+        res.json('更新成功')
+      }, {upsert: true})
     })
   }
 }
@@ -184,7 +217,7 @@ exports.deleteRecord = function (req, res) {
     if(err){
       res.status(500).send(err)
     }
-    res.send('删除成功')
+    res.json('删除成功')
   })
 }
 function distinct (data) {
@@ -199,3 +232,4 @@ function distinct (data) {
   }
   return arr
 }
+

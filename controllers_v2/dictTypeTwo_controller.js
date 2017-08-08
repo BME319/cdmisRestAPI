@@ -33,3 +33,17 @@ exports.getTypes = function (req, res) {
     }
   })
 }
+
+exports.getCategoryTest = function (req, res) {
+  var category = req.query.category
+  var query = {category: category}
+
+  DictTypeTwo.getOneCategory(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    console.log(item.user)
+    console.log(item.user.name)
+    res.json({results: item})
+  })
+}

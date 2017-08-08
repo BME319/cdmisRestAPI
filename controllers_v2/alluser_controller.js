@@ -285,7 +285,7 @@ exports.getAlluserList = function (role) {
     // console.log(1);
   return function (req, res) {
     var query = {'invalidFlag': 0}
-    var fields = {'_id': 0}//, 'revisionInfo':0
+    var fields = {'_id': 1}//, 'revisionInfo':0
 
     var limit = Number(req.query.limit)
     var skip = Number(req.query.skip)
