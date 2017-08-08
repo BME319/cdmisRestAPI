@@ -1001,6 +1001,7 @@ exports.login = function (req, res) {
           var userPayload = {
             _id: user._id,
             userId: user.userId,
+            name: user.name, 
             role: role,
             exp: Date.now() + config.TOKEN_EXPIRATION * 1000
           }
