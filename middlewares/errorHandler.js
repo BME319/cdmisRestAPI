@@ -1,6 +1,7 @@
 var domain = require('domain')
 var fs = require('fs')
 var bunyan = require('bunyan')
+var commonFunc = require('../middlewares/commonFunc')
 
 var log = bunyan.createLogger({
   name: 'kidney',
@@ -64,4 +65,41 @@ exports.error = function (req, res, next) {
   d.add(req)
   d.add(res)
   d.run(next)
+}
+
+exports.insertLog = function (req, res) {
+  var errStack = req.body.errStack || null
+  var method = req.body.method || null
+  var apiUrl = req.body.url || null
+  var args = req.body.args || null
+  var user = req.body.userId || null
+  var role = req.body.role || null
+  var ip = commonFunc.getClientIp(req)
+  var webState = req.body.webState
+  var userProxy = req.body.userProxy
+
+  var data = {
+    method: method,
+    apiUrl: apiUrl,
+    args: args,
+    user: user,
+    role: role,
+    ip: ip,
+    webState: webState,
+    userProxy: userProxy,
+    err: errStack
+  }
+
+  fs.appendFile('./logs/log4front.txt', data, 'utf8', function (appendErr) {
+    if (appendErr) {
+      console.log(appendErr)
+    }
+    res.json({results: {msg: '日志记录成功', code: 0, data: ''}})
+  })
+
+    // log.error('= ------------------------------------------------------------')
+    // log.error(errStack)
+    // log.error(req.url)
+    // log.error(req.query || req.body)
+    // log.error(req.session)
 }

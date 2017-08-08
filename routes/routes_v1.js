@@ -360,4 +360,6 @@ module.exports = function (app, webEntry, acl) {
 
   app.get(version + '/version', errorHandler.error, versionCtrl.getVersionInfo)
   app.post(version + '/version', errorHandler.error, getNoMid.getNo(10), versionCtrl.insertVersionInfo)
+
+  app.post(version + '/log', errorHandler.error, errorHandler.insertLog)
 }
