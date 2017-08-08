@@ -58,6 +58,7 @@ var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
 var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
 var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 var forumCtrl = require('../controllers_v2/forum_controller')
+var policyCtrl = require('../controllers_v2/policy_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -2855,6 +2856,9 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.confirmPD)
 
+  // PC端保险管理 权限insuranceC/insuranceA
+  app.get(version + '/policy/patients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatients)
+
   // lgf
   // account
   /**
@@ -3676,7 +3680,7 @@ module.exports = function (app, webEntry, acl) {
    *       200:
    *         description: success
   */
-  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.setPrefer)
+  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), serviceCtrl.getSessionObject, insuranceCtrl.setPrefer)
   /**
    * @swagger
    * /insurance/prefer:
