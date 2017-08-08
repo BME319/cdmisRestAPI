@@ -759,31 +759,41 @@ exports.getAvailablePD = function (req, res, next) {
   Alluser.getOne(query, function (err, itemD) {
     if (err) {
       return res.status(500).send(err)
-    } else {
-      if (itemD === null) {
-        return res.status(404).send('PD Not Found')
-      } else {
-        let availablePDsList = itemD.availablePDs || []
-        let availablePDsArray = []
-        for (let i = 0; i < availablePDsList.length; i++) {
-          if (availablePDsList[i].availableDay >= today && availablePDsList[i].availableDay < twoWeeksLater) {
-            availablePDsArray.push(availablePDsList[i])
-          }
-        }
-        let returns = []
-        for (let j = 0; j < availablePDsArray.length; j++) {
+    } else if (itemD === null) {
+      let returns = []
+      let period = ['Morning', 'Afternoon']
+      for (let ii = today; ii < twoWeeksLater; ii.setDate(ii.getDate() + 1)) {
+        for (let kk in period) {
           let objTemp = {}
-          let dayTemp = commonFunc.convertToFormatDate(new Date(availablePDsArray[j].availableDay))
+          let dayTemp = commonFunc.convertToFormatDate(new Date(ii))
           objTemp['availableDay'] = dayTemp.slice(0, 4) + '-' + dayTemp.slice(4, 6) + '-' + dayTemp.slice(6, 8)
-          objTemp['availableTime'] = availablePDsArray[j].availableTime
-          objTemp['suspendFlag'] = availablePDsArray[j].suspendFlag
-          objTemp['margin'] = availablePDsArray[j].total - availablePDsArray[j].count
-          objTemp['place'] = availablePDsArray[j].place
+          objTemp['availableTime'] = period[kk]
+          objTemp['margin'] = 0
           returns.push(objTemp)
         }
-        req.body.returns = returns
-        next()
       }
+      return res.status(200).json({results: returns})
+    } else {
+      let availablePDsList = itemD.availablePDs || []
+      let availablePDsArray = []
+      for (let i = 0; i < availablePDsList.length; i++) {
+        if (availablePDsList[i].availableDay >= today && availablePDsList[i].availableDay < twoWeeksLater) {
+          availablePDsArray.push(availablePDsList[i])
+        }
+      }
+      let returns = []
+      for (let j = 0; j < availablePDsArray.length; j++) {
+        let objTemp = {}
+        let dayTemp = commonFunc.convertToFormatDate(new Date(availablePDsArray[j].availableDay))
+        objTemp['availableDay'] = dayTemp.slice(0, 4) + '-' + dayTemp.slice(4, 6) + '-' + dayTemp.slice(6, 8)
+        objTemp['availableTime'] = availablePDsArray[j].availableTime
+        objTemp['suspendFlag'] = availablePDsArray[j].suspendFlag
+        objTemp['margin'] = availablePDsArray[j].total - availablePDsArray[j].count
+        objTemp['place'] = availablePDsArray[j].place
+        returns.push(objTemp)
+      }
+      req.body.returns = returns
+      next()
     }
   }, opts, fields)
 }
@@ -832,7 +842,6 @@ exports.sortAndTagPDs = function (req, res) {
           objTemp['availableTime'] = period[kk]
           objTemp['margin'] = 0
           returns.push(objTemp)
-          console.log(ii, period[kk], flag, objTemp)
         }
       }
     }

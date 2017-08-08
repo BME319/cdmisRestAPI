@@ -2646,8 +2646,8 @@ module.exports = function (app, webEntry, acl) {
    *       200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, personalDiagCtrl.updatePDCapacityDown, personalDiagCtrl.newPersonalDiag, orderCtrl.getOrderNo, orderCtrl.updateOrder)
-  // 患者端 取消面诊服务（至少提前三天) cancelMyPD 还没有和order退款连起来
+  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, personalDiagCtrl.updatePDCapacityDown, personalDiagCtrl.newPersonalDiag, alluserCtrl.successMessage)
+  // 患者端 取消面诊服务 还没有和order退款连起来
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
    * /services/personalDiagnosis:
@@ -2856,8 +2856,21 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.confirmPD)
 
-  // PC端保险管理 权限insuranceC/insuranceA
+  // PC端保险管理
+  // 获取患者 权限insuranceC/insuranceA
   app.get(version + '/policy/patients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatients)
+  // 获取专员 权限insuranceC
+  app.get(version + '/policy/agents', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getAgents)
+  // 主管设置／更换专员 权限insuranceC
+  app.post(version + '/policy/agent', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.getInsuranceAObject, policyCtrl.setAgent)
+  // 专员／主管录入患者跟踪记录 权限insuranceC/insuranceA
+  app.post(version + '/policy/followUp', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertFollowUp)
+  // 专员／主管录入患者保单 权限insuranceC/insuranceA
+  app.post(version + '/policy/policy', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertPolicy)
+  // 主管审核患者保单 权限insuranceC
+  app.post(version + '/policy/policyReview', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.reviewPolicy)
+  // 主管注销专员 权限insuranceC
+  app.post(version + '/policy/agentOff', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getInsuranceAObject, policyCtrl.agentOff)
 
   // lgf
   // account
