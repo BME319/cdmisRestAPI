@@ -31,6 +31,7 @@ var log = bunyan.createLogger({
 // domain来处理异常
 exports.error = function (req, res, next) {
   var d = domain.create()
+  log.info(req.method + ' ' + req.url)
   // 监听domain的错误事件
   d.on('error', function (err) {
     // logger.error(err)
@@ -42,7 +43,7 @@ exports.error = function (req, res, next) {
     // console.log(req)
     log.error('= ------------------------------------------------------------')
     log.error(err)
-    log.error(req.url)
+    log.error(req.method + ' ' + req.url)
     log.error(req.query || req.body)
     log.error(req.session)
     // log.error({
