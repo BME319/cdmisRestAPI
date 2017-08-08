@@ -2856,8 +2856,8 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.confirmPD)
 
-  // PC端保险管理
-  app.get(version + '/policy/patients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getPatients)
+  // PC端保险管理 权限insuranceC/insuranceA
+  app.get(version + '/policy/patients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatients)
 
   // lgf
   // account

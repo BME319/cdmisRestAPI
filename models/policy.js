@@ -2,7 +2,7 @@ var mongoose = require('mongoose')
 
 var policySchema = new mongoose.Schema({
   patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-  followUps: [
+  followUps: [ // 跟踪历史记录
     {
       _id: 0,
       agentId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
@@ -12,20 +12,20 @@ var policySchema = new mongoose.Schema({
       photos: [String]
     }
   ],
-  currentAgent: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-  agents: [
+  currentAgent: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'}, // 当前保险专员
+  agents: [ // 保险专员历史记录
     {
       agentId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       startTime: Date,
       endTime: Date
     }
   ],
-  content: String,
-  photos: [String],
+  content: String, // 保单文字内容
+  photos: [String], // 保单图片
   supervisor: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'}, // 审核保单的保险主管
   status: {type: Number, default: 0, enum: [0, 1, 2, 3]}, // 0，仅有意向；1，保单待审核；2，保单已审核；3，保单过期
-  startTime: Date,
-  endTime: Date
+  startTime: Date, // 保单起始时间
+  endTime: Date // 保单失效时间
 })
 
 var PolicyModel = mongoose.model('policy', policySchema)
