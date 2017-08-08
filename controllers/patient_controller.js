@@ -724,6 +724,9 @@ exports.bindingMyDoctor = function(req, res, next) {
 							// }
 							// else{
 							var doctor_new={doctorId:doc,firstTime:new Date(),invalidFlag:0}
+							console.log("*************************** bindingMyDoctor : doctor_new ********************************");
+							console.log(doctor_new);
+
 							doctorsList.push(doctor_new)
 							// }
 							var upObj = {$set:{doctors:doctorsList}};
@@ -806,7 +809,7 @@ exports.bindingMyDoctor = function(req, res, next) {
 }
 //3. DpRelation表中医生绑定患者
 exports.bindingPatient = function(req, res, next) {
-	console.log("heng")
+	// console.log("heng")
 	var doctorId = req.body.doctor_id;
 	var patientId = req.body.patient_id;
 	if (req.body.dpRelationTime == null || req.body.dpRelationTime == '') {

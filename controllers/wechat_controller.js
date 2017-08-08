@@ -11,6 +11,7 @@ var config = require('../config'),
     User = require('../models/user'),
     Doctor = require('../models/doctor'), 
     OpenIdTmp = require('../models/openId'),
+    Doctor = require('../models/doctor'), 
     Order = require('../models/order');
 
 // appid: wx8a6a43fb9585fb7c;secret: b23a4696c3b0c9b506891209d2856ab2
@@ -220,7 +221,7 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
     }, function (err, response, body) {
         if (err) return res.status(401).send('换取网页授权access_token失败!');
         
-    console.log(body);
+    // console.log(body);
           var wechatData = {
             access_token: body.access_token, //获取用户信息的access_token
             expires_in: body.expires_in,
@@ -418,7 +419,7 @@ exports.addOrder = function(req, res, next) {
       // 微信生成的预支付会话标识，用于后续接口调用中使用，该值有效期为2小时
       prepay_id = data.xml.prepay_id;
       req.prepay_id = prepay_id;
-      console.log(prepay_id);
+      // console.log(prepay_id);
       next();
 
       // res.redirect('/zbtong/?#/shopping/wxpay/'+ orderObject.oid +'/' + data.xml.prepay_id);
@@ -811,13 +812,13 @@ exports.messageTemplate = function(req, res) {
           }
           var messageOpenId;
           if(role == 'doctor'){
-            messageOpenId = item.MessageOpenId.doctorWechat;
+            messageOpenId = item.MessageOpenId.doctorWechat || null;
           }
           else if(role == 'patient'){
-            messageOpenId = item.MessageOpenId.patientWechat;
+            messageOpenId = item.MessageOpenId.patientWechat || null;
           }
           else if(role == 'test'){
-            messageOpenId = item.MessageOpenId.test;
+            messageOpenId = item.MessageOpenId.test || null;
           }
     
           if(messageOpenId === null){
@@ -826,6 +827,8 @@ exports.messageTemplate = function(req, res) {
             res.json({results:{"errcode" : 0,"errmsg" : "ok"}});
           }
           else{
+            // console.log(item.phoneNo)
+            // console.log(messageOpenId)
             var jsondata = {};
             jsondata = req.body.postdata;
             jsondata.touser = messageOpenId;
@@ -940,6 +943,7 @@ exports.receiveTextMessage = function(req, res) {
     // console.log("partial: " + body);
   });
   req.on('end',function(){
+    // console.log("*************************** finish : body ********************************");
     // console.log("finish: " + body);
     var parser = new xml2js.Parser();
     var jsondata = {};
@@ -949,18 +953,23 @@ exports.receiveTextMessage = function(req, res) {
     });
     MsgType = jsondata.xml.MsgType;
 
+    // console.log(jsondata);
+    // console.log((jsondata.xml.EventKey[0] == '' || jsondata.xml.EventKey[0] == null));
     // 事件推送
     if(MsgType == 'event'){
       // 扫描带参数二维码事件    用户未关注时，进行关注后的事件推送 || 用户已关注时的事件推送
-      if(jsondata.xml.Event == 'subscribe' || jsondata.xml.Event == 'SCAN'){
-        
+      if(jsondata.xml.Event == 'subscribe' || jsondata.xml.Event == 'SCAN'){   
         // do something
-        
-        if(jsondata.xml.EventKey != null ){
+        // console.log("*************************** inin ********************************");
+        // console.log("inin");
+        if(jsondata.xml.EventKey[0] != null && jsondata.xml.EventKey[0] != ''){
+    
           var doctor_userId;
-          // 
+          // console.log("*************************** jsondata ********************************");
           // console.log(jsondata);
+
           var patientType;
+
           if(jsondata.xml.Event == 'subscribe'){
             doctor_userId =  jsondata.xml.EventKey[0].split('_')[1];
             // 未注册
@@ -971,7 +980,7 @@ exports.receiveTextMessage = function(req, res) {
             // 已注册
             patientType = 1;
           }
-        console.log(doctor_userId);
+          console.log(doctor_userId);
           // 暂存医生和患者的openId
           var patient_openId = jsondata.xml.FromUserName;       
           var time = new Date();
@@ -982,11 +991,15 @@ exports.receiveTextMessage = function(req, res) {
             time: time,
             patientType: patientType
           };
+          // console.log("*************************** openIdData ********************************");
           // console.log(openIdData);
           var newOpenIdTmp = new OpenIdTmp(openIdData);
           newOpenIdTmp.save(function(err, item) {
             if (err) {
               results = err.errmsg;
+              res.statusCode = 500;
+              res.write(results);
+              res.end();
             }
             else{
               // results = 'success';
@@ -994,10 +1007,18 @@ exports.receiveTextMessage = function(req, res) {
               Doctor.getOne(query, function (err, doctor) {
                 if (err) {
                   results = err;
+                  res.statusCode = 500;
+                  res.write(results);
+                  res.end();
                 }
                 if (doctor == null) {
                   results = 'doctor not exist';
+                  res.statusCode = 500;
+                  res.write(results);
+                  res.end();
                 }
+                // console.log("*************************** doctor ********************************");
+                // console.log(doctor)
                 var name = doctor.name;
                 var title = doctor.title;
                 var workUnit = doctor.workUnit;
@@ -1045,11 +1066,14 @@ exports.receiveTextMessage = function(req, res) {
                     results = err;
                   }
                   else{
+
                     if( jsondata.xml.Event == 'SCAN'){
                       results = 'success';
                     }
                     else{
-                      results = "您好，欢迎关注肾事管家~让每一位慢性肾病患者得到有效管理。找名医进行咨询问诊，请点击底栏【肾事管家】~定制私人肾病全程管理方案，请点击底栏【全程管理】~";
+                      // results = "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~";
+                      results = "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
+
                     }
 
                   }
@@ -1065,24 +1089,59 @@ exports.receiveTextMessage = function(req, res) {
             }           
           });
         }
+        else if(jsondata.xml.EventKey[0] == '' || jsondata.xml.EventKey[0] == null){
+          // console.log("*************************** jsondata ********************************");
+          // console.log(jsondata);
+          var ToUserName = jsondata.xml.ToUserName[0];    // 开发者微信号
+          var FromUserName = jsondata.xml.FromUserName[0];  // 发送方帐号（一个OpenID）
+          var CreateTime = parseInt(jsondata.xml.CreateTime[0]); 
+          // console.log(CreateTime);
+          // var date = new Date();
+
+          var res_json = {
+            ToUserName: FromUserName,
+            FromUserName: ToUserName,
+            // ToUserName: ToUserName,
+            // FromUserName: FromUserName,
+            CreateTime: CreateTime,
+            MsgType: 'text',
+            // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+            Content: "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
+          };
+          // console.log(res_json);
+          var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+          var xmlString = xmlBuilder.buildObject(res_json);
+          // console.log(xmlString);
+          results = xmlString;
+          res.statusCode = 200;
+          res.write(results);
+          res.end();
+        }
         else{
           // EventKey为空
-          results = 'EventKey Error'
+          results = 'EventKey Error';
+          res.statusCode = 500;
+          res.write(results);
+          res.end();
         }
 
       }
       else{
         results = 'success';
+        res.statusCode = 200;
+        res.write(results);
+        res.end();
       }
     }
     else{
       results = 'success';
+      res.statusCode = 200;
+      res.write(results);
+      res.end();
     }
 
   });
 
-  res.writeHead(200, {'Content-Type': 'text/html'});
-  res.end(results);
 }
 
 

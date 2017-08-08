@@ -15,12 +15,12 @@ var userWechatPatientList = {};
 
 var userWechatDoctorServer = {};
 var userWechatDoctorList = {};
-
 var userAppPatientServer = {};
 var userAppPatientList = {};
-
 var userAppDoctorServer = {};
 var userAppDoctorList = {};
+var userList = {};
+var count = 0;
 
 function Arrayremove(array,name){
     var len = array.length;
@@ -65,7 +65,7 @@ function messageSaveSend(data, url,sender){
     }
     request({
         // url: url + '?token=' + req.query.token || req.body.token,
-        url: url,
+        url: url ,
         method: 'POST',
         body: jsondata,
         json:true
@@ -77,6 +77,7 @@ function messageSaveSend(data, url,sender){
             // console.log(response.body);
             // send message
             /// send to sendBy
+
             // console.log("SENDBY: "+ sendBy);
             // console.log("app_doctor:  "+Object.keys(userAppDoctorServer));
             // console.log("app_patient:  "+Object.keys(userAppPatientServer));
@@ -254,6 +255,7 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                                 json:true
 
                             }, function(err, response, body){
+                                // console.log(body)
 
                                 // if (!err && response.statusCode == 200) {   
                                 //     res.json({results:body});
@@ -270,15 +272,19 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
             }
         });
     }
+
 }
+
 
 // namespace chat
 exports.chat = function (io, socket) {
     socket.on('newUser',function(data){
+
         var nickname = data.user_name,
+
             user_id = data.user_id,
             client = data.client;
-        
+        // console.log(data)
         // socket.id = user_id;
         
         if(client == 'doctor'){
@@ -375,8 +381,26 @@ exports.chat = function (io, socket) {
         // console.log('disconnect: ' + id);
         // console.log(Object.keys(userServer));
     })
+    // socket.on('disconnect',function(){ //用户注销登陆执行内容
+
+    //     // console.log('disconnect');
+
+    //     count -= 1; 
+    //     var id = socket.id
+    //     delete userServer[id]
+    //     delete userList[id]
+    //     // console.log(id);
+    //     // console.log(Object.keys(userServer));
+    //     // io.emit('onlineCount',freeList)
+    //     // io.emit('offline',{id:id})
+    //     // io.emit('addCount', count)
+    //     // console.log('disconnect: ' + id);
+    //     // console.log(Object.keys(userServer));
+    // })
+
     socket.on('message', function(data){
         // console.log('message by: '+data.msg.fromName );
+
         var contentType = data.msg.contentType;
         var clientType = data.msg.clientType;
         var role = data.role;
@@ -397,7 +421,8 @@ exports.chat = function (io, socket) {
             // download
             request({
                 // url: url + '?serverId=' + mediaId + '&name=' + name + '&role=' + role + '?token=' + req.query.token || req.body.token,
-                url: url + '?serverId=' + mediaId + '&name=' + name + '&role=' + role,
+                url: url + '?serverId=' + mediaId + '&name=' + name + '&role=' + role ,
+               
                 method: 'GET',
                 json: true
             }, function(err, response){
@@ -407,6 +432,7 @@ exports.chat = function (io, socket) {
                 else{
                     var resUrl = "uploads/photos/" + name;
                     data.msg.content['src_thumb'] = resUrl;
+
                     messageSaveSend(data, resUrl,socket);
                 }
             });
@@ -416,17 +442,13 @@ exports.chat = function (io, socket) {
 
      
     })
-    // socket.on('sendImg',function(data){
-    //     if(userAppServer.hasOwnProperty(data.to)){
-    //         userAppServer[data.to].emit('getImg',{msg:data.msg})
-    //     }
-    //     else if(userWechatServer.hasOwnProperty(data.to)){
-    //         userWechatList[data.to].emit('getImg',{msg:data.msg})
-    //     }
-    //     else{
-    //         socket.emit("err",{msg:"对方已经下线或者断开连接"})
-    //     }
-    // })
+    socket.on('sendImg',function(data){
+        if(userServer.hasOwnProperty(data.to)){
+            userServer[data.to].emit('getImg',{msg:data.msg})
+        }else{
+            socket.emit("err",{msg:"对方已经下线或者断开连接"})
+        }
+    })
 };
 
 
