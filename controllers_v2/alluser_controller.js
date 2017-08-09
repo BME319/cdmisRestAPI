@@ -1137,7 +1137,7 @@ exports.sendSMS = function (req, res) {
     tplId = tplId3
     appId = appId1
     param = _reason
-    JSONData = J6 + '"' + Jsonstring1 + '"' + ':' + '{' + '"' + Jsonstring2 + '"' + ':' + '"' + appId + '"' + ',' + '"' + Jsonstring3 + '"' + ':' + '"' + param + '"' + ',' + '"' + Jsonstring4 + '"' + ':' + '"' + tplId + '"' + ',' + '"' + Jsonstring5 + '"' + ':' + '"' + _mobile + '"' + '}' + '}' + '}'
+    JSONData = J6 + '"' + Jsonstring1 + '"' + ':' + '{' + '"' + Jsonstring2 + '"' + ':' + '"' + appId + '"' + ',' + '"' + Jsonstring3 + '"' + ':' + '"' + param + '"' + ',' + '"' + Jsonstring4 + '"' + ':' + '"' + tplId + '"' + ',' + '"' + Jsonstring5 + '"' + ':' + '"' + _mobile + '"' + '}' + '}'
   }
   // console.log(JSONData)
   var query = {'Expire': {'$lte': now.getTime()}}
@@ -1177,7 +1177,7 @@ exports.sendSMS = function (req, res) {
             var authorization = Base64.encode(accountSid + ':' + timestamp)
                         // console.log(md5)
                         // console.log(authorization)
-            var bytes = commonFunc.stringToBytes(JSONData)
+            // var bytes = commonFunc.stringToBytes(JSONData)
             // var Url = 'https://api.ucpaas.com/2014-06-30/Accounts/' + accountSid + '/Messages/templateSMS?sig=' + md5
                         // console.log(Url);
             var options = {
@@ -1190,7 +1190,7 @@ exports.sendSMS = function (req, res) {
                                 // "Accept-Encoding":"gzip, deflate",
                                 // "Accept-Language":"zh-CN,zh;q=0.8",
                                 // "Connection":"keep-alive",
-                'Content-Length': bytes.length,
+                // 'Content-Length': bytes.length,
                 'Content-Type': 'application/json;charset=utf-8',
                                 // "Cookie":"imooc_uuid=6cc9e8d5-424a-4861-9f7d-9cbcfbe4c6ae; imooc_isnew_ct=1460873157; loginstate=1; apsid=IzZDJiMGU0OTMyNTE0ZGFhZDAzZDNhZTAyZDg2ZmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjkyOTk0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGNmNmFhMmVhMTYwNzRmMjczNjdmZWUyNDg1ZTZkMGM1BwhXVwcIV1c%3DMD; PHPSESSID=thh4bfrl1t7qre9tr56m32tbv0; Hm_lvt_f0cfcccd7b1393990c78efdeebff3968=1467635471,1467653719,1467654690,1467654957; Hm_lpvt_f0cfcccd7b1393990c78efdeebff3968=1467655022; imooc_isnew=2; cvde=577a9e57ce250-34",
                                 // "Host":"www.imooc.com",
