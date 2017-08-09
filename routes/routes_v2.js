@@ -134,7 +134,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/labtestImport/countByStatus', tokenManager.verifyToken(), labtestImportCtrl.countByStatus)
 
   // doctor_services
-  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生
+  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生 2017-08-09 患者
    * @swagger
    * /services:
    *   get:
@@ -153,7 +153,8 @@ module.exports = function (app, webEntry, acl) {
    *       type: "string"
    *     - name: "userId"
    *       in: "query"
-   *       required: true
+   *       required: false
+   *       description: "患者查询医生服务开启状态时输入"
    *       type: "string"
    *     responses:
    *       200:
@@ -585,7 +586,7 @@ module.exports = function (app, webEntry, acl) {
    *       description: "Token."
    *       required: true
    *       type: "string"
-   *     - name: "userId"
+   *     - name: "doctorId"
    *       in: "query"
    *       description: "The userId of the Doctor to be queried."
    *       required: true
@@ -624,7 +625,7 @@ module.exports = function (app, webEntry, acl) {
    *     - name: "counselId"
    *       in: "query"
    *       description: "Comments of counsel to be found."
-   *       required: true
+   *       required: false
    *       type: "string"
    *     responses:
    *       200:
@@ -653,10 +654,15 @@ module.exports = function (app, webEntry, acl) {
    *     produces:
    *     - "application/json"
    *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "token of the admin user."
+   *       required: true
+   *       type: "string"
    *     - name: "advisorId"
    *       in: "query"
    *       description: "UserId of the advisor to be queried."
-   *       required: true
+   *       required: false
    *       type: "string"
    *     responses:
    *       200:
@@ -732,7 +738,7 @@ module.exports = function (app, webEntry, acl) {
    *     - name: "userId"
    *       in: "query"
    *       description: "UserId to be queried."
-   *       required: false
+   *       required: true
    *       type: "string"
    *     - name: "date"
    *       in: "query"
@@ -758,7 +764,7 @@ module.exports = function (app, webEntry, acl) {
    *               items:
    *                 $ref: '#/definitions/Compliance'
    */
-  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getComplianceByDay)
+  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getCompliance)
   /** YQC 17-07-24 - acl 2017-08-04 患者
    * @swagger
    * /compliance/compliances:
@@ -888,7 +894,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData, patientCtrl.editPatientDetail)
-  // counsel 2017-07-17 debug 1-
+  // counsel 2017-07-17
   // 医生获取问诊信息
   app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getCounsels)
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay)
@@ -1286,7 +1292,7 @@ module.exports = function (app, webEntry, acl) {
    *                 doctor:
    *                   type: "object"
    */
-  app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getMyDoctor)
+  // app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getMyDoctor)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
    * @swagger
    * /patient/counselRecords:
@@ -5766,8 +5772,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: date
    *   Data:
    *     type: array
-   *     item:
-   *       type: object
+   *     items:
    *       $ref: '#/definitions/Patient'
   */
   /**

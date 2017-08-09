@@ -38,6 +38,11 @@ exports.postAdvice = function (req, res) {
   let userId = req.session.userId || null
   let role = req.session.role || null
   let query = {userId: userId}
+  let topic = req.body.topic || null
+  let content = req.body.content || null
+  if (topic === null || content === null) {
+    return res.status(412).json({results: '请填写topic,content'})
+  }
   // 调用用户获取函数Alluser.getOne
   Alluser.getOne(query, function (err, item) {
     // 用户不存在或角色不匹配返回错误提示信息
@@ -49,7 +54,7 @@ exports.postAdvice = function (req, res) {
     } else if (item.role.indexOf(role) === -1) {
       return res.json({result: '用户与角色不匹配!'})
     } else {
-      let queryA = {userId: req.session.userId, topic: req.body.topic, content: req.body.content}
+      let queryA = {userId: req.session.userId, topic: topic, content: content}
       Advice.getOne(queryA, function (err, item) {
         if (err) {
           return res.status(500).send(err)
@@ -58,8 +63,8 @@ exports.postAdvice = function (req, res) {
             userId: req.session.userId,
             role: req.session.role,
             time: commonFunc.getNowFormatSecond(),
-            topic: req.body.topic,
-            content: req.body.content
+            topic: topic,
+            content: content
           }
 
           // 将建议内容保存
