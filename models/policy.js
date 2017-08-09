@@ -7,23 +7,24 @@ var policySchema = new mongoose.Schema({
       _id: 0,
       agentId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       time: Date,
-      type: {type: Number, enum: [0, 1, 2]}, // 2，专员更换；1，沟通记录；0，新建跟踪
+      type: {type: Number, enum: [0, 1, 2, 3]}, // 2，专员更换；1，沟通记录；0，新建跟踪；3，保单相关
       content: String,
       photos: [String]
     }
   ],
   currentAgent: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'}, // 当前保险专员
-  agents: [ // 保险专员历史记录
-    {
-      agentId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-      startTime: Date,
-      endTime: Date
-    }
-  ],
+  // agents: [ // 保险专员历史记录
+  //   {
+  //     agentId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  //     startTime: Date,
+  //     endTime: Date
+  //   }
+  // ],
   content: String, // 保单文字内容
   photos: [String], // 保单图片
   supervisor: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'}, // 审核保单的保险主管
-  status: {type: Number, default: 0, enum: [0, 1, 2, 3]}, // 0，仅有意向；1，保单待审核；2，保单已审核；3，保单过期
+  status: {type: Number, default: 0, enum: [0, 1, 2, 3, 4, 5]}, // 0，有意向无专员；1，有意向有专员；2，保单待审核；3，保单审核通过；4，保单审核未通过；5，保单过期
+  time: Date, // 保单录入时间
   startTime: Date, // 保单起始时间
   endTime: Date // 保单失效时间
 })

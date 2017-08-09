@@ -122,8 +122,12 @@ exports.getOrderNo = function (req, res, next) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    req.body.orderNo = item.orderNo
-    next()
+    if (item === null) {
+      return res.status(404).json({result: '更新订单错误：无法查询到订单请重新尝试或联系管理员'})
+    } else {
+      req.body.orderNo = item.orderNo
+      next()
+    }
   })
 }
 
@@ -294,7 +298,12 @@ exports.updateOrder = function (req, res) {
         }
       })
     } else {
-      res.json({results: item, msg: 'success!'})
+      if (req.body.counselInfo) {
+        return res.json({result: '新建成功', results: req.body.counselInfo})
+      } else {
+        res.json({results: item, msg: 'success!'})
+      }
+      // res.json({results: item, msg: 'success!'})
     }
   })
 }
