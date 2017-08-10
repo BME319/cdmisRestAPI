@@ -975,16 +975,267 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData, patientCtrl.editPatientDetail)
   // counsel 2017-07-17
   // 医生获取问诊信息
-  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getCounsels)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 医生
+   * @swagger
+   * /counsel/counsels:
+   *   get:
+   *     tags:
+   *     - "counsel"
+   *     summary: "获取资讯问诊内容"
+   *     description: ""
+   *     operationId: "counsels"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "status"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     - name: "type"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   messages:
+   *                     type: "array"
+   *                     items:
+   *                       $ref: '#/definitions/Message'
+   *             count:
+   *               type: number
+   */
+  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getSessionObject, counselCtrl.getCounsels)
   // 获取咨询状态
-  app.get(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 医生／患者
+   * @swagger
+   * /counsel/status:
+   *   get:
+   *     tags:
+   *     - "counsel"
+   *     summary: "获取资讯问诊状态"
+   *     description: ""
+   *     operationId: "status"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "body"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "status"
+   *       in: "body"
+   *       required: false
+   *       type: "number"
+   *     - name: "type"
+   *       in: "body"
+   *       required: false
+   *       type: "number"
+   *     - name: "doctorId"
+   *       in: "body"
+   *       required: true
+   *       type: "string"
+   *     - name: "patientId"
+   *       in: "body"
+   *       required: true
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 messages:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Message'
+   *                 Patient:
+   *                   type: "object"
+   *                   $ref: '#/definitions/Patient'
+   *                 Doctor:
+   *                   type: "object"
+   *                   $ref: '#/definitions/Doctor'
+   *             count:
+   *               type: number
+   */
+  app.get(version + '/counsel/status', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
   // 修改咨询状态
-  app.post(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 医生／患者
+   * @swagger
+   * /counsel/status:
+   *   post:
+   *     tags:
+   *     - "counsel"
+   *     summary: "修改资讯问诊状态"
+   *     description: ""
+   *     operationId: "status"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "docotorId"
+   *           - "status"
+   *           - "type"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           docotorId:
+   *             type: string
+   *           status:
+   *             type: number
+   *             default: 0
+   *           type:
+   *             type: number
+   *             default: 2
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               $ref: '#/definitions/Counsel'
+   */
+  app.post(version + '/counsel/status', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
   // 修改咨询类型
-  app.post(version + '/counsel/type', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 患者
+   * @swagger
+   * /counsel/type:
+   *   post:
+   *     tags:
+   *     - "counsel"
+   *     summary: "修改咨询类型"
+   *     description: ""
+   *     operationId: "type"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "docotorId"
+   *           - "changeType"
+   *           - "type"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           docotorId:
+   *             type: string
+   *           changeType:
+   *             type: string
+   *             default: "true"
+   *           type:
+   *             type: number
+   *             default: 2
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               $ref: '#/definitions/Counsel'
+   */
+  app.post(version + '/counsel/type', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
   // 评价医生
-  app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
-  // communication 2017-07-14
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 患者
+   * @swagger
+   * /counsel/commentScore:
+   *   post:
+   *     tags:
+   *     - "counsel"
+   *     summary: "评价医生"
+   *     description: ""
+   *     operationId: "commentScore"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "totalScore"
+   *           - "docotorId"
+   *           - "content"
+   *           - "couselId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           totalScore:
+   *             type: "number"
+   *           docotorId:
+   *             type: string
+   *           content:
+   *             type: string
+   *           couselId:
+   *             type: number
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             CounselResults:
+   *               type: object
+   *               $ref: '#/definitions/Counsel'
+   *             commentresults:
+   *               type: object
+   *               $ref: '#/definitions/Comment'
+   *             result:
+   *               type: string
+   */
+  app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
+  // communication
   app.get(version + '/communication/counselReport', tokenManager.verifyToken(), communicationCtrl.getCounselReport)
   // app.post(version + '/communication/newTeam', tokenManager.verifyToken(), getNoMid.getNo(4), communicationCtrl.newTeam)
   app.post(version + '/communication/team', tokenManager.verifyToken(), communicationCtrl.newTeam)
@@ -4072,7 +4323,8 @@ module.exports = function (app, webEntry, acl) {
    *       sendBy:
    *         type: string
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       title:
    *         type: string
    *       description:
@@ -4244,7 +4496,8 @@ module.exports = function (app, webEntry, acl) {
    *       sendBy:
    *         type: string
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       title:
    *         type: string
    *       description:
@@ -6023,9 +6276,11 @@ module.exports = function (app, webEntry, acl) {
    *       counselId:
    *         type: string
    *       doctorId:
-   *         type: string
+   *         type: object
+   *         $ref: '#/definitions/Doctor'
    *       patientId:
-   *         type: string
+   *         type: object
+   *         $ref: '#/definitions/Patient'
    *       type:
    *         type: number
    *       time:

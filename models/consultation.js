@@ -26,7 +26,7 @@ var consultationSchema = new mongoose.Schema({
   }
 })
 
-var consultationModel = mongoose.model('consultation', consultationSchema)
+var ConsultationModel = mongoose.model('consultation', consultationSchema)
 
 function Consultation (consultation) {
   this.consultation = consultation
@@ -34,7 +34,7 @@ function Consultation (consultation) {
 
 Consultation.prototype.save = function (callback) {
   var consultation = this.consultation
-  var newConsultation = new consultationModel(consultation)
+  var newConsultation = new ConsultationModel(consultation)
   newConsultation.save(function (err, consultationItem) {
     if (err) {
       return callback(err)
@@ -48,7 +48,7 @@ Consultation.getOne = function (query, callback, opts, fields, populate) {
   var _fields = fields || null
   var _populate = populate || ''
 
-  consultationModel
+  ConsultationModel
   .findOne(query, _fields, options)
   .populate(_populate)
   .exec(function (err, consultationInfo) {
@@ -63,7 +63,7 @@ Consultation.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
   var _fields = fields || null
   var _populate = populate || ''
-  consultationModel
+  ConsultationModel
   .find(query, _fields, options)
   .populate(_populate)
   .exec(function (err, consultations) {
@@ -78,7 +78,7 @@ Consultation.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  consultationModel
+  ConsultationModel
   .findOneAndUpdate(query, obj, options)
   .populate(_populate)
   .exec(function (err, upconsultation) {
@@ -93,7 +93,7 @@ Consultation.update = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var _populate = populate || ''
 
-  consultationModel
+  ConsultationModel
     .update(query, obj, options)
     .populate(_populate)
     .exec(function (err, upconsultation) {

@@ -978,7 +978,7 @@ exports.getMassTargets = function (req, res, next) {
           }
           for (let j = 0; j < doctorItem.patientsInCharge.length; j++) {
             if (doctorItem.patientsInCharge[j].patientId !== null) {
-              targets[i + j] = doctorItem.patientsInCharge[j].patientId
+              targets[doctorItem.patients.length + j] = doctorItem.patientsInCharge[j].patientId
             }
           }
           break
