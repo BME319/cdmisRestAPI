@@ -564,7 +564,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSuspend)
-  // 咨询问卷填写(新增自动转发功能)
+  // 咨询问卷填写(新增自动转发功能) - acl 2017-08-10 患者
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
 
   // YQC
@@ -897,10 +897,13 @@ module.exports = function (app, webEntry, acl) {
   // counsel 2017-07-17
   // 医生获取问诊信息
   app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getCounsels)
-  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay)
+  // 获取咨询状态
   app.get(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
+  // 修改咨询状态
   app.post(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
+  // 修改咨询类型
   app.post(version + '/counsel/type', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
+  // 评价医生
   app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
   // communication 2017-07-14
   app.get(version + '/communication/counselReport', tokenManager.verifyToken(), communicationCtrl.getCounselReport)
