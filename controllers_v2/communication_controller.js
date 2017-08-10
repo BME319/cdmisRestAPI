@@ -935,7 +935,7 @@ exports.getMassTargets = function (req, res, next) {
   let content = req.body.content || null
   if (content === null) {
     return res.status(412).json({results: '群发内容不能为空'})
-  } 
+  }
   // else if (!(content.createTimeInMillis && content.newsType)) {
   //   return res.status(412).json({results: '不合规则的content'})
   // }
@@ -956,7 +956,7 @@ exports.getMassTargets = function (req, res, next) {
     } else {
       let targets = []
       switch (target) {
-        case 'FOLLOW': 
+        case 'FOLLOW':
           for (let i = 0; i < doctorItem.patients.length; i++) {
             if (doctorItem.patients[i].patientId !== null) {
               targets[i] = doctorItem.patients[i].patientId
@@ -982,7 +982,7 @@ exports.getMassTargets = function (req, res, next) {
             }
           }
           break
-        default: 
+        default:
           break
       }
       if (targets.length === 0) {
@@ -996,7 +996,7 @@ exports.getMassTargets = function (req, res, next) {
 }
 // 构建并写入communication, news表数据
 // 突然就变成系统消息了，所以改成写入message表
-exports.massCommunication = function (req, res, next) {  
+exports.massCommunication = function (req, res, next) {
   function add00 (m) {
     return m < 10 ? '00' + m : (m < 100 ? '0' + m : m)
   }
@@ -1021,21 +1021,21 @@ exports.massCommunication = function (req, res, next) {
 
   for (let i = 0; i < req.massTarget.length; i++) {
     let massId = 'MAM' + req.session.userId + y + add0(m) + add0(d) + add0(h) + add0(mm) + add00(s) + add00(i)
-    
+
     // content[i] = JSON.parse(JSON.stringify(req.body.content))
     // content[i].targetID = req.massTarget[i].userId
     // content[i].targetName = req.massTarget[i].name
     // content[i].fromID = req.session.userId
 
     let communicationData = {
-      messageId: massId, 
-      userId: req.massTarget[i].userId, 
-      sendBy: req.session.userId, 
-      readOrNot: 0, 
-      type: 8, 
-      time: now, 
-      title: title, 
-      description: description, 
+      messageId: massId,
+      userId: req.massTarget[i].userId,
+      sendBy: req.session.userId,
+      readOrNot: 0,
+      type: 8,
+      time: now,
+      title: title,
+      description: description,
       url: ''
     }
 
@@ -1056,20 +1056,19 @@ exports.massCommunication = function (req, res, next) {
   //   }
 
   for (let i = 0; i < req.massTarget.length; i++) {
-
     uparr[i] = {
       updateOne: {
         filter: {
-          userId: req.massTarget[i].userId, 
-          userRole: 'patient', 
-          sendBy: req.session.userId, 
+          userId: req.massTarget[i].userId,
+          userRole: 'patient',
+          sendBy: req.session.userId,
           type: 8
-        }, 
-        update: { 
-          description: description, 
-          readOrNot: 0, 
+        },
+        update: {
+          description: description,
+          readOrNot: 0,
           messageId: communicationDatas[i].messageId
-        }, 
+        },
         upsert: true
       }
     }
@@ -1090,5 +1089,4 @@ exports.massCommunication = function (req, res, next) {
       return res.json({results: '群发成功', title: cmuInfos[0].title, description: cmuInfos[0].description})
     })
   })
-
 }
