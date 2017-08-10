@@ -58,11 +58,8 @@ var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
 var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
 var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 var forumCtrl = require('../controllers_v2/forum_controller')
-<<<<<<< HEAD
 var departmentMonitorCtrl = require('../controllers_v2/departmentMonitor_controller')
-=======
 var policyCtrl = require('../controllers_v2/policy_controller')
->>>>>>> cdmis/develop
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
