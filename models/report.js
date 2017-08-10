@@ -37,7 +37,14 @@ var reportSchema = new mongoose.Schema({
   drugConcentration: Number, // 药物浓度
   data1: [], // 历史数据记录1
   data2: [], // 历史数据记录2
+  data3: [],
+  data4: [],
+  data5: [],
   recordTime: [Date], // 历史数据记录时间
+  recordTime2: [Date],
+  recordTime3: [Date],
+  recordTime4: [Date],
+  recordTime5: [Date],
   bestControlMonth: Number, // 控制最佳月份 季年报
   worstControlMonth: Number, // 控制最差月份 季年报
   mostCompleteRecordMonth: Number, // 记录最完整月份 季年报

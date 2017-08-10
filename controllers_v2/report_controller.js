@@ -3,6 +3,7 @@ var async = require('async')
 var Report = require('../models/report')
 var Compliance = require('../models/compliance')
 var Alluser = require('../models/alluser')
+var LabtestImport = require('../models/labtestImport')
 
 // 获取报表 2017-07-24 wf  修改 2017-07-28 lgf
 exports.getReport = function (req, res) {
@@ -42,7 +43,7 @@ exports.getReport = function (req, res) {
     if (type === 'week') {  // '周报'
       let currentTimeDay = currentTime.getDay()
       startTimeTemp = new Date(currentTime - (currentTimeDay - 1) * 24 * 3600 * 1000)
-      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '08', '00', '00')  // 本周一零点
+      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')  // 本周一零点
       while (modify !== 0) {
         endTime = new Date(startTime)
         startTime = new Date(endTime - 7 * 24 * 3600 * 1000)
@@ -57,7 +58,7 @@ exports.getReport = function (req, res) {
     if (type === 'month') {  // '月报'
       startTimeTemp = new Date(timeTemp)
       startTimeTemp.setDate(1)
-      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '08', '00', '00')
+      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')
       while (modify !== 0) {
         startTime = new Date(getLastMonthYestdy(new Date(startTime)))
         time = String(startTime.getFullYear()) + String(add0(startTime.getMonth() + 1))
@@ -69,7 +70,7 @@ exports.getReport = function (req, res) {
       let startTimeTempM = currentTime.getMonth()
       let startTimeTempD = currentTime.getDate()
       startTimeTempM = getQuarterStartMonth(startTimeTempM)
-      startTime = new Date(startTimeTempY, startTimeTempM, startTimeTempD, '08', '00', '00')
+      startTime = new Date(startTimeTempY, startTimeTempM, startTimeTempD, '00', '00', '00')
       startTime.setDate(1)
       while (modify !== 0) {
         startTime = new Date(getLastSeason(new Date(startTime)))
@@ -82,9 +83,9 @@ exports.getReport = function (req, res) {
       startTime = new Date(currentTime)
       startTime.setMonth(0)
       startTime.setDate(1)
-      startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate(), '08', '00', '00')
+      startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate(), '00', '00', '00')
       while (modify !== 0) {
-        startTime = new Date(startTime.getFullYear() - 1, startTime.getMonth(), startTime.getDate(), '08', '00', '00')
+        startTime = new Date(startTime.getFullYear() - 1, startTime.getMonth(), startTime.getDate(), '00', '00', '00')
         time = String(startTime.getFullYear())
         modify++
       }
@@ -115,10 +116,51 @@ exports.getReport = function (req, res) {
       // console.log('items', items)
       return res.json({results: '不存在该段时间的报告!'})
     } else {
-      let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
-      if (item.patientId.class === 'class_5') { flag.flagVA = true }
-      if (item.patientId.class === 'class_6') { flag.flagPD = true }
-      return res.json({results: {item, flag}})
+      let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+      if (item.patientId.class === null || item.patientId.class === '' || item.patientId.class === undefined) {
+        return res.json({results: '请填写患者肾病类型!'})
+      } else {
+        if (item.patientId.class === 'class_5') { flag.flagVA = true }
+        if (item.patientId.class === 'class_6') { flag.flagPD = true }
+        let lab = {SCr: '', GFR: '', PRO: '', ALB: '', HB: ''}
+        if (item.labTestArray.length !== 0) {
+          for (let i = 0; i < item.labTestArray.length; i++) {
+            switch (item.labTestArray[i]._type) {
+              case 'SCr':
+                lab.SCr = {
+                  'max': item.labTestArray[i].max,
+                  'min': item.labTestArray[i].min
+                }
+                break
+              case 'GFR':
+                lab.GFR = {
+                  'max': item.labTestArray[i].max,
+                  'min': item.labTestArray[i].min
+                }
+                break
+              case 'PRO':
+                lab.PRO = {
+                  'max': item.labTestArray[i].max,
+                  'min': item.labTestArray[i].min
+                }
+                break
+              case 'ALB':
+                lab.ALB = {
+                  'max': item.labTestArray[i].max,
+                  'min': item.labTestArray[i].min
+                }
+                break
+              case 'HB':
+                lab.HB = {
+                  'max': item.labTestArray[i].max,
+                  'min': item.labTestArray[i].min
+                }
+                break
+            }
+          }
+        }
+        return res.json({results: {item, lab, flag}})
+      }
     }
   }, opts, fields, populate)
 }
@@ -307,6 +349,7 @@ exports.getVitalSigns = function (req, res, next) {
   var modify = req.query.modify || null // 调用历史测量数据的标签，0 当前 -1 前一段 -2
   var query = {}
   var query2 = {}
+  var queryL = {}
   if (modify !== null && modify !== '') {
     modify = Number(modify)
   } else {
@@ -352,6 +395,9 @@ exports.getVitalSigns = function (req, res, next) {
       query2 = {
         'date': {$gte: startTime, $lt: currentTime} // >= <
       }
+      queryL = {
+        'time': {$gte: startTime, $lt: currentTime} // >= <
+      }
     } else {
       return res.json({result: '请填写当前时间!'})
     }
@@ -361,10 +407,12 @@ exports.getVitalSigns = function (req, res, next) {
   if (userRole === 'patient') {
     query['userId'] = userId
     query2['userId'] = userId
+    queryL['userId'] = userId
   } else {
     if (patientId !== null && patientId !== '') {
       query['userId'] = patientId
       query2['userId'] = patientId
+      queryL['userId'] = patientId
     } else {
       return res.json({result: '请填写patientId!'})
     }
@@ -392,8 +440,8 @@ exports.getVitalSigns = function (req, res, next) {
     '__v': 0
   }
   let query3 = {
-    'userId': userId,
-    'role': userRole
+    'userId': patientId || userId,
+    'role': 'patient'
   }
   if (code === 'BloodPressure') {
     if (modify === 0) {
@@ -411,6 +459,9 @@ exports.getVitalSigns = function (req, res, next) {
       }, function (err, results) {
         if (err) {
           return res.status(500).send(err.errmsg)
+        }
+        if (results.one === null) {
+          return res.json({results: '不存在的患者ID!'})
         } else {
           // console.log(items)
           let dataBP = []
@@ -445,14 +496,27 @@ exports.getVitalSigns = function (req, res, next) {
           let data1 = dataSBP
           let data2 = dataDBP
           let recordTime = recordTimeTemp
-          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
-          if (results.class === 'class_5') { flag.flagVA = true }
-          if (results.class === 'class_6') { flag.flagPD = true }
-          return res.json({results: {item: {data1, data2, recordTime}, flag}})
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+          if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+            return res.json({results: '请填写患者肾病类型!'})
+          } else {
+            if (results.one.class === 'class_5') { flag.flagVA = true }
+            if (results.one.class === 'class_6') { flag.flagPD = true }
+            return res.json({results: {item: {data1, data2, recordTime}, flag}})
+          }
         }
       })
     } else {
-      next()
+      Alluser.getOne(query3, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
+        }
+      })
     }
   } else if (code === 'PeritonealDialysis') {
     if (modify === 0) {
@@ -492,6 +556,9 @@ exports.getVitalSigns = function (req, res, next) {
       }, function (err, results) {
         if (err) {
           return res.status(500).send(err.errmsg)
+        }
+        if (results.one === null) {
+          return res.json({results: '不存在的患者ID!'})
         } else {
           // console.log(results.originDataUF)
           // console.log(results.originDataVol)
@@ -604,14 +671,130 @@ exports.getVitalSigns = function (req, res, next) {
           let data1 = dataUFAll
           let data2 = dataPV
           let recordTime = recordTimeAll
-          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
-          if (results.class === 'class_5') { flag.flagVA = true }
-          if (results.class === 'class_6') { flag.flagPD = true }
-          return res.json({results: {item: {data1, data2, recordTime}, flag}})
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+          if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+            return res.json({results: '请填写患者肾病类型!'})
+          } else {
+            if (results.one.class === 'class_5') { flag.flagVA = true }
+            if (results.one.class === 'class_6') { flag.flagPD = true }
+            return res.json({results: {item: {data1, data2, recordTime}, flag}})
+          }
         }
       })
     } else {
-      next()
+      Alluser.getOne(query3, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
+        }
+      })
+    }
+  } else if (code === 'LabTest') {
+    if (modify === 0) {
+      let labTestData = []
+      let labTestRecordTime = []
+      for (let j = 0; j < 5; j++) {
+        switch (j) {
+          case 0:
+            queryL['type'] = 'SCr'
+            break
+          case 1:
+            queryL['type'] = 'GFR'
+            break
+          case 2:
+            queryL['type'] = 'PRO'
+            break
+          case 3:
+            queryL['type'] = 'ALB'
+            break
+          case 4:
+            queryL['type'] = 'HB'
+            break
+        }
+        let optsL = {'sort': '+time'}
+        async.parallel({
+          one: function (callback) {
+            Alluser.getOne(query3, function (err, item) {
+              callback(err, item)
+            })
+          },
+          two: function (callback) {
+            LabtestImport.getSome(queryL, function (err, items) {
+              callback(err, items)
+            }, optsL)
+          }
+        }, function (err, results) {
+          if (err) {
+            return res.status(500).send(err.errmsg)
+          }
+          if (results.one === null) {
+            return res.json({results: '不存在的患者ID!'})
+          } else {
+            let labTemp = []
+            let labRecordTimeTemp = []
+            if (results.two.length !== 0) {
+              for (let n = 0; n < results.two.length; n++) {
+                labTemp.push(results.two[n].value)
+                labRecordTimeTemp.push(new Date(results.two[n].time))
+              }
+            }
+            labTestData.push({j, labTemp})
+            labTestRecordTime.push({j, labRecordTimeTemp})
+            // console.log('j', j)
+            // console.log('labTestData', labTestData)
+            if (labTestData.length === 5) {
+              let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+              if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+                return res.json({results: '请填写患者肾病类型!'})
+              } else {
+                if (results.one.class === 'class_5') { flag.flagVA = true }
+                if (results.one.class === 'class_6') { flag.flagPD = true }
+                // return res.json({results: {item: {data1, recordTime}, flag}})
+              }
+              for (let i = 0; i < labTestData.length; i++) {
+                switch (Number(labTestData[i].j)) {
+                  case 0:
+                    var data1 = labTestData[i].labTemp
+                    var recordTime = labTestRecordTime[i].labRecordTimeTemp
+                    break
+                  case 1:
+                    var data2 = labTestData[i].labTemp
+                    var recordTime2 = labTestRecordTime[i].labRecordTimeTemp
+                    break
+                  case 2:
+                    var data3 = labTestData[i].labTemp
+                    var recordTime3 = labTestRecordTime[i].labRecordTimeTemp
+                    break
+                  case 3:
+                    var data4 = labTestData[i].labTemp
+                    var recordTime4 = labTestRecordTime[i].labRecordTimeTemp
+                    break
+                  case 4:
+                    var data5 = labTestData[i].labTemp
+                    var recordTime5 = labTestRecordTime[i].labRecordTimeTemp
+                    break
+                }
+              }
+              return res.json({results: {item: {data1, data2, data3, data4, data5, recordTime, recordTime2, recordTime3, recordTime4, recordTime5}, flag}})
+            }
+          }
+        })
+      }
+    } else {
+      Alluser.getOne(query3, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
+        }
+      })
     }
   } else {
     if (modify === 0) {
@@ -629,6 +812,9 @@ exports.getVitalSigns = function (req, res, next) {
       }, function (err, results) {
         if (err) {
           return res.status(500).send(err.errmsg)
+        }
+        if (results.one === null) {
+          return res.json({results: '不存在的患者ID!'})
         } else {
           let data = []
           let recordTimeTemp = []
@@ -659,14 +845,27 @@ exports.getVitalSigns = function (req, res, next) {
           }
           let data1 = dataTemp
           let recordTime = recordTimeTemp
-          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: true}
-          if (results.class === 'class_5') { flag.flagVA = true }
-          if (results.class === 'class_6') { flag.flagPD = true }
-          return res.json({results: {item: {data1, recordTime}, flag}})
+          let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+          if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+            return res.json({results: '请填写患者肾病类型!'})
+          } else {
+            if (results.one.class === 'class_5') { flag.flagVA = true }
+            if (results.one.class === 'class_6') { flag.flagPD = true }
+            return res.json({results: {item: {data1, recordTime}, flag}})
+          }
         }
       })
     } else {
-      next()
+      Alluser.getOne(query3, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
+        }
+      })
     }
   }
 }

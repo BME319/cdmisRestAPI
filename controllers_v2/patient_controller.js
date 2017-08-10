@@ -472,6 +472,7 @@ exports.newPatientDetail = function (req, res) {
 }
 
 // 修改患者个人信息 2017-04-06 GY
+// 修改 患者修改个人体重信息时加入体征测量数据的操作 2017-08-07 lgf
 exports.editPatientDetail = function (req, res) {
   let patientId
   if (req.session.role === 'doctor') {
@@ -550,7 +551,7 @@ exports.editPatientDetail = function (req, res) {
   if (req.body.allergic !== null && req.body.allergic !== '' && req.body.allergic !== undefined) {
     upObj['allergic'] = req.body.allergic
   }
-  if (req.body.lastVisit !== null) {
+  if (req.body.lastVisit !== null &&　req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
     if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
       upObj['lastVisit.time'] = new Date(req.body.lastVisit.time)
     }
@@ -570,8 +571,9 @@ exports.editPatientDetail = function (req, res) {
     if (upPatient == null) {
       return res.json({result: '修改失败，不存在的患者ID！'})
     }
-    if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
-      var timenow = commonFunc.getNowFormatSecond()
+    let date = req.body.date || null   // 区别是通过vitalSign插入体重信息，还是通过修改个人信息插入体重信息
+    let dateTime = req.body.datatime || null
+    if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined && date === null && dateTime === null) {
       var queryVital = {
         patientId: upPatient._id,
         type: 'Weight',
@@ -595,7 +597,7 @@ exports.editPatientDetail = function (req, res) {
           var upWeight = {
             $push: {
               data: {
-                time: new Date(timenow),
+                time: new Date(),
                 value: req.body.weight
               }
             }

@@ -14,6 +14,7 @@ var Wechat = require('../models/wechat')
 var getNoMid = require('../middlewares/getNoMid')
 var tokenManager = require('../middlewares/tokenManager')
 var aclChecking = require('../middlewares/aclChecking')
+var errorHandler = require('../middlewares/errorHandler')
 
 // controllers
 var aclsettingCtrl = require('../controllers_v2/aclsetting_controller')
@@ -57,7 +58,11 @@ var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
 var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
 var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 var forumCtrl = require('../controllers_v2/forum_controller')
+<<<<<<< HEAD
 var departmentMonitorCtrl = require('../controllers_v2/departmentMonitor_controller')
+=======
+var policyCtrl = require('../controllers_v2/policy_controller')
+>>>>>>> cdmis/develop
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -65,7 +70,7 @@ module.exports = function (app, webEntry, acl) {
   // });
 
   // csq
-  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
+  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl), errorHandler.error, alluserCtrl.changerole)
   app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
   app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl))
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl))
@@ -95,7 +100,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/alluser/adminList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(6))
   app.post(version + '/alluser/alluser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList)
 
-  app.post(version + '/alluser/register', alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
+  app.post(version + '/alluser/register', errorHandler.error, alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
   app.post(version + '/alluser/cancelUser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.cancelAlluser)
   app.post(version + '/alluser/unionid', tokenManager.verifyToken(), alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
   app.post(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
@@ -133,7 +138,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/labtestImport/countByStatus', tokenManager.verifyToken(), labtestImportCtrl.countByStatus)
 
   // doctor_services
-  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生
+  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生 2017-08-09 患者
    * @swagger
    * /services:
    *   get:
@@ -152,7 +157,8 @@ module.exports = function (app, webEntry, acl) {
    *       type: "string"
    *     - name: "userId"
    *       in: "query"
-   *       required: true
+   *       required: false
+   *       description: "患者查询医生服务开启状态时输入"
    *       type: "string"
    *     responses:
    *       200:
@@ -446,7 +452,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/setSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2)
+  app.post(version + '/services/setSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.setServiceSchedule, personalDiagCtrl.getDaysToUpdate, personalDiagCtrl.updateAvailablePD1, personalDiagCtrl.updateAvailablePD2)
   /** YQC annotation 2017-08-04 - acl 2017-08-03 医生
    * @swagger
    * /services/deleteSchedule:
@@ -490,7 +496,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.deleteServiceSchedule, serviceCtrl.getDaysToUpdate, serviceCtrl.updateAvailablePD1, serviceCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, serviceCtrl.cancelBookedPds)
+  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSchedule, personalDiagCtrl.getDaysToUpdate, personalDiagCtrl.updateAvailablePD1, personalDiagCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, personalDiagCtrl.cancelBookedPds)
   // YQC 2017-07-29 医生设置面诊停诊 将可预约面诊和已预约面诊取消 已预约的取消未实现通知患者和退款
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
    * @swagger
@@ -526,7 +532,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/setSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.setServiceSuspend, serviceCtrl.suspendAvailablePds, serviceCtrl.cancelBookedPds)
+  app.post(version + '/services/setSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, personalDiagCtrl.setServiceSuspend, personalDiagCtrl.suspendAvailablePds, personalDiagCtrl.cancelBookedPds)
   /** YQC annotation 2017-08-04 - acl 2017-08-03 医生
    * @swagger
    * /services/deleteSuspend:
@@ -561,9 +567,9 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.deleteServiceSuspend)
+  app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSuspend)
   // 咨询问卷填写(新增自动转发功能)
-  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay)
+  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
 
   // YQC
   // comment
@@ -584,7 +590,7 @@ module.exports = function (app, webEntry, acl) {
    *       description: "Token."
    *       required: true
    *       type: "string"
-   *     - name: "userId"
+   *     - name: "doctorId"
    *       in: "query"
    *       description: "The userId of the Doctor to be queried."
    *       required: true
@@ -623,7 +629,7 @@ module.exports = function (app, webEntry, acl) {
    *     - name: "counselId"
    *       in: "query"
    *       description: "Comments of counsel to be found."
-   *       required: true
+   *       required: false
    *       type: "string"
    *     responses:
    *       200:
@@ -652,10 +658,15 @@ module.exports = function (app, webEntry, acl) {
    *     produces:
    *     - "application/json"
    *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "token of the admin user."
+   *       required: true
+   *       type: "string"
    *     - name: "advisorId"
    *       in: "query"
    *       description: "UserId of the advisor to be queried."
-   *       required: true
+   *       required: false
    *       type: "string"
    *     responses:
    *       200:
@@ -731,7 +742,7 @@ module.exports = function (app, webEntry, acl) {
    *     - name: "userId"
    *       in: "query"
    *       description: "UserId to be queried."
-   *       required: false
+   *       required: true
    *       type: "string"
    *     - name: "date"
    *       in: "query"
@@ -757,7 +768,7 @@ module.exports = function (app, webEntry, acl) {
    *               items:
    *                 $ref: '#/definitions/Compliance'
    */
-  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getComplianceByDay)
+  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getCompliance)
   /** YQC 17-07-24 - acl 2017-08-04 患者
    * @swagger
    * /compliance/compliances:
@@ -886,8 +897,8 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData)
-  // counsel 2017-07-17 debug 1-
+  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData, patientCtrl.editPatientDetail)
+  // counsel 2017-07-17
   // 医生获取问诊信息
   app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getCounsels)
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay)
@@ -1285,7 +1296,7 @@ module.exports = function (app, webEntry, acl) {
    *                 doctor:
    *                   type: "object"
    */
-  app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getMyDoctor)
+  // app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getMyDoctor)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
    * @swagger
    * /patient/counselRecords:
@@ -2552,7 +2563,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "Doctor not found."
    */
-  app.get(version + '/services/mySchedules', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getMySchedules)
+  app.get(version + '/services/mySchedules', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.getMySchedules)
   // 患者端 获取医生面诊余量 权限-患者 2017-07-28 YQC
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
@@ -2604,7 +2615,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "PD Not Found"
    */
-  app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.getAvailablePD, serviceCtrl.sortAndTagPDs)
+  app.get(version + '/services/availablePD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, personalDiagCtrl.getAvailablePD, personalDiagCtrl.sortAndTagPDs)
   // 患者端 预约面诊 2017-07-27 YQC 生成了验证码但是验证码的发送还未实现
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
@@ -2645,8 +2656,8 @@ module.exports = function (app, webEntry, acl) {
    *       200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.updatePDCapacityDown, serviceCtrl.newPersonalDiag, orderCtrl.getOrderNo, orderCtrl.updateOrder)
-  // 患者端 取消面诊服务（至少提前三天) cancelMyPD 还没有和order退款连起来
+  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, personalDiagCtrl.updatePDCapacityDown, personalDiagCtrl.newPersonalDiag, alluserCtrl.successMessage, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  // 患者端 取消面诊服务 还没有和order退款连起来
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
    * /services/personalDiagnosis:
@@ -2688,7 +2699,7 @@ module.exports = function (app, webEntry, acl) {
    *       412:
    *         description: "Please Check Input of diagId"
    */
-  app.post(version + '/services/cancelMyPD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.cancelMyPD, serviceCtrl.updatePDCapacityUp)
+  app.post(version + '/services/cancelMyPD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.cancelMyPD, personalDiagCtrl.updatePDCapacityUp)
   // 患者端 我的面诊服务列表 还未添加分页显示
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者
    * @swagger
@@ -2747,7 +2758,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "PDs Not Found"
    */
-  app.get(version + '/services/myPD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getMyPDs)
+  app.get(version + '/services/myPD', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, personalDiagCtrl.getMyPDs)
   // 医生端 获取预约面诊患者列表 还未添加分页显示
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者
    * @swagger
@@ -2806,8 +2817,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "PDs Not Found"
    */
-  app.get(version + '/services/myPDpatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getPDPatients)
-
+  app.get(version + '/services/myPDpatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, personalDiagCtrl.getPDPatients)
   // 医生端 确认面诊服务
   /** YQC annotation 2017-07-28 - acl 2017-07-28 医生
    * @swagger
@@ -2854,7 +2864,23 @@ module.exports = function (app, webEntry, acl) {
    *       304:
    *         description: "Not Modified"
    */
-  app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.confirmPD)
+  app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.confirmPD)
+
+  // PC端保险管理
+  // 获取患者 权限insuranceC/insuranceA
+  app.get(version + '/policy/patients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatients)
+  // 获取专员 权限insuranceC
+  app.get(version + '/policy/agents', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getAgents)
+  // 主管设置／更换专员 权限insuranceC
+  app.post(version + '/policy/agent', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.getInsuranceAObject, policyCtrl.setAgent)
+  // 专员／主管录入患者跟踪记录 权限insuranceC/insuranceA
+  app.post(version + '/policy/followUp', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertFollowUp)
+  // 专员／主管录入患者保单 权限insuranceC/insuranceA
+  app.post(version + '/policy/policy', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertPolicy)
+  // 主管审核患者保单 权限insuranceC
+  app.post(version + '/policy/policyReview', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.reviewPolicy)
+  // 主管注销专员 权限insuranceC
+  app.post(version + '/policy/agentOff', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getInsuranceAObject, policyCtrl.agentOff)
 
   // lgf
   // account
@@ -2983,7 +3009,7 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: Server internal error
   */
-  // 权限 患者
+  // 查询咨询免费次数，或者咨询某个医生的次数 权限 患者
   app.get(version + '/account/counts', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts)
   /**
    * @swagger
@@ -3031,7 +3057,7 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: Server internal error
   */
-  // 权限 患者
+  // 次数更新(咨询、咨询转问诊、问诊结束) 权限 患者
   app.post(version + '/account/counts', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts)
   /**
    * @swagger
@@ -3068,6 +3094,7 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: Server internal error
   */
+  // 新建咨询时调用 权限 患者
   app.post(version + '/account/freeTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
   /**
    * @swagger
@@ -3100,7 +3127,8 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: Server internal error
   */
-  app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
+  // 获取未完成咨询/问诊计数 权限 患者
+  app.get(version + '/account/countsRespective', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
 
   // expense
   /**
@@ -3677,7 +3705,7 @@ module.exports = function (app, webEntry, acl) {
    *       200:
    *         description: success
   */
-  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.setPrefer)
+  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), serviceCtrl.getSessionObject, insuranceCtrl.setPrefer)
   /**
    * @swagger
    * /insurance/prefer:
@@ -4233,6 +4261,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: Server internal error
   */
   app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
+
   /**
    * @swagger
    * definition:
@@ -4308,7 +4337,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: date
    *   Data:
    *     type: array
-   *     item:
+   *     items:
    *       type: object
    *       $ref: '#/definitions/Patient'
   */
@@ -4429,7 +4458,8 @@ module.exports = function (app, webEntry, acl) {
    *         type: integer
 
    */
-  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictTypeTwoCtrl.getCategory)
+  // app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), errorHandler.error, dictTypeTwoCtrl.getCategory)
+  app.get(version + '/dict/typeTwo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), errorHandler.error, dictTypeTwoCtrl.getCategory)
   // 2017-07-24测试 权限：admin
   /**
    * @swagger
@@ -5561,4 +5591,6 @@ module.exports = function (app, webEntry, acl) {
    *       content:
    *         type: string
    */
+
+  app.get(version + '/dict/typeTwoTest', errorHandler.error, dictTypeTwoCtrl.getCategoryTest)
 }

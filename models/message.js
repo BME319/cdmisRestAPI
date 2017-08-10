@@ -7,7 +7,7 @@ var messageSchema = new mongoose.Schema({
 
   sendBy: String,
   readOrNot: Number,
-  // 患者保险消息5, 患者退款消息6, 医生提醒更新主管患者任务7
+  // 患者保险消息5, 患者退款消息6, 医生提醒更新主管患者任务7, 群体教育消息8
   type: Number,
   time: Date,
   title: String,
@@ -91,6 +91,15 @@ Message.update = function (query, obj, callback, opts, populate) {
       }
       callback(null, upmessage)
     })
+}
+
+Message.create = function (docs, callback) {
+  messageModel.create(docs, function (err, messageInfos) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, messageInfos)
+  })
 }
 
 module.exports = Message

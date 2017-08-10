@@ -11,7 +11,7 @@ exports.getOrder = function (req, res) {
   var _orderNo = req.query.orderNo || null
   // console.log(_orderNo)
   var query = {}
-  var populate = [{path: 'conselObject', select: 'status -_id'}, {path: 'perDiagObject', select: 'status code -_id'}, {path: 'docInChaObject', select: 'invalidFlag -_id'}]
+  var populate = [{path: 'conselObject', select: 'status -_id'}, {path: 'perDiagObject', select: 'status code bookingDay bookingTime place diagId -_id'}, {path: 'docInChaObject', select: 'invalidFlag -_id'}]
   if (_orderNo !== null && _orderNo !== '') {
     query['orderNo'] = _orderNo
   } else {
@@ -118,12 +118,16 @@ exports.getOrderNo = function (req, res, next) {
   if (type === 5) {
     query['perDiagObject'] = {$exists: false}
   }
-  Order.getSome(query, function (err, item) {
+  Order.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    req.body.orderNo = item.orderNo
-    next()
+    if (item === null) {
+      return res.status(404).json({result: '更新订单错误：无法查询到订单请重新尝试或联系管理员'})
+    } else {
+      req.body.orderNo = item.orderNo
+      next()
+    }
   })
 }
 
@@ -165,18 +169,18 @@ exports.insertOrder = function (req, res, next) {
         // 咨询升级问诊
         trueMoney = doctor.charge2 * 100 - doctor.charge1 * 100
       } else if (req.body.class === '04') {
-        // 加急咨询
-        trueMoney = doctor.charge3 * 100
-      } else if (req.body.class === '05') {
         // 主管医生
         let month = req.body.month || 0
         if (month === 0) {
           return res.json({result: '购买主管医生的服务时间输入错误！'})
         }
         trueMoney = doctor.charge4 * 100 * month
-      } else if (req.body.class === '06') {
+      } else if (req.body.class === '05') {
         // 面诊
         trueMoney = doctor.charge5 * 100
+      } else if (req.body.class === '06') {
+        // 加急咨询
+        trueMoney = doctor.charge3 * 100
       } else {
         return res.status(403).send('服务类型不存在!')
       }
@@ -294,7 +298,12 @@ exports.updateOrder = function (req, res) {
         }
       })
     } else {
-      res.json({results: item, msg: 'success!'})
+      if (req.body.counselInfo) {
+        return res.json({result: '新建成功', results: req.body.counselInfo})
+      } else {
+        res.json({results: item, msg: 'success!'})
+      }
+      // res.json({results: item, msg: 'success!'})
     }
   })
 }

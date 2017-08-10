@@ -33,7 +33,9 @@ exports.Checking = function (acl, numPathComponents, userId, actions) {
     if (!numPathComponents) {
       resource = url
     } else {
-      resource = url.split('/').slice(3, numPathComponents + 3).join('/')
+      // resource = url.split('/').slice(3, numPathComponents + 3).join('/')
+      // decode of checking
+      resource = url.split('/').slice(3, numPathComponents + 3).join('-')
     }
 
     if (!_actions) {

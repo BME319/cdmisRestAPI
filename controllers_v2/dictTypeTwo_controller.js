@@ -22,7 +22,8 @@ exports.getTypes = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (items !== '') {
+    // if (items !== '') {
+    if (items.length !== 0) {
       var contents = items[0].contents
       var lists = contents.find(function (x) {
         return x.type === type
@@ -31,5 +32,19 @@ exports.getTypes = function (req, res) {
     } else {
       res.json({results: items})
     }
+  })
+}
+
+exports.getCategoryTest = function (req, res) {
+  var category = req.query.category
+  var query = {category: category}
+
+  DictTypeTwo.getOneCategory(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    console.log(item.user)
+    console.log(item.user.name)
+    res.json({results: item})
   })
 }

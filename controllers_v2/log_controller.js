@@ -37,5 +37,5 @@ exports.logger = function (name) {
  * @returns {Function|*}
  */
 exports.useLog = function () {
-  return log4js.connectLogger(log4js.getLogger('cheese'), {level: log4js.levels.WARN})
+  return log4js.connectLogger(log4js.getLogger('cheese'), {level: 'auto'})
 }
