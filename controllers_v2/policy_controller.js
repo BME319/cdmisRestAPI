@@ -81,7 +81,7 @@ exports.getPatients = function (req, res) {
   let opts = ''
   let fields = {}
   // 通过子表查询主表，定义主表查询路径及输出内容
-  let populate = {path: 'patientId', select: {'_id': 0, 'name': 1, 'gender': 1, 'phoneNo': 1, 'VIP': 1, 'birthday': 1}}
+  let populate = {path: 'patientId', select: {'_id': 0, 'userId': 1, 'name': 1, 'gender': 1, 'phoneNo': 1, 'VIP': 1, 'birthday': 1}}
   // 模糊搜索
   if (_name) {
     let nameReg = new RegExp(_name)

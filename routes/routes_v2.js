@@ -400,7 +400,86 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Doctor's userId not found."
    */
   app.post(version + '/services/charge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setCharge)
-  app.post(version + '/services/relayTarget', tokenManager.verifyToken(), serviceCtrl.setRelayTarget)
+  /** YQC 17-08-10 - acl 2017-08-10 医生
+   * @swagger
+   * /services/relayTarget:
+   *   post:
+   *     tags:
+   *     - "services"
+   *     summary: "Set/Change the relayTarget of a doctor"
+   *     description: ""
+   *     operationId: "relayTarget"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "relayTarget"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           relayTarget:
+   *             type: "array"
+   *             items:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: string
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userId:
+   *                   type: string
+   *                 name:
+   *                   type: string
+   *                 counselStatus1:
+   *                   type: number
+   *                 counselStatus2:
+   *                   type: number
+   *                 counselStatus3:
+   *                   type: number
+   *                 counselStatus4:
+   *                   type: number
+   *                 counselStatus5:
+   *                   type: number
+   *                 charge1:
+   *                   type: number
+   *                 charge2:
+   *                   type: number
+   *                 charge3:
+   *                   type: number
+   *                 charge4:
+   *                   type: number
+   *                 charge5:
+   *                   type: number
+   *                 serviceSchedules:
+   *                   type: "array"
+   *                   $ref: '#/definitions/ServiceSchedule'
+   *                 serviceSuspendTime:
+   *                   type: "array"
+   *                   $ref: '#/definitions/ServiceSuspend'
+   *                 autoRelay:
+   *                   type: number
+   *                 relayTarget:
+   *                   type: "array"
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       teamId:
+   *                         type: string
+   */
+  app.post(version + '/services/relayTarget', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setRelayTarget)
   // YQC 2017-07-28 添加面诊余量更新函数 添加未来十四天内的面诊余量记录
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
    * @swagger
@@ -966,17 +1045,195 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/communication/massToPatient', tokenManager.verifyToken(), communicationCtrl.getMassTargets, communicationCtrl.massCommunication)
   // task 2017-07-14
   /** YQC annotation 2017-08-10 - acl 2017-08-10 患者／医生
+   * @swagger
+   * /tasks:
+   *   get:
+   *     tags:
+   *     - "tasks"
+   *     summary: "获取任务"
+   *     description: ""
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "userId"
+   *       in: "query"
+   *       description: "userId of a patient."
+   *       required: true
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "sortNo"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   userId:
+   *                     type: "string"
+   *                   sortNo:
+   *                     type: "number"
+   *                   name:
+   *                     type: "string"
+   *                   date:
+   *                     type: "string"
+   *                     format: "date-time"
+   *                   description:
+   *                     type: "string"
+   *                   invalidFlag:
+   *                     type: "number"
+   *                   task:
+   *                     type: "array"
+   *                     items:
+   *                       $ref: '#/definitions/Task'
    */
-  app.get(version + '/tasks', tokenManager.verifyToken(), taskCtrl.getTasks)
-  /** YQC annotation 2017-08-10
+  app.get(version + '/tasks', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), taskCtrl.getTasks)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 患者
+   * @swagger
+   * /tasks/status:
+   *   post:
+   *     tags:
+   *     - "tasks"
+   *     summary: "修改任务状态"
+   *     description: ""
+   *     operationId: "status"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "userId"
+   *           - "status"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           sortNo:
+   *             type: number
+   *           type:
+   *             type: string
+   *           code:
+   *             type: string
+   *           status:
+   *             type: number
+   *     responses:
+   *      200:
+   *         description: "Operation success."
    */
-  app.post(version + '/tasks/status', tokenManager.verifyToken(), taskCtrl.updateStatus)
-  /** YQC annotation 2017-08-10
+  app.post(version + '/tasks/status', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.updateStatus)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 医生
+   * @swagger
+   * /tasks/time:
+   *   post:
+   *     tags:
+   *     - "tasks"
+   *     summary: "修改任务起始时间"
+   *     description: ""
+   *     operationId: "time"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "userId"
+   *           - "startTime"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           sortNo:
+   *             type: number
+   *           type:
+   *             type: string
+   *           code:
+   *             type: string
+   *           startTime:
+   *             type: string
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: "Operation success."
    */
-  app.post(version + '/tasks/time', tokenManager.verifyToken(), taskCtrl.updateStartTime)
-  /** YQC annotation 2017-08-10
+  app.post(version + '/tasks/time', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.updateStartTime)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 医生
+   * @swagger
+   * /tasks/task:
+   *   post:
+   *     tags:
+   *     - "tasks"
+   *     summary: "给患者设置一个任务模版"
+   *     description: ""
+   *     operationId: "task"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "userId"
+   *           - "sortNo"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           sortNo:
+   *             type: number
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userId:
+   *                   type: "string"
+   *                 sortNo:
+   *                   type: "number"
+   *                 name:
+   *                   type: "string"
+   *                 date:
+   *                   type: "string"
+   *                   format: "date-time"
+   *                 description:
+   *                   type: "string"
+   *                 invalidFlag:
+   *                   type: "number"
+   *                 task:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Task'
    */
-  app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
+  app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者/医生
    * @swagger
    * /tasks/task:
@@ -2841,18 +3098,288 @@ module.exports = function (app, webEntry, acl) {
 
   // PC端保险管理
   // 获取患者 权限insuranceC/insuranceA
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/patients:
+   *   get:
+   *     tags:
+   *     - "policy"
+   *     summary: "获取保险意向患者"
+   *     description: ""
+   *     operationId: "patients"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "status"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   gender:
+   *                     type: "string"
+   *                   phoneNo:
+   *                     type: "number"
+   *                   name:
+   *                     type: "string"
+   *                   userId:
+   *                     type: "string"
+   *                   birthday:
+   *                     type: "string"
+   *                     format: "date-time"
+   *                   VIP:
+   *                     type: "number"
+   *             code:
+   *               type: number
+   */
   app.get(version + '/policy/patients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatients)
   // 获取专员 权限insuranceC
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/agents:
+   *   get:
+   *     tags:
+   *     - "policy"
+   *     summary: "获取保险专员列表"
+   *     description: ""
+   *     operationId: "agents"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   userId:
+   *                     type: "string"
+   *                   phoneNo:
+   *                     type: "number"
+   *                   name:
+   *                     type: "string"
+   *             code:
+   *               type: number
+   */
   app.get(version + '/policy/agents', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getAgents)
   // 主管设置／更换专员 权限insuranceC
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/agent:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "设置保险专员"
+   *     description: ""
+   *     operationId: "agent"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "insuranceAId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           insuranceAId:
+   *             type: string
+   *           reason:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/policy/agent', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.getInsuranceAObject, policyCtrl.setAgent)
   // 专员／主管录入患者跟踪记录 权限insuranceC/insuranceA
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/followUp:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "录入跟踪记录"
+   *     description: ""
+   *     operationId: "followUp"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "content"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           content:
+   *             type: string
+   *           photoUrls:
+   *             type: array
+   *             items:
+   *               type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/policy/followUp', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertFollowUp)
   // 专员／主管录入患者保单 权限insuranceC/insuranceA
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/policy:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "录入保单"
+   *     description: ""
+   *     operationId: "policy"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "content"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           content:
+   *             type: string
+   *           photoUrls:
+   *             type: array
+   *             items:
+   *               type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/policy/policy', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertPolicy)
   // 主管审核患者保单 权限insuranceC
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/policyReview:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "审核保单"
+   *     description: ""
+   *     operationId: "policyReview"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "reviewResult"
+   *           - "startTime"
+   *           - "endTime"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           reviewResult:
+   *             type: string
+   *           rejectReason:
+   *             type: string
+   *           startTime:
+   *             type: string
+   *             format: date-time
+   *           endTime:
+   *             type: string
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/policy/policyReview', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.reviewPolicy)
   // 主管注销专员 权限insuranceC
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/agentOff:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "注销保险专员"
+   *     description: ""
+   *     operationId: "agentOff"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "insuranceAId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           insuranceAId:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
   app.post(version + '/policy/agentOff', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getInsuranceAObject, policyCtrl.agentOff)
 
   // lgf

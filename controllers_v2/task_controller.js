@@ -122,7 +122,7 @@ exports.updateStartTime = function (req, res) {
     // modified by GY 2017-07-26 added `date`
     var upObj = {
       $set: {
-        task: item.task, 
+        task: item.task,
         date: new Date()
       }
     }
