@@ -104,7 +104,11 @@ exports.getDoctorList = function (req, res) {
       if (err) {
         res.status(500).send(err)
       }
-      res.json({results: Info.doctors})
+      if (Info !== null){
+        res.json({results: Info.doctors})
+      } else {
+        res.status(500).send('没有医生')
+      }
     }, populate, opts)
   }
 }
