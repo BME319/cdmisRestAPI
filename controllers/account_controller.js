@@ -857,7 +857,7 @@ exports.getCountsRespective = function(req, res) {
 // 测试方法，注意修改之后删除 2017-08-10 GY
 exports.test = function (req, res) {
 	console.log(req.body.test)
-	if (req.body.test.b) {
+	if (req.body.test.b.constructor === Array && req.body.test.b.length) {
 		console.log('here1')
 		var count = 0
 		console.log(req.body.test.b.length)
