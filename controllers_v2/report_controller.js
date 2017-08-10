@@ -43,7 +43,7 @@ exports.getReport = function (req, res) {
     if (type === 'week') {  // '周报'
       let currentTimeDay = currentTime.getDay()
       startTimeTemp = new Date(currentTime - (currentTimeDay - 1) * 24 * 3600 * 1000)
-      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '08', '00', '00')  // 本周一零点
+      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')  // 本周一零点
       while (modify !== 0) {
         endTime = new Date(startTime)
         startTime = new Date(endTime - 7 * 24 * 3600 * 1000)
@@ -58,7 +58,7 @@ exports.getReport = function (req, res) {
     if (type === 'month') {  // '月报'
       startTimeTemp = new Date(timeTemp)
       startTimeTemp.setDate(1)
-      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '08', '00', '00')
+      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')
       while (modify !== 0) {
         startTime = new Date(getLastMonthYestdy(new Date(startTime)))
         time = String(startTime.getFullYear()) + String(add0(startTime.getMonth() + 1))
@@ -70,7 +70,7 @@ exports.getReport = function (req, res) {
       let startTimeTempM = currentTime.getMonth()
       let startTimeTempD = currentTime.getDate()
       startTimeTempM = getQuarterStartMonth(startTimeTempM)
-      startTime = new Date(startTimeTempY, startTimeTempM, startTimeTempD, '08', '00', '00')
+      startTime = new Date(startTimeTempY, startTimeTempM, startTimeTempD, '00', '00', '00')
       startTime.setDate(1)
       while (modify !== 0) {
         startTime = new Date(getLastSeason(new Date(startTime)))
@@ -83,9 +83,9 @@ exports.getReport = function (req, res) {
       startTime = new Date(currentTime)
       startTime.setMonth(0)
       startTime.setDate(1)
-      startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate(), '08', '00', '00')
+      startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate(), '00', '00', '00')
       while (modify !== 0) {
-        startTime = new Date(startTime.getFullYear() - 1, startTime.getMonth(), startTime.getDate(), '08', '00', '00')
+        startTime = new Date(startTime.getFullYear() - 1, startTime.getMonth(), startTime.getDate(), '00', '00', '00')
         time = String(startTime.getFullYear())
         modify++
       }
@@ -122,7 +122,44 @@ exports.getReport = function (req, res) {
       } else {
         if (item.patientId.class === 'class_5') { flag.flagVA = true }
         if (item.patientId.class === 'class_6') { flag.flagPD = true }
-        return res.json({results: {item, flag}})
+        let lab = {SCr: '', GFR: '', PRO: '', ALB: '', HB: ''}
+        if (item.labTestArray.length !== 0) {
+          for (let i = 0; i < item.labTestArray.length; i++) {
+            switch (item.labTestArray[i]._type) {
+              case 'SCr':
+                lab.SCr = {
+                  'max': item.labTestArray[i].max,
+                  'min': item.labTestArray[i].min
+                }
+                break
+              case 'GFR':
+                lab.GFR = {
+                  'max': item.labTestArray[i].max,
+                  'min': item.labTestArray[i].min
+                }
+                break
+              case 'PRO':
+                lab.PRO = {
+                  'max': item.labTestArray[i].max,
+                  'min': item.labTestArray[i].min
+                }
+                break
+              case 'ALB':
+                lab.ALB = {
+                  'max': item.labTestArray[i].max,
+                  'min': item.labTestArray[i].min
+                }
+                break
+              case 'HB':
+                lab.HB = {
+                  'max': item.labTestArray[i].max,
+                  'min': item.labTestArray[i].min
+                }
+                break
+            }
+          }
+        }
+        return res.json({results: {item, lab, flag}})
       }
     }
   }, opts, fields, populate)
