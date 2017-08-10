@@ -69,6 +69,8 @@ module.exports = function(app,webEntry, acl) {
     res.send("Server Root");
   });
 // tokenManager.verifyToken(),
+
+  app.post('/test', accountCtrl.test);
   // csq 
   app.get(version + '/token/refresh', tokenManager.refreshToken);
 

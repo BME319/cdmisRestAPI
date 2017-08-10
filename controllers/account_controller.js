@@ -79,10 +79,15 @@ exports.checkDoctor = function(req, res, next) {
 				}
 				else {
 					var count = 0;
-					for (var i = accountitem.times.length - 1; i >= 0; i--) {
-						count += accountitem.times[i].count;
-					}
-					return res.json({result:{freeTimes:accountitem.freeTimes, totalCount:count}});
+					// 2017-08-10 debug
+					let returnFreeTimes = accountitem.freeTimes || 0
+					if (accountitem.times.constructor === Array && accountitem.times.length) {
+						for (var i = accountitem.times.length - 1; i >= 0; i--) {
+							count += accountitem.times[i].count;
+						}
+					} 
+					// return res.json({result:{freeTimes:accountitem.freeTimes, totalCount:count}});
+					return res.json({result:{freeTimes:returnFreeTimes, totalCount:count}});
 				}
 			});
 		}
@@ -831,17 +836,40 @@ exports.getCountsRespective = function(req, res) {
 			var count1 = 0; //咨询
 			var count2 = 0; //问诊
 
-			for (var i = item.times.length - 1; i >= 0; i--) {
-				// item.times[i]
-				if (item.times[i].count == 999){
-					count2 += 1;
+			// 2017-08-10 debug
+			if (item.times.constructor === Array && item.times.length) {
+				for (var i = item.times.length - 1; i >= 0; i--) {
+					// item.times[i]
+					if (item.times[i].count == 999){
+						count2 += 1;
+					}
+					else if (item.times[i].count > 0 && item.times[i].count < 4){
+						count1 += 1;
+					}
 				}
-				else if (item.times[i].count > 0 && item.times[i].count < 4){
-					count1 += 1;
-				}
-			}
+			}			
 
 			return res.json({result:{count1:count1, count2:count2}});
 		}
 	})
+}
+
+// 测试方法，注意修改之后删除 2017-08-10 GY
+exports.test = function (req, res) {
+	console.log(req.body.test)
+	if (req.body.test.b) {
+		console.log('here1')
+		var count = 0
+		console.log(req.body.test.b.length)
+		for (var i = req.body.test.b.length - 1; i >= 0; i--) {
+			console.log(req.body.test.b.length)
+			count += 1
+			console.log(count)
+		}
+	} else {
+		console.log('here2')
+	}
+	// console.log(req.body.test.a)
+	// console.log(req.body.test.b.length)
+	return res.json({result: req.body.test})
 }
