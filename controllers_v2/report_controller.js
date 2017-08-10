@@ -112,54 +112,58 @@ exports.getReport = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+    // console.log('item', item)
     if (item === null) {
-      // console.log('items', items)
       return res.json({results: '不存在该段时间的报告!'})
     } else {
-      let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
-      if (item.patientId.class === null || item.patientId.class === '' || item.patientId.class === undefined) {
-        return res.json({results: '请填写患者肾病类型!'})
+      if (itemType === 'DoctorReport') {
+        return res.json({results: item})
       } else {
-        if (item.patientId.class === 'class_5') { flag.flagVA = true }
-        if (item.patientId.class === 'class_6') { flag.flagPD = true }
-        let lab = {SCr: '', GFR: '', PRO: '', ALB: '', HB: ''}
-        if (item.labTestArray.length !== 0) {
-          for (let i = 0; i < item.labTestArray.length; i++) {
-            switch (item.labTestArray[i]._type) {
-              case 'SCr':
-                lab.SCr = {
-                  'max': item.labTestArray[i].max,
-                  'min': item.labTestArray[i].min
-                }
-                break
-              case 'GFR':
-                lab.GFR = {
-                  'max': item.labTestArray[i].max,
-                  'min': item.labTestArray[i].min
-                }
-                break
-              case 'PRO':
-                lab.PRO = {
-                  'max': item.labTestArray[i].max,
-                  'min': item.labTestArray[i].min
-                }
-                break
-              case 'ALB':
-                lab.ALB = {
-                  'max': item.labTestArray[i].max,
-                  'min': item.labTestArray[i].min
-                }
-                break
-              case 'HB':
-                lab.HB = {
-                  'max': item.labTestArray[i].max,
-                  'min': item.labTestArray[i].min
-                }
-                break
+        let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+        if (item.patientId.class === null || item.patientId.class === '' || item.patientId.class === undefined) {
+          return res.json({results: '请填写患者肾病类型!'})
+        } else {
+          if (item.patientId.class === 'class_5') { flag.flagVA = true }
+          if (item.patientId.class === 'class_6') { flag.flagPD = true }
+          let lab = {SCr: '', GFR: '', PRO: '', ALB: '', HB: ''}
+          if (item.labTestArray.length !== 0) {
+            for (let i = 0; i < item.labTestArray.length; i++) {
+              switch (item.labTestArray[i]._type) {
+                case 'SCr':
+                  lab.SCr = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'GFR':
+                  lab.GFR = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'PRO':
+                  lab.PRO = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'ALB':
+                  lab.ALB = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'HB':
+                  lab.HB = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+              }
             }
           }
+          return res.json({results: {item, lab, flag}})
         }
-        return res.json({results: {item, lab, flag}})
       }
     }
   }, opts, fields, populate)

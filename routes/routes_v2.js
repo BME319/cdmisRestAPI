@@ -3351,7 +3351,8 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: Server internal error
   */
-  app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)
+  // 获得患者所有的健康信息 权限 医生/患者
+  app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.getAllHealthInfo)
   /**
    * @swagger
    * /healthInfo/healthDetail:
@@ -3383,7 +3384,8 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: Server internal error
   */
-  app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.getHealthDetail)
+  // 获得患者某条健康信息详情 权限 医生/患者
+  app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.getHealthDetail)
   /**
    * @swagger
    * /healthInfo/healthInfo:
@@ -3433,7 +3435,8 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: The server could not find the requested page
   */
-  app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), healthInfoCtrl.insertHealthInfo)
+  // 新增患者健康信息 权限 医生/患者
+  app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.insertHealthInfo)
   /**
    * @swagger
    * /healthInfo/healthDetail:
@@ -3486,7 +3489,8 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: The server could not find the requested page
   */
-  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.modifyHealthDetail)
+  // 修改患者某条健康信息 权限 医生/患者
+  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.modifyHealthDetail)
   /**
    * @swagger
    * /healthInfo/deleteHealthDetail:
@@ -3517,7 +3521,8 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: Server internal error
   */
-  app.post(version + '/healthInfo/deleteHealthDetail', tokenManager.verifyToken(), healthInfoCtrl.deleteHealthDetail)
+  // 删除患者某条健康信息 权限 医生/患者
+  app.post(version + '/healthInfo/deleteHealthDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.deleteHealthDetail)
 
   // insurance
   /**
