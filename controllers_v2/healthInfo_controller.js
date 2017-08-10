@@ -3,10 +3,22 @@
 var Alluser = require('../models/alluser')
 var HealthInfo = require('../models/healthInfo')
 
+// 获得患者所有的健康信息 修改为医生端和患者端共用 2017-08-09 lgf
 exports.getAllHealthInfo = function (req, res) {
   // var _userId = req.query.userId
   var _userId = req.session.userId
-  var query = {userId: _userId}
+  var _role = req.session.role
+  var patientId = req.query.patientId || null
+  var query = {}
+  if (_role === 'patient') {
+    query['userId'] = _userId
+  } else {
+    if (patientId === null) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      query['userId'] = patientId
+    }
+  }
   // var opts = {sort:-"time"};
   var opts = {'sort': {'time': -1, 'revisionInfo.operationTime': -1}}
   var fields = {'_id': 0, 'revisionInfo': 0}
@@ -21,10 +33,28 @@ exports.getAllHealthInfo = function (req, res) {
   }, opts, fields, populate)
 }
 
+// 获得患者某条健康信息详情 修改为医生端和患者端共用 2017-08-09 lgf
 exports.getHealthDetail = function (req, res) {
   var _userId = req.session.userId
-  var _insertTime = new Date(req.query.insertTime)         // session不包含insertTime
-  var query = {userId: _userId, insertTime: _insertTime}
+  var _role = req.session.role
+  var patientId = req.query.patientId || null
+  var insertTime = req.query.insertTime || null
+  var query = {}
+  if (insertTime === null) {
+    return res.json({result: '请填写insertTime!'})
+  } else {
+    let _insertTime = new Date(req.query.insertTime)       // session不包含insertTime
+    query['insertTime'] = _insertTime
+  }
+  if (_role === 'patient') {
+    query['userId'] = _userId
+  } else {
+    if (patientId === null) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      query['userId'] = patientId
+    }
+  }
   var opts = ''
   var fields = {'_id': 0, 'revisionInfo': 0}
   var populate = {'path': 'resultId'}
@@ -249,9 +279,29 @@ exports.modifyHealthDetail = function (req, res) {
 //   });
 // }
 
+// 删除患者某条健康信息 修改为医生端和患者端共用 2017-08-09 lgf
 exports.deleteHealthDetail = function (req, res) {
   // var query = {userId: req.query.userId, insertTime: new Date(req.query.insertTime)}
-  var query = {userId: req.session.userId, insertTime: new Date(req.body.insertTime)}
+  var _userId = req.session.userId
+  var _role = req.session.role
+  var patientId = req.body.patientId || null
+  var insertTime = req.body.insertTime || null
+  var query = {}
+  if (insertTime === null) {
+    return res.json({result: '请填写insertTime!'})
+  } else {
+    let _insertTime = new Date(insertTime)
+    query['insertTime'] = _insertTime
+  }
+  if (_role === 'patient') {
+    query['userId'] = _userId
+  } else {
+    if (patientId === null) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      query['userId'] = patientId
+    }
+  }
   HealthInfo.removeOne(query, function (err, item1) {
     if (err) {
       return res.status(500).send(err.errmsg)

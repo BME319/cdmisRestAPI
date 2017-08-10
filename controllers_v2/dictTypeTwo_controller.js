@@ -22,7 +22,8 @@ exports.getTypes = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    if (items !== '') {
+    // if (items !== '') {
+    if (items.length !== 0) {
       var contents = items[0].contents
       var lists = contents.find(function (x) {
         return x.type === type
