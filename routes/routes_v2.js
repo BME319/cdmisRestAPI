@@ -134,7 +134,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/labtestImport/countByStatus', tokenManager.verifyToken(), labtestImportCtrl.countByStatus)
 
   // doctor_services
-  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生 2017-08-09 患者
+  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生
    * @swagger
    * /services:
    *   get:
@@ -718,7 +718,7 @@ module.exports = function (app, webEntry, acl) {
    *                 $ref: '#/definitions/Advice'
    */
   app.post(version + '/advice/advice', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), adviceCtrl.postAdvice)
-  // compliance - debug complete 2017-07-17
+  // compliance
   /** YQC 17-07-24 - acl 2017-08-04 医生，患者，管理员
    * @swagger
    * /compliance/compliance:
@@ -804,7 +804,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/compliance/compliance', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
-  // vitalSign 2017-07-14  - debug complete 2017-07-24
+  // vitalSign
   /** YQC 17-07-24 - acl 2017-07-28 医生/患者
    * @swagger
    * /vitalSign/vitalSigns:
@@ -965,9 +965,17 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/communication/massToPatient', tokenManager.verifyToken(), communicationCtrl.getMassTargets, communicationCtrl.massCommunication)
   // task 2017-07-14
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 患者／医生
+   */
   app.get(version + '/tasks', tokenManager.verifyToken(), taskCtrl.getTasks)
+  /** YQC annotation 2017-08-10
+   */
   app.post(version + '/tasks/status', tokenManager.verifyToken(), taskCtrl.updateStatus)
+  /** YQC annotation 2017-08-10
+   */
   app.post(version + '/tasks/time', tokenManager.verifyToken(), taskCtrl.updateStartTime)
+  /** YQC annotation 2017-08-10
+   */
   app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者/医生
    * @swagger
@@ -1083,7 +1091,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "patient"
-   *     summary: "获取患者详情（注释未完成）"
+   *     summary: "获取患者详情"
    *     description: ""
    *     operationId: "detail"
    *     produces:
@@ -1107,9 +1115,7 @@ module.exports = function (app, webEntry, acl) {
    *           properties:
    *             results:
    *               type: object
-   *               properties:
-   *                 patient:
-   *                   type: "object"
+   *               $ref: '#/definitions/Patient'
    *             weight:
    *               type: number
    *             recentDiagnosis:
@@ -1221,7 +1227,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "patient"
-   *     summary: "获取所有医生的列表（可分页／条件／模糊查询）（注释未完成）"
+   *     summary: "获取所有医生的列表（可分页／条件／模糊查询）"
    *     description: ""
    *     operationId: "doctors"
    *     produces:
@@ -1262,40 +1268,9 @@ module.exports = function (app, webEntry, acl) {
    *             results:
    *               type: array
    *               items:
-   *                 doctor:
-   *                   type: "object"
+   *                 $ref: '#/definitions/Doctor'
    */
   app.get(version + '/patient/doctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getDoctorLists)
-  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者 【弃用，和myDoctorsIncharge重复】
-   * @swagger
-   * /patient/myDoctors:
-   *   get:
-   *     tags:
-   *     - "patient"
-   *     summary: "获取当前的主管医生（注释未完成）"
-   *     description: ""
-   *     operationId: "myDoctors"
-   *     produces:
-   *     - "application/json"
-   *     parameters:
-   *     - name: "token"
-   *       in: "query"
-   *       description: "Token."
-   *       required: true
-   *       type: "string"
-   *     responses:
-   *       200:
-   *         description: "Operation success."
-   *         schema:
-   *           type: object
-   *           properties:
-   *             results:
-   *               type: object
-   *               properties:
-   *                 doctor:
-   *                   type: "object"
-   */
-  // app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getMyDoctor)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
    * @swagger
    * /patient/counselRecords:
@@ -1322,23 +1297,22 @@ module.exports = function (app, webEntry, acl) {
    *             results:
    *               type: array
    *               items:
-   *                 CounselRecord:
-   *                   type: "object"
-   *                   properties:
-   *                     time:
-   *                       type: "string"
-   *                       format: data-time
-   *                     messages:
-   *                       type: "string"
-   *                     doctorId:
-   *                       type: "object"
-   *                       properties:
-   *                         userId:
-   *                           type: "string"
-   *                         name:
-   *                           type: "string"
-   *                         photoUrl:
-   *                           type: "string"
+   *                 type: "object"
+   *                 properties:
+   *                   time:
+   *                     type: "string"
+   *                     format: data-time
+   *                   messages:
+   *                     type: "string"
+   *                   doctorId:
+   *                     type: "object"
+   *                     properties:
+   *                       userId:
+   *                         type: "string"
+   *                       name:
+   *                         type: "string"
+   *                       photoUrl:
+   *                         type: "string"
    */
   app.get(version + '/patient/counselRecords', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getSessionObject, patientCtrl.getCounselRecords)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
@@ -1595,7 +1569,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "doctor"
-   *     summary: "获取我的主管患者和关注患者（注释未完成）"
+   *     summary: "获取我的主管患者和关注患者"
    *     description: ""
    *     operationId: "myPatients"
    *     produces:
@@ -1618,13 +1592,11 @@ module.exports = function (app, webEntry, acl) {
    *                 patients:
    *                   type: "array"
    *                   items:
-   *                     Patient:
-   *                       type: object
+   *                     $ref: '#/definitions/Patient'
    *                 patientsInCharge:
    *                   type: "array"
    *                   items:
-   *                     Patient:
-   *                       type: object
+   *                     $ref: '#/definitions/Patient'
    *       404:
    *         description: "Doctor not found."
    */
@@ -1635,7 +1607,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "doctor"
-   *     summary: "按日获取我的主管患者和关注患者（注释未完成）"
+   *     summary: "按日获取我的主管患者和关注患者"
    *     description: ""
    *     operationId: "myPatientsByDate"
    *     produces:
@@ -1663,13 +1635,11 @@ module.exports = function (app, webEntry, acl) {
    *                 patients:
    *                   type: "array"
    *                   items:
-   *                     Patient:
-   *                       type: object
+   *                     $ref: '#/definitions/Patient'
    *                 patientsInCharge:
    *                   type: "array"
    *                   items:
-   *                     Patient:
-   *                       type: object
+   *                     $ref: '#/definitions/Patient'
    *       404:
    *         description: "Doctor not found."
    */
@@ -1878,7 +1848,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "doctor"
-   *     summary: "获取最近交流过的医生列表（注释未完成）"
+   *     summary: "获取最近交流过的医生列表"
    *     description: ""
    *     operationId: "myRecentDoctors"
    *     produces:
@@ -2070,7 +2040,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/doctor/deleteSuspendTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.deleteSuspendTime)
-  /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 医生/患者
    * @swagger
    * /doctor/suspendTime:
    *   get:
@@ -2087,6 +2057,11 @@ module.exports = function (app, webEntry, acl) {
    *       description: "Token."
    *       required: true
    *       type: "string"
+   *     - name: "docotrId"
+   *       in: "query"
+   *       description: "患者查询的时候需输入."
+   *       required: false
+   *       type: "string"
    *     responses:
    *       200:
    *         description: "Operation success."
@@ -2100,7 +2075,7 @@ module.exports = function (app, webEntry, acl) {
    *                   description: "面诊加号服务停诊信息"
    *                   type: "array"
    *                   items:
-   *                     $ref: '#/definitions/SuspendTime'
+   *                     $ref: '#/definitions/ServiceSuspend'
    *                 suspendTime:
    *                   description: "工作停诊信息"
    *                   type: "array"
@@ -2171,7 +2146,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "UserId not found."
    */
   app.get(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getAliPayAccount)
-  /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 医生 2017-08-10 患者
    * @swagger
    * /doctor/AliPayAccount:
    *   post:
@@ -2270,7 +2245,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "patient"
-   *     summary: "Finds the list of FavoriteDoctors, with the function of skip and limit.（注释未完成）"
+   *     summary: "Finds the list of FavoriteDoctors, with the function of skip and limit."
    *     description: ""
    *     operationId: "myFavoriteDoctors"
    *     produces:
@@ -2298,13 +2273,9 @@ module.exports = function (app, webEntry, acl) {
    *           type: object
    *           properties:
    *             results:
-   *               type: object
-   *               properties:
-   *                 FavoriteDoctors:
-   *                   type: array
-   *                   items:
-   *                     FavoriteDoctor:
-   *                       type: object
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Doctor'
    *             nexurl:
    *               type: string
    *               description: "下一页显示的请求路径"
@@ -2354,7 +2325,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "patient"
-   *     summary: "Finds the doctor-in-charge status, if there's any, of a patient.（注释未完成）"
+   *     summary: "Finds the doctor-in-charge status, if there's any, of a patient."
    *     description: ""
    *     operationId: "myDoctorsInCharge"
    *     produces:
@@ -2370,12 +2341,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    *         schema:
    *           type: object
-   *           properties:
-   *             results:
-   *               type: object
-   *               properties:
-   *                 DoctorInCharge:
-   *                   type: object
+   *           $ref: '#/definitions/Doctor'
    *       404:
    *         description: "UserId not found."
    */
@@ -2600,15 +2566,23 @@ module.exports = function (app, webEntry, acl) {
    *                 properties:
    *                   day:
    *                     type: string
-   *                     format: "YYYYMMDD"
+   *                     format: "YYYY-MM-DD"
+   *                     description: "预约日期"
    *                   time:
    *                     type: string
    *                     enum:
    *                       - "Morning"
    *                       - "Afternoon"
+   *                     description: "预约时段"
+   *                   place:
+   *                     type: string
+   *                     description: "医生出诊地点"
+   *                   diagId:
+   *                     type: string
+   *                     description: "某时段已预约的面诊号"
    *                   margin:
    *                     type: number
-   *                     description: "某时段剩余可预约数量"
+   *                     description: "该时段剩余可预约数量"
    *       500:
    *         description: "Internal Server Error"
    *       404:
@@ -3599,11 +3573,6 @@ module.exports = function (app, webEntry, acl) {
    *             - token
    *             - patientId
    *             - insuranceId
-   *             - time
-   *             - insdescription
-   *             - title
-   *             - description
-   *             - url
    *           properties:
    *             token:
    *               type: string
@@ -3613,7 +3582,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: stirng
    *             time:
    *               type: date
-   *             insdescription:
+   *             insDescription:
    *               type: string
    *             title:
    *               type: string
@@ -4607,6 +4576,7 @@ module.exports = function (app, webEntry, acl) {
    *       - name: token
    *         in: query
    *         type: string
+   *         required: true
    *     responses:
    *       200:
    *         description: 返回地区信息
@@ -4663,6 +4633,7 @@ module.exports = function (app, webEntry, acl) {
    *       - name: token
    *         in: query
    *         type: string
+   *         required: true
    *     responses:
    *       200:
    *         description: 返回医院信息
@@ -5308,6 +5279,7 @@ module.exports = function (app, webEntry, acl) {
    *         format: date-time
    *       doctorId:
    *         type: object
+   *         $ref: '#/definitions/Doctor'
    *   TeamMember:
    *     type: object
    *     properties:
