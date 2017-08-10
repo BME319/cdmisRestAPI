@@ -57,6 +57,7 @@ var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
 var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
 var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 var forumCtrl = require('../controllers_v2/forum_controller')
+var departmentMonitorCtrl = require('../controllers_v2/departmentMonitor_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -5071,6 +5072,12 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/forum/deletepost', tokenManager.verifyToken(), forumCtrl.deletePost)
   app.post(version + '/forum/deletecomment', tokenManager.verifyToken(), forumCtrl.deleteComment)
   app.post(version + '/forum/deletefavorite', tokenManager.verifyToken(), forumCtrl.deleteFavorite)
+
+  // 科主任报告
+  app.get(version + '/departmentmonitor/patients', departmentMonitorCtrl.getPatientsCount)
+  app.get(version + '/departmentmonitor/score', departmentMonitorCtrl.getScore)
+  app.get(version + '/departmentmonitor/negcomment', departmentMonitorCtrl.getNegComment)
+  app.get(version + '/departmentmonitor/counseltimeout', departmentMonitorCtrl.getCounselTimeout)
 
   /** YQC definitions
    * @swagger
