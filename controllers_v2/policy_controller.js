@@ -354,7 +354,24 @@ exports.reviewPolicy = function (req, res) {
     } else if (upItem.nModified === 0) {
       return res.json({code: 1, msg: '保单审核未成功'})
     } else {
-      return res.json({code: 0, msg: '保单审核成功'})
+      // return res.json({code: 0, msg: '保单审核成功'})
+      let queryP = {_id: patientObject._id, role: 'patient'}
+      let upObjP = {
+        $set: {
+          VIP: 1,
+          VIPStartTime: startTime,
+          VIPEndTime: endTime
+        }
+      }
+      Alluser.update(queryP, upObjP, function (err, upPat) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (upPat.nModified === 0) {
+          return res.json({code: 1, msg: 'VIP状态设置未成功'})
+        } else {
+          return res.json({code: 0, msg: '保单审核成功'})
+        }
+      })
     }
   })
 }

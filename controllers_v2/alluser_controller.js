@@ -1666,7 +1666,7 @@ exports.getDoctorObject = function (req, res, next) {
   })
 }
 
-exports.successMessage = function (req, res) {
+exports.successMessage = function (req, res, next) {
   let token = '86cf8733b80a31fd7deb7b3147a226d0'
   let accountSid = '43b82098fcec135770091f446f6b7367'
   let appId = 'af8afab59dd04001a4b5b37bcc419ec3'
@@ -1725,5 +1725,5 @@ exports.successMessage = function (req, res) {
   })
   requests.write(JSONData)
   requests.end()
-  // next()
+  next()
 }

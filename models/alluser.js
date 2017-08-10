@@ -134,6 +134,8 @@ var alluserSchema = new mongoose.Schema({
   class_info: [String],
   operationTime: Date,
   VIP: {type: Number, default: 0},
+  VIPStartTime: Date,
+  VIPEndTime: Date,
   hypertension: Number,
   allergic: String,
   // 关注医生字段

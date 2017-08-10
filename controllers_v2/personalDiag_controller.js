@@ -998,7 +998,8 @@ exports.autoAvailablePD = function (req, res) {
                     availableDay: twoWeeksLater,
                     total: sSDoc[j].total,
                     suspendFlag: suspendFlag,
-                    place: sSDoc[j].place
+                    place: sSDoc[j].place,
+                    count: 0
                   }
                 }
               }
