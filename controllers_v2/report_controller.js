@@ -181,7 +181,7 @@ exports.updateReport = function (req, res) {
   // var labTest = req.body.labTest || null
   // var doctorReport = req.body.doctorReport || null
   // reportType 0-正常 1-信息缺失 2-异常 3-修改
-  var reportType = req.body.reportType || null
+  // var reportType = req.body.reportType || null
   // var recommendValue1 = req.body.recommendValue1 || null
   // var recommendValue2 = req.body.recommendValue2 || null
   // var recommendValue3 = req.body.recommendValue3 || null
@@ -222,6 +222,7 @@ exports.updateReport = function (req, res) {
         recommendValue12 = Number(data[i].recommendValue12)
         recommendValue13 = Number(data[i].recommendValue13)
         recommendValue14 = Number(data[i].recommendValue14)
+        doctorComment = data[i].doctorComment
         if (type === 'week') { doctorReport = '建议下周控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
         if (type === 'month') { doctorReport = '建议下月控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
         if (type === 'season') { doctorReport = '建议下一季度控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
@@ -230,6 +231,7 @@ exports.updateReport = function (req, res) {
       case 'Weight':
         recommendValue11 = Number(data[i].recommendValue11)
         recommendValue12 = Number(data[i].recommendValue12)
+        doctorComment = data[i].doctorComment
         if (type === 'week') { doctorReport = '建议下周控制体重范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'month') { doctorReport = '建议下月控制体重范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'season') { doctorReport = '建议下一季度控制体重范围' + recommendValue11 + '-' + recommendValue12 }
@@ -240,6 +242,7 @@ exports.updateReport = function (req, res) {
         break
       case 'Temperature':
         recommendValue11 = Number(data[i].recommendValue11)
+        doctorComment = data[i].doctorComment
         break
       case 'HeartRate':
         recommendValue11 = Number(data[i].recommendValue11)
@@ -252,16 +255,15 @@ exports.updateReport = function (req, res) {
       case 'PeritonealDialysis':
         recommendValue11 = Number(data[i].recommendValue11)
         recommendValue12 = Number(data[i].recommendValue12)
+        doctorComment = data[i].doctorComment
         if (type === 'week') { doctorReport = '建议下周控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'month') { doctorReport = '建议下月控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'season') { doctorReport = '建议下一季度控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'year') { doctorReport = '建议下一年控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         break
       case 'LabTest':
-        if (type === 'week') { upData['labTest'] = data[i].labTest }
-        if (type === 'month') { upData['labTest'] = data[i].labTest }
-        if (type === 'season') { upData['doctorReport'] = '建议增加检测' + data[i].labTestNewItem }
-        if (type === 'year') { upData['doctorReport'] = '建议增加检测' + data[i].labTestNewItem }
+        doctorComment = data[i].doctorComment
+        doctorReport = data[i].doctorReport
         break
       case 'DoctorReport':
         doctorReport = data[i].doctorReport || null
@@ -287,6 +289,9 @@ exports.updateReport = function (req, res) {
     }
     if (doctorReport !== '') {
       upData['doctorReport'] = doctorReport
+    }
+    if (doctorComment !== '') {
+      upData['doctorComment'] = doctorComment
     }
     console.log(query)
     console.log(upData)
@@ -341,7 +346,7 @@ exports.updateReport = function (req, res) {
   // }
 }
 
-// 获取患者当前周月季年的测量记录 2017-07-26 lgf
+// 获取患者当前和历史周月季年的测量记录 2017-07-26 lgf
 exports.getVitalSigns = function (req, res, next) {
   var userRole = req.session.role
   var userId = req.session.userId
