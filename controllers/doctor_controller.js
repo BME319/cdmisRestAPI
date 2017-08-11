@@ -867,42 +867,44 @@ exports.getPatientByDate = function(req, res) {
     		};
     		// return res.json({result:dpRelationData});
     		var newDpRelation = new DpRelation(dpRelationData);
-			newDpRelation.save(function(err, dpRelationInfo) {
-				if (err) {
-      				return res.status(500).send(err.errmsg);
-    			}
-    			// return res.json({result: '暂无患者2!'});
-			});
-			return res.json({result: '暂无患者!'});
-    	}
+				newDpRelation.save(function(err, dpRelationInfo) {
+					if (err) {
+								return res.status(500).send(err.errmsg);
+						}
+						// return res.json({result: '暂无患者2!'});
+				});
+				return res.json({result: '暂无患者!'});
+    	} else if (item.patients.constructor === Array) {
+				var patientsitem = [];
+				var dpTimeFormat = null;
+				var j = 0;
+				if (item.patients.length == 0) {
+					return res.json({result:'暂无患者!'});
+				}
+				else if (item.patients.length != 0) {
+					for (var i = item.patients.length - 1; i >= 0; i--) {
+						if (item.patients[i].patientId != null) {
+							if (item.patients[i].dpRelationTime == undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='') {
+								item.patients[i].dpRelationTime = new Date('2017-05-15');
+							}
+							dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime);
+							if (dpTimeFormat == date) {
+								patientsitem[j] = item.patients[i];
+								j++;
+							}
+						}    			
+					}
 
-    	var patientsitem = [];
-    	var dpTimeFormat = null;
-    	var j = 0;
-    	if (item.patients.length == 0) {
-    		return res.json({result:'暂无患者!'});
-    	}
-    	else if (item.patients.length != 0) {
-    		for (var i = item.patients.length - 1; i >= 0; i--) {
-    			if (item.patients[i].patientId != null) {
-    				if (item.patients[i].dpRelationTime == undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='') {
-    					item.patients[i].dpRelationTime = new Date('2017-05-15');
-    				}
-    				dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime);
-    				if (dpTimeFormat == date) {
-    					patientsitem[j] = item.patients[i];
-    					j++;
-    				}
-    			}    			
-    		}
+					patientsitem = patientsitem.sort(sortVIPpinyin);
+				}
 
-    		patientsitem = patientsitem.sort(sortVIPpinyin);
-    	}
+				//2017-06-07GY调试用
+				// console.log({method:'getPatientByDate', resultCount:patientsitem.length});
 
-    	//2017-06-07GY调试用
-	    // console.log({method:'getPatientByDate', resultCount:patientsitem.length});
-
-    	res.json({results2:patientsitem});
+				res.json({results2:patientsitem});
+			} else {
+				return res.json({result: '暂无患者!'})
+			}
 	}, opts, fields, populate);
 }
 
@@ -1009,15 +1011,14 @@ exports.getPatientList = function(req, res) {
     		};
     		// return res.json({result:dpRelationData});
     		var newDpRelation = new DpRelation(dpRelationData);
-			newDpRelation.save(function(err, dpRelationInfo) {
-				if (err) {
-      				return res.status(500).send(err.errmsg);
-    			}
-    			// return res.json({result: '暂无患者2!'});
-			});
-			return res.json({results: {patients:[]}});
-    	}
-    	else{
+				newDpRelation.save(function(err, dpRelationInfo) {
+					if (err) {
+								return res.status(500).send(err.errmsg);
+						}
+						// return res.json({result: '暂无患者2!'});
+				});
+				return res.json({results: {patients:[]}});
+    	} else if (item.patients.constructor === Array) {
 	    	var patients = [];
 	    	// console.log(item);
 	    	// item.patients=item.patients.sort(sortVIPpinyin);
@@ -1054,7 +1055,9 @@ exports.getPatientList = function(req, res) {
 	    	// console.log({method:'getPatientList', resultCount:patients.length});
 
 	    	res.json({results: item1});
-	    }
+	    } else {
+				return res.json({results: {patients:[]}});
+			}
 	}, opts, fields, populate);
 	// });
 }
