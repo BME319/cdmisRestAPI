@@ -1041,13 +1041,13 @@ exports.getPatientByDate = function (req, res) {
     } else if (item == null) {
     // return res.json({result:'请先与其他医生或患者建立联系!'});
       var dpRelationData = {
-        doctorId: req.body.doctorObject._id,
-        revisionInfo: {
-          operationTime: new Date(),
-          userId: 'gy',
-          userName: 'gy',
-          terminalIP: '10.12.43.32'
-        }
+        doctorId: req.body.doctorObject._id//,
+        // revisionInfo: {
+        //   operationTime: new Date(),
+        //   userId: 'gy',
+        //   userName: 'gy',
+        //   terminalIP: '10.12.43.32'
+        // }
       }
       // return res.json({result:dpRelationData});
       var newDpRelation = new DpRelation(dpRelationData)
@@ -1058,53 +1058,55 @@ exports.getPatientByDate = function (req, res) {
       // return res.json({result: '暂无患者2!'});
       })
       return res.json({result: '暂无患者!'})
-    }
-
-    let patients = []
-    let dpTimeFormat = null
-    if (item.patients.length === 0) {
-      return res.json({result: '暂无患者!'})
-    } else if (item.patients.length !== 0) {
-      for (var i = item.patients.length - 1; i >= 0; i--) {
-        if (item.patients[i].patientId !== null) {
-          if (item.patients[i].dpRelationTime === undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime === '') {
-            item.patients[i].dpRelationTime = new Date('2017-05-15')
-          }
-          dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime)
-          if (dpTimeFormat === date) {
-            patients.push(item.patients[i])
-          }
-        }
-      }
-      patients = patients.sort(sortVIPpinyin)
-
-      let patientsInCharge = []
-      let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
-      let queryDIC = {doctorId: doctorObject._id, invalidFlag: 1}
-      let fieldsDIC = {patientId: 1, dpRelationTime: 1, start: 1}
-      let populateDIC = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
-      if (_name) {
-        populateDIC['match'] = {'name': nameReg}
-      }
-      DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
-        if (err) {
-          return res.status(500).send(err)
-        } else if (itemsDIC.length === 0) {
-          return res.json({results: item1})
-        } else {
-          for (var j = itemsDIC.length - 1; j >= 0; j--) {
-            if (itemsDIC[j].patientId !== null) {
-              dpTimeFormat = commonFunc.convertToFormatDate(itemsDIC[j].start)
-              if (dpTimeFormat === date) {
-                patientsInCharge.push(itemsDIC[j])
-              }
+    } else if (item.patient.constructor === Array) {
+      let patients = []
+      let dpTimeFormat = null
+      if (item.patients.length === 0) {
+        return res.json({result: '暂无患者!'})
+      } else if (item.patients.length !== 0) {
+        for (var i = item.patients.length - 1; i >= 0; i--) {
+          if (item.patients[i].patientId !== null) {
+            if (item.patients[i].dpRelationTime === undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime === '') {
+              item.patients[i].dpRelationTime = new Date('2017-05-15')
+            }
+            dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime)
+            if (dpTimeFormat === date) {
+              patients.push(item.patients[i])
             }
           }
-          patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
-          item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
-          return res.json({results: item1})
         }
-      }, opts, fieldsDIC, populateDIC)
+        patients = patients.sort(sortVIPpinyin)
+
+        let patientsInCharge = []
+        let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+        let queryDIC = {doctorId: doctorObject._id, invalidFlag: 1}
+        let fieldsDIC = {patientId: 1, dpRelationTime: 1, start: 1}
+        let populateDIC = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
+        if (_name) {
+          populateDIC['match'] = {'name': nameReg}
+        }
+        DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
+          if (err) {
+            return res.status(500).send(err)
+          } else if (itemsDIC.length === 0) {
+            return res.json({results: item1})
+          } else {
+            for (var j = itemsDIC.length - 1; j >= 0; j--) {
+              if (itemsDIC[j].patientId !== null) {
+                dpTimeFormat = commonFunc.convertToFormatDate(itemsDIC[j].start)
+                if (dpTimeFormat === date) {
+                  patientsInCharge.push(itemsDIC[j])
+                }
+              }
+            }
+            patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
+            item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+            return res.json({results: item1})
+          }
+        }, opts, fieldsDIC, populateDIC)
+      }
+    } else {
+      return res.json({result: '暂无患者!'})
     }
   }, opts, fields, populate)
 }
