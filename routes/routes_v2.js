@@ -1236,21 +1236,577 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
   // communication
-  app.get(version + '/communication/counselReport', tokenManager.verifyToken(), communicationCtrl.getCounselReport)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/counselReport:
+   *   get:
+   *     tags:
+   *     - "communication"
+   *     summary: "获取资讯问诊报告"
+   *     description: ""
+   *     operationId: "counselReport"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "counselId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 $ref: '#/definitions/Counsel'
+   */
+  app.get(version + '/communication/counselReport', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getCounselReport)
   // app.post(version + '/communication/newTeam', tokenManager.verifyToken(), getNoMid.getNo(4), communicationCtrl.newTeam)
-  app.post(version + '/communication/team', tokenManager.verifyToken(), communicationCtrl.newTeam)
-  app.post(version + '/communication/deleteTeam', tokenManager.verifyToken(), communicationCtrl.deleteTeam)
-  app.get(version + '/communication/team', tokenManager.verifyToken(), communicationCtrl.getTeam)
-  app.post(version + '/communication/consultation', tokenManager.verifyToken(), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/team:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "新建会诊团队"
+   *     description: ""
+   *     operationId: "team"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "teamId"
+   *           - "name"
+   *           - "sponsorId"
+   *           - "sponsorName"
+   *           - "sponsorPhoto"
+   *           - "photoAddress"
+   *           - "description"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           teamId:
+   *             type: "string"
+   *           name:
+   *             type: string
+   *           sponsorId:
+   *             type: string
+   *           sponsorName:
+   *             type: string
+   *           sponsorPhoto:
+   *             type: string
+   *           photoAddress:
+   *             type: string
+   *           description:
+   *             type: string
+   *           time:
+   *             type: string
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             newResults:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   */
+  app.post(version + '/communication/team', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.newTeam)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/deleteTeam:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "删除会诊团队"
+   *     description: ""
+   *     operationId: "deleteTeam"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "teamId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           teamId:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             newResults:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   *                 members:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamMember'
+   */
+  app.post(version + '/communication/deleteTeam', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.deleteTeam)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/team:
+   *   get:
+   *     tags:
+   *     - "communication"
+   *     summary: "获取会诊团队"
+   *     description: ""
+   *     operationId: "team"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "teamId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   *                 members:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamMember'
+   */
+  app.get(version + '/communication/team', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getTeam)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/consultation:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "新建会诊"
+   *     description: ""
+   *     operationId: "consultation"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "teamId"
+   *           - "counselId"
+   *           - "sponsorId"
+   *           - "patientId"
+   *           - "consultationId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           teamId:
+   *             type: "string"
+   *           counselId:
+   *             type: string
+   *           sponsorId:
+   *             type: string
+   *           patientId:
+   *             type: string
+   *           consultationId:
+   *             type: string
+   *           status:
+   *             type: number
+   *             default: 1
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 consultationId:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 patientId:
+   *                   type: "string"
+   *                 diseaseInfo:
+   *                   type: "string"
+   *                 status:
+   *                   type: "number"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   */
+  app.post(version + '/communication/consultation', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation)
   // app.post(version + '/communication/consultation', tokenManager.verifyToken(), getNoMid.getNo(5), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
-  app.get(version + '/communication/consultation', tokenManager.verifyToken(), communicationCtrl.getConsultation)
-  app.post(version + '/communication/conclusion', tokenManager.verifyToken(), communicationCtrl.conclusion)
-  app.post(version + '/communication/insertMember', tokenManager.verifyToken(), communicationCtrl.insertMember, communicationCtrl.updateNumber)
-  app.post(version + '/communication/removeMember', tokenManager.verifyToken(), communicationCtrl.removeMember, communicationCtrl.updateNumber)
-  app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
-  app.post(version + '/communication/communication', tokenManager.verifyToken(), getNoMid.getNo(8), communicationCtrl.postCommunication)
-  app.get(version + '/communication/communication', tokenManager.verifyToken(), communicationCtrl.getCommunication)
-  /** GY 2017-07-28
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/consultation:
+   *   get:
+   *     tags:
+   *     - "communication"
+   *     summary: "获取会诊信息"
+   *     description: ""
+   *     operationId: "consultation"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "consultationId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 consultationId:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   $ref: '#/definitions/Doctor'
+   *                 patientId:
+   *                   $ref: '#/definitions/Patient'
+   *                 diseaseInfo:
+   *                   $ref: '#/definitions/Counsel'
+   *                 teamId:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 conclusion:
+   *                   type: "string"
+   *                 status:
+   *                   type: "number"
+   *                   default: "1"
+   *                 messages:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Message'
+   */
+  app.get(version + '/communication/consultation', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getConsultation)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/conclusion:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "新建会诊"
+   *     description: ""
+   *     operationId: "conclusion"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "conclusion"
+   *           - "consultationId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           conclusion:
+   *             type: "string"
+   *           consultationId:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 consultationId:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 patientId:
+   *                   type: "string"
+   *                 diseaseInfo:
+   *                   type: "string"
+   *                 status:
+   *                   type: "number"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 conclusion:
+   *                   type: "string"
+   */
+  app.post(version + '/communication/conclusion', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.conclusion)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/insertMember:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "设置团队成员"
+   *     description: ""
+   *     operationId: "insertMember"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "teamId"
+   *           - "member"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           teamId:
+   *             type: "string"
+   *           member:
+   *             type: array
+   *             items:
+   *               $ref: '#/definitions/TeamMember'
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   *                 members:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamMember'
+   */
+  app.post(version + '/communication/insertMember', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.insertMember, communicationCtrl.updateNumber)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/removeMember:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "移除团队成员"
+   *     description: ""
+   *     operationId: "removeMember"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "teamId"
+   *           - "membersuserId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           teamId:
+   *             type: "string"
+   *           membersuserId:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   *                 members:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamMember'
+   */
+  app.post(version + '/communication/removeMember', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.removeMember, communicationCtrl.updateNumber)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/updateLastTalkTime:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "更新最新交流时间"
+   *     description: ""
+   *     operationId: "updateLastTalkTime"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "doctorId"
+   *           - "doctorId2"
+   *           - "lastTalkTime"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           doctorId:
+   *             type: "string"
+   *           doctorId2:
+   *             type: "string"
+   *           lastTalkTime:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
+  app.post(version + '/communication/communication', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), getNoMid.getNo(8), communicationCtrl.postCommunication)
+  app.get(version + '/communication/communication', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getCommunication)
+  /** GY 2017-07-28 - acl 2017-08-11 医生
    * @swagger
    * /communication/massToPatient:
    *   post:
@@ -1293,7 +1849,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "target not found."
    */
-  app.post(version + '/communication/massToPatient', tokenManager.verifyToken(), communicationCtrl.getMassTargets, communicationCtrl.massCommunication)
+  app.post(version + '/communication/massToPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getMassTargets, communicationCtrl.massCommunication)
   // task 2017-07-14
   /** YQC annotation 2017-08-10 - acl 2017-08-10 患者／医生
    * @swagger
