@@ -682,6 +682,7 @@ exports.newPersonalDiag = function (req, res, next) {
   let patientObjectId = req.body.patientObject._id
   let bookingDay = new Date(new Date(req.body.day).toDateString())
   let bookingTime = req.body.time
+  let place = req.body.place
 
   let queryPD = {doctorId: doctorObjectId, patientId: patientObjectId, bookingDay: bookingDay, bookingTime: bookingTime, status: 0}
   PersonalDiag.getOne(queryPD, function (err, itemPD) {
@@ -704,6 +705,7 @@ exports.newPersonalDiag = function (req, res, next) {
         patientId: patientObjectId,
         bookingDay: bookingDay,
         bookingTime: bookingTime,
+        place: place,
         code: code,
         creatTime: new Date(),
         endTime: endTime,
