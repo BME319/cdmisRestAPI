@@ -111,11 +111,13 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/alluser/agreement', tokenManager.verifyToken(), alluserCtrl.getAlluserAgreement)
   app.post(version + '/alluser/agreement', tokenManager.verifyToken(), alluserCtrl.updateAlluserAgreement)
 
-  app.post(version + '/expense/rechargeDoctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
-  app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
+  // 弃用，expense表已合并至 order表 2017-08-10 lgf
+  // app.post(version + '/expense/rechargeDoctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  // app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
 
-  app.get(version + '/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), alluserCtrl.checkPatient, reportCtrl.getReport)
-  app.post(version + '/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reportCtrl.updateReport)
+  // report 方法已在下方更新 2017-08-10 lgf
+  // app.get(version + '/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), alluserCtrl.checkPatient, reportCtrl.getReport)
+  // app.post(version + '/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reportCtrl.updateReport)
 
   // gy
   // review
@@ -4306,7 +4308,8 @@ module.exports = function (app, webEntry, acl) {
    *     type: object
    *     properties:
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       money:
    *         type: number
    *       from:
@@ -4315,7 +4318,8 @@ module.exports = function (app, webEntry, acl) {
    *     type: object
    *     properties:
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       money:
    *         type: number
    *       title:
@@ -4324,7 +4328,8 @@ module.exports = function (app, webEntry, acl) {
    *     type: object
    *     properties:
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       type:
    *         type: number
    *       money:
@@ -4352,7 +4357,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: array
    *         items:
    *           $ref: '#/definitions/Times'
-  */
+   */
   /**
    * @swagger
    * /account/accountInfo:
@@ -4360,6 +4365,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getAccountInfo
    *     tags:
    *       - AccountInfo
+   *     summary: 查询账户信息
    *     description: Get All AccountInfo
    *     produces:
    *       - application/json
@@ -4378,8 +4384,8 @@ module.exports = function (app, webEntry, acl) {
    *             $ref: '#/definitions/AccountInfo'
    *       500:
    *         description: Server internal error
-  */
-  // 权限 患者
+   */
+  // 查询账户信息 权限 医生/患者
   app.get(version + '/account/accountInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.getAccountInfo)
   /**
    * @swagger
@@ -4388,6 +4394,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getCounts
    *     tags:
    *       - AccountInfo
+   *     summary: 查询咨询免费次数，或者咨询某个医生的次数
    *     description: Get Counts
    *     produces:
    *       - application/json
@@ -4414,9 +4421,20 @@ module.exports = function (app, webEntry, acl) {
    *               type: number
    *             count:
    *               type: number
+   *       201:
+   *         schema:
+   *           type: object
+   *           required:
+   *             - freeTimes
+   *             - totalCount
+   *           properties:
+   *             freeTimes:
+   *               type: number
+   *             totalCount:
+   *               type: number
    *       500:
    *         description: Server internal error
-  */
+   */
   // 查询咨询免费次数，或者咨询某个医生的次数 权限 患者
   app.get(version + '/account/counts', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts)
   /**
@@ -4426,6 +4444,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: modifyCounts
    *     tags:
    *       - AccountInfo
+   *     summary: 次数更新(咨询、咨询转问诊、问诊结束)
    *     description: Modify Counts
    *     produces:
    *       - application/json
@@ -4464,7 +4483,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: number
    *       500:
    *         description: Server internal error
-  */
+   */
   // 次数更新(咨询、咨询转问诊、问诊结束) 权限 患者
   app.post(version + '/account/counts', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts)
   /**
@@ -4474,6 +4493,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: updateFreeTime
    *     tags:
    *       - AccountInfo
+   *     summary: 新建咨询时调用
    *     description: Update FreeTime
    *     produces:
    *       - application/json
@@ -4501,7 +4521,7 @@ module.exports = function (app, webEntry, acl) {
    *               $ref: '#/definitions/AccountInfo'
    *       500:
    *         description: Server internal error
-  */
+   */
   // 新建咨询时调用 权限 患者
   app.post(version + '/account/freeTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
   /**
@@ -4511,6 +4531,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getCountsRespective
    *     tags:
    *       - AccountInfo
+   *     summary: 获取未完成咨询/问诊计数
    *     description: Get Counts Respective
    *     produces:
    *       - application/json
@@ -4534,7 +4555,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: number
    *       500:
    *         description: Server internal error
-  */
+   */
   // 获取未完成咨询/问诊计数 权限 患者
   app.get(version + '/account/countsRespective', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
 
@@ -4560,7 +4581,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *       status:
    *         type: number
-  */
+   */
   /**
    * @swagger
    * /expense/doctor:
@@ -4612,7 +4633,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: number
    *       500:
    *         description: Server internal error
-  */
+   */
   app.post(version + '/expense/doctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
   /**
    * @swagger
@@ -4695,7 +4716,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: string
    *       500:
    *         description: Server internal error
-  */
+   */
   app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
 
   // healthInfo
@@ -4721,9 +4742,11 @@ module.exports = function (app, webEntry, acl) {
    *       type:
    *         type: string
    *       insertTime:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       label:
    *         type: string
    *       description:
@@ -4736,7 +4759,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: array
    *         items:
    *           $ref: '#/definitions/Url'
-  */
+   */
   /**
    * @swagger
    * /healthInfo/healthInfos:
@@ -4744,6 +4767,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getAllHealthInfo
    *     tags:
    *       - HealthInfo
+   *     summary: 获得患者所有的健康信息
    *     description: Get All HealthInfo
    *     produces:
    *       - application/json
@@ -4762,8 +4786,9 @@ module.exports = function (app, webEntry, acl) {
    *             $ref: '#/definitions/HealthInfo'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)
+   */
+  // 获得患者所有的健康信息 权限 医生/患者
+  app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.getAllHealthInfo)
   /**
    * @swagger
    * /healthInfo/healthDetail:
@@ -4771,6 +4796,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getHealthDetail
    *     tags:
    *       - HealthInfo
+   *     summary: 获得患者某条健康信息详情
    *     description: Get Health Detail
    *     produces:
    *       - application/json
@@ -4794,8 +4820,9 @@ module.exports = function (app, webEntry, acl) {
    *             $ref: '#/definitions/HealthInfo'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.getHealthDetail)
+   */
+  // 获得患者某条健康信息详情 权限 医生/患者
+  app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.getHealthDetail)
   /**
    * @swagger
    * /healthInfo/healthInfo:
@@ -4803,6 +4830,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: insertHealthInfo
    *     tags:
    *       - HealthInfo
+   *     summary: 新增患者健康信息
    *     description: Insert HealthInfo
    *     produces:
    *       - application/json
@@ -4818,15 +4846,14 @@ module.exports = function (app, webEntry, acl) {
    *             - time
    *             - label
    *             - url
-   *             - description
-   *             - comments
    *           properties:
    *             token:
    *               type: string
    *             type:
    *               type: string
    *             time:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *             label:
    *               type: string
    *             url:
@@ -4844,8 +4871,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: The server does not meet one of the prerequisites set by the requester in the request
    *       404:
    *         description: The server could not find the requested page
-  */
-  app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), healthInfoCtrl.insertHealthInfo)
+   */
+  // 新增患者健康信息 权限 医生/患者
+  app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.insertHealthInfo)
   /**
    * @swagger
    * /healthInfo/healthDetail:
@@ -4853,6 +4881,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: modifyHealthDetail
    *     tags:
    *       - HealthInfo
+   *     summary: 修改患者某条健康信息
    *     description: Modify HealthDetail
    *     produces:
    *       - application/json
@@ -4877,9 +4906,11 @@ module.exports = function (app, webEntry, acl) {
    *             type:
    *               type: string
    *             time:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *             insertTime:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *             label:
    *               type: string
    *             url:
@@ -4897,8 +4928,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: The server does not meet one of the prerequisites set by the requester in the request
    *       404:
    *         description: The server could not find the requested page
-  */
-  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.modifyHealthDetail)
+   */
+  // 修改患者某条健康信息 权限 医生/患者
+  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.modifyHealthDetail)
   /**
    * @swagger
    * /healthInfo/deleteHealthDetail:
@@ -4906,6 +4938,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: deleteHealthDetail
    *     tags:
    *       - HealthInfo
+   *     summary: 删除患者某条健康信息
    *     description: Delete a Health Detail
    *     produces:
    *       - application/json
@@ -4922,14 +4955,16 @@ module.exports = function (app, webEntry, acl) {
    *             token:
    *               type: string
    *             insertTime:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *     responses:
    *       200:
    *         description: success
    *       500:
    *         description: Server internal error
-  */
-  app.post(version + '/healthInfo/deleteHealthDetail', tokenManager.verifyToken(), healthInfoCtrl.deleteHealthDetail)
+   */
+  // 删除患者某条健康信息 权限 医生/患者
+  app.post(version + '/healthInfo/deleteHealthDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.deleteHealthDetail)
 
   // insurance
   /**
@@ -4941,14 +4976,16 @@ module.exports = function (app, webEntry, acl) {
    *       status:
    *         type: number
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *   InsuranceMsg:
    *     type: object
    *     properties:
    *       insuranceId:
    *         type: string
    *       time:
-   *         type: Date
+   *         type: string
+   *         format: date-time
    *       description:
    *         type: string
    *   insMsg:
@@ -4988,7 +5025,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *       url:
    *         type: string
-  */
+   */
   /**
    * @swagger
    * /insurance/message:
@@ -4996,6 +5033,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: insertInsuranceMessage
    *     tags:
    *       - Insurance
+   *     summary: 给患者发送保险推送
    *     description: Insert Insurance Message
    *     produces:
    *       - application/json
@@ -5015,10 +5053,11 @@ module.exports = function (app, webEntry, acl) {
    *             patientId:
    *               type: string
    *             insuranceId:
-   *               type: stirng
+   *               type: string
    *             time:
-   *               type: date
-   *             insDescription:
+   *               type: string
+   *               format: date-time
+   *             insdescription:
    *               type: string
    *             title:
    *               type: string
@@ -5045,8 +5084,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: Server internal error
    *       422:
    *         description: Unsuccessfully modified
-  */
-  app.post(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
+   */
+  // 给患者发送保险推送 权限 医生
+  app.post(version + '/insurance/message', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
   /**
    * @swagger
    * /insurance/message:
@@ -5054,6 +5094,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getInsuranceMessage
    *     tags:
    *       - Insurance
+   *     summary: 获取保险推送信息
    *     description: Returns Insurance Message
    *     produces:
    *       - application/json
@@ -5076,8 +5117,9 @@ module.exports = function (app, webEntry, acl) {
    *           $ref: '#/definitions/insMsg'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkDoctor, insuranceCtrl.getInsMsg)
+   */
+  // 获取保险推送信息 权限 患者
+  app.get(version + '/insurance/message', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkDoctor, insuranceCtrl.getInsMsg)
   /**
    * @swagger
    * /insurance/prefer:
@@ -5085,6 +5127,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: setInsurancePrefer
    *     tags:
    *       - Insurance
+   *     summary: 设置保险购买意向
    *     description: Set Insurance Prefer
    *     produces:
    *       - application/json
@@ -5104,12 +5147,14 @@ module.exports = function (app, webEntry, acl) {
    *             status:
    *               type: number
    *             date:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *     responses:
    *       200:
    *         description: success
-  */
-  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), serviceCtrl.getSessionObject, insuranceCtrl.setPrefer)
+   */
+  // 设置保险购买意向 权限 患者
+  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, insuranceCtrl.setPrefer)
   /**
    * @swagger
    * /insurance/prefer:
@@ -5117,6 +5162,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getInsurancePrefer
    *     tags:
    *       - Insurance
+   *     summary: 获取保险购买意向
    *     description: Return Insurance Message
    *     produces:
    *       - application/json
@@ -5132,8 +5178,9 @@ module.exports = function (app, webEntry, acl) {
    *         schema:
    *           type: object
    *           $ref: '#/definitions/insMsg'
-  */
-  app.get(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.getPrefer)
+   */
+  // 获取保险购买意向 权限 患者
+  app.get(version + '/insurance/prefer', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), insuranceCtrl.getPrefer)
 
   // message
   /**
@@ -5161,7 +5208,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *       url:
    *         type: string
-  */
+   */
   /**
    * @swagger
    * /message/messages:
@@ -5169,6 +5216,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getMessages
    *     tags:
    *       - Message
+   *     summary: 获取某个用户(某种类型)的所有消息
    *     description: Get All Messages
    *     produces:
    *       - application/json
@@ -5191,8 +5239,9 @@ module.exports = function (app, webEntry, acl) {
    *           $ref: '#/definitions/Message'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/message/messages', tokenManager.verifyToken(), messageCtrl.getMessages)
+   */
+  // 获取某个用户(某种类型)的所有消息 权限 医生/患者
+  app.get(version + '/message/messages', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), messageCtrl.getMessages)
   /**
    * @swagger
    * /message/status:
@@ -5201,6 +5250,7 @@ module.exports = function (app, webEntry, acl) {
    *     tags:
    *       - Message
    *     description: Change MessageStatus
+   *     summary: 修改某个用户某种类型消息的已读状态
    *     produces:
    *       - application/json
    *     parameters:
@@ -5225,8 +5275,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: success
    *       422:
    *         description: Unsuccessfully modified
-  */
-  app.post(version + '/message/status', tokenManager.verifyToken(), messageCtrl.changeMessageStatus)
+   */
+  // 修改某个用户某种类型消息的已读状态 权限 医生/患者
+  app.post(version + '/message/status', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), messageCtrl.changeMessageStatus)
   /**
    * @swagger
    * /message/message:
@@ -5234,6 +5285,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: insertMessage
    *     tags:
    *       - Message
+   *     summary: 插入消息
    *     description: Insert Message
    *     produces:
    *       - application/json
@@ -5262,7 +5314,8 @@ module.exports = function (app, webEntry, acl) {
    *             sendBy:
    *               type: string
    *             time:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *             title:
    *               type: string
    *             description:
@@ -5286,8 +5339,9 @@ module.exports = function (app, webEntry, acl) {
    *               $ref: '#/definitions/Message'
    *       422:
    *         description: Unsuccessfully modified
-  */
-  app.post(version + '/message/message', tokenManager.verifyToken(), getNoMid.getNo(6), messageCtrl.insertMessage)
+   */
+  // 插入消息 权限 医生/患者
+  app.post(version + '/message/message', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(6), messageCtrl.insertMessage)
 
   // order
   /**
@@ -5310,7 +5364,8 @@ module.exports = function (app, webEntry, acl) {
    *       orderNo:
    *         type: string
    *       ordertime:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       money:
    *         type: number
    *       goodsInfo:
@@ -5319,14 +5374,27 @@ module.exports = function (app, webEntry, acl) {
    *       paystatus:
    *         type: number
    *       paytime:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       refundNo:
    *         type: number
    *       refundAppTime:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       refundSucTime:
-   *         type: date
-  */
+   *         type: string
+   *         format: date-time
+   *       type:
+   *         type: number
+   *       freeFlag:
+   *         type: number
+   *       docInChaObject:
+   *         type: string
+   *       conselObject:
+   *         type: string
+   *       perDiagObject:
+   *         type: string
+   */
   /**
    * @swagger
    * /order/order:
@@ -5334,6 +5402,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: updateOrder
    *     tags:
    *       - Order
+   *     summary: 更新订单信息
    *     description: Update Order
    *     produces:
    *       - application/json
@@ -5345,27 +5414,45 @@ module.exports = function (app, webEntry, acl) {
    *           type: object
    *           required:
    *             - token
-   *             - type
-   *             - readOrNot
+   *             - orderNo
    *           properties:
    *             token:
    *               type: string
-   *             type:
+   *             orderNo:
+   *               type: string
+   *             paystatus:
    *               type: number
-   *             readOrNot:
-   *               type: number
+   *             paytime:
+   *               type: string
+   *               format: date-time
+   *             docInChaObject:
+   *               type: string
+   *             conselObject:
+   *               type: string
+   *             perDiagObject:
+   *               type: string
    *     responses:
    *       200:
    *         description: success
    *         schema:
    *           type: object
-   *           $ref: '#/definitions/Order'
+   *           required:
+   *             - n
+   *             - nModified
+   *             - ok
+   *           properties:
+   *             n:
+   *               type: number
+   *             nModified:
+   *               type: number
+   *             ok:
+   *               type: number
    *       500:
    *         description: Server internal error
-  */
-
+   */
+  // 更新订单信息 权限 医生/患者
   // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
-  app.post(version + '/order/order', tokenManager.verifyToken(), orderCtrl.updateOrder)
+  app.post(version + '/order/order', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), orderCtrl.updateOrder)
   /**
    * @swagger
    * /order/order:
@@ -5373,6 +5460,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getOrder
    *     tags:
    *       - Order
+   *     summary: 获取订单信息
    *     description: Get Order
    *     produces:
    *       - application/json
@@ -5383,20 +5471,42 @@ module.exports = function (app, webEntry, acl) {
    *         required: true
    *         type: string
    *       - name: orderNo
-   *         description: order number
+   *         description: 订单号
    *         in: query
    *         required: true
    *         type: string
+   *       - name: patientName
+   *         description: 患者姓名
+   *         required: false
+   *         type: string
+   *       - name: doctorName
+   *         description: 医生姓名
+   *         required: false
+   *         type: string
+   *       - name: paytime
+   *         description: 支付时间
+   *         required: false
+   *         type: string
+   *         format: date-time
+   *       - name: money
+   *         description: 支付金额
+   *         required: false
+   *         type: string
+   *       - name: type
+   *         description: 订单类型
+   *         required: false
+   *         type: string
    *     responses:
    *       200:
-   *         description: order information
+   *         description: success
    *         schema:
    *           type: object
    *           $ref: '#/definitions/Order'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/order/order', tokenManager.verifyToken(), orderCtrl.getOrder)
+   */
+  // 获取订单信息 权限 医生/患者
+  app.get(version + '/order/order', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), orderCtrl.getOrder)
 
   // load
   /**
@@ -5406,6 +5516,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: upload
    *     tags:
    *       - Upload
+   *     summary: 上传图片
    *     description: Upload Photo
    *     produces:
    *       - application/json
@@ -5440,8 +5551,9 @@ module.exports = function (app, webEntry, acl) {
    *               type: string
    *       500:
    *         description: Server internal error
-  */
-  app.post(version + '/upload', tokenManager.verifyToken(), loadCtrl.uploadphoto(), loadCtrl.upload)
+   */
+  // 上传图片 权限 医生/患者
+  app.post(version + '/upload', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), loadCtrl.uploadphoto(), loadCtrl.upload)
 
   // news
   /**
@@ -5463,14 +5575,15 @@ module.exports = function (app, webEntry, acl) {
    *       sendBy:
    *         type: string
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       title:
    *         type: string
    *       description:
    *         type: string
    *       url:
    *         type: string
-  */
+   */
   /**
    * @swagger
    * /new/news:
@@ -5478,6 +5591,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getNews
    *     tags:
    *       - News
+   *     summary: 获取消息
    *     description: Get News
    *     produces:
    *       - application/json
@@ -5500,8 +5614,9 @@ module.exports = function (app, webEntry, acl) {
    *           $ref: '#/definitions/News'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/new/news', tokenManager.verifyToken(), newsCtrl.getNews)
+   */
+  // 获取消息 权限 医生/患者
+  app.get(version + '/new/news', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.getNews)
   /**
    * @swagger
    * /new/newsByReadOrNot:
@@ -5509,6 +5624,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getNewsByReadOrNot
    *     tags:
    *       - News
+   *     summary: 通过消息状态获取消息
    *     description: Get News By ReadOrNot
    *     produces:
    *       - application/json
@@ -5536,8 +5652,9 @@ module.exports = function (app, webEntry, acl) {
    *           $ref: '#/definitions/News'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), newsCtrl.getNewsByReadOrNot)
+   */
+  // 通过消息状态获取消息 权限 医生/患者
+  app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.getNewsByReadOrNot)
   /**
    * @swagger
    * /new/news:
@@ -5545,6 +5662,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: insertNews
    *     tags:
    *       - News
+   *     summary: 插入news
    *     description: Insert News
    *     produces:
    *       - application/json
@@ -5603,8 +5721,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: Unsuccessfully modified
    *       500:
    *         description: Server internal error
-  */
-  app.post(version + '/new/news', tokenManager.verifyToken(), newsCtrl.insertNews)
+   */
+  // 插入news 权限 医生/患者
+  app.post(version + '/new/news', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.insertNews)
   /**
    * @swagger
    * /new/teamNews:
@@ -5612,6 +5731,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: insertTeamNews
    *     tags:
    *       - News
+   *     summary: 插入TeamNews
    *     description: Insert Team News
    *     produces:
    *       - application/json
@@ -5664,24 +5784,44 @@ module.exports = function (app, webEntry, acl) {
    *         description: Unsuccessfully modified
    *       500:
    *         description: Server internal error
-  */
-  app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
+   */
+  // 插入TeamNews 权限 医生
+  app.post(version + '/new/teamNews', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.insertTeamNews)
 
+  // report
   /**
    * @swagger
    * definition:
    *   Results:
    *     type: object
    *     properties:
-   *       data:
+   *       data1:
    *         type: array
    *         items:
    *           type: number
    *       recordTime:
    *         type: array
    *         items:
-   *           type: date
-  */
+   *           type: string
+   *           format: date-time
+   *   DataItem:
+   *     type: object
+   *     properties:
+   *       itemType:
+   *         type: string
+   *       recommendValue11:
+   *         type: number
+   *       recommendValue12:
+   *         type: number
+   *       recommendValue13:
+   *         type: number
+   *       recommendValue14:
+   *         type: number
+   *       doctorReport:
+   *         type: string
+   *       doctorComment:
+   *         type: string
+   */
   /**
    * @swagger
    * /report/vitalSigns:
@@ -5689,7 +5829,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getVitalSigns
    *     tags:
    *       - Report
-   *     description: 获取患者当前和历史周月季年的测量记录
+   *     summary: 获取患者当前和历史周月季年的测量记录
    *     produces:
    *       - application/json
    *     parameters:
@@ -5702,7 +5842,8 @@ module.exports = function (app, webEntry, acl) {
    *         description: 患者请求查询的时间
    *         in: query
    *         required: true
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       - name: type
    *         description: 任务类型
    *         in: query
@@ -5724,12 +5865,69 @@ module.exports = function (app, webEntry, acl) {
    *         schema:
    *           type: object
    *           $ref: '#/definitions/Results'
+   *       201:
+   *         description: 不存在该段时间的报告
    *       500:
    *         description: Server internal error
-  */
+   */
+  // 获取患者当前和历史周月季年的测量记录 权限 医生/患者
   app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns, reportCtrl.getReport)
+  /**
+   * @swagger
+   * /report/report:
+   *   post:
+   *     operationId: updateReport
+   *     tags:
+   *       - Report
+   *     summary: 医生点评患者的报表信息
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - type
+   *             - patientId
+   *             - time
+   *             - data
+   *           properties:
+   *             token:
+   *               type: string
+   *             type:
+   *               type: string
+   *             patientId:
+   *               type: string
+   *             time:
+   *               type: string
+   *             data:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/DataItem'
+   *     responses:
+   *       200:
+   *         description: 全部更新成功/未全部更新/未修改！请检查修改目标是否与原来一致！
+   *         schema:
+   *           type: object
+   *           required:
+   *             - n
+   *             - nModified
+   *             - ok
+   *           properties:
+   *             n:
+   *               type: number
+   *             nModified:
+   *               type: number
+   *             ok:
+   *               type: number
+   *       500:
+   *         description: Server internal error
+   */
+  // 医生点评患者的报表信息 权限 医生
   app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, reportCtrl.updateReport)
-  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
   /**
    * @swagger
    * definition:
@@ -5739,13 +5937,44 @@ module.exports = function (app, webEntry, acl) {
    *       patientId:
    *         type: string
    *       dpRelationTime:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *   Data:
    *     type: array
    *     items:
    *       type: object
    *       $ref: '#/definitions/Patient'
-  */
+   */
+  /**
+   * @swagger
+   * /nurse/bindingPatient:
+   *   post:
+   *     operationId: bindingPatient
+   *     tags:
+   *       - Nurse
+   *     summary: 护士端微信扫码绑定患者
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: body
+   *         description: token
+   *         required: true
+   *         properties:
+   *             token:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 绑定患者成功！
+   *       201:
+   *         description: 无临时绑定数据，扫码失败！
+   *       202:
+   *         description: 已绑定过该患者!
+   *       500:
+   *         description: Server internal error
+   */
+  // 护士端微信扫码绑定患者 权限 护士
+  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
   /**
    * @swagger
    * /nurse/patientsList:
@@ -5753,12 +5982,12 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getInsurancePatientsList
    *     tags:
    *       - Nurse
-   *     description: 获取护士推送保险信息的患者列表
+   *     summary: 获取护士推送保险信息的患者列表
    *     produces:
    *       - application/json
    *     parameters:
    *       - name: token
-   *         description: 授权信息
+   *         description: token
    *         in: query
    *         required: true
    *         type: string
@@ -5770,7 +5999,8 @@ module.exports = function (app, webEntry, acl) {
    *           $ref: '#/definitions/Data'
    *       500:
    *         description: Server internal error
-  */
+   */
+  // 获取护士推送保险信息的患者列表 权限 护士
   app.get(version + '/nurse/patientsList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserObject, nurseInsuranceWorkCtrl.getInsurancePatientsList)
 
   // jyf
