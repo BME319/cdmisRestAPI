@@ -1004,7 +1004,13 @@ exports.getPatientList = function (req, res) {
         } else if (itemsDIC.length === 0) {
           return res.json({results: item1})
         } else {
-          patientsInCharge = itemsDIC.sort(sortVIPpinyin)
+          for (let j = 0; j < itemsDIC.length; j++) {
+            let patientIC = itemsDIC[j]
+            if (patientIC.patientId !== null) {
+              patientsInCharge.push(patientIC)
+            }
+          }
+          patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
           item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
           return res.json({results: item1})
         }
@@ -1098,7 +1104,7 @@ exports.getPatientByDate = function (req, res) {
         } else if (itemsDIC.length === 0) {
           return res.json({results: item1})
         } else {
-          for (var j = itemsDIC.length - 1; j >= 0; j--) {
+          for (let j = 0; j < itemsDIC.length; j++) {
             if (itemsDIC[j].patientId !== null) {
               dpTimeFormat = commonFunc.convertToFormatDate(itemsDIC[j].start)
               if (dpTimeFormat === date) {
