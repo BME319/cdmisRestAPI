@@ -95,14 +95,43 @@ exports.getHealthDetail = function (req, res) {
 // }
 
 // 重写插入方法 2017-07-07 GY
+// 新增患者健康信息 修改为医生端和患者端共用 2017-08-09 lgf
 exports.insertHealthInfo = function (req, res) {
+  var _userId = req.session.userId
+  var _role = req.session.role
+  var patientId = req.body.patientId || null
+  var _time = req.body.time || null
+  var _type = req.body.type || null
+  var _label = req.body.label || null
   var healthInfoData = {
-    // userId: req.body.userId,
-    userId: req.session.userId,
-    type: req.body.type,
-    insertTime: new Date(),
-    time: new Date(req.body.time),
-    label: req.body.label
+    // type: req.body.type,
+    insertTime: new Date()
+    // time: new Date(req.body.time),
+    // label: req.body.label
+  }
+  if (_time === null) {
+    return res.json({result: '请填写time!'})
+  } else {
+    healthInfoData['time'] = new Date(_time)
+  }
+  if (_type === null) {
+    return res.json({result: '请填写type!'})
+  } else {
+    healthInfoData['type'] = _type
+  }
+  if (_label === null) {
+    return res.json({result: '请填写label!'})
+  } else {
+    healthInfoData['label'] = _label
+  }
+  if (_role === 'patient') {
+    healthInfoData['userId'] = _userId
+  } else {
+    if (patientId === null) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      healthInfoData['userId'] = patientId
+    }
   }
   // 自动生成图片ID
   let urlObj = [
@@ -154,7 +183,8 @@ exports.insertHealthInfo = function (req, res) {
     // 如果是化验的健康信息，需要查找Alluser表并根据结果更新
     // 如果Alluser表中labtestImportStatus字段为1或null则更新为0并更新earliestUploadTime
     if (healthInfo.type === 'Health_002' && healthInfo.url.length !== 0) {
-      var queryuser = {userId: healthInfo.userId, role: req.session.role}
+      // var queryuser = {userId: healthInfo.userId, role: req.session.role}
+      var queryuser = {userId: healthInfo.userId, role: 'patient'}
       Alluser.getOne(queryuser, function (err, userItem) {
         if (err) {
           return res.status(500).send(err)
@@ -189,9 +219,22 @@ exports.insertHealthInfo = function (req, res) {
 }
 
 // 重写修改方法 2017-07-07 GY
+// 修改患者某条健康信息 修改为医生端和患者端共用 2017-08-09 lgf
 exports.modifyHealthDetail = function (req, res) {
   // var query = {userId: req.body.userId, insertTime: new Date(req.body.insertTime)}
-  var query = {userId: req.session.userId, insertTime: new Date(req.body.insertTime)}
+  var _userId = req.session.userId
+  var _role = req.session.role
+  var patientId = req.body.patientId || null
+  var query = {insertTime: new Date(req.body.insertTime)}
+  if (_role === 'patient') {
+    query['userId'] = _userId
+  } else {
+    if (patientId === null) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      query['userId'] = patientId
+    }
+  }
   var upObj = {}
   let urlObj = [
     {

@@ -68,11 +68,11 @@ exports.checkBinding = function (req, res, next) {
             // console.log('item1', item1)
             next()
           } else {
-            return res.json('无临时绑定数据，扫码失败！')
+            return res.json({data: {}, msg: '无临时绑定数据，扫码失败！', code: 0})
           }
         })
       } else {
-        return res.json('请填写个人信息中的openId!')
+        return res.json({data: {}, msg: '请填写个人信息中的openId!', code: 0})
       }
     }
   })
