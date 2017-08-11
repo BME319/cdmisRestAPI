@@ -1799,13 +1799,113 @@ module.exports = function (app, webEntry, acl) {
    *             type: "string"
    *           lastTalkTime:
    *             type: string
+   *             format: date-time
    *     responses:
    *      200:
    *         description: "Operation success."
    */
   app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
-  app.post(version + '/communication/communication', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), getNoMid.getNo(8), communicationCtrl.postCommunication)
-  app.get(version + '/communication/communication', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getCommunication)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生/患者
+   * @swagger
+   * /communication/communication:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "新建交流"
+   *     description: ""
+   *     operationId: "communication"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "messageType"
+   *           - "sendBy"
+   *           - "receiver"
+   *           - "content"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           messageType:
+   *             type: "number"
+   *           sendBy:
+   *             type: string
+   *           sponsorId:
+   *             type: string
+   *           receiver:
+   *             type: string
+   *           content:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             newResults:
+   *               type: object
+   *               $ref: '#/definitions/Communication'
+   */
+  app.post(version + '/communication/communication', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(8), communicationCtrl.postCommunication)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生/患者
+   * @swagger
+   * /communication/communication:
+   *   get:
+   *     tags:
+   *     - "communication"
+   *     summary: "获取交流信息"
+   *     description: ""
+   *     operationId: "communication"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "messageType"
+   *       in: "query"
+   *       required: true
+   *       type: "number"
+   *     - name: "newsType"
+   *       in: "query"
+   *       required: true
+   *       type: "number"
+   *     - name: "id1"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     - name: "id2"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             newResults:
+   *               type: object
+   *               $ref: '#/definitions/Communication'
+   *             nexturl:
+   *               type: string
+   */
+  app.get(version + '/communication/communication', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.getCommunication)
   /** GY 2017-07-28 - acl 2017-08-11 医生
    * @swagger
    * /communication/massToPatient:
@@ -6892,6 +6992,30 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *         format: date-time
    *       content:
+   *         type: string
+   *   Communication:
+   *     type: object
+   *     properties:
+   *       messageNo:
+   *         type: string
+   *       messageType:
+   *         type: number
+   *       sendStatus:
+   *         type: number
+   *       readStatus:
+   *         type: number
+   *       sendBy:
+   *         type: string
+   *       receiver:
+   *         type: string
+   *       sendDateTime:
+   *         type: string
+   *         format: date-time
+   *       title:
+   *         type: string
+   *       content:
+   *         type: object
+   *       newsType:
    *         type: string
    */
 
