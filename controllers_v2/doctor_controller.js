@@ -381,7 +381,7 @@ exports.getComments = function (req, res, next) {
 //     }, opts, fields, populate);
 // }
 exports.getDoctorInfo = function (req, res) {
-  let query = {userId: req.doctorObject._id, role: 'doctor'}
+  let query = {userId: req.body.doctorObject.userId, role: 'doctor'}
   let comments = req.body.comments
 
   let newScore = 0
