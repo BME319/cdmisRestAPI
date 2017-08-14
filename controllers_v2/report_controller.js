@@ -177,6 +177,7 @@ exports.updateReport = function (req, res) {
   var type = req.body.type || null
   var time = req.body.time || null
   var data = req.body.data || null
+  let index = []
   // var labTestNewItem = req.body.labTestNewItem || null
   // var labTest = req.body.labTest || null
   // var doctorReport = req.body.doctorReport || null
@@ -214,15 +215,13 @@ exports.updateReport = function (req, res) {
     let recommendValue12 = -1
     let recommendValue13 = -1
     let recommendValue14 = -1
-    let doctorReport = ''
-    let doctorComment = ''
+    let doctorReport = ''  // 需要修改为读取历史记录
     switch (data[i].itemType) {
       case 'BloodPressure':
         recommendValue11 = Number(data[i].recommendValue11)
         recommendValue12 = Number(data[i].recommendValue12)
         recommendValue13 = Number(data[i].recommendValue13)
         recommendValue14 = Number(data[i].recommendValue14)
-        doctorComment = data[i].doctorComment
         if (type === 'week') { doctorReport = '建议下周控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
         if (type === 'month') { doctorReport = '建议下月控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
         if (type === 'season') { doctorReport = '建议下一季度控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
@@ -231,18 +230,18 @@ exports.updateReport = function (req, res) {
       case 'Weight':
         recommendValue11 = Number(data[i].recommendValue11)
         recommendValue12 = Number(data[i].recommendValue12)
-        doctorComment = data[i].doctorComment
         if (type === 'week') { doctorReport = '建议下周控制体重范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'month') { doctorReport = '建议下月控制体重范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'season') { doctorReport = '建议下一季度控制体重范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'year') { doctorReport = '建议下一年控制体重范围' + recommendValue11 + '-' + recommendValue12 }
         break
       case 'Vol':
-        recommendValue11 = Number(data[i].recommendValue11)
+        // recommendValue11 = Number(data[i].recommendValue11)
+        recommendValue11 = 500
         break
       case 'Temperature':
-        recommendValue11 = Number(data[i].recommendValue11)
-        doctorComment = data[i].doctorComment
+        // recommendValue11 = Number(data[i].recommendValue11)
+        recommendValue11 = 37.3
         break
       case 'HeartRate':
         recommendValue11 = Number(data[i].recommendValue11)
@@ -255,14 +254,12 @@ exports.updateReport = function (req, res) {
       case 'PeritonealDialysis':
         recommendValue11 = Number(data[i].recommendValue11)
         recommendValue12 = Number(data[i].recommendValue12)
-        doctorComment = data[i].doctorComment
         if (type === 'week') { doctorReport = '建议下周控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'month') { doctorReport = '建议下月控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'season') { doctorReport = '建议下一季度控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'year') { doctorReport = '建议下一年控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         break
       case 'LabTest':
-        doctorComment = data[i].doctorComment
         doctorReport = data[i].doctorReport
         break
       case 'DoctorReport':
@@ -287,36 +284,39 @@ exports.updateReport = function (req, res) {
     if (recommendValue14 !== -1) {
       upData['recommendValue14'] = recommendValue14
     }
-    if (doctorReport !== '') {
-      upData['doctorReport'] = doctorReport
-    }
-    if (doctorComment !== '') {
-      upData['doctorComment'] = doctorComment
-    }
+    upData['doctorReport'] = doctorReport
+    let doctorComment = data[i].doctorComment || ''  // doctorComment为选填,医生未填写默认为空
+    upData['doctorComment'] = doctorComment          // 需要修改为读取历史记录
     console.log(query)
     console.log(upData)
-    Report.update(query, upData, function (err, upmessage) {
+    Report.updateOne(query, upData, function (err, upmessage) {
       if (err) {
         if (res !== undefined) {
           return res.status(422).send(err.message)
         }
       }
-      if (i === (data.length - 1)) {  // data内的数据全部更新完再输出结果
-        if (upmessage.n !== 0 && upmessage.nModified === 0) {
-          if (res !== undefined) {
-            return res.json({msg: '未修改！请检查修改目标是否与原来一致！', data: upmessage, code: 0})
-          }
+      index.push(i)
+      if (index.length === data.length) {  // data内的数据全部更新完再输出结果
+        if (upmessage === null) {
+          return res.json({msg: '未修改！请检查项目填写是否正确！', data: {}, code: 0})
+        } else {
+          return res.json({msg: '修改成功！', data: {}, code: 1})
         }
-        if (upmessage.n !== 0 && upmessage.nModified !== 0) {
-          if (upmessage.n === upmessage.nModified) {
-            if (res !== undefined) {
-              return res.json({msg: '全部更新成功', data: upmessage, code: 1})
-            }
-          }
-          if (res !== undefined) {
-            return res.json({msg: '未全部更新！', data: upmessage, code: 0})
-          }
-        }
+        // if (upmessage.n !== 0 && upmessage.nModified === 0) {
+        //   if (res !== undefined) {
+        //     return res.json({msg: '未修改！请检查修改目标是否与原来一致！', data: upmessage, code: 0})
+        //   }
+        // }
+        // if (upmessage.n !== 0 && upmessage.nModified !== 0) {
+        //   if (upmessage.n === upmessage.nModified) {
+        //     if (res !== undefined) {
+        //       return res.json({msg: '全部更新成功', data: upmessage, code: 1})
+        //     }
+        //   }
+        //   if (res !== undefined) {
+        //     return res.json({msg: '未全部更新！', data: upmessage, code: 0})
+        //   }
+        // }
       }
     }, {upsert: true})
   }
