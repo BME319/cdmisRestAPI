@@ -2853,7 +2853,7 @@ module.exports = function (app, webEntry, acl) {
    *             nexturl:
    *               type: string
    */
-  app.get(version + '/doctor/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
+  app.get(version + '/doctor/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo)
   /** YQC annotation 2017-07-26 - acl 2017-08-04 医生
    * @swagger
    * /doctor/myTeams:
