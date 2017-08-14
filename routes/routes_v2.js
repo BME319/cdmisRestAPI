@@ -2812,7 +2812,7 @@ module.exports = function (app, webEntry, acl) {
    */
   app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
-  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生
+  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生／2017-08-14 患者
    * @swagger
    * /doctor/detail:
    *   get:
@@ -4528,7 +4528,7 @@ module.exports = function (app, webEntry, acl) {
    * @swagger
    * /account/countsRespective:
    *   get:
-   *     operationId: getCountsRespective
+   *     operationId: countsRespective
    *     tags:
    *       - AccountInfo
    *     summary: 获取未完成咨询/问诊计数
