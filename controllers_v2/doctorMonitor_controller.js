@@ -541,21 +541,22 @@ exports.getWorkload = function (req, res) {
           doctorsincharge: {$size: '$doctorsincharge'},
           doctorsinchargetoday: {$size: '$doctorsinchargetoday'}
         }
-      }
-      // {$sort: {count: -1}},
+      },
+      {$sort: {count: -1}}
       // {$skip: skip},
       // {$limit: limit}
     ]
 
-    if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-      limit = Number(limit)
-      skip = Number(skip)
-      array.push(
-        {$sort: {count: -1}},
-        {$skip: skip},
-        {$limit: limit}
-      )
-    }
+    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+    //   limit = Number(limit)
+    //   skip = Number(skip)
+    //   console.log(limit, skip)
+    //   array.push(
+    //     {$sort: {count: -1}},
+    //     {$skip: skip},
+    //     {$limit: limit}
+    //   )
+    // }
 
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
@@ -568,7 +569,9 @@ exports.getWorkload = function (req, res) {
         res.status(500).send(err.errmsg)
       }
       console.log(results)
-      res.json({results: results})
+      limit = Number(limit)
+      skip = Number(skip)
+      res.json({results: results.slice(skip, limit + skip)})
     })
   }
 }
@@ -651,21 +654,21 @@ exports.getCounseltimeout = function (req, res) {
           phoneNo: '$doctorinfo.phoneNo',
           patientname: '$patientinfo.name'
         }
-      }
-      // {$sort: {time: 1}},
+      },
+      {$sort: {time: 1}}
       // {$skip: skip},
       // {$limit: limit}
     ]
 
-    if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-      limit = Number(limit)
-      skip = Number(skip)
-      array.push(
-        {$sort: {count: -1}},
-        {$skip: skip},
-        {$limit: limit}
-      )
-    }
+    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+    //   limit = Number(limit)
+    //   skip = Number(skip)
+    //   array.push(
+    //     {$sort: {count: -1}},
+    //     {$skip: skip},
+    //     {$limit: limit}
+    //   )
+    // }
 
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
@@ -677,7 +680,9 @@ exports.getCounseltimeout = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      res.json({results: results})
+      limit = Number(limit)
+      skip = Number(skip)
+      res.json({results: results.slice(skip, limit + skip)})
     })
   }
 }
@@ -757,15 +762,15 @@ exports.getScore = function (req, res) {
     //   }
     // }
   ]
-  if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-    limit = Number(limit)
-    skip = Number(skip)
-    array.push(
-      {$sort: {count: -1}},
-      {$skip: skip},
-      {$limit: limit}
-    )
-  }
+  // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+  //   limit = Number(limit)
+  //   skip = Number(skip)
+  //   array.push(
+  //     {$sort: {count: -1}},
+  //     {$skip: skip},
+  //     {$limit: limit}
+  //   )
+  // }
   if (province !== '' && city === '') {
     array.push({$match: {province: province}})
   } else if (province !== '' && city !== '') {
@@ -777,7 +782,9 @@ exports.getScore = function (req, res) {
       res.status(500).send(err.errmsg)
     }
     console.log(results)
-    res.json({results: results})
+    limit = Number(limit)
+    skip = Number(skip)
+    res.json({results: results.slice(skip, limit + skip)})
   })
   //}
   
@@ -907,15 +914,15 @@ exports.getOrder = function (req, res) {
       }
     ]
 
-    if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-      limit = Number(limit)
-      skip = Number(skip)
-      array.push(
-        {$sort: {count: -1}},
-        {$skip: skip},
-        {$limit: limit}
-      )
-    }
+    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+    //   limit = Number(limit)
+    //   skip = Number(skip)
+    //   array.push(
+    //     {$sort: {count: -1}},
+    //     {$skip: skip},
+    //     {$limit: limit}
+    //   )
+    // }
 
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
@@ -927,7 +934,9 @@ exports.getOrder = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      res.json({results: results})
+      limit = Number(limit)
+      skip = Number(skip)
+      res.json({results: results.slice(skip, limit + skip)})
     })
   }
 }

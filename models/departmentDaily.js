@@ -126,4 +126,13 @@ DepartmentDaily.aggregate = function (array, callback) {
     })
 }
 
+DepartmentDaily.create = function (query, callback) {
+  departmentDailyModel.create(query, function (err, info) {
+    if (err) {
+        return callback(err)
+    }
+    callback(null, info)
+  })
+}
+
 module.exports = DepartmentDaily
