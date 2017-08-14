@@ -64,7 +64,7 @@ exports.getNo = function (setType) {
             _KeyDate = _targetDate
           }
           var query1 = {type: _numberingType, date: _KeyDate}
-          Numbering.getOne(query1, function (err, item1) {
+          Numbering.updateOne(query1, {$inc: {number:1}}, function (err, item1) {
             if (err) {
               return res.status(500).send(err.errmsg)
             }
@@ -83,41 +83,18 @@ exports.getNo = function (setType) {
               _TrnNumberingNo = 1
               _Seq = 1
             }
-            if (_TrnNumberingNo === 1) {
-              var numberingData = {
-                type: _numberingType,
-                date: _KeyDate,
-                number: _TrnNumberingNo
-              }
-
-              var newNumbering = new Numbering(numberingData)
-              newNumbering.save(function (err, Info) {
-                if (err) {
-                  return res.status(500).send(err.errmsg)
-                }
-  // res.json({results: Info});
-              })
-            } else {
-              Numbering.updateOne(query1, { $set: { number: _TrnNumberingNo } }, function (err, item1) {
-                if (err) {
-                  return res.status(500).send(err.errmsg)
-                }
-              })
-            }
-  // console.log(_Seq.toString().length)
-  // console.log(_SeqLength)
+            console.log(_Seq)
             if (_Seq.toString().length < _SeqLength) {
               var n = _SeqLength - _Seq.toString().length
               while (n) {
                 _Seq = '0' + _Seq
                 n = n - 1
-  // console.log(_Seq)
               }
             }
             var _Ret = _Initial + _Date + _Seq
-  // console.log(_Ret)
             req.newId = _Ret
             return next()
+
           })
         }
       })
