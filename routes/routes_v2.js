@@ -5106,6 +5106,9 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/departmentmonitor/negcomment', departmentMonitorCtrl.getNegComment)
   app.get(version + '/departmentmonitor/counseltimeout', departmentMonitorCtrl.getCounselTimeout)
 
+  // test
+  // app.get(version + '/departmentmonitor/test', departmentMonitorCtrl.autoDepartmentDaily)
+
   /** YQC definitions
    * @swagger
    * definition:

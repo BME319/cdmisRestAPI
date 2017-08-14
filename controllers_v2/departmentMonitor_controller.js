@@ -2,6 +2,195 @@ var Alluser = require('../models/alluser')
 var Department = require('../models/department')
 var Counselautochangestatus = require('../models/counselautochangestatus')
 var Comment = require('../models/comment')
+var DepartmentDaily = require('../models/departmentDaily')
+
+exports.autoDepartmentDaily = function (req, res) {
+  let date = new Date()
+  let y = date.getFullYear()
+  let m = date.getMonth() + 1
+  let d = date.getDate()
+  let startTime = new Date(y+ '-' + m + '-' +d)
+  let endTime = new Date((startTime / 1000 + 86400) * 1000)
+  console.log(y,m,d,startTime)
+  let array = [
+    {$match: {department: {$ne: null}}},
+    {
+      $lookup: {
+        from: 'doctorsincharges',
+        localField: 'doctors',
+        foreignField: 'doctorId',
+        as: 'inchargeinfo'
+      }
+    },
+    {
+      $lookup: {
+        from: 'dprelations',
+        localField: 'doctors',
+        foreignField: 'doctorId',
+        as: 'dpinfo'
+      }
+    },
+    {
+      $project: {
+        'district': 1,
+        'hospital': 1,
+        'department': 1,
+        'doctors': 1,
+        inchargeinfo: {
+          $filter: {
+            input: '$inchargeinfo',
+            as: 'inchargeinfo',
+            cond: {
+              $and: [
+                {$gte: ['$$inchargeinfo.end', date]},
+                {$lt: ['$$inchargeinfo.start', date]},
+                {$eq: ['$$inchargeinfo.invalidFlag', 1]},
+                {$ne: ['$$inchargeinfo.patinetId', null]},
+                {$ne: ['$$inchargeinfo.patientId', undefined]}
+              ]
+            }
+          }
+        },
+        dpinfo: {
+          $filter: {
+            input: '$dpinfo',
+            as: 'dpinfo',
+            cond: {
+              $and: [
+                {$ne: ['$$dpinfo.patinets', null]},
+                {$ne: ['$$dpinfo.patients', undefined]},
+                {$ne: ['$$dpinfo.patients', []]}
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        'district': 1,
+        'hospital': 1,
+        'department': 1,
+        'doctors': 1,
+        'inchargeinfo': 1,
+        dpinfo: '$dpinfo.patients',
+        patientsincharge: '$inchargeinfo.patientId',
+      }
+    },
+    {$unwind: { path: '$dpinfo', preserveNullAndEmptyArrays: true }},
+    {$unwind: { path: '$dpinfo', preserveNullAndEmptyArrays: true }},
+    {
+      $group: {
+        _id: {district: '$district', hospital: '$hospital', department: '$department'},
+        doctors: {$first: '$doctors'},
+        inchargeinfo: {$first: '$inchargeinfo'},
+        patientsincharge: {$first: '$patientsincharge'},
+        dpinfo: {$addToSet: '$dpinfo'}
+      }
+    },
+    {
+      $lookup: {
+        from: 'allusers',
+        localField: 'patientsincharge',
+        foreignField: '_id',
+        as: 'VIPinfo'
+      }
+    },
+    {
+      $project: {
+        'district': 1,
+        'hospital': 1,
+        'department': 1,
+        'doctors': 1,
+        'inchargeinfo': 1,
+        'dpinfo': 1,
+        'patientsincharge': 1,
+        VIPinfo: {
+          $filter: {
+            input: '$VIPinfo',
+            as: 'vipinfo',
+            cond: {$eq: ['$$vipinfo.VIP', 1]}
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        'district': 1,
+        'hospital': 1,
+        'department': 1,
+        'doctors': 1,
+        'inchargeinfo': 1,
+        'dpinfo': 1,
+        // 'patientsincharge': 1,
+        'VIPinfo': 1,
+        inchargetoday: {
+          $filter: {
+            input: '$inchargeinfo',
+            as: 'inchargeinfo',
+            cond: {
+              $and: [
+                {$gte: ['$$inchargeinfo.dpRelationTime', startTime]},
+                {$lt: ['$$inchargeinfo.dpRelationTime', endTime]}
+              ]
+            }
+          }
+        },
+        dptoday: {
+          $filter: {
+            input: '$dpinfo',
+            as: 'dpinfo',
+            cond: {
+              $and: [
+                {$gte: ['$$dpinfo.dpRelationTime', startTime]},
+                {$lt: ['$$dpinfo.dpRelationTime', endTime]}
+              ]
+            }
+          }
+        },
+        VIPtoday: {
+          $filter: {
+            input: '$VIPinfo',
+            as: 'vipinfo',
+            cond: {
+              $and: [
+                {$gte: ['$$vipinfo.VIPStartTime', startTime]},
+                {$lt: ['$$vipinfo.VIPStartTime', endTime]}
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        '_id': 0,
+        district: '$_id.district',
+        hospital: '$_id.hospital',
+        department: '$_id.department',
+        inchargeCount: {$size: '$inchargeinfo'},
+        dpCount: {$size: '$dpinfo'},
+        VIPCount: {$size: '$VIPinfo'},
+        inchargeCounttoday: {$size: '$inchargetoday'},
+        dpCounttoday: {$size: '$dptoday'},
+        VIPCounttoday: {$size: '$VIPtoday'},
+        date: date
+      }
+    }
+  ]
+  Department.aggregate(array, function (err, results) {
+    if (err) {
+      res.status(500).json({code: 1, msg: err.errmsg})
+    }
+    // res.json({code: 0, data: results, msg: 'success'})
+    DepartmentDaily.create(results, function (err, info) {
+      if (err) {
+        res.status(500).json({code: 1, msg: err.errmsg})
+      }
+      res.json({code: 0, data: results, msg: 'success'})
+    })
+  })
+}
 
 exports.getPatientsCount = function (req, res) {
   let district = req.query.district || ''
@@ -26,38 +215,26 @@ exports.getPatientsCount = function (req, res) {
     // endTime = new Date((endTime / 1000 + 86400) * 1000)
     let array = [
       {$match: {district: district, hospital: hospital, department:department}},
-      // 获取科室医生
       {
         $project: {
-          'doctors': 1
+          'district': 1,
+          'hospital': 1,
+          'department': 1,
+          'inchargeCount': 1,
+          'dpCount': 1,
+          'VIPCount': 1,
+          'inchargeCounttoday': 1,
+          'dpCounttoday': 1,
+          'VIPCounttoday': 1,
+          date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
         }
-      },
-      {$unwind: {path: '$doctors', preserveNullAndEmptyArrays: true}},
-      // 获取每位医生主管患者数
-      {
-        $lookup: {
-          from: 'doctorsincharges',
-          localField: 'doctors',
-          foreignField: 'doctorId',
-          as: 'inchargeinfo'
-        }
-      },
-      {$unwind: {path: '$inchargeinfo', preserveNullAndEmptyArrays: false}},
-      {
-        $project: {
-          'dpRelationTime': '$inchargeinfo.dpRelationTime',
-          'start': '$inchargeinfo.start',
-          'end': '$inchargeinfo.end'
-        }
-      },
-      {$match: {dpRelationTime: {$gte: startTime, $lt: endTime}}}
+      }
     ]
-    Department.aggregate(array, function (err, results) {
+    DepartmentDaily.aggregate(array, function (err, results) {
       if (err) {
         res.status(500).json({code: 1, msg: err.errmsg})
       }
-      //res.json({code: 0, data: results, msg: 'success'})
-      
+      res.json({code: 0, data: results, msg: 'success'})
     })
   }
 }
@@ -90,7 +267,7 @@ exports.getScore = function (req, res) {
           'doctors': 1
         }
       },
-      {$unwind: {path: '$doctors', preserveNullAndEmptyArrays: true}},
+      {$unwind: {path: '$doctors', preserveNullAndEmptyArrays: false}},
       // 获取医生评价
       {
         $lookup: {
@@ -100,25 +277,75 @@ exports.getScore = function (req, res) {
           as: 'commentinfo'
         }
       },
+      {
+        $project: {
+          'doctors': 1,
+          'commentinfo': {
+            $filter: {
+              input: '$commentinfo',
+              as: 'commentinfo',
+              cond: {
+                $and: [
+                  {$gte: ['$$commentinfo.time', startTime]},
+                  {$lt: ['$$commentinfo.time', endTime]}
+                ]
+              }
+            }
+          }
+        }
+      },
       {$unwind: {path: '$commentinfo', preserveNullAndEmptyArrays: true}},
-      // {
-      //   $project: {
-      //     'doctors': 1,
-      //     totalScore: '$commentinfo.totalScore'
-      //   }
-      // },
-      // {
-      //   $group: {
-      //     _id: '$doctors',
-      //     score: {$sum: '$totalScore'}
-      //   }
-      // }
+      {
+        $project: {
+          'doctors': 1,
+          score: {
+            $cond: {if: {$ne: ['$commentinfo', []]},
+              then: '$commentinfo.totalScore',
+              else: 'nocomment'
+            }
+          },
+        }
+      },
+      {$unwind: {path: '$score', preserveNullAndEmptyArrays: true}},
+      {
+        $group: {
+          _id: '$doctors',
+          score: {$sum: '$score'}
+        }
+      },
+      {
+        $lookup: {
+          from: 'allusers',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'doctorinfo'
+        }
+      },
+      {$unwind: {path: '$doctorinfo', preserveNullAndEmptyArrays: true}},
+      {
+        $project: {
+          'score': 1,
+          doctoruserId: '$doctorinfo.userId',
+          doctorname: '$doctorinfo.name'
+        }
+      },
+      {$sort: {score: -1}}
     ]
     Department.aggregate(array, function (err, results) {
       if (err) {
         res.status(500).json({code: 1, msg: err.errmsg})
       }
-      res.json({code: 0, data: results, msg: 'success'})
+      let i
+      let count = 0
+      let sum = 0
+      for (i = 0; i < results.length; i++) {
+        if (results[i].score !== 0) {
+          count++
+          sum = sum + results[i].score
+        }
+      }
+      avgscore = sum/count
+      res.json({code: 0, data: {results: results, avgscore: avgscore}, msg: 'success'})
     })
   }
 }
