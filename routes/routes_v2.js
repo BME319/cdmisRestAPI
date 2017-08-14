@@ -60,6 +60,7 @@ var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_contr
 var forumCtrl = require('../controllers_v2/forum_controller')
 var departmentMonitorCtrl = require('../controllers_v2/departmentMonitor_controller')
 var policyCtrl = require('../controllers_v2/policy_controller')
+var departmentReportTempCtrl = require('../controllers_v2/departmentReportTemp_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -4559,164 +4560,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/account/countsRespective', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
 
   // expense
-  /**
-   * @swagger
-   * definition:
-   *   Expense:
-   *     properties:
-   *       patientId:
-   *         type: number
-   *       patientName:
-   *         type: string
-   *       doctorId:
-   *         type: string
-   *       doctorName:
-   *         type: string
-   *       time:
-   *         type: date
-   *       money:
-   *         type: number
-   *       type:
-   *         type: string
-   *       status:
-   *         type: number
-   */
-  /**
-   * @swagger
-   * /expense/doctor:
-   *   post:
-   *     operationId: rechargeDoctor
-   *     tags:
-   *       - Expense
-   *     description: Recharge Doctor
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - doctorId
-   *             - type
-   *             - money
-   *             - status
-   *           properties:
-   *             token:
-   *               type: string
-   *             doctorId:
-   *               type: string
-   *             type:
-   *               type: string
-   *             money:
-   *               type: number
-   *             status:
-   *               type: number
-   *     responses:
-   *       200:
-   *         description: success
-   *         schema:
-   *           type: object
-   *           required:
-   *             - n
-   *             - nModified
-   *             - ok
-   *           properties:
-   *             n:
-   *               type: number
-   *             nModified:
-   *               type: number
-   *             ok:
-   *               type: number
-   *       500:
-   *         description: Server internal error
-   */
-  app.post(version + '/expense/doctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
-  /**
-   * @swagger
-   * /expense/records:
-   *   get:
-   *     operationId: getRecords
-   *     tags:
-   *       - Expense
-   *     description: Get Expense Records
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: patientId
-   *         description: patientId
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: patientName
-   *         description: patientName
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: doctorId
-   *         description: doctorId
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: doctorName
-   *         description: doctorName
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: time
-   *         description: time
-   *         in: query
-   *         required: true
-   *         type: date
-   *       - name: money
-   *         description: money
-   *         in: query
-   *         required: true
-   *         type: number
-   *       - name: type
-   *         description: type
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: status
-   *         description: status
-   *         in: query
-   *         required: false
-   *         type: number
-   *       - name: limit
-   *         description: limit
-   *         in: query
-   *         required: true
-   *         type: number
-   *       - name: skip
-   *         description: skip
-   *         in: query
-   *         required: true
-   *         type: number
-   *     responses:
-   *       200:
-   *         schema:
-   *           type: object
-   *           required:
-   *             - expense
-   *             - nexturl
-   *           properties:
-   *             expense:
-   *               type: object
-   *               $ref: '#/definitions/Expense'
-   *             nexturl:
-   *               type: string
-   *       500:
-   *         description: Server internal error
-   */
-  app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
+  // app.post(version + '/expense/doctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  // app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
 
   // healthInfo
   /**
@@ -6001,6 +5846,19 @@ module.exports = function (app, webEntry, acl) {
    */
   // 获取护士推送保险信息的患者列表 权限 护士
   app.get(version + '/nurse/patientsList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserObject, nurseInsuranceWorkCtrl.getInsurancePatientsList)
+
+  // 获取科室普通咨询/加急咨询/预约面诊/点评报表总数
+  app.get(version + '/department/departmentCounsel', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDepartmentCounsel)
+  // 获取具体医生普通咨询/加急咨询量
+  app.get(version + '/department/docCounsel', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDocCounsel)
+  // 获取具体医生的预约面诊数
+  app.get(version + '/department/docPD', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDocPD)
+  // 获取科室预约面诊数
+  app.get(version + '/department/departmentPD', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDepartmentPD)
+  // 获取具体医生的预约面诊数
+  app.get(version + '/department/docRepComment', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDocRepComment)
+  // 获取科室点评患者周／月／季／年报数量
+  app.get(version + '/department/departRepComment', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDepartRepComment)
 
   // jyf
   // 刷新token
