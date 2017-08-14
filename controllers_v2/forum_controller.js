@@ -358,7 +358,7 @@ exports.getPostContent = function (req, res) {
           depth: '$replies.depth',
           content: '$replies.content',
           // at: '$replies.at'
-          // replies: '$replies.replies'
+          replies: '$replies.replies'
         }
       },
       {
@@ -378,7 +378,7 @@ exports.getPostContent = function (req, res) {
           'depth': 1,
           'content': 1,
           'at': 1,
-          // 'replies': 1,
+          'replies': 1,
           avatar: '$userinfo.photoUrl'
         }
       },
