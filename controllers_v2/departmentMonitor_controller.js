@@ -187,7 +187,7 @@ exports.autoDepartmentDaily = function (req, res) {
       if (err) {
         res.status(500).json({code: 1, msg: err.errmsg})
       }
-      res.json({code: 0, data: results, msg: 'success'})
+      // res.json({code: 0, data: results, msg: 'success'})
     })
   })
 }
@@ -236,6 +236,116 @@ exports.getPatientsCount = function (req, res) {
       }
       res.json({code: 0, data: results, msg: 'success'})
     })
+  }
+}
+
+exports.getCurrentPatientsCount = function (req, res) {
+  let district = req.query.district || ''
+  let department = req.query.department || ''
+  let hospital = req.query.hospital || ''
+  if (district === '') {
+    res.status(400).json({code: 1, msg: '请输入地区'})
+  } else if (hospital === '') {
+    res.status(400).json({code: 1, msg: '请输入医院'})
+  } else if (department === '') {
+    res.status(400).json({code: 1, msg: '请输入科室'})
+  } else {
+    let array = [
+      {$match: {district: district, hospital: hospital, department:department}},
+      // 获取科室医生
+      {
+        $project: {
+          'doctors': 1
+        }
+      },
+      {$unwind: {path: '$doctors', preserveNullAndEmptyArrays: false}},
+      {
+        $lookup: {
+          from: 'doctorsincharges',
+          localField: 'doctors',
+          foreignField: 'doctorId',
+          as: 'inchargeinfo'
+        }
+      },
+      {
+        $project: {
+          'doctors': 1,
+          inchargeinfo: {
+            $filter: {
+              input: '$inchargeinfo',
+              as: 'inchargeinfo',
+              cond: {
+                $and: [
+                  {$eq: ['$$inchargeinfo.invalidFlag', 1]},
+                  {$ne: ['$$inchargeinfo.patinetId', null]},
+                  {$ne: ['$$inchargeinfo.patientId', undefined]}
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          'doctors': 1,
+          'inchargeinfo': 1,
+          patientsincharge: '$inchargeinfo.patientId',
+        }
+      },
+      {
+        $lookup: {
+          from: 'allusers',
+          localField: 'patientsincharge',
+          foreignField: '_id',
+          as: 'VIPinfo'
+        }
+      },
+      {
+        $project: {
+          'doctors': 1,
+          'inchargeinfo': 1,
+          'patientsincharge': 1,
+          VIPinfo: {
+            $filter: {
+              input: '$VIPinfo',
+              as: 'vipinfo',
+              cond: {$eq: ['$$vipinfo.VIP', 1]}
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          'doctors': 1,
+          inchargecount: {$size: '$inchargeinfo'},
+          VIPcount: {$size: '$VIPinfo'}
+        }
+      },
+      {
+        $lookup: {
+          from: 'allusers',
+          localField: 'doctors',
+          foreignField: '_id',
+          as: 'doctorinfo'
+        }
+      },
+      {$unwind: {path: '$doctorinfo', preserveNullAndEmptyArrays: true}},
+      {
+        $project: {
+          doctoruserId: '$doctorinfo.userId',
+          doctorname: '$doctorinfo.name',
+          'inchargecount': 1,
+          'VIPcount': 1,
+        }
+      },
+      {$sort: {inchargeCount: -1}}
+    ]
+    Department.aggregate(array, function (err, results) {
+    if (err) {
+      res.status(500).json({code: 1, msg: err.errmsg})
+    }
+    res.json({code: 0, data: results, msg: 'success'})
+  })
   }
 }
 
@@ -525,3 +635,7 @@ exports.getCounselTimeout = function (req, res) {
     })
   }
 }
+
+// exports.getActiveCount = function (req, res) {
+
+// }
