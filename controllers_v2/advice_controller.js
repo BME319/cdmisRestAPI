@@ -40,8 +40,8 @@ exports.postAdvice = function (req, res) {
   let query = {userId: userId}
   let topic = req.body.topic || null
   let content = req.body.content || null
-  if (topic === null || content === null) {
-    return res.status(412).json({results: '请填写topic,content'})
+  if (content === null) {
+    return res.status(412).json({results: '请填写content'})
   }
   // 调用用户获取函数Alluser.getOne
   Alluser.getOne(query, function (err, item) {

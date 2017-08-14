@@ -262,15 +262,15 @@ exports.getInsurance = function (req, res) {
       }
     ]
 
-    if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-      limit = Number(limit)
-      skip = Number(skip)
-      array.push(
-        {$sort: {count: -1}},
-        {$skip: skip},
-        {$limit: limit}
-      )
-    }
+    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+    //   limit = Number(limit)
+    //   skip = Number(skip)
+    //   array.push(
+    //     {$sort: {count: -1}},
+    //     {$skip: skip},
+    //     {$limit: limit}
+    //   )
+    // }
 
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
@@ -281,7 +281,9 @@ exports.getInsurance = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      res.json({results: results})
+      limit = Number(limit)
+      skip = Number(skip)
+      res.json({results: results.slice(skip, limit + skip)})
     })
   }
 }
@@ -367,15 +369,15 @@ exports.getPatientsByClass = function (req, res) {
     }
   ]
 
-  if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-    limit = Number(limit)
-    skip = Number(skip)
-    array.push(
-      {$sort: {count: -1}},
-      {$skip: skip},
-      {$limit: limit}
-    )
-  }
+  // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+  //   limit = Number(limit)
+  //   skip = Number(skip)
+  //   array.push(
+  //     {$sort: {count: -1}},
+  //     {$skip: skip},
+  //     {$limit: limit}
+  //   )
+  // }
   if (classNo !== ''){
     array.splice(
       0,
@@ -387,7 +389,9 @@ exports.getPatientsByClass = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      res.json({results: results})
+      limit = Number(limit)
+      skip = Number(skip)
+      res.json({results: results.slice(skip, limit + skip)})
     })
 
 }
