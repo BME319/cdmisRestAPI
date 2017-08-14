@@ -136,7 +136,10 @@ exports.getDocPD = function (req, res) {
   for (let k = 0; k < days; k++) {
     let queryPD = {
       'doctorId': doctorObjectId,
-      'status': 2,
+      '$or': [
+        {'status': 1},
+        {'status': 2}
+      ],
       'creatTime': {$gte: startTimeTmp, $lt: endTimeTmp}
     }
     console.log('queryPD', queryPD)
@@ -375,7 +378,10 @@ exports.getDepartmentPD = function (req, res) {
         let doctorObjectId = doctorsList[i]
         let queryPD = {
           'doctorId': doctorObjectId,
-          'status': 2,
+          '$or': [
+            {'status': 1},
+            {'status': 2}
+          ],
           'creatTime': {$gte: startTimeTmp, $lt: endTimeTmp}
         }
         console.log('queryPD', queryPD)
