@@ -10,11 +10,11 @@ exports.updateInsuranceMsg = function (req, res, next) {
   //   return res.json({result: '请填写doctorId'})
   // }
   if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
-    return res.json({resutl: '请填写patientId'})
+    return res.json({result: '请填写patientId'})
   }
 
   if (req.body.insuranceId === null || req.body.insuranceId === '' || req.body.insuranceId === undefined) {
-    return res.json({resutl: '请填写insuranceId'})
+    return res.json({result: '请填写insuranceId'})
   }
 
  // 为调用insertMessage方法传入参数，患者从message中查看推送信息

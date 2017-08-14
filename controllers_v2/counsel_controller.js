@@ -9,6 +9,10 @@ var Alluser = require('../models/alluser')
 var Comment = require('../models/comment')
 // var Patient = require('../models/patient')
 var Consultation = require('../models/consultation')
+var Team = require('../models/team')
+var Communication = require('../models/communication')
+var webEntry = require('../settings').webEntry
+var request = require('request')
 
 // 获取医生ID对象，并添加自动转发标记 2017-07-15 GY
 // 注释 输入，doctorId；输出，相应的doctorObject
@@ -520,20 +524,22 @@ exports.getStatus = function (req, res, next) {
 // 注释 更改问诊类型 输入，type，changetype，counselId；输出，更新成功或失败
 exports.changeCounselType = function (req, res) {
   // 若类型为1 更改类型标识为True 写入查询和更新参数 否则返回错误
+  let query = {}
+  let upObj = {}
   if (req.body.type === 1 && req.body.changeType === 'type3') {
     // type3 咨询转问诊
-    var query = {
+    query = {
       counselId: req.body.counselId
     }
-    var upObj = {
+    upObj = {
       type: 3
     }
   } else if (req.body.type === 1 && req.body.changeType === 'type7') {
     // type7 咨询转加急咨询
-    var query = {
+    query = {
       counselId: req.body.counselId
     }
-    var upObj = {
+    upObj = {
       type: 7
     }
   } else {

@@ -112,54 +112,58 @@ exports.getReport = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+    // console.log('item', item)
     if (item === null) {
-      // console.log('items', items)
       return res.json({results: '不存在该段时间的报告!'})
     } else {
-      let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
-      if (item.patientId.class === null || item.patientId.class === '' || item.patientId.class === undefined) {
-        return res.json({results: '请填写患者肾病类型!'})
+      if (itemType === 'DoctorReport') {
+        return res.json({results: item})
       } else {
-        if (item.patientId.class === 'class_5') { flag.flagVA = true }
-        if (item.patientId.class === 'class_6') { flag.flagPD = true }
-        let lab = {SCr: '', GFR: '', PRO: '', ALB: '', HB: ''}
-        if (item.labTestArray.length !== 0) {
-          for (let i = 0; i < item.labTestArray.length; i++) {
-            switch (item.labTestArray[i]._type) {
-              case 'SCr':
-                lab.SCr = {
-                  'max': item.labTestArray[i].max,
-                  'min': item.labTestArray[i].min
-                }
-                break
-              case 'GFR':
-                lab.GFR = {
-                  'max': item.labTestArray[i].max,
-                  'min': item.labTestArray[i].min
-                }
-                break
-              case 'PRO':
-                lab.PRO = {
-                  'max': item.labTestArray[i].max,
-                  'min': item.labTestArray[i].min
-                }
-                break
-              case 'ALB':
-                lab.ALB = {
-                  'max': item.labTestArray[i].max,
-                  'min': item.labTestArray[i].min
-                }
-                break
-              case 'HB':
-                lab.HB = {
-                  'max': item.labTestArray[i].max,
-                  'min': item.labTestArray[i].min
-                }
-                break
+        let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+        if (item.patientId.class === null || item.patientId.class === '' || item.patientId.class === undefined) {
+          return res.json({results: '请填写患者肾病类型!'})
+        } else {
+          if (item.patientId.class === 'class_5') { flag.flagVA = true }
+          if (item.patientId.class === 'class_6') { flag.flagPD = true }
+          let lab = {SCr: '', GFR: '', PRO: '', ALB: '', HB: ''}
+          if (item.labTestArray.length !== 0) {
+            for (let i = 0; i < item.labTestArray.length; i++) {
+              switch (item.labTestArray[i]._type) {
+                case 'SCr':
+                  lab.SCr = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'GFR':
+                  lab.GFR = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'PRO':
+                  lab.PRO = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'ALB':
+                  lab.ALB = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'HB':
+                  lab.HB = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+              }
             }
           }
+          return res.json({results: {item, lab, flag}})
         }
-        return res.json({results: {item, lab, flag}})
       }
     }
   }, opts, fields, populate)
@@ -177,7 +181,7 @@ exports.updateReport = function (req, res) {
   // var labTest = req.body.labTest || null
   // var doctorReport = req.body.doctorReport || null
   // reportType 0-正常 1-信息缺失 2-异常 3-修改
-  var reportType = req.body.reportType || null
+  // var reportType = req.body.reportType || null
   // var recommendValue1 = req.body.recommendValue1 || null
   // var recommendValue2 = req.body.recommendValue2 || null
   // var recommendValue3 = req.body.recommendValue3 || null
@@ -218,6 +222,7 @@ exports.updateReport = function (req, res) {
         recommendValue12 = Number(data[i].recommendValue12)
         recommendValue13 = Number(data[i].recommendValue13)
         recommendValue14 = Number(data[i].recommendValue14)
+        doctorComment = data[i].doctorComment
         if (type === 'week') { doctorReport = '建议下周控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
         if (type === 'month') { doctorReport = '建议下月控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
         if (type === 'season') { doctorReport = '建议下一季度控制血压范围' + recommendValue11 + '-' + recommendValue12 + '/' + recommendValue13 + '-' + recommendValue14 }
@@ -226,6 +231,7 @@ exports.updateReport = function (req, res) {
       case 'Weight':
         recommendValue11 = Number(data[i].recommendValue11)
         recommendValue12 = Number(data[i].recommendValue12)
+        doctorComment = data[i].doctorComment
         if (type === 'week') { doctorReport = '建议下周控制体重范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'month') { doctorReport = '建议下月控制体重范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'season') { doctorReport = '建议下一季度控制体重范围' + recommendValue11 + '-' + recommendValue12 }
@@ -236,6 +242,7 @@ exports.updateReport = function (req, res) {
         break
       case 'Temperature':
         recommendValue11 = Number(data[i].recommendValue11)
+        doctorComment = data[i].doctorComment
         break
       case 'HeartRate':
         recommendValue11 = Number(data[i].recommendValue11)
@@ -248,16 +255,15 @@ exports.updateReport = function (req, res) {
       case 'PeritonealDialysis':
         recommendValue11 = Number(data[i].recommendValue11)
         recommendValue12 = Number(data[i].recommendValue12)
+        doctorComment = data[i].doctorComment
         if (type === 'week') { doctorReport = '建议下周控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'month') { doctorReport = '建议下月控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'season') { doctorReport = '建议下一季度控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         if (type === 'year') { doctorReport = '建议下一年控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         break
       case 'LabTest':
-        if (type === 'week') { upData['labTest'] = data[i].labTest }
-        if (type === 'month') { upData['labTest'] = data[i].labTest }
-        if (type === 'season') { upData['doctorReport'] = '建议增加检测' + data[i].labTestNewItem }
-        if (type === 'year') { upData['doctorReport'] = '建议增加检测' + data[i].labTestNewItem }
+        doctorComment = data[i].doctorComment
+        doctorReport = data[i].doctorReport
         break
       case 'DoctorReport':
         doctorReport = data[i].doctorReport || null
@@ -283,6 +289,9 @@ exports.updateReport = function (req, res) {
     }
     if (doctorReport !== '') {
       upData['doctorReport'] = doctorReport
+    }
+    if (doctorComment !== '') {
+      upData['doctorComment'] = doctorComment
     }
     console.log(query)
     console.log(upData)
@@ -337,7 +346,7 @@ exports.updateReport = function (req, res) {
   // }
 }
 
-// 获取患者当前周月季年的测量记录 2017-07-26 lgf
+// 获取患者当前和历史周月季年的测量记录 2017-07-26 lgf
 exports.getVitalSigns = function (req, res, next) {
   var userRole = req.session.role
   var userId = req.session.userId

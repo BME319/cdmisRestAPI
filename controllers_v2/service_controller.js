@@ -66,7 +66,7 @@ exports.getDoctorObject = function (req, res, next) {
 // 获取某位医生的服务开启状态及收费情况
 // 根据医生ID获取服务开启状态 2017-07-14 GY
 exports.getServices = function (req, res) {
-  let doctorId = req.query.userId || null
+  let doctorId = req.session.userId || null
   let query = {}
   if (doctorId === null) {
     return res.status(412).json({results: '请输入doctorId'})
