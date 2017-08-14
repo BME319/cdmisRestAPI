@@ -11,7 +11,11 @@ var communicationSchema = new mongoose.Schema({
   sendDateTime: Date,
   title: String,
   content: mongoose.Schema.Types.Mixed,
-  newsType: String
+  // newsType: 11 医-患 12 医-医 13 医-团队
+  newsType: {
+    type: String, 
+    enum: ['11', '12', '13']
+  }
 })
 
 var CommunicationModel = mongoose.model('communication', communicationSchema)
