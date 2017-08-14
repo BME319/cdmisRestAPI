@@ -99,17 +99,17 @@ module.exports = function (app, webEntry, acl) {
 
   app.post(version + '/alluser/register', errorHandler.error, alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
   app.post(version + '/alluser/cancelUser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.cancelAlluser)
-  app.post(version + '/alluser/unionid', tokenManager.verifyToken(), alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
+  app.post(version + '/alluser/unionid', alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
   app.post(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
   app.get(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId)
-  app.post(version + '/alluser/reset', tokenManager.verifyToken(), alluserCtrl.reset)
+  app.post(version + '/alluser/reset', alluserCtrl.reset)
   app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest, alluserCtrl.checkBinding, alluserCtrl.login)
   app.post(version + '/alluser/logout', tokenManager.verifyToken(), alluserCtrl.logout)
-  app.get(version + '/alluser/userID', tokenManager.verifyToken(), alluserCtrl.getAlluserID)
-  app.post(version + '/alluser/sms', tokenManager.verifyToken(), alluserCtrl.sendSMS)
-  app.get(version + '/alluser/sms', tokenManager.verifyToken(), alluserCtrl.verifySMS)
-  app.get(version + '/alluser/agreement', tokenManager.verifyToken(), alluserCtrl.getAlluserAgreement)
-  app.post(version + '/alluser/agreement', tokenManager.verifyToken(), alluserCtrl.updateAlluserAgreement)
+  app.get(version + '/alluser/userID', alluserCtrl.getAlluserID)
+  app.post(version + '/alluser/sms', alluserCtrl.sendSMS)
+  app.get(version + '/alluser/sms', alluserCtrl.verifySMS)
+  app.get(version + '/alluser/agreement', alluserCtrl.getAlluserAgreement)
+  app.post(version + '/alluser/agreement', alluserCtrl.updateAlluserAgreement)
 
   // 弃用，expense表已合并至 order表 2017-08-10 lgf
   // app.post(version + '/expense/rechargeDoctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
@@ -2666,7 +2666,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/wechatPhotoUrl', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.wechatPhotoUrl)
+  app.post(version + '/patient/wechatPhotoUrl', patientCtrl.wechatPhotoUrl)
   // doctor_Info
   /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
    * @swagger
@@ -6450,7 +6450,7 @@ module.exports = function (app, webEntry, acl) {
   // wechat
   app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.settingConfig)
   // 获取用户基本信息
-  app.get(version + '/wechat/getUserInfo', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.getuserinfo)
+  app.get(version + '/wechat/getUserInfo', wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.getuserinfo)
   app.get(version + '/wechat/gettokenbycode', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken)
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
 
