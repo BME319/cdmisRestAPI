@@ -180,6 +180,13 @@ exports.getDoctorLists = function (req, res) {
     _Url = _Url.substr(0, _Url.length - 1)
   }
   var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/getDoctorLists' + _Url
+
+  if (req.query.doctorId !== null && req.query.doctorId !== undefined && req.query.doctorId !== '') {
+    query = {userId: req.query.doctorId}
+    option = ''
+    fields = docInfoForPat
+  }
+
   Alluser.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
