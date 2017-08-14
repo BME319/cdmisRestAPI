@@ -420,7 +420,7 @@ exports.getScore = function (req, res) {
       {
         $group: {
           _id: '$doctors',
-          score: {$sum: '$score'}
+          score: {$avg: '$score'}
         }
       },
       {
@@ -449,7 +449,7 @@ exports.getScore = function (req, res) {
       let count = 0
       let sum = 0
       for (i = 0; i < results.length; i++) {
-        if (results[i].score !== 0) {
+        if (results[i].score !== 0 && results[i].score !== null) {
           count++
           sum = sum + results[i].score
         }
