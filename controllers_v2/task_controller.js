@@ -418,7 +418,7 @@ exports.remindChangeTask = function () {
                   userId: doctorItem.userId, 
                   sendBy: 'System', 
                   readOrNot: 0, 
-                  type: 7, 
+                  type: 9, 
                   time: now, 
                   title: title, 
                   description: description
@@ -427,7 +427,7 @@ exports.remindChangeTask = function () {
                   userId: doctorItem.userId, 
                   userRole: 'doctor', 
                   sendBy: 'System', 
-                  type: 7
+                  type: 9
                 }
                 let upNews = {
                   messageId: messageId, 

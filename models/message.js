@@ -7,7 +7,7 @@ var messageSchema = new mongoose.Schema({
 
   sendBy: String,
   readOrNot: Number,
-  // 患者保险消息5, 患者退款消息6, 医生提醒更新主管患者任务7, 群体教育消息8
+  // 患者保险消息5, 患者退款消息6, 医生提醒更新主管患者任务9, 群体教育消息8, 审核消息7
   type: Number,
   time: Date,
   title: String,
