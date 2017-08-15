@@ -50,11 +50,11 @@ var alluserSchema = new mongoose.Schema({
   score: Number,
   // 1: 咨询 2: 问诊 3: 加急咨询 4: 主管医生 5: 面诊服务
   // 状态： 默认1   1为开启，0为关闭
-  counselStatus1: {type: Number, default: 1},
-  counselStatus2: {type: Number, default: 1},
-  counselStatus3: {type: Number, default: 1},
-  counselStatus4: {type: Number, default: 1},
-  counselStatus5: {type: Number, default: 1},
+  counselStatus1: {type: Number, default: 0},
+  counselStatus2: {type: Number, default: 0},
+  counselStatus3: {type: Number, default: 0},
+  counselStatus4: {type: Number, default: 0},
+  counselStatus5: {type: Number, default: 0},
   // 医生设置的面诊排班（模板）（医生设置）
   serviceSchedules: [
     {
@@ -134,6 +134,8 @@ var alluserSchema = new mongoose.Schema({
   class_info: [String],
   operationTime: Date,
   VIP: {type: Number, default: 0},
+  VIPStartTime: Date,
+  VIPEndTime: Date,
   hypertension: Number,
   allergic: String,
   // 关注医生字段

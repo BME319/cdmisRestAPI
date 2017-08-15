@@ -51,6 +51,7 @@ exports.getAllposts = function (req, res) {
   let userId = req.session.userId
   let limit = Number(req.query.limit)
   let skip = Number(req.query.skip)
+  let title = req.query.title || '' 
   let array = [
     {
       $lookup: {
@@ -119,6 +120,13 @@ exports.getAllposts = function (req, res) {
     {$skip: skip},
     {$limit: limit}
   ]
+  if (title !== '') {
+    array.splice(
+      0,
+      0,
+      {$match: {title: {$regex: title}}}
+    )
+  }
   Forum.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
@@ -357,16 +365,17 @@ exports.getPostContent = function (req, res) {
           time: '$replies.time',
           depth: '$replies.depth',
           content: '$replies.content',
-          at: '$replies.at'
+          // at: '$replies.at'
+          replies: '$replies.replies'
         }
       },
       {
         $lookup: {
-        from: 'allusers',
-        localField: 'userId',
-        foreignField: 'userId',
-        as: 'userinfo'
-      }
+          from: 'allusers',
+          localField: 'userId',
+          foreignField: 'userId',
+          as: 'userinfo'
+        }
       },
       {
         $project: {
@@ -377,6 +386,7 @@ exports.getPostContent = function (req, res) {
           'depth': 1,
           'content': 1,
           'at': 1,
+          'replies': 1,
           avatar: '$userinfo.photoUrl'
         }
       },
@@ -432,7 +442,7 @@ exports.forumComment = function (req, res) {
             time: time,
             depth: 1,
             content: content,
-            at: postId
+            // at: postId
           }
         },
         $inc: {replyCount: 1}
@@ -473,22 +483,23 @@ exports.forumReply = function (req, res) {
             res.status(500).json({code: 1, msg: err.errmsg})
           }
           let name = alluserInfo.name
+          let query2 = {postId: postId, 'replies.commentId': commentId}
           let obj = {
             $push: {
-              replies: {
-                commentId: commentId,
+              'replies.$.replies': {
+                // commentId: commentId,
                 replyId: replyId,
                 userId: userId,
                 userName: name,
                 time: time,
-                depth: 2,
+                // depth: 2,
                 content: content,
                 at: at
               }
             }
             // $inc: {replyCount: 1}
           }
-          Forum.updateOne(query, obj, function (err, upforum) {
+          Forum.updateOne(query2, obj, function (err, upforum) {
             if (err) {
               res.status(500).json({code: 1, msg: err.errmsg})
             }
@@ -586,34 +597,35 @@ exports.deleteComment = function (req, res) {
       res.status(500).json({code: 1, msg: '该commentId不存在'})
     } else {
       let query = {postId: postId}
-  let obj = {}
-  if (replyId !== '') {
-    obj = {
-      $pull: {
-        replies: {
-          commentId: commentId,
-          replyId: replyId
+      let obj = {}
+      if (replyId !== '') {
+        query['replies.commentId'] = commentId
+        obj = {
+          $pull: {
+            'replies.$.replies': {
+              // commentId: commentId,
+              replyId: replyId
+            }
+          }
+          // $inc: {replyCount: -1}
+        }
+      } else {
+        obj = {
+          $pull: {
+            replies: {
+              commentId: commentId
+            }
+          },
+          $inc: {replyCount: -1}
         }
       }
-      // $inc: {replyCount: -1}
-    }
-  } else {
-    obj = {
-      $pull: {
-        replies: {
-          commentId: commentId
+      
+      Forum.updateOne(query, obj, function (err, upforum) {
+        if (err) {
+          res.status(500).json({code: 1, msg: err.errmsg})
         }
-      },
-      $inc: {replyCount: -1}
-    }
-  }
-  
-  Forum.updateOne(query, obj, function (err, upforum) {
-    if (err) {
-      res.status(500).json({code: 1, msg: err.errmsg})
-    }
-    res.json({code: 0, msg: 'success'})
-  })
+        res.json({code: 0, msg: 'success'})
+      })
     }
   })
 }

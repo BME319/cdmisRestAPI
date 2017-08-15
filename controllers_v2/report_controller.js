@@ -3,6 +3,7 @@ var async = require('async')
 var Report = require('../models/report')
 var Compliance = require('../models/compliance')
 var Alluser = require('../models/alluser')
+var LabtestImport = require('../models/labtestImport')
 
 // 获取报表 2017-07-24 wf  修改 2017-07-28 lgf
 exports.getReport = function (req, res) {
@@ -42,7 +43,7 @@ exports.getReport = function (req, res) {
     if (type === 'week') {  // '周报'
       let currentTimeDay = currentTime.getDay()
       startTimeTemp = new Date(currentTime - (currentTimeDay - 1) * 24 * 3600 * 1000)
-      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '08', '00', '00')  // 本周一零点
+      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')  // 本周一零点
       while (modify !== 0) {
         endTime = new Date(startTime)
         startTime = new Date(endTime - 7 * 24 * 3600 * 1000)
@@ -57,7 +58,7 @@ exports.getReport = function (req, res) {
     if (type === 'month') {  // '月报'
       startTimeTemp = new Date(timeTemp)
       startTimeTemp.setDate(1)
-      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '08', '00', '00')
+      startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')
       while (modify !== 0) {
         startTime = new Date(getLastMonthYestdy(new Date(startTime)))
         time = String(startTime.getFullYear()) + String(add0(startTime.getMonth() + 1))
@@ -69,7 +70,7 @@ exports.getReport = function (req, res) {
       let startTimeTempM = currentTime.getMonth()
       let startTimeTempD = currentTime.getDate()
       startTimeTempM = getQuarterStartMonth(startTimeTempM)
-      startTime = new Date(startTimeTempY, startTimeTempM, startTimeTempD, '08', '00', '00')
+      startTime = new Date(startTimeTempY, startTimeTempM, startTimeTempD, '00', '00', '00')
       startTime.setDate(1)
       while (modify !== 0) {
         startTime = new Date(getLastSeason(new Date(startTime)))
@@ -82,9 +83,9 @@ exports.getReport = function (req, res) {
       startTime = new Date(currentTime)
       startTime.setMonth(0)
       startTime.setDate(1)
-      startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate(), '08', '00', '00')
+      startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate(), '00', '00', '00')
       while (modify !== 0) {
-        startTime = new Date(startTime.getFullYear() - 1, startTime.getMonth(), startTime.getDate(), '08', '00', '00')
+        startTime = new Date(startTime.getFullYear() - 1, startTime.getMonth(), startTime.getDate(), '00', '00', '00')
         time = String(startTime.getFullYear())
         modify++
       }
@@ -104,24 +105,81 @@ exports.getReport = function (req, res) {
     return res.json({result: '请填写itemType!'})
   }
   var fields = {}
-  var opts = {} // 'sort': '-time'
+  var opts = {}
   var populate = {'path': 'patientId', 'select': 'class'}
   // console.log(query)
   Report.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+    // console.log('item', item)
     if (item === null) {
-      // console.log('items', items)
       return res.json({results: '不存在该段时间的报告!'})
     } else {
-      let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
-      if (item.patientId.class === null || item.patientId.class === '' || item.patientId.class === undefined) {
-        return res.json({results: '请填写患者肾病类型!'})
+      let doctorReport = ''
+      let doctorComment = ''
+      if (item.doctorReport.length !== 0) {
+        let rows = item.doctorReport
+        rows.sort(function (a, b) {
+          return Date.parse(b.insertTime) - Date.parse(a.insertTime) // 时间降序
+        })
+        doctorReport = rows[0].content
+      }
+      if (item.doctorComment.length !== 0) {
+        let rows = item.doctorComment
+        rows.sort(function (a, b) {
+          return Date.parse(b.insertTime) - Date.parse(a.insertTime) // 时间降序
+        })
+        doctorComment = rows[0].content
+      }
+      if (itemType === 'DoctorReport') {
+        return res.json({results: {item, doctorReport, doctorComment}})
       } else {
-        if (item.patientId.class === 'class_5') { flag.flagVA = true }
-        if (item.patientId.class === 'class_6') { flag.flagPD = true }
-        return res.json({results: {item, flag}})
+        let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+        if (item.patientId.class === null || item.patientId.class === '' || item.patientId.class === undefined) {
+          return res.json({results: '请填写患者肾病类型!'})
+        } else {
+          if (item.patientId.class === 'class_5') { flag.flagVA = true }
+          if (item.patientId.class === 'class_6') { flag.flagPD = true }
+          let lab = {SCr: '', GFR: '', PRO: '', ALB: '', HB: ''}
+          if (item.labTestArray.length !== 0) {
+            for (let i = 0; i < item.labTestArray.length; i++) {
+              switch (item.labTestArray[i]._type) {
+                case 'SCr':
+                  lab.SCr = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'GFR':
+                  lab.GFR = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'PRO':
+                  lab.PRO = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'ALB':
+                  lab.ALB = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+                case 'HB':
+                  lab.HB = {
+                    'max': item.labTestArray[i].max,
+                    'min': item.labTestArray[i].min
+                  }
+                  break
+              }
+            }
+          }
+          return res.json({results: {item, lab, doctorReport, doctorComment, flag}})
+        }
       }
     }
   }, opts, fields, populate)
@@ -135,11 +193,13 @@ exports.updateReport = function (req, res) {
   var type = req.body.type || null
   var time = req.body.time || null
   var data = req.body.data || null
+  let currentTime = new Date()
+  let index = []
   // var labTestNewItem = req.body.labTestNewItem || null
   // var labTest = req.body.labTest || null
   // var doctorReport = req.body.doctorReport || null
   // reportType 0-正常 1-信息缺失 2-异常 3-修改
-  var reportType = req.body.reportType || null
+  // var reportType = req.body.reportType || null
   // var recommendValue1 = req.body.recommendValue1 || null
   // var recommendValue2 = req.body.recommendValue2 || null
   // var recommendValue3 = req.body.recommendValue3 || null
@@ -167,13 +227,11 @@ exports.updateReport = function (req, res) {
     if (time !== null && time !== '') {
       query['time'] = time
     }
-    let upData = {}
     let recommendValue11 = -1
     let recommendValue12 = -1
     let recommendValue13 = -1
     let recommendValue14 = -1
-    let doctorReport = ''
-    let doctorComment = ''
+    let doctorReport = ''  // 需要修改为读取历史记录
     switch (data[i].itemType) {
       case 'BloodPressure':
         recommendValue11 = Number(data[i].recommendValue11)
@@ -194,10 +252,12 @@ exports.updateReport = function (req, res) {
         if (type === 'year') { doctorReport = '建议下一年控制体重范围' + recommendValue11 + '-' + recommendValue12 }
         break
       case 'Vol':
-        recommendValue11 = Number(data[i].recommendValue11)
+        // recommendValue11 = Number(data[i].recommendValue11)
+        recommendValue11 = 500
         break
       case 'Temperature':
-        recommendValue11 = Number(data[i].recommendValue11)
+        // recommendValue11 = Number(data[i].recommendValue11)
+        recommendValue11 = 37.3
         break
       case 'HeartRate':
         recommendValue11 = Number(data[i].recommendValue11)
@@ -216,10 +276,7 @@ exports.updateReport = function (req, res) {
         if (type === 'year') { doctorReport = '建议下一年控制超滤量或出量范围' + recommendValue11 + '-' + recommendValue12 }
         break
       case 'LabTest':
-        if (type === 'week') { upData['labTest'] = data[i].labTest }
-        if (type === 'month') { upData['labTest'] = data[i].labTest }
-        if (type === 'season') { upData['doctorReport'] = '建议增加检测' + data[i].labTestNewItem }
-        if (type === 'year') { upData['doctorReport'] = '建议增加检测' + data[i].labTestNewItem }
+        doctorReport = data[i].doctorReport
         break
       case 'DoctorReport':
         doctorReport = data[i].doctorReport || null
@@ -231,6 +288,22 @@ exports.updateReport = function (req, res) {
         return res.json({result: '请填写正确的测量项目名称!'})
     }
     query['itemType'] = data[i].itemType
+    let doctorComment = data[i].doctorComment || ''  // doctorComment为选填,医生未填写默认为空
+    // doctorReport\doctorComment均修改为记录历史小结和点评
+    let upData = {
+      $push: {
+        doctorReport: {
+          content: doctorReport,
+          doctorId: req.userObject._id,
+          insertTime: new Date(currentTime)
+        },
+        doctorComment: {
+          content: doctorComment,
+          doctorId: req.userObject._id,
+          insertTime: new Date(currentTime)
+        }
+      }
+    }
     if (recommendValue11 !== -1) {
       upData['recommendValue11'] = recommendValue11
     }
@@ -243,33 +316,36 @@ exports.updateReport = function (req, res) {
     if (recommendValue14 !== -1) {
       upData['recommendValue14'] = recommendValue14
     }
-    if (doctorReport !== '') {
-      upData['doctorReport'] = doctorReport
-    }
     console.log(query)
     console.log(upData)
-    Report.update(query, upData, function (err, upmessage) {
+    Report.updateOne(query, upData, function (err, upmessage) {
       if (err) {
         if (res !== undefined) {
           return res.status(422).send(err.message)
         }
       }
-      if (i === (data.length - 1)) {  // data内的数据全部更新完再输出结果
-        if (upmessage.n !== 0 && upmessage.nModified === 0) {
-          if (res !== undefined) {
-            return res.json({msg: '未修改！请检查修改目标是否与原来一致！', data: upmessage, code: 0})
-          }
+      index.push(i)
+      if (index.length === data.length) {  // data内的数据全部更新完再输出结果
+        if (upmessage === null) {
+          return res.json({msg: '未修改！请检查项目填写是否正确！', data: {}, code: 0})
+        } else {
+          return res.json({msg: '修改成功！', data: {}, code: 1})
         }
-        if (upmessage.n !== 0 && upmessage.nModified !== 0) {
-          if (upmessage.n === upmessage.nModified) {
-            if (res !== undefined) {
-              return res.json({msg: '全部更新成功', data: upmessage, code: 1})
-            }
-          }
-          if (res !== undefined) {
-            return res.json({msg: '未全部更新！', data: upmessage, code: 0})
-          }
-        }
+        // if (upmessage.n !== 0 && upmessage.nModified === 0) {
+        //   if (res !== undefined) {
+        //     return res.json({msg: '未修改！请检查修改目标是否与原来一致！', data: upmessage, code: 0})
+        //   }
+        // }
+        // if (upmessage.n !== 0 && upmessage.nModified !== 0) {
+        //   if (upmessage.n === upmessage.nModified) {
+        //     if (res !== undefined) {
+        //       return res.json({msg: '全部更新成功', data: upmessage, code: 1})
+        //     }
+        //   }
+        //   if (res !== undefined) {
+        //     return res.json({msg: '未全部更新！', data: upmessage, code: 0})
+        //   }
+        // }
       }
     }, {upsert: true})
   }
@@ -299,7 +375,7 @@ exports.updateReport = function (req, res) {
   // }
 }
 
-// 获取患者当前周月季年的测量记录 2017-07-26 lgf
+// 获取患者当前和历史周月季年的测量记录 2017-07-26 lgf
 exports.getVitalSigns = function (req, res, next) {
   var userRole = req.session.role
   var userId = req.session.userId
@@ -311,6 +387,7 @@ exports.getVitalSigns = function (req, res, next) {
   var modify = req.query.modify || null // 调用历史测量数据的标签，0 当前 -1 前一段 -2
   var query = {}
   var query2 = {}
+  var queryL = {}
   if (modify !== null && modify !== '') {
     modify = Number(modify)
   } else {
@@ -356,6 +433,9 @@ exports.getVitalSigns = function (req, res, next) {
       query2 = {
         'date': {$gte: startTime, $lt: currentTime} // >= <
       }
+      queryL = {
+        'time': {$gte: startTime, $lt: currentTime} // >= <
+      }
     } else {
       return res.json({result: '请填写当前时间!'})
     }
@@ -365,10 +445,12 @@ exports.getVitalSigns = function (req, res, next) {
   if (userRole === 'patient') {
     query['userId'] = userId
     query2['userId'] = userId
+    queryL['userId'] = userId
   } else {
     if (patientId !== null && patientId !== '') {
       query['userId'] = patientId
       query2['userId'] = patientId
+      queryL['userId'] = patientId
     } else {
       return res.json({result: '请填写patientId!'})
     }
@@ -637,6 +719,109 @@ exports.getVitalSigns = function (req, res, next) {
           }
         }
       })
+    } else {
+      Alluser.getOne(query3, function (err, item) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        if (item === null) {
+          return res.json({results: '不存在的患者ID!'})
+        } else {
+          next()
+        }
+      })
+    }
+  } else if (code === 'LabTest') {
+    if (modify === 0) {
+      let labTestData = []
+      let labTestRecordTime = []
+      for (let j = 0; j < 5; j++) {
+        switch (j) {
+          case 0:
+            queryL['type'] = 'SCr'
+            break
+          case 1:
+            queryL['type'] = 'GFR'
+            break
+          case 2:
+            queryL['type'] = 'PRO'
+            break
+          case 3:
+            queryL['type'] = 'ALB'
+            break
+          case 4:
+            queryL['type'] = 'HB'
+            break
+        }
+        let optsL = {'sort': '+time'}
+        async.parallel({
+          one: function (callback) {
+            Alluser.getOne(query3, function (err, item) {
+              callback(err, item)
+            })
+          },
+          two: function (callback) {
+            LabtestImport.getSome(queryL, function (err, items) {
+              callback(err, items)
+            }, optsL)
+          }
+        }, function (err, results) {
+          if (err) {
+            return res.status(500).send(err.errmsg)
+          }
+          if (results.one === null) {
+            return res.json({results: '不存在的患者ID!'})
+          } else {
+            let labTemp = []
+            let labRecordTimeTemp = []
+            if (results.two.length !== 0) {
+              for (let n = 0; n < results.two.length; n++) {
+                labTemp.push(results.two[n].value)
+                labRecordTimeTemp.push(new Date(results.two[n].time))
+              }
+            }
+            labTestData.push({j, labTemp})
+            labTestRecordTime.push({j, labRecordTimeTemp})
+            // console.log('j', j)
+            // console.log('labTestData', labTestData)
+            if (labTestData.length === 5) {
+              let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
+              if (results.one.class === null || results.one.class === '' || results.one.class === undefined) {
+                return res.json({results: '请填写患者肾病类型!'})
+              } else {
+                if (results.one.class === 'class_5') { flag.flagVA = true }
+                if (results.one.class === 'class_6') { flag.flagPD = true }
+                // return res.json({results: {item: {data1, recordTime}, flag}})
+              }
+              for (let i = 0; i < labTestData.length; i++) {
+                switch (Number(labTestData[i].j)) {
+                  case 0:
+                    var data1 = labTestData[i].labTemp
+                    var recordTime = labTestRecordTime[i].labRecordTimeTemp
+                    break
+                  case 1:
+                    var data2 = labTestData[i].labTemp
+                    var recordTime2 = labTestRecordTime[i].labRecordTimeTemp
+                    break
+                  case 2:
+                    var data3 = labTestData[i].labTemp
+                    var recordTime3 = labTestRecordTime[i].labRecordTimeTemp
+                    break
+                  case 3:
+                    var data4 = labTestData[i].labTemp
+                    var recordTime4 = labTestRecordTime[i].labRecordTimeTemp
+                    break
+                  case 4:
+                    var data5 = labTestData[i].labTemp
+                    var recordTime5 = labTestRecordTime[i].labRecordTimeTemp
+                    break
+                }
+              }
+              return res.json({results: {item: {data1, data2, data3, data4, data5, recordTime, recordTime2, recordTime3, recordTime4, recordTime5}, flag}})
+            }
+          }
+        })
+      }
     } else {
       Alluser.getOne(query3, function (err, item) {
         if (err) {

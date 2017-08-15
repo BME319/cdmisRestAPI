@@ -58,7 +58,10 @@ var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
 var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
 var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 var forumCtrl = require('../controllers_v2/forum_controller')
+var departmentMonitorCtrl = require('../controllers_v2/departmentMonitor_controller')
 var policyCtrl = require('../controllers_v2/policy_controller')
+var districtMonitorCtrl = require('../controllers_v2/districtMonitor_controller')
+var departmentReportTempCtrl = require('../controllers_v2/departmentReportTemp_controller')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -98,23 +101,25 @@ module.exports = function (app, webEntry, acl) {
 
   app.post(version + '/alluser/register', errorHandler.error, alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
   app.post(version + '/alluser/cancelUser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.cancelAlluser)
-  app.post(version + '/alluser/unionid', tokenManager.verifyToken(), alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
+  app.post(version + '/alluser/unionid', alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
   app.post(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
   app.get(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId)
-  app.post(version + '/alluser/reset', tokenManager.verifyToken(), alluserCtrl.reset)
+  app.post(version + '/alluser/reset', alluserCtrl.reset)
   app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest, alluserCtrl.checkBinding, alluserCtrl.login)
   app.post(version + '/alluser/logout', tokenManager.verifyToken(), alluserCtrl.logout)
-  app.get(version + '/alluser/userID', tokenManager.verifyToken(), alluserCtrl.getAlluserID)
-  app.post(version + '/alluser/sms', tokenManager.verifyToken(), alluserCtrl.sendSMS)
-  app.get(version + '/alluser/sms', tokenManager.verifyToken(), alluserCtrl.verifySMS)
-  app.get(version + '/alluser/agreement', tokenManager.verifyToken(), alluserCtrl.getAlluserAgreement)
-  app.post(version + '/alluser/agreement', tokenManager.verifyToken(), alluserCtrl.updateAlluserAgreement)
+  app.get(version + '/alluser/userID', alluserCtrl.getAlluserID)
+  app.post(version + '/alluser/sms', alluserCtrl.sendSMS)
+  app.get(version + '/alluser/sms', alluserCtrl.verifySMS)
+  app.get(version + '/alluser/agreement', alluserCtrl.getAlluserAgreement)
+  app.post(version + '/alluser/agreement', alluserCtrl.updateAlluserAgreement)
 
-  app.post(version + '/expense/rechargeDoctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
-  app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
+  // 弃用，expense表已合并至 order表 2017-08-10 lgf
+  // app.post(version + '/expense/rechargeDoctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  // app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
 
-  app.get(version + '/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), alluserCtrl.checkPatient, reportCtrl.getReport)
-  app.post(version + '/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reportCtrl.updateReport)
+  // report 方法已在下方更新 2017-08-10 lgf
+  // app.get(version + '/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), alluserCtrl.checkPatient, reportCtrl.getReport)
+  // app.post(version + '/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reportCtrl.updateReport)
 
   // gy
   // review
@@ -153,7 +158,8 @@ module.exports = function (app, webEntry, acl) {
    *       type: "string"
    *     - name: "userId"
    *       in: "query"
-   *       required: true
+   *       required: false
+   *       description: "患者查询医生服务开启状态时输入"
    *       type: "string"
    *     responses:
    *       200:
@@ -399,7 +405,86 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Doctor's userId not found."
    */
   app.post(version + '/services/charge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setCharge)
-  app.post(version + '/services/relayTarget', tokenManager.verifyToken(), serviceCtrl.setRelayTarget)
+  /** YQC 17-08-10 - acl 2017-08-10 医生
+   * @swagger
+   * /services/relayTarget:
+   *   post:
+   *     tags:
+   *     - "services"
+   *     summary: "Set/Change the relayTarget of a doctor"
+   *     description: ""
+   *     operationId: "relayTarget"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "relayTarget"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           relayTarget:
+   *             type: "array"
+   *             items:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: string
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userId:
+   *                   type: string
+   *                 name:
+   *                   type: string
+   *                 counselStatus1:
+   *                   type: number
+   *                 counselStatus2:
+   *                   type: number
+   *                 counselStatus3:
+   *                   type: number
+   *                 counselStatus4:
+   *                   type: number
+   *                 counselStatus5:
+   *                   type: number
+   *                 charge1:
+   *                   type: number
+   *                 charge2:
+   *                   type: number
+   *                 charge3:
+   *                   type: number
+   *                 charge4:
+   *                   type: number
+   *                 charge5:
+   *                   type: number
+   *                 serviceSchedules:
+   *                   type: "array"
+   *                   $ref: '#/definitions/ServiceSchedule'
+   *                 serviceSuspendTime:
+   *                   type: "array"
+   *                   $ref: '#/definitions/ServiceSuspend'
+   *                 autoRelay:
+   *                   type: number
+   *                 relayTarget:
+   *                   type: "array"
+   *                   items:
+   *                     type: object
+   *                     properties:
+   *                       teamId:
+   *                         type: string
+   */
+  app.post(version + '/services/relayTarget', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.setRelayTarget)
   // YQC 2017-07-28 添加面诊余量更新函数 添加未来十四天内的面诊余量记录
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
    * @swagger
@@ -563,7 +648,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSuspend)
-  // 咨询问卷填写(新增自动转发功能)
+  // 咨询问卷填写(新增自动转发功能) - acl 2017-08-10 患者
   app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
 
   // YQC
@@ -585,7 +670,7 @@ module.exports = function (app, webEntry, acl) {
    *       description: "Token."
    *       required: true
    *       type: "string"
-   *     - name: "userId"
+   *     - name: "doctorId"
    *       in: "query"
    *       description: "The userId of the Doctor to be queried."
    *       required: true
@@ -624,7 +709,7 @@ module.exports = function (app, webEntry, acl) {
    *     - name: "counselId"
    *       in: "query"
    *       description: "Comments of counsel to be found."
-   *       required: true
+   *       required: false
    *       type: "string"
    *     responses:
    *       200:
@@ -653,10 +738,15 @@ module.exports = function (app, webEntry, acl) {
    *     produces:
    *     - "application/json"
    *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "token of the admin user."
+   *       required: true
+   *       type: "string"
    *     - name: "advisorId"
    *       in: "query"
    *       description: "UserId of the advisor to be queried."
-   *       required: true
+   *       required: false
    *       type: "string"
    *     responses:
    *       200:
@@ -712,7 +802,7 @@ module.exports = function (app, webEntry, acl) {
    *                 $ref: '#/definitions/Advice'
    */
   app.post(version + '/advice/advice', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), adviceCtrl.postAdvice)
-  // compliance - debug complete 2017-07-17
+  // compliance
   /** YQC 17-07-24 - acl 2017-08-04 医生，患者，管理员
    * @swagger
    * /compliance/compliance:
@@ -732,7 +822,7 @@ module.exports = function (app, webEntry, acl) {
    *     - name: "userId"
    *       in: "query"
    *       description: "UserId to be queried."
-   *       required: false
+   *       required: true
    *       type: "string"
    *     - name: "date"
    *       in: "query"
@@ -758,7 +848,7 @@ module.exports = function (app, webEntry, acl) {
    *               items:
    *                 $ref: '#/definitions/Compliance'
    */
-  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getComplianceByDay)
+  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getCompliance)
   /** YQC 17-07-24 - acl 2017-08-04 患者
    * @swagger
    * /compliance/compliances:
@@ -798,7 +888,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/compliance/compliance', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
-  // vitalSign 2017-07-14  - debug complete 2017-07-24
+  // vitalSign
   /** YQC 17-07-24 - acl 2017-07-28 医生/患者
    * @swagger
    * /vitalSign/vitalSigns:
@@ -888,30 +978,940 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData, patientCtrl.editPatientDetail)
-  // counsel 2017-07-17 debug 1-
+  // counsel 2017-07-17
   // 医生获取问诊信息
-  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getCounsels)
-  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay)
-  app.get(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
-  app.post(version + '/counsel/status', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
-  app.post(version + '/counsel/type', tokenManager.verifyToken(), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
-  app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
-  // communication 2017-07-14
-  app.get(version + '/communication/counselReport', tokenManager.verifyToken(), communicationCtrl.getCounselReport)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 医生
+   * @swagger
+   * /counsel/counsels:
+   *   get:
+   *     tags:
+   *     - "counsel"
+   *     summary: "获取资讯问诊内容"
+   *     description: ""
+   *     operationId: "counsels"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "status"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     - name: "type"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   messages:
+   *                     type: "array"
+   *                     items:
+   *                       $ref: '#/definitions/Message'
+   *             count:
+   *               type: number
+   */
+  app.get(version + '/counsel/counsels', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getSessionObject, counselCtrl.getCounsels)
+  // 获取咨询状态
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 医生／患者
+   * @swagger
+   * /counsel/status:
+   *   get:
+   *     tags:
+   *     - "counsel"
+   *     summary: "获取资讯问诊状态"
+   *     description: ""
+   *     operationId: "status"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "body"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "status"
+   *       in: "body"
+   *       required: false
+   *       type: "number"
+   *     - name: "type"
+   *       in: "body"
+   *       required: false
+   *       type: "number"
+   *     - name: "doctorId"
+   *       in: "body"
+   *       required: true
+   *       type: "string"
+   *     - name: "patientId"
+   *       in: "body"
+   *       required: true
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 messages:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Message'
+   *                 Patient:
+   *                   type: "object"
+   *                   $ref: '#/definitions/Patient'
+   *                 Doctor:
+   *                   type: "object"
+   *                   $ref: '#/definitions/Doctor'
+   *             count:
+   *               type: number
+   */
+  app.get(version + '/counsel/status', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus)
+  // 修改咨询状态
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 医生／患者
+   * @swagger
+   * /counsel/status:
+   *   post:
+   *     tags:
+   *     - "counsel"
+   *     summary: "修改资讯问诊状态"
+   *     description: ""
+   *     operationId: "status"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "docotorId"
+   *           - "status"
+   *           - "type"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           docotorId:
+   *             type: string
+   *           status:
+   *             type: number
+   *             default: 0
+   *           type:
+   *             type: number
+   *             default: 2
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               $ref: '#/definitions/Counsel'
+   */
+  app.post(version + '/counsel/status', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus)
+  // 修改咨询类型
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 患者
+   * @swagger
+   * /counsel/type:
+   *   post:
+   *     tags:
+   *     - "counsel"
+   *     summary: "修改咨询类型"
+   *     description: ""
+   *     operationId: "type"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "docotorId"
+   *           - "changeType"
+   *           - "type"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           docotorId:
+   *             type: string
+   *           changeType:
+   *             type: string
+   *             default: "true"
+   *           type:
+   *             type: number
+   *             default: 2
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               $ref: '#/definitions/Counsel'
+   */
+  app.post(version + '/counsel/type', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
+  // 评价医生
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 患者
+   * @swagger
+   * /counsel/commentScore:
+   *   post:
+   *     tags:
+   *     - "counsel"
+   *     summary: "评价医生"
+   *     description: ""
+   *     operationId: "commentScore"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "totalScore"
+   *           - "docotorId"
+   *           - "content"
+   *           - "couselId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           totalScore:
+   *             type: "number"
+   *           docotorId:
+   *             type: string
+   *           content:
+   *             type: string
+   *           couselId:
+   *             type: number
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             CounselResults:
+   *               type: object
+   *               $ref: '#/definitions/Counsel'
+   *             commentresults:
+   *               type: object
+   *               $ref: '#/definitions/Comment'
+   *             result:
+   *               type: string
+   */
+  app.post(version + '/counsel/commentScore', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore)
+  // communication
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/counselReport:
+   *   get:
+   *     tags:
+   *     - "communication"
+   *     summary: "获取资讯问诊报告"
+   *     description: ""
+   *     operationId: "counselReport"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "counselId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 $ref: '#/definitions/Counsel'
+   */
+  app.get(version + '/communication/counselReport', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getCounselReport)
   // app.post(version + '/communication/newTeam', tokenManager.verifyToken(), getNoMid.getNo(4), communicationCtrl.newTeam)
-  app.post(version + '/communication/team', tokenManager.verifyToken(), communicationCtrl.newTeam)
-  app.post(version + '/communication/deleteTeam', tokenManager.verifyToken(), communicationCtrl.deleteTeam)
-  app.get(version + '/communication/team', tokenManager.verifyToken(), communicationCtrl.getTeam)
-  app.post(version + '/communication/consultation', tokenManager.verifyToken(), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/team:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "新建会诊团队"
+   *     description: ""
+   *     operationId: "team"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "teamId"
+   *           - "name"
+   *           - "sponsorId"
+   *           - "sponsorName"
+   *           - "sponsorPhoto"
+   *           - "photoAddress"
+   *           - "description"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           teamId:
+   *             type: "string"
+   *           name:
+   *             type: string
+   *           sponsorId:
+   *             type: string
+   *           sponsorName:
+   *             type: string
+   *           sponsorPhoto:
+   *             type: string
+   *           photoAddress:
+   *             type: string
+   *           description:
+   *             type: string
+   *           time:
+   *             type: string
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             newResults:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   */
+  app.post(version + '/communication/team', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.newTeam)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/deleteTeam:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "删除会诊团队"
+   *     description: ""
+   *     operationId: "deleteTeam"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "teamId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           teamId:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             newResults:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   *                 members:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamMember'
+   */
+  app.post(version + '/communication/deleteTeam', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.deleteTeam)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/team:
+   *   get:
+   *     tags:
+   *     - "communication"
+   *     summary: "获取会诊团队"
+   *     description: ""
+   *     operationId: "team"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "teamId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   *                 members:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamMember'
+   */
+  app.get(version + '/communication/team', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getTeam)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/consultation:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "新建会诊"
+   *     description: ""
+   *     operationId: "consultation"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "teamId"
+   *           - "counselId"
+   *           - "sponsorId"
+   *           - "patientId"
+   *           - "consultationId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           teamId:
+   *             type: "string"
+   *           counselId:
+   *             type: string
+   *           sponsorId:
+   *             type: string
+   *           patientId:
+   *             type: string
+   *           consultationId:
+   *             type: string
+   *           status:
+   *             type: number
+   *             default: 1
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 consultationId:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 patientId:
+   *                   type: "string"
+   *                 diseaseInfo:
+   *                   type: "string"
+   *                 status:
+   *                   type: "number"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   */
+  app.post(version + '/communication/consultation', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation)
   // app.post(version + '/communication/consultation', tokenManager.verifyToken(), getNoMid.getNo(5), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
-  app.get(version + '/communication/consultation', tokenManager.verifyToken(), communicationCtrl.getConsultation)
-  app.post(version + '/communication/conclusion', tokenManager.verifyToken(), communicationCtrl.conclusion)
-  app.post(version + '/communication/insertMember', tokenManager.verifyToken(), communicationCtrl.insertMember, communicationCtrl.updateNumber)
-  app.post(version + '/communication/removeMember', tokenManager.verifyToken(), communicationCtrl.removeMember, communicationCtrl.updateNumber)
-  app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
-  app.post(version + '/communication/communication', tokenManager.verifyToken(), getNoMid.getNo(8), communicationCtrl.postCommunication)
-  app.get(version + '/communication/communication', tokenManager.verifyToken(), communicationCtrl.getCommunication)
-  /** GY 2017-07-28
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/consultation:
+   *   get:
+   *     tags:
+   *     - "communication"
+   *     summary: "获取会诊信息"
+   *     description: ""
+   *     operationId: "consultation"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "consultationId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 consultationId:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   $ref: '#/definitions/Doctor'
+   *                 patientId:
+   *                   $ref: '#/definitions/Patient'
+   *                 diseaseInfo:
+   *                   $ref: '#/definitions/Counsel'
+   *                 teamId:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 conclusion:
+   *                   type: "string"
+   *                 status:
+   *                   type: "number"
+   *                   default: "1"
+   *                 messages:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Message'
+   */
+  app.get(version + '/communication/consultation', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getConsultation)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/conclusion:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "新建会诊"
+   *     description: ""
+   *     operationId: "conclusion"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "conclusion"
+   *           - "consultationId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           conclusion:
+   *             type: "string"
+   *           consultationId:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 consultationId:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 patientId:
+   *                   type: "string"
+   *                 diseaseInfo:
+   *                   type: "string"
+   *                 status:
+   *                   type: "number"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 conclusion:
+   *                   type: "string"
+   */
+  app.post(version + '/communication/conclusion', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.conclusion)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/insertMember:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "设置团队成员"
+   *     description: ""
+   *     operationId: "insertMember"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "teamId"
+   *           - "member"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           teamId:
+   *             type: "string"
+   *           member:
+   *             type: array
+   *             items:
+   *               $ref: '#/definitions/TeamMember'
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   *                 members:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamMember'
+   */
+  app.post(version + '/communication/insertMember', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.insertMember, communicationCtrl.updateNumber)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/removeMember:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "移除团队成员"
+   *     description: ""
+   *     operationId: "removeMember"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "teamId"
+   *           - "membersuserId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           teamId:
+   *             type: "string"
+   *           membersuserId:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 teamId:
+   *                   type: "string"
+   *                 name:
+   *                   type: "string"
+   *                 sponsorId:
+   *                   type: "string"
+   *                 sponsorName:
+   *                   type: "string"
+   *                 sponsorPhoto:
+   *                   type: "string"
+   *                 photoAddress:
+   *                   type: "string"
+   *                 time:
+   *                   type: "string"
+   *                   format: date-time
+   *                 description:
+   *                   type: "string"
+   *                 number:
+   *                   type: "number"
+   *                   default: "1"
+   *                 members:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/TeamMember'
+   */
+  app.post(version + '/communication/removeMember', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.removeMember, communicationCtrl.updateNumber)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
+   * @swagger
+   * /communication/updateLastTalkTime:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "更新最新交流时间"
+   *     description: ""
+   *     operationId: "updateLastTalkTime"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "doctorId"
+   *           - "doctorId2"
+   *           - "lastTalkTime"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           doctorId:
+   *             type: "string"
+   *           doctorId2:
+   *             type: "string"
+   *           lastTalkTime:
+   *             type: string
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生/患者
+   * @swagger
+   * /communication/communication:
+   *   post:
+   *     tags:
+   *     - "communication"
+   *     summary: "新建交流"
+   *     description: ""
+   *     operationId: "communication"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "messageType"
+   *           - "sendBy"
+   *           - "receiver"
+   *           - "content"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           messageType:
+   *             type: "number"
+   *           sendBy:
+   *             type: string
+   *           sponsorId:
+   *             type: string
+   *           receiver:
+   *             type: string
+   *           content:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             newResults:
+   *               type: object
+   *               $ref: '#/definitions/Communication'
+   */
+  app.post(version + '/communication/communication', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(8), communicationCtrl.postCommunication)
+  /** YQC annotation 2017-08-11 - acl 2017-08-11 医生/患者
+   * @swagger
+   * /communication/communication:
+   *   get:
+   *     tags:
+   *     - "communication"
+   *     summary: "获取交流信息"
+   *     description: ""
+   *     operationId: "communication"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "messageType"
+   *       in: "query"
+   *       required: true
+   *       type: "number"
+   *     - name: "newsType"
+   *       in: "query"
+   *       required: true
+   *       type: "number"
+   *     - name: "id1"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     - name: "id2"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             newResults:
+   *               type: object
+   *               $ref: '#/definitions/Communication'
+   *             nexturl:
+   *               type: string
+   */
+  app.get(version + '/communication/communication', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.getCommunication)
+  /** GY 2017-07-28 - acl 2017-08-11 医生
    * @swagger
    * /communication/massToPatient:
    *   post:
@@ -954,12 +1954,198 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "target not found."
    */
-  app.post(version + '/communication/massToPatient', tokenManager.verifyToken(), communicationCtrl.getMassTargets, communicationCtrl.massCommunication)
+  app.post(version + '/communication/massToPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getMassTargets, communicationCtrl.massCommunication)
   // task 2017-07-14
-  app.get(version + '/tasks', tokenManager.verifyToken(), taskCtrl.getTasks)
-  app.post(version + '/tasks/status', tokenManager.verifyToken(), taskCtrl.updateStatus)
-  app.post(version + '/tasks/time', tokenManager.verifyToken(), taskCtrl.updateStartTime)
-  app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 患者／医生
+   * @swagger
+   * /tasks:
+   *   get:
+   *     tags:
+   *     - "tasks"
+   *     summary: "获取任务"
+   *     description: ""
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "userId"
+   *       in: "query"
+   *       description: "userId of a patient."
+   *       required: true
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     - name: "sortNo"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   userId:
+   *                     type: "string"
+   *                   sortNo:
+   *                     type: "number"
+   *                   name:
+   *                     type: "string"
+   *                   date:
+   *                     type: "string"
+   *                     format: "date-time"
+   *                   description:
+   *                     type: "string"
+   *                   invalidFlag:
+   *                     type: "number"
+   *                   task:
+   *                     type: "array"
+   *                     items:
+   *                       $ref: '#/definitions/Task'
+   */
+  app.get(version + '/tasks', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), taskCtrl.getTasks)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 患者
+   * @swagger
+   * /tasks/status:
+   *   post:
+   *     tags:
+   *     - "tasks"
+   *     summary: "修改任务状态"
+   *     description: ""
+   *     operationId: "status"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "userId"
+   *           - "status"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           sortNo:
+   *             type: number
+   *           type:
+   *             type: string
+   *           code:
+   *             type: string
+   *           status:
+   *             type: number
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/tasks/status', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.updateStatus)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 医生
+   * @swagger
+   * /tasks/time:
+   *   post:
+   *     tags:
+   *     - "tasks"
+   *     summary: "修改任务起始时间"
+   *     description: ""
+   *     operationId: "time"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "userId"
+   *           - "startTime"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           sortNo:
+   *             type: number
+   *           type:
+   *             type: string
+   *           code:
+   *             type: string
+   *           startTime:
+   *             type: string
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/tasks/time', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.updateStartTime)
+  /** YQC annotation 2017-08-10 - acl 2017-08-10 医生
+   * @swagger
+   * /tasks/task:
+   *   post:
+   *     tags:
+   *     - "tasks"
+   *     summary: "给患者设置一个任务模版"
+   *     description: ""
+   *     operationId: "task"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "userId"
+   *           - "sortNo"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           sortNo:
+   *             type: number
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userId:
+   *                   type: "string"
+   *                 sortNo:
+   *                   type: "number"
+   *                 name:
+   *                   type: "string"
+   *                 date:
+   *                   type: "string"
+   *                   format: "date-time"
+   *                 description:
+   *                   type: "string"
+   *                 invalidFlag:
+   *                   type: "number"
+   *                 task:
+   *                   type: "array"
+   *                   items:
+   *                     $ref: '#/definitions/Task'
+   */
+  app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者/医生
    * @swagger
    * /tasks/task:
@@ -1074,7 +2260,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "patient"
-   *     summary: "获取患者详情（注释未完成）"
+   *     summary: "获取患者详情"
    *     description: ""
    *     operationId: "detail"
    *     produces:
@@ -1098,9 +2284,7 @@ module.exports = function (app, webEntry, acl) {
    *           properties:
    *             results:
    *               type: object
-   *               properties:
-   *                 patient:
-   *                   type: "object"
+   *               $ref: '#/definitions/Patient'
    *             weight:
    *               type: number
    *             recentDiagnosis:
@@ -1212,7 +2396,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "patient"
-   *     summary: "获取所有医生的列表（可分页／条件／模糊查询）（注释未完成）"
+   *     summary: "获取所有医生的列表（可分页／条件／模糊查询）"
    *     description: ""
    *     operationId: "doctors"
    *     produces:
@@ -1253,40 +2437,9 @@ module.exports = function (app, webEntry, acl) {
    *             results:
    *               type: array
    *               items:
-   *                 doctor:
-   *                   type: "object"
+   *                 $ref: '#/definitions/Doctor'
    */
   app.get(version + '/patient/doctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getDoctorLists)
-  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者 【弃用，和myDoctorsIncharge重复】
-   * @swagger
-   * /patient/myDoctors:
-   *   get:
-   *     tags:
-   *     - "patient"
-   *     summary: "获取当前的主管医生（注释未完成）"
-   *     description: ""
-   *     operationId: "myDoctors"
-   *     produces:
-   *     - "application/json"
-   *     parameters:
-   *     - name: "token"
-   *       in: "query"
-   *       description: "Token."
-   *       required: true
-   *       type: "string"
-   *     responses:
-   *       200:
-   *         description: "Operation success."
-   *         schema:
-   *           type: object
-   *           properties:
-   *             results:
-   *               type: object
-   *               properties:
-   *                 doctor:
-   *                   type: "object"
-   */
-  app.get(version + '/patient/myDoctors', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getMyDoctor)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
    * @swagger
    * /patient/counselRecords:
@@ -1313,23 +2466,22 @@ module.exports = function (app, webEntry, acl) {
    *             results:
    *               type: array
    *               items:
-   *                 CounselRecord:
-   *                   type: "object"
-   *                   properties:
-   *                     time:
-   *                       type: "string"
-   *                       format: data-time
-   *                     messages:
-   *                       type: "string"
-   *                     doctorId:
-   *                       type: "object"
-   *                       properties:
-   *                         userId:
-   *                           type: "string"
-   *                         name:
-   *                           type: "string"
-   *                         photoUrl:
-   *                           type: "string"
+   *                 type: "object"
+   *                 properties:
+   *                   time:
+   *                     type: "string"
+   *                     format: data-time
+   *                   messages:
+   *                     type: "string"
+   *                   doctorId:
+   *                     type: "object"
+   *                     properties:
+   *                       userId:
+   *                         type: "string"
+   *                       name:
+   *                         type: "string"
+   *                       photoUrl:
+   *                         type: "string"
    */
   app.get(version + '/patient/counselRecords', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getSessionObject, patientCtrl.getCounselRecords)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
@@ -1516,7 +2668,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/wechatPhotoUrl', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.wechatPhotoUrl)
+  app.post(version + '/patient/wechatPhotoUrl', patientCtrl.wechatPhotoUrl)
   // doctor_Info
   /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
    * @swagger
@@ -1586,7 +2738,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "doctor"
-   *     summary: "获取我的主管患者和关注患者（注释未完成）"
+   *     summary: "获取我的主管患者和关注患者"
    *     description: ""
    *     operationId: "myPatients"
    *     produces:
@@ -1609,13 +2761,11 @@ module.exports = function (app, webEntry, acl) {
    *                 patients:
    *                   type: "array"
    *                   items:
-   *                     Patient:
-   *                       type: object
+   *                     $ref: '#/definitions/Patient'
    *                 patientsInCharge:
    *                   type: "array"
    *                   items:
-   *                     Patient:
-   *                       type: object
+   *                     $ref: '#/definitions/Patient'
    *       404:
    *         description: "Doctor not found."
    */
@@ -1626,7 +2776,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "doctor"
-   *     summary: "按日获取我的主管患者和关注患者（注释未完成）"
+   *     summary: "按日获取我的主管患者和关注患者"
    *     description: ""
    *     operationId: "myPatientsByDate"
    *     produces:
@@ -1654,18 +2804,15 @@ module.exports = function (app, webEntry, acl) {
    *                 patients:
    *                   type: "array"
    *                   items:
-   *                     Patient:
-   *                       type: object
+   *                     $ref: '#/definitions/Patient'
    *                 patientsInCharge:
    *                   type: "array"
    *                   items:
-   *                     Patient:
-   *                       type: object
+   *                     $ref: '#/definitions/Patient'
    *       404:
    *         description: "Doctor not found."
    */
   app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
-  // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
   /** YQC annotation 2017-07-26 - acl 2017-08-04 医生
    * @swagger
    * /doctor/detail:
@@ -1869,7 +3016,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "doctor"
-   *     summary: "获取最近交流过的医生列表（注释未完成）"
+   *     summary: "获取最近交流过的医生列表"
    *     description: ""
    *     operationId: "myRecentDoctors"
    *     produces:
@@ -2061,7 +3208,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/doctor/deleteSuspendTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.deleteSuspendTime)
-  /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 医生/患者
    * @swagger
    * /doctor/suspendTime:
    *   get:
@@ -2078,6 +3225,11 @@ module.exports = function (app, webEntry, acl) {
    *       description: "Token."
    *       required: true
    *       type: "string"
+   *     - name: "docotrId"
+   *       in: "query"
+   *       description: "患者查询的时候需输入."
+   *       required: false
+   *       type: "string"
    *     responses:
    *       200:
    *         description: "Operation success."
@@ -2091,7 +3243,7 @@ module.exports = function (app, webEntry, acl) {
    *                   description: "面诊加号服务停诊信息"
    *                   type: "array"
    *                   items:
-   *                     $ref: '#/definitions/SuspendTime'
+   *                     $ref: '#/definitions/ServiceSuspend'
    *                 suspendTime:
    *                   description: "工作停诊信息"
    *                   type: "array"
@@ -2162,7 +3314,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "UserId not found."
    */
   app.get(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getAliPayAccount)
-  /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
+  /** YQC annotation 2017-07-25 - acl 2017-07-25 医生 2017-08-10 患者
    * @swagger
    * /doctor/AliPayAccount:
    *   post:
@@ -2261,7 +3413,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "patient"
-   *     summary: "Finds the list of FavoriteDoctors, with the function of skip and limit.（注释未完成）"
+   *     summary: "Finds the list of FavoriteDoctors, with the function of skip and limit."
    *     description: ""
    *     operationId: "myFavoriteDoctors"
    *     produces:
@@ -2289,13 +3441,9 @@ module.exports = function (app, webEntry, acl) {
    *           type: object
    *           properties:
    *             results:
-   *               type: object
-   *               properties:
-   *                 FavoriteDoctors:
-   *                   type: array
-   *                   items:
-   *                     FavoriteDoctor:
-   *                       type: object
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/Doctor'
    *             nexurl:
    *               type: string
    *               description: "下一页显示的请求路径"
@@ -2345,7 +3493,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "patient"
-   *     summary: "Finds the doctor-in-charge status, if there's any, of a patient.（注释未完成）"
+   *     summary: "Finds the doctor-in-charge status, if there's any, of a patient."
    *     description: ""
    *     operationId: "myDoctorsInCharge"
    *     produces:
@@ -2361,12 +3509,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    *         schema:
    *           type: object
-   *           properties:
-   *             results:
-   *               type: object
-   *               properties:
-   *                 DoctorInCharge:
-   *                   type: object
+   *           $ref: '#/definitions/Doctor'
    *       404:
    *         description: "UserId not found."
    */
@@ -2591,15 +3734,23 @@ module.exports = function (app, webEntry, acl) {
    *                 properties:
    *                   day:
    *                     type: string
-   *                     format: "YYYYMMDD"
+   *                     format: "YYYY-MM-DD"
+   *                     description: "预约日期"
    *                   time:
    *                     type: string
    *                     enum:
    *                       - "Morning"
    *                       - "Afternoon"
+   *                     description: "预约时段"
+   *                   place:
+   *                     type: string
+   *                     description: "医生出诊地点"
+   *                   diagId:
+   *                     type: string
+   *                     description: "某时段已预约的面诊号"
    *                   margin:
    *                     type: number
-   *                     description: "某时段剩余可预约数量"
+   *                     description: "该时段剩余可预约数量"
    *       500:
    *         description: "Internal Server Error"
    *       404:
@@ -2646,8 +3797,8 @@ module.exports = function (app, webEntry, acl) {
    *       200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, personalDiagCtrl.updatePDCapacityDown, personalDiagCtrl.newPersonalDiag, orderCtrl.getOrderNo, orderCtrl.updateOrder)
-  // 患者端 取消面诊服务（至少提前三天) cancelMyPD 还没有和order退款连起来
+  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, personalDiagCtrl.updatePDCapacityDown, personalDiagCtrl.newPersonalDiag, alluserCtrl.successMessage, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  // 患者端 取消面诊服务 还没有和order退款连起来
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
    * /services/personalDiagnosis:
@@ -2856,8 +4007,291 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.confirmPD)
 
-  // PC端保险管理 权限insuranceC/insuranceA
+  // PC端保险管理
+  // 获取患者 权限insuranceC/insuranceA
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/patients:
+   *   get:
+   *     tags:
+   *     - "policy"
+   *     summary: "获取保险意向患者"
+   *     description: ""
+   *     operationId: "patients"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "status"
+   *       in: "query"
+   *       required: false
+   *       type: "number"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   gender:
+   *                     type: "string"
+   *                   phoneNo:
+   *                     type: "number"
+   *                   name:
+   *                     type: "string"
+   *                   userId:
+   *                     type: "string"
+   *                   birthday:
+   *                     type: "string"
+   *                     format: "date-time"
+   *                   VIP:
+   *                     type: "number"
+   *             code:
+   *               type: number
+   */
   app.get(version + '/policy/patients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatients)
+  // 获取专员 权限insuranceC
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/agents:
+   *   get:
+   *     tags:
+   *     - "policy"
+   *     summary: "获取保险专员列表"
+   *     description: ""
+   *     operationId: "agents"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   userId:
+   *                     type: "string"
+   *                   phoneNo:
+   *                     type: "number"
+   *                   name:
+   *                     type: "string"
+   *             code:
+   *               type: number
+   */
+  app.get(version + '/policy/agents', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getAgents)
+  // 主管设置／更换专员 权限insuranceC
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/agent:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "设置保险专员"
+   *     description: ""
+   *     operationId: "agent"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "insuranceAId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           insuranceAId:
+   *             type: string
+   *           reason:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/policy/agent', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.getInsuranceAObject, policyCtrl.setAgent)
+  // 专员／主管录入患者跟踪记录 权限insuranceC/insuranceA
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/followUp:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "录入跟踪记录"
+   *     description: ""
+   *     operationId: "followUp"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "content"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           content:
+   *             type: string
+   *           photoUrls:
+   *             type: array
+   *             items:
+   *               type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/policy/followUp', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertFollowUp)
+  // 专员／主管录入患者保单 权限insuranceC/insuranceA
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/policy:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "录入保单"
+   *     description: ""
+   *     operationId: "policy"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "content"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           content:
+   *             type: string
+   *           photoUrls:
+   *             type: array
+   *             items:
+   *               type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/policy/policy', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertPolicy)
+  // 主管审核患者保单 权限insuranceC
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/policyReview:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "审核保单"
+   *     description: ""
+   *     operationId: "policyReview"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *           - "reviewResult"
+   *           - "startTime"
+   *           - "endTime"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *           reviewResult:
+   *             type: string
+   *           rejectReason:
+   *             type: string
+   *           startTime:
+   *             type: string
+   *             format: date-time
+   *           endTime:
+   *             type: string
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/policy/policyReview', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.reviewPolicy)
+  // 主管注销专员 权限insuranceC
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/agentOff:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "注销保险专员"
+   *     description: ""
+   *     operationId: "agentOff"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "insuranceAId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           insuranceAId:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/policy/agentOff', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getInsuranceAObject, policyCtrl.agentOff)
 
   // lgf
   // account
@@ -2875,7 +4309,8 @@ module.exports = function (app, webEntry, acl) {
    *     type: object
    *     properties:
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       money:
    *         type: number
    *       from:
@@ -2884,7 +4319,8 @@ module.exports = function (app, webEntry, acl) {
    *     type: object
    *     properties:
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       money:
    *         type: number
    *       title:
@@ -2893,7 +4329,8 @@ module.exports = function (app, webEntry, acl) {
    *     type: object
    *     properties:
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       type:
    *         type: number
    *       money:
@@ -2921,7 +4358,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: array
    *         items:
    *           $ref: '#/definitions/Times'
-  */
+   */
   /**
    * @swagger
    * /account/accountInfo:
@@ -2929,6 +4366,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getAccountInfo
    *     tags:
    *       - AccountInfo
+   *     summary: 查询账户信息
    *     description: Get All AccountInfo
    *     produces:
    *       - application/json
@@ -2947,8 +4385,8 @@ module.exports = function (app, webEntry, acl) {
    *             $ref: '#/definitions/AccountInfo'
    *       500:
    *         description: Server internal error
-  */
-  // 权限 患者
+   */
+  // 查询账户信息 权限 医生/患者
   app.get(version + '/account/accountInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.getAccountInfo)
   /**
    * @swagger
@@ -2957,6 +4395,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getCounts
    *     tags:
    *       - AccountInfo
+   *     summary: 查询咨询免费次数，或者咨询某个医生的次数
    *     description: Get Counts
    *     produces:
    *       - application/json
@@ -2983,10 +4422,21 @@ module.exports = function (app, webEntry, acl) {
    *               type: number
    *             count:
    *               type: number
+   *       201:
+   *         schema:
+   *           type: object
+   *           required:
+   *             - freeTimes
+   *             - totalCount
+   *           properties:
+   *             freeTimes:
+   *               type: number
+   *             totalCount:
+   *               type: number
    *       500:
    *         description: Server internal error
-  */
-  // 权限 患者
+   */
+  // 查询咨询免费次数，或者咨询某个医生的次数 权限 患者
   app.get(version + '/account/counts', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts)
   /**
    * @swagger
@@ -2995,6 +4445,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: modifyCounts
    *     tags:
    *       - AccountInfo
+   *     summary: 次数更新(咨询、咨询转问诊、问诊结束)
    *     description: Modify Counts
    *     produces:
    *       - application/json
@@ -3033,8 +4484,8 @@ module.exports = function (app, webEntry, acl) {
    *               type: number
    *       500:
    *         description: Server internal error
-  */
-  // 权限 患者
+   */
+  // 次数更新(咨询、咨询转问诊、问诊结束) 权限 患者
   app.post(version + '/account/counts', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts)
   /**
    * @swagger
@@ -3043,6 +4494,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: updateFreeTime
    *     tags:
    *       - AccountInfo
+   *     summary: 新建咨询时调用
    *     description: Update FreeTime
    *     produces:
    *       - application/json
@@ -3070,15 +4522,17 @@ module.exports = function (app, webEntry, acl) {
    *               $ref: '#/definitions/AccountInfo'
    *       500:
    *         description: Server internal error
-  */
+   */
+  // 新建咨询时调用 权限 患者
   app.post(version + '/account/freeTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
   /**
    * @swagger
    * /account/countsRespective:
    *   get:
-   *     operationId: getCountsRespective
+   *     operationId: countsRespective
    *     tags:
    *       - AccountInfo
+   *     summary: 获取未完成咨询/问诊计数
    *     description: Get Counts Respective
    *     produces:
    *       - application/json
@@ -3102,168 +4556,13 @@ module.exports = function (app, webEntry, acl) {
    *               type: number
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
+   */
+  // 获取未完成咨询/问诊计数 权限 患者
+  app.get(version + '/account/countsRespective', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
 
   // expense
-  /**
-   * @swagger
-   * definition:
-   *   Expense:
-   *     properties:
-   *       patientId:
-   *         type: number
-   *       patientName:
-   *         type: string
-   *       doctorId:
-   *         type: string
-   *       doctorName:
-   *         type: string
-   *       time:
-   *         type: date
-   *       money:
-   *         type: number
-   *       type:
-   *         type: string
-   *       status:
-   *         type: number
-  */
-  /**
-   * @swagger
-   * /expense/doctor:
-   *   post:
-   *     operationId: rechargeDoctor
-   *     tags:
-   *       - Expense
-   *     description: Recharge Doctor
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - doctorId
-   *             - type
-   *             - money
-   *             - status
-   *           properties:
-   *             token:
-   *               type: string
-   *             doctorId:
-   *               type: string
-   *             type:
-   *               type: string
-   *             money:
-   *               type: number
-   *             status:
-   *               type: number
-   *     responses:
-   *       200:
-   *         description: success
-   *         schema:
-   *           type: object
-   *           required:
-   *             - n
-   *             - nModified
-   *             - ok
-   *           properties:
-   *             n:
-   *               type: number
-   *             nModified:
-   *               type: number
-   *             ok:
-   *               type: number
-   *       500:
-   *         description: Server internal error
-  */
-  app.post(version + '/expense/doctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
-  /**
-   * @swagger
-   * /expense/records:
-   *   get:
-   *     operationId: getRecords
-   *     tags:
-   *       - Expense
-   *     description: Get Expense Records
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: patientId
-   *         description: patientId
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: patientName
-   *         description: patientName
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: doctorId
-   *         description: doctorId
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: doctorName
-   *         description: doctorName
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: time
-   *         description: time
-   *         in: query
-   *         required: true
-   *         type: date
-   *       - name: money
-   *         description: money
-   *         in: query
-   *         required: true
-   *         type: number
-   *       - name: type
-   *         description: type
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: status
-   *         description: status
-   *         in: query
-   *         required: false
-   *         type: number
-   *       - name: limit
-   *         description: limit
-   *         in: query
-   *         required: true
-   *         type: number
-   *       - name: skip
-   *         description: skip
-   *         in: query
-   *         required: true
-   *         type: number
-   *     responses:
-   *       200:
-   *         schema:
-   *           type: object
-   *           required:
-   *             - expense
-   *             - nexturl
-   *           properties:
-   *             expense:
-   *               type: object
-   *               $ref: '#/definitions/Expense'
-   *             nexturl:
-   *               type: string
-   *       500:
-   *         description: Server internal error
-  */
-  app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
+  // app.post(version + '/expense/doctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
+  // app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
 
   // healthInfo
   /**
@@ -3288,9 +4587,11 @@ module.exports = function (app, webEntry, acl) {
    *       type:
    *         type: string
    *       insertTime:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       label:
    *         type: string
    *       description:
@@ -3303,7 +4604,7 @@ module.exports = function (app, webEntry, acl) {
    *         type: array
    *         items:
    *           $ref: '#/definitions/Url'
-  */
+   */
   /**
    * @swagger
    * /healthInfo/healthInfos:
@@ -3311,6 +4612,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getAllHealthInfo
    *     tags:
    *       - HealthInfo
+   *     summary: 获得患者所有的健康信息
    *     description: Get All HealthInfo
    *     produces:
    *       - application/json
@@ -3329,8 +4631,9 @@ module.exports = function (app, webEntry, acl) {
    *             $ref: '#/definitions/HealthInfo'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)
+   */
+  // 获得患者所有的健康信息 权限 医生/患者
+  app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.getAllHealthInfo)
   /**
    * @swagger
    * /healthInfo/healthDetail:
@@ -3338,6 +4641,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getHealthDetail
    *     tags:
    *       - HealthInfo
+   *     summary: 获得患者某条健康信息详情
    *     description: Get Health Detail
    *     produces:
    *       - application/json
@@ -3361,8 +4665,9 @@ module.exports = function (app, webEntry, acl) {
    *             $ref: '#/definitions/HealthInfo'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.getHealthDetail)
+   */
+  // 获得患者某条健康信息详情 权限 医生/患者
+  app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.getHealthDetail)
   /**
    * @swagger
    * /healthInfo/healthInfo:
@@ -3370,6 +4675,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: insertHealthInfo
    *     tags:
    *       - HealthInfo
+   *     summary: 新增患者健康信息
    *     description: Insert HealthInfo
    *     produces:
    *       - application/json
@@ -3385,15 +4691,14 @@ module.exports = function (app, webEntry, acl) {
    *             - time
    *             - label
    *             - url
-   *             - description
-   *             - comments
    *           properties:
    *             token:
    *               type: string
    *             type:
    *               type: string
    *             time:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *             label:
    *               type: string
    *             url:
@@ -3411,8 +4716,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: The server does not meet one of the prerequisites set by the requester in the request
    *       404:
    *         description: The server could not find the requested page
-  */
-  app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), healthInfoCtrl.insertHealthInfo)
+   */
+  // 新增患者健康信息 权限 医生/患者
+  app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.insertHealthInfo)
   /**
    * @swagger
    * /healthInfo/healthDetail:
@@ -3420,6 +4726,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: modifyHealthDetail
    *     tags:
    *       - HealthInfo
+   *     summary: 修改患者某条健康信息
    *     description: Modify HealthDetail
    *     produces:
    *       - application/json
@@ -3444,9 +4751,11 @@ module.exports = function (app, webEntry, acl) {
    *             type:
    *               type: string
    *             time:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *             insertTime:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *             label:
    *               type: string
    *             url:
@@ -3464,8 +4773,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: The server does not meet one of the prerequisites set by the requester in the request
    *       404:
    *         description: The server could not find the requested page
-  */
-  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.modifyHealthDetail)
+   */
+  // 修改患者某条健康信息 权限 医生/患者
+  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.modifyHealthDetail)
   /**
    * @swagger
    * /healthInfo/deleteHealthDetail:
@@ -3473,6 +4783,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: deleteHealthDetail
    *     tags:
    *       - HealthInfo
+   *     summary: 删除患者某条健康信息
    *     description: Delete a Health Detail
    *     produces:
    *       - application/json
@@ -3489,14 +4800,16 @@ module.exports = function (app, webEntry, acl) {
    *             token:
    *               type: string
    *             insertTime:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *     responses:
    *       200:
    *         description: success
    *       500:
    *         description: Server internal error
-  */
-  app.post(version + '/healthInfo/deleteHealthDetail', tokenManager.verifyToken(), healthInfoCtrl.deleteHealthDetail)
+   */
+  // 删除患者某条健康信息 权限 医生/患者
+  app.post(version + '/healthInfo/deleteHealthDetail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), healthInfoCtrl.deleteHealthDetail)
 
   // insurance
   /**
@@ -3508,14 +4821,16 @@ module.exports = function (app, webEntry, acl) {
    *       status:
    *         type: number
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *   InsuranceMsg:
    *     type: object
    *     properties:
    *       insuranceId:
    *         type: string
    *       time:
-   *         type: Date
+   *         type: string
+   *         format: date-time
    *       description:
    *         type: string
    *   insMsg:
@@ -3547,14 +4862,15 @@ module.exports = function (app, webEntry, acl) {
    *       sendBy:
    *         type: string
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       title:
    *         type: string
    *       description:
    *         type: string
    *       url:
    *         type: string
-  */
+   */
   /**
    * @swagger
    * /insurance/message:
@@ -3562,6 +4878,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: insertInsuranceMessage
    *     tags:
    *       - Insurance
+   *     summary: 给患者发送保险推送
    *     description: Insert Insurance Message
    *     produces:
    *       - application/json
@@ -3575,20 +4892,16 @@ module.exports = function (app, webEntry, acl) {
    *             - token
    *             - patientId
    *             - insuranceId
-   *             - time
-   *             - insdescription
-   *             - title
-   *             - description
-   *             - url
    *           properties:
    *             token:
    *               type: string
    *             patientId:
    *               type: string
    *             insuranceId:
-   *               type: stirng
+   *               type: string
    *             time:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *             insdescription:
    *               type: string
    *             title:
@@ -3616,8 +4929,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: Server internal error
    *       422:
    *         description: Unsuccessfully modified
-  */
-  app.post(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
+   */
+  // 给患者发送保险推送 权限 医生
+  app.post(version + '/insurance/message', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
   /**
    * @swagger
    * /insurance/message:
@@ -3625,6 +4939,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getInsuranceMessage
    *     tags:
    *       - Insurance
+   *     summary: 获取保险推送信息
    *     description: Returns Insurance Message
    *     produces:
    *       - application/json
@@ -3647,8 +4962,9 @@ module.exports = function (app, webEntry, acl) {
    *           $ref: '#/definitions/insMsg'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkDoctor, insuranceCtrl.getInsMsg)
+   */
+  // 获取保险推送信息 权限 患者
+  app.get(version + '/insurance/message', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkDoctor, insuranceCtrl.getInsMsg)
   /**
    * @swagger
    * /insurance/prefer:
@@ -3656,6 +4972,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: setInsurancePrefer
    *     tags:
    *       - Insurance
+   *     summary: 设置保险购买意向
    *     description: Set Insurance Prefer
    *     produces:
    *       - application/json
@@ -3675,12 +4992,14 @@ module.exports = function (app, webEntry, acl) {
    *             status:
    *               type: number
    *             date:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *     responses:
    *       200:
    *         description: success
-  */
-  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), serviceCtrl.getSessionObject, insuranceCtrl.setPrefer)
+   */
+  // 设置保险购买意向 权限 患者
+  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, insuranceCtrl.setPrefer)
   /**
    * @swagger
    * /insurance/prefer:
@@ -3688,6 +5007,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getInsurancePrefer
    *     tags:
    *       - Insurance
+   *     summary: 获取保险购买意向
    *     description: Return Insurance Message
    *     produces:
    *       - application/json
@@ -3703,8 +5023,9 @@ module.exports = function (app, webEntry, acl) {
    *         schema:
    *           type: object
    *           $ref: '#/definitions/insMsg'
-  */
-  app.get(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.getPrefer)
+   */
+  // 获取保险购买意向 权限 患者
+  app.get(version + '/insurance/prefer', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), insuranceCtrl.getPrefer)
 
   // message
   /**
@@ -3724,14 +5045,15 @@ module.exports = function (app, webEntry, acl) {
    *       sendBy:
    *         type: string
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       title:
    *         type: string
    *       description:
    *         type: string
    *       url:
    *         type: string
-  */
+   */
   /**
    * @swagger
    * /message/messages:
@@ -3739,6 +5061,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getMessages
    *     tags:
    *       - Message
+   *     summary: 获取某个用户(某种类型)的所有消息
    *     description: Get All Messages
    *     produces:
    *       - application/json
@@ -3761,8 +5084,9 @@ module.exports = function (app, webEntry, acl) {
    *           $ref: '#/definitions/Message'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/message/messages', tokenManager.verifyToken(), messageCtrl.getMessages)
+   */
+  // 获取某个用户(某种类型)的所有消息 权限 医生/患者
+  app.get(version + '/message/messages', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), messageCtrl.getMessages)
   /**
    * @swagger
    * /message/status:
@@ -3771,6 +5095,7 @@ module.exports = function (app, webEntry, acl) {
    *     tags:
    *       - Message
    *     description: Change MessageStatus
+   *     summary: 修改某个用户某种类型消息的已读状态
    *     produces:
    *       - application/json
    *     parameters:
@@ -3795,8 +5120,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: success
    *       422:
    *         description: Unsuccessfully modified
-  */
-  app.post(version + '/message/status', tokenManager.verifyToken(), messageCtrl.changeMessageStatus)
+   */
+  // 修改某个用户某种类型消息的已读状态 权限 医生/患者
+  app.post(version + '/message/status', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), messageCtrl.changeMessageStatus)
   /**
    * @swagger
    * /message/message:
@@ -3804,6 +5130,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: insertMessage
    *     tags:
    *       - Message
+   *     summary: 插入消息
    *     description: Insert Message
    *     produces:
    *       - application/json
@@ -3832,7 +5159,8 @@ module.exports = function (app, webEntry, acl) {
    *             sendBy:
    *               type: string
    *             time:
-   *               type: date
+   *               type: string
+   *               format: date-time
    *             title:
    *               type: string
    *             description:
@@ -3856,8 +5184,9 @@ module.exports = function (app, webEntry, acl) {
    *               $ref: '#/definitions/Message'
    *       422:
    *         description: Unsuccessfully modified
-  */
-  app.post(version + '/message/message', tokenManager.verifyToken(), getNoMid.getNo(6), messageCtrl.insertMessage)
+   */
+  // 插入消息 权限 医生/患者
+  app.post(version + '/message/message', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(6), messageCtrl.insertMessage)
 
   // order
   /**
@@ -3880,7 +5209,8 @@ module.exports = function (app, webEntry, acl) {
    *       orderNo:
    *         type: string
    *       ordertime:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       money:
    *         type: number
    *       goodsInfo:
@@ -3889,14 +5219,27 @@ module.exports = function (app, webEntry, acl) {
    *       paystatus:
    *         type: number
    *       paytime:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       refundNo:
    *         type: number
    *       refundAppTime:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       refundSucTime:
-   *         type: date
-  */
+   *         type: string
+   *         format: date-time
+   *       type:
+   *         type: number
+   *       freeFlag:
+   *         type: number
+   *       docInChaObject:
+   *         type: string
+   *       conselObject:
+   *         type: string
+   *       perDiagObject:
+   *         type: string
+   */
   /**
    * @swagger
    * /order/order:
@@ -3904,6 +5247,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: updateOrder
    *     tags:
    *       - Order
+   *     summary: 更新订单信息
    *     description: Update Order
    *     produces:
    *       - application/json
@@ -3915,27 +5259,45 @@ module.exports = function (app, webEntry, acl) {
    *           type: object
    *           required:
    *             - token
-   *             - type
-   *             - readOrNot
+   *             - orderNo
    *           properties:
    *             token:
    *               type: string
-   *             type:
+   *             orderNo:
+   *               type: string
+   *             paystatus:
    *               type: number
-   *             readOrNot:
-   *               type: number
+   *             paytime:
+   *               type: string
+   *               format: date-time
+   *             docInChaObject:
+   *               type: string
+   *             conselObject:
+   *               type: string
+   *             perDiagObject:
+   *               type: string
    *     responses:
    *       200:
    *         description: success
    *         schema:
    *           type: object
-   *           $ref: '#/definitions/Order'
+   *           required:
+   *             - n
+   *             - nModified
+   *             - ok
+   *           properties:
+   *             n:
+   *               type: number
+   *             nModified:
+   *               type: number
+   *             ok:
+   *               type: number
    *       500:
    *         description: Server internal error
-  */
-
+   */
+  // 更新订单信息 权限 医生/患者
   // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
-  app.post(version + '/order/order', tokenManager.verifyToken(), orderCtrl.updateOrder)
+  app.post(version + '/order/order', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), orderCtrl.updateOrder)
   /**
    * @swagger
    * /order/order:
@@ -3943,6 +5305,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getOrder
    *     tags:
    *       - Order
+   *     summary: 获取订单信息
    *     description: Get Order
    *     produces:
    *       - application/json
@@ -3953,20 +5316,42 @@ module.exports = function (app, webEntry, acl) {
    *         required: true
    *         type: string
    *       - name: orderNo
-   *         description: order number
+   *         description: 订单号
    *         in: query
    *         required: true
    *         type: string
+   *       - name: patientName
+   *         description: 患者姓名
+   *         required: false
+   *         type: string
+   *       - name: doctorName
+   *         description: 医生姓名
+   *         required: false
+   *         type: string
+   *       - name: paytime
+   *         description: 支付时间
+   *         required: false
+   *         type: string
+   *         format: date-time
+   *       - name: money
+   *         description: 支付金额
+   *         required: false
+   *         type: string
+   *       - name: type
+   *         description: 订单类型
+   *         required: false
+   *         type: string
    *     responses:
    *       200:
-   *         description: order information
+   *         description: success
    *         schema:
    *           type: object
    *           $ref: '#/definitions/Order'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/order/order', tokenManager.verifyToken(), orderCtrl.getOrder)
+   */
+  // 获取订单信息 权限 医生/患者
+  app.get(version + '/order/order', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), orderCtrl.getOrder)
 
   // load
   /**
@@ -3976,6 +5361,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: upload
    *     tags:
    *       - Upload
+   *     summary: 上传图片
    *     description: Upload Photo
    *     produces:
    *       - application/json
@@ -4010,8 +5396,9 @@ module.exports = function (app, webEntry, acl) {
    *               type: string
    *       500:
    *         description: Server internal error
-  */
-  app.post(version + '/upload', tokenManager.verifyToken(), loadCtrl.uploadphoto(), loadCtrl.upload)
+   */
+  // 上传图片 权限 医生/患者
+  app.post(version + '/upload', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), loadCtrl.uploadphoto(), loadCtrl.upload)
 
   // news
   /**
@@ -4033,14 +5420,15 @@ module.exports = function (app, webEntry, acl) {
    *       sendBy:
    *         type: string
    *       time:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       title:
    *         type: string
    *       description:
    *         type: string
    *       url:
    *         type: string
-  */
+   */
   /**
    * @swagger
    * /new/news:
@@ -4048,6 +5436,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getNews
    *     tags:
    *       - News
+   *     summary: 获取消息
    *     description: Get News
    *     produces:
    *       - application/json
@@ -4070,8 +5459,9 @@ module.exports = function (app, webEntry, acl) {
    *           $ref: '#/definitions/News'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/new/news', tokenManager.verifyToken(), newsCtrl.getNews)
+   */
+  // 获取消息 权限 医生/患者
+  app.get(version + '/new/news', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.getNews)
   /**
    * @swagger
    * /new/newsByReadOrNot:
@@ -4079,6 +5469,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getNewsByReadOrNot
    *     tags:
    *       - News
+   *     summary: 通过消息状态获取消息
    *     description: Get News By ReadOrNot
    *     produces:
    *       - application/json
@@ -4106,8 +5497,9 @@ module.exports = function (app, webEntry, acl) {
    *           $ref: '#/definitions/News'
    *       500:
    *         description: Server internal error
-  */
-  app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), newsCtrl.getNewsByReadOrNot)
+   */
+  // 通过消息状态获取消息 权限 医生/患者
+  app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.getNewsByReadOrNot)
   /**
    * @swagger
    * /new/news:
@@ -4115,6 +5507,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: insertNews
    *     tags:
    *       - News
+   *     summary: 插入news
    *     description: Insert News
    *     produces:
    *       - application/json
@@ -4173,8 +5566,9 @@ module.exports = function (app, webEntry, acl) {
    *         description: Unsuccessfully modified
    *       500:
    *         description: Server internal error
-  */
-  app.post(version + '/new/news', tokenManager.verifyToken(), newsCtrl.insertNews)
+   */
+  // 插入news 权限 医生/患者
+  app.post(version + '/new/news', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.insertNews)
   /**
    * @swagger
    * /new/teamNews:
@@ -4182,6 +5576,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: insertTeamNews
    *     tags:
    *       - News
+   *     summary: 插入TeamNews
    *     description: Insert Team News
    *     produces:
    *       - application/json
@@ -4234,24 +5629,44 @@ module.exports = function (app, webEntry, acl) {
    *         description: Unsuccessfully modified
    *       500:
    *         description: Server internal error
-  */
-  app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
+   */
+  // 插入TeamNews 权限 医生
+  app.post(version + '/new/teamNews', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.insertTeamNews)
 
+  // report
   /**
    * @swagger
    * definition:
    *   Results:
    *     type: object
    *     properties:
-   *       data:
+   *       data1:
    *         type: array
    *         items:
    *           type: number
    *       recordTime:
    *         type: array
    *         items:
-   *           type: date
-  */
+   *           type: string
+   *           format: date-time
+   *   DataItem:
+   *     type: object
+   *     properties:
+   *       itemType:
+   *         type: string
+   *       recommendValue11:
+   *         type: number
+   *       recommendValue12:
+   *         type: number
+   *       recommendValue13:
+   *         type: number
+   *       recommendValue14:
+   *         type: number
+   *       doctorReport:
+   *         type: string
+   *       doctorComment:
+   *         type: string
+   */
   /**
    * @swagger
    * /report/vitalSigns:
@@ -4259,7 +5674,7 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getVitalSigns
    *     tags:
    *       - Report
-   *     description: 获取患者当前和历史周月季年的测量记录
+   *     summary: 获取患者当前和历史周月季年的测量记录
    *     produces:
    *       - application/json
    *     parameters:
@@ -4272,7 +5687,8 @@ module.exports = function (app, webEntry, acl) {
    *         description: 患者请求查询的时间
    *         in: query
    *         required: true
-   *         type: date
+   *         type: string
+   *         format: date-time
    *       - name: type
    *         description: 任务类型
    *         in: query
@@ -4294,523 +5710,21 @@ module.exports = function (app, webEntry, acl) {
    *         schema:
    *           type: object
    *           $ref: '#/definitions/Results'
+   *       201:
+   *         description: 不存在该段时间的报告
    *       500:
    *         description: Server internal error
-  */
+   */
+  // 获取患者当前和历史周月季年的测量记录 权限 医生/患者
   app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns, reportCtrl.getReport)
-  app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, reportCtrl.updateReport)
-  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
-
   /**
    * @swagger
-   * definition:
-   *   Times:
-   *     type: object
-   *     properties:
-   *       count:
-   *         type: number
-   *       doctorId:
-   *         type: string
-   *   IncomeRecords:
-   *     type: object
-   *     properties:
-   *       time:
-   *         type: date
-   *       money:
-   *         type: number
-   *       from:
-   *         type: string
-   *   RechargeRecords:
-   *     type: object
-   *     properties:
-   *       time:
-   *         type: date
-   *       money:
-   *         type: number
-   *       title:
-   *         type: string
-   *   ExpenseRecords:
-   *     type: object
-   *     properties:
-   *       time:
-   *         type: date
-   *       type:
-   *         type: number
-   *       money:
-   *         type: number
-   *       title:
-   *         type: string
-   *   AccountInfo:
-   *     type: object
-   *     properties:
-   *       userId:
-   *         type: string
-   *       freeTimes:
-   *         type: number
-   *         default: 3
-   *       incomeRecords:
-   *         type: array
-   *         $ref: '#/definitions/IncomeRecords'
-   *       rechargeRecords:
-   *         type: array
-   *         $ref: '#/definitions/RechargeRecords'
-   *       expenseRecords:
-   *         type: array
-   *         $ref: '#/definitions/ExpenseRecords'
-   *       times:
-   *         type: array
-   *         items:
-   *           $ref: '#/definitions/Times'
-  */
-  /**
-   * @swagger
-   * /account/accountInfo:
-   *   get:
-   *     operationId: getAccountInfo
-   *     tags:
-   *       - AccountInfo
-   *     description: Get All AccountInfo
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *     responses:
-   *       200:
-   *         description: AccountInfo List
-   *         schema:
-   *           type: array
-   *           items:
-   *             $ref: '#/definitions/AccountInfo'
-   *       500:
-   *         description: Server internal error
-  */
-  // 权限 患者
-  app.get(version + '/account/accountInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.getAccountInfo)
-  /**
-   * @swagger
-   * /account/counts:
-   *   get:
-   *     operationId: getCounts
-   *     tags:
-   *       - AccountInfo
-   *     description: Get Counts
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: doctorId
-   *         description: Optional Item
-   *         in: query
-   *         required: false
-   *         type : string
-   *     responses:
-   *       200:
-   *         schema:
-   *           type: object
-   *           required:
-   *             - freeTimes
-   *             - count
-   *           properties:
-   *             freeTimes:
-   *               type: number
-   *             count:
-   *               type: number
-   *       500:
-   *         description: Server internal error
-  */
-  // 权限 患者
-  app.get(version + '/account/counts', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts)
-  /**
-   * @swagger
-   * /account/counts:
+   * /report/report:
    *   post:
-   *     operationId: modifyCounts
+   *     operationId: updateReport
    *     tags:
-   *       - AccountInfo
-   *     description: Modify Counts
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - doctorId
-   *             - modify
-   *           properties:
-   *             token:
-   *               type: string
-   *             doctorId:
-   *               type: string
-   *             modify:
-   *               type: string
-   *     responses:
-   *       200:
-   *         description: success
-   *         schema:
-   *           type: object
-   *           required:
-   *             - n
-   *             - nModified
-   *             - ok
-   *           properties:
-   *             n:
-   *               type: number
-   *             nModified:
-   *               type: number
-   *             ok:
-   *               type: number
-   *       500:
-   *         description: Server internal error
-  */
-  // 权限 患者
-  app.post(version + '/account/counts', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts)
-  /**
-   * @swagger
-   * /account/freeTime:
-   *   post:
-   *     operationId: updateFreeTime
-   *     tags:
-   *       - AccountInfo
-   *     description: Update FreeTime
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *           properties:
-   *             token:
-   *               type: string
-   *     responses:
-   *       200:
-   *         description: success
-   *         schema:
-   *           type: object
-   *           required:
-   *             - accountInfo
-   *           properties:
-   *             accountInfo:
-   *               type: object
-   *               $ref: '#/definitions/AccountInfo'
-   *       500:
-   *         description: Server internal error
-  */
-  app.post(version + '/account/freeTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.updateFreeTime)
-  /**
-   * @swagger
-   * /account/countsRespective:
-   *   get:
-   *     operationId: getCountsRespective
-   *     tags:
-   *       - AccountInfo
-   *     description: Get Counts Respective
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *     responses:
-   *       200:
-   *         schema:
-   *           type: object
-   *           required:
-   *             - count1
-   *             - count2
-   *           properties:
-   *             count1:
-   *               type: number
-   *             count2:
-   *               type: number
-   *       500:
-   *         description: Server internal error
-  */
-  app.get(version + '/account/countsRespective', tokenManager.verifyToken(), accountCtrl.checkPatient, accountCtrl.getCountsRespective)
-
-  // expense
-  /**
-   * @swagger
-   * definition:
-   *   Expense:
-   *     properties:
-   *       patientId:
-   *         type: number
-   *       patientName:
-   *         type: string
-   *       doctorId:
-   *         type: string
-   *       doctorName:
-   *         type: string
-   *       time:
-   *         type: date
-   *       money:
-   *         type: number
-   *       type:
-   *         type: string
-   *       status:
-   *         type: number
-  */
-  /**
-   * @swagger
-   * /expense/doctor:
-   *   post:
-   *     operationId: rechargeDoctor
-   *     tags:
-   *       - Expense
-   *     description: Recharge Doctor
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - doctorId
-   *             - type
-   *             - money
-   *             - status
-   *           properties:
-   *             token:
-   *               type: string
-   *             doctorId:
-   *               type: string
-   *             type:
-   *               type: string
-   *             money:
-   *               type: number
-   *             status:
-   *               type: number
-   *     responses:
-   *       200:
-   *         description: success
-   *         schema:
-   *           type: object
-   *           required:
-   *             - n
-   *             - nModified
-   *             - ok
-   *           properties:
-   *             n:
-   *               type: number
-   *             nModified:
-   *               type: number
-   *             ok:
-   *               type: number
-   *       500:
-   *         description: Server internal error
-  */
-  app.post(version + '/expense/doctor', tokenManager.verifyToken(), alluserCtrl.checkDoctor, expenseCtrl.rechargeDoctor)
-  /**
-   * @swagger
-   * /expense/records:
-   *   get:
-   *     operationId: getRecords
-   *     tags:
-   *       - Expense
-   *     description: Get Expense Records
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: patientId
-   *         description: patientId
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: patientName
-   *         description: patientName
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: doctorId
-   *         description: doctorId
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: doctorName
-   *         description: doctorName
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: time
-   *         description: time
-   *         in: query
-   *         required: true
-   *         type: date
-   *       - name: money
-   *         description: money
-   *         in: query
-   *         required: true
-   *         type: number
-   *       - name: type
-   *         description: type
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: status
-   *         description: status
-   *         in: query
-   *         required: false
-   *         type: number
-   *       - name: limit
-   *         description: limit
-   *         in: query
-   *         required: true
-   *         type: number
-   *       - name: skip
-   *         description: skip
-   *         in: query
-   *         required: true
-   *         type: number
-   *     responses:
-   *       200:
-   *         schema:
-   *           type: object
-   *           required:
-   *             - expense
-   *             - nexturl
-   *           properties:
-   *             expense:
-   *               type: object
-   *               $ref: '#/definitions/Expense'
-   *             nexturl:
-   *               type: string
-   *       500:
-   *         description: Server internal error
-  */
-  app.get(version + '/expense/records', tokenManager.verifyToken(), expenseCtrl.getRecords)
-
-  // healthInfo
-  /**
-   * @swagger
-   * definition:
-   *   Url:
-   *     type: object
-   *     properties:
-   *       photoId:
-   *         type: string
-   *       photo:
-   *         type: string
-   *       photoType:
-   *         type: string
-   *       status:
-   *         type: number
-   *   HealthInfo:
-   *     type: object
-   *     properties:
-   *       userId:
-   *         type: string
-   *       type:
-   *         type: string
-   *       insertTime:
-   *         type: date
-   *       time:
-   *         type: date
-   *       label:
-   *         type: string
-   *       description:
-   *         type: string
-   *       comments:
-   *         type: string
-   *       importStatus:
-   *         type: number
-   *       url:
-   *         type: array
-   *         items:
-   *           $ref: '#/definitions/Url'
-  */
-  /**
-   * @swagger
-   * /healthInfo/healthInfos:
-   *   get:
-   *     operationId: getAllHealthInfo
-   *     tags:
-   *       - HealthInfo
-   *     description: Get All HealthInfo
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *     responses:
-   *       200:
-   *         description: HealthInfo List
-   *         schema:
-   *           type: array
-   *           items:
-   *             $ref: '#/definitions/HealthInfo'
-   *       500:
-   *         description: Server internal error
-  */
-  app.get(version + '/healthInfo/healthInfos', tokenManager.verifyToken(), healthInfoCtrl.getAllHealthInfo)
-  /**
-   * @swagger
-   * /healthInfo/healthDetail:
-   *   get:
-   *     operationId: getHealthDetail
-   *     tags:
-   *       - HealthInfo
-   *     description: Get Health Detail
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: insertTime
-   *         description: insert time
-   *         in: query
-   *         required: true
-   *         type: date
-   *     responses:
-   *       200:
-   *         description: HealthInfo List
-   *         schema:
-   *           type: array
-   *           items:
-   *             $ref: '#/definitions/HealthInfo'
-   *       500:
-   *         description: Server internal error
-  */
-  app.get(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.getHealthDetail)
-  /**
-   * @swagger
-   * /healthInfo/healthInfo:
-   *   post:
-   *     operationId: insertHealthInfo
-   *     tags:
-   *       - HealthInfo
-   *     description: Insert HealthInfo
+   *       - Report
+   *     summary: 医生点评患者的报表信息
    *     produces:
    *       - application/json
    *     parameters:
@@ -4822,780 +5736,25 @@ module.exports = function (app, webEntry, acl) {
    *           required:
    *             - token
    *             - type
-   *             - time
-   *             - label
-   *             - url
-   *             - description
-   *             - comments
-   *           properties:
-   *             token:
-   *               type: string
-   *             type:
-   *               type: string
-   *             time:
-   *               type: date
-   *             label:
-   *               type: string
-   *             url:
-   *               type: array
-   *               items:
-   *                 $ref: '#/definitions/Url'
-   *             description:
-   *               type: string
-   *             comments:
-   *               type: string
-   *     responses:
-   *       200:
-   *         description: success
-   *       412:
-   *         description: The server does not meet one of the prerequisites set by the requester in the request
-   *       404:
-   *         description: The server could not find the requested page
-  */
-  app.post(version + '/healthInfo/healthInfo', tokenManager.verifyToken(), healthInfoCtrl.insertHealthInfo)
-  /**
-   * @swagger
-   * /healthInfo/healthDetail:
-   *   post:
-   *     operationId: modifyHealthDetail
-   *     tags:
-   *       - HealthInfo
-   *     description: Modify HealthDetail
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - type
-   *             - time
-   *             - insertTime
-   *             - label
-   *             - url
-   *             - description
-   *             - comments
-   *           properties:
-   *             token:
-   *               type: string
-   *             type:
-   *               type: string
-   *             time:
-   *               type: date
-   *             insertTime:
-   *               type: date
-   *             label:
-   *               type: string
-   *             url:
-   *               type: array
-   *               items:
-   *                 $ref: '#/definitions/Url'
-   *             description:
-   *               type: string
-   *             comments:
-   *               type: string
-   *     responses:
-   *       200:
-   *         description: success
-   *       412:
-   *         description: The server does not meet one of the prerequisites set by the requester in the request
-   *       404:
-   *         description: The server could not find the requested page
-  */
-  app.post(version + '/healthInfo/healthDetail', tokenManager.verifyToken(), healthInfoCtrl.modifyHealthDetail)
-  /**
-   * @swagger
-   * /healthInfo/deleteHealthDetail:
-   *   post:
-   *     operationId: deleteHealthDetail
-   *     tags:
-   *       - HealthInfo
-   *     description: Delete a Health Detail
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - insertTime
-   *           properties:
-   *             token:
-   *               type: string
-   *             insertTime:
-   *               type: date
-   *     responses:
-   *       200:
-   *         description: success
-   *       500:
-   *         description: Server internal error
-  */
-  app.post(version + '/healthInfo/deleteHealthDetail', tokenManager.verifyToken(), healthInfoCtrl.deleteHealthDetail)
-
-  // insurance
-  /**
-   * @swagger
-   * definition:
-   *   Preference:
-   *     type: object
-   *     properties:
-   *       status:
-   *         type: number
-   *       time:
-   *         type: date
-   *   InsuranceMsg:
-   *     type: object
-   *     properties:
-   *       insuranceId:
-   *         type: string
-   *       time:
-   *         type: Date
-   *       description:
-   *         type: string
-   *   insMsg:
-   *     type: object
-   *     properties:
-   *       doctorId:
-   *         type: string
-   *       patientId:
-   *         type: string
-   *       preference:
-   *         $ref: '#/definitions/Preference'
-   *       count:
-   *         type: number
-   *       insuranceMsg:
-   *         type: array
-   *         items:
-   *           $ref: '#/definitions/InsuranceMsg'
-   *   Message:
-   *     type: object
-   *     properties:
-   *       messageId:
-   *         type: string
-   *       userId:
-   *         type: string
-   *       type:
-   *         type: number
-   *       readOrNot:
-   *         type: number
-   *       sendBy:
-   *         type: string
-   *       time:
-   *         type: date
-   *       title:
-   *         type: string
-   *       description:
-   *         type: string
-   *       url:
-   *         type: string
-  */
-  /**
-   * @swagger
-   * /insurance/message:
-   *   post:
-   *     operationId: insertInsuranceMessage
-   *     tags:
-   *       - Insurance
-   *     description: Insert Insurance Message
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
    *             - patientId
-   *             - insuranceId
    *             - time
-   *             - insdescription
-   *             - title
-   *             - description
-   *             - url
+   *             - data
    *           properties:
    *             token:
+   *               type: string
+   *             type:
    *               type: string
    *             patientId:
    *               type: string
-   *             insuranceId:
-   *               type: stirng
    *             time:
-   *               type: date
-   *             insdescription:
    *               type: string
-   *             title:
-   *               type: string
-   *             description:
-   *               type: string
-   *             url:
-   *               type: string
+   *             data:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/DataItem'
    *     responses:
    *       200:
-   *         description: New insurance success
-   *         schema:
-   *           type: object
-   *           required:
-   *             - insMsg
-   *             - message
-   *           properties:
-   *             insMsg:
-   *               type: object
-   *               $ref: '#/definitions/insMsg'
-   *             message:
-   *               type: object
-   *               $ref: '#/definitions/Message'
-   *       500:
-   *         description: Server internal error
-   *       422:
-   *         description: Unsuccessfully modified
-  */
-  app.post(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkPatient, insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage)
-  /**
-   * @swagger
-   * /insurance/message:
-   *   get:
-   *     operationId: getInsuranceMessage
-   *     tags:
-   *       - Insurance
-   *     description: Returns Insurance Message
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: doctorId
-   *         description: doctorId
-   *         in: query
-   *         required: true
-   *         type: string
-   *     responses:
-   *       200:
-   *         description: description of insurances
-   *         schema:
-   *           type: object
-   *           $ref: '#/definitions/insMsg'
-   *       500:
-   *         description: Server internal error
-  */
-  app.get(version + '/insurance/message', tokenManager.verifyToken(), alluserCtrl.checkDoctor, insuranceCtrl.getInsMsg)
-  /**
-   * @swagger
-   * /insurance/prefer:
-   *   post:
-   *     operationId: setInsurancePrefer
-   *     tags:
-   *       - Insurance
-   *     description: Set Insurance Prefer
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - status
-   *             - date
-   *           properties:
-   *             token:
-   *               type: string
-   *             status:
-   *               type: number
-   *             date:
-   *               type: date
-   *     responses:
-   *       200:
-   *         description: success
-  */
-  app.post(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.setPrefer)
-  /**
-   * @swagger
-   * /insurance/prefer:
-   *   get:
-   *     operationId: getInsurancePrefer
-   *     tags:
-   *       - Insurance
-   *     description: Return Insurance Message
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *     responses:
-   *       200:
-   *         description: description of insurances
-   *         schema:
-   *           type: object
-   *           $ref: '#/definitions/insMsg'
-  */
-  app.get(version + '/insurance/prefer', tokenManager.verifyToken(), insuranceCtrl.getPrefer)
-
-  // message
-  /**
-   * @swagger
-   * definition:
-   *   Message:
-   *     type: object
-   *     properties:
-   *       messageId:
-   *         type: string
-   *       userId:
-   *         type: string
-   *       type:
-   *         type: number
-   *       readOrNot:
-   *         type: number
-   *       sendBy:
-   *         type: string
-   *       time:
-   *         type: date
-   *       title:
-   *         type: string
-   *       description:
-   *         type: string
-   *       url:
-   *         type: string
-  */
-  /**
-   * @swagger
-   * /message/messages:
-   *   get:
-   *     operationId: getMessages
-   *     tags:
-   *       - Message
-   *     description: Get All Messages
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: type
-   *         description: messageType (Optional Item)
-   *         in: query
-   *         required: false
-   *         type: number
-   *     responses:
-   *       200:
-   *         description: list of messages
-   *         schema:
-   *           type: object
-   *           $ref: '#/definitions/Message'
-   *       500:
-   *         description: Server internal error
-  */
-  app.get(version + '/message/messages', tokenManager.verifyToken(), messageCtrl.getMessages)
-  /**
-   * @swagger
-   * /message/status:
-   *   post:
-   *     operationId: changeMessageStatus
-   *     tags:
-   *       - Message
-   *     description: Change MessageStatus
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - type
-   *             - readOrNot
-   *           properties:
-   *             token:
-   *               type: string
-   *             type:
-   *               type: number
-   *             readOrNot:
-   *               type: number
-   *     responses:
-   *       200:
-   *         description: success
-   *       422:
-   *         description: Unsuccessfully modified
-  */
-  app.post(version + '/message/status', tokenManager.verifyToken(), messageCtrl.changeMessageStatus)
-  /**
-   * @swagger
-   * /message/message:
-   *   post:
-   *     operationId: insertMessage
-   *     tags:
-   *       - Message
-   *     description: Insert Message
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - type
-   *             - userId
-   *             - sendBy
-   *             - time
-   *             - title
-   *             - description
-   *             - url
-   *           properties:
-   *             token:
-   *               type: string
-   *             userId:
-   *               type: string
-   *             type:
-   *               type: number
-   *             sendBy:
-   *               type: string
-   *             time:
-   *               type: date
-   *             title:
-   *               type: string
-   *             description:
-   *               type: string
-   *             url:
-   *               type: string
-   *     responses:
-   *       200:
-   *         description: success
-   *         schema:
-   *           type: object
-   *           required:
-   *             - insMsg
-   *             - message
-   *           properties:
-   *             insMsg:
-   *               type: object
-   *               $ref: '#/definitions/insMsg'
-   *             message:
-   *               type: object
-   *               $ref: '#/definitions/Message'
-   *       422:
-   *         description: Unsuccessfully modified
-  */
-  app.post(version + '/message/message', tokenManager.verifyToken(), getNoMid.getNo(6), messageCtrl.insertMessage)
-
-  // order
-  /**
-   * @swagger
-   * definition:
-   *   GoodsInfo:
-   *     type: object
-   *     properties:
-   *       class:
-   *         type: string
-   *       name:
-   *         type: string
-   *       notes:
-   *         type: string
-   *   Order:
-   *     type: object
-   *     properties:
-   *       userId:
-   *         type: string
-   *       orderNo:
-   *         type: string
-   *       ordertime:
-   *         type: date
-   *       money:
-   *         type: number
-   *       goodsInfo:
-   *         type: object
-   *         $ref: '#/definitions/GoodsInfo'
-   *       paystatus:
-   *         type: number
-   *       paytime:
-   *         type: date
-   *       refundNo:
-   *         type: number
-   *       refundAppTime:
-   *         type: date
-   *       refundSucTime:
-   *         type: date
-  */
-  /**
-   * @swagger
-   * /order/order:
-   *   post:
-   *     operationId: updateOrder
-   *     tags:
-   *       - Order
-   *     description: Update Order
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - type
-   *             - readOrNot
-   *           properties:
-   *             token:
-   *               type: string
-   *             type:
-   *               type: number
-   *             readOrNot:
-   *               type: number
-   *     responses:
-   *       200:
-   *         description: success
-   *         schema:
-   *           type: object
-   *           $ref: '#/definitions/Order'
-   *       500:
-   *         description: Server internal error
-  */
-
-  // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
-  app.post(version + '/order/order', tokenManager.verifyToken(), orderCtrl.updateOrder)
-  /**
-   * @swagger
-   * /order/order:
-   *   get:
-   *     operationId: getOrder
-   *     tags:
-   *       - Order
-   *     description: Get Order
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: orderNo
-   *         description: order number
-   *         in: query
-   *         required: true
-   *         type: string
-   *     responses:
-   *       200:
-   *         description: order information
-   *         schema:
-   *           type: object
-   *           $ref: '#/definitions/Order'
-   *       500:
-   *         description: Server internal error
-  */
-  app.get(version + '/order/order', tokenManager.verifyToken(), orderCtrl.getOrder)
-
-  // load
-  /**
-   * @swagger
-   * /upload:
-   *   post:
-   *     operationId: upload
-   *     tags:
-   *       - Upload
-   *     description: Upload Photo
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - file
-   *           properties:
-   *             token:
-   *               type: string
-   *             file:
-   *               type: string
-   *     responses:
-   *       200:
-   *         schema:
-   *           type: object
-   *           required:
-   *             - ret_code
-   *             - filepath
-   *             - path_resized
-   *           properties:
-   *             ret_code:
-   *               type: string
-   *             filepath:
-   *               type: string
-   *             path_resized:
-   *               type: string
-   *       500:
-   *         description: Server internal error
-  */
-  app.post(version + '/upload', tokenManager.verifyToken(), loadCtrl.uploadphoto(), loadCtrl.upload)
-
-  // news
-  /**
-   * @swagger
-   * definition:
-   *   News:
-   *     type: object
-   *     properties:
-   *       messageId:
-   *         type: string
-   *       userId:
-   *         type: string
-   *       userRole:
-   *         type: string
-   *       type:
-   *         type: number
-   *       readOrNot:
-   *         type: number
-   *       sendBy:
-   *         type: string
-   *       time:
-   *         type: date
-   *       title:
-   *         type: string
-   *       description:
-   *         type: string
-   *       url:
-   *         type: string
-  */
-  /**
-   * @swagger
-   * /new/news:
-   *   get:
-   *     operationId: getNews
-   *     tags:
-   *       - News
-   *     description: Get News
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: type
-   *         description: newsType (Optional Item)
-   *         in: query
-   *         required: false
-   *         type: number
-   *     responses:
-   *       200:
-   *         description: list of news
-   *         schema:
-   *           type: array
-   *           $ref: '#/definitions/News'
-   *       500:
-   *         description: Server internal error
-  */
-  app.get(version + '/new/news', tokenManager.verifyToken(), newsCtrl.getNews)
-  /**
-   * @swagger
-   * /new/newsByReadOrNot:
-   *   get:
-   *     operationId: getNewsByReadOrNot
-   *     tags:
-   *       - News
-   *     description: Get News By ReadOrNot
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: authorization message
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: type
-   *         description: newsType (Optional Item)
-   *         in: query
-   *         required: false
-   *         type: number
-   *       - name: readOrNot
-   *         description: news readOrNot flag 1:read 0:not
-   *         in: query
-   *         required: true
-   *         type: number
-   *     responses:
-   *       200:
-   *         description: list of news
-   *         schema:
-   *           type: array
-   *           $ref: '#/definitions/News'
-   *       500:
-   *         description: Server internal error
-  */
-  app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), newsCtrl.getNewsByReadOrNot)
-  /**
-   * @swagger
-   * /new/news:
-   *   post:
-   *     operationId: insertNews
-   *     tags:
-   *       - News
-   *     description: Insert News
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - type
-   *             - userId
-   *             - readOrNot
-   *             - title
-   *             - description
-   *             - url
-   *             - userRole
-   *             - messageId
-   *           properties:
-   *             token:
-   *               type: string
-   *             userId:
-   *               type: string
-   *             type:
-   *               type: number
-   *             readOrNot:
-   *               type: number
-   *             title:
-   *               type: string
-   *             description:
-   *               type: string
-   *             url:
-   *               type: string
-   *             userRole:
-   *               type: string
-   *             messageId:
-   *               type: string
-   *     responses:
-   *       200:
-   *         description: success
+   *         description: 全部更新成功/未全部更新/未修改！请检查修改目标是否与原来一致！
    *         schema:
    *           type: object
    *           required:
@@ -5609,138 +5768,11 @@ module.exports = function (app, webEntry, acl) {
    *               type: number
    *             ok:
    *               type: number
-   *       422:
-   *         description: Unsuccessfully modified
    *       500:
    *         description: Server internal error
-  */
-  app.post(version + '/new/news', tokenManager.verifyToken(), newsCtrl.insertNews)
-  /**
-   * @swagger
-   * /new/teamNews:
-   *   post:
-   *     operationId: insertTeamNews
-   *     tags:
-   *       - News
-   *     description: Insert Team News
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: body
-   *         in: body
-   *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - token
-   *             - type
-   *             - userId
-   *             - title
-   *             - description
-   *             - url
-   *             - messageId
-   *           properties:
-   *             token:
-   *               type: string
-   *             userId:
-   *               type: string
-   *             type:
-   *               type: number
-   *             title:
-   *               type: string
-   *             description:
-   *               type: string
-   *             url:
-   *               type: string
-   *             messageId:
-   *               type: string
-   *     responses:
-   *       200:
-   *         description: success
-   *         schema:
-   *           type: object
-   *           required:
-   *             - n
-   *             - nModified
-   *             - ok
-   *           properties:
-   *             n:
-   *               type: number
-   *             nModified:
-   *               type: number
-   *             ok:
-   *               type: number
-   *       422:
-   *         description: Unsuccessfully modified
-   *       500:
-   *         description: Server internal error
-  */
-  app.post(version + '/new/teamNews', tokenManager.verifyToken(), newsCtrl.insertTeamNews)
-
-
-  /**
-   * @swagger
-   * definition:
-   *   Results:
-   *     type: object
-   *     properties:
-   *       data:
-   *         type: array
-   *         item:
-   *           type: number
-   *       recordTime:
-   *         type: array
-   *         item:
-   *           type: date
-  */
-  /**
-   * @swagger
-   * /report/vitalSigns:
-   *   get:
-   *     operationId: getVitalSigns
-   *     tags:
-   *       - Report
-   *     description: 获取患者当前和历史周月季年的测量记录
-   *     produces:
-   *       - application/json
-   *     parameters:
-   *       - name: token
-   *         description: 授权信息
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: time
-   *         description: 患者请求查询的时间
-   *         in: query
-   *         required: true
-   *         type: date
-   *       - name: type
-   *         description: 任务类型
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: code
-   *         description: 检测项目
-   *         in: query
-   *         required: true
-   *         type: string
-   *       - name: showType
-   *         description: 绘制图表类型
-   *         in: query
-   *         required: true
-   *         type: string
-   *     responses:
-   *       200:
-   *         description: 返回相应数据和记录时间
-   *         schema:
-   *           type: object
-   *           $ref: '#/definitions/Results'
-   *       500:
-   *         description: Server internal error
-  */
-
-  app.get(version + '/report/vitalSigns', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), reportCtrl.getVitalSigns, reportCtrl.getReport)
-  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
+   */
+  // 医生点评患者的报表信息 权限 医生
+  app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, alluserCtrl.getAlluserObject, reportCtrl.updateReport)
   /**
    * @swagger
    * definition:
@@ -5750,13 +5782,44 @@ module.exports = function (app, webEntry, acl) {
    *       patientId:
    *         type: string
    *       dpRelationTime:
-   *         type: date
+   *         type: string
+   *         format: date-time
    *   Data:
    *     type: array
-   *     item:
+   *     items:
    *       type: object
    *       $ref: '#/definitions/Patient'
-  */
+   */
+  /**
+   * @swagger
+   * /nurse/bindingPatient:
+   *   post:
+   *     operationId: bindingPatient
+   *     tags:
+   *       - Nurse
+   *     summary: 护士端微信扫码绑定患者
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: body
+   *         description: token
+   *         required: true
+   *         properties:
+   *             token:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 绑定患者成功！
+   *       201:
+   *         description: 无临时绑定数据，扫码失败！
+   *       202:
+   *         description: 已绑定过该患者!
+   *       500:
+   *         description: Server internal error
+   */
+  // 护士端微信扫码绑定患者 权限 护士
+  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
   /**
    * @swagger
    * /nurse/patientsList:
@@ -5764,12 +5827,12 @@ module.exports = function (app, webEntry, acl) {
    *     operationId: getInsurancePatientsList
    *     tags:
    *       - Nurse
-   *     description: 获取护士推送保险信息的患者列表
+   *     summary: 获取护士推送保险信息的患者列表
    *     produces:
    *       - application/json
    *     parameters:
    *       - name: token
-   *         description: 授权信息
+   *         description: token
    *         in: query
    *         required: true
    *         type: string
@@ -5781,8 +5844,22 @@ module.exports = function (app, webEntry, acl) {
    *           $ref: '#/definitions/Data'
    *       500:
    *         description: Server internal error
-  */
+   */
+  // 获取护士推送保险信息的患者列表 权限 护士
   app.get(version + '/nurse/patientsList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserObject, nurseInsuranceWorkCtrl.getInsurancePatientsList)
+
+  // 获取科室普通咨询/加急咨询/预约面诊/点评报表总数
+  app.get(version + '/department/departmentCounsel', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDepartmentCounsel)
+  // 获取具体医生普通咨询/加急咨询量
+  app.get(version + '/department/docCounsel', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDocCounsel)
+  // 获取具体医生的预约面诊数
+  app.get(version + '/department/docPD', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDocPD)
+  // 获取科室预约面诊数
+  app.get(version + '/department/departmentPD', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDepartmentPD)
+  // 获取具体医生的预约面诊数
+  app.get(version + '/department/docRepComment', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDocRepComment)
+  // 获取科室点评患者周／月／季／年报数量
+  app.get(version + '/department/departRepComment', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDepartRepComment)
 
   // jyf
   // 刷新token
@@ -6024,6 +6101,7 @@ module.exports = function (app, webEntry, acl) {
    *       - name: token
    *         in: query
    *         type: string
+   *         required: true
    *     responses:
    *       200:
    *         description: 返回地区信息
@@ -6080,6 +6158,7 @@ module.exports = function (app, webEntry, acl) {
    *       - name: token
    *         in: query
    *         type: string
+   *         required: true
    *     responses:
    *       200:
    *         description: 返回医院信息
@@ -6229,7 +6308,7 @@ module.exports = function (app, webEntry, acl) {
   // wechat
   app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.settingConfig)
   // 获取用户基本信息
-  app.get(version + '/wechat/getUserInfo', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.getuserinfo)
+  app.get(version + '/wechat/getUserInfo', wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.getuserinfo)
   app.get(version + '/wechat/gettokenbycode', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken)
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
 
@@ -6519,6 +6598,23 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/forum/deletecomment', tokenManager.verifyToken(), forumCtrl.deleteComment)
   app.post(version + '/forum/deletefavorite', tokenManager.verifyToken(), forumCtrl.deleteFavorite)
 
+  // 科主任报告
+  app.get(version + '/departmentmonitor/patients', departmentMonitorCtrl.getPatientsCount)
+  app.get(version + '/departmentmonitor/score', departmentMonitorCtrl.getScore)
+  app.get(version + '/departmentmonitor/negcomment', departmentMonitorCtrl.getNegComment)
+  app.get(version + '/departmentmonitor/counseltimeout', departmentMonitorCtrl.getCounselTimeout)
+  app.get(version + '/departmentmonitor/currentpatients', departmentMonitorCtrl.getCurrentPatientsCount)
+
+  // 地区负责人报告
+  app.get(version + '/districtmonitor/patients', districtMonitorCtrl.getPatientsCount)
+  app.get(version + '/districtmonitor/departmentpatients', districtMonitorCtrl.getDepartmentPatientsCount)
+  app.get(version + '/districtmonitor/score', districtMonitorCtrl.getScore)
+  app.get(version + '/districtmonitor/negcomment', districtMonitorCtrl.getNegComment)
+  app.get(version + '/districtmonitor/counseltimeout', districtMonitorCtrl.getCounselTimeout)
+
+  // test
+  // app.get(version + '/departmentmonitor/test', departmentMonitorCtrl.autoDepartmentDaily)
+
   /** YQC definitions
    * @swagger
    * definition:
@@ -6725,6 +6821,7 @@ module.exports = function (app, webEntry, acl) {
    *         format: date-time
    *       doctorId:
    *         type: object
+   *         $ref: '#/definitions/Doctor'
    *   TeamMember:
    *     type: object
    *     properties:
@@ -6941,9 +7038,11 @@ module.exports = function (app, webEntry, acl) {
    *       counselId:
    *         type: string
    *       doctorId:
-   *         type: string
+   *         type: object
+   *         $ref: '#/definitions/Doctor'
    *       patientId:
-   *         type: string
+   *         type: object
+   *         $ref: '#/definitions/Patient'
    *       type:
    *         type: number
    *       time:
@@ -6999,6 +7098,30 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *         format: date-time
    *       content:
+   *         type: string
+   *   Communication:
+   *     type: object
+   *     properties:
+   *       messageNo:
+   *         type: string
+   *       messageType:
+   *         type: number
+   *       sendStatus:
+   *         type: number
+   *       readStatus:
+   *         type: number
+   *       sendBy:
+   *         type: string
+   *       receiver:
+   *         type: string
+   *       sendDateTime:
+   *         type: string
+   *         format: date-time
+   *       title:
+   *         type: string
+   *       content:
+   *         type: object
+   *       newsType:
    *         type: string
    */
 

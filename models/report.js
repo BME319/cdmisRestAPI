@@ -37,13 +37,34 @@ var reportSchema = new mongoose.Schema({
   drugConcentration: Number, // 药物浓度
   data1: [], // 历史数据记录1
   data2: [], // 历史数据记录2
+  data3: [],
+  data4: [],
+  data5: [],
   recordTime: [Date], // 历史数据记录时间
+  recordTime2: [Date],
+  recordTime3: [Date],
+  recordTime4: [Date],
+  recordTime5: [Date],
   bestControlMonth: Number, // 控制最佳月份 季年报
   worstControlMonth: Number, // 控制最差月份 季年报
   mostCompleteRecordMonth: Number, // 记录最完整月份 季年报
   worstCompleteRecordMonth: Number, // 记录最差月份 季年报
-  doctorReport: String, // 医生报告
-  doctorComment: String, // 医生点评 季年报
+  doctorReport: [   // 医生报告
+    {
+      _id: 0,
+      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+      content: String,
+      insertTime: Date
+    }
+  ],
+  doctorComment: [   // 医生点评
+    {
+      _id: 0,
+      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+      content: String,
+      insertTime: Date
+    }
+  ],
   labTest: String, // 化验_周报月报文本
   labTestArray: [], // 化验_季报年报检查项目数组
   labTestNewItem: String // 化验_建议新增项目

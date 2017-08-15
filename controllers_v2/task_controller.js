@@ -122,7 +122,7 @@ exports.updateStartTime = function (req, res) {
     // modified by GY 2017-07-26 added `date`
     var upObj = {
       $set: {
-        task: item.task, 
+        task: item.task,
         date: new Date()
       }
     }
@@ -198,7 +198,7 @@ exports.insertTaskModel = function (req, res) {
   })
 }
 
-// 注释 根据userId获取任务 输入，session.id；输出，用户任务
+// 注释 根据userId获取任务 输入，患者userId；输出，用户任务
 exports.getUserTask = function (req, res) {
   // var userId = 'Admin';
   var query = {userId: req.query.userId}

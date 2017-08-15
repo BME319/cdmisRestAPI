@@ -11,7 +11,7 @@ exports.getOrder = function (req, res) {
   var _orderNo = req.query.orderNo || null
   // console.log(_orderNo)
   var query = {}
-  var populate = [{path: 'conselObject', select: 'status -_id'}, {path: 'perDiagObject', select: 'status code -_id'}, {path: 'docInChaObject', select: 'invalidFlag -_id'}]
+  var populate = [{path: 'conselObject', select: 'status -_id'}, {path: 'perDiagObject', select: 'status code bookingDay bookingTime place diagId -_id'}, {path: 'docInChaObject', select: 'invalidFlag -_id'}]
   if (_orderNo !== null && _orderNo !== '') {
     query['orderNo'] = _orderNo
   } else {

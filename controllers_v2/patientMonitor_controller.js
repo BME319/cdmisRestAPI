@@ -206,6 +206,9 @@ exports.getInsurance = function (req, res) {
   let endTime = req.query.endTime || ''
   let province = req.query.province || ''
   let city = req.query.city || ''
+  let limit = req.query.limit
+  let skip = req.query.skip
+
   if (startTime === '') {
     res.status(400).send('请输入开始时间')
   } else if (endTime === '') {
@@ -258,6 +261,17 @@ exports.getInsurance = function (req, res) {
         }
       }
     ]
+
+    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+    //   limit = Number(limit)
+    //   skip = Number(skip)
+    //   array.push(
+    //     {$sort: {count: -1}},
+    //     {$skip: skip},
+    //     {$limit: limit}
+    //   )
+    // }
+
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
     } else if (province !== '' && city !== '') {
@@ -267,13 +281,17 @@ exports.getInsurance = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      res.json({results: results})
+      limit = Number(limit)
+      skip = Number(skip)
+      res.json({results: results.slice(skip, limit + skip)})
     })
   }
 }
 
 exports.getPatientsByClass = function (req, res) {
   let classNo = req.query.classNo || ''
+  let limit = req.query.limit
+  let skip = req.query.skip
   let array = [
     {$match: {role: 'patient'}},
     {
@@ -351,6 +369,15 @@ exports.getPatientsByClass = function (req, res) {
     }
   ]
 
+  // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+  //   limit = Number(limit)
+  //   skip = Number(skip)
+  //   array.push(
+  //     {$sort: {count: -1}},
+  //     {$skip: skip},
+  //     {$limit: limit}
+  //   )
+  // }
   if (classNo !== ''){
     array.splice(
       0,
@@ -362,7 +389,9 @@ exports.getPatientsByClass = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      res.json({results: results})
+      limit = Number(limit)
+      skip = Number(skip)
+      res.json({results: results.slice(skip, limit + skip)})
     })
 
 }

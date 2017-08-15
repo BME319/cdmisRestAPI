@@ -381,7 +381,7 @@ exports.getComments = function (req, res, next) {
 //     }, opts, fields, populate);
 // }
 exports.getDoctorInfo = function (req, res) {
-  let query = {userId: req.session.userId, role: 'doctor'}
+  let query = {userId: req.body.doctorObject.userId, role: 'doctor'}
   let comments = req.body.comments
 
   let newScore = 0
@@ -805,7 +805,12 @@ exports.deleteSuspendTime = function (req, res) {
 // 患者或医生获取医生停诊信息 输入userId（医生），输出结果，相应医生的停诊信息
 exports.getSuspendTime = function (req, res) {
   // 查询条件
-  let doctorId = req.session.userId
+  let doctorId
+  if (req.session.role === 'doctor') {
+    doctorId = req.session.userId
+  } else if (req.session.role === 'patient') {
+    doctorId = req.session.userId
+  }
   let query = {userId: doctorId, role: 'doctor'}
   var opts = ''
   var fields = {'_id': 0, 'suspendTime': 1, 'serviceSuspendTime': 1}
@@ -816,8 +821,9 @@ exports.getSuspendTime = function (req, res) {
     }
     if (item == null) {
       return res.json({msg: '该医生无停诊信息'})
+    } else {
+      res.json({results: item})
     }
-    res.json({results: item})
   }, opts, fields)
 }
 
@@ -998,7 +1004,13 @@ exports.getPatientList = function (req, res) {
         } else if (itemsDIC.length === 0) {
           return res.json({results: item1})
         } else {
-          patientsInCharge = itemsDIC.sort(sortVIPpinyin)
+          for (let j = 0; j < itemsDIC.length; j++) {
+            let patientIC = itemsDIC[j]
+            if (patientIC.patientId !== null) {
+              patientsInCharge.push(patientIC)
+            }
+          }
+          patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
           item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
           return res.json({results: item1})
         }
@@ -1129,7 +1141,12 @@ exports.editAliPayAccount = function (req, res) {
 // 获取医生支付宝账号 2017-06-16 GY
 // 注释 医生获取自己绑定的支付宝账号信息 输入userId；输出，支付宝账号信息
 exports.getAliPayAccount = function (req, res) {
-  let query = {userId: req.query.userId, role: 'doctor'}
+  let query = {role: 'doctor'}
+  if (req.session.role === 'doctor') {
+    query['userId'] = req.session.userId
+  } else {
+    query['userId'] = req.query.userId
+  }
 
   Alluser.getOne(query, function (err, item) {
     if (err) {
