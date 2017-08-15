@@ -648,8 +648,9 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSuspend)
   // 咨询问卷填写(新增自动转发功能) - acl 2017-08-10 患者
-  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
-
+  // app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  
   // YQC
   // comment
   /** YQC annotation 2017-07-20 - debug complete 2017-07-17 - acl 2017-07-25 患者获取医生评价
@@ -2195,7 +2196,7 @@ module.exports = function (app, webEntry, acl) {
    *                     $ref: '#/definitions/Task'
    */
   app.get(version + '/tasks/task', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getUserTask)
-  /** YQC annotation 2017-07-28 - acl 2017-07-28 医生
+  /** YQC annotation 2017-07-28 - acl 2017-07-28 医生／2017-08-14 患者
    * @swagger
    * /tasks/task:
    *   post:

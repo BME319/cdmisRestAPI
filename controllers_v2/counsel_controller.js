@@ -149,13 +149,14 @@ exports.getSessionObject = function (req, res, next) {
     }
   })
 }
+
 // 提交咨询问卷 2017-04-05 GY
 // 增加选填字段 2017-04-13 GY
 // 注释 输入，type，sickTime，symptom/photo,help,选填hospital,visitDate,diagnosis/photo；输出，保存问卷
 exports.saveQuestionaire = function (req, res, next) {
   let type = req.body.type || null
   if (type === null) {
-    return res.json({result: '请填写type,咨询=1,问诊=2'})
+    return res.json({result: '请填写type,咨询=1,问诊=2,加急咨询=6'})
   }
 
   var counselData = {
@@ -206,19 +207,31 @@ exports.saveQuestionaire = function (req, res, next) {
   newCounsel.save(function (err, counselInfo) {
     if (err) {
       return res.status(500).send(err.errmsg)
+    } else {
+      req.body.counselInfo = counselInfo
+      req.body.patientId = req.session.userId
+      req.body.conselObject = counselInfo._id
+      next()
     }
     // 自动转发相关 2017-07-15 GY
-    if (req.body.autoRelayFlag) {
-      req.body.counselInfo = counselInfo
-      next()
-    } else {
-      res.json({result: '新建成功', results: counselInfo})
-    }
+    // if (req.body.autoRelayFlag) {
+    //   req.body.counselInfo = counselInfo
+    //   next()
+    // } else {
+    //   res.json({result: '新建成功', results: counselInfo})
+    // }
   })
 }
 
 // 实现自动转发 暂未实现socket功能 2017-07-15 GY
-exports.counselAutoRelay = function (req, res) {
+exports.counselAutoRelay = function (req, res, next) {
+  // 未设置自动转发，进入下一步
+  if (!req.body.autoRelayFlag) {
+    console.log('no_auto_relay')
+    // return res.send('test_success')
+    next()
+  }
+
   function add00 (m) {
     return m < 10 ? '00' + m : (m < 100 ? '0' + m : m)
   }
@@ -249,24 +262,38 @@ exports.counselAutoRelay = function (req, res) {
           relayOne(++index)
         } else {
           if (teamErrFlag || consultationErrFlag || communicationErrFlag || newsErrFlag) {
-            return res.status(206).json({
-              result: '新建成功',
-              results: req.body.counselInfo,
-              message: '医生设置了自动转发但在发消息时出现错误'
+            // return res.status(206).json({
+            //   result: '新建成功',
+            //   results: req.body.counselInfo,
+            //   message: '医生设置了自动转发但在发消息时出现错误'
+            // })
+            console.log({
+              time: new Date(),
+              doctorId: req.body.doctorId,
+              warning: '医生设置了自动转发但在发消息时出现错误'
             })
+            next()
           } else if (teamEmptyFlag.length !== 0) {
             let emptyTeams = []
             for (let i = 0; i < teamIds.length; i++) {
               if (teamEmptyFlag[i]) emptyTeams.push(teamIds[i])
             }
-            return res.status(206).json({
-              result: '新建成功',
-              results: req.body.counselInfo,
-              message: '医生设置了自动转发但部分转发目标不存在',
-              messageDetail: emptyTeams
+            // return res.status(206).json({
+            //   result: '新建成功',
+            //   results: req.body.counselInfo,
+            //   message: '医生设置了自动转发但部分转发目标不存在',
+            //   messageDetail: emptyTeams
+            // })
+            console.log({
+              time: new Date(),
+              doctorId: req.body.doctorId,
+              warning: '医生设置了自动转发但部分转发目标不存在',
+              warningDetail: emptyTeams
             })
+            next()
           } else {
-            return res.json({result: '新建成功', results: req.body.counselInfo})
+            // return res.json({result: '新建成功', results: req.body.counselInfo})
+            next()
           }
         }
       } else {
@@ -342,7 +369,7 @@ exports.counselAutoRelay = function (req, res) {
             }
             // 需要插入news表卧槽好多我先调已经存在的接口好了
             request({
-              url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v1/new/teamNews' + '?token=' + req.query.token || req.body.token,
+              url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/new/teamNews' + '?token=' + req.query.token || req.body.token,
               method: 'POST',
               body: newsData,
               json: true
@@ -354,24 +381,38 @@ exports.counselAutoRelay = function (req, res) {
                 relayOne(++index)
               } else {
                 if (teamErrFlag || consultationErrFlag || communicationErrFlag || newsErrFlag) {
-                  return res.status(206).json({
-                    result: '新建成功',
-                    results: req.body.counselInfo,
-                    message: '医生设置了自动转发但在发消息时出现错误'
+                  // return res.status(206).json({
+                  //   result: '新建成功',
+                  //   results: req.body.counselInfo,
+                  //   message: '医生设置了自动转发但在发消息时出现错误'
+                  // })
+                  console.log({
+                    time: new Date(),
+                    doctorId: req.body.doctorId,
+                    warning: '医生设置了自动转发但在转发消息时出现错误'
                   })
+                  next()
                 } else if (teamEmptyFlag.length !== 0) {
                   let emptyTeams = []
                   for (let i = 0; i < teamIds.length; i++) {
                     if (teamEmptyFlag[i]) emptyTeams.push(teamIds[i])
                   }
-                  return res.status(206).json({
-                    result: '新建成功',
-                    results: req.body.counselInfo,
-                    message: '医生设置了自动转发但部分转发目标不存在',
-                    messageDetail: emptyTeams
+                  // return res.status(206).json({
+                  //   result: '新建成功',
+                  //   results: req.body.counselInfo,
+                  //   message: '医生设置了自动转发但部分转发目标不存在',
+                  //   messageDetail: emptyTeams
+                  // })
+                  console.log({
+                    time: new Date(),
+                    doctorId: req.body.doctorId,
+                    warning: '医生设置了自动转发但部分转发目标不存在',
+                    warningDetail: emptyTeams
                   })
+                  next()
                 } else {
-                  return res.json({result: '新建成功', results: req.body.counselInfo})
+                  // return res.json({result: '新建成功', results: req.body.counselInfo})
+                  next()
                 }
               }
             })
@@ -392,11 +433,18 @@ exports.counselAutoRelay = function (req, res) {
   //
 
   if (teamIds.length === 0) {
-    return res.status(206).json({
-      result: '新建成功',
-      results: req.body.counselInfo,
-      message: '医生设置了自动转发但没有设置转发目标'
+    // return res.status(206).json({
+    //   result: '新建成功',
+    //   results: req.body.counselInfo,
+    //   message: '医生设置了自动转发但没有设置转发目标'
+    // })
+    console.log({
+      time: new Date(),
+      doctorId: req.body.doctorId,
+      warning: '医生设置了自动转发但没有设置转发目标'
     })
+    // return res.send('test_success')
+    next()
   }
   relayOne(0)
 }
