@@ -1248,7 +1248,7 @@ exports.verifySMS = function (req, res) {
   var now = new Date()
   var _mobile = req.query.mobile
   var _smsType = req.query.smsType
-  var _smsCode = req.query.smsCode
+  var _smsCode = Number(req.query.smsCode)
 
   var query = {'Expire': {'$gte': now.getTime()}, 'mobile': _mobile, 'smsType': _smsType}
   Sms.getOne(query, function (err, item) {
