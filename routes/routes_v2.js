@@ -60,6 +60,7 @@ var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_contr
 var forumCtrl = require('../controllers_v2/forum_controller')
 var departmentMonitorCtrl = require('../controllers_v2/departmentMonitor_controller')
 var policyCtrl = require('../controllers_v2/policy_controller')
+var districtMonitorCtrl = require('../controllers_v2/districtMonitor_controller')
 var departmentReportTempCtrl = require('../controllers_v2/departmentReportTemp_controller')
 
 module.exports = function (app, webEntry, acl) {
@@ -5772,7 +5773,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: Server internal error
    */
   // 医生点评患者的报表信息 权限 医生
-  app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, reportCtrl.updateReport)
+  app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, alluserCtrl.getAlluserObject, reportCtrl.updateReport)
   /**
    * @swagger
    * definition:
@@ -6603,6 +6604,14 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/departmentmonitor/score', departmentMonitorCtrl.getScore)
   app.get(version + '/departmentmonitor/negcomment', departmentMonitorCtrl.getNegComment)
   app.get(version + '/departmentmonitor/counseltimeout', departmentMonitorCtrl.getCounselTimeout)
+  app.get(version + '/departmentmonitor/currentpatients', departmentMonitorCtrl.getCurrentPatientsCount)
+
+  // 地区负责人报告
+  app.get(version + '/districtmonitor/patients', districtMonitorCtrl.getPatientsCount)
+  app.get(version + '/districtmonitor/departmentpatients', districtMonitorCtrl.getDepartmentPatientsCount)
+  app.get(version + '/districtmonitor/score', districtMonitorCtrl.getScore)
+  app.get(version + '/districtmonitor/negcomment', districtMonitorCtrl.getNegComment)
+  app.get(version + '/districtmonitor/counseltimeout', districtMonitorCtrl.getCounselTimeout)
 
   // test
   // app.get(version + '/departmentmonitor/test', departmentMonitorCtrl.autoDepartmentDaily)

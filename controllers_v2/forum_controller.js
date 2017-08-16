@@ -51,6 +51,7 @@ exports.getAllposts = function (req, res) {
   let userId = req.session.userId
   let limit = Number(req.query.limit)
   let skip = Number(req.query.skip)
+  let title = req.query.title || '' 
   let array = [
     {
       $lookup: {
@@ -119,6 +120,13 @@ exports.getAllposts = function (req, res) {
     {$skip: skip},
     {$limit: limit}
   ]
+  if (title !== '') {
+    array.splice(
+      0,
+      0,
+      {$match: {title: {$regex: title}}}
+    )
+  }
   Forum.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
