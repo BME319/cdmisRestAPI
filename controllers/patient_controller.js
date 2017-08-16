@@ -724,8 +724,8 @@ exports.bindingMyDoctor = function(req, res, next) {
 							// }
 							// else{
 							var doctor_new={doctorId:doc,firstTime:new Date(),invalidFlag:0}
-							console.log("*************************** bindingMyDoctor : doctor_new ********************************");
-							console.log(doctor_new);
+							// console.log("*************************** bindingMyDoctor : doctor_new ********************************");
+							// console.log(doctor_new);
 
 							doctorsList.push(doctor_new)
 							// }
@@ -864,7 +864,7 @@ exports.bindingPatient = function(req, res, next) {
 						console.log(new Date())
 						req.body.postdata = {
 
-  							"template_id":"F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M",
+  							"template_id":"65jORF4DzfoSCb8ABRGjR3sJwLlM6Hj675kt4ihxDgA",
   							"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
   							
         					"data":{
@@ -901,7 +901,7 @@ exports.bindingPatient = function(req, res, next) {
 			req.body.userId = req.body.doctorId;
 			req.body.role = 'doctor';
 			req.body.postdata = {
-				"template_id":"F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M",
+				"template_id":"65jORF4DzfoSCb8ABRGjR3sJwLlM6Hj675kt4ihxDgA",
 				"url":"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect",
   							
         		"data":{

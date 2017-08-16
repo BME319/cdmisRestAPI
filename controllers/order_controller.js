@@ -19,7 +19,7 @@ exports.insertOrder = function(req, res, next) {
     var money = req.body.money;
    
     if(money == null || money === '' || money == 'undefined'){
-        console.log('in');
+        // console.log('in');
         return res.status(403).send('invalid input');
     }
 
@@ -116,7 +116,7 @@ exports.checkPayStatus = function (type) {
             if (err) {
                 return res.status(500).send(err);
             }
-            console.log(item)
+            // console.log(item)
             if (item === null) {
                 return res.status(400).send('不存在的订单');
             }

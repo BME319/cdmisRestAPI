@@ -87,7 +87,7 @@ exports.getPatientObject = function (req, res, next) {
   var query = {userId: req.patientId}
   Patient.getOne(query, function (err, patient) {
     if (err) {
-      console.log(err)
+      // console.log(err)
       return res.status(500).send('服务器错误, 用户查询失败!')
     }
     if (patient == null) {

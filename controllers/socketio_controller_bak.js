@@ -189,7 +189,7 @@ function sendToReceiver(messageType, receiver, sendBy, userAppServer, userWechat
                             "userId": members[idx].userId,          // data.msg.content.doctorId, //医生的UID
                             "role": "doctor",
                             "postdata": {
-                                "template_id": "cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k",
+                                "template_id": "U1KajBosUqmQSl0MLA3p-BN_v9VnTf5-hty-3UD9N08",
                                 "url": actionUrl,
                                 "data": {
                                     "first": {

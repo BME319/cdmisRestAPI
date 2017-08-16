@@ -880,10 +880,10 @@ exports.addcontenttime = function (req, res) {
 							console.log(err);
 						}
 						else {
-							console.log('updateSuccess');
-							console.log(upCM._id);
+							// console.log('updateSuccess');
+							// console.log(upCM._id);
 							// console.log(upCM.content.time);
-							console.log(i)
+							// console.log(i)
 						}
 					}, {new: true});
 				}
@@ -901,13 +901,13 @@ exports.timeconfirmation = function (req, res) {
 		}
 		for (let i = 0; i < items.length; i ++) {
 			if (!(items[i].content.time)) {
-				console.log(i);
-				console.log(items[i]._id);
+				// console.log(i);
+				// console.log(items[i]._id);
 			}
 			flag = i;
-			console.log(flag);
+			// console.log(flag);
 		}
-		console.log(items.length);
+		// console.log(items.length);
 		if (flag === items.length-1) {
 			return res.json({'result': 'finish'});
 		}
