@@ -348,73 +348,64 @@ exports.getPostContent = function (req, res) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
     // res.json({data: results[0], code: 0, msg: 'success'})
-    let result1 = results[0]
-    let array2 = [
-      {$match: {postId: postId}},
-      {
-        $project: {
-          'replies': 1
+    if (!results.length) {
+      res.status(500).json({code: 1, msg: 'postId不存在'})
+    } else {
+      // console.log(results)
+      let result1 = results[0]
+      let array2 = [
+        {$match: {postId: postId}},
+        {
+          $project: {
+            'replies': 1
+          }
+        },
+        {$unwind: {path: '$replies', preserveNullAndEmptyArrays: true}},
+        {
+          $project: {
+            commentId: '$replies.commentId',
+            userId: '$replies.userId',
+            userName: '$replies.userName',
+            time: '$replies.time',
+            depth: '$replies.depth',
+            content: '$replies.content',
+            // at: '$replies.at'
+            replies: '$replies.replies'
+          }
+        },
+        {
+          $lookup: {
+            from: 'allusers',
+            localField: 'userId',
+            foreignField: 'userId',
+            as: 'userinfo'
+          }
+        },
+        {
+          $project: {
+            'commentId': 1,
+            'userId': 1,
+            'userName': 1,
+            'time': 1,
+            'depth': 1,
+            'content': 1,
+            'at': 1,
+            'replies': 1,
+            avatar: '$userinfo.photoUrl'
+          }
+        },
+        {$unwind: {path: '$avatar', preserveNullAndEmptyArrays: true}}
+      ]
+      Forum.aggregate(array2, function (err, results) {
+        if (err) {
+          res.status(500).json({code: 1, msg: err.errmsg})
         }
-      },
-      {$unwind: {path: '$replies', preserveNullAndEmptyArrays: true}},
-      {
-        $project: {
-          commentId: '$replies.commentId',
-          userId: '$replies.userId',
-          userName: '$replies.userName',
-          time: '$replies.time',
-          depth: '$replies.depth',
-          content: '$replies.content',
-          // at: '$replies.at'
-          replies: '$replies.replies'
-        }
-      },
-      {
-        $lookup: {
-          from: 'allusers',
-          localField: 'userId',
-          foreignField: 'userId',
-          as: 'userinfo'
-        }
-      },
-      {
-        $project: {
-          'commentId': 1,
-          'userId': 1,
-          'userName': 1,
-          'time': 1,
-          'depth': 1,
-          'content': 1,
-          'at': 1,
-          'replies': 1,
-          avatar: '$userinfo.photoUrl'
-        }
-      },
-      {$unwind: {path: '$avatar', preserveNullAndEmptyArrays: true}}
-    ]
-    Forum.aggregate(array2, function (err, results) {
-      if (err) {
-        res.status(500).json({code: 1, msg: err.errmsg})
-      }
-      result1['replies'] = results
-      res.json({data: result1, code: 0, msg: 'success'})
-      // res.json({data: extend({}, result1[0], results[0]), code: 0, msg: 'success'})
-    })
+        result1['replies'] = results
+        res.json({data: result1, code: 0, msg: 'success'})
+        // res.json({data: extend({}, result1[0], results[0]), code: 0, msg: 'success'})
+      })
+    }
   })
-  // let userId = req.query.userId
-  // let query = {postId: postId}
-  // let populate = [
-  //   {
-  //     path: 'sponsorId',
-  //     select: {'name': 1, 'userId': 1}
-  //   }
-  // ]
-  // Forum.getOne(query, function (err, forumInfo) {
-  //   if (err) {
-  //     res.status(500).json({code: 1, msg: err.errmsg})
-  //   }
-  //   // res.json({data: forumInfo, code: 0, msg: 'success'})
-  // })
 }
 
 exports.forumComment = function (req, res) {
