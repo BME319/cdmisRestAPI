@@ -453,7 +453,7 @@ exports.counselAutoRelay = function (req, res, next) {
 // 输入，counselId，status；输出，咨询状态更新
 exports.changeCounselStatus = function (req, res, next) {
   var counselId = req.body.counselId || null
-  if (counselId == null || counselId === '') {
+  if (counselId === null) {
     return res.json({result: '请填写counselId!'})
   }
   var query = {
@@ -521,23 +521,25 @@ exports.getStatus = function (req, res, next) {
   // else {
   //   req.type = req.query.type;
   // }
-  if (req.body.status === null || req.body.status === '' || req.body.status === undefined) {
-    req.body.status = null
-  } else {
-    // 以十进制解析状态字符串
-    req.body.status = parseInt(req.body.status, 10)
+  let status = req.body.status || req.query.status || null
+  let statusInBody = req.body.status || null
+  let changeType = req.body.changeType || null
+  let type = req.query.type || req.body.type || null
+  if (changeType === null) {
+    if (status === null) {
+      return res.json({result: '请填写status!'})
+    } else {
+      status = parseInt(status, 10)
+    }
   }
-  // console.log(req.body.status)
 
   var query = {
     patientId: req.body.patientObject._id,
     doctorId: req.body.doctorObject._id
   // type:req.type
   }
-  if (req.query.type != null) {
-    query['type'] = req.query.type
-  } else if (req.body.type != null) {
-    query['type'] = req.body.type
+  if (type !== null) {
+    query['type'] = type
   }
 
   // 设置排序规则函数，时间降序
@@ -559,7 +561,7 @@ exports.getStatus = function (req, res, next) {
       var counsels = []
       counsels = items.sort(sortTime)
       req.body.counselId = counsels[0].counselId
-      if (req.body.status == null && req.body.changeType == null) {
+      if (statusInBody === null && changeType === null) {
         return res.json({result: counsels[0]})
       } else {
         next()

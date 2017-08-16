@@ -23,7 +23,7 @@ exports.uploadphoto = function () {
 }
 
 exports.upload = function (req, res) {
-  var file = req.body.file
+  var file = req.file
   var path = file.path
   var type = req.body.type
   if (type === null || type === undefined) {
