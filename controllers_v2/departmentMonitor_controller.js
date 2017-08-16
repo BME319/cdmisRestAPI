@@ -341,11 +341,11 @@ exports.getCurrentPatientsCount = function (req, res) {
       {$sort: {inchargeCount: -1}}
     ]
     Department.aggregate(array, function (err, results) {
-    if (err) {
-      res.status(500).json({code: 1, msg: err.errmsg})
-    }
-    res.json({code: 0, data: results, msg: 'success'})
-  })
+      if (err) {
+        res.status(500).json({code: 1, msg: err.errmsg})
+      }
+      res.json({code: 0, data: results, msg: 'success'})
+    })
   }
 }
 
@@ -420,7 +420,7 @@ exports.getScore = function (req, res) {
       {
         $group: {
           _id: '$doctors',
-          score: {$sum: '$score'}
+          score: {$avg: '$score'}
         }
       },
       {
@@ -449,7 +449,7 @@ exports.getScore = function (req, res) {
       let count = 0
       let sum = 0
       for (i = 0; i < results.length; i++) {
-        if (results[i].score !== 0) {
+        if (results[i].score !== 0 && results[i].score !== null) {
           count++
           sum = sum + results[i].score
         }
@@ -636,6 +636,97 @@ exports.getCounselTimeout = function (req, res) {
   }
 }
 
-// exports.getActiveCount = function (req, res) {
+exports.getActiveCount = function (req, res) {
+  let district = req.query.district || ''
+  let department = req.query.department || ''
+  let hospital = req.query.hospital || ''
+  let startTime = req.query.startTime || ''
+  let endTime = req.query.endTime || ''
 
-// }
+  if (district === '') {
+    res.status(400).json({code: 1, msg: '请输入地区'})
+  } else if (hospital === '') {
+    res.status(400).json({code: 1, msg: '请输入医院'})
+  } else if (department === '') {
+    res.status(400).json({code: 1, msg: '请输入科室'})
+  } else if (startTime === '') {
+    res.status(400).json({code: 1, msg: '请输入开始时间'})
+  } else if (endTime === '') {
+    res.status(400).json({code: 1, msg: '请输入结束时间'})
+  } else {
+    startTime = new Date(startTime)
+    endTime = new Date(endTime)
+    let array = [
+      {$match: {district: district, hospital: hospital, department:department}},
+      // 获取科室医生
+      {
+        $project: {
+          'doctors': 1
+        }
+      },
+      {$unwind: {path: '$doctors', preserveNullAndEmptyArrays: false}},
+      {
+        $lookup: {
+          from: 'doctorsincharges',
+          localField: 'doctors',
+          foreignField: 'doctorId',
+          as: 'inchargeinfo'
+        }
+      },
+      {
+        $project: {
+          'doctors': 1,
+          inchargeinfo: {
+            $filter: {
+              input: '$inchargeinfo',
+              as: 'inchargeinfo',
+              cond: {
+                $and: [
+                  {$gt: ['$$inchargeinfo.end', startTime]},
+                  {$lt: ['$$inchargeinfo.start', endTime]},
+                  {$ne: ['$$inchargeinfo.patinetId', null]},
+                  {$ne: ['$$inchargeinfo.patientId', undefined]}
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          'doctors': 1,
+          'inchargeinfo': 1,
+          patientsincharge: '$inchargeinfo.patientId',
+        }
+      },
+      {
+        $lookup: {
+          from: 'allusers',
+          localField: 'patientsincharge',
+          foreignField: '_id',
+          as: 'patientinfo'
+        }
+      },
+      {
+        $project: {
+          patients: '$patientinfo.userId'
+        }
+      },
+      {
+        $lookup: {
+          from: 'apirecords',
+          localField: 'patients',
+          foreignField: 'userId',
+          as: 'apiinfo'
+        }
+      },
+      // {$unwind: {path: '$doctors', preserveNullAndEmptyArrays: false}},
+    ]
+    Department.aggregate(array, function (err, results) {
+      if (err) {
+        res.status(500).json({code: 1, msg: err.errmsg})
+      }
+        res.json({code: 0, data: results, msg: 'success'})
+    })
+  }
+}

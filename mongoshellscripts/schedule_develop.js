@@ -36,8 +36,12 @@ function schedule () {
       db.counselautochangestatuses.insert(counselItem[i])
             // 查询相关科室信息
       let departmentItem = db.departments.find({doctors: counselItem[i].doctorId}).toArray()
+      // 查询医生回复次数
+      let cmudoc = db.allusers.find({_id: counselItem[i].doctorId}).toArray()[0].userId
+      let cmupat = db.allusers.find({_id: counselItem[i].patientId}).toArray()[0].userId
+      let count_of_reply = db.communications.find({sendBy:cmudoc, receiver:cmupat, sendDateTime:{$gt:counselItem[i].time}}).toArray().length
             // 插入科主任、结束时间、超时类型、更改状态为0
-      db.counselautochangestatuses.update({counselId: counselItem[i].counselId}, {$set: {departLeader: departmentItem[0].departLeader, status: 0, endTime: now, timeouttype: 1}})
+      db.counselautochangestatuses.update({counselId: counselItem[i].counselId}, {$set: {departLeader: departmentItem[0].departLeader, status: 0, endTime: now, timeouttype: 1, reply: count_of_reply}})
             // 更改counsel表的状态为0，插入结束时间
       db.counsels.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now}})
             // 更改consultation表状态
@@ -45,10 +49,13 @@ function schedule () {
       printjson({'result': 'change_status_success', 'counselId': counselItem[i].counselId})
             // 存消息
             // 查找患者与医生的ID
-      let messagedoc = db.doctors.find({_id: counselItem[i].doctorId}).toArray()
+            // 二期代码应该是alluser
+      // let messagedoc = db.doctors.find({_id: counselItem[i].doctorId}).toArray()
+      let messagedoc = db.allusers.find({_id: counselItem[i].doctorId}).toArray()
       print(counselItem[i].doctorId)
       print(counselItem[i].patientId)
-      let messagepat = db.patients.find({_id: counselItem[i].patientId}).toArray()
+      // let messagepat = db.patients.find({_id: counselItem[i].patientId}).toArray()
+      let messagepat = db.allusers.find({_id: counselItem[i].patientId}).toArray()
       let endlMsg = {
         type: '',
         info: '',
