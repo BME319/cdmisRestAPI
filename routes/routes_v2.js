@@ -89,28 +89,1435 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl))
 
   // wf
-  app.get(version + '/alluser/count', tokenManager.verifyToken(), alluserCtrl.countAlluserList)
-  app.get(version + '/alluser/userList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(0))
-  app.get(version + '/alluser/doctorList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(1))
-  app.get(version + '/alluser/patientList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(2))
-  app.get(version + '/alluser/nurseList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(3))
-  app.get(version + '/alluser/insuranceList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(4))
-  app.get(version + '/alluser/healthList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(5))
-  app.get(version + '/alluser/adminList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(6))
-  app.post(version + '/alluser/alluser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList)
+  /**
+   * @swagger
+   * definition:
+   *   User:
+   *     type: object
+   *     properties:
+   *       role:
+   *         type: string
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *   Doctor1:
+   *     type: object
+   *     properties:
+   *       role:
+   *         type: string
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       workUnit:
+   *         type: string
+   *       department:
+   *         type: string
+   *       title:
+   *         type: string
+   *       count1:
+   *         type: number
+   *       count2:
+   *         type: number
+   *       score:
+   *         type: number
+   *       description:
+   *         type: string
+   *       major:
+   *         type: string
+   *   Patient1:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       VIP:
+   *         type: number
+   *       IDNo:
+   *         type: string
+   *       class:
+   *         type: string
+   *       hypertension:
+   *         type: number
+   *       bloodType:
+   *         type: string
+   *       height:
+   *         type: string
+   *       weight:
+   *         type: number
+   *       class_info:
+   *             type: string
+   *       birthday:
+   *         type: string
+   *         format: date-time
+   *       allergic:
+   *         type: string
+   *   Nurse:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       workUnit:
+   *         type: string
+   *       department:
+   *         type: string
+   *       workAmounts:
+   *         type: number
+   *   Insurance:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       boardingTime:
+   *         type: string
+   *         format: date-time
+   *       workAmounts:
+   *         type: number
+   *       role:
+   *         type: string
+   *   Health:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       boardingTime:
+   *         type: string
+   *         format: date-time
+   *       workAmounts:
+   *         type: number
+   *   Admin:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       creationTime:
+   *         type: string
+   *         format: date-time
+   *       workUnit:
+   *         type: number
+   */
+  /**
+   * @swagger
+   * /alluser/count:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型统计用户数量"
+   *     operationId: countAlluserList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role1"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "role2"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "string"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: "number"
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型统计用户数量 权限 admin
+  app.get(version + '/alluser/count', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.countAlluserList)
+  /**
+   * @swagger
+   * /alluser/userList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取用户列表"
+   *     operationId: getUserList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/User'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取用户列表 权限 admin
+  app.get(version + '/alluser/userList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(0))
+  /**
+   * @swagger
+   * /alluser/doctorList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取医生列表"
+   *     operationId: getDoctorList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Doctor'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取医生列表 权限 admin
+  app.get(version + '/alluser/doctorList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(1))
+  /**
+   * @swagger
+   * /alluser/patientList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取患者列表"
+   *     operationId: getPatientList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Patient1'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取患者列表 权限 admin
+  app.get(version + '/alluser/patientList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(2))
+  /**
+   * @swagger
+   * /alluser/nurseList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取护士列表"
+   *     operationId: getNurseList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Nurse'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取护士列表 权限 admin
+  app.get(version + '/alluser/nurseList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(3))
+  /**
+   * @swagger
+   * /alluser/insuranceList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取保险专员列表"
+   *     operationId: getInsuranceList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Insurance'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取保险专员列表 权限 admin
+  app.get(version + '/alluser/insuranceList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(4))
+  /**
+   * @swagger
+   * /alluser/healthList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取健康专员列表"
+   *     operationId: getHealthList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Health'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取健康专员列表 权限 admin
+  app.get(version + '/alluser/healthList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(5))
+  /**
+   * @swagger
+   * /alluser/adminList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取管理员列表"
+   *     operationId: getAdminList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Admin'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取管理员列表 权限 admin
+  app.get(version + '/alluser/adminList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(6))
+  /**
+   * @swagger
+   * /alluser/alluser:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 更新用户信息
+   *     operationId: updateAlluserList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           name:
+   *             type: "string"
+   *           gender:
+   *             type: "number"
+   *           phoneNo:
+   *             type: "string"
+   *           workUnit:
+   *             type: "string"
+   *           department:
+   *             type: "string"
+   *           workAmounts:
+   *             type: "number"
+   *           boardingTime:
+   *             type: "string"
+   *             format: date-time
+   *           creationTime:
+   *             type: "string"
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: success
+   *      500:
+   *         description: Server internal error
+   */
+  // 更新用户信息 权限 admin
+  app.post(version + '/alluser/alluser', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList)
 
+  /**
+   * @swagger
+   * /alluser/register:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 用户注册
+   *     operationId: register
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "phoneNo"
+   *           - "password"
+   *           - "role"
+   *         properties:
+   *           phoneNo:
+   *             type: "string"
+   *           password:
+   *             type: "string"
+   *           role:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: Alluser Register Success!
+   *      400:
+   *        description: empty inputs
+   *      422:
+   *        description: Alluser Already Exist!
+   *      500:
+   *        description: Server internal error
+   */
+  // 用户注册 权限 医生/患者
   app.post(version + '/alluser/register', errorHandler.error, alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
-  app.post(version + '/alluser/cancelUser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.cancelAlluser)
-  app.post(version + '/alluser/unionid', alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
-  app.post(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
-  app.get(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId)
+  /**
+   * @swagger
+   * /alluser/cancelUser:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: "删除用户"
+   *     operationId: cancelAlluser
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "userId"
+   *           - "invalidFlag"
+   *         properties:
+   *           userId:
+   *             type: "string"
+   *           invalidFlag:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: success!
+   *      500:
+   *        description: Server internal error
+   */
+  // 删除用户
+  app.post(version + '/alluser/cancelUser', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkAlluser, alluserCtrl.cancelAlluser)
+  /**
+   * @swagger
+   * /alluser/unionid:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 绑定微信账号
+   *     operationId: setMessageOpenId
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "phoneNo"
+   *           - "openId"
+   *         properties:
+   *           phoneNo:
+   *             type: "string"
+   *           openId:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: success!
+   *      403:
+   *        description: unionid不能为空/unionid已存在/用户不存在
+   *      422:
+   *        description: Alluser doesn't Exist!
+   *      500:
+   *        description: Server internal error
+   */
+  // 绑定微信账号 权限 医生/患者  修改：删除checkBinding操作，绑定微信后需要重新登录，调用login方法 2017-08-17 lgf
+  app.post(version + '/alluser/unionid', alluserCtrl.setOpenId, alluserCtrl.setOpenIdRes)
+  // app.post(version + '/alluser/unionid', alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
+  /**
+   * @swagger
+   * /alluser/openId:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 写入用户openId
+   *     operationId: setMessageOpenId
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "userId"
+   *           - "openId"
+   *           - "type"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           openId:
+   *             type: "string"
+   *           type:
+   *             type: "number"
+   *     responses:
+   *      200:
+   *        description: success!
+   *      403:
+   *        description: openId不能为空
+   *      422:
+   *        description: plz input type
+   *      500:
+   *        description: Server internal error
+   */
+  // 写入用户openId 权限 医生/患者
+  app.post(version + '/alluser/openId', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
+  /**
+   * @swagger
+   * /alluser/openId:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: " 获取用户openId"
+   *     operationId: getMessageOpenId
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       required: true
+   *       description: "授权信息"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             doctorWechat:
+   *               type: string
+   *       201:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             patientWechat:
+   *               type: string
+   *       202:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             doctorApp:
+   *               type: string
+   *       203:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             patientApp:
+   *               type: string
+   *       412:
+   *         plz input type
+   *       500:
+   *         description: Server internal error
+   */
+  // 获取用户openId 权限 医生/患者
+  app.get(version + '/alluser/openId', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId)
+  /**
+   * @swagger
+   * /alluser/reset:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 用户重置密码
+   *     operationId: reset
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "phoneNo"
+   *           - "password"
+   *         properties:
+   *           phoneNo:
+   *             type: "string"
+   *           password:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: password reset success!
+   *      422:
+   *        description: Alluser doesn't Exist!
+   *      500:
+   *        description: Server internal error
+   */
+  // 用户重置密码
   app.post(version + '/alluser/reset', alluserCtrl.reset)
-  app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest, alluserCtrl.checkBinding, alluserCtrl.login)
-  app.post(version + '/alluser/logout', tokenManager.verifyToken(), alluserCtrl.logout)
+  /**
+   * @swagger
+   * /alluser/login:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 用户登录
+   *     operationId: login
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "username"
+   *           - "password"
+   *           - "role"
+   *         properties:
+   *           username:
+   *             type: "string"
+   *           password:
+   *             type: "string"
+   *           role:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: login success
+   *      422:
+   *        description: 请输入用户名和密码
+   *      423:
+   *        description: Alluser doesn't Exist!
+   *      424:
+   *        description: Alluser password isn't correct!
+   *      425:
+   *        description: No authority!
+   *      500:
+   *        description: Server internal error
+   */
+  // 用户登录 修改：调整方法流程，先进行登录操作，获取token，再进行患者和医生/护士和患者的绑定 2017-08-17 lgf
+  app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest, alluserCtrl.login, alluserCtrl.checkBinding)
+  // app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest, alluserCtrl.checkBinding, alluserCtrl.login)
+  /**
+   * @swagger
+   * /alluser/logout:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 用户登出
+   *     operationId: logout
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: logout success
+   *      422:
+   *        description: Alluser doesn't Exist
+   *      500:
+   *        description: Server internal error
+   */
+  // 用户登出 权限 医生/患者
+  app.post(version + '/alluser/logout', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.logout)
+  /**
+   * @swagger
+   * /alluser/userID:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: " 获取用户ID"
+   *     operationId: getAlluserID
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "username"
+   *       in: "query"
+   *       required: true
+   *       description: "用户ID,可以输入手机号或者unionid"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             AlluserId:
+   *               type: string
+   *             phoneNo:
+   *               type: string
+   *             roles:
+   *               type: string
+   *             openId:
+   *               type: string
+   *       412:
+   *         description: Alluser doesn't Exist
+   *       500:
+   *         description: Server internal error
+   */
+  // 获取用户ID
   app.get(version + '/alluser/userID', alluserCtrl.getAlluserID)
+  /**
+   * @swagger
+   * /alluser/sms:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 发送验证码
+   *     operationId: sendSMS
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "mobile"
+   *           - "smsType"
+   *         properties:
+   *           mobile:
+   *             type: "string"
+   *           smsType:
+   *             type: "number"
+   *           reason:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: success
+   *      201:
+   *        description: 您的邀请码已发送，请等待XXs后重新获取
+   *      412:
+   *        description: mobile and smsType input Error!
+   *      500:
+   *        description: Server internal error
+   */
+  // 发送验证码
   app.post(version + '/alluser/sms', alluserCtrl.sendSMS)
+  /**
+   * @swagger
+   * /alluser/sms:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "校验验证码"
+   *     operationId: verifySMS
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "smsCode"
+   *       in: "query"
+   *       required: true
+   *       description: "验证码"
+   *       type: "number"
+   *     - name: "mobile"
+   *       in: "query"
+   *       required: true
+   *       description: "用户电话"
+   *       type: "string"
+   *     - name: "smsType"
+   *       in: "query"
+   *       required: true
+   *       description: "验证码类型"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: 验证码正确
+   *       412:
+   *         description: 验证码错误
+   *       422:
+   *         description: 没有验证码或验证码已过期
+   *       500:
+   *         description: Server internal error
+   */
+  // 校验验证码
   app.get(version + '/alluser/sms', alluserCtrl.verifySMS)
+  /**
+   * @swagger
+   * /alluser/agreement:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: " 获取用户签署协议状态"
+   *     operationId: getAlluserAgreement
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "userId"
+   *       in: "query"
+   *       required: true
+   *       description: "用户ID"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             agreement:
+   *               type: string
+   *       500:
+   *         description: Server internal error
+   */
+  // 获取用户签署协议状态
   app.get(version + '/alluser/agreement', alluserCtrl.getAlluserAgreement)
+  /**
+   * @swagger
+   * /alluser/agreement:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 修改用户签署协议状态
+   *     operationId: updateAlluserAgreement
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "userId"
+   *           - "agreement"
+   *         properties:
+   *           userId:
+   *             type: "string"
+   *           agreement:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: success
+   *        schema:
+   *          type: object
+   *          properties:
+   *            agreement:
+   *              type: string
+   *      500:
+   *        description: Server internal error
+   */
+  // 修改用户签署协议状态
   app.post(version + '/alluser/agreement', alluserCtrl.updateAlluserAgreement)
 
   // 弃用，expense表已合并至 order表 2017-08-10 lgf
@@ -4414,13 +5821,16 @@ module.exports = function (app, webEntry, acl) {
    *         default: 3
    *       incomeRecords:
    *         type: array
-   *         $ref: '#/definitions/IncomeRecords'
+   *         items:
+   *           $ref: '#/definitions/IncomeRecords'
    *       rechargeRecords:
    *         type: array
-   *         $ref: '#/definitions/RechargeRecords'
+   *         items:
+   *           $ref: '#/definitions/RechargeRecords'
    *       expenseRecords:
    *         type: array
-   *         $ref: '#/definitions/ExpenseRecords'
+   *         items:
+   *           $ref: '#/definitions/ExpenseRecords'
    *       times:
    *         type: array
    *         items:
@@ -5886,7 +7296,8 @@ module.exports = function (app, webEntry, acl) {
    *         description: Server internal error
    */
   // 护士端微信扫码绑定患者 权限 护士
-  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
+  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient)
+  // app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
   /**
    * @swagger
    * /nurse/patientsList:
