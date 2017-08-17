@@ -105,7 +105,7 @@ exports.getReport = function (req, res) {
     return res.json({result: '请填写itemType!'})
   }
   var fields = {}
-  var opts = {} // 'sort': '-time'
+  var opts = {}
   var populate = {'path': 'patientId', 'select': 'class'}
   // console.log(query)
   Report.getOne(query, function (err, item) {
@@ -116,8 +116,24 @@ exports.getReport = function (req, res) {
     if (item === null) {
       return res.json({results: '不存在该段时间的报告!'})
     } else {
+      let doctorReport = ''
+      let doctorComment = ''
+      if (item.doctorReport.length !== 0) {
+        let rows = item.doctorReport
+        rows.sort(function (a, b) {
+          return Date.parse(b.insertTime) - Date.parse(a.insertTime) // 时间降序
+        })
+        doctorReport = rows[0].content
+      }
+      if (item.doctorComment.length !== 0) {
+        let rows = item.doctorComment
+        rows.sort(function (a, b) {
+          return Date.parse(b.insertTime) - Date.parse(a.insertTime) // 时间降序
+        })
+        doctorComment = rows[0].content
+      }
       if (itemType === 'DoctorReport') {
-        return res.json({results: item})
+        return res.json({results: {item, doctorReport, doctorComment}})
       } else {
         let flag = {flagBP: true, flagWeight: true, flagVol: true, flagT: true, flagHR: true, flagVA: false, flagPD: false}
         if (item.patientId.class === null || item.patientId.class === '' || item.patientId.class === undefined) {
@@ -162,7 +178,7 @@ exports.getReport = function (req, res) {
               }
             }
           }
-          return res.json({results: {item, lab, flag}})
+          return res.json({results: {item, lab, doctorReport, doctorComment, flag}})
         }
       }
     }
@@ -177,6 +193,7 @@ exports.updateReport = function (req, res) {
   var type = req.body.type || null
   var time = req.body.time || null
   var data = req.body.data || null
+  let currentTime = new Date()
   let index = []
   // var labTestNewItem = req.body.labTestNewItem || null
   // var labTest = req.body.labTest || null
@@ -210,7 +227,6 @@ exports.updateReport = function (req, res) {
     if (time !== null && time !== '') {
       query['time'] = time
     }
-    let upData = {}
     let recommendValue11 = -1
     let recommendValue12 = -1
     let recommendValue13 = -1
@@ -272,6 +288,22 @@ exports.updateReport = function (req, res) {
         return res.json({result: '请填写正确的测量项目名称!'})
     }
     query['itemType'] = data[i].itemType
+    let doctorComment = data[i].doctorComment || ''  // doctorComment为选填,医生未填写默认为空
+    // doctorReport\doctorComment均修改为记录历史小结和点评
+    let upData = {
+      $push: {
+        doctorReport: {
+          content: doctorReport,
+          doctorId: req.userObject._id,
+          insertTime: new Date(currentTime)
+        },
+        doctorComment: {
+          content: doctorComment,
+          doctorId: req.userObject._id,
+          insertTime: new Date(currentTime)
+        }
+      }
+    }
     if (recommendValue11 !== -1) {
       upData['recommendValue11'] = recommendValue11
     }
@@ -284,9 +316,6 @@ exports.updateReport = function (req, res) {
     if (recommendValue14 !== -1) {
       upData['recommendValue14'] = recommendValue14
     }
-    upData['doctorReport'] = doctorReport
-    let doctorComment = data[i].doctorComment || ''  // doctorComment为选填,医生未填写默认为空
-    upData['doctorComment'] = doctorComment          // 需要修改为读取历史记录
     console.log(query)
     console.log(upData)
     Report.updateOne(query, upData, function (err, upmessage) {

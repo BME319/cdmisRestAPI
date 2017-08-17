@@ -180,17 +180,29 @@ exports.getDocRepComment = function (req, res) {
   let days = Math.ceil((endTime - startTime) / (24 * 3600 * 1000))
   for (let k = 0; k < days; k++) {
     let queryD = {'doctorId': doctorObjectId}
+    let populate = {
+      'path': 'patientsInCharge.patientId',
+      'select': {'userId': 1}
+    }
     DpRelation.getOne(queryD, function (err, item) {
       if (err) {
         return res.status(500).send(err)
       }
       let patientsList = item.patientsInCharge
+      if (patientsList.length === 0) {  // 医生无主管的患者
+        let day = days - k
+        let sumTmp = 0
+        oneDocSumList.push({day, sumTmp})
+        if (oneDocSumList.length === days) {
+          return res.json({data: {oneDocSumList}, msg: '获取成功！', code: 1})
+        }
+      }
       for (let i = 0; i < patientsList.length; i++) {
         let queryR = {
-          'patientId': patientsList[i].patientId,
-          'itemType': 'DoctorReport',
+          'userId': patientsList[i].patientId.userId,
+          'itemType': 'DoctorReport'
           // 'type': 'week',                   // 周月季年点评数分开存？
-          'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
+          // 'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
         }
         console.log('queryR', queryR)
         Report.getSome(queryR, function (err, items) {
@@ -205,7 +217,7 @@ exports.getDocRepComment = function (req, res) {
           }
         })
       }
-    })
+    }, '', '', populate)
     endTimeTmp = new Date(startTimeTmp)
     startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
   }
@@ -266,9 +278,9 @@ exports.getDepartmentCounsel = function (req, res) {
     }
     let doctorsList = item.doctors
     // 医生列表加入科室主任
-    // for (let i = 0; i < item.departLeader.length; i++) {
-    //   doctorsList.push(item.departLeader[i])
-    // }
+    for (let i = 0; i < item.departLeader.length; i++) {
+      doctorsList.push(item.departLeader[i])
+    }
     let docCounselSumList = []                  // 科室每日咨询总量列表
     let oneDocSumList = []                      // 某个医生每日咨询总量列表
     let endTimeTmp = new Date(endTime)          // 某日终止时间
@@ -355,9 +367,9 @@ exports.getDepartmentPD = function (req, res) {
     }
     let doctorsList = item.doctors
     // 医生列表加入科室主任
-    // for (let i = 0; i < item.departLeader.length; i++) {
-    //   doctorsList.push(item.departLeader[i])
-    // }
+    for (let i = 0; i < item.departLeader.length; i++) {
+      doctorsList.push(item.departLeader[i])
+    }
     let docsPDSumList = []                      // 科室每日咨询总量列表
     let endTimeTmp = new Date(endTime)          // 某日终止时间
     let startTimeTmp                            // 某日起始时间
@@ -441,10 +453,13 @@ exports.getDepartRepComment = function (req, res) {
     }
     let doctorsList = item.doctors
     // 医生列表加入科室主任
-    // for (let i = 0; i < item.departLeader.length; i++) {
-    //   doctorsList.push(item.departLeader[i])
-    // }
-    let docsRCSumList = []                      // 科室每日点评报表总量列表
+    for (let i = 0; i < item.departLeader.length; i++) {
+      doctorsList.push(item.departLeader[i])
+    }
+    let docsWeekRCSumList = []                      // 科室每日点评报表总量列表
+    let docsMonthRCSumList = []
+    let docsSeasonRCSumList = []
+    let docsYearRCSumList = []
     let endTimeTmp = new Date(endTime)          // 某日终止时间
     let startTimeTmp                            // 某日起始时间
     if (modify === 0) {
@@ -458,51 +473,155 @@ exports.getDepartRepComment = function (req, res) {
 
     let days = Math.ceil((endTime - startTime) / (24 * 3600 * 1000))
     for (let k = 0; k < days; k++) {
-      let rcSum = 0
-      let docsRCList = []                   // 每个医生点评报表的列表
+      // let rcSum = 0
+      let docsWeekRCList = []                   // 每个医生点评报表的列表
+      let docsMonthRCList = []
+      let docsSeasonRCList = []
+      let docsYearRCList = []
       for (let i = 0; i < doctorsList.length; i++) {
         let doctorObjectId = doctorsList[i]
-        let queryD = {'doctorId': doctorObjectId}
-        let docRCSum = 0                   // 某个医生某天点评报表总数
-        DpRelation.getOne(queryD, function (err, item) {
+        // let queryD = {'doctorId': doctorObjectId}
+        // let docRCSum = 0                   // 某个医生某天点评报表总数
+        let docsWeekRCSum = 0
+        let docsMonthRCSum = 0
+        let docsSeasonRCSum = 0
+        let docsYearRCSum = 0
+        // let populate = {
+        //   'path': 'patientsInCharge.patientId',
+        //   'select': {'userId': 1}
+        // }
+        let queryR = {
+          'itemType': 'DoctorReport',
+          // 'type': 'week',                   // 分别存储周月季年点评数
+          'doctorReport.doctorId': doctorObjectId,
+          'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
+        }
+        Report.getSome(queryR, function (err, items) {
           if (err) {
             return res.status(500).send(err)
           }
-          let patientsList = item.patientsInCharge  // 医生主管的患者列表
-          let patientsRCList = []
-          for (let n = 0; n < patientsList.length; n++) {
-            let queryR = {
-              'patientId': patientsList[n].patientId,
-              'itemType': 'DoctorReport'
-              // 'type': 'week',                   // 周月季年点评数分开存？
-              // 'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
+          console.log('items', items)
+          let sumWeekTmp = 0
+          let sumMonthTmp = 0
+          let sumSeasonTmp = 0
+          let sumYearTmp = 0
+          for (let j = 0; j < items.length; j++) {
+            if (items[j].type === 'week') {
+              for (let n = 0; n < items[j].doctorReport.length; n++) {
+                let insertTime = new Date(items[j].doctorReport[n].insertTime)
+                if (insertTime.getTime() >= startTimeTmp.getTime() && insertTime.getTime() < endTimeTmp.getTime()) {
+                  sumWeekTmp++
+                }
+              }
             }
-            console.log('queryR', queryR)
-            Report.getSome(queryR, function (err, items) {
-              if (err) {
-                return res.status(500).send(err)
-              }
-              let day = days - k
-              let sumTmp = items.length
-              patientsRCList.push(sumTmp)
-              if (patientsRCList.length === patientsList.length) {
-                for (let j = 0; j < patientsRCList.length; j++) {
-                  docRCSum += patientsRCList[j]
-                }
-                docsRCList.push(docRCSum)
-                if (docsRCList.length === doctorsList.length) {
-                  for (let j = 0; j < docsRCList.length; j++) {
-                    rcSum += docsRCList[j]
-                  }
-                  docsRCSumList.push({day, rcSum})
-                  if (docsRCSumList.length === days) {
-                    return res.json({data: {docsRCSumList}, msg: '获取成功！', code: 1})
-                  }
+            if (items[j].type === 'month') {
+              for (let n = 0; n < items[j].doctorReport.length; n++) {
+                let insertTime = new Date(items[j].doctorReport[n].insertTime)
+                if (insertTime.getTime() >= startTimeTmp.getTime() && insertTime.getTime() < endTimeTmp.getTime()) {
+                  sumMonthTmp++
                 }
               }
-            })
+            }
+            if (items[j].type === 'season') {
+              for (let n = 0; n < items[j].doctorReport.length; n++) {
+                let insertTime = new Date(items[j].doctorReport[n].insertTime)
+                console.log('startTimeTmp', startTimeTmp)
+                console.log('insertTime', insertTime)
+                console.log('endTimeTmp', endTimeTmp)
+                console.log(Number(insertTime.getTime()) < Number(endTimeTmp.getTime()))
+                if (Number(insertTime.getTime()) >= Number(startTimeTmp.getTime()) && Number(insertTime.getTime()) < Number(endTimeTmp.getTime())) {
+                  sumSeasonTmp++
+                  console.log('sumSeasonTmp', sumSeasonTmp)
+                }
+              }
+            }
+            if (items[j].type === 'year') {
+              for (let n = 0; n < items[j].doctorReport.length; n++) {
+                let insertTime = new Date(items[j].doctorReport[n].insertTime)
+                if (insertTime.getTime() >= startTimeTmp.getTime() && insertTime.getTime() < endTimeTmp.getTime()) {
+                  sumYearTmp++
+                }
+              }
+            }
+          }
+          docsWeekRCList.push(sumWeekTmp)
+          docsMonthRCList.push(sumMonthTmp)
+          docsSeasonRCList.push(sumSeasonTmp)
+          docsYearRCList.push(sumYearTmp)
+          if (docsWeekRCList.length === doctorsList.length) {
+            for (let n = 0; n < doctorsList.length; n++) {
+              docsWeekRCSum += docsWeekRCList[n]
+              docsMonthRCSum += docsMonthRCList[n]
+              docsSeasonRCSum += docsSeasonRCList[n]
+              docsYearRCSum += docsYearRCList[n]
+            }
+          }
+          let day = days - k
+          docsWeekRCSumList.push({day, docsWeekRCSum})
+          docsMonthRCSumList.push({day, docsMonthRCSum})
+          docsSeasonRCSumList.push({day, docsSeasonRCSum})
+          docsYearRCSumList.push({day, docsYearRCSum})
+          if (docsWeekRCSumList.length === days) {
+            return res.json({data: {docsWeekRCSumList, docsMonthRCSumList, docsSeasonRCSumList, docsYearRCSumList}, msg: '获取成功！', code: 1})
           }
         })
+        // DpRelation.getOne(queryD, function (err, item) {
+        //   if (err) {
+        //     return res.status(500).send(err)
+        //   }
+        //   let patientsList = item.patientsInCharge  // 医生主管的患者列表
+        //   let patientsRCList = []
+        //   console.log('patientsList', patientsList)
+        //   if (patientsList.length === 0) {  // 医生无主管的患者
+        //     let day = days - k
+        //     docsRCList.push(docRCSum)
+        //     console.log('docsRCList', docsRCList)
+        //     if (docsRCList.length === doctorsList.length) {
+        //       for (let j = 0; j < docsRCList.length; j++) {
+        //         rcSum += docsRCList[j]
+        //       }
+        //       docsRCSumList.push({day, rcSum})
+        //       if (docsRCSumList.length === days) {
+        //         return res.json({data: {docsRCSumList}, msg: '获取成功！', code: 1})
+        //       }
+        //     }
+        //   }
+        //   for (let n = 0; n < patientsList.length; n++) {
+        //     let queryR = {
+        //       'userId': patientsList[n].patientId.userId,
+        //       'itemType': 'DoctorReport',
+        //       // 'type': 'week',                   // 分别存储周月季年点评数
+        //       'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
+        //     }
+        //     console.log('queryR', queryR)
+        //     Report.getSome(queryR, function (err, items) {
+        //       if (err) {
+        //         return res.status(500).send(err)
+        //       }
+        //       let day = days - k
+        //       let sumTmp = items.length
+        //       console.log('items', items)
+        //       patientsRCList.push(sumTmp)
+        //       if (patientsRCList.length === patientsList.length) {
+        //         // console.log(patientsRCList.length)
+        //         for (let j = 0; j < patientsRCList.length; j++) {
+        //           docRCSum += patientsRCList[j]
+        //         }
+        //         docsRCList.push(docRCSum)
+        //         console.log('docsRCList', docsRCList)
+        //         if (docsRCList.length === doctorsList.length) {
+        //           for (let j = 0; j < docsRCList.length; j++) {
+        //             rcSum += docsRCList[j]
+        //           }
+        //           docsRCSumList.push({day, rcSum})
+        //           if (docsRCSumList.length === days) {
+        //             return res.json({data: {docsRCSumList}, msg: '获取成功！', code: 1})
+        //           }
+        //         }
+        //       }
+        //     })
+        //   }
+        // }, '', '', populate)
       }
       endTimeTmp = new Date(startTimeTmp)
       startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)

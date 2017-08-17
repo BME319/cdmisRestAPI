@@ -5772,7 +5772,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: Server internal error
    */
   // 医生点评患者的报表信息 权限 医生
-  app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, reportCtrl.updateReport)
+  app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, alluserCtrl.getAlluserObject, reportCtrl.updateReport)
   /**
    * @swagger
    * definition:
