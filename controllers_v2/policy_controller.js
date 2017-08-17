@@ -71,10 +71,11 @@ exports.getInsuranceAObject = function (req, res, next) {
 exports.getPatients = function (req, res) {
   let status = Number(req.query.status || null)
   let _name = req.query.name || null
+  let _agentName = req.query.agentName || null
   let _gender = req.query.gender || null
   if (_gender !== null) {
     if (_gender !== 1 && _gender !== 2) {
-      return res.json({msg: '请确认gender输入', code: 1})
+      return res.json({msg: '请确认gender的输入是否正确', code: 1})
     }
   }
   let _phone = req.query.phoneNo || null
@@ -86,7 +87,17 @@ exports.getPatients = function (req, res) {
   if (status !== null || status !== undefined || status !== '') {
     query['status'] = status
   }
+
   let opts = ''
+  let skip = req.query.skip || null
+  let limit = req.query.limit || null
+  if (limit !== null && skip !== null) {
+    opts = {limit: Number(limit), skip: Number(skip), sort: '_id'}
+  } else if (limit === null && skip === null) {
+    opts = {sort: '_id'}
+  } else {
+    return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
+  }
   let fields = {_id: 0, patientId: 1, followUps: 1, currentAgent: 1, status: 1}
   // 通过子表查询主表，定义主表查询路径及输出内容
   let populate = [
@@ -105,6 +116,10 @@ exports.getPatients = function (req, res) {
     let phoneReg = new RegExp(_phone)
     populate[0]['match'] = {'phoneNo': phoneReg}
   }
+  if (_agentName) {
+    let agentNameReg = new RegExp(_agentName)
+    populate[1]['match'] = {'name': agentNameReg}
+  }
 
   Policy.getSome(query, function (err, items) {
     if (err) {
@@ -112,12 +127,15 @@ exports.getPatients = function (req, res) {
     } else {
       let returns = []
       for (let item in items) {
-        if (items[item].patientId !== null) {
-          let itemTemp = items[item]
-          let followUps = itemTemp.followUps
-          let latestFollowUp = followUps[-1]
-          delete itemTemp.followUps
+        if (items[item].patientId !== null && items[item].currentAgent !== null) {
+          let itemTemp = {}
+          let followUps = items[item].followUps
+          let latestFollowUp = followUps[followUps.length - 1]
           itemTemp['latestFollowUp'] = latestFollowUp
+          itemTemp['patientId'] = items[item].patientId
+          itemTemp['currentAgent'] = items[item].currentAgent
+          itemTemp['status'] = items[item].status
+          console.log(itemTemp)
           returns.push(itemTemp)
         }
       }
@@ -131,6 +149,15 @@ exports.getHistory = function (req, res) {
   let patientId = req.body.patientObject._id
   let query = {patientId: patientId, status: {$ne: 5}}
   let opts = ''
+  let skip = req.query.skip || null
+  let limit = req.query.limit || null
+  if (limit !== null && skip !== null) {
+    opts = {limit: Number(limit), skip: Number(skip), sort: '_id'}
+  } else if (limit === null && skip === null) {
+    opts = {sort: '_id'}
+  } else {
+    return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
+  }
   let fields = {_id: 0, patientId: 1, followUps: 1, currentAgent: 1, status: 1}
 
   Policy.getOne(query, function (err, item) {
@@ -145,7 +172,7 @@ exports.getHistory = function (req, res) {
 }
 
 // 保险主管获取专员列表 2017-08-08 YQC
-exports.getAgents = function (req, res) {
+exports.getAgents = function (req, res, next) {
   let query = {role: 'insuranceA'}
   let _name = req.query.name || null
   if (_name) {
@@ -153,14 +180,63 @@ exports.getAgents = function (req, res) {
     query['name'] = nameReg
   }
   let opts = ''
-  let fields = {_id: 0, name: 1, phoneNo: 1, userId: 1}
+  let fields = {_id: 1, name: 1, phoneNo: 1, userId: 1, gender: 1}
+
+  let skip = req.query.skip || null
+  let limit = req.query.limit || null
+  if (limit !== null && skip !== null) {
+    req.limit = limit
+    req.skip = skip
+  } else if (limit === null && skip === null) {
+    req.full = 1
+  } else {
+    return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
+  }
+
   Alluser.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
     } else {
-      res.json({data: items, code: 0})
+      // res.json({data: items, code: 0})
+      let returns = []
+      for (let item in items) {
+        let agent = items[item]
+        let queryA = {currentAgent: agent._id}
+        Policy.count(queryA, function (err, num) {
+          if (err) {
+            return res.status(500).send(err)
+          } else {
+            let itemTemp = {}
+            itemTemp['name'] = agent.name
+            itemTemp['phoneNo'] = agent.phoneNo
+            itemTemp['userId'] = agent.userId
+            itemTemp['gender'] = agent.gender
+            itemTemp['currentPatientNo'] = num
+            // console.log(itemTemp)
+            returns.push(itemTemp)
+            req.returns = returns
+            if (req.returns.length === items.length) {
+              next()
+            }
+          }
+        })
+      }
     }
   }, opts, fields)
+}
+
+exports.sortAgents = function (req, res) {
+  let returns = req.returns
+  returns.sort(function (x, y) {
+    if (x.currentPatientNo > y.currentPatientNo) {
+      return 1
+    }
+  })
+  if (req.full) {
+    res.json({data: returns, code: 0})
+  } else {
+    res.json({data: returns.slice(req.skip, req.skip + req.limit), code: 0})
+  }
 }
 
 // 保险主管设置／更换专员 2017-08-08 YQC

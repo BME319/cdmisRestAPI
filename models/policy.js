@@ -107,4 +107,15 @@ Policy.update = function (query, obj, callback, opts, populate) {
     })
 }
 
+Policy.count = function (query, callback) {
+  PolicyModel
+    .count(query)
+    .exec(function (err, num) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, num)
+    })
+}
+
 module.exports = Policy
