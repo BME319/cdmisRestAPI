@@ -6708,9 +6708,9 @@ module.exports = function (app, webEntry, acl) {
    *             new:
    *               type: object
    *               properties:
-   *                 newdistrict
+   *                 newdistrict:
    *                   type: string
-   *                 newportleader
+   *                 newportleader:
    *                   type: string
    *     responses:
    *       200:
@@ -6742,9 +6742,9 @@ module.exports = function (app, webEntry, acl) {
    *             new:
    *               type: object
    *               properties:
-   *                 newdepartment
+   *                 newdepartment:
    *                   type: string
-   *                 newdepartLeader
+   *                 newdepartLeader:
    *                   type: array
    *                 newdoctors:
    *                   type: array
