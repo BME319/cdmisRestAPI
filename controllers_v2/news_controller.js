@@ -59,7 +59,7 @@ exports.getNewsByReadOrNot = function (req, res) {
   if (type !== null && type !== '' && type !== undefined) {
     query['type'] = type
     if (type === 'chat') {
-      query = {'$or': [{type: 11}, {type: 12}, {type: 13}]}
+      query = {'$or': [{type: 11}, {type: 12}, {type: 13}, {type: 15}]}
     }
   }
   query['userId'] = userId
