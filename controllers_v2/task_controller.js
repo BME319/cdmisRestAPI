@@ -483,6 +483,9 @@ exports.remindChangeTask = function () {
       console.log('task_querying_error')
       console.log('need_to_contact_admin')
       console.log(err)
+    } else if (taskItems.length === 0) {
+      console.log('task_querying_success')
+      console.log('no_need_to_send_message')
     } else {
       sendMessage(taskItems, 0)
     }
