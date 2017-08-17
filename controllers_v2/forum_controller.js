@@ -1,6 +1,7 @@
 var Forum = require('../models/forum')
 var Alluser = require('../models/alluser')
 var Forumuserinfo = require('../models/forumuserinfo')
+var webEntry = require('../settings').webEntry
 
 exports.forumPosting = function (req, res) {
   let userId = req.session.userId || ''
@@ -127,12 +128,46 @@ exports.getAllposts = function (req, res) {
       {$match: {title: {$regex: title}}}
     )
   }
+
+  let titleUrl = ''
+  let limitUrl = ''
+  let skipUrl = ''
+  let Url = ''
+
+  // 检查查询条件存在并设定
+  if (title !== null) {
+    titleUrl = 'title=' + title
+  }
+  if (limit !== null) {
+    limitUrl = 'limit=' + String(limit)
+  }
+  if (skip !== null) {
+    skipUrl = 'skip=' + String(skip + limit)
+  }
+
+  // 路径尾部添加查询条件
+  if (titleUrl !== '' || limitUrl !== '' || skipUrl !== '') {
+    Url = Url + '?'
+    if (titleUrl !== '') {
+      Url = Url + titleUrl + '&'
+    }
+    if (limitUrl !== '') {
+      Url = Url + limitUrl + '&'
+    }
+    if (skipUrl !== '') {
+      Url = Url + skipUrl + '&'
+    }
+    Url = Url.substr(0, Url.length - 1)
+  }
+  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/forum/allposts' + Url
+  // let nexturl = 'localhost:4060/api/v2/forum/allposts' + Url
+
   Forum.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
     console.log(results)
-    res.json({data: results, code: 0, msg: 'success'})
+    res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
   })
 }
 
@@ -195,11 +230,38 @@ exports.getMycollection = function (req, res) {
     {$skip: skip},
     {$limit: limit}
   ]
+
+  let titleUrl = ''
+  let limitUrl = ''
+  let skipUrl = ''
+  let Url = ''
+
+  // 检查查询条件存在并设定
+  if (limit !== null) {
+    limitUrl = 'limit=' + String(limit)
+  }
+  if (skip !== null) {
+    skipUrl = 'skip=' + String(skip + limit)
+  }
+
+  // 路径尾部添加查询条件
+  if (limitUrl !== '' || skipUrl !== '') {
+    Url = Url + '?'
+    if (limitUrl !== '') {
+      Url = Url + limitUrl + '&'
+    }
+    if (skipUrl !== '') {
+      Url = Url + skipUrl + '&'
+    }
+    Url = Url.substr(0, Url.length - 1)
+  }
+  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/forum/mycollection' + Url
+
   Forumuserinfo.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
-    res.json({data: results, code: 0, msg: 'success'})
+    res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
   })
 }
 
@@ -261,12 +323,37 @@ exports.getMyposts = function (req, res) {
     {$skip: skip},
     {$limit: limit}
   ]
+  let titleUrl = ''
+  let limitUrl = ''
+  let skipUrl = ''
+  let Url = ''
+
+  // 检查查询条件存在并设定
+  if (limit !== null) {
+    limitUrl = 'limit=' + String(limit)
+  }
+  if (skip !== null) {
+    skipUrl = 'skip=' + String(skip + limit)
+  }
+
+  // 路径尾部添加查询条件
+  if (limitUrl !== '' || skipUrl !== '') {
+    Url = Url + '?'
+    if (limitUrl !== '') {
+      Url = Url + limitUrl + '&'
+    }
+    if (skipUrl !== '') {
+      Url = Url + skipUrl + '&'
+    }
+    Url = Url.substr(0, Url.length - 1)
+  }
+  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/forum/myposts' + Url
   Forumuserinfo.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
     console.log(results)
-    res.json({data: results, code: 0, msg: 'success'})
+    res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
   })
 }
 
