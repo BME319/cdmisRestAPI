@@ -85,7 +85,7 @@ exports.getPatients = function (req, res) {
   // 模糊搜索
   if (_name) {
     let nameReg = new RegExp(_name)
-    populate['match'] = {'patientId.name': nameReg}
+    populate['match'] = {'name': nameReg}
   }
   Policy.getSome(query, function (err, items) {
     if (err) {
