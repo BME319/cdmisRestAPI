@@ -5,7 +5,7 @@ var PersonalDiag = require('../models/personalDiag')
 var Report = require('../models/report')
 var DpRelation = require('../models/dpRelation')
 
-// 计算查询起止时间
+// 计算查询起止时间 2017-08-14 lgf
 exports.getPeriodTime = function (req, res, next) {
   let reportType = req.query.reportType || null   // 报表类型
   let currentTime = new Date()
@@ -71,7 +71,7 @@ exports.getPeriodTime = function (req, res, next) {
   next()
 }
 
-// 获取具体医生普通咨询/加急咨询总数
+// 获取具体医生普通咨询/加急咨询总数 2017-08-14 lgf
 exports.getDocCounsel = function (req, res) {
   let doctorObjectId = req.query.doctorObjectId
   let type = req.query.type || null           // 咨询类型
@@ -106,7 +106,7 @@ exports.getDocCounsel = function (req, res) {
       let sumTmp = items.length
       oneDocSumList.push({day, sumTmp})
       if (oneDocSumList.length === days) {
-        return res.json({data: {oneDocSumList}, msg: '获取成功！', code: 1})
+        return res.json({data: {oneDocSumList}, msg: '获取成功！', code: 0})
       }
     })
     endTimeTmp = new Date(startTimeTmp)
@@ -114,7 +114,7 @@ exports.getDocCounsel = function (req, res) {
   }
 }
 
-// 获取具体医生的预约面诊数
+// 获取具体医生的预约面诊数 2017-08-14 lgf
 exports.getDocPD = function (req, res) {
   let doctorObjectId = req.query.doctorObjectId
   let modify = Number(req.query.modify)
@@ -151,7 +151,7 @@ exports.getDocPD = function (req, res) {
       let sumTmp = items.length
       oneDocSumList.push({day, sumTmp})
       if (oneDocSumList.length === days) {
-        return res.json({data: {oneDocSumList}, msg: '获取成功！', code: 1})
+        return res.json({data: {oneDocSumList}, msg: '获取成功！', code: 0})
       }
     })
     endTimeTmp = new Date(startTimeTmp)
@@ -159,7 +159,7 @@ exports.getDocPD = function (req, res) {
   }
 }
 
-// 获取具体医生点评患者周／月／季／年报数量
+// 获取具体医生点评患者周／月／季／年报数量 2017-08-14 lgf
 exports.getDocRepComment = function (req, res) {
   let doctorObjectId = req.query.doctorObjectId
   let modify = Number(req.query.modify)
@@ -194,7 +194,7 @@ exports.getDocRepComment = function (req, res) {
         let sumTmp = 0
         oneDocSumList.push({day, sumTmp})
         if (oneDocSumList.length === days) {
-          return res.json({data: {oneDocSumList}, msg: '获取成功！', code: 1})
+          return res.json({data: {oneDocSumList}, msg: '获取成功！', code: 0})
         }
       }
       for (let i = 0; i < patientsList.length; i++) {
@@ -213,7 +213,7 @@ exports.getDocRepComment = function (req, res) {
           let sumTmp = items.length
           oneDocSumList.push({day, sumTmp})
           if (oneDocSumList.length === days) {
-            return res.json({data: {oneDocSumList}, msg: '获取成功！', code: 1})
+            return res.json({data: {oneDocSumList}, msg: '获取成功！', code: 0})
           }
         })
       }
@@ -241,7 +241,7 @@ exports.getDocRepComment = function (req, res) {
 //   })
 // }
 
-// 获取科室普通咨询/加急咨询总数
+// 获取科室普通咨询/加急咨询总数 2017-08-14 lgf
 exports.getDepartmentCounsel = function (req, res) {
   let district = req.query.district || null
   let hospital = req.query.hospital || null
@@ -324,7 +324,7 @@ exports.getDepartmentCounsel = function (req, res) {
             // let day = days - k
             docCounselSumList.push({day, counselSum})
             if (docCounselSumList.length === days) {
-              return res.json({data: {docCounselSumList}, msg: '获取成功！', code: 1})
+              return res.json({data: {docCounselSumList}, msg: '获取成功！', code: 0})
             }
           }
         })
@@ -335,7 +335,7 @@ exports.getDepartmentCounsel = function (req, res) {
   })
 }
 
-// 获取科室预约面诊数
+// 获取科室预约面诊数 2017-08-14 lgf
 exports.getDepartmentPD = function (req, res) {
   let district = req.query.district || null
   let hospital = req.query.hospital || null
@@ -410,7 +410,7 @@ exports.getDepartmentPD = function (req, res) {
             }
             docsPDSumList.push({day, pdSum})
             if (docsPDSumList.length === days) {
-              return res.json({data: {docsPDSumList}, msg: '获取成功！', code: 1})
+              return res.json({data: {docsPDSumList}, msg: '获取成功！', code: 0})
             }
           }
         })
@@ -421,7 +421,7 @@ exports.getDepartmentPD = function (req, res) {
   })
 }
 
-// 获取科室点评患者周／月／季／年报数量
+// 获取科室点评患者周／月／季／年报数量 2017-08-14 lgf
 exports.getDepartRepComment = function (req, res) {
   let district = req.query.district || null
   let hospital = req.query.hospital || null
@@ -456,7 +456,7 @@ exports.getDepartRepComment = function (req, res) {
     for (let i = 0; i < item.departLeader.length; i++) {
       doctorsList.push(item.departLeader[i])
     }
-    let docsWeekRCSumList = []                      // 科室每日点评报表总量列表
+    let docsWeekRCSumList = []                  // 科室每日点评报表总量列表
     let docsMonthRCSumList = []
     let docsSeasonRCSumList = []
     let docsYearRCSumList = []
@@ -471,8 +471,12 @@ exports.getDepartRepComment = function (req, res) {
     console.log('startTimeTmp', startTimeTmp)
     console.log('endTimeTmp', endTimeTmp)
 
+    let startT = []
+    let endT = []
     let days = Math.ceil((endTime - startTime) / (24 * 3600 * 1000))
     for (let k = 0; k < days; k++) {
+      startT.push(startTimeTmp)
+      endT.push(endTimeTmp)
       // let rcSum = 0
       let docsWeekRCList = []                   // 每个医生点评报表的列表
       let docsMonthRCList = []
@@ -496,20 +500,25 @@ exports.getDepartRepComment = function (req, res) {
           'doctorReport.doctorId': doctorObjectId,
           'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
         }
+        console.log('queryR', queryR)
         Report.getSome(queryR, function (err, items) {
           if (err) {
             return res.status(500).send(err)
           }
+          let day = days - k
+          console.log('day', day)
           console.log('items', items)
           let sumWeekTmp = 0
           let sumMonthTmp = 0
           let sumSeasonTmp = 0
           let sumYearTmp = 0
+          let startTimeTmp1 = new Date(startT[k])
+          let endTimeTmp1 = new Date(endT[k])
           for (let j = 0; j < items.length; j++) {
             if (items[j].type === 'week') {
               for (let n = 0; n < items[j].doctorReport.length; n++) {
                 let insertTime = new Date(items[j].doctorReport[n].insertTime)
-                if (insertTime.getTime() >= startTimeTmp.getTime() && insertTime.getTime() < endTimeTmp.getTime()) {
+                if (insertTime.getTime() >= startTimeTmp1.getTime() && insertTime.getTime() < endTimeTmp1.getTime()) {
                   sumWeekTmp++
                 }
               }
@@ -517,7 +526,7 @@ exports.getDepartRepComment = function (req, res) {
             if (items[j].type === 'month') {
               for (let n = 0; n < items[j].doctorReport.length; n++) {
                 let insertTime = new Date(items[j].doctorReport[n].insertTime)
-                if (insertTime.getTime() >= startTimeTmp.getTime() && insertTime.getTime() < endTimeTmp.getTime()) {
+                if (insertTime.getTime() >= startTimeTmp1.getTime() && insertTime.getTime() < endTimeTmp1.getTime()) {
                   sumMonthTmp++
                 }
               }
@@ -525,11 +534,11 @@ exports.getDepartRepComment = function (req, res) {
             if (items[j].type === 'season') {
               for (let n = 0; n < items[j].doctorReport.length; n++) {
                 let insertTime = new Date(items[j].doctorReport[n].insertTime)
-                console.log('startTimeTmp', startTimeTmp)
+                console.log('startTimeTmp1', startTimeTmp1)
                 console.log('insertTime', insertTime)
-                console.log('endTimeTmp', endTimeTmp)
-                console.log(Number(insertTime.getTime()) < Number(endTimeTmp.getTime()))
-                if (Number(insertTime.getTime()) >= Number(startTimeTmp.getTime()) && Number(insertTime.getTime()) < Number(endTimeTmp.getTime())) {
+                console.log('endTimeTmp1', endTimeTmp1)
+                console.log(Number(insertTime.getTime()) < Number(endTimeTmp1.getTime()))
+                if (Number(insertTime.getTime()) >= Number(startTimeTmp1.getTime()) && Number(insertTime.getTime()) < Number(endTimeTmp1.getTime())) {
                   sumSeasonTmp++
                   console.log('sumSeasonTmp', sumSeasonTmp)
                 }
@@ -538,7 +547,7 @@ exports.getDepartRepComment = function (req, res) {
             if (items[j].type === 'year') {
               for (let n = 0; n < items[j].doctorReport.length; n++) {
                 let insertTime = new Date(items[j].doctorReport[n].insertTime)
-                if (insertTime.getTime() >= startTimeTmp.getTime() && insertTime.getTime() < endTimeTmp.getTime()) {
+                if (insertTime.getTime() >= startTimeTmp1.getTime() && insertTime.getTime() < endTimeTmp1.getTime()) {
                   sumYearTmp++
                 }
               }
@@ -555,76 +564,192 @@ exports.getDepartRepComment = function (req, res) {
               docsSeasonRCSum += docsSeasonRCList[n]
               docsYearRCSum += docsYearRCList[n]
             }
-          }
-          let day = days - k
-          docsWeekRCSumList.push({day, docsWeekRCSum})
-          docsMonthRCSumList.push({day, docsMonthRCSum})
-          docsSeasonRCSumList.push({day, docsSeasonRCSum})
-          docsYearRCSumList.push({day, docsYearRCSum})
-          if (docsWeekRCSumList.length === days) {
-            return res.json({data: {docsWeekRCSumList, docsMonthRCSumList, docsSeasonRCSumList, docsYearRCSumList}, msg: '获取成功！', code: 1})
+            docsWeekRCSumList.push({day, docsWeekRCSum})
+            docsMonthRCSumList.push({day, docsMonthRCSum})
+            docsSeasonRCSumList.push({day, docsSeasonRCSum})
+            docsYearRCSumList.push({day, docsYearRCSum})
+            if (docsWeekRCSumList.length === days) {
+              return res.json({data: {docsWeekRCSumList, docsMonthRCSumList, docsSeasonRCSumList, docsYearRCSumList}, msg: '获取成功！', code: 0})
+            }
           }
         })
-        // DpRelation.getOne(queryD, function (err, item) {
-        //   if (err) {
-        //     return res.status(500).send(err)
-        //   }
-        //   let patientsList = item.patientsInCharge  // 医生主管的患者列表
-        //   let patientsRCList = []
-        //   console.log('patientsList', patientsList)
-        //   if (patientsList.length === 0) {  // 医生无主管的患者
-        //     let day = days - k
-        //     docsRCList.push(docRCSum)
-        //     console.log('docsRCList', docsRCList)
-        //     if (docsRCList.length === doctorsList.length) {
-        //       for (let j = 0; j < docsRCList.length; j++) {
-        //         rcSum += docsRCList[j]
-        //       }
-        //       docsRCSumList.push({day, rcSum})
-        //       if (docsRCSumList.length === days) {
-        //         return res.json({data: {docsRCSumList}, msg: '获取成功！', code: 1})
-        //       }
-        //     }
-        //   }
-        //   for (let n = 0; n < patientsList.length; n++) {
-        //     let queryR = {
-        //       'userId': patientsList[n].patientId.userId,
-        //       'itemType': 'DoctorReport',
-        //       // 'type': 'week',                   // 分别存储周月季年点评数
-        //       'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
-        //     }
-        //     console.log('queryR', queryR)
-        //     Report.getSome(queryR, function (err, items) {
-        //       if (err) {
-        //         return res.status(500).send(err)
-        //       }
-        //       let day = days - k
-        //       let sumTmp = items.length
-        //       console.log('items', items)
-        //       patientsRCList.push(sumTmp)
-        //       if (patientsRCList.length === patientsList.length) {
-        //         // console.log(patientsRCList.length)
-        //         for (let j = 0; j < patientsRCList.length; j++) {
-        //           docRCSum += patientsRCList[j]
-        //         }
-        //         docsRCList.push(docRCSum)
-        //         console.log('docsRCList', docsRCList)
-        //         if (docsRCList.length === doctorsList.length) {
-        //           for (let j = 0; j < docsRCList.length; j++) {
-        //             rcSum += docsRCList[j]
-        //           }
-        //           docsRCSumList.push({day, rcSum})
-        //           if (docsRCSumList.length === days) {
-        //             return res.json({data: {docsRCSumList}, msg: '获取成功！', code: 1})
-        //           }
-        //         }
-        //       }
-        //     })
-        //   }
-        // }, '', '', populate)
       }
       endTimeTmp = new Date(startTimeTmp)
       startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
+    }
+  })
+}
+
+// 获取地区点评患者周／月／季／年报数量 2017-08-15 lgf
+exports.getDistrictRepComment = function (req, res) {
+  let district = req.query.district || null
+  let modify = Number(req.query.modify)
+
+  let query = {}
+  if (district === null) {
+    return res.json({result: '请输入district！'})
+  } else {
+    query['district'] = district
+  }
+  let fields = ''
+  let partsWeekRCList = []
+  let partsMonthRCList = []
+  let partsSeasonRCList = []
+  let partsYearRCList = []
+  Department.getSome(query, fields, function (err, departments) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (departments.length === 0) {
+      return res.json({msg: '请输入正确的地区名！', data: {}, code: 1})
+    } else {
+      for (let p = 0; p < departments.length; p++) {   // 地区各科室列表
+        let hospital = departments[p].hospital
+        let department = departments[p].department
+        let startTime = new Date(req.startTime)
+        let endTime = new Date(req.endTime)
+
+        let queryD = {
+          'district': district,
+          'hospital': hospital,
+          'department': department
+        }
+        Department.getOne(queryD, fields, function (err, item) {
+          if (err) {
+            return res.status(500).send(err)
+          }
+          let doctorsList = item.doctors
+          // 医生列表加入科室主任和地区负责人
+          for (let i = 0; i < item.portleader.length; i++) {
+            doctorsList.push(item.portleader[i])
+          }
+          for (let i = 0; i < item.departLeader.length; i++) {
+            doctorsList.push(item.departLeader[i])
+          }
+          let docsWeekRCSumList = []                  // 科室每日点评报表总量列表
+          let docsMonthRCSumList = []
+          let docsSeasonRCSumList = []
+          let docsYearRCSumList = []
+          let endTimeTmp = new Date(endTime)          // 某日终止时间
+          let startTimeTmp                            // 某日起始时间
+          if (modify === 0) {
+            startTimeTmp = new Date(endTimeTmp.getFullYear(), endTimeTmp.getMonth(), endTimeTmp.getDate(), '00', '00', '00')
+          } else {
+            startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
+          }
+          console.log('modify', modify)
+          console.log('startTimeTmp', startTimeTmp)
+          console.log('endTimeTmp', endTimeTmp)
+
+          let startT = []
+          let endT = []
+          let days = Math.ceil((endTime - startTime) / (24 * 3600 * 1000))
+          for (let k = 0; k < days; k++) {
+            startT.push(startTimeTmp)
+            endT.push(endTimeTmp)
+            // let rcSum = 0
+            let docsWeekRCList = []                   // 每个医生点评报表的列表
+            let docsMonthRCList = []
+            let docsSeasonRCList = []
+            let docsYearRCList = []
+            for (let i = 0; i < doctorsList.length; i++) {
+              let doctorObjectId = doctorsList[i]
+              // let docRCSum = 0                   // 某个医生某天点评报表总数
+              let docsWeekRCSum = 0
+              let docsMonthRCSum = 0
+              let docsSeasonRCSum = 0
+              let docsYearRCSum = 0
+              let queryR = {
+                'itemType': 'DoctorReport',
+                // 'type': 'week',                   // 分别存储周月季年点评数
+                'doctorReport.doctorId': doctorObjectId,
+                'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
+              }
+              console.log('queryR', queryR)
+              Report.getSome(queryR, function (err, items) {
+                if (err) {
+                  return res.status(500).send(err)
+                }
+                let day = days - k
+                console.log('day', day)
+                console.log('items', items)
+                let sumWeekTmp = 0
+                let sumMonthTmp = 0
+                let sumSeasonTmp = 0
+                let sumYearTmp = 0
+                let startTimeTmp1 = new Date(startT[k])
+                let endTimeTmp1 = new Date(endT[k])
+                for (let j = 0; j < items.length; j++) {
+                  if (items[j].type === 'week') {
+                    for (let n = 0; n < items[j].doctorReport.length; n++) {
+                      let insertTime = new Date(items[j].doctorReport[n].insertTime)
+                      if (Number(insertTime.getTime()) >= Number(startTimeTmp1.getTime()) && Number(insertTime.getTime()) < Number(endTimeTmp1.getTime())) {
+                        sumWeekTmp++
+                      }
+                    }
+                  }
+                  if (items[j].type === 'month') {
+                    for (let n = 0; n < items[j].doctorReport.length; n++) {
+                      let insertTime = new Date(items[j].doctorReport[n].insertTime)
+                      if (Number(insertTime.getTime()) >= Number(startTimeTmp1.getTime()) && Number(insertTime.getTime()) < Number(endTimeTmp1.getTime())) {
+                        sumMonthTmp++
+                      }
+                    }
+                  }
+                  if (items[j].type === 'season') {
+                    for (let n = 0; n < items[j].doctorReport.length; n++) {
+                      let insertTime = new Date(items[j].doctorReport[n].insertTime)
+                      console.log('startTimeTmp1', startTimeTmp1)
+                      console.log('insertTime', insertTime)
+                      console.log('endTimeTmp1', endTimeTmp1)
+                      console.log(Number(insertTime.getTime()) < Number(endTimeTmp1.getTime()))
+                      if (Number(insertTime.getTime()) >= Number(startTimeTmp1.getTime()) && Number(insertTime.getTime()) < Number(endTimeTmp1.getTime())) {
+                        sumSeasonTmp++
+                        console.log('sumSeasonTmp', sumSeasonTmp)
+                      }
+                    }
+                  }
+                  if (items[j].type === 'year') {
+                    for (let n = 0; n < items[j].doctorReport.length; n++) {
+                      let insertTime = new Date(items[j].doctorReport[n].insertTime)
+                      if (Number(insertTime.getTime()) >= Number(startTimeTmp1.getTime()) && Number(insertTime.getTime()) < Number(endTimeTmp1.getTime())) {
+                        sumYearTmp++
+                      }
+                    }
+                  }
+                }
+                docsWeekRCList.push(sumWeekTmp)
+                docsMonthRCList.push(sumMonthTmp)
+                docsSeasonRCList.push(sumSeasonTmp)
+                docsYearRCList.push(sumYearTmp)
+                if (docsWeekRCList.length === doctorsList.length) {
+                  for (let n = 0; n < doctorsList.length; n++) {
+                    docsWeekRCSum += docsWeekRCList[n]
+                    docsMonthRCSum += docsMonthRCList[n]
+                    docsSeasonRCSum += docsSeasonRCList[n]
+                    docsYearRCSum += docsYearRCList[n]
+                  }
+                  docsWeekRCSumList.push({day, docsWeekRCSum})
+                  docsMonthRCSumList.push({day, docsMonthRCSum})
+                  docsSeasonRCSumList.push({day, docsSeasonRCSum})
+                  docsYearRCSumList.push({day, docsYearRCSum})
+                  if (docsWeekRCSumList.length === days) {
+                    partsWeekRCList.push({department, docsWeekRCSumList})
+                    partsMonthRCList.push({department, docsMonthRCSumList})
+                    partsSeasonRCList.push({department, docsSeasonRCSum})
+                    partsYearRCList.push({department, docsYearRCSum})
+                    if (partsWeekRCList.length === departments.length) {
+                      return res.json({data: {partsWeekRCList, partsMonthRCList, partsSeasonRCList, partsYearRCList}, msg: '获取成功！', code: 0})
+                    }
+                  }
+                }
+              })
+            }
+            endTimeTmp = new Date(startTimeTmp)
+            startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
+          }
+        })
+      }
     }
   })
 }

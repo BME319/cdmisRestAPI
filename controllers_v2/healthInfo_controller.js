@@ -21,16 +21,30 @@ exports.getAllHealthInfo = function (req, res) {
   }
   // var opts = {sort:-"time"};
   var opts = {'sort': {'time': -1, 'revisionInfo.operationTime': -1}}
-  var fields = {'_id': 0, 'revisionInfo': 0}
+  var fields = {'_id': 0, 'revisionInfo': 0, 'insertTime': 0, 'importStatus': 0, 'url.photoId': 0, 'url._id': 0, 'url.status': 0}
   // var fields = {'_id':0};
-  var populate = {'path': 'resultId'}
-
+  // var populate = {'path': 'resultId'}
   HealthInfo.getSome(query, function (err, healthInfolist) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    res.json({results: healthInfolist})
-  }, opts, fields, populate)
+    let healthInfolistTmp = []
+    for (let i = 0; i < healthInfolist.length; i++) {
+      let time = healthInfolist[i].time
+      let type = healthInfolist[i].type
+      let label = healthInfolist[i].label
+      let userId = healthInfolist[i].userId
+      let description = healthInfolist[i].description
+      let comments = healthInfolist[i].comments
+      let url = []
+      for (let j = 0; j < healthInfolist[i].url.length; j++) {
+        url.push(healthInfolist[i].url[j].photo)
+      }
+      let healthInfoTmp = {time, type, label, userId, description, comments, url}
+      healthInfolistTmp.push(healthInfoTmp)
+    }
+    return res.json({results: healthInfolistTmp})
+  }, opts, fields)
 }
 
 // 获得患者某条健康信息详情 修改为医生端和患者端共用 2017-08-09 lgf
@@ -56,15 +70,26 @@ exports.getHealthDetail = function (req, res) {
     }
   }
   var opts = ''
-  var fields = {'_id': 0, 'revisionInfo': 0}
-  var populate = {'path': 'resultId'}
+  var fields = {'_id': 0, 'revisionInfo': 0, 'insertTime': 0, 'importStatus': 0, 'url.photoId': 0, 'url._id': 0, 'url.status': 0}
+  // var populate = {'path': 'resultId'}
 
   HealthInfo.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    res.json({results: item})
-  }, opts, fields, populate)
+    let time = item.time
+    let type = item.type
+    let label = item.label
+    let userId = item.userId
+    let description = item.description
+    let comments = item.comments
+    let url = []
+    for (let i = 0; i < item.url.length; i++) {
+      url.push(item.url[i].photo)
+    }
+    console.log('item', item)
+    return res.json({results: {time, type, label, userId, description, comments, url}})
+  }, opts, fields)
 }
 
 // exports.insertHealthInfo = function(req, res) {
@@ -158,12 +183,11 @@ exports.insertHealthInfo = function (req, res) {
       }
       for (let i = 0; i < req.body.url.length; i++) {
         // console.log(req.body.url[i].photo)
-        urlObj[i].photo = req.body.url[i].photo
+        urlObj[i].photo = req.body.url[i]
         // console.log(urlObj[i].photo)
         urlObj[i].photoId = healthInfoData.userId + insertTimestr + add0(i)
       }
       healthInfoData['url'] = urlObj
-      console.log(healthInfoData)
     } else {
       return res.status(412).json({results: 'url需要是数组'})
     }
@@ -174,7 +198,7 @@ exports.insertHealthInfo = function (req, res) {
   if (req.body.comments !== null && req.body.comments !== '' && req.body.comments !== undefined) {
     healthInfoData['comments'] = req.body.comments
   }
-
+  // console.log('healthInfoData', healthInfoData)
   var newHealthInfo = new HealthInfo(healthInfoData)
   newHealthInfo.save(function (err, healthInfo) {
     if (err) {
@@ -192,7 +216,7 @@ exports.insertHealthInfo = function (req, res) {
           return res.status(404).json({results: '找不到对象'})
         } else if (userItem.labtestImportStatus === 0) {
           return res.json({results: healthInfo})
-        } else if (userItem.labtestImportStatus === 1 || userItem.labtestImportStatus === null) {
+        } else if (userItem.labtestImportStatus === 1 || userItem.labtestImportStatus === null || userItem.labtestImportStatus === undefined) {
           var upObj = {
             labtestImportStatus: 0,
             earliestUploadTime: healthInfo.insertTime
@@ -205,7 +229,7 @@ exports.insertHealthInfo = function (req, res) {
             } else {
               return res.json({results: healthInfo})
             }
-          })
+          }, {'upsert': true})
         }
       })
     } else {
@@ -261,7 +285,7 @@ exports.modifyHealthDetail = function (req, res) {
         return res.status(412).json({results: '最多一次上传10张图片'})
       }
       for (let i = 0; i < req.body.url.length; i++) {
-        urlObj[i].photo = req.body.url[i].photo
+        urlObj[i].photo = req.body.url[i]
         urlObj[i].photoId = req.session.userId + insertTimestr + add0(i)  // 需要确认是谁进行健康信息的修改
       }
       upObj['url'] = urlObj
