@@ -79,13 +79,13 @@ exports.getPatients = function (req, res) {
     query['status'] = status
   }
   let opts = ''
-  let fields = {}
+  let fields = {_id: 0, patientId: 1, followUps: 1, currentAgent: 1, status: 1}
   // 通过子表查询主表，定义主表查询路径及输出内容
-  let populate = {path: 'patientId', select: {'_id': 0, 'userId': 1, 'name': 1, 'gender': 1, 'phoneNo': 1, 'VIP': 1, 'birthday': 1}}
+  let populate = {path: 'patientId currentAgent', select: {'_id': 0, 'userId': 1, 'name': 1, 'gender': 1, 'phoneNo': 1, 'VIP': 1, 'birthday': 1}}
   // 模糊搜索
   if (_name) {
     let nameReg = new RegExp(_name)
-    populate['match'] = {'name': nameReg}
+    populate['match'] = {'patientId.name': nameReg}
   }
   Policy.getSome(query, function (err, items) {
     if (err) {
@@ -94,12 +94,35 @@ exports.getPatients = function (req, res) {
       let returns = []
       for (let item in items) {
         if (items[item].patientId !== null) {
-          returns.push(items[item])
+          let itemTemp = items[item]
+          let followUps = itemTemp.followUps
+          let latestFollowUp = followUps[-1]
+          delete itemTemp.followUps
+          itemTemp['latestFollowUp'] = latestFollowUp
+          returns.push(itemTemp)
         }
       }
       res.json({data: returns, code: 0})
     }
   }, opts, fields, populate)
+}
+
+// 保险专员／主管获取患者 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-17 YQC
+exports.getHistory = function (req, res) {
+  let patientId = req.body.patientObject._id
+  let query = {patientId: patientId, status: {$ne: 5}}
+  let opts = ''
+  let fields = {_id: 0, patientId: 1, followUps: 1, currentAgent: 1, status: 1}
+
+  Policy.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    } else if (req.session.role === 'insuranceA' && String(item.currentAgent) !== String(req.body.insuranceAObject._id)) {
+      res.json({msg: '非负责该用户的保险专员', code: 1})
+    } else {
+      res.json({data: item.followUps, code: 0})
+    }
+  }, opts, fields)
 }
 
 // 保险主管获取专员列表 2017-08-08 YQC

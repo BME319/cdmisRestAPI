@@ -2732,7 +2732,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/doctor/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.insertDocBasic)
+  app.post(version + '/doctor/detail', doctorCtrl.insertDocBasic)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
    * @swagger
    * /doctor/myPatients:
@@ -4046,23 +4046,89 @@ module.exports = function (app, webEntry, acl) {
    *               items:
    *                 type: object
    *                 properties:
-   *                   gender:
-   *                     type: "string"
-   *                   phoneNo:
-   *                     type: "number"
-   *                   name:
-   *                     type: "string"
-   *                   userId:
-   *                     type: "string"
-   *                   birthday:
-   *                     type: "string"
-   *                     format: "date-time"
-   *                   VIP:
-   *                     type: "number"
+   *                   patientId:
+   *                     type: object
+   *                     properties:
+   *                       gender:
+   *                         type: "string"
+   *                       phoneNo:
+   *                         type: "number"
+   *                       name:
+   *                         type: "string"
+   *                       userId:
+   *                         type: "string"
+   *                       birthday:
+   *                         type: "string"
+   *                         format: "date-time"
+   *                       VIP:
+   *                         type: "number"
+   *                   currentAgent:
+   *                     type: object
+   *                     properties:
+   *                       phoneNo:
+   *                         type: "number"
+   *                       name:
+   *                         type: "string"
+   *                   latestFollowUp:
+   *                     type: object
+   *                     properties:
+   *                       content:
+   *                         type: "string"
+   *                   status:
+   *                     type: number
    *             code:
    *               type: number
    */
   app.get(version + '/policy/patients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatients)
+  // 获取患者跟踪记录详情 权限insuranceC/insuranceA
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/history:
+   *   get:
+   *     tags:
+   *     - "policy"
+   *     summary: "获取患者跟踪记录详情"
+   *     description: ""
+   *     operationId: "history"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "patientId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   patientId:
+   *                     type: object
+   *                     properties:
+   *                       content:
+   *                         type: "string"
+   *                       time:
+   *                         type: "string"
+   *                         format: date-time
+   *                       photos:
+   *                         type: "array"
+   *                         items:
+   *                           type: string
+   *             code:
+   *               type: number
+   */
+  app.get(version + '/policy/history', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.getHistory)
   // 获取专员 权限insuranceC
   /** YQC annotation 2017-08-10
    * @swagger
