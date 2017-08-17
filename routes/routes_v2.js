@@ -5861,6 +5861,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/department/docRepComment', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDocRepComment)
   // 获取科室点评患者周／月／季／年报数量
   app.get(version + '/department/departRepComment', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDepartRepComment)
+  // 获取地区点评患者周／月／季／年报数量
+  app.get(version + '/department/districtRepComment', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDistrictRepComment)
 
   // jyf
   // 刷新token
