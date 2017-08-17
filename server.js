@@ -30,7 +30,7 @@ var routesV2 = require('./routes/routes_v2')
 // 数据库连接
 var db = mongoose.connection
 if (typeof (db.db) === 'undefined') {
-  mongoose.connect(dbUri)
+  mongoose.connect(process.env.MONGO_LINK || dbUri)
 }
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', function () {
@@ -45,7 +45,7 @@ var app = express()
 // app.engine('.html', require('ejs').__express);
 // app.set('views', __dirname + '/views');
 // app.set('view engine', 'html');
-app.set('port', restPort)
+app.set('port', process.env.PORT || restPort)
 // app.set('trust proxy', 'loopback, localhost');
 
 app.use(bodyParser.json({ limit: config.bodyParserJSONLimit }))
