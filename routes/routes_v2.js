@@ -6132,7 +6132,8 @@ module.exports = function (app, webEntry, acl) {
    *         type: integer
    */
 
-  app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictDistrictCtrl.getDistrict)
+  // app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictDistrictCtrl.getDistrict)
+  app.get(version + '/dict/district', dictDistrictCtrl.getDistrict)
   // 2017-07-24测试 权限：admin
   /**
    * @swagger
@@ -6192,7 +6193,8 @@ module.exports = function (app, webEntry, acl) {
    *       inputCode:
    *         type: string
    */
-  app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictHospitalCtrl.getHospital)
+  // app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictHospitalCtrl.getHospital)
+  app.get(version + '/dict/hospital', dictHospitalCtrl.getHospital)
 
   // devicedata
   // 2017-07-24测试 权限：patient
