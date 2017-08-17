@@ -36,8 +36,8 @@ exports.autoCounselNews = function (req, res) {
     },
     {
       $group: {
-          _id: '$leaderuserId',
-          count: {$sum: 1}
+        _id: '$leaderuserId',
+        count: {$sum: 1}
       }
     }
   ]
@@ -47,46 +47,46 @@ exports.autoCounselNews = function (req, res) {
     }
     // res.json({results: results})
     for (let i = 0; i < results.length; i++) {
-        let newData = {
-          userId: results[i]._id,
-          sendBy: 'U201700000000',
-          messageId: 'M' + nowstr + i,
-          readOrNot: 0,
-          userRole: 'doctor',
-          type: 14,
-          time: enddate,
-          title: y+'-'+m+'-'+d+'超时未回复医生报告',
-          description: '超时未回复医生数为'+results[i].count,
-          url: 'http://121.43.107.106:4060/api/v2/departmentcounsel?date=' + y+'-'+m+'-'+d+ ' '+h+':'+mm+':'+s+'&departLeaderId='+results[i]._id
+      let newData = {
+        userId: results[i]._id,
+        sendBy: 'U201700000000',
+        messageId: 'M' + nowstr + i,
+        readOrNot: 0,
+        userRole: 'doctor',
+        type: 14,
+        time: enddate,
+        title: y + '-' + m + '-' + d + '超时未回复医生报告',
+        description: '超时未回复医生数为' + results[i].count,
+        url: 'http://121.43.107.106:4060/api/v2/departmentcounsel?date=' + y + '-' + m + '-' + d + ' ' + h + ':' + mm + ':' + s + '&departLeaderId=' + results[i]._id
+      }
+      let newmessage = new Message(newData)
+      newmessage.save(function (err, newInfo) {
+        if (err) {
+          if (res !== undefined) {
+            return res.status(500).send(err.errmsg)
+          }
         }
-        let newmessage = new Message(newData)
-        newmessage.save(function (err, newInfo) {
+        let query = {userId: results[i]._id, sendBy: 'U201700000000'}
+        let obj = {
+          $set: {
+            messageId: 'M' + nowstr + i,
+            readOrNot: 0,
+            userRole: 'doctor',
+            type: 14,
+            time: enddate,
+            title: y + '-' + m + '-' + d + '超时未回复医生报告',
+            description: '超时未回复医生数为' + results[i].count,
+            url: 'http://121.43.107.106:4060/api/v2/departmentcounsel?date=' + y + '-' + m + '-' + d + ' ' + h + ':' + mm + ':' + s + '&departLeaderId=' + results[i]._id
+          }
+        }
+        News.updateOne(query, obj, function (err, upnews) {
           if (err) {
             if (res !== undefined) {
-                return res.status(500).send(err.errmsg)
+              return res.status(500).send(err.errmsg)
             }
           }
-          let query = {userId: results[i]._id, sendBy: 'U201700000000'}
-          let obj = {
-            $set: {
-              messageId: 'M' + nowstr + i,
-              readOrNot: 0,
-              userRole: 'doctor',
-              type: 14,
-              time: enddate,
-              title: y+'-'+m+'-'+d+'超时未回复医生报告',
-              description: '超时未回复医生数为'+results[i].count,
-              url: 'http://121.43.107.106:4060/api/v2/departmentcounsel?date=' + y+'-'+m+'-'+d+ ' '+h+':'+mm+':'+s+'&departLeaderId='+results[i]._id
-            }
-          }
-          News.updateOne(query, obj, function (err, upnews) {
-            if (err) {
-              if (res !== undefined) {
-                return res.status(500).send(err.errmsg)
-              }
-            }
-          })
         })
+      })
     }
   })
 }
@@ -96,7 +96,7 @@ exports.getDepartmentCounsel = function (req, res) {
   let date = req.query.date || ''
   let enddate = new Date(date)
   let startdate = new Date((enddate / 1000 - 86400) * 1000)
-  console.log(typeof(departLeaderId))
+  console.log(typeof (departLeaderId))
 
   let array = [
     {$match: {endTime: {$gte: startdate, $lt: enddate}}},

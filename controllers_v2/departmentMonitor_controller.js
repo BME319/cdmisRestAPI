@@ -1,7 +1,7 @@
-var Alluser = require('../models/alluser')
+// var Alluser = require('../models/alluser')
 var Department = require('../models/department')
-var Counselautochangestatus = require('../models/counselautochangestatus')
-var Comment = require('../models/comment')
+// var Counselautochangestatus = require('../models/counselautochangestatus')
+// var Comment = require('../models/comment')
 var DepartmentDaily = require('../models/departmentDaily')
 
 exports.autoDepartmentDaily = function (req, res) {
@@ -9,9 +9,9 @@ exports.autoDepartmentDaily = function (req, res) {
   let y = date.getFullYear()
   let m = date.getMonth() + 1
   let d = date.getDate()
-  let startTime = new Date(y+ '-' + m + '-' +d)
+  let startTime = new Date(y + '-' + m + '-' + d)
   let endTime = new Date((startTime / 1000 + 86400) * 1000)
-  console.log(y,m,d,startTime)
+  console.log(y, m, d, startTime)
   let array = [
     {$match: {department: {$ne: null}}},
     {
@@ -74,7 +74,7 @@ exports.autoDepartmentDaily = function (req, res) {
         'doctors': 1,
         'inchargeinfo': 1,
         dpinfo: '$dpinfo.patients',
-        patientsincharge: '$inchargeinfo.patientId',
+        patientsincharge: '$inchargeinfo.patientId'
       }
     },
     {$unwind: { path: '$dpinfo', preserveNullAndEmptyArrays: true }},
@@ -214,7 +214,7 @@ exports.getPatientsCount = function (req, res) {
     endTime = new Date(endTime)
     // endTime = new Date((endTime / 1000 + 86400) * 1000)
     let array = [
-      {$match: {district: district, hospital: hospital, department:department}},
+      {$match: {district: district, hospital: hospital, department: department}},
       {
         $project: {
           'district': 1,
@@ -226,7 +226,7 @@ exports.getPatientsCount = function (req, res) {
           'inchargeCounttoday': 1,
           'dpCounttoday': 1,
           'VIPCounttoday': 1,
-          date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
+          date: { $dateToString: { format: '%Y-%m-%d', date: '$date' } }
         }
       }
     ]
@@ -251,7 +251,7 @@ exports.getCurrentPatientsCount = function (req, res) {
     res.status(400).json({code: 1, msg: '请输入科室'})
   } else {
     let array = [
-      {$match: {district: district, hospital: hospital, department:department}},
+      {$match: {district: district, hospital: hospital, department: department}},
       // 获取科室医生
       {
         $project: {
@@ -289,7 +289,7 @@ exports.getCurrentPatientsCount = function (req, res) {
         $project: {
           'doctors': 1,
           'inchargeinfo': 1,
-          patientsincharge: '$inchargeinfo.patientId',
+          patientsincharge: '$inchargeinfo.patientId'
         }
       },
       {
@@ -335,7 +335,7 @@ exports.getCurrentPatientsCount = function (req, res) {
           doctoruserId: '$doctorinfo.userId',
           doctorname: '$doctorinfo.name',
           'inchargecount': 1,
-          'VIPcount': 1,
+          'VIPcount': 1
         }
       },
       {$sort: {inchargeCount: -1}}
@@ -370,7 +370,7 @@ exports.getScore = function (req, res) {
     startTime = new Date(startTime)
     endTime = new Date(endTime)
     let array = [
-      {$match: {district: district, hospital: hospital, department:department}},
+      {$match: {district: district, hospital: hospital, department: department}},
       // 获取科室医生
       {
         $project: {
@@ -413,7 +413,7 @@ exports.getScore = function (req, res) {
               then: '$commentinfo.totalScore',
               else: 'nocomment'
             }
-          },
+          }
         }
       },
       {$unwind: {path: '$score', preserveNullAndEmptyArrays: true}},
@@ -454,7 +454,7 @@ exports.getScore = function (req, res) {
           sum = sum + results[i].score
         }
       }
-      avgscore = sum/count
+      let avgscore = sum / count
       res.json({code: 0, data: {results: results, avgscore: avgscore}, msg: 'success'})
     })
   }
@@ -481,7 +481,7 @@ exports.getNegComment = function (req, res) {
     startTime = new Date(startTime)
     endTime = new Date(endTime)
     let array = [
-      {$match: {district: district, hospital: hospital, department:department}},
+      {$match: {district: district, hospital: hospital, department: department}},
       // 获取科室医生
       {
         $project: {
@@ -570,7 +570,6 @@ exports.getNegComment = function (req, res) {
       res.json({code: 0, data: results, msg: 'success'})
     })
   }
-
 }
 
 exports.getCounselTimeout = function (req, res) {
@@ -594,7 +593,7 @@ exports.getCounselTimeout = function (req, res) {
     startTime = new Date(startTime)
     endTime = new Date(endTime)
     let array = [
-      {$match: {district: district, hospital: hospital, department:department}},
+      {$match: {district: district, hospital: hospital, department: department}},
       // 获取科室医生
       {
         $project: {
@@ -657,7 +656,7 @@ exports.getActiveCount = function (req, res) {
     startTime = new Date(startTime)
     endTime = new Date(endTime)
     let array = [
-      {$match: {district: district, hospital: hospital, department:department}},
+      {$match: {district: district, hospital: hospital, department: department}},
       // 获取科室医生
       {
         $project: {
@@ -696,7 +695,7 @@ exports.getActiveCount = function (req, res) {
         $project: {
           'doctors': 1,
           'inchargeinfo': 1,
-          patientsincharge: '$inchargeinfo.patientId',
+          patientsincharge: '$inchargeinfo.patientId'
         }
       },
       {
@@ -719,14 +718,14 @@ exports.getActiveCount = function (req, res) {
           foreignField: 'userId',
           as: 'apiinfo'
         }
-      },
+      }
       // {$unwind: {path: '$doctors', preserveNullAndEmptyArrays: false}},
     ]
     Department.aggregate(array, function (err, results) {
       if (err) {
         res.status(500).json({code: 1, msg: err.errmsg})
       }
-        res.json({code: 0, data: results, msg: 'success'})
+      res.json({code: 0, data: results, msg: 'success'})
     })
   }
 }

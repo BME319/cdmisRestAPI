@@ -649,7 +649,8 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSuspend)
   // 咨询问卷填写(新增自动转发功能) - acl 2017-08-10 患者
-  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  // app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
 
   // YQC
   // comment
@@ -848,7 +849,7 @@ module.exports = function (app, webEntry, acl) {
    *               items:
    *                 $ref: '#/definitions/Compliance'
    */
-  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getCompliance)
+  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getCompliances)
   /** YQC 17-07-24 - acl 2017-08-04 患者
    * @swagger
    * /compliance/compliances:
@@ -2196,7 +2197,7 @@ module.exports = function (app, webEntry, acl) {
    *                     $ref: '#/definitions/Task'
    */
   app.get(version + '/tasks/task', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getUserTask)
-  /** YQC annotation 2017-07-28 - acl 2017-07-28 医生
+  /** YQC annotation 2017-07-28 - acl 2017-07-28 医生／2017-08-14 患者
    * @swagger
    * /tasks/task:
    *   post:
@@ -6332,11 +6333,11 @@ module.exports = function (app, webEntry, acl) {
   // 退款查询
   app.post('/wechat/refundquery', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
   // 消息模板
-  app.post(version + '/wechat/messageTemplate', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
+  app.post(version + '/wechat/messageTemplate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
   // 下载
   app.get(version + '/wechat/download', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.download)
   // 创建永久二维码
-  app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
+  app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
 
   // 接收微信服务器的post请求
   app.post(version + '/wechat', wechatCtrl.receiveTextMessage)

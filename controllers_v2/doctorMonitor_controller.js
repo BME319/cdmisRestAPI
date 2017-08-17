@@ -77,7 +77,7 @@ exports.getLinegraph = function (req, res) {
       // {$sort: {creationTime: 1}},
       {
         $project: {
-          creationTime: { $dateToString: { format: "%Y-%m-%d", date: "$creationTime" } },
+          creationTime: { $dateToString: { format: '%Y-%m-%d', date: '$creationTime' } }
         }
       },
       {
@@ -120,8 +120,8 @@ exports.getWorkload = function (req, res) {
   let date = req.query.date || ''
   let startdate = new Date(date)
   let enddate = new Date((startdate / 1000 + 86400) * 1000)
-  limit = req.query.limit || ''
-  skip = req.query.skip || ''
+  let limit = req.query.limit || ''
+  let skip = req.query.skip || ''
 
   if (startTime === '') {
     res.status(400).send('请输入开始时间')
@@ -736,7 +736,7 @@ exports.getScore = function (req, res) {
         //   }
         // }
       }
-    },
+    }
     // {
     //   $project: {
     //     'doctorId': 1,
@@ -786,8 +786,7 @@ exports.getScore = function (req, res) {
     skip = Number(skip)
     res.json({results: results.slice(skip, limit + skip)})
   })
-  //}
-  
+  // }
 }
 
 exports.getComment = function (req, res) {
@@ -807,7 +806,7 @@ exports.getComment = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      doctorId = alluserInfo._id
+      let doctorId = alluserInfo._id
       let array = [
         {$match: {doctorId: doctorId}},
         {$match: {time: {$gte: startTime, $lt: endTime}}},
@@ -836,9 +835,9 @@ exports.getComment = function (req, res) {
             'totalScore': 8,
             patientId: '$patientinfo.userId',
             patientname: '$patientinfo.name',
-            doctorname:　'$doctorinfo.name',
+            doctorname: '$doctorinfo.name',
             doctorId: '$doctorinfo.userId',
-            doctorphone: '$doctorinfo.phoneNo',
+            doctorphone: '$doctorinfo.phoneNo'
           }
         }
       ]
