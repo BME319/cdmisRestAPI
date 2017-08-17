@@ -1,6 +1,7 @@
 var Forum = require('../models/forum')
 var Alluser = require('../models/alluser')
 var Forumuserinfo = require('../models/forumuserinfo')
+var webEntry = require('../settings').webEntry
 
 exports.forumPosting = function (req, res) {
   let userId = req.session.userId || ''
@@ -127,12 +128,46 @@ exports.getAllposts = function (req, res) {
       {$match: {title: {$regex: title}}}
     )
   }
+
+  let titleUrl = ''
+  let limitUrl = ''
+  let skipUrl = ''
+  let Url = ''
+
+  // 检查查询条件存在并设定
+  if (title !== null) {
+    titleUrl = 'title=' + title
+  }
+  if (limit !== null) {
+    limitUrl = 'limit=' + String(limit)
+  }
+  if (skip !== null) {
+    skipUrl = 'skip=' + String(skip + limit)
+  }
+
+  // 路径尾部添加查询条件
+  if (titleUrl !== '' || limitUrl !== '' || skipUrl !== '') {
+    Url = Url + '?'
+    if (titleUrl !== '') {
+      Url = Url + titleUrl + '&'
+    }
+    if (limitUrl !== '') {
+      Url = Url + limitUrl + '&'
+    }
+    if (skipUrl !== '') {
+      Url = Url + skipUrl + '&'
+    }
+    Url = Url.substr(0, Url.length - 1)
+  }
+  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/forum/allposts' + Url
+  // let nexturl = 'localhost:4060/api/v2/forum/allposts' + Url
+
   Forum.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
     console.log(results)
-    res.json({data: results, code: 0, msg: 'success'})
+    res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
   })
 }
 
@@ -195,11 +230,38 @@ exports.getMycollection = function (req, res) {
     {$skip: skip},
     {$limit: limit}
   ]
+
+  let titleUrl = ''
+  let limitUrl = ''
+  let skipUrl = ''
+  let Url = ''
+
+  // 检查查询条件存在并设定
+  if (limit !== null) {
+    limitUrl = 'limit=' + String(limit)
+  }
+  if (skip !== null) {
+    skipUrl = 'skip=' + String(skip + limit)
+  }
+
+  // 路径尾部添加查询条件
+  if (limitUrl !== '' || skipUrl !== '') {
+    Url = Url + '?'
+    if (limitUrl !== '') {
+      Url = Url + limitUrl + '&'
+    }
+    if (skipUrl !== '') {
+      Url = Url + skipUrl + '&'
+    }
+    Url = Url.substr(0, Url.length - 1)
+  }
+  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/forum/mycollection' + Url
+
   Forumuserinfo.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
-    res.json({data: results, code: 0, msg: 'success'})
+    res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
   })
 }
 
@@ -261,12 +323,37 @@ exports.getMyposts = function (req, res) {
     {$skip: skip},
     {$limit: limit}
   ]
+  let titleUrl = ''
+  let limitUrl = ''
+  let skipUrl = ''
+  let Url = ''
+
+  // 检查查询条件存在并设定
+  if (limit !== null) {
+    limitUrl = 'limit=' + String(limit)
+  }
+  if (skip !== null) {
+    skipUrl = 'skip=' + String(skip + limit)
+  }
+
+  // 路径尾部添加查询条件
+  if (limitUrl !== '' || skipUrl !== '') {
+    Url = Url + '?'
+    if (limitUrl !== '') {
+      Url = Url + limitUrl + '&'
+    }
+    if (skipUrl !== '') {
+      Url = Url + skipUrl + '&'
+    }
+    Url = Url.substr(0, Url.length - 1)
+  }
+  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/forum/myposts' + Url
   Forumuserinfo.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
     console.log(results)
-    res.json({data: results, code: 0, msg: 'success'})
+    res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
   })
 }
 
@@ -348,73 +435,64 @@ exports.getPostContent = function (req, res) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
     // res.json({data: results[0], code: 0, msg: 'success'})
-    let result1 = results[0]
-    let array2 = [
-      {$match: {postId: postId}},
-      {
-        $project: {
-          'replies': 1
+    if (!results.length) {
+      res.status(500).json({code: 1, msg: 'postId不存在'})
+    } else {
+      // console.log(results)
+      let result1 = results[0]
+      let array2 = [
+        {$match: {postId: postId}},
+        {
+          $project: {
+            'replies': 1
+          }
+        },
+        {$unwind: {path: '$replies', preserveNullAndEmptyArrays: true}},
+        {
+          $project: {
+            commentId: '$replies.commentId',
+            userId: '$replies.userId',
+            userName: '$replies.userName',
+            time: '$replies.time',
+            depth: '$replies.depth',
+            content: '$replies.content',
+            // at: '$replies.at'
+            replies: '$replies.replies'
+          }
+        },
+        {
+          $lookup: {
+            from: 'allusers',
+            localField: 'userId',
+            foreignField: 'userId',
+            as: 'userinfo'
+          }
+        },
+        {
+          $project: {
+            'commentId': 1,
+            'userId': 1,
+            'userName': 1,
+            'time': 1,
+            'depth': 1,
+            'content': 1,
+            'at': 1,
+            'replies': 1,
+            avatar: '$userinfo.photoUrl'
+          }
+        },
+        {$unwind: {path: '$avatar', preserveNullAndEmptyArrays: true}}
+      ]
+      Forum.aggregate(array2, function (err, results) {
+        if (err) {
+          res.status(500).json({code: 1, msg: err.errmsg})
         }
-      },
-      {$unwind: {path: '$replies', preserveNullAndEmptyArrays: true}},
-      {
-        $project: {
-          commentId: '$replies.commentId',
-          userId: '$replies.userId',
-          userName: '$replies.userName',
-          time: '$replies.time',
-          depth: '$replies.depth',
-          content: '$replies.content',
-          // at: '$replies.at'
-          replies: '$replies.replies'
-        }
-      },
-      {
-        $lookup: {
-          from: 'allusers',
-          localField: 'userId',
-          foreignField: 'userId',
-          as: 'userinfo'
-        }
-      },
-      {
-        $project: {
-          'commentId': 1,
-          'userId': 1,
-          'userName': 1,
-          'time': 1,
-          'depth': 1,
-          'content': 1,
-          'at': 1,
-          'replies': 1,
-          avatar: '$userinfo.photoUrl'
-        }
-      },
-      {$unwind: {path: '$avatar', preserveNullAndEmptyArrays: true}}
-    ]
-    Forum.aggregate(array2, function (err, results) {
-      if (err) {
-        res.status(500).json({code: 1, msg: err.errmsg})
-      }
-      result1['replies'] = results
-      res.json({data: result1, code: 0, msg: 'success'})
-      // res.json({data: extend({}, result1[0], results[0]), code: 0, msg: 'success'})
-    })
+        result1['replies'] = results
+        res.json({data: result1, code: 0, msg: 'success'})
+        // res.json({data: extend({}, result1[0], results[0]), code: 0, msg: 'success'})
+      })
+    }
   })
-  // let userId = req.query.userId
-  // let query = {postId: postId}
-  // let populate = [
-  //   {
-  //     path: 'sponsorId',
-  //     select: {'name': 1, 'userId': 1}
-  //   }
-  // ]
-  // Forum.getOne(query, function (err, forumInfo) {
-  //   if (err) {
-  //     res.status(500).json({code: 1, msg: err.errmsg})
-  //   }
-  //   // res.json({data: forumInfo, code: 0, msg: 'success'})
-  // })
 }
 
 exports.forumComment = function (req, res) {
