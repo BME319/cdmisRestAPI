@@ -71,6 +71,14 @@ exports.getInsuranceAObject = function (req, res, next) {
 exports.getPatients = function (req, res) {
   let status = Number(req.query.status || null)
   let _name = req.query.name || null
+  let _gender = req.query.gender || null
+  if (_gender !== null) {
+    if (_gender !== 1 && _gender !== 2) {
+      return res.json({msg: '请确认gender输入', code: 1})
+    }
+  }
+  let _phone = req.query.phoneNo || null
+
   let query = {}
   if (req.session.role === 'insuranceA') {
     query['currentAgent'] = req.body.insuranceAObject._id
@@ -81,12 +89,23 @@ exports.getPatients = function (req, res) {
   let opts = ''
   let fields = {_id: 0, patientId: 1, followUps: 1, currentAgent: 1, status: 1}
   // 通过子表查询主表，定义主表查询路径及输出内容
-  let populate = {path: 'patientId currentAgent', select: {'_id': 0, 'userId': 1, 'name': 1, 'gender': 1, 'phoneNo': 1, 'VIP': 1, 'birthday': 1}}
+  let populate = [
+    {path: 'patientId', select: {'_id': 0, 'userId': 1, 'name': 1, 'gender': 1, 'phoneNo': 1, 'VIP': 1, 'birthday': 1}},
+    {path: 'currentAgent', select: {'_id': 0, 'name': 1, 'phoneNo': 1}}
+  ]
   // 模糊搜索
   if (_name) {
     let nameReg = new RegExp(_name)
-    populate['match'] = {'name': nameReg}
+    populate[0]['match'] = {'name': nameReg}
   }
+  if (_gender) {
+    populate[0]['match'] = {'gender': _gender}
+  }
+  if (_phone) {
+    let phoneReg = new RegExp(_phone)
+    populate[0]['match'] = {'phoneNo': phoneReg}
+  }
+
   Policy.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
