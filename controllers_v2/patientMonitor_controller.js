@@ -1,5 +1,5 @@
 var Alluser = require('../models/alluser')
-var DictDistrict = require('../models/dictDistrict')
+// var DictDistrict = require('../models/dictDistrict')
 var InsuranceMsg = require('../models/insuranceMsg')
 
 exports.getDistribution = function (req, res) {
@@ -20,10 +20,10 @@ exports.getDistribution = function (req, res) {
       {$match: {creationTime: {$gte: startTime, $lt: endTime}}},
       {
         $project: {
-            '_id': 1,
-            provinceNo: {$concat: [{$substr: ['$IDNo', 0, 2]}, '0000']},
-            cityNo: {$concat: [{$substr: ['$IDNo', 0, 4]}, '00']},
-            districtNo: {$substr: ['$IDNo', 0, 6]}
+          '_id': 1,
+          provinceNo: {$concat: [{$substr: ['$IDNo', 0, 2]}, '0000']},
+          cityNo: {$concat: [{$substr: ['$IDNo', 0, 4]}, '00']},
+          districtNo: {$substr: ['$IDNo', 0, 6]}
         }
       },
       {
@@ -69,7 +69,7 @@ exports.getDistribution = function (req, res) {
           count: {$sum: 1}
         }
       })
-    } else if (city === ''){
+    } else if (city === '') {
       array.push(
         {$match: {province: province}},
         {
@@ -118,11 +118,11 @@ exports.getLinegraph = function (req, res) {
       {$match: {creationTime: {$gte: startTime, $lt: endTime}}},
       {
         $project: {
-            '_id': 1,
-            'creationTime': 1,
-            provinceNo: {$concat: [{$substr: ['$IDNo', 0, 2]}, '0000']},
-            cityNo: {$concat: [{$substr: ['$IDNo', 0, 4]}, '00']},
-            districtNo: {$substr: ['$IDNo', 0, 6]}
+          '_id': 1,
+          'creationTime': 1,
+          provinceNo: {$concat: [{$substr: ['$IDNo', 0, 2]}, '0000']},
+          cityNo: {$concat: [{$substr: ['$IDNo', 0, 4]}, '00']},
+          districtNo: {$substr: ['$IDNo', 0, 6]}
         }
       },
       {
@@ -155,7 +155,7 @@ exports.getLinegraph = function (req, res) {
       {
         $project: {
           '_id': 1,
-          creationTime: { $dateToString: { format: "%Y-%m-%d", date: "$creationTime" } },
+          creationTime: { $dateToString: { format: '%Y-%m-%d', date: '$creationTime' } },
           province: {$ifNull: ['$provinceinfo.name', '未知']},
           city: {$ifNull: ['$cityinfo.name', '未知']},
           district: {$ifNull: ['$districtinfo.name', '未知']}
@@ -165,18 +165,18 @@ exports.getLinegraph = function (req, res) {
     if (province === '') {
       array.push(
         {
-        $group: {
-          _id: '$creationTime',
-          count: {$sum: 1}
-        }
-      })
-    } else if (city === ''){
+          $group: {
+            _id: '$creationTime',
+            count: {$sum: 1}
+          }
+        })
+    } else if (city === '') {
       array.push(
         {$match: {province: province}},
         {
           $group: {
-          _id: '$creationTime',
-          count: {$sum: 1}
+            _id: '$creationTime',
+            count: {$sum: 1}
           }
         }
       )
@@ -186,8 +186,8 @@ exports.getLinegraph = function (req, res) {
         {$match: {city: city}},
         {
           $group: {
-          _id: '$creationTime',
-          count: {$sum: 1}
+            _id: '$creationTime',
+            count: {$sum: 1}
           }
         }
       )
@@ -299,9 +299,8 @@ exports.getPatientsByClass = function (req, res) {
         '_id': 1,
         'name': 1,
         'creationTime': 1,
-        'class':1,
-        'userId': 1,
         'class': 1,
+        'userId': 1,
         content: '$diagnosisInfo.content'
       }
     },
@@ -318,15 +317,14 @@ exports.getPatientsByClass = function (req, res) {
         '_id': 1,
         'name': 1,
         'creationTime': 1,
-        'class':1,
+        'class': 1,
         'userId': 1,
         'content': 1,
-        'class': 1,
         doctorsincharge: {
           $filter: {
-              input: '$doctorsincharge',
-              as: 'doctorsincharge',
-              cond: {$eq: ['$$doctorsincharge.invalidFlag', 1]},
+            input: '$doctorsincharge',
+            as: 'doctorsincharge',
+            cond: {$eq: ['$$doctorsincharge.invalidFlag', 1]}
           }
         }
       }
@@ -337,10 +335,9 @@ exports.getPatientsByClass = function (req, res) {
         '_id': 1,
         'name': 1,
         'creationTime': 1,
-        'class':1,
+        'class': 1,
         'userId': 1,
         'content': 1,
-        'class': 1,
         doctorsincharge: '$doctorsincharge.doctorId'
       }
     },
@@ -358,10 +355,9 @@ exports.getPatientsByClass = function (req, res) {
         '_id': 1,
         'name': 1,
         'creationTime': 1,
-        'class':1,
+        'class': 1,
         'userId': 1,
         'content': 1,
-        'class': 1,
         'doctorsincharge': 1,
         doctorname: '$doctorinfo.name',
         doctorhospital: '$doctorinfo.workUnit'
@@ -378,7 +374,7 @@ exports.getPatientsByClass = function (req, res) {
   //     {$limit: limit}
   //   )
   // }
-  if (classNo !== ''){
+  if (classNo !== '') {
     array.splice(
       0,
       0,
@@ -386,12 +382,11 @@ exports.getPatientsByClass = function (req, res) {
     )
   }
   Alluser.aggregate(array, function (err, results) {
-      if (err) {
-        res.status(500).send(err.errmsg)
-      }
-      limit = Number(limit)
-      skip = Number(skip)
-      res.json({results: results.slice(skip, limit + skip)})
-    })
-
+    if (err) {
+      res.status(500).send(err.errmsg)
+    }
+    limit = Number(limit)
+    skip = Number(skip)
+    res.json({results: results.slice(skip, limit + skip)})
+  })
 }
