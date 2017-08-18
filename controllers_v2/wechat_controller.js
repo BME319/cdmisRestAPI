@@ -55,9 +55,10 @@ var wxApis = {
 
 // var wxApiUserObject = config.wxDeveloperConfig.zdyyszbzx;
 
-// 根据角色获取AppId
+// 根据角色获取AppId 修改 从session中获取role 2017-08-17 lgf
 exports.chooseAppId = function (req, res, next) {
-  var role = req.query.role || req.body.role
+  // var role = req.query.role || req.body.role
+  var role = req.session.role
   // console.log("test1");
   // console.log(role);
   if (role === 'doctor') {
