@@ -874,7 +874,7 @@ exports.getPatientByDate = function(req, res) {
 						// return res.json({result: '暂无患者2!'});
 				});
 				return res.json({result: '暂无患者!'});
-    	} else if (item.patients.constructor === Array) {
+    	} else if (item.patients) {
 				var patientsitem = [];
 				var dpTimeFormat = null;
 				var j = 0;
