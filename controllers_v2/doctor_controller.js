@@ -490,9 +490,6 @@ exports.editDoctorDetail = function (req, res, next) {
     upObj['charge2'] = req.body.charge2
   }
 
-  console.log(query)
-  console.log(upObj)
-
   // return res.json({query: query, upObj: upObj});
   Alluser.updateOne(query, upObj, function (err, upDoctor) {
     if (err) {
