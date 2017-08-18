@@ -342,7 +342,7 @@ exports.editInfo = function (req, res) {
     if (err) {
       return res.status(500).send(err)
     } else {
-      return res.json({code: 0, msg: '修改成功', data: item})
+      return res.json({code: 0, msg: '修改成功'})
     }
   }, {new: true})
 }

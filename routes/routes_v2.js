@@ -5795,6 +5795,9 @@ module.exports = function (app, webEntry, acl) {
    *             type: string
    *           gender:
    *             type: number
+   *             enum:
+   *               - "1"
+   *               - "2"
    *           phoneNo:
    *             type: number
    *           password:
