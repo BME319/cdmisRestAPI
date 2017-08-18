@@ -111,6 +111,9 @@ function insertOneNews (userId, sendBy, req, res) {
   }
   if (req.body.type !== null && req.body.type !== undefined) {
     newData['type'] = req.body.type
+    if (Number(req.body.type) === 15) {
+      newData['caseType'] = req.body.caseType
+    }
     query1['type'] = req.body.type
     query2['type'] = req.body.type
   }
@@ -306,6 +309,9 @@ exports.insertTeamNews = function (req, res) {
     }
     if (team1 === null) {
       var TeamId = req.body.type  // type是区别于大专家团队的 小团队标签，也记录在 teams 的 teamId 中
+      if (Number(TeamId) === 15) {
+        TeamId = Number(req.body.caseType)
+      }
       var query = {
         teamId: TeamId
       }
