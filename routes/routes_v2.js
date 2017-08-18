@@ -5794,9 +5794,9 @@ module.exports = function (app, webEntry, acl) {
    *           name:
    *             type: string
    *           gender:
-   *             type: string
+   *             type: number
    *           phoneNo:
-   *             type: string
+   *             type: number
    *           password:
    *             type: string
    *     responses:
@@ -5804,7 +5804,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/policy/info', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.editInfo)
-  
+
   // lgf
   // account
   /**
