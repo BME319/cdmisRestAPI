@@ -103,7 +103,8 @@ Wechat.baseTokenManager = function (type) {
               jsapi_ticket: body2.ticket,
               api_ticket: 'body3.ticket',
               type: type || 'access_token',
-              role: req.query.role || req.body.role
+              // role: req.query.role || req.body.role
+              role: req.session.role
             }, function (err, tokenObject) {
               if (err) return res.status(401).send('微信令牌保存失败!')
               req.wxToken = tokenObject
