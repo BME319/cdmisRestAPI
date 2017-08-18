@@ -60,7 +60,7 @@ exports.chooseAppId = function (req, res, next) {
   // var role = req.query.role || req.body.role
   var role = req.session.role
   // console.log("test1");
-  // console.log(role);
+  // console.log('role', role)
   if (role === 'doctor') {
     req.wxApiUserObject = config.wxDeveloperConfig.sjkshz
     next()
