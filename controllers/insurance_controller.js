@@ -97,7 +97,9 @@ exports.updateMsgCount = function(req, res, next) {
 	InsuranceMsg.getOne(query, function(err, item) {
 		if (err) {
       return res.status(500).send(err.errmsg);
-    } else if (item.insuranceMsg.constructor === Array) {
+    } else if (item === null) {
+			return res.status(404).send('update_target_not_found')
+		} else if (item.insuranceMsg.constructor === Array) {
 			var upObj = {count: item.insuranceMsg.length};
 			InsuranceMsg.updateOne(query, upObj, function(err, upInsMsg) {
 				if (err){
