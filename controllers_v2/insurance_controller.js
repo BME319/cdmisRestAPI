@@ -100,22 +100,25 @@ exports.updateMsgCount = function (req, res, next) {
   InsuranceMsg.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
+    } else if (item === null) {
+      return res.status(404).send('update_target_not_found')
+    } else if (item.insuranceMsg.constructor === Array) {
+      var upObj = {count: item.insuranceMsg.length}
+      InsuranceMsg.updateOne(query, upObj, function (err, upInsMsg) {
+        if (err) {
+          return res.status(422).send(err.message)
+        } else if (upInsMsg === null) {
+          return res.json({result: '修改失败'})
+        } else {
+      // return res.json({result: '修改成功', results:upInsMsg});
+          req.body.InsMsg = upInsMsg
+          next()
+        }
+      }, {new: true})
+      // res.json({results:item});
+    } else {
+      return res.status(400).send('no_insuranceMsg_available')
     }
-
-    var upObj = {count: item.insuranceMsg.length}
-    InsuranceMsg.updateOne(query, upObj, function (err, upInsMsg) {
-      if (err) {
-        return res.status(422).send(err.message)
-      } else if (upInsMsg === null) {
-        return res.json({result: '修改失败'})
-      } else {
-    // return res.json({result: '修改成功', results:upInsMsg});
-        req.body.InsMsg = upInsMsg
-        next()
-      }
-    }, {new: true})
-
-     // res.json({results:item});
   }, opts, fields, populate)
 }
 
