@@ -861,18 +861,17 @@ exports.checkBinding = function (req, res) {
   // 2017-06-07GY调试
   // console.log('checkBinding_in');
 
-  // var username = req.body.username
-  var userId = req.session.userId
-  var role = req.session.role
-  var query = {'userId': userId}
+  var username = req.body.username
+  var role = req.body.role
+  // var query = {'userId': userId}
   // console.log(username);
-  // var query = {
-  //   $or: [
-  //     {userId: username},
-  //     {openId: username},
-  //     {phoneNo: username}
-  //   ]
-  // }
+  var query = {
+    $or: [
+      {userId: username},
+      {openId: username},
+      {phoneNo: username}
+    ]
+  }
   // console.log(query);
 
   Alluser.getOne(query, function (err, item) {
@@ -1342,10 +1341,30 @@ exports.getPhoneNoByRole = function (req, res) {
 exports.setTDCticket = function (req, res) {
   var TDCticket = req.results.ticket
   var TDCurl = req.results.url
-  var userId = req.body.userId
+  // var userId = req.body.userId
+  var userId = req.session.userId
+  var role = req.session.role
 
   var query = {userId: userId}
-  Alluser.updateOne(query, {$set: {TDCticket: TDCticket, TDCurl: TDCurl}}, function (err, item) {
+  var upObj = {}
+  if (role === 'doctor') {
+    upObj = {
+      $set: {
+        'docTDCticket': TDCticket,
+        'docTDCurl': TDCurl
+      }
+    }
+  } else if (role === 'patient') {
+    upObj = {
+      $set: {
+        'patTDCticket': TDCticket,
+        'patTDCurl': TDCurl
+      }
+    }
+  } else {
+    upObj = {}
+  }
+  Alluser.updateOne(query, upObj, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -1504,19 +1523,22 @@ exports.getMessageOpenId = function (req, res) {
   Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
-    }
-    if (_type === 1) {
-      res.json({results: item.MessageOpenId.doctorWechat})
-    } else if (_type === 2) {
-      res.json({results: item.MessageOpenId.patientWechat})
-    } else if (_type === 3) {
-      res.json({results: item.MessageOpenId.doctorApp})
-    } else if (_type === 4) {
-      res.json({results: item.MessageOpenId.patientApp})
-    } else if (_type === 5) {
-      res.json({results: item.MessageOpenId.test})
+    } else if (item === null) {
+      return res.status(404).send('userId_not_available')
     } else {
-      res.json({results: 'type must be 1-4'})
+      if (_type === 1) {
+        res.json({results: item.MessageOpenId.doctorWechat})
+      } else if (_type === 2) {
+        res.json({results: item.MessageOpenId.patientWechat})
+      } else if (_type === 3) {
+        res.json({results: item.MessageOpenId.doctorApp})
+      } else if (_type === 4) {
+        res.json({results: item.MessageOpenId.patientApp})
+      } else if (_type === 5) {
+        res.json({results: item.MessageOpenId.test})
+      } else {
+        res.json({results: 'type must be 1-4'})
+      }
     }
   })
 }

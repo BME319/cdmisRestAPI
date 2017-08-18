@@ -15,8 +15,8 @@ var alluserSchema = new mongoose.Schema({
   role: [String],
   loginStatus: Number,
   lastLogin: Date,
-  TDCticket: String,
-  TDCurl: String,
+  // TDCticket: String,  // 患者和医生的二维码分别存储
+  // TDCurl: String,
   invalidFlag: Number,
   MessageOpenId: {
     doctorWechat: String,
@@ -32,6 +32,8 @@ var alluserSchema = new mongoose.Schema({
   },
 
   // doctor_info
+  docTDCticket: String,
+  docTDCurl: String,
   certificatePhotoUrl: String, // 资格证书地址
   practisingPhotoUrl: String, // 执业证书地址
   aliPayAccount: {
@@ -121,6 +123,8 @@ var alluserSchema = new mongoose.Schema({
   reviewContent: String,
 
   // patient_info
+  patTDCticket: String,
+  patTDCurl: String,
   height: String,
   weight: String,
   occupation: String,
