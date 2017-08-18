@@ -311,6 +311,42 @@ exports.setAgent = function (req, res) {
   })
 }
 
+exports.editInfo = function (req, res) {
+  let query = {userId: req.session.userId}
+  if (req.session.role === 'insuranceC') {
+    // 主管角色，输入insuranceAId参数则修改某专员信息，不输入则修改自己的信息
+    let insuranceAId = req.body.insuranceAId || null
+    if (insuranceAId !== null) {
+      query = {userId: insuranceAId}
+    }
+  }
+  let upObj = {}
+  let name = req.body.name || null
+  let gender = req.body.gender || null
+  let phoneNo = req.body.phoneNo || null
+  let password = req.body.password || null
+  if (name !== null) {
+    upObj['name'] = name
+  }
+  if (gender !== null) {
+    upObj['gender'] = gender
+  }
+  if (phoneNo !== null) {
+    upObj['phoneNo'] = phoneNo
+  }
+  if (password !== null) {
+    upObj['password'] = password
+  }
+
+  Alluser.updateOne(query, upObj, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      return res.json({code: 0, msg: '修改成功', data: item})
+    }
+  }, {new: true})
+}
+
 // 跟踪记录录入 2017-08-08 YQC
 exports.insertFollowUp = function (req, res) {
   let content = req.body.content || null

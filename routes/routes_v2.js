@@ -5766,7 +5766,45 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/policy/agentOff', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getInsuranceAObject, policyCtrl.agentOff)
-
+  // 主管／专员修改个人信息
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/info:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "主管／专员修改个人信息"
+   *     description: ""
+   *     operationId: "info"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           insuranceAId:
+   *             type: string
+   *           name:
+   *             type: string
+   *           gender:
+   *             type: string
+   *           phoneNo:
+   *             type: string
+   *           password:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/policy/info', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.editInfo)
+  
   // lgf
   // account
   /**
