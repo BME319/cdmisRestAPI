@@ -5578,7 +5578,7 @@ module.exports = function (app, webEntry, acl) {
    *             code:
    *               type: number
    */
-  app.get(version + '/policy/agents', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getAgents)
+  app.get(version + '/policy/agents', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getAgents, policyCtrl.sortAgents)
   // 主管设置／更换专员 权限insuranceC
   /** YQC annotation 2017-08-10
    * @swagger
