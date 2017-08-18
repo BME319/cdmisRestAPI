@@ -1070,7 +1070,7 @@ exports.getPatientByDate = function (req, res) {
       // return res.json({result: '暂无患者2!'});
       })
       return res.json({result: '暂无患者!'})
-    } else if (item.patient.constructor === Array) {
+    } else if (item.patient) {
       let patients = []
       let dpTimeFormat = null
       if (item.patients.length === 0) {
