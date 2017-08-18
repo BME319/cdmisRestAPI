@@ -3725,7 +3725,7 @@ module.exports = function (app, webEntry, acl) {
    *                       type: "string"
    */
   app.get(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getPatientDetail)
-  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者 弃用
    * @swagger
    * /patient/detail:
    *   post:
@@ -3797,7 +3797,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.newPatientDetail)
+  // app.post(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.newPatientDetail)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
    * @swagger
    * /patient/doctors:
@@ -8114,7 +8114,7 @@ module.exports = function (app, webEntry, acl) {
    *                 departLeader:
    *                   type: array
    *                   items:
-   *                     type: string                   
+   *                     type: string
    */
   app.get(version + '/department/department', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDepartment)
   /** JYF 2017-08-16
@@ -8166,7 +8166,7 @@ module.exports = function (app, webEntry, acl) {
    *                 doctors:
    *                   type: array
    *                   items:
-   *                     type: string                   
+   *                     type: string
    */
   app.get(version + '/department/doctorlist', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDoctorList)
   /** JYF 2017-08-16

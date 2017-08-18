@@ -632,9 +632,9 @@ exports.insertAlluser = function (req, res) {
 }
 exports.registerTest = function (acl) {
   return function (req, res, next) {
-    var _phoneNo = req.query.phoneNo
-    var _password = req.query.password
-    var _role = req.query.role
+    var _phoneNo = req.body.phoneNo
+    var _password = req.body.password
+    var _role = req.body.role
     var query = {phoneNo: _phoneNo}
         // var _userNo = req.newId
     Alluser.getOne(query, function (err, item) {
@@ -682,9 +682,9 @@ exports.registerTest = function (acl) {
 }
 exports.register = function (acl) {
   return function (req, res) {
-    var _phoneNo = req.query.phoneNo
-    var _password = req.query.password
-    var _role = req.query.role
+    var _phoneNo = req.body.phoneNo
+    var _password = req.body.password
+    var _role = req.body.role
         // var query = {phoneNo:_phoneNo};
     var _userNo = req.newId
 
@@ -781,8 +781,8 @@ exports.register = function (acl) {
 //     });
 // }
 exports.reset = function (req, res) {
-  var _phoneNo = req.query.phoneNo
-  var _password = req.query.password
+  var _phoneNo = req.body.phoneNo
+  var _password = req.body.password
   var query = {phoneNo: _phoneNo}
   Alluser.getOne(query, function (err, item) {
     if (err) {

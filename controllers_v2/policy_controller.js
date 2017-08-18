@@ -84,7 +84,7 @@ exports.getPatients = function (req, res) {
   if (req.session.role === 'insuranceA') {
     query['currentAgent'] = req.body.insuranceAObject._id
   }
-  if (status !== null || status !== undefined || status !== '') {
+  if ((status !== null || status !== undefined || status !== '') && status !== 9) { // 输入9返回所有患者列表
     query['status'] = status
   }
 
