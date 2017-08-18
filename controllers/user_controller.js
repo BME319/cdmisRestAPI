@@ -1187,24 +1187,27 @@ exports.getMessageOpenId = function(req,res){
     User.getOne(query, function(err, item) {
         if (err) {
             return res.status(500).send(err.errmsg);
-        }
-        if(_type==1){
-            res.json({results: item.MessageOpenId.doctorWechat});
-        }
-        else if(_type==2){
-            res.json({results: item.MessageOpenId.patientWechat});
-        }
-        else if(_type==3){
-            res.json({results: item.MessageOpenId.doctorApp});
-        }
-        else if(_type==4){
-            res.json({results: item.MessageOpenId.patientApp});
-        }
-        else if(_type==5){
-            res.json({results: item.MessageOpenId.test});
-        }
-        else{
-            res.json({results: "type must be 1-4"});
+        } else if (item == null) {
+            return res.status(404).send('userId_not_available')
+        } else {
+            if(_type==1){
+                res.json({results: item.MessageOpenId.doctorWechat});
+            }
+            else if(_type==2){
+                res.json({results: item.MessageOpenId.patientWechat});
+            }
+            else if(_type==3){
+                res.json({results: item.MessageOpenId.doctorApp});
+            }
+            else if(_type==4){
+                res.json({results: item.MessageOpenId.patientApp});
+            }
+            else if(_type==5){
+                res.json({results: item.MessageOpenId.test});
+            }
+            else{
+                res.json({results: "type must be 1-4"});
+            }
         }
     });
 
