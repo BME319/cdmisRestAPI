@@ -8,8 +8,8 @@ exports.getTasks = function(req, res) {
 
 	Task.getSome(query, function(err, tasks) {
 		if (err) {
-      		return res.status(500).send(err.errmsg);
-    	}
+      return res.status(500).send(err.errmsg);
+    }
 
     	if(tasks.length == 0)
     	{
@@ -55,35 +55,43 @@ exports.updateStatus = function(req, res) {
       	// console.log(item.task);
         if(item != null)
         {
-          flag = 0;
-          for(var i =0; i < item.task.length; i++)
-          {
-            if(item.task[i].type == type)
-            {
-              for(var j =0; j<item.task[i].details.length;j++)
+          if (item.task) {
+            if (item.task.constructor === Array && item.task.length) {
+              flag = 0;
+              for(var i =0; i < item.task.length; i++)
               {
-                if(item.task[i].details[j].code == code)
+                if(item.task[i].type == type)
                 {
-                  // console.log(item.task[i].details[j].status);
-                  item.task[i].details[j].status = status;
-                  flag = 1;
-                  break;
+                  for(var j =0; j<item.task[i].details.length;j++)
+                  {
+                    if(item.task[i].details[j].code == code)
+                    {
+                      // console.log(item.task[i].details[j].status);
+                      item.task[i].details[j].status = status;
+                      flag = 1;
+                      break;
+                    }
+                  }
                 }
+                if(flag == 1)
+                  break;
               }
-            }
-            if(flag == 1)
-              break;
-          }
-          var upObj = {$set:{task:item.task}};
-        
-          Task.updateOne(query, upObj,function(err, task) {
-            if (err) {
-              return res.status(500).send(err.errmsg);
-            }
+              var upObj = {$set:{task:item.task}};
+            
+              Task.updateOne(query, upObj,function(err, task) {
+                if (err) {
+                  return res.status(500).send(err.errmsg);
+                }
 
-          res.json({results: 0});
-  
-          });
+              res.json({results: 0});
+      
+              });
+            } else {
+              return res.json({results: 1})
+            }
+          } else {
+            return res.json({results: 1})
+          }
         }
         else
         {
