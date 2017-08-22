@@ -53,80 +53,82 @@ exports.getDoctors = function (req, res) {
 
 // 新建医生基本信息 2017-04-01 GY
 exports.insertDocBasic = function (req, res) {
-  let doctorData = {
-    userId: req.session.userId,
-    registerTime: commonFunc.getNowFormatSecond()
-  // revisionInfo:{
-  //   operationTime:commonFunc.getNowFormatSecond(),
-  //   userId:"gy",
-  //   userName:"gy",
-  //   terminalIP:"10.12.43.32"
-  // }
+  let doctorId = req.body.userId || null
+  if (doctorId === null) {
+    return res.json({result: '请填写userId!'})
   }
-  // certificatePhotoUrl:String, //资格证书地址
-  // practisingPhotoUrl:String, //
-  if (req.body.certificatePhotoUrl !== null && req.body.certificatePhotoUrl !== '' && req.body.certificatePhotoUrl !== undefined) {
-    doctorData['certificatePhotoUrl'] = req.body.certificatePhotoUrl
-  }
-  if (req.body.practisingPhotoUrl !== null && req.body.practisingPhotoUrl !== '' && req.body.practisingPhotoUrl !== undefined) {
-    doctorData['practisingPhotoUrl'] = req.body.practisingPhotoUrl
-  }
-  if (req.body.name !== null && req.body.name !== '' && req.body.name !== undefined) {
-    doctorData['name'] = req.body.name
-  }
-  if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
-    doctorData['photoUrl'] = req.body.photoUrl
-  }
-  if (req.body.birthday !== null && req.body.birthday !== '' && req.body.birthday !== undefined) {
-    doctorData['birthday'] = new Date(req.body.birthday)
-  }
-  if (req.body.gender !== null && req.body.gender !== '' && req.body.gender !== undefined) {
-    doctorData['gender'] = req.body.gender
-  }
-  if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
-    doctorData['IDNo'] = req.body.IDNo
-  }
-  if (req.body.province !== null && req.body.province !== '' && req.body.province !== undefined) {
-    doctorData['province'] = req.body.province
-  }
-  if (req.body.city !== null && req.body.city !== '' && req.body.city !== undefined) {
-    doctorData['city'] = req.body.city
-  }
-  if (req.body.district !== null && req.body.district !== '' && req.body.district !== undefined) {
-    doctorData['district'] = req.body.district
-  }
-  if (req.body.workUnit !== null && req.body.workUnit !== '' && req.body.workUnit !== undefined) {
-    doctorData['workUnit'] = req.body.workUnit
-  }
-  if (req.body.title !== null && req.body.title !== '' && req.body.title !== undefined) {
-    doctorData['title'] = req.body.title
-  }
-  if (req.body.job !== null && req.body.job !== '' && req.body.job !== undefined) {
-    doctorData['job'] = req.body.job
-  }
-  if (req.body.department !== null && req.body.department !== '' && req.body.department !== undefined) {
-    doctorData['department'] = req.body.department
-  }
-  if (req.body.major !== null && req.body.major !== '' && req.body.major !== undefined) {
-    doctorData['major'] = req.body.major
-  }
-  if (req.body.description !== null && req.body.description !== '' && req.body.description !== undefined) {
-    doctorData['description'] = req.body.description
-  }
-  if (req.body.charge1 !== null && req.body.charge1 !== '' && req.body.charge1 !== undefined) {
-    doctorData['charge1'] = req.body.charge1
-  }
-  if (req.body.charge2 !== null && req.body.charge2 !== '' && req.body.charge2 !== undefined) {
-    doctorData['charge2'] = req.body.charge2
+  let query = {
+    userId: doctorId,
+    role: 'guest'
   }
 
-  var newDoctor = new Alluser(doctorData)
-  newDoctor.save(function (err, doctorInfo) {
+  let upObj = {}
+  if (req.body.certificatePhotoUrl !== null && req.body.certificatePhotoUrl !== '' && req.body.certificatePhotoUrl !== undefined) {
+    upObj['certificatePhotoUrl'] = req.body.certificatePhotoUrl
+  }
+  if (req.body.practisingPhotoUrl !== null && req.body.practisingPhotoUrl !== '' && req.body.practisingPhotoUrl !== undefined) {
+    upObj['practisingPhotoUrl'] = req.body.practisingPhotoUrl
+  }
+  if (req.body.name !== null && req.body.name !== '' && req.body.name !== undefined) {
+    upObj['name'] = req.body.name
+  }
+  if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
+    upObj['photoUrl'] = req.body.photoUrl
+  }
+  if (req.body.birthday !== null && req.body.birthday !== '' && req.body.birthday !== undefined) {
+    upObj['birthday'] = new Date(req.body.birthday)
+  }
+  if (req.body.gender !== null && req.body.gender !== '' && req.body.gender !== undefined) {
+    upObj['gender'] = req.body.gender
+  }
+  if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
+    upObj['IDNo'] = req.body.IDNo
+  }
+  if (req.body.province !== null && req.body.province !== '' && req.body.province !== undefined) {
+    upObj['province'] = req.body.province
+  }
+  if (req.body.city !== null && req.body.city !== '' && req.body.city !== undefined) {
+    upObj['city'] = req.body.city
+  }
+  if (req.body.district !== null && req.body.district !== '' && req.body.district !== undefined) {
+    upObj['district'] = req.body.district
+  }
+  if (req.body.workUnit !== null && req.body.workUnit !== '' && req.body.workUnit !== undefined) {
+    upObj['workUnit'] = req.body.workUnit
+  }
+  if (req.body.title !== null && req.body.title !== '' && req.body.title !== undefined) {
+    upObj['title'] = req.body.title
+  }
+  if (req.body.job !== null && req.body.job !== '' && req.body.job !== undefined) {
+    upObj['job'] = req.body.job
+  }
+  if (req.body.department !== null && req.body.department !== '' && req.body.department !== undefined) {
+    upObj['department'] = req.body.department
+  }
+  if (req.body.major !== null && req.body.major !== '' && req.body.major !== undefined) {
+    upObj['major'] = req.body.major
+  }
+  if (req.body.description !== null && req.body.description !== '' && req.body.description !== undefined) {
+    upObj['description'] = req.body.description
+  }
+  if (req.body.charge1 !== null && req.body.charge1 !== '' && req.body.charge1 !== undefined) {
+    upObj['charge1'] = req.body.charge1
+  }
+  if (req.body.charge2 !== null && req.body.charge2 !== '' && req.body.charge2 !== undefined) {
+    upObj['charge2'] = req.body.charge2
+  }
+
+  // return res.json({query: query, upObj: upObj});
+  Alluser.updateOne(query, upObj, function (err, upDoctor) {
     if (err) {
-      return res.status(500).send(err.errmsg)
+      return res.status(422).send(err.message)
     }
-    res.json({result: '新建成功', newResults: doctorInfo})
-  })
+    if (upDoctor == null) {
+      return res.json({result: '修改失败，不存在的医生ID！'})
+    } else {
+      return res.json({result: '修改成功', editResults: upDoctor})
+    }
+  }, {new: true})
 }
 
 // 根据doctorId获取所有团队 2017-03-29 GY
