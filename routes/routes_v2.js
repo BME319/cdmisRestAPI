@@ -26,7 +26,7 @@ var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
 var serviceCtrl = require('../controllers_v2/service_controller')
 var orderCtrl = require('../controllers_v2/order_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
-var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
+// var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
 var expenseCtrl = require('../controllers_v2/expense_controller')
 var dictTypeOneCtrl = require('../controllers_v2/dictTypeOne_controller')
 var dictTypeTwoCtrl = require('../controllers_v2/dictTypeTwo_controller')
@@ -1530,7 +1530,7 @@ module.exports = function (app, webEntry, acl) {
 
   // gy
   // review
-  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo)
+  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo(acl))
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate)
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo)
   app.get(version + '/review/countByStatus', tokenManager.verifyToken(), reviewCtrl.countByStatus)
@@ -4221,7 +4221,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Doctor not found."
    */
   app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
-  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生
+  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生／guest
    * @swagger
    * /doctor/detail:
    *   get:
@@ -4356,7 +4356,7 @@ module.exports = function (app, webEntry, acl) {
    */
   app.get(version + '/doctor/teamPatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
   // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
-  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生
+  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生／guest
    * @swagger
    * /doctor/editDetail:
    *   post:

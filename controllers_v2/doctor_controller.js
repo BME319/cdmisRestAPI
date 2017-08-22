@@ -381,7 +381,7 @@ exports.getComments = function (req, res, next) {
 //     }, opts, fields, populate);
 // }
 exports.getDoctorInfo = function (req, res) {
-  let query = {userId: req.body.doctorObject.userId, role: 'doctor'}
+  let query = {userId: req.body.doctorObject.userId}
   let comments = req.body.comments
 
   let newScore = 0
@@ -905,7 +905,7 @@ exports.getSessionObject = function (req, res, next) {
     } else if (req.session.role === 'patient') {
       req.body.patientObject = user
       next()
-    } else if (req.session.role === 'doctor') {
+    } else if (req.session.role === 'doctor' || req.session.role === 'guest') {
       req.body.doctorObject = user
       next()
     } else {
