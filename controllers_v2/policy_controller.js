@@ -198,6 +198,8 @@ exports.getAgents = function (req, res, next) {
   Alluser.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
+    } else if (items.length === 0) {
+      return res.json({data: [], code: 0})
     } else {
       // res.json({data: items, code: 0})
       let returns = []
