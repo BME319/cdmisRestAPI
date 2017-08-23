@@ -1530,10 +1530,10 @@ module.exports = function (app, webEntry, acl) {
 
   // gy
   // review
-  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo(acl))
-  app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate)
-  app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo)
-  app.get(version + '/review/countByStatus', tokenManager.verifyToken(), reviewCtrl.countByStatus)
+  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reviewCtrl.postReviewInfo(acl))
+  app.get(version + '/review/certificate', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reviewCtrl.getCertificate)
+  app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reviewCtrl.getReviewInfo)
+  app.get(version + '/review/countByStatus', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reviewCtrl.countByStatus)
 
   // labtestImport
   app.get(version + '/labtestImport/listByStatus', tokenManager.verifyToken(), labtestImportCtrl.listByStatus)

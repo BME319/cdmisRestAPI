@@ -1,12 +1,12 @@
 // var config = require('../config')
 var webEntry = require('../settings').webEntry
-var Doctor = require('../models/doctor')
+// var Doctor = require('../models/doctor')
 var Team = require('../models/team')
 var DpRelation = require('../models/dpRelation')
 var Consultation = require('../models/consultation')
 var Counsel = require('../models/counsel')
 var Comment = require('../models/comment')
-var User = require('../models/user')
+// var User = require('../models/user')
 var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
 var pinyin = require('pinyin')
@@ -30,26 +30,28 @@ var DoctorsInCharge = require('../models/doctorsInCharge')
 // 输入：无/用户ID，角色
 // 输出：用户ID，姓名，性别，手机号码，医院，科室，职称，咨询量，问诊量，评分；
 
-exports.getDoctors = function (req, res) {
-  var query = {}
-  if (req.query.userId !== null && req.query.userId !== '' && req.query.userId !== undefined) {
-    query['userId'] = req.query.userId
-  };
-  var opts = ''
-  var fields = {'_id': 0, 'patients': 1}
-  // 通过子表查询主表，定义主表查询路径及输出内容
-  var populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0}}
-  Doctor.getSome(query, function (err, doctor) {
-    if (err) {
-      console.log(err)
-      return res.status(500).send('服务器错误, 用户查询失败!')
-    }
-    if (doctor == null) {
-      return res.json({result: '不存在的医生ID！'})
-    }
-    return res.json({doctors: doctor})
-  }, opts, fields, populate)
-}
+/** 弃用
+  exports.getDoctors = function (req, res) {
+    var query = {}
+    if (req.query.userId !== null && req.query.userId !== '' && req.query.userId !== undefined) {
+      query['userId'] = req.query.userId
+    };
+    var opts = ''
+    var fields = {'_id': 0, 'patients': 1}
+    // 通过子表查询主表，定义主表查询路径及输出内容
+    var populate = {path: 'patients.patientId', select: {'_id': 0, 'revisionInfo': 0}}
+    Doctor.getSome(query, function (err, doctor) {
+      if (err) {
+        console.log(err)
+        return res.status(500).send('服务器错误, 用户查询失败!')
+      }
+      if (doctor == null) {
+        return res.json({result: '不存在的医生ID！'})
+      }
+      return res.json({doctors: doctor})
+    }, opts, fields, populate)
+  }
+*/
 
 // 新建医生基本信息 2017-04-01 GY
 exports.insertDocBasic = function (req, res) {
@@ -151,28 +153,30 @@ exports.getTeams = function (req, res) {
   }, opts, fields)
 }
 
-// 通过doctor表中userId查询_id 2017-03-30 GY
-// 修改：增加判断不存在ID情况 2017-04-05 GY
-// 注释 输入，userId（要查询的doctorId）；输出，对应的doctorObject；目的，得到doctorObject._id
-exports.getDoctorObject = function (req, res, next) {
-  if (req.query.doctorId == null || req.query.doctorId === '') {
-    return res.json({result: '请填写doctorId!'})
-  }
-  let query = {
-    userId: req.query.doctorId
-  }
-  Doctor.getOne(query, function (err, doctor) {
-    if (err) {
-      console.log(err)
-      return res.status(500).send('服务器错误, 用户查询失败!')
+/** 弃用
+  // 通过doctor表中userId查询_id 2017-03-30 GY
+  // 修改：增加判断不存在ID情况 2017-04-05 GY
+  // 注释 输入，userId（要查询的doctorId）；输出，对应的doctorObject；目的，得到doctorObject._id
+  exports.getDoctorObject = function (req, res, next) {
+    if (req.query.doctorId == null || req.query.doctorId === '') {
+      return res.json({result: '请填写doctorId!'})
     }
-    if (doctor == null) {
-      return res.json({result: '不存在的医生ID！'})
+    let query = {
+      userId: req.query.doctorId
     }
-    req.body.doctorObject = doctor
-    next()
-  })
-}
+    Doctor.getOne(query, function (err, doctor) {
+      if (err) {
+        console.log(err)
+        return res.status(500).send('服务器错误, 用户查询失败!')
+      }
+      if (doctor == null) {
+        return res.json({result: '不存在的医生ID！'})
+      }
+      req.body.doctorObject = doctor
+      next()
+    })
+  }
+*/
 
 // 通过team表中teamId查询teamObject 2017-03-30 GY
 // 注释 输入，teamId，status，输出teamObject
@@ -265,21 +269,23 @@ exports.getGroupPatientList = function (req, res) {
 //   }, opts, fields, populate);
 // }
 
-// 获取医生User表信息 2017-06-15 GY
-exports.getUserInfo = function (req, res, next) {
-  var query = {userId: req.query.userId}
-  User.getOne(query, function (err, item) {
-    if (err) {
-      return res.status(500).send(err.errmsg)
-    }
-    if (item == null) {
-      return res.json({result: '请重新注册'})
-    } else {
-      req.body.TDCticket = item.TDCticket
-      next()
-    }
-  })
-}
+/** 弃用
+  // 获取医生User表信息 2017-06-15 GY
+  exports.getUserInfo = function (req, res, next) {
+    var query = {userId: req.query.userId}
+    User.getOne(query, function (err, item) {
+      if (err) {
+        return res.status(500).send(err.errmsg)
+      }
+      if (item == null) {
+        return res.json({result: '请重新注册'})
+      } else {
+        req.body.TDCticket = item.TDCticket
+        next()
+      }
+    })
+  }
+*/
 
 // 修改获取医生详细信息方法 2017-4-12 GY
 // 注释 type 123是啥？
