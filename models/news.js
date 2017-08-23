@@ -10,6 +10,7 @@ var newsSchema = new mongoose.Schema({
 	readOrNot: Number,
 	// sendReadOrNot: Number,
 	type:Number,
+	caseType: Number,
 	time:Date,
 	title:String,
 	description:String,
