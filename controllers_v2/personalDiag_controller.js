@@ -1072,7 +1072,17 @@ exports.autoOverduePD = function (req, res) {
   })
 }
 
-// 发送面诊预约成功短信，包含验证码，预约时间地点等信息
-// exports.successMessage = function (req, res) {
-
-// }
+// 给医生账户充值
+exports.recharge = function (req, res) {
+  let doctorId = req.body.doctorId
+  let money = Number(req.body.money)
+  let queryA = {userId: doctorId}
+  let upObjA = {$inc: {money: money}}
+  Account.updateOne(queryA, upObjA, function (err, upAccount) { // 给相应医生账户充值
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      return res.json({data: upAccount, code: 0})
+    }
+  }, {upsert: true, new: true})
+}

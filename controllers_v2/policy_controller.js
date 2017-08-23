@@ -102,7 +102,8 @@ exports.getPatients = function (req, res) {
   // 通过子表查询主表，定义主表查询路径及输出内容
   let populate = [
     {path: 'patientId', select: {'_id': 0, 'userId': 1, 'name': 1, 'gender': 1, 'phoneNo': 1, 'VIP': 1, 'birthday': 1}},
-    {path: 'currentAgent', select: {'_id': 0, 'name': 1, 'phoneNo': 1}}
+    {path: 'currentAgent', select: {'_id': 0, 'name': 1, 'phoneNo': 1}},
+    {path: 'followUps.agentId', select: {'_id': 0, 'name': 1, 'phoneNo': 1, 'userId': 1, 'gender': 1}}
   ]
   // 模糊搜索
   if (_name) {
@@ -159,6 +160,7 @@ exports.getHistory = function (req, res) {
     return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
   }
   let fields = {_id: 0, patientId: 1, followUps: 1, currentAgent: 1, status: 1}
+  let populate = {path: 'followUps.agentId', select: {'_id': 0, 'name': 1, 'phoneNo': 1, 'userId': 1, 'gender': 1}}
 
   Policy.getOne(query, function (err, item) {
     if (err) {
@@ -168,7 +170,7 @@ exports.getHistory = function (req, res) {
     } else {
       res.json({data: item.followUps, code: 0})
     }
-  }, opts, fields)
+  }, opts, fields, populate)
 }
 
 // 保险主管获取专员列表 2017-08-08 YQC
