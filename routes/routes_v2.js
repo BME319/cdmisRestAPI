@@ -26,8 +26,8 @@ var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
 var serviceCtrl = require('../controllers_v2/service_controller')
 var orderCtrl = require('../controllers_v2/order_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
-var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
-var expenseCtrl = require('../controllers_v2/expense_controller')
+// var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
+// var expenseCtrl = require('../controllers_v2/expense_controller')
 var dictTypeOneCtrl = require('../controllers_v2/dictTypeOne_controller')
 var dictTypeTwoCtrl = require('../controllers_v2/dictTypeTwo_controller')
 var dictDistrictCtrl = require('../controllers_v2/dictDistrict_controller')
@@ -1530,7 +1530,7 @@ module.exports = function (app, webEntry, acl) {
 
   // gy
   // review
-  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo)
+  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo(acl))
   app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate)
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo)
   app.get(version + '/review/countByStatus', tokenManager.verifyToken(), reviewCtrl.countByStatus)
@@ -1540,7 +1540,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/labtestImport/photoList', tokenManager.verifyToken(), labtestImportCtrl.photoList)
   app.post(version + '/labtestImport', tokenManager.verifyToken(), getNoMid.getNo(11), labtestImportCtrl.saveLabtest)
   app.post(version + '/labtestImport/edit', tokenManager.verifyToken(), labtestImportCtrl.editLabtest)
-  app.get(version + '/labtestImport', tokenManager.verifyToken(), labtestImportCtrl.getLabtest)
+  // 权限-医生
+  app.get(version + '/labtestImport', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), labtestImportCtrl.getLabtest)
   app.get(version + '/labtestImport/photoByLabtest', tokenManager.verifyToken(), labtestImportCtrl.photoByLabtest)
   app.post(version + '/labtestImport/labelphoto', tokenManager.verifyToken(), labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
   app.get(version + '/labtestImport/countByStatus', tokenManager.verifyToken(), labtestImportCtrl.countByStatus)
@@ -3725,7 +3726,7 @@ module.exports = function (app, webEntry, acl) {
    *                       type: "string"
    */
   app.get(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getPatientDetail)
-  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者 弃用
    * @swagger
    * /patient/detail:
    *   post:
@@ -3797,7 +3798,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.newPatientDetail)
+  // app.post(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.newPatientDetail)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
    * @swagger
    * /patient/doctors:
@@ -4221,7 +4222,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Doctor not found."
    */
   app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
-  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生
+  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生／guest
    * @swagger
    * /doctor/detail:
    *   get:
@@ -4356,7 +4357,7 @@ module.exports = function (app, webEntry, acl) {
    */
   app.get(version + '/doctor/teamPatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
   // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
-  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生
+  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生／guest
    * @swagger
    * /doctor/editDetail:
    *   post:
@@ -5766,6 +5767,47 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/policy/agentOff', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getInsuranceAObject, policyCtrl.agentOff)
+  // 主管／专员修改个人信息
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/info:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "主管／专员修改个人信息"
+   *     description: ""
+   *     operationId: "info"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           insuranceAId:
+   *             type: string
+   *           name:
+   *             type: string
+   *           gender:
+   *             type: number
+   *             enum:
+   *               - "1"
+   *               - "2"
+   *           phoneNo:
+   *             type: number
+   *           password:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/policy/info', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.editInfo)
 
   // lgf
   // account
@@ -7799,7 +7841,7 @@ module.exports = function (app, webEntry, acl) {
 
   // 输入：微信用户授权的code 商户系统生成的订单号
 
-//   app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
+  // app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
 
   // 订单支付结果回调
   app.post(version + '/wechat/payResult', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.payResult)
@@ -8114,7 +8156,7 @@ module.exports = function (app, webEntry, acl) {
    *                 departLeader:
    *                   type: array
    *                   items:
-   *                     type: string                   
+   *                     type: string
    */
   app.get(version + '/department/department', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDepartment)
   /** JYF 2017-08-16
@@ -8166,7 +8208,7 @@ module.exports = function (app, webEntry, acl) {
    *                 doctors:
    *                   type: array
    *                   items:
-   *                     type: string                   
+   *                     type: string
    */
   app.get(version + '/department/doctorlist', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDoctorList)
   /** JYF 2017-08-16

@@ -633,9 +633,9 @@ exports.insertAlluser = function (req, res) {
 }
 exports.registerTest = function (acl) {
   return function (req, res, next) {
-    var _phoneNo = req.query.phoneNo
-    var _password = req.query.password
-    var _role = req.query.role
+    var _phoneNo = req.body.phoneNo
+    var _password = req.body.password
+    var _role = req.body.role
     var query = {phoneNo: _phoneNo}
         // var _userNo = req.newId
     Alluser.getOne(query, function (err, item) {
@@ -651,6 +651,9 @@ exports.registerTest = function (acl) {
           if (item1 != null) {
             res.json({results: 1, userNo: '', mesg: 'Alluser Already Exist!'})
           } else {
+            if (_role === 'doctor') { // 医生注册时赋予临时角色
+              _role = 'guest'
+            }
             // 在原有账号基础上增加新角色
             Alluser.updateOne(query, {$push: { role: _role }, $set: {password: _password}}, function (err, item2) {
               if (err) {
@@ -683,11 +686,15 @@ exports.registerTest = function (acl) {
 }
 exports.register = function (acl) {
   return function (req, res) {
-    var _phoneNo = req.query.phoneNo
-    var _password = req.query.password
-    var _role = req.query.role
+    var _phoneNo = req.body.phoneNo
+    var _password = req.body.password
+    var _role = req.body.role
         // var query = {phoneNo:_phoneNo};
     var _userNo = req.newId
+
+    if (_role === 'doctor') { // 医生注册时赋予临时角色
+      _role = 'guest'
+    }
 
     var userData = {
       phoneNo: _phoneNo,
@@ -782,8 +789,8 @@ exports.register = function (acl) {
 //     });
 // }
 exports.reset = function (req, res) {
-  var _phoneNo = req.query.phoneNo
-  var _password = req.query.password
+  var _phoneNo = req.body.phoneNo
+  var _password = req.body.password
   var query = {phoneNo: _phoneNo}
   Alluser.getOne(query, function (err, item) {
     if (err) {
@@ -1010,6 +1017,9 @@ exports.login = function (req, res, next) {
 
       res.json({results: 1, mesg: "Alluser doesn't Exist!"})
     } else {
+      if (role === 'doctor' && Number(item.reviewStatus) !== 1) {
+        role = 'guest'
+      }
       if (password !== item.password && openIdFlag === 0) {
         // 2017-06-07GY调试
         // console.log('login_err_password_not_correct');

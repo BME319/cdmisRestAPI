@@ -1,6 +1,8 @@
 var PersonalDiag = require('../models/personalDiag')
 var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
+var Order = require('../models/order')
+var Account = require('../models/account')
 
 /**
 医生端
@@ -1023,7 +1025,7 @@ exports.autoAvailablePD = function (req, res) {
   })
 }
 
-// 每日核销过期面诊PD 给医生账户充值待实现
+// 每日核销过期面诊PD
 exports.autoOverduePD = function (req, res) {
   console.log(new Date())
   let today = new Date(new Date().toDateString())
@@ -1031,16 +1033,56 @@ exports.autoOverduePD = function (req, res) {
   middleOfToday.setHours(today.getHours() + 12)
   let query = {endTime: {$lte: middleOfToday}, status: 0}
   let upObj = {$set: {status: 2}}
-  PersonalDiag.update(query, upObj, function (err, upItems) {
+  PersonalDiag.getSome(query, function (err, items) { // 获取需要自动核销的PD
     if (err) {
       console.log(err)
     } else {
-      console.log(upItems.n + ' Entries Found, and ' + upItems.nModified + ' Entries Modified.')
+      let count = 0
+      for (let item in items) { // 遍历所有需要自动核销的PD
+        let itemPD = items[item]
+        let PDId = itemPD._id
+        PersonalDiag.updateOne({_id: PDId}, upObj, function (err, upPD) { // 修改PD状态
+          if (err) {
+            console.log(err)
+          } else {
+            let queryO = {perDiagObject: PDId}
+            Order.getOne(queryO, function (err, itemO) { // 获取相应订单的医生userId和订单金额
+              if (err) {
+                console.log(err)
+              } else {
+                let doctorId = itemO.doctorId
+                let money = Number(itemO.money)
+                let queryA = {userId: doctorId}
+                let upObjA = {$inc: {money: money}}
+                Account.updateOne(queryA, upObjA, function (err, upAccount) { // 给相应医生账户充值
+                  if (err) {
+                    console.log(err)
+                  } else {
+                    console.log(doctorId + 'recharges with' + money)
+                    count++
+                  }
+                }, {upsert: true})
+              }
+            })
+          }
+        })
+      }
+      console.log(items.length + ' Entries Found, and ' + count + ' Entries Successfully Modified.')
     }
-  }, {multi: true})
+  })
 }
 
-// 发送面诊预约成功短信，包含验证码，预约时间地点等信息
-// exports.successMessage = function (req, res) {
-
-// }
+// 给医生账户充值
+exports.recharge = function (req, res) {
+  let doctorId = req.body.doctorId
+  let money = Number(req.body.money)
+  let queryA = {userId: doctorId}
+  let upObjA = {$inc: {money: money}}
+  Account.updateOne(queryA, upObjA, function (err, upAccount) { // 给相应医生账户充值
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      return res.json({data: upAccount, code: 0})
+    }
+  }, {upsert: true, new: true})
+}

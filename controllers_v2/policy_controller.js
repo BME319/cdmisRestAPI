@@ -84,7 +84,7 @@ exports.getPatients = function (req, res) {
   if (req.session.role === 'insuranceA') {
     query['currentAgent'] = req.body.insuranceAObject._id
   }
-  if (status !== null || status !== undefined || status !== '') {
+  if ((status !== null || status !== undefined || status !== '') && status !== 9) { // 输入9返回所有患者列表
     query['status'] = status
   }
 
@@ -102,7 +102,8 @@ exports.getPatients = function (req, res) {
   // 通过子表查询主表，定义主表查询路径及输出内容
   let populate = [
     {path: 'patientId', select: {'_id': 0, 'userId': 1, 'name': 1, 'gender': 1, 'phoneNo': 1, 'VIP': 1, 'birthday': 1}},
-    {path: 'currentAgent', select: {'_id': 0, 'name': 1, 'phoneNo': 1}}
+    {path: 'currentAgent', select: {'_id': 0, 'name': 1, 'phoneNo': 1}},
+    {path: 'followUps.agentId', select: {'_id': 0, 'name': 1, 'phoneNo': 1, 'userId': 1, 'gender': 1}}
   ]
   // 模糊搜索
   if (_name) {
@@ -159,6 +160,7 @@ exports.getHistory = function (req, res) {
     return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
   }
   let fields = {_id: 0, patientId: 1, followUps: 1, currentAgent: 1, status: 1}
+  let populate = {path: 'followUps.agentId', select: {'_id': 0, 'name': 1, 'phoneNo': 1, 'userId': 1, 'gender': 1}}
 
   Policy.getOne(query, function (err, item) {
     if (err) {
@@ -168,7 +170,7 @@ exports.getHistory = function (req, res) {
     } else {
       res.json({data: item.followUps, code: 0})
     }
-  }, opts, fields)
+  }, opts, fields, populate)
 }
 
 // 保险主管获取专员列表 2017-08-08 YQC
@@ -196,6 +198,8 @@ exports.getAgents = function (req, res, next) {
   Alluser.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
+    } else if (items.length === 0) {
+      return res.json({data: [], code: 0})
     } else {
       // res.json({data: items, code: 0})
       let returns = []
@@ -309,6 +313,42 @@ exports.setAgent = function (req, res) {
       }
     }
   })
+}
+
+exports.editInfo = function (req, res) {
+  let query = {userId: req.session.userId}
+  if (req.session.role === 'insuranceC') {
+    // 主管角色，输入insuranceAId参数则修改某专员信息，不输入则修改自己的信息
+    let insuranceAId = req.body.insuranceAId || null
+    if (insuranceAId !== null) {
+      query = {userId: insuranceAId}
+    }
+  }
+  let upObj = {}
+  let name = req.body.name || null
+  let gender = req.body.gender || null
+  let phoneNo = req.body.phoneNo || null
+  let password = req.body.password || null
+  if (name !== null) {
+    upObj['name'] = name
+  }
+  if (gender !== null) {
+    upObj['gender'] = gender
+  }
+  if (phoneNo !== null) {
+    upObj['phoneNo'] = phoneNo
+  }
+  if (password !== null) {
+    upObj['password'] = password
+  }
+
+  Alluser.updateOne(query, upObj, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      return res.json({code: 0, msg: '修改成功'})
+    }
+  }, {new: true})
 }
 
 // 跟踪记录录入 2017-08-08 YQC

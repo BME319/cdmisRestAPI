@@ -5,69 +5,95 @@ var commonFunc = require('../middlewares/commonFunc')
 // var async = require('async')
 
 // 保存审核信息 2017-07-05 GY
-exports.postReviewInfo = function (req, res) {
-  if (req.body.doctorId === null || req.body.doctorId === '' || req.body.doctorId === undefined) {
-    return res.status(412).json({results: '请填写doctorId'})
-  }
-  // if (req.body.adminId === null || req.body.adminId === '' || req.body.adminId === undefined) {
-  //   return res.status(412).json({results: '请填写adminId'});
-  // }
-  var queryAdmin = {_id: req.session._id}
-
-  Alluser.getOne(queryAdmin, function (err, reviewItem) {
-    if (err) {
-      return res.status(500).send(err)
+exports.postReviewInfo = function (acl) {
+  return function (req, res) {
+    if (req.body.doctorId === null || req.body.doctorId === '' || req.body.doctorId === undefined) {
+      return res.status(412).json({results: '请填写doctorId'})
     }
-    if (reviewItem === null || reviewItem === undefined || reviewItem === '') {
-      return res.status(401).json({results: 'admin查找失败'})
-    } else if (reviewItem.role.indexOf('admin') === -1) {
-      return res.status(401).json({results: '无审核权限'})
-    } else {
-      var adminId = reviewItem._id
-      var reviewDate
-      if (req.body.reviewDate === null || req.body.reviewDate === '' || req.body.reviewDate === undefined) {
-        reviewDate = commonFunc.getNowDate()
-      } else {
-        reviewDate = req.body.reviewDate
-      }
-      if (req.body.reviewStatus === 1 || req.body.reviewStatus === 2) {
-        var status = req.body.reviewStatus
-      } else {
-        return res.status(400).json({results: '无效的审核状态'})
-      }
-      var queryDoctor = {userId: req.body.doctorId}
+    // if (req.body.adminId === null || req.body.adminId === '' || req.body.adminId === undefined) {
+    //   return res.status(412).json({results: '请填写adminId'});
+    // }
+    var queryAdmin = {_id: req.session._id}
 
-      Alluser.getOne(queryDoctor, function (err, doctorItem) {
-        if (err) {
-          return res.status(500).send(err)
+    Alluser.getOne(queryAdmin, function (err, reviewItem) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      if (reviewItem === null || reviewItem === undefined || reviewItem === '') {
+        return res.status(401).json({results: 'admin查找失败'})
+      } else if (reviewItem.role.indexOf('admin') === -1) {
+        return res.status(401).json({results: '无审核权限'})
+      } else {
+        var adminId = reviewItem._id
+        var reviewDate
+        if (req.body.reviewDate === null || req.body.reviewDate === '' || req.body.reviewDate === undefined) {
+          reviewDate = commonFunc.getNowDate()
+        } else {
+          reviewDate = req.body.reviewDate
         }
-        var upObj = {
-          reviewStatus: status,
-          reviewDate: reviewDate,
-          adminId: adminId
+        if (req.body.reviewStatus === 1 || req.body.reviewStatus === 2) {
+          var status = req.body.reviewStatus
+        } else {
+          return res.status(400).json({results: '无效的审核状态'})
         }
-        if (req.body.reviewContent !== null && req.body.reviewContent !== '' && req.body.reviewContent !== undefined) {
-          upObj['reviewContent'] = req.body.reviewContent
-        }
-        var opts = {
-          new: true,
-          fields: {
-            'class_info': 0, 'VIP': 0, 'doctors': 0, 'diagnosisInfo': 0
-          }
-        }
-        Alluser.updateOne(queryDoctor, upObj, function (err, upReview) {
+        var queryDoctor = {userId: req.body.doctorId}
+
+        Alluser.getOne(queryDoctor, function (err, doctorItem) {
           if (err) {
             return res.status(500).send(err)
           }
-          if (upReview === null) {
-            return res.status(404).json({results: '不存在的doctorId'})
-          } else {
-            return res.json({results: '审核信息保存成功', editResults: upReview})
+          var upObj = {
+            reviewStatus: status,
+            reviewDate: reviewDate,
+            adminId: adminId
           }
-        }, opts)
-      })
-    }
-  })
+          if (req.body.reviewContent !== null && req.body.reviewContent !== '' && req.body.reviewContent !== undefined) {
+            upObj['reviewContent'] = req.body.reviewContent
+          }
+          var opts = {
+            new: true,
+            fields: {
+              'class_info': 0, 'VIP': 0, 'doctors': 0, 'diagnosisInfo': 0
+            }
+          }
+          Alluser.updateOne(queryDoctor, upObj, function (err, upReview) {
+            if (err) {
+              return res.status(500).send(err)
+            }
+            if (upReview === null) {
+              return res.status(404).json({results: '不存在的doctorId'})
+            } else if (Number(status) === 1) {
+              let roleList = doctorItem.role
+              roleList.pull('guest')
+              roleList.push('doctor')
+              let upDoc = {
+                $set: {
+                  role: roleList
+                }
+              }
+              Alluser.updateOne(queryDoctor, upDoc, function (err, itemDoc) {
+                if (err) {
+                  return res.status(500).send(err)
+                } else {
+                  let userId = req.body.doctorId
+                  let roles = 'doctor'
+                  acl.addUserRoles(userId, roles, function (err) {
+                    if (err) {
+                      return res.status(500).send(err.errmsg)
+                    }
+                              // res.json({results: {status:1,msg:'success'}});
+                    return res.json({results: '审核信息保存成功', editResults: upReview})
+                  })
+                }
+              }, {new: true})
+            } else {
+              return res.json({results: '审核信息保存成功', editResults: upReview})
+            }
+          }, opts)
+        })
+      }
+    })
+  }
 }
 
 // 根据医生ID获取资质证书相关信息 2017-07-05 GY
