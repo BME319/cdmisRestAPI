@@ -611,7 +611,7 @@ exports.postCommunication = function(req, res) {
         if(msg.targetType=='single'){
         	// console.log("111");
             request({
-                url:'http://' + webEntry.domain + ':4050/api/v1/new/news' + '?token=' + req.query.token || req.body.token,
+                url:'http://' + webEntry.domain + ':4060/api/v1/new/news' + '?token=' + req.query.token || req.body.token,
                 method:'POST',
                 body:bodyGen(msg,communicationInfo['messageNo']),
                 json:true
@@ -621,7 +621,7 @@ exports.postCommunication = function(req, res) {
             });
         }else{
             request({
-                url:'http://' + webEntry.domain + ':4050/api/v1/new/teamNews' + '?token=' + req.query.token || req.body.token,
+                url:'http://' + webEntry.domain + ':4060/api/v1/new/teamNews' + '?token=' + req.query.token || req.body.token,
                 method:'POST',
                 body:bodyGen(msg,communicationInfo['_id']),
                 json:true
@@ -880,10 +880,10 @@ exports.addcontenttime = function (req, res) {
 							console.log(err);
 						}
 						else {
-							// console.log('updateSuccess');
-							// console.log(upCM._id);
+							console.log('updateSuccess');
+							console.log(upCM._id);
 							// console.log(upCM.content.time);
-							// console.log(i)
+							console.log(i)
 						}
 					}, {new: true});
 				}
@@ -901,13 +901,13 @@ exports.timeconfirmation = function (req, res) {
 		}
 		for (let i = 0; i < items.length; i ++) {
 			if (!(items[i].content.time)) {
-				// console.log(i);
-				// console.log(items[i]._id);
+				console.log(i);
+				console.log(items[i]._id);
 			}
 			flag = i;
-			// console.log(flag);
+			console.log(flag);
 		}
-		// console.log(items.length);
+		console.log(items.length);
 		if (flag === items.length-1) {
 			return res.json({'result': 'finish'});
 		}

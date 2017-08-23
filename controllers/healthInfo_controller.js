@@ -37,7 +37,6 @@ exports.getHealthDetail = function(req, res) {
 }
 
 exports.insertHealthInfo = function(req, res) {
-	console.log(req.query)
 	var healthInfoData = {
 		userId: req.query.userId,
 		type: req.query.type,
@@ -54,8 +53,6 @@ exports.insertHealthInfo = function(req, res) {
 			terminalIP:"1234"
 		}
 	};
-
-	console.log(healthInfoData)
 
 	var newHealthInfo = new HealthInfo(healthInfoData);
 	newHealthInfo.save(function(err, healthInfoInfo) {

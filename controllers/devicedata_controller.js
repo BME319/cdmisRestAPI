@@ -7,7 +7,7 @@ var	request = require('request'),
 	Device = require('../models/device');
 
 exports.bindingDevice = function(req, res){
-    // console.log("in 111");
+    console.log("in 111");
 	var userId = req.body.userId || null;
 	var appId = req.body.appId || null;
 	var twoDimensionalCode = req.body.twoDimensionalCode || null;
@@ -24,8 +24,8 @@ exports.bindingDevice = function(req, res){
         if(err){
             return res.status(500).send(err.errmsg);     
         }
-        // console.log(config.third_party_data.bloodpressure.get_device_url);
-        // console.log(body);
+        console.log(config.third_party_data.bloodpressure.get_device_url);
+        console.log(body);
         body = JSON.parse(body);  
         if(body.errorCode == 0){
         	// save device info
@@ -152,7 +152,7 @@ exports.receiveBloodPressure = function(req, res){
   var imei = req.body.imei;
   var deviceId = sn + imei;
   var query = {deviceId: deviceId};
-  // console.log(sn);
+  console.log(sn);
   
 
 
@@ -171,7 +171,7 @@ exports.receiveBloodPressure = function(req, res){
     }
     if(item == null){
         // res.json({results: {errorCode: 10, requestStatus: '设备不存在'}});
-        // console.log('null');
+        console.log('null');
         res.json(results);
     }
     else{
@@ -254,7 +254,7 @@ function saveBPdata(patient, req, results, res){
             // return res.status(422).send(err.message);
             res.json(results);
         }
-        // console.log(updata);
+        console.log(updata);
             // if (updata.nModified == 0) {
             //     console.log('err3');
             //     res.json(results);
@@ -346,7 +346,7 @@ function saveBPdata(patient, req, results, res){
                             results.code = 1;
                             results.status = 'success';
                             results.msg = '提交成功';
-                            // console.log('提交成功');
+                            console.log('提交成功');
                             res.json(results);    
                         });
                     }

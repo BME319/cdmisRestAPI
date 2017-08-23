@@ -63,7 +63,7 @@ function messageSaveSend (data, url, sender) {
   data.msg['time'] = Date.now()
 
     // save data
-  var url = 'http://' + webEntry.domain + ':4050/api/v1/communication/communication'
+  var url = 'http://' + webEntry.domain + ':4060/api/v1/communication/communication'
   var jsondata = {
     messageType: messageType,
     sendBy: sendBy,
@@ -183,8 +183,8 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
   } else {           // 群聊
         // console.log(receiver);
     request({
-            // url: 'http://' + webEntry.domain + ':4050/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
-      url: 'http://' + webEntry.domain + ':4050/api/v1/communication/team?teamId=' + data.msg.teamId,
+            // url: 'http://' + webEntry.domain + ':4060/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
+      url: 'http://' + webEntry.domain + ':4060/api/v1/communication/team?teamId=' + data.msg.teamId,
       method: 'GET',
       json: true
     }, function (err, response) {
@@ -242,7 +242,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
               'userId': members[idx].userId,          // data.msg.content.doctorId, //医生的UID
               'role': 'doctor',
               'postdata': {
-                'template_id': 'U1KajBosUqmQSl0MLA3p-BN_v9VnTf5-hty-3UD9N08',
+                'template_id': 'cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k',
                 'url': actionUrl,
                 'data': {
                   'first': {
@@ -277,8 +277,8 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
 
                             // groupSend(data);
             request({
-                                // url: 'http://'+ webEntry.domain +':4050/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
-              url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/messageTemplate',
+                                // url: 'http://'+ webEntry.domain +':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+              url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate',
               method: 'POST',
               body: template,
               json: true
@@ -418,7 +418,7 @@ exports.chat = function (io, socket) {
     var test = data.msg.test
         // var toUserId = data.to;
 
-    var url = 'http://' + webEntry.domain + ':4050/api/v1/wechat/download'
+    var url = 'http://' + webEntry.domain + ':4060/api/v1/wechat/download'
 
     // receive from sender
     if (test == 'test') {

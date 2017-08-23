@@ -59,8 +59,7 @@ Wechat.baseTokenManager = function (type) {
   // console.log(type || 'access_token');
   return function (req, res, next) {
     // console.log(req.headers);
-    // var query = {type: type || 'access_token',role:req.query.role||req.body.role};
-    var query = {type: type || 'access_token',role:'patient'};
+    var query = {type: type || 'access_token',role:req.query.role||req.body.role};
     var appid = req.wxApiUserObject.appid;
     var secret = req.wxApiUserObject.appsecret;
 
@@ -103,8 +102,7 @@ Wechat.baseTokenManager = function (type) {
               jsapi_ticket: body2.ticket,
               api_ticket: "body3.ticket",
               type: type || 'access_token',
-              // role:req.query.role||req.body.role 
-              role:'patient'
+              role:req.query.role||req.body.role
             }, function(err, tokenObject) {
               if (err) return res.status(401).send('微信令牌保存失败!');
               req.wxToken = tokenObject;

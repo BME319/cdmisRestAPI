@@ -139,7 +139,7 @@ exports.getDoctorObject = function (req, res, next) {
     };
     Doctor.getOne(query, function (err, doctor) {
         if (err) {
-            // console.log(err);
+            console.log(err);
             return res.status(500).send('服务器错误, 用户查询失败!');
         }
         if (doctor == null) {
@@ -990,7 +990,7 @@ exports.getPatientList = function(req, res) {
 	if (_name) {
 		populate['match'] = {'name': nameReg};
 	}
-	// console.log(populate);
+	console.log(populate);
 	// console.log(query);
 	DpRelation.getOne(query, function(err, item) {
 		if (err) {

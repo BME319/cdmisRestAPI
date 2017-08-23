@@ -383,7 +383,7 @@ exports.addOrder = function(req, res, next) {
     spbill_create_ip: commonFunc.getClientIp(req),   // 终端IP
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
-    notify_url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/payResult',   // 通知地址
+    notify_url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/payResult',   // 通知地址
     trade_type: req.body.trade_type    // 交易类型
     // openid: req.body.openid    // 用户标识
   };
@@ -794,15 +794,7 @@ exports.messageTemplate = function(req, res) {
   var token = tokenObject.token;
 
   if(req.body.userId != ''){
-    // var query = {userId: req.body.userId};
-    console.log(req.body.userId)
-    var query = {
-        $or: [
-            {userId: req.body.userId},
-            {"MessageOpenId.patientWechat": req.body.userId}
-        ]
-    };
-    console.log(query)
+    var query = {userId: req.body.userId};
     var role = req.query.role || req.body.role;
    
     User.getOne(query, function(err, item) {
@@ -814,7 +806,7 @@ exports.messageTemplate = function(req, res) {
             return res.status(400).send('user do not exist');
           }
           if(item.MessageOpenId === null){
-            // console.log("open 11");
+            console.log("open 11");
             // return res.status(400).send('openId do not exist');
             res.json({results:{"errcode" : 0,"errmsg" : "ok"}});
           }
@@ -830,12 +822,12 @@ exports.messageTemplate = function(req, res) {
           }
     
           if(messageOpenId === null){
-            // console.log("open 22");
+            console.log("open 22");
             // return res.status(400).send('openId do not exist');
             res.json({results:{"errcode" : 0,"errmsg" : "ok"}});
           }
           else{
-            // console.log(item.phoneNo)
+            console.log(item.phoneNo)
             console.log(messageOpenId)
             var jsondata = {};
             jsondata = req.body.postdata;
@@ -848,6 +840,7 @@ exports.messageTemplate = function(req, res) {
               json:true
             }, function(err, response, body){
               if (!err && response.statusCode == 200) {   
+                console.log(body)
                 res.json({results:body});
               }
               else{
@@ -866,6 +859,7 @@ exports.messageTemplate = function(req, res) {
         json:true
       }, function(err, response, body){
         if (!err && response.statusCode == 200) {   
+          console.log(body)
           res.json({results:body});
         }
         else{
@@ -883,24 +877,6 @@ exports.messageTemplate = function(req, res) {
 }
 
 // 下载
-// exports.download = function(req, res) {
-//   var tokenObject = req.wxToken || {};
-//   var token = tokenObject.token;
-//   var serverId = req.query.serverId;
-//   var name = req.query.name;
-  
-//   var fileurl = wxApis.download + '?access_token=' + token + '&media_id=' + serverId;
-//   var dir = "./uploads/photos";
-
-  
-//       request.head(fileurl, function(err, response1, body) {
-//         request(fileurl).pipe(fs.createWriteStream(dir + '/' + name));
-        
-//         // console.log("Done: " + fileurl);
-//         res.json({results:"success"});
-//       });   
-// }
-
 exports.download = function(req, res) {
   var tokenObject = req.wxToken || {};
   var token = tokenObject.token;
@@ -909,72 +885,47 @@ exports.download = function(req, res) {
   
   var fileurl = wxApis.download + '?access_token=' + token + '&media_id=' + serverId;
   var dir = "./uploads/photos";
+  console.log(fileurl)
 
-  request        
-  .get(fileurl)        
-  .on('response', function (res) {            
-    // console.log(res.statusCode) // 200            
-    // console.log(res.headers['content-type']) // 'image/jpeg'        
-  })        
-  .on('error', function (err) {            
-    console.log(err)        
-  })        
-  .pipe(fs.createWriteStream(dir + '/' + name))        
-  .on('close', function () {  
-    // 没有参数传入            
-    // res.json({results: img}); 
-    res.json({results:"success"});       
+  request({
+    url: fileurl,
+    method: 'GET',
+    json: true
+  }, function(err, response){
+    if(!err && response.statusCode == 200) {
+      request.head(fileurl, function(err, response1, body) {
+        request(fileurl).pipe(fs.createWriteStream(dir + '/' + name));
+        
+        // console.log("Done: " + fileurl);
+        res.json({results:"success"});
+      });   
+    }    
+   
+    // if(!err && response.statusCode == 200) {
+    //   download(fileurl, dir, name);
+    //   console.log("Done: " + fileurl);
+    //   res.json({results:"success"});
+    // }      
+
+    // var imgData = "";
+    // res.json(response.body);
+
+    // response.setEncoding("binary"); //一定要设置response的编码为binary否则会下载下来的图片打不开
+    // response.on("data", function(chunk){
+    //     imgData += chunk;
+    //     console.log(chunk);
+    // });
+
+    // response.on("end", function(){
+    //   fs.writeFile("./public/upload/downImg/name.jpg", imgData, "binary", function(err){
+    //     if(err){
+    //       return res.status(500).send('Error');
+    //     }
+    //     res.json({results:"success"});
+    //   });
+    // });
   });
 }
-
-// exports.download = function(req, res) {
-//   var tokenObject = req.wxToken || {};
-//   var token = tokenObject.token;
-//   var serverId = req.query.serverId;
-//   var name = req.query.name;
-  
-//   var fileurl = wxApis.download + '?access_token=' + token + '&media_id=' + serverId;
-//   var dir = "./uploads/photos";
-
-//   request({
-//     url: fileurl,
-//     method: 'GET',
-//     json: true
-//   }, function(err, response){
-//     if(!err && response.statusCode == 200) {
-//       request.head(fileurl, function(err, response1, body) {
-//         request(fileurl).pipe(fs.createWriteStream(dir + '/' + name));
-        
-//         // console.log("Done: " + fileurl);
-//         res.json({results:"success"});
-//       });   
-//     }    
-   
-//     // if(!err && response.statusCode == 200) {
-//     //   download(fileurl, dir, name);
-//     //   console.log("Done: " + fileurl);
-//     //   res.json({results:"success"});
-//     // }      
-
-//     // var imgData = "";
-//     // res.json(response.body);
-
-//     // response.setEncoding("binary"); //一定要设置response的编码为binary否则会下载下来的图片打不开
-//     // response.on("data", function(chunk){
-//     //     imgData += chunk;
-//     //     console.log(chunk);
-//     // });
-
-//     // response.on("end", function(){
-//     //   fs.writeFile("./public/upload/downImg/name.jpg", imgData, "binary", function(err){
-//     //     if(err){
-//     //       return res.status(500).send('Error');
-//     //     }
-//     //     res.json({results:"success"});
-//     //   });
-//     // });
-//   });
-// }
 
 var download = function(url, dir, filename) {
   request.head(url, function(err, res, body) {
@@ -989,7 +940,6 @@ var download = function(url, dir, filename) {
 exports.receiveTextMessage = function(req, res) {
   var body = '';
   var results = '';
-
 
   req.on('data',function(data){
     body += data;
@@ -1050,30 +1000,28 @@ exports.receiveTextMessage = function(req, res) {
           newOpenIdTmp.save(function(err, item) {
             if (err) {
               results = err.errmsg;
-
-              // console.log("*************************** results ********************************")
-              // console.log(results)
               res.statusCode = 500;
               res.write(results);
               res.end();
             }
             else{
-              // ------------------------------------------------ 为什么要发这个呢 start ---------------------------------------------------
+              // results = 'success';
               // var query = { userId: doctor_userId };
               // Doctor.getOne(query, function (err, doctor) {
-              //   console.log(doctor)
               //   if (err) {
               //     results = err;
               //     res.statusCode = 500;
               //     res.write(results);
               //     res.end();
               //   }
-              //   if (doctor === null) {
+              //   if (doctor == null) {
               //     results = 'doctor not exist';
               //     res.statusCode = 500;
               //     res.write(results);
               //     res.end();
               //   }
+              //   // console.log("*************************** doctor ********************************");
+              //   // console.log(doctor)
               //   var name = doctor.name;
               //   var title = doctor.title;
               //   var workUnit = doctor.workUnit;
@@ -1083,7 +1031,7 @@ exports.receiveTextMessage = function(req, res) {
               //     "role": "patient",
               //     "postdata": {
               //       "touser": patient_openId,
-              //       "template_id": "-KsJgrnFvhJbH1BZIYTrHHntqdf6dPjYQGycVgDESiU",
+              //       "template_id": "43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg",
               //       "url": '',
               //       "data": {
               //         "first": {
@@ -1110,10 +1058,9 @@ exports.receiveTextMessage = function(req, res) {
               //       }
               //     }
               //   };
-              //   console.log(template.userId)
 
               //   request({
-              //     url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/messageTemplate',  // + '?token=' + req.query.token || req.body.token,
+              //     url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
               //     method: 'POST',
               //     body:template,
               //     json:true
@@ -1122,48 +1069,117 @@ exports.receiveTextMessage = function(req, res) {
               //       results = err;
               //     }
               //     else{
-              //       console.log(response.body)
 
               //       if( jsondata.xml.Event == 'SCAN'){
               //         results = 'success';
               //       }
               //       else{
+              //         // results = "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~";
               //         results = "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
-              //       }
-              //     }
-              //   })
-              // });  
-              // ------------------------------------------------ 为什么要发这个呢 end ---------------------------------------------------   
-              
-              // 手动关注
-              // console.log("*************************** jsondata ********************************");
-              // console.log(jsondata);
-              var ToUserName = jsondata.xml.ToUserName[0];    // 开发者微信号
-              var FromUserName = jsondata.xml.FromUserName[0];  // 发送方帐号（一个OpenID）
-              var CreateTime = parseInt(jsondata.xml.CreateTime[0]); 
-              // console.log(CreateTime);
-              // var date = new Date();
 
-              var res_json = {
-                ToUserName: FromUserName,
-                FromUserName: ToUserName,
-                // ToUserName: ToUserName,
-                // FromUserName: FromUserName,
-                CreateTime: CreateTime,
-                MsgType: 'text',
-                // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
-                Content: "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
-              };
-              console.log(res_json);
-              var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
-              var xmlString = xmlBuilder.buildObject(res_json);
-              // console.log(xmlString);
-              results = xmlString;
-              // console.log("*************************** results ********************************")
+              //       }
+
+              //     }
+
+              //   });
+              // });
+
+              if( jsondata.xml.Event == 'SCAN'){
+                results = 'success';
+              }
+              else{
+                // 扫码关注
+                // console.log("*************************** jsondata ********************************");
+                // console.log(jsondata);
+                var ToUserName = jsondata.xml.ToUserName[0];    // 开发者微信号
+                var FromUserName = jsondata.xml.FromUserName[0];  // 发送方帐号（一个OpenID）
+                var CreateTime = parseInt(jsondata.xml.CreateTime[0]); 
+                // console.log(CreateTime);
+                // var date = new Date();
+
+                // console.log(ToUserName)
+                // console.log(FromUserName)
+
+                if(ToUserName === 'gh_38a170c4a996'){
+                  // 医生服务号的开发者微信号
+                  var res_json = {
+                    ToUserName: FromUserName,
+                    FromUserName: ToUserName,
+                    // ToUserName: ToUserName,
+                    // FromUserName: FromUserName,
+                    CreateTime: CreateTime,
+                    MsgType: 'text',
+                    // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+                    Content: "您好，欢迎关注肾健康守护者联盟! \n 慢性肾病的专业管理及医护人员的学习交流平台"
+                  };
+                  console.log(res_json);
+                  var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+                  var xmlString = xmlBuilder.buildObject(res_json);
+                  // console.log(xmlString);
+                  results = xmlString;
+                  // console.log("*************************** results ********************************")
                   // console.log(results)
-              res.statusCode = 200;
-              res.write(results);
-              res.end();
+                  res.statusCode = 200;
+                  res.write(results);
+                  res.end();
+                  
+
+                }
+                else if (ToUserName === 'gh_b55234d77eb3'){
+                  // 肾事管家的开发者微信号
+                  var res_json = {
+                    ToUserName: FromUserName,
+                    FromUserName: ToUserName,
+                    // ToUserName: ToUserName,
+                    // FromUserName: FromUserName,
+                    CreateTime: CreateTime,
+                    MsgType: 'text',
+                    // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+                    Content: "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
+                  };
+                  console.log(res_json);
+                  var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+                  var xmlString = xmlBuilder.buildObject(res_json);
+                  // console.log(xmlString);
+                  results = xmlString;
+                  // console.log("*************************** results ********************************")
+                  // console.log(results)
+                  res.statusCode = 200;
+                  res.write(results);
+                  res.end();
+                  
+                }
+                else{
+                  var res_json = {
+                    ToUserName: FromUserName,
+                    FromUserName: ToUserName,
+                    // ToUserName: ToUserName,
+                    // FromUserName: FromUserName,
+                    CreateTime: CreateTime,
+                    MsgType: 'text',
+                    // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+                    Content: "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
+                  };
+                  console.log(res_json);
+                  var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+                  var xmlString = xmlBuilder.buildObject(res_json);
+                  // console.log(xmlString);
+                  results = xmlString;
+                  // console.log("*************************** results ********************************")
+                  // console.log(results)
+                  res.statusCode = 200;
+                  res.write(results);
+                  res.end();
+
+                }
+
+              }
+
+              
+
+          
+                     
+              
             }           
           });
         }
@@ -1177,8 +1193,8 @@ exports.receiveTextMessage = function(req, res) {
           // console.log(CreateTime);
           // var date = new Date();
 
-          console.log(ToUserName)
-          console.log(FromUserName)
+          // console.log(ToUserName)
+          // console.log(FromUserName)
 
           if(ToUserName === 'gh_38a170c4a996'){
             // 医生服务号的开发者微信号
@@ -1253,14 +1269,10 @@ exports.receiveTextMessage = function(req, res) {
 
           }
           
-
-          
         }
         else{
           // EventKey为空
           results = 'EventKey Error';
-          // console.log("*************************** results ********************************")
-              // console.log(results)
           res.statusCode = 500;
           res.write(results);
           res.end();
@@ -1269,8 +1281,6 @@ exports.receiveTextMessage = function(req, res) {
       }
       else{
         results = 'success';
-        // console.log("*************************** results ********************************")
-              // console.log(results)
         res.statusCode = 200;
         res.write(results);
         res.end();
@@ -1278,8 +1288,6 @@ exports.receiveTextMessage = function(req, res) {
     }
     else{
       results = 'success';
-      // console.log("*************************** results ********************************")
-              // console.log(results)
       res.statusCode = 200;
       res.write(results);
       res.end();
