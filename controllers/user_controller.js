@@ -13,6 +13,7 @@ var config = require('../config'),
   request = require('request'),
   jwt = require('jsonwebtoken')
 var Patient = require('../models/patient')
+var Errorlog = require('../models/errorlog')
 var commonFunc = require('../middlewares/commonFunc')
 var Base64 = {
     // 转码表
@@ -874,11 +875,26 @@ exports.sendSMS = function (req, res) {
                                 // console.log("### end ##");
                 var json = eval('(' + resdata + ')')
                 code = json.resp.respCode
+                // code = '77777777'
                 if (code === '000000') {
                   res.json({results: 0, mesg: "User doesn't Exist!"})
                 } else {
                                 // res.json({results: 2,ErrorCode: code});
-                  res.json({results: 1, mesg: {'ErrorCode': code}})
+                  // res.json({results: 1, mesg: {'ErrorCode': code}})
+                  var errData = {
+                    fieldInfo: 'sms',
+                    userInfo: _mobile,
+                    inputInfo: _smsType,
+                    errorInfo: code,
+                    errorTime: new Date()
+                  }
+                  var newErrorlog = new Errorlog(errData)
+                  newErrorlog.save(function (err, Info) {
+                    if (err) {
+                      return res.status(500).send(err.errmsg)
+                    }
+                    res.json({results: 1, mesg: {'ErrorCode': code}})
+                  })
                 }
                                 // console.log(json.resp.respCode);
               })
