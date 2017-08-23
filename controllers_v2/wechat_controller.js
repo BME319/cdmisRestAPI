@@ -397,7 +397,7 @@ exports.addOrder = function (req, res, next) {
     body: xmlString
   }, function (err, response, body) {
     var prepayId = ''
-    // console.log(body);
+    console.log(body)
 
     if (!err && response.statusCode === 200) {
       var parser = new xml2js.Parser()
