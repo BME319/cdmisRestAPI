@@ -5,14 +5,15 @@ var webEntry = require('../settings').webEntry
 var Communication = require('../models/communication')
 var Counsel = require('../models/counsel')
 var Team = require('../models/team')
-var Patient = require('../models/patient')
-var Doctor = require('../models/doctor')
+// var Patient = require('../models/patient')
+// var Doctor = require('../models/doctor')
 var Consultation = require('../models/consultation')
 var DpRelation = require('../models/dpRelation')
 var News = require('../models/news')
 var Message = require('../models/message')
 // var commonFunc = require('../middlewares/commonFunc')
 var request = require('request')
+var Alluser = require('../models/alluser')
 
 // 根据counselId获取counsel表除messages外的信息 2017-03-31 GY
 // 注释 输入，counselId；输出，问诊信息
@@ -163,9 +164,10 @@ exports.checkPatient = function (req, res, next) {
     return res.json({result: '请填写patientId!'})
   }
   var query = {
-    userId: req.body.patientId
+    userId: req.body.patientId,
+    role: 'patient'
   }
-  Patient.getOne(query, function (err, patient) {
+  Alluser.getOne(query, function (err, patient) {
     if (err) {
       console.log(err)
       return res.status(500).send('服务器错误, 患者查询失败!')
@@ -183,9 +185,10 @@ exports.checkDoctor = function (req, res, next) {
     return res.json({result: '请填写sponsorId!'})
   }
   var query = {
-    userId: req.body.sponsorId
+    userId: req.body.sponsorId,
+    role: 'doctor'
   }
-  Doctor.getOne(query, function (err, doctor) {
+  Alluser.getOne(query, function (err, doctor) {
     if (err) {
       console.log(err)
       return res.status(500).send('服务器错误, 医生查询失败!')
@@ -417,9 +420,10 @@ exports.getDoctor1Object = function (req, res, next) {
     return res.json({result: '请填写doctorId!'})
   }
   var query = {
-    userId: req.body.doctorId
+    userId: req.body.doctorId,
+    role: 'doctor'
   }
-  Doctor.getOne(query, function (err, doctor) {
+  Alluser.getOne(query, function (err, doctor) {
     if (err) {
       console.log(err)
       return res.status(500).send('服务器错误, 用户查询失败!')
@@ -437,9 +441,10 @@ exports.getDoctor2Object = function (req, res, next) {
     return res.json({result: '请填写doctorId2!'})
   }
   var query = {
-    userId: req.body.doctorId2
+    userId: req.body.doctorId2,
+    role: 'doctor'
   }
-  Doctor.getOne(query, function (err, doctor) {
+  Alluser.getOne(query, function (err, doctor) {
     if (err) {
       console.log(err)
       return res.status(500).send('服务器错误, 用户查询失败!')
