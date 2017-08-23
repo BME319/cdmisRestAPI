@@ -26,9 +26,12 @@ var Compliance = require('../models/compliance')
 
 // 获取任务执行情况
 // 注释 输入可选，userId，date，type，code；输出结果，相应任务执行情况
-exports.getComplianceByDay = function (req, res) {
+exports.getCompliances = function (req, res) {
   // 请求数据提取
   let userId = req.query.userId || null
+  if (userId === null) {
+    return res.json({result: '请填写userId!'})
+  }
   let date = req.query.date || null
   let type = req.query.type || null
   let code = req.query.code || null

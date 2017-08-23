@@ -381,7 +381,7 @@ exports.getComments = function (req, res, next) {
 //     }, opts, fields, populate);
 // }
 exports.getDoctorInfo = function (req, res) {
-  let query = {userId: req.session.userId, role: 'doctor'}
+  let query = {userId: req.body.doctorObject.userId, role: 'doctor'}
   let comments = req.body.comments
 
   let newScore = 0
@@ -435,58 +435,58 @@ exports.editDoctorDetail = function (req, res, next) {
   //   terminalIP:"10.12.43.32"
   // }
   }
-  if (req.body.certificatePhotoUrl !== null || req.body.certificatePhotoUrl !== '' || req.body.certificatePhotoUrl !== undefined) {
+  if (req.body.certificatePhotoUrl !== null && req.body.certificatePhotoUrl !== '' && req.body.certificatePhotoUrl !== undefined) {
     upObj['certificatePhotoUrl'] = req.body.certificatePhotoUrl
   }
-  if (req.body.practisingPhotoUrl !== null || req.body.practisingPhotoUrl !== '' || req.body.practisingPhotoUrl !== undefined) {
+  if (req.body.practisingPhotoUrl !== null && req.body.practisingPhotoUrl !== '' && req.body.practisingPhotoUrl !== undefined) {
     upObj['practisingPhotoUrl'] = req.body.practisingPhotoUrl
   }
-  if (req.body.name !== null || req.body.name !== '' || req.body.name !== undefined) {
+  if (req.body.name !== null && req.body.name !== '' && req.body.name !== undefined) {
     upObj['name'] = req.body.name
   }
-  if (req.body.photoUrl !== null || req.body.photoUrl !== '' || req.body.photoUrl !== undefined) {
+  if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
     upObj['photoUrl'] = req.body.photoUrl
   }
-  if (req.body.birthday !== null || req.body.birthday !== '' || req.body.birthday !== undefined) {
+  if (req.body.birthday !== null && req.body.birthday !== '' && req.body.birthday !== undefined) {
     upObj['birthday'] = new Date(req.body.birthday)
   }
-  if (req.body.gender !== null || req.body.gender !== '' || req.body.gender !== undefined) {
+  if (req.body.gender !== null && req.body.gender !== '' && req.body.gender !== undefined) {
     upObj['gender'] = req.body.gender
   }
-  if (req.body.IDNo !== null || req.body.IDNo !== '' || req.body.IDNo !== undefined) {
+  if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
     upObj['IDNo'] = req.body.IDNo
   }
-  if (req.body.province !== null || req.body.province !== '' || req.body.province !== undefined) {
+  if (req.body.province !== null && req.body.province !== '' && req.body.province !== undefined) {
     upObj['province'] = req.body.province
   }
-  if (req.body.city !== null || req.body.city !== '' || req.body.city !== undefined) {
+  if (req.body.city !== null && req.body.city !== '' && req.body.city !== undefined) {
     upObj['city'] = req.body.city
   }
-  if (req.body.district !== null || req.body.district !== '' || req.body.district !== undefined) {
+  if (req.body.district !== null && req.body.district !== '' && req.body.district !== undefined) {
     upObj['district'] = req.body.district
   }
-  if (req.body.workUnit !== null || req.body.workUnit !== '' || req.body.workUnit !== undefined) {
+  if (req.body.workUnit !== null && req.body.workUnit !== '' && req.body.workUnit !== undefined) {
     upObj['workUnit'] = req.body.workUnit
   }
-  if (req.body.title !== null || req.body.title !== '' || req.body.title !== undefined) {
+  if (req.body.title !== null && req.body.title !== '' && req.body.title !== undefined) {
     upObj['title'] = req.body.title
   }
-  if (req.body.job !== null || req.body.job !== '' || req.body.job !== undefined) {
+  if (req.body.job !== null && req.body.job !== '' && req.body.job !== undefined) {
     upObj['job'] = req.body.job
   }
-  if (req.body.department !== null || req.body.department !== '' || req.body.department !== undefined) {
+  if (req.body.department !== null && req.body.department !== '' && req.body.department !== undefined) {
     upObj['department'] = req.body.department
   }
-  if (req.body.major !== null || req.body.major !== '' || req.body.major !== undefined) {
+  if (req.body.major !== null && req.body.major !== '' && req.body.major !== undefined) {
     upObj['major'] = req.body.major
   }
-  if (req.body.description !== null || req.body.description !== '' || req.body.description !== undefined) {
+  if (req.body.description !== null && req.body.description !== '' && req.body.description !== undefined) {
     upObj['description'] = req.body.description
   }
-  if (req.body.charge1 !== null || req.body.charge1 !== '' || req.body.charge1 !== undefined) {
+  if (req.body.charge1 !== null && req.body.charge1 !== '' && req.body.charge1 !== undefined) {
     upObj['charge1'] = req.body.charge1
   }
-  if (req.body.charge2 !== null || req.body.charge2 !== '' || req.body.charge2 !== undefined) {
+  if (req.body.charge2 !== null && req.body.charge2 !== '' && req.body.charge2 !== undefined) {
     upObj['charge2'] = req.body.charge2
   }
 
@@ -805,7 +805,12 @@ exports.deleteSuspendTime = function (req, res) {
 // 患者或医生获取医生停诊信息 输入userId（医生），输出结果，相应医生的停诊信息
 exports.getSuspendTime = function (req, res) {
   // 查询条件
-  let doctorId = req.session.userId
+  let doctorId
+  if (req.session.role === 'doctor') {
+    doctorId = req.session.userId
+  } else if (req.session.role === 'patient') {
+    doctorId = req.session.userId
+  }
   let query = {userId: doctorId, role: 'doctor'}
   var opts = ''
   var fields = {'_id': 0, 'suspendTime': 1, 'serviceSuspendTime': 1}
@@ -816,8 +821,9 @@ exports.getSuspendTime = function (req, res) {
     }
     if (item == null) {
       return res.json({msg: '该医生无停诊信息'})
+    } else {
+      res.json({results: item})
     }
-    res.json({results: item})
   }, opts, fields)
 }
 
@@ -998,7 +1004,13 @@ exports.getPatientList = function (req, res) {
         } else if (itemsDIC.length === 0) {
           return res.json({results: item1})
         } else {
-          patientsInCharge = itemsDIC.sort(sortVIPpinyin)
+          for (let j = 0; j < itemsDIC.length; j++) {
+            let patientIC = itemsDIC[j]
+            if (patientIC.patientId !== null) {
+              patientsInCharge.push(patientIC)
+            }
+          }
+          patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
           item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
           return res.json({results: item1})
         }
@@ -1041,13 +1053,13 @@ exports.getPatientByDate = function (req, res) {
     } else if (item == null) {
     // return res.json({result:'请先与其他医生或患者建立联系!'});
       var dpRelationData = {
-        doctorId: req.body.doctorObject._id,
-        revisionInfo: {
-          operationTime: new Date(),
-          userId: 'gy',
-          userName: 'gy',
-          terminalIP: '10.12.43.32'
-        }
+        doctorId: req.body.doctorObject._id//,
+        // revisionInfo: {
+        //   operationTime: new Date(),
+        //   userId: 'gy',
+        //   userName: 'gy',
+        //   terminalIP: '10.12.43.32'
+        // }
       }
       // return res.json({result:dpRelationData});
       var newDpRelation = new DpRelation(dpRelationData)
@@ -1058,53 +1070,55 @@ exports.getPatientByDate = function (req, res) {
       // return res.json({result: '暂无患者2!'});
       })
       return res.json({result: '暂无患者!'})
-    }
-
-    let patients = []
-    let dpTimeFormat = null
-    if (item.patients.length === 0) {
-      return res.json({result: '暂无患者!'})
-    } else if (item.patients.length !== 0) {
-      for (var i = item.patients.length - 1; i >= 0; i--) {
-        if (item.patients[i].patientId !== null) {
-          if (item.patients[i].dpRelationTime === undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime === '') {
-            item.patients[i].dpRelationTime = new Date('2017-05-15')
-          }
-          dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime)
-          if (dpTimeFormat === date) {
-            patients.push(item.patients[i])
-          }
-        }
-      }
-      patients = patients.sort(sortVIPpinyin)
-
-      let patientsInCharge = []
-      let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
-      let queryDIC = {doctorId: doctorObject._id, invalidFlag: 1}
-      let fieldsDIC = {patientId: 1, dpRelationTime: 1, start: 1}
-      let populateDIC = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
-      if (_name) {
-        populateDIC['match'] = {'name': nameReg}
-      }
-      DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
-        if (err) {
-          return res.status(500).send(err)
-        } else if (itemsDIC.length === 0) {
-          return res.json({results: item1})
-        } else {
-          for (var j = itemsDIC.length - 1; j >= 0; j--) {
-            if (itemsDIC[j].patientId !== null) {
-              dpTimeFormat = commonFunc.convertToFormatDate(itemsDIC[j].start)
-              if (dpTimeFormat === date) {
-                patientsInCharge.push(itemsDIC[j])
-              }
+    } else if (item.patient) {
+      let patients = []
+      let dpTimeFormat = null
+      if (item.patients.length === 0) {
+        return res.json({result: '暂无患者!'})
+      } else if (item.patients.length !== 0) {
+        for (var i = item.patients.length - 1; i >= 0; i--) {
+          if (item.patients[i].patientId !== null) {
+            if (item.patients[i].dpRelationTime === undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime === '') {
+              item.patients[i].dpRelationTime = new Date('2017-05-15')
+            }
+            dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime)
+            if (dpTimeFormat === date) {
+              patients.push(item.patients[i])
             }
           }
-          patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
-          item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
-          return res.json({results: item1})
         }
-      }, opts, fieldsDIC, populateDIC)
+        patients = patients.sort(sortVIPpinyin)
+
+        let patientsInCharge = []
+        let item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+        let queryDIC = {doctorId: doctorObject._id, invalidFlag: 1}
+        let fieldsDIC = {patientId: 1, dpRelationTime: 1, start: 1}
+        let populateDIC = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0, 'doctors': 0, 'doctorsInCharge': 0}}
+        if (_name) {
+          populateDIC['match'] = {'name': nameReg}
+        }
+        DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
+          if (err) {
+            return res.status(500).send(err)
+          } else if (itemsDIC.length === 0) {
+            return res.json({results: item1})
+          } else {
+            for (var j = itemsDIC.length - 1; j >= 0; j--) {
+              if (itemsDIC[j].patientId !== null) {
+                dpTimeFormat = commonFunc.convertToFormatDate(itemsDIC[j].start)
+                if (dpTimeFormat === date) {
+                  patientsInCharge.push(itemsDIC[j])
+                }
+              }
+            }
+            patientsInCharge = patientsInCharge.sort(sortVIPpinyin)
+            item1 = {'patients': patients, 'patientsInCharge': patientsInCharge}
+            return res.json({results: item1})
+          }
+        }, opts, fieldsDIC, populateDIC)
+      }
+    } else {
+      return res.json({result: '暂无患者!'})
     }
   }, opts, fields, populate)
 }
@@ -1127,7 +1141,12 @@ exports.editAliPayAccount = function (req, res) {
 // 获取医生支付宝账号 2017-06-16 GY
 // 注释 医生获取自己绑定的支付宝账号信息 输入userId；输出，支付宝账号信息
 exports.getAliPayAccount = function (req, res) {
-  let query = {userId: req.query.userId, role: 'doctor'}
+  let query = {role: 'doctor'}
+  if (req.session.role === 'doctor') {
+    query['userId'] = req.session.userId
+  } else {
+    query['userId'] = req.query.userId
+  }
 
   Alluser.getOne(query, function (err, item) {
     if (err) {

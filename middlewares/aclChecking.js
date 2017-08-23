@@ -1,6 +1,7 @@
 
 // 3rd packages
 var util = require('util')
+var ApiRecord = require('../models/apiRecord')
 
 exports.Checking = function (acl, numPathComponents, userId, actions) {
   function HttpError (errorCode, msg) {
@@ -33,7 +34,9 @@ exports.Checking = function (acl, numPathComponents, userId, actions) {
     if (!numPathComponents) {
       resource = url
     } else {
-      resource = url.split('/').slice(3, numPathComponents + 3).join('/')
+      // resource = url.split('/').slice(3, numPathComponents + 3).join('/')
+      // decode of checking
+      resource = url.split('/').slice(3, numPathComponents + 3).join('-')
     }
 
     if (!_actions) {
@@ -61,7 +64,14 @@ exports.Checking = function (acl, numPathComponents, userId, actions) {
         next(new HttpError(403, 'Insufficient permissions to access resource'))
       } else {
         acl.logger ? acl.logger.debug('Allowed ' + _actions + ' on ' + resource + ' by user ' + _userId) : null
-        next()
+        let query = {userId: _userId, time: new Date()}
+        let obj = {$set: {api: resource, method: _actions, role: req.session.role}}
+        ApiRecord.updateOne(query, obj, {upsert: true}, function (err, apiRecordInfo) {
+          if (err) {
+            next(new HttpError(403, 'api saving error'))
+          }
+          next()
+        })
       }
     })
   }

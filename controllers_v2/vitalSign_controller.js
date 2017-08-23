@@ -127,7 +127,8 @@ exports.getVitalSign = function (req, res, next) {
 // 注释 根据患者提供的数据采集时间和数据数值更新相应体征记录的数值
 // 输入，datatime，datavalue，datavalue2（用于血压）；输出体征数据更新
 // 修改 插入数据时判断同一时刻的体征数据是否存在，存在则更新数据，不存在则新建数据 YQC 2017-07-24
-exports.insertData = function (req, res) {
+// 修改 体征表插入或更新体重数据时，向alluser表里更新weight数据 lgf 2017-08-07
+exports.insertData = function (req, res, next) {
   if (req.body.datatime === null || req.body.datatime === '' || req.body.datatime === undefined) {
     return res.json({result: '请填写datatime!'})
   }
@@ -177,13 +178,23 @@ exports.insertData = function (req, res) {
         } else if (push.nModified === 0) {
           return res.json({result: '未成功修改！请检查输入是否符合要求！', results: push})
         } else if (push.nModified === 1) {
-          return res.json({result: '新建或修改成功', results: push})
+          if (req.body.type === 'Weight') {
+            req.body.weight = req.body.datavalue
+            return next()
+          } else {
+            return res.json({result: '新建或修改成功', results: push})
+          }
         }
       }, {new: true})
     } else if (update.nModified === 0) {
       return res.json({result: '未成功修改！请检查输入是否符合要求！', results: update})
     } else if (update.nModified === 1) {
-      return res.json({result: '新建或修改成功', results: update})
+      if (req.body.type === 'Weight') {
+        req.body.weight = req.body.datavalue
+        return next()
+      } else {
+        return res.json({result: '新建或修改成功', results: update})
+      }
     }
   })
 }

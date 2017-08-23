@@ -77,7 +77,7 @@ exports.getLinegraph = function (req, res) {
       // {$sort: {creationTime: 1}},
       {
         $project: {
-          creationTime: { $dateToString: { format: "%Y-%m-%d", date: "$creationTime" } },
+          creationTime: { $dateToString: { format: '%Y-%m-%d', date: '$creationTime' } }
         }
       },
       {
@@ -120,8 +120,8 @@ exports.getWorkload = function (req, res) {
   let date = req.query.date || ''
   let startdate = new Date(date)
   let enddate = new Date((startdate / 1000 + 86400) * 1000)
-  let limit = Number(req.query.limit)
-  let skip = Number(req.query.skip)
+  let limit = req.query.limit || ''
+  let skip = req.query.skip || ''
 
   if (startTime === '') {
     res.status(400).send('请输入开始时间')
@@ -542,10 +542,21 @@ exports.getWorkload = function (req, res) {
           doctorsinchargetoday: {$size: '$doctorsinchargetoday'}
         }
       },
-      {$sort: {count: -1}},
-      {$skip: skip},
-      {$limit: limit}
+      {$sort: {count: -1}}
+      // {$skip: skip},
+      // {$limit: limit}
     ]
+
+    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+    //   limit = Number(limit)
+    //   skip = Number(skip)
+    //   console.log(limit, skip)
+    //   array.push(
+    //     {$sort: {count: -1}},
+    //     {$skip: skip},
+    //     {$limit: limit}
+    //   )
+    // }
 
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
@@ -558,7 +569,9 @@ exports.getWorkload = function (req, res) {
         res.status(500).send(err.errmsg)
       }
       console.log(results)
-      res.json({results: results})
+      limit = Number(limit)
+      skip = Number(skip)
+      res.json({results: results.slice(skip, limit + skip)})
     })
   }
 }
@@ -568,8 +581,8 @@ exports.getCounseltimeout = function (req, res) {
   let endTime = req.query.endTime || ''
   let province = req.query.province || ''
   let city = req.query.city || ''
-  let limit = Number(req.query.limit)
-  let skip = Number(req.query.skip)
+  let limit = req.query.limit
+  let skip = req.query.skip
   // let date = req.query.date || ''
   // let startdate = new Date(date)
   // let enddate = new Date((startdate / 1000 + 86400) * 1000)
@@ -642,10 +655,20 @@ exports.getCounseltimeout = function (req, res) {
           patientname: '$patientinfo.name'
         }
       },
-      {$sort: {time: 1}},
-      {$skip: skip},
-      {$limit: limit}
+      {$sort: {time: 1}}
+      // {$skip: skip},
+      // {$limit: limit}
     ]
+
+    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+    //   limit = Number(limit)
+    //   skip = Number(skip)
+    //   array.push(
+    //     {$sort: {count: -1}},
+    //     {$skip: skip},
+    //     {$limit: limit}
+    //   )
+    // }
 
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
@@ -657,7 +680,9 @@ exports.getCounseltimeout = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      res.json({results: results})
+      limit = Number(limit)
+      skip = Number(skip)
+      res.json({results: results.slice(skip, limit + skip)})
     })
   }
 }
@@ -665,6 +690,8 @@ exports.getCounseltimeout = function (req, res) {
 exports.getScore = function (req, res) {
   let province = req.query.province || ''
   let city = req.query.city || ''
+  let limit = req.query.limit
+  let skip = req.query.skip
   // let startTime = req.query.startTime || ''
   // let endTime = req.query.endTime || ''
 
@@ -709,7 +736,7 @@ exports.getScore = function (req, res) {
         //   }
         // }
       }
-    },
+    }
     // {
     //   $project: {
     //     'doctorId': 1,
@@ -735,6 +762,15 @@ exports.getScore = function (req, res) {
     //   }
     // }
   ]
+  // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+  //   limit = Number(limit)
+  //   skip = Number(skip)
+  //   array.push(
+  //     {$sort: {count: -1}},
+  //     {$skip: skip},
+  //     {$limit: limit}
+  //   )
+  // }
   if (province !== '' && city === '') {
     array.push({$match: {province: province}})
   } else if (province !== '' && city !== '') {
@@ -746,10 +782,11 @@ exports.getScore = function (req, res) {
       res.status(500).send(err.errmsg)
     }
     console.log(results)
-    res.json({results: results})
+    limit = Number(limit)
+    skip = Number(skip)
+    res.json({results: results.slice(skip, limit + skip)})
   })
-  //}
-  
+  // }
 }
 
 exports.getComment = function (req, res) {
@@ -769,7 +806,7 @@ exports.getComment = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      doctorId = alluserInfo._id
+      let doctorId = alluserInfo._id
       let array = [
         {$match: {doctorId: doctorId}},
         {$match: {time: {$gte: startTime, $lt: endTime}}},
@@ -798,9 +835,9 @@ exports.getComment = function (req, res) {
             'totalScore': 8,
             patientId: '$patientinfo.userId',
             patientname: '$patientinfo.name',
-            doctorname:　'$doctorinfo.name',
+            doctorname: '$doctorinfo.name',
             doctorId: '$doctorinfo.userId',
-            doctorphone: '$doctorinfo.phoneNo',
+            doctorphone: '$doctorinfo.phoneNo'
           }
         }
       ]
@@ -819,6 +856,8 @@ exports.getOrder = function (req, res) {
   let city = req.query.city || ''
   let startTime = req.query.startTime || ''
   let endTime = req.query.endTime || ''
+  let limit = req.query.limit
+  let skip = req.query.skip
   if (startTime === '') {
     res.status(400).send('请输入开始时间')
   } else if (endTime === '') {
@@ -874,6 +913,16 @@ exports.getOrder = function (req, res) {
       }
     ]
 
+    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+    //   limit = Number(limit)
+    //   skip = Number(skip)
+    //   array.push(
+    //     {$sort: {count: -1}},
+    //     {$skip: skip},
+    //     {$limit: limit}
+    //   )
+    // }
+
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
     } else if (province !== '' && city !== '') {
@@ -884,7 +933,9 @@ exports.getOrder = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      res.json({results: results})
+      limit = Number(limit)
+      skip = Number(skip)
+      res.json({results: results.slice(skip, limit + skip)})
     })
   }
 }

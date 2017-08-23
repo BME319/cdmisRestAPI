@@ -15,8 +15,8 @@ var alluserSchema = new mongoose.Schema({
   role: [String],
   loginStatus: Number,
   lastLogin: Date,
-  TDCticket: String,
-  TDCurl: String,
+  // TDCticket: String,  // 患者和医生的二维码分别存储
+  // TDCurl: String,
   invalidFlag: Number,
   MessageOpenId: {
     doctorWechat: String,
@@ -32,6 +32,8 @@ var alluserSchema = new mongoose.Schema({
   },
 
   // doctor_info
+  docTDCticket: String,
+  docTDCurl: String,
   certificatePhotoUrl: String, // 资格证书地址
   practisingPhotoUrl: String, // 执业证书地址
   aliPayAccount: {
@@ -50,11 +52,11 @@ var alluserSchema = new mongoose.Schema({
   score: Number,
   // 1: 咨询 2: 问诊 3: 加急咨询 4: 主管医生 5: 面诊服务
   // 状态： 默认1   1为开启，0为关闭
-  counselStatus1: {type: Number, default: 1},
-  counselStatus2: {type: Number, default: 1},
-  counselStatus3: {type: Number, default: 1},
-  counselStatus4: {type: Number, default: 1},
-  counselStatus5: {type: Number, default: 1},
+  counselStatus1: {type: Number, default: 0},
+  counselStatus2: {type: Number, default: 0},
+  counselStatus3: {type: Number, default: 0},
+  counselStatus4: {type: Number, default: 0},
+  counselStatus5: {type: Number, default: 0},
   // 医生设置的面诊排班（模板）（医生设置）
   serviceSchedules: [
     {
@@ -121,6 +123,8 @@ var alluserSchema = new mongoose.Schema({
   reviewContent: String,
 
   // patient_info
+  patTDCticket: String,
+  patTDCurl: String,
   height: String,
   weight: String,
   occupation: String,
@@ -134,6 +138,8 @@ var alluserSchema = new mongoose.Schema({
   class_info: [String],
   operationTime: Date,
   VIP: {type: Number, default: 0},
+  VIPStartTime: Date,
+  VIPEndTime: Date,
   hypertension: Number,
   allergic: String,
   // 关注医生字段
@@ -145,22 +151,22 @@ var alluserSchema = new mongoose.Schema({
       invalidFlag: Number
     }
   ],
-  // 主管医生字段
-  doctorsInCharge: [
-    {
-      // _id: 0,
-      doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-      firstTime: Date,
-      // 历史2、当前1、待审核0，被拒3
-      invalidFlag: Number,
-      rejectReason: String,
-      // 时长数字类型以秒为单位
-      length: Number,
-      // 有效的起止时间
-      start: Date,
-      end: Date
-    }
-  ],
+  // 主管医生字段 改用doctorsInCharge表
+  // doctorsInCharge: [
+  //   {
+  //     // _id: 0,
+  //     doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  //     firstTime: Date,
+  //     // 历史2、当前1、待审核0，被拒3
+  //     invalidFlag: Number,
+  //     rejectReason: String,
+  //     // 时长数字类型以秒为单位
+  //     length: Number,
+  //     // 有效的起止时间
+  //     start: Date,
+  //     end: Date
+  //   }
+  // ],
   diagnosisInfo: [
     {
       _id: 0,

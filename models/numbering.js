@@ -6,6 +6,8 @@ var numberingSchema = new mongoose.Schema({
   number: Number
 })
 
+numberingSchema.index({type: 1, date: -1})
+
 var numberingModel = mongoose.model('numbering', numberingSchema)
 
 function Numbering (numbering) {

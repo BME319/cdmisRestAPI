@@ -71,7 +71,7 @@ exports.updateStatus = function (req, res) {
       // modified by GY 2017-07-26 added `date`
       var upObj = {
         $set: {
-          task: item.task, 
+          task: item.task,
           date: new Date()
         }
       }
@@ -122,7 +122,7 @@ exports.updateStartTime = function (req, res) {
     // modified by GY 2017-07-26 added `date`
     var upObj = {
       $set: {
-        task: item.task, 
+        task: item.task,
         date: new Date()
       }
     }
@@ -198,7 +198,7 @@ exports.insertTaskModel = function (req, res) {
   })
 }
 
-// 注释 根据userId获取任务 输入，session.id；输出，用户任务
+// 注释 根据userId获取任务 输入，患者userId；输出，用户任务
 exports.getUserTask = function (req, res) {
   // var userId = 'Admin';
   var query = {userId: req.query.userId}
@@ -326,7 +326,7 @@ exports.updateContent = function (req, res) {
         type: req.body.type,
         details: typeNew
       }
-    }, 
+    },
     $set: {
       date: new Date()
     }
@@ -343,7 +343,7 @@ exports.updateContent = function (req, res) {
   }, {new: true})
 }
 
-// 取3个月以上无操作的数据，提醒主管医生为其调整方案 2017-07-26 GY 
+// 取3个月以上无操作的数据，提醒主管医生为其调整方案 2017-07-26 GY
 exports.remindChangeTask = function () {
   // 设定时间线为当前的90天前
   let now = new Date()
@@ -355,10 +355,10 @@ exports.remindChangeTask = function () {
   let m = now.getMonth() + 1
   let d = now.getDate()
 
-  let timeline = now - 1000*60*60*24*90
+  let timeline = now - 1000 * 60 * 60 * 24 * 90
 
   function nextOrEnd (taskItems, index) {
-    if (index < taskItems.length-1) {
+    if (index < taskItems.length - 1) {
       sendMessage(taskItems, ++index)
     } else {
       console.log('auto_remind_change_task_success')
@@ -380,89 +380,95 @@ exports.remindChangeTask = function () {
         let warningPatientNotFound = queryP.userId + '_not_found'
         console.log(warningPatientNotFound)
         nextOrEnd(taskItems, index)
-      } else {
-        let flag = 0
-        for (let i = patientItem.doctorsInCharge.length - 1; i > 0; i--) {
-          if (patientItem.doctorsInCharge[i].invalidFlag === 1) {
-            doctorInchargeid = patientItem.doctorsInCharge[i].doctorId
-            break
-          }
-          flag++
-        }
-        if (flag === patientItem.doctorsInCharge.length || doctorInchargeid === '') {
-          let warningDoctorNotFound = queryP.userId + '_no_doctor_in_charge_avaliable'
-          console.log(warningDoctorNotFound)
-          nextOrEnd(taskItems, index)
-        } else {
-          let queryD = {_id: doctorInchargeid}
-          Alluser.getOne(queryD, function (err, doctorItem) {
-            if (err) {
-              let warningGetDoctor = queryP.userId + '_`s_doctor_querying_error'
-              console.log(warningGetDoctor)
-              console.log(err)
-              nextOrEnd(taskItems, index)
-            } else if (doctorItem === null) {
-              let warningDoctorItemNotFound = queryP.userId + '_`s_doctor_item_not_found'
-              console.log(warningDoctorItemNotFound)
-              nextOrEnd(taskItems, index)
-            } else {
-              // 调试用输出
-              // console.log({doctorId: doctorItem.userId})
-              // 构建message表和news表数据结构
-              let messageId = 'MR' + y + add0(m) + add0(d) + queryP.userId
-              let title = '主管患者任务方案调整提醒'
-              let description = '您的患者_' + patientItem.name + '_的任务方案已经90天未更新，请前往方案定制处调整方案'
-              let messageData = {
-                messageId: messageId, 
-                userId: doctorItem.userId, 
-                sendBy: 'System', 
-                readOrNot: 0, 
-                type: 7, 
-                time: now, 
-                title: title, 
-                description: description
-              }
-              let queryN = {
-                userId: doctorItem.userId, 
-                userRole: 'doctor', 
-                sendBy: 'System', 
-                type: 7
-              }
-              let upNews = {
-                messageId: messageId, 
-                readOrNot: 0, 
-                time: now, 
-                title: title, 
-                description: description
-              }
-              let newsOpts = {upsert: true}
-              let newMessage = new Message(messageData)
-              newMessage.save(function (err, messageInfo) {
-                if (err) {
-                  let warningMessage = queryP.userId + '_`s_doctor_message_not_received'
-                  console.log(warningMessage)
-                  console.log(err)
-                  nextOrEnd(taskItems, index)
-                } else {
-                  // 调试用输出
-                  // console.log(messageInfo)
-                  News.update(queryN, upNews, function (err, upNewsRes) {
-                    if (err) {
-                      let warningNews = queryP.userId + '_`s_doctor_news_not_sent'
-                      console.log(warningNews)
-                      console.log(err)
-                      nextOrEnd(taskItems, index)
-                    } else {
-                      // 调试用输出
-                      // console.log(upNews)
-                      nextOrEnd(taskItems, index)
-                    }
-                  }, newsOpts)
-                }
-              })
+      } else if (patientItem.doctorsInCharge) {
+        if (patientItem.doctorsInCharge.length) {
+          let flag = 0
+          for (let i = patientItem.doctorsInCharge.length - 1; i > 0; i--) {
+            if (patientItem.doctorsInCharge[i].invalidFlag === 1) {
+              doctorInchargeid = patientItem.doctorsInCharge[i].doctorId
+              break
             }
-          })
+            flag++
+          }
+          if (flag === patientItem.doctorsInCharge.length || doctorInchargeid === '') {
+            let warningDoctorNotFound = queryP.userId + '_no_doctor_in_charge_avaliable'
+            console.log(warningDoctorNotFound)
+            nextOrEnd(taskItems, index)
+          } else {
+            let queryD = {_id: doctorInchargeid}
+            Alluser.getOne(queryD, function (err, doctorItem) {
+              if (err) {
+                let warningGetDoctor = queryP.userId + '_`s_doctor_querying_error'
+                console.log(warningGetDoctor)
+                console.log(err)
+                nextOrEnd(taskItems, index)
+              } else if (doctorItem === null) {
+                let warningDoctorItemNotFound = queryP.userId + '_`s_doctor_item_not_found'
+                console.log(warningDoctorItemNotFound)
+                nextOrEnd(taskItems, index)
+              } else {
+                // 调试用输出
+                // console.log({doctorId: doctorItem.userId})
+                // 构建message表和news表数据结构
+                let messageId = 'MR' + y + add0(m) + add0(d) + queryP.userId
+                let title = '主管患者任务方案调整提醒'
+                let description = '您的患者_' + patientItem.name + '_的任务方案已经90天未更新，请前往方案定制处调整方案'
+                let messageData = {
+                  messageId: messageId,
+                  userId: doctorItem.userId,
+                  sendBy: 'System',
+                  readOrNot: 0,
+                  type: 9,
+                  time: now,
+                  title: title,
+                  description: description
+                }
+                let queryN = {
+                  userId: doctorItem.userId,
+                  userRole: 'doctor',
+                  sendBy: 'System',
+                  type: 9
+                }
+                let upNews = {
+                  messageId: messageId,
+                  readOrNot: 0,
+                  time: now,
+                  title: title,
+                  description: description
+                }
+                let newsOpts = {upsert: true}
+                let newMessage = new Message(messageData)
+                newMessage.save(function (err, messageInfo) {
+                  if (err) {
+                    let warningMessage = queryP.userId + '_`s_doctor_message_not_received'
+                    console.log(warningMessage)
+                    console.log(err)
+                    nextOrEnd(taskItems, index)
+                  } else {
+                    // 调试用输出
+                    // console.log(messageInfo)
+                    News.update(queryN, upNews, function (err, upNewsRes) {
+                      if (err) {
+                        let warningNews = queryP.userId + '_`s_doctor_news_not_sent'
+                        console.log(warningNews)
+                        console.log(err)
+                        nextOrEnd(taskItems, index)
+                      } else {
+                        // 调试用输出
+                        // console.log(upNews)
+                        nextOrEnd(taskItems, index)
+                      }
+                    }, newsOpts)
+                  }
+                })
+              }
+            })
+          }
+        } else {
+          nextOrEnd(taskItems, index)
         }
+      } else {
+        nextOrEnd(taskItems, index)
       }
     })
   }
@@ -477,6 +483,9 @@ exports.remindChangeTask = function () {
       console.log('task_querying_error')
       console.log('need_to_contact_admin')
       console.log(err)
+    } else if (taskItems.length === 0) {
+      console.log('task_querying_success')
+      console.log('no_need_to_send_message')
     } else {
       sendMessage(taskItems, 0)
     }

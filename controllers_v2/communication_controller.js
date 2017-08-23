@@ -10,6 +10,7 @@ var Doctor = require('../models/doctor')
 var Consultation = require('../models/consultation')
 var DpRelation = require('../models/dpRelation')
 var News = require('../models/news')
+var Message = require('../models/message')
 // var commonFunc = require('../middlewares/commonFunc')
 var request = require('request')
 
@@ -934,9 +935,10 @@ exports.getMassTargets = function (req, res, next) {
   let content = req.body.content || null
   if (content === null) {
     return res.status(412).json({results: '群发内容不能为空'})
-  } else if (!(content.createTimeInMillis && content.newsType)) {
-    return res.status(412).json({results: '不合规则的content'})
   }
+  // else if (!(content.createTimeInMillis && content.newsType)) {
+  //   return res.status(412).json({results: '不合规则的content'})
+  // }
   let target = req.body.target || null
   if (target === null) {
     return res.status(412).json({results: '群发目标不能为空'})
@@ -954,7 +956,7 @@ exports.getMassTargets = function (req, res, next) {
     } else {
       let targets = []
       switch (target) {
-        case 'FOLLOW': 
+        case 'FOLLOW':
           for (let i = 0; i < doctorItem.patients.length; i++) {
             if (doctorItem.patients[i].patientId !== null) {
               targets[i] = doctorItem.patients[i].patientId
@@ -976,11 +978,11 @@ exports.getMassTargets = function (req, res, next) {
           }
           for (let j = 0; j < doctorItem.patientsInCharge.length; j++) {
             if (doctorItem.patientsInCharge[j].patientId !== null) {
-              targets[i + j] = doctorItem.patientsInCharge[j].patientId
+              targets[doctorItem.patients.length + j] = doctorItem.patientsInCharge[j].patientId
             }
           }
           break
-        default: 
+        default:
           break
       }
       if (targets.length === 0) {
@@ -993,7 +995,8 @@ exports.getMassTargets = function (req, res, next) {
   }, opts, fields, populate)
 }
 // 构建并写入communication, news表数据
-exports.massCommunication = function (req, res, next) {  
+// 突然就变成系统消息了，所以改成写入message表
+exports.massCommunication = function (req, res, next) {
   function add00 (m) {
     return m < 10 ? '00' + m : (m < 100 ? '0' + m : m)
   }
@@ -1009,63 +1012,71 @@ exports.massCommunication = function (req, res, next) {
   let s = now.getMilliseconds()
 
   let communicationDatas = []
-  let content = []
+  // let content = []
+  let content = req.body.content || null
+
+  let doctorname = req.session.name
+  let title = '医生 ' + doctorname + ' 给您发来一条消息'
+  let description = '您的关注/主管医生 ' + doctorname + ' 给您发来一条群体教育消息：' + content
 
   for (let i = 0; i < req.massTarget.length; i++) {
-    let massId = 'CMUM' + req.session.userId + y + add0(m) + add0(d) + add0(h) + add0(mm) + add00(s) + add00(i)
-    
-    content[i] = JSON.parse(JSON.stringify(req.body.content))
-    content[i].targetID = req.massTarget[i].userId
-    content[i].targetName = req.massTarget[i].name
-    content[i].fromID = req.session.userId
+    let massId = 'MAM' + req.session.userId + y + add0(m) + add0(d) + add0(h) + add0(mm) + add00(s) + add00(i)
+
+    // content[i] = JSON.parse(JSON.stringify(req.body.content))
+    // content[i].targetID = req.massTarget[i].userId
+    // content[i].targetName = req.massTarget[i].name
+    // content[i].fromID = req.session.userId
 
     let communicationData = {
-      messageNo: massId, 
-      messageType: 1, 
-      sendBy: req.session.userId, 
-      receiver: req.massTarget[i].userId, 
-      sendDateTime: content[i].createTimeInMillis, 
-      content: content[i], 
-      newsType: content[i].newsType
+      messageId: massId,
+      userId: req.massTarget[i].userId,
+      sendBy: req.session.userId,
+      readOrNot: 0,
+      type: 8,
+      time: now,
+      title: title,
+      description: description,
+      url: ''
     }
 
     communicationDatas[i] = communicationData
   }
 
   let uparr = []
-  let msgType = communicationDatas[0].content.content.contentType
-  let desc = ''
-  switch(msgType){
-        case 'text':desc = communicationDatas[0].content.content.text;break;
-        case 'image':desc='[图片]';break;
-        case 'voice':desc='[语音]';break;
-        // case 'card':desc = isSingle?'[咨询消息]':'[会诊消息]';break;
-        // case 'contact':desc='[联系人名片]';break;
-        // case 'endl':desc='[咨询结束]';break;
-        default:break;
-    }
+  // let msgType = communicationDatas[0].content.content.contentType
+  // let desc = ''
+  // switch(msgType){
+  //       case 'text':desc = communicationDatas[0].content.content.text;break;
+  //       case 'image':desc='[图片]';break;
+  //       case 'voice':desc='[语音]';break;
+  //       // case 'card':desc = isSingle?'[咨询消息]':'[会诊消息]';break;
+  //       // case 'contact':desc='[联系人名片]';break;
+  //       // case 'endl':desc='[咨询结束]';break;
+  //       default:break;
+  //   }
 
   for (let i = 0; i < req.massTarget.length; i++) {
-
     uparr[i] = {
       updateOne: {
         filter: {
-          userId: req.massTarget[i].userId, 
-          userRole: 'patient', 
-          sendBy: req.session.userId
-        }, 
+          userId: req.massTarget[i].userId,
+          userRole: 'patient',
+          sendBy: req.session.userId,
+          type: 8
+        },
         update: {
-          type: 11, 
-          description: desc, 
-          readOrNot: 0, 
-          messageId: communicationDatas[i].messageNo
-        }, 
+          description: description,
+          readOrNot: 0,
+          messageId: communicationDatas[i].messageId
+        },
         upsert: true
       }
     }
   }
 
-  Communication.create(communicationDatas, function (err, cmuInfos) {
+  // console.log(communicationDatas)
+
+  Message.create(communicationDatas, function (err, cmuInfos) {
     if (err) {
       return res.status(500).send(err)
     }
@@ -1074,8 +1085,8 @@ exports.massCommunication = function (req, res, next) {
         return res.status(500).send(err)
       }
       // return res.json ({result: newsInfo})
-      return res.json({results: '群发成功', content: cmuInfos[0].content.content})
+      // return res.json({results: '群发成功', content: cmuInfos[0].description})
+      return res.json({results: '群发成功', title: cmuInfos[0].title, description: cmuInfos[0].description})
     })
   })
-
 }

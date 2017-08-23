@@ -68,18 +68,18 @@ exports.checkBinding = function (req, res, next) {
             // console.log('item1', item1)
             next()
           } else {
-            return res.json('无临时绑定数据，扫码失败！')
+            return res.json({data: {}, msg: '无临时绑定数据，扫码失败！', code: 0})
           }
         })
       } else {
-        return res.json('请填写个人信息中的openId!')
+        return res.json({data: {}, msg: '请填写个人信息中的openId!', code: 0})
       }
     }
   })
 }
 
 // 绑定护士和患者
-exports.bindingPatient = function (req, res, next) {
+exports.bindingPatient = function (req, res) {
   var nurseId = req.body.nurseObjectId
   var patientId = req.patientObject._id
   var dpRelationTime = req.body.dpRelationTime || null
@@ -102,8 +102,8 @@ exports.bindingPatient = function (req, res, next) {
       for (let i = 0; i < patientsList.length; i++) {
         if (String(patientsList[i].patientId) === String(patientId)) {
           req.isBinding = 1 // 是否绑定过该患者的标志，1表示已绑定过 0表示未绑定过
-          // return res.json({data: {}, msg: '已绑定过该患者!', code: 0})
-          return next()
+          return res.json({msg: '已绑定过该患者!', code: 1})
+          // return next()
         }
       }
     }
@@ -121,9 +121,9 @@ exports.bindingPatient = function (req, res, next) {
         return res.status(422).send(err.message)
       } else {
         req.isBinding = 0
-        console.log('req.isBinding2', req.isBinding)
-        next()
-        // return res.json({msg: '绑定患者成功！', results: updpRelation, code: 1})
+        // console.log('req.isBinding2', req.isBinding)
+        // next()
+        return res.json({msg: '绑定患者成功！', results: updpRelation, code: 0})
       }
     }, {upsert: true})
   })
@@ -140,9 +140,9 @@ exports.deleteOpenIdTmp = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     if (req.isBinding) {
-      return res.json({data: {}, msg: '已绑定过该患者!', code: 0})
+      return res.json({data: {}, msg: '已绑定过该患者!', code: 1})
     } else {
-      return res.json({data: {}, msg: '绑定患者成功！', code: 1})
+      return res.json({data: {}, msg: '绑定患者成功！', code: 0})
     }
   })
 }

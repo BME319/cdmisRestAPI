@@ -21,13 +21,23 @@ var forumSchema = new mongoose.Schema({
   replies: [
     {
       commentId: String,
-      replyId: String,
+      // replyId: String,
       userId: String,
       userName: String,
       time: Date,
       depth: Number,
       content: String,
-      at: String
+      replies: [
+        {
+          replyId: String,
+          userId: String,
+          userName: String,
+          content: String,
+          time: Date,
+          at: String
+        }
+      ]
+      // at: String
     }
   ],
   favoritesNum: Number,

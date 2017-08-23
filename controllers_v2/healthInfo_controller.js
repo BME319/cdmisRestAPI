@@ -3,38 +3,93 @@
 var Alluser = require('../models/alluser')
 var HealthInfo = require('../models/healthInfo')
 
+// 获得患者所有的健康信息 修改为医生端和患者端共用 2017-08-09 lgf
 exports.getAllHealthInfo = function (req, res) {
   // var _userId = req.query.userId
   var _userId = req.session.userId
-  var query = {userId: _userId}
+  var _role = req.session.role
+  var patientId = req.query.patientId || null
+  var query = {}
+  if (_role === 'patient') {
+    query['userId'] = _userId
+  } else {
+    if (patientId === null) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      query['userId'] = patientId
+    }
+  }
   // var opts = {sort:-"time"};
   var opts = {'sort': {'time': -1, 'revisionInfo.operationTime': -1}}
-  var fields = {'_id': 0, 'revisionInfo': 0}
+  var fields = {'_id': 0, 'revisionInfo': 0, 'insertTime': 0, 'importStatus': 0, 'url.photoId': 0, 'url._id': 0, 'url.status': 0}
   // var fields = {'_id':0};
-  var populate = {'path': 'resultId'}
-
+  // var populate = {'path': 'resultId'}
   HealthInfo.getSome(query, function (err, healthInfolist) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    res.json({results: healthInfolist})
-  }, opts, fields, populate)
+    let healthInfolistTmp = []
+    for (let i = 0; i < healthInfolist.length; i++) {
+      let time = healthInfolist[i].time
+      let type = healthInfolist[i].type
+      let label = healthInfolist[i].label
+      let userId = healthInfolist[i].userId
+      let description = healthInfolist[i].description
+      let comments = healthInfolist[i].comments
+      let url = []
+      for (let j = 0; j < healthInfolist[i].url.length; j++) {
+        url.push(healthInfolist[i].url[j].photo)
+      }
+      let healthInfoTmp = {time, type, label, userId, description, comments, url}
+      healthInfolistTmp.push(healthInfoTmp)
+    }
+    return res.json({results: healthInfolistTmp})
+  }, opts, fields)
 }
 
+// 获得患者某条健康信息详情 修改为医生端和患者端共用 2017-08-09 lgf
 exports.getHealthDetail = function (req, res) {
   var _userId = req.session.userId
-  var _insertTime = new Date(req.query.insertTime)         // session不包含insertTime
-  var query = {userId: _userId, insertTime: _insertTime}
+  var _role = req.session.role
+  var patientId = req.query.patientId || null
+  var insertTime = req.query.insertTime || null
+  var query = {}
+  if (insertTime === null) {
+    return res.json({result: '请填写insertTime!'})
+  } else {
+    let _insertTime = new Date(req.query.insertTime)       // session不包含insertTime
+    query['insertTime'] = _insertTime
+  }
+  if (_role === 'patient') {
+    query['userId'] = _userId
+  } else {
+    if (patientId === null) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      query['userId'] = patientId
+    }
+  }
   var opts = ''
-  var fields = {'_id': 0, 'revisionInfo': 0}
-  var populate = {'path': 'resultId'}
+  var fields = {'_id': 0, 'revisionInfo': 0, 'insertTime': 0, 'importStatus': 0, 'url.photoId': 0, 'url._id': 0, 'url.status': 0}
+  // var populate = {'path': 'resultId'}
 
   HealthInfo.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    res.json({results: item})
-  }, opts, fields, populate)
+    let time = item.time
+    let type = item.type
+    let label = item.label
+    let userId = item.userId
+    let description = item.description
+    let comments = item.comments
+    let url = []
+    for (let i = 0; i < item.url.length; i++) {
+      url.push(item.url[i].photo)
+    }
+    console.log('item', item)
+    return res.json({results: {time, type, label, userId, description, comments, url}})
+  }, opts, fields)
 }
 
 // exports.insertHealthInfo = function(req, res) {
@@ -65,14 +120,43 @@ exports.getHealthDetail = function (req, res) {
 // }
 
 // 重写插入方法 2017-07-07 GY
+// 新增患者健康信息 修改为医生端和患者端共用 2017-08-09 lgf
 exports.insertHealthInfo = function (req, res) {
+  var _userId = req.session.userId
+  var _role = req.session.role
+  var patientId = req.body.patientId || null
+  var _time = req.body.time || null
+  var _type = req.body.type || null
+  var _label = req.body.label || null
   var healthInfoData = {
-    // userId: req.body.userId,
-    userId: req.session.userId,
-    type: req.body.type,
-    insertTime: new Date(),
-    time: new Date(req.body.time),
-    label: req.body.label
+    // type: req.body.type,
+    insertTime: new Date()
+    // time: new Date(req.body.time),
+    // label: req.body.label
+  }
+  if (_time === null) {
+    return res.json({result: '请填写time!'})
+  } else {
+    healthInfoData['time'] = new Date(_time)
+  }
+  if (_type === null) {
+    return res.json({result: '请填写type!'})
+  } else {
+    healthInfoData['type'] = _type
+  }
+  if (_label === null) {
+    return res.json({result: '请填写label!'})
+  } else {
+    healthInfoData['label'] = _label
+  }
+  if (_role === 'patient') {
+    healthInfoData['userId'] = _userId
+  } else {
+    if (patientId === null) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      healthInfoData['userId'] = patientId
+    }
   }
   // 自动生成图片ID
   let urlObj = [
@@ -99,12 +183,11 @@ exports.insertHealthInfo = function (req, res) {
       }
       for (let i = 0; i < req.body.url.length; i++) {
         // console.log(req.body.url[i].photo)
-        urlObj[i].photo = req.body.url[i].photo
+        urlObj[i].photo = req.body.url[i]
         // console.log(urlObj[i].photo)
         urlObj[i].photoId = healthInfoData.userId + insertTimestr + add0(i)
       }
       healthInfoData['url'] = urlObj
-      console.log(healthInfoData)
     } else {
       return res.status(412).json({results: 'url需要是数组'})
     }
@@ -115,7 +198,7 @@ exports.insertHealthInfo = function (req, res) {
   if (req.body.comments !== null && req.body.comments !== '' && req.body.comments !== undefined) {
     healthInfoData['comments'] = req.body.comments
   }
-
+  // console.log('healthInfoData', healthInfoData)
   var newHealthInfo = new HealthInfo(healthInfoData)
   newHealthInfo.save(function (err, healthInfo) {
     if (err) {
@@ -124,7 +207,8 @@ exports.insertHealthInfo = function (req, res) {
     // 如果是化验的健康信息，需要查找Alluser表并根据结果更新
     // 如果Alluser表中labtestImportStatus字段为1或null则更新为0并更新earliestUploadTime
     if (healthInfo.type === 'Health_002' && healthInfo.url.length !== 0) {
-      var queryuser = {userId: healthInfo.userId, role: req.session.role}
+      // var queryuser = {userId: healthInfo.userId, role: req.session.role}
+      var queryuser = {userId: healthInfo.userId, role: 'patient'}
       Alluser.getOne(queryuser, function (err, userItem) {
         if (err) {
           return res.status(500).send(err)
@@ -132,7 +216,7 @@ exports.insertHealthInfo = function (req, res) {
           return res.status(404).json({results: '找不到对象'})
         } else if (userItem.labtestImportStatus === 0) {
           return res.json({results: healthInfo})
-        } else if (userItem.labtestImportStatus === 1 || userItem.labtestImportStatus === null) {
+        } else if (userItem.labtestImportStatus === 1 || userItem.labtestImportStatus === null || userItem.labtestImportStatus === undefined) {
           var upObj = {
             labtestImportStatus: 0,
             earliestUploadTime: healthInfo.insertTime
@@ -145,7 +229,7 @@ exports.insertHealthInfo = function (req, res) {
             } else {
               return res.json({results: healthInfo})
             }
-          })
+          }, {'upsert': true})
         }
       })
     } else {
@@ -159,9 +243,22 @@ exports.insertHealthInfo = function (req, res) {
 }
 
 // 重写修改方法 2017-07-07 GY
+// 修改患者某条健康信息 修改为医生端和患者端共用 2017-08-09 lgf
 exports.modifyHealthDetail = function (req, res) {
   // var query = {userId: req.body.userId, insertTime: new Date(req.body.insertTime)}
-  var query = {userId: req.session.userId, insertTime: new Date(req.body.insertTime)}
+  var _userId = req.session.userId
+  var _role = req.session.role
+  var patientId = req.body.patientId || null
+  var query = {insertTime: new Date(req.body.insertTime)}
+  if (_role === 'patient') {
+    query['userId'] = _userId
+  } else {
+    if (patientId === null) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      query['userId'] = patientId
+    }
+  }
   var upObj = {}
   let urlObj = [
     {
@@ -188,7 +285,7 @@ exports.modifyHealthDetail = function (req, res) {
         return res.status(412).json({results: '最多一次上传10张图片'})
       }
       for (let i = 0; i < req.body.url.length; i++) {
-        urlObj[i].photo = req.body.url[i].photo
+        urlObj[i].photo = req.body.url[i]
         urlObj[i].photoId = req.session.userId + insertTimestr + add0(i)  // 需要确认是谁进行健康信息的修改
       }
       upObj['url'] = urlObj
@@ -249,9 +346,29 @@ exports.modifyHealthDetail = function (req, res) {
 //   });
 // }
 
+// 删除患者某条健康信息 修改为医生端和患者端共用 2017-08-09 lgf
 exports.deleteHealthDetail = function (req, res) {
   // var query = {userId: req.query.userId, insertTime: new Date(req.query.insertTime)}
-  var query = {userId: req.session.userId, insertTime: new Date(req.body.insertTime)}
+  var _userId = req.session.userId
+  var _role = req.session.role
+  var patientId = req.body.patientId || null
+  var insertTime = req.body.insertTime || null
+  var query = {}
+  if (insertTime === null) {
+    return res.json({result: '请填写insertTime!'})
+  } else {
+    let _insertTime = new Date(insertTime)
+    query['insertTime'] = _insertTime
+  }
+  if (_role === 'patient') {
+    query['userId'] = _userId
+  } else {
+    if (patientId === null) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      query['userId'] = patientId
+    }
+  }
   HealthInfo.removeOne(query, function (err, item1) {
     if (err) {
       return res.status(500).send(err.errmsg)

@@ -1,3 +1,35 @@
+// encode `/` to `-`
+function encodeSlaToHyp(text) {
+  if (!text) {
+    return null
+  } else if (typeof text === 'string' && text.constructor == String) {
+    // console.log('string')
+    text = text.replace(/\//g, '-')
+    return text
+  } else if (typeof text === 'object' && text.constructor == Array) {
+    // console.log('array')
+    for (let i = 0; i < text.length; i++) text[i] = text[i].replace(/\//g, '-')
+    return text
+  } else {
+    return text
+  }
+}
+// decode `-` to `/`
+function decodeHypToSla(text) {
+  if (!text) {
+    return null
+  } else if (typeof text === 'string' && text.constructor == String) {
+    // console.log('string')
+    text = text.replace(/\-/g, '/')
+    return text
+  } else if (typeof text === 'object' && text.constructor == Array) {
+    // console.log('array')
+    for (let i = 0; i < text.length; i++) text[i] = text[i].replace(/\-/g, '/')
+    return text
+  } else {
+    return text
+  }
+}
 
 // Adds roles to a given user id.
 exports.addUserRoles = function (acl) {
@@ -155,7 +187,8 @@ exports.removeRole = function (acl) {
 // Removes a resource from the system
 exports.removeResource = function (acl) {
   return function (req, res) {
-    var resource = req.body.resource
+    // var resource = req.body.resource
+    var resource = encodeSlaToHyp(req.body.resource)
 
     if (resource) {
       acl.removeResource(resource, function (err) {
@@ -174,7 +207,8 @@ exports.removeResource = function (acl) {
 exports.allow = function (acl) {
   return function (req, res) {
     var roles = req.body.roles
-    var resources = req.body.resources
+    // var resources = req.body.resources
+    var resources = encodeSlaToHyp(req.body.resources)
     var permissions = req.body.permissions
     if (roles && resources && permissions) {
       acl.allow(roles, resources, permissions, function (err) {
@@ -193,7 +227,8 @@ exports.allow = function (acl) {
 exports.removeAllow = function (acl) {
   return function (req, res) {
     var roles = req.body.roles
-    var resources = req.body.resources
+    // var resources = req.body.resources
+    var resources = encodeSlaToHyp(req.body.resources)
     var permissions = req.body.permissions
 
     if (roles && resources && permissions) {
@@ -213,7 +248,8 @@ exports.removeAllow = function (acl) {
 exports.allowedPermissions = function (acl) {
   return function (req, res) {
     var userId = req.query.userId
-    var resources = req.query.resources
+    // var resources = req.query.resources
+    var resources = encodeSlaToHyp(req.query.resources)
 
     if (userId && resources) {
       acl.allowedPermissions(userId, resources, function (err, permissions) {
@@ -232,7 +268,8 @@ exports.allowedPermissions = function (acl) {
 exports.isAllowed = function (acl) {
   return function (req, res) {
     var userId = req.query.userId
-    var resources = req.query.resources
+    // var resources = req.query.resources
+    var resources = encodeSlaToHyp(req.query.resources)
     var permissions = req.query.permissions
 
     if (userId && resources && permissions) {
@@ -252,7 +289,8 @@ exports.isAllowed = function (acl) {
 exports.areAnyRolesAllowed = function (acl) {
   return function (req, res) {
     var roles = req.query.roles
-    var resources = req.query.resources
+    // var resources = req.query.resources
+    var resources = encodeSlaToHyp(req.query.resources)
     var permissions = req.query.permissions
 
     if (roles && resources && permissions) {
@@ -279,13 +317,24 @@ exports.whatResources = function (acl) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
-        res.json({results: {status: 1, msg: 'success', resources: resources}})
+        // res.json({results: {status: 1, msg: 'success', resources: resources}})
+        res.json({results: {status: 1, msg: 'success', resources: decodeHypToSla(resources)}})
       })
     } else if (roles) {
 // Returns what resources a given role has permissions over.
       acl.whatResources(roles, function (err, resPerm) {
         if (err) {
           return res.status(500).send(err.errmsg)
+        }
+        // decode key of resPerm
+        for (let key in resPerm) {
+          if (key.indexOf('-') === -1) {
+            continue
+          } else {
+            let decoded_key = decodeHypToSla(key)
+            resPerm[decoded_key] = resPerm[key]
+            resPerm[key] = undefined
+          }
         }
         res.json({results: {status: 1, msg: 'success', resPerm: resPerm}})
       })

@@ -1,6 +1,7 @@
 // var config = require('../config')
 var InsuranceMsg = require('../models/insuranceMsg')
-var Alluser = require('../models/alluser')
+// var Alluser = require('../models/alluser')
+var Policy = require('../models/policy')
 
 // 更新或插入保险消息 ,医生向患者推送 2017-04-18 GY
 exports.updateInsuranceMsg = function (req, res, next) {
@@ -9,11 +10,11 @@ exports.updateInsuranceMsg = function (req, res, next) {
   //   return res.json({result: '请填写doctorId'})
   // }
   if (req.body.patientId === null || req.body.patientId === '' || req.body.patientId === undefined) {
-    return res.json({resutl: '请填写patientId'})
+    return res.json({result: '请填写patientId'})
   }
 
   if (req.body.insuranceId === null || req.body.insuranceId === '' || req.body.insuranceId === undefined) {
-    return res.json({resutl: '请填写insuranceId'})
+    return res.json({result: '请填写insuranceId'})
   }
 
  // 为调用insertMessage方法传入参数，患者从message中查看推送信息
@@ -99,22 +100,25 @@ exports.updateMsgCount = function (req, res, next) {
   InsuranceMsg.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
+    } else if (item === null) {
+      return res.status(404).send('update_target_not_found')
+    } else if (item.insuranceMsg.constructor === Array) {
+      var upObj = {count: item.insuranceMsg.length}
+      InsuranceMsg.updateOne(query, upObj, function (err, upInsMsg) {
+        if (err) {
+          return res.status(422).send(err.message)
+        } else if (upInsMsg === null) {
+          return res.json({result: '修改失败'})
+        } else {
+      // return res.json({result: '修改成功', results:upInsMsg});
+          req.body.InsMsg = upInsMsg
+          next()
+        }
+      }, {new: true})
+      // res.json({results:item});
+    } else {
+      return res.status(400).send('no_insuranceMsg_available')
     }
-
-    var upObj = {count: item.insuranceMsg.length}
-    InsuranceMsg.updateOne(query, upObj, function (err, upInsMsg) {
-      if (err) {
-        return res.status(422).send(err.message)
-      } else if (upInsMsg === null) {
-        return res.json({result: '修改失败'})
-      } else {
-    // return res.json({result: '修改成功', results:upInsMsg});
-        req.body.InsMsg = upInsMsg
-        next()
-      }
-    }, {new: true})
-
-     // res.json({results:item});
   }, opts, fields, populate)
 }
 
@@ -150,6 +154,7 @@ exports.getInsMsg = function (req, res) {
 }
 
 // 设置保险购买意向
+// 添加新建policy条目 2017-08-07 YQC
 exports.setPrefer = function (req, res) {
   var preference = {
     status: req.body.status,
@@ -163,12 +168,48 @@ exports.setPrefer = function (req, res) {
   InsuranceMsg.update(query, { $set: {preference: preference} }, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
+    } else {
+      let patientObject = req.body.patientObject || null
+      if (patientObject === null) {
+        return res.json({msg: '无权限', code: 1})
+      }
+      let queryP = {
+        patientId: patientObject._id
+      }
+      Policy.getSome(queryP, function (err, items) {
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          let inProcessNo = 0
+          for (let policyItem in items) {
+            if (items[policyItem].status === 1 || items[policyItem].status === 2 || items[policyItem].status === 0) {
+              inProcessNo = inProcessNo + 1
+            }
+          }
+          if (inProcessNo !== 0) {
+            return res.json({msg: '已设置意向，请等候保险专员联系'})
+          } else {
+            var policyData = {
+              patientId: req.body.patientObject._id,
+              status: 0,
+              followUps: [{
+                time: new Date(),
+                type: 0,
+                content: '该患者设置了保险购买意向，请尽快分配保险专员进行沟通联系。'
+              }]
+            }
+            var newPolicy = new Policy(policyData)
+            newPolicy.save(function (err, PInfo) {
+              if (err) {
+                return res.status(500).send(err)
+              } else {
+                return res.json({msg: '设置意向成功，请等候保险专员联系'})
+              }
+            })
+          }
+        }
+      })
     }
-        // if(item === null){
-        //  return res.status(400).send('Patient do not exist!');
-        // }
-        // console.log(item);
-    res.json({results: 'success'})
   }, {upsert: true})
 }
 
