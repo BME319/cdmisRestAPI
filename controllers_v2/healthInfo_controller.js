@@ -21,7 +21,7 @@ exports.getAllHealthInfo = function (req, res) {
   }
   // var opts = {sort:-"time"};
   var opts = {'sort': {'time': -1, 'revisionInfo.operationTime': -1}}
-  var fields = {'_id': 0, 'revisionInfo': 0, 'insertTime': 0, 'importStatus': 0, 'url.photoId': 0, 'url._id': 0, 'url.status': 0}
+  var fields = {'_id': 0, 'revisionInfo': 0, 'importStatus': 0, 'url.photoId': 0, 'url._id': 0, 'url.status': 0}
   // var fields = {'_id':0};
   // var populate = {'path': 'resultId'}
   HealthInfo.getSome(query, function (err, healthInfolist) {
@@ -31,6 +31,7 @@ exports.getAllHealthInfo = function (req, res) {
     let healthInfolistTmp = []
     for (let i = 0; i < healthInfolist.length; i++) {
       let time = healthInfolist[i].time
+      let insertTime = healthInfolist[i].insertTime
       let type = healthInfolist[i].type
       let label = healthInfolist[i].label
       let userId = healthInfolist[i].userId
@@ -38,9 +39,11 @@ exports.getAllHealthInfo = function (req, res) {
       let comments = healthInfolist[i].comments
       let url = []
       for (let j = 0; j < healthInfolist[i].url.length; j++) {
-        url.push(healthInfolist[i].url[j].photo)
+        if (healthInfolist[i].url[j].photo !== '') {
+          url.push(healthInfolist[i].url[j].photo)
+        }
       }
-      let healthInfoTmp = {time, type, label, userId, description, comments, url}
+      let healthInfoTmp = {time, insertTime, type, label, userId, description, comments, url}
       healthInfolistTmp.push(healthInfoTmp)
     }
     return res.json({results: healthInfolistTmp})
@@ -70,7 +73,7 @@ exports.getHealthDetail = function (req, res) {
     }
   }
   var opts = ''
-  var fields = {'_id': 0, 'revisionInfo': 0, 'insertTime': 0, 'importStatus': 0, 'url.photoId': 0, 'url._id': 0, 'url.status': 0}
+  var fields = {'_id': 0, 'revisionInfo': 0, 'importStatus': 0, 'url.photoId': 0, 'url._id': 0, 'url.status': 0}
   // var populate = {'path': 'resultId'}
 
   HealthInfo.getOne(query, function (err, item) {
@@ -78,6 +81,7 @@ exports.getHealthDetail = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     let time = item.time
+    let insertTime = item.insertTime
     let type = item.type
     let label = item.label
     let userId = item.userId
@@ -85,10 +89,12 @@ exports.getHealthDetail = function (req, res) {
     let comments = item.comments
     let url = []
     for (let i = 0; i < item.url.length; i++) {
-      url.push(item.url[i].photo)
+      if (item.url[i].photo !== '') {
+        url.push(item.url[i].photo)
+      }
     }
     console.log('item', item)
-    return res.json({results: {time, type, label, userId, description, comments, url}})
+    return res.json({results: {time, insertTime, type, label, userId, description, comments, url}})
   }, opts, fields)
 }
 

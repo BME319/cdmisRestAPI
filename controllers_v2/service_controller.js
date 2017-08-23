@@ -580,7 +580,7 @@ exports.addPatientInCharge = function (req, res, next) {
 
 // 2017-07-20 YQC
 // 获取患者的主管医生服务的状态
-exports.getDoctorsInCharge = function (req, res) {
+exports.getDoctorsInCharge = function (req, res, next) {
   let patientObjectId = req.body.patientObject._id
   let queryDIC = {patientId: patientObjectId}
   let opts = ''
@@ -595,7 +595,17 @@ exports.getDoctorsInCharge = function (req, res) {
         if (Number(itemsDIC[i].invalidFlag) === 0) {
           return res.json({message: '已申请主管医生，请等待审核!'})
         } else if (Number(itemsDIC[i].invalidFlag) === 1) {
-          return res.json({message: '当前已有主管医生!', results: itemsDIC[i]})
+          // 用于区别是否是 vitalSign插入数据后进行警戒值提醒而获取主管医生 2017-08-22 lgf
+          if (req.isOutOfRange) {
+            req.body.userId = itemsDIC[i].userId
+            req.body.sendBy = req.session.userId
+            // 定义警戒值消息类型为6
+            req.body.type = 6
+            req.body.description = req.body.patientObject.name + '患者的' + req.itemType + '项目超标,测量值为' + req.measureData + ',该项正常值为' + req.recommend
+            return next()
+          } else {
+            return res.json({message: '当前已有主管医生!', results: itemsDIC[i]})
+          }
         }
       }
     }
