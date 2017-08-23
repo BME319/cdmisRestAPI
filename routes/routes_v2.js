@@ -7906,7 +7906,7 @@ module.exports = function (app, webEntry, acl) {
    *       token:
    *         type: string
    */
-  app.get(version + '/version', tokenManager.verifyToken(), versionCtrl.getVersionInfo)
+  app.get(version + '/version', versionCtrl.getVersionInfo)
   app.post(version + '/version', tokenManager.verifyToken(), getNoMid.getNo(10), versionCtrl.insertVersionInfo)
 
   // niaodaifu
