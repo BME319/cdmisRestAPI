@@ -7844,7 +7844,7 @@ module.exports = function (app, webEntry, acl) {
   // app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
 
   // 订单支付结果回调
-  app.post(version + '/wechat/payResult', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.payResult)
+  app.post(version + '/wechat/payResult', wechatCtrl.payResult)
   // 查询订单   orderNo
   app.get(version + '/wechat/getWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.getWechatOrder)
   // 关闭订单   orderNo
