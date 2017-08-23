@@ -63,7 +63,7 @@ function messageSaveSend (data, url, sender) {
   data.msg['time'] = Date.now()
 
     // save data
-  var url = 'http://' + webEntry.domain + ':4060/api/v1/communication/communication'
+  var url = 'http://' + webEntry.domain + ':4050/api/v1/communication/communication'
   var jsondata = {
     messageType: messageType,
     sendBy: sendBy,
@@ -156,6 +156,7 @@ function messageSaveSend (data, url, sender) {
 }
 
 function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWechatServer, data) {
+  
   var test = data.msg.test
   if (messageType == 1) {       // 单聊
     var online = false
@@ -183,8 +184,8 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
   } else {           // 群聊
         // console.log(receiver);
     request({
-            // url: 'http://' + webEntry.domain + ':4060/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
-      url: 'http://' + webEntry.domain + ':4060/api/v1/communication/team?teamId=' + data.msg.teamId,
+            // url: 'http://' + webEntry.domain + ':4050/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
+      url: 'http://' + webEntry.domain + ':4050/api/v1/communication/team?teamId=' + data.msg.teamId,
       method: 'GET',
       json: true
     }, function (err, response) {
@@ -196,15 +197,15 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
         var sponsorId = response.body.results.sponsorId
         var members = response.body.results.members
         members.push({'userId': sponsorId})
-        console.log(members)
-        console.log(members.length)
+           console.log(members);
+                console.log(members.length);
 
         for (var idx in members) {
-         // var online = false
-          console.log(members[idx])
+          var online = false
+                    console.log(members[idx]);
 
           if (userAppServer.hasOwnProperty(members[idx].userId)) {         // 用户在线
-            // online = true
+            online = true
             console.log(idx)
                         // console.log(member.userId);
             if (members[idx].userId != sendBy) {
@@ -214,7 +215,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
           }
                     // console.log(member);
           if (userWechatServer.hasOwnProperty(members[idx].userId)) {         // 用户在线
-            // online = true
+            online = true
             console.log(idx)
                         // console.log(member.userId);
             if (members[idx].userId != sendBy) {
@@ -222,70 +223,70 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
               userWechatServer[members[idx].userId].emit('getMsg', {msg: data.msg})
             }
           }
-         // if (!online) {       // 用户不在线
+          if (!online) {       // 用户不在线
           // else {       // 用户不在线
                         // custom card 群发
             // if (data.msg.contentType === 'custom' && data.msg.content.type === 'card' || (data.msg.contentType === 'text' || data.msg.contentType === 'image' || data.msg.contentType === 'voice')) {
-          if (data.msg.contentType === 'custom' && data.msg.content.type === 'card') {
-                            // console.log(idx + ' 用户不在线');
-            var actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_' + data.msg.content.consultationId + '_' + data.msg.teamId + '&#wechat_redirect'
-            var help
-            var time
-            if (data.msg.content !== null) {
-              var counsel = data.msg.content.counsel || null
-              if (counsel !== null) {
-                help = counsel.help
-                time = counsel.time || new Date()
+            if (data.msg.contentType === 'custom' && data.msg.content.type === 'card') {
+                            console.log(idx + ' 用户不在线');
+              var actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_' + data.msg.content.consultationId + '_' + data.msg.teamId + '&#wechat_redirect'
+              var help
+              var time
+              if(data.msg.content !== null){
+                var counsel = data.msg.content.counsel || null
+                if(counsel !== null){
+                  help = counsel.help
+                  time = counsel.time || new Date()
+                }
               }
-            }
-            var template = {
-              'userId': members[idx].userId,          // data.msg.content.doctorId, //医生的UID
-              'role': 'doctor',
-              'postdata': {
-                'template_id': 'cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k',
-                'url': actionUrl,
-                'data': {
-                  'first': {
-                    'value': '您的团队有一个新的咨询（问诊）消息，请及时处理',
-                    'color': '#173177'
-                  },
-                  'keyword1': {
-                    'value': data.msg.content.counselId, // 咨询ID
-                    'color': '#173177'
-                  },
-                  'keyword2': {
-                    'value': data.msg.content.patientName, // 患者信息（姓名，性别，年龄）
-                    'color': '#173177'
-                  },
-                  'keyword3': {
-                    'value': help, // 问题描述
-                    'color': '#173177'
-                  },
-                  'keyword4': {
-                    'value': commonFunc.getNowFormatSecondMinus(new Date(time)), // 提交时间
-                    'color': '#173177'
-                  },
+              var template = {
+                'userId': members[idx].userId,          // data.msg.content.doctorId, //医生的UID
+                'role': 'doctor',
+                'postdata': {
+                  'template_id': 'U1KajBosUqmQSl0MLA3p-BN_v9VnTf5-hty-3UD9N08',
+                  'url': actionUrl,
+                  'data': {
+                    'first': {
+                      'value': '您的团队有一个新的咨询（问诊）消息，请及时处理',
+                      'color': '#173177'
+                    },
+                    'keyword1': {
+                      'value': data.msg.content.counselId, // 咨询ID
+                      'color': '#173177'
+                    },
+                    'keyword2': {
+                      'value': data.msg.content.patientName, // 患者信息（姓名，性别，年龄）
+                      'color': '#173177'
+                    },
+                    'keyword3': {
+                      'value': help, // 问题描述
+                      'color': '#173177'
+                    },
+                    'keyword4': {
+                      'value': commonFunc.getNowFormatSecondMinus(new Date(time)), // 提交时间
+                      'color': '#173177'
+                    },
 
-                  'remark': {
-                    'value': '感谢您的使用！',
-                    'color': '#173177'
+                    'remark': {
+                      'value': '感谢您的使用！',
+                      'color': '#173177'
+                    }
                   }
                 }
               }
-            }
-            console.log(idx)
+              console.log(idx)
 
                             // groupSend(data);
-            request({
-                                // url: 'http://'+ webEntry.domain +':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
-              url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate',
-              method: 'POST',
-              body: template,
-              json: true
+              request({
+                                // url: 'http://'+ webEntry.domain +':4050/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                url: 'http://' + webEntry.domain + ':4050/api/v1/wechat/messageTemplate',
+                method: 'POST',
+                body: template,
+                json: true
 
-            }, function (err, response, body) {
+              }, function (err, response, body) {
                                 // console.log(idx + 'done')
-              console.log(body)
+                                console.log(body)
 
                                 // if (!err && response.statusCode == 200) {
                                 //     res.json({results:body});
@@ -293,11 +294,11 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
                                 // else{
                                 //     return res.status(500).send('Error');
                                 // }
-            })
-          }
+              })
+            }
 
                         // others: no process
-          // }
+          }
         }
       }
     })
@@ -371,7 +372,7 @@ exports.chat = function (io, socket) {
         // console.log('newUser: ' +data.user_id);
         // console.log(Object.keys(userServer));
   })
-
+  
   socket.on('disconnect', function (data) { // 用户注销登陆执行内容
         // console.log('disconnect');
 
@@ -418,7 +419,7 @@ exports.chat = function (io, socket) {
     var test = data.msg.test
         // var toUserId = data.to;
 
-    var url = 'http://' + webEntry.domain + ':4060/api/v1/wechat/download'
+    var url = 'http://' + webEntry.domain + ':4050/api/v1/wechat/download'
 
     // receive from sender
     if (test == 'test') {

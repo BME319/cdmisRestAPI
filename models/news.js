@@ -2,24 +2,26 @@
 var mongoose = require('mongoose')
 
 var newsSchema = new mongoose.Schema({
-  messageId: String,
-  userId: String,
-  userRole: String,
-  sendBy: String,
-  readOrNot: Number,
-  // sendReadOrNot: Number,
-  type: Number,
-  caseType: Number,
-  time: Date,
-  title: String,
-  description: String,
-  url: String
-})
+	messageId:String,
+	userId:String,
+	userRole:String,
+	sendBy:String,
+	readOrNot: Number,
+	// sendReadOrNot: Number,
+	type:Number,
+	caseType: Number,
+	time:Date,
+	title:String,
+	description:String,
+	url:String
+});
 
-newsModel = mongoose.model('news', newsSchema)
 
-function News (news) {
-  this.news = news
+newsModel = mongoose.model('news', newsSchema);
+
+function News(news) {
+	this.news = news;
+
 }
 
 News.prototype.save = function (callback) {

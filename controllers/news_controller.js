@@ -94,46 +94,47 @@ function insertOneNews (userId, sendBy, req, res) {
   var newData = {
 		// userId: req.body.userId,
 		// sendBy: req.body.sendBy,
-    userId: userId,
-    sendBy: sendBy,
-    readOrNot: req.body.readOrNot
-  }
-  var query1 = {
-    userId: userId,
-    sendBy: sendBy
-  }
-  var query2 = {
-    sendBy: userId,
-    userId: sendBy
-  }
-  if (req.body.type !== null && req.body.type !== undefined) {
-    newData['type'] = req.body.type
-    if (Number(req.body.type) === 15) {
-      newData['caseType'] = req.body.caseType
-    }
-    query1['type'] = req.body.type
-    query2['type'] = req.body.type
-  }
-  if (req.body.userRole !== null && req.body.userRole !== undefined) {
-    newData['userRole'] = req.body.userRole
-  }
-  if (req.body.messageId !== null && req.body.messageId !== undefined) {
-    newData['messageId'] = req.body.messageId
-  }
-  if (req.body.time !== null && req.body.time !== '' && req.body.time !== undefined) {
-    newData['time'] = new Date(req.body.time)
-  } else {
-    newData['time'] = new Date()
-  }
-  if (req.body.title !== null && req.body.title !== undefined) {
-    newData['title'] = req.body.title
-  }
-  if (req.body.description !== null && req.body.description !== undefined) {
-    newData['description'] = req.body.description
-  }
-  if (req.body.url !== null && req.body.url !== undefined) {
-    newData['url'] = req.body.url
-  }
+		userId: userId,
+		sendBy: sendBy,
+		readOrNot: req.body.readOrNot
+	};
+	var query1 = {
+		userId:userId,
+		sendBy:sendBy
+	};
+	var query2 = {
+		sendBy:userId,
+		userId:sendBy
+	};
+	if (req.body.type !== null && req.body.type !== undefined){
+		newData['type'] = req.body.type;
+		if (Number(req.body.type) === 15) {
+           newData['caseType'] = req.body.caseType
+        }
+		query1['type'] = req.body.type;
+		query2['type'] = req.body.type;
+	}
+	if (req.body.userRole !== null && req.body.userRole !== undefined){
+		newData['userRole'] = req.body.userRole;
+	}
+	if (req.body.messageId !== null && req.body.messageId !== undefined){
+		newData['messageId'] = req.body.messageId;
+	}
+	if (req.body.time !== null && req.body.time !== ''&& req.body.time !== undefined){
+		newData['time'] = new Date(req.body.time);
+	}
+	else {
+		newData['time'] = new Date();
+	}
+	if (req.body.title !== null && req.body.title !== undefined){
+		newData['title'] = req.body.title;
+	}
+	if (req.body.description !== null && req.body.description !== undefined){
+		newData['description'] = req.body.description;
+	}
+	if (req.body.url !== null && req.body.url !== undefined){
+		newData['url'] = req.body.url;
+	}
 
 	// return res.json({messageData:messageData})
 
@@ -293,6 +294,7 @@ exports.insertTeamNews = function (req, res) {
     if (err) {
       console.log(err)
             // return res.status(500).send('服务器错误, 用户查询失败!');
+
       return 500
     }
     if (team1 == null) {
@@ -301,6 +303,7 @@ exports.insertTeamNews = function (req, res) {
         TeamId = req.body.caseType
       }
       var query = {
+
 			    teamId: TeamId
       }
 			// req.body.status = _status;

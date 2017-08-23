@@ -570,23 +570,24 @@ exports.checkBinding = function (req, res, next) {
             }
                         // console.log("*************************** login : jsondata ********************************");
                         // console.log(jsondata);
-            request({
-              url: 'http://' + webEntry.domain + ':4050/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
-              method: 'POST',
-              body: jsondata,
-              json: true
-            }, function (err, response, body) {
-              if (err) {
-                return res.status(500).send(err.errmsg)
-              }
-                            // 绑定成功后 删除OpenIdTmp表中的数据
-                            // console.log({query1:query});
-              OpenIdTmp.remove(query, function (err) {
-                if (err) {
-                  return res.status(500).send(err.errmsg)
-                }
 
-                                // 2017-06-07GY调试
+                        request({
+                          url: 'http://' + webEntry.domain + ':4060/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
+                          method: 'POST',
+                          body: jsondata,
+                          json: true
+                        }, function (err, response, body) {
+                            if (err) {
+                                return res.status(500).send(err.errmsg);
+                            }
+                            // 绑定成功后 删除OpenIdTmp表中的数据  
+                            // console.log({query1:query});                          
+                            OpenIdTmp.remove(query,function(err){
+                                if (err) {
+                                    return res.status(500).send(err.errmsg);
+                                }
+
+                                //2017-06-07GY调试
                                 // console.log('checkBinding_out1');
 
                 next()
