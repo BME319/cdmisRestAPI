@@ -507,7 +507,7 @@ exports.payResult = function (req, res) {
       } else {
             // res.json({results: item});
         var upObj
-        if (payRes.result_code === 'SUCCESS') {
+        if (payRes.result_code[0] === 'SUCCESS') {
           if (item.paystatus !== 2) {    // 非成功
             upObj = {
               paystatus: 2,
