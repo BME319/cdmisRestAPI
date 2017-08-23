@@ -549,9 +549,13 @@ exports.editPatientDetail = function (req, res) {
   }
   if (req.body.height !== null && req.body.height !== '' && req.body.height !== undefined) {
     upObj['height'] = req.body.height
+  } else {
+    upObj['height'] = undefined
   }
   if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
     upObj['weight'] = req.body.weight
+  } else {
+    upObj['weight'] = undefined
   }
   if (req.body.occupation !== null && req.body.occupation !== '' && req.body.occupation !== undefined) {
     upObj['occupation'] = req.body.occupation
@@ -576,6 +580,8 @@ exports.editPatientDetail = function (req, res) {
   }
   if (req.body.operationTime !== null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
     upObj['operationTime'] = new Date(req.body.operationTime)
+  } else {
+    upObj['operationTime'] = undefined
   }
   if (req.body.hypertension !== null && req.body.hypertension !== '' && req.body.hypertension !== undefined) {
     upObj['hypertension'] = req.body.hypertension
@@ -586,13 +592,23 @@ exports.editPatientDetail = function (req, res) {
   if (req.body.lastVisit !== null && req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
     if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
       upObj['lastVisit.time'] = new Date(req.body.lastVisit.time)
+    } else {
+      upObj['lastVisit.time'] = undefined
     }
     if (req.body.lastVisit.hospital !== null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
       upObj['lastVisit.hospital'] = req.body.lastVisit.hospital
+    } else {
+      upObj['lastVisit.hospital'] = undefined
     }
     if (req.body.lastVisit.diagnosis !== null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
       upObj['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
+    } else {
+      upObj['lastVisit.diagnosis'] = undefined
     }
+  } else {
+    upObj['lastVisit.time'] = undefined
+    upObj['lastVisit.hospital'] = undefined
+    upObj['lastVisit.diagnosis'] = undefined
   }
 
   // return res.json({query: query, upObj: upObj});

@@ -145,17 +145,19 @@ exports.getPatients = function (req, res) {
   }, opts, fields, populate)
 }
 
-// 保险专员／主管获取患者 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-17 YQC
+// 保险专员／主管获取患者跟踪记录详情 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-17 YQC
 exports.getHistory = function (req, res) {
   let patientId = req.body.patientObject._id
   let query = {patientId: patientId, status: {$ne: 5}}
   let opts = ''
   let skip = req.query.skip || null
   let limit = req.query.limit || null
+  let flag = 0
   if (limit !== null && skip !== null) {
-    opts = {limit: Number(limit), skip: Number(skip), sort: '_id'}
+    limit = Number(limit)
+    skip = Number(skip)
   } else if (limit === null && skip === null) {
-    opts = {sort: '_id'}
+    flag = 1
   } else {
     return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
   }
@@ -167,8 +169,10 @@ exports.getHistory = function (req, res) {
       return res.status(500).send(err)
     } else if (req.session.role === 'insuranceA' && String(item.currentAgent) !== String(req.body.insuranceAObject._id)) {
       res.json({msg: '非负责该用户的保险专员', code: 1})
+    } else if (flag === 1) {
+      res.json({data: item.followUps.length, code: 0})
     } else {
-      res.json({data: item.followUps, code: 0})
+      res.json({data: item.followUps.reverse().slice(skip, skip + limit), code: 0})
     }
   }, opts, fields, populate)
 }
@@ -444,6 +448,25 @@ exports.insertPolicy = function (req, res) {
       })
     }
   })
+}
+
+// 保险专员／主管获取患者保单详情 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-23 YQC
+exports.getPolicy = function (req, res) {
+  let patientId = req.body.patientObject._id
+  let query = {patientId: patientId, status: {$ne: 5}}
+  let opts = ''
+
+  let fields = {_id: 0, patientId: 1, content: 1, photos: 1, status: 1}
+
+  Policy.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    } else if (req.session.role === 'insuranceA' && String(item.currentAgent) !== String(req.body.insuranceAObject._id)) {
+      res.json({msg: '非负责该用户的保险专员', code: 1})
+    } else {
+      res.json({data: item, code: 0})
+    }
+  }, opts, fields)
 }
 
 // 审核保单 2017-08-08 YQC

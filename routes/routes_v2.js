@@ -5692,6 +5692,51 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/policy/policy', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertPolicy)
+  // 获取患者保单详情 权限insuranceC/insuranceA
+  /** YQC annotation 2017-08-23
+   * @swagger
+   * /policy/policy:
+   *   get:
+   *     tags:
+   *     - "policy"
+   *     summary: "获取患者保单详情"
+   *     description: ""
+   *     operationId: "policy"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "patientId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: object
+   *               properties:
+   *                 patientId:
+   *                   type: string
+   *                 content:
+   *                   type: "string"
+   *                 status:
+   *                   type: "number"
+   *                 photos:
+   *                   type: "array"
+   *                   items:
+   *                     type: string
+   *             code:
+   *               type: number
+   */
+  app.get(version + '/policy/policy', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.getPolicy)
   // 主管审核患者保单 权限insuranceC
   /** YQC annotation 2017-08-10
    * @swagger
