@@ -64,19 +64,19 @@ exports.getNo = function (setType) {
             _KeyDate = _targetDate
           }
           var query1 = {type: _numberingType, date: _KeyDate}
-          console.log(query1)
+          // console.log(query1)
           Numbering.updateOne(query1, {$inc: {number:1}}, function (err, item1) {
             if (err) {
               return res.status(500).send(err.errmsg)
             }
             _TrnNumberingData = item1
-            console.log(_TrnNumberingData)
+            // console.log(_TrnNumberingData)
             if (_TrnNumberingData == null) {
               _TrnNumberingNo = 0
             } else {
               _TrnNumberingNo = _TrnNumberingData.number
             }
-            console.log(_TrnNumberingNo)
+            // console.log(_TrnNumberingNo)
             _TrnNumberingNo = _TrnNumberingNo + 1
             var _Seq = _TrnNumberingNo
             if (_AlphamericFlag === 1) {
@@ -86,7 +86,7 @@ exports.getNo = function (setType) {
               _TrnNumberingNo = 1
               _Seq = 1
             }
-            console.log(_Seq)
+            // console.log(_Seq)
             if (_Seq.toString().length < _SeqLength) {
               var n = _SeqLength - _Seq.toString().length
               while (n) {
