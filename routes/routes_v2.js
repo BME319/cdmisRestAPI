@@ -2387,7 +2387,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   // 修改 增加每次体征表更新体重数据 往alluser表里更新weight数据 以及 对添加的体征数据进行警戒值判断 2017-08-22 lgf
-  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData, patientCtrl.editPatientDetail, vitalSignCtrl.outOfRange, serviceCtrl.getDoctorsInCharge, getNoMid.getNo(6), messageCtrl.insertMessage)
+  app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData, patientCtrl.editPatientDetail, vitalSignCtrl.outOfRange, doctorsInChargeCtrl.getDoctorsInCharge, getNoMid.getNo(6), messageCtrl.insertMessage)
   // app.post(version + '/vitalSign/vitalSign', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), vitalSignCtrl.getSessionObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData, patientCtrl.editPatientDetail)
   // counsel 2017-07-17
   // 医生获取问诊信息
