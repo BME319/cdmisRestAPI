@@ -272,6 +272,8 @@ exports.outOfRange = function (req, res, next) {
           req.isOutOfRange = 1
           req.measureData = req.body.datavalue
           req.recommend = 500
+          // console.log('req.measureData', req.measureData)
+          // console.log('req.recommend', req.recommend)
           return next()
         } else {
           return res.json({result: '新建或修改成功', results: req.result})
@@ -315,8 +317,6 @@ exports.outOfRange = function (req, res, next) {
           req.isOutOfRange = 1
           req.measureData = req.body.datavalue
           req.recommend = String(recommendValue1) + '-' + String(recommendValue2)
-          // console.log('req.measureData', req.measureData)
-          // console.log('req.recommend', req.recommend)
           return next()
         } else {
           return res.json({result: '新建或修改成功', results: req.result})

@@ -284,7 +284,29 @@ exports.addPatientInCharge = function (req, res, next) {
 
 // 2017-07-20 YQC
 // 获取患者的主管医生服务的状态
-exports.getDoctorsInCharge = function (req, res) {
+// exports.getDoctorsInCharge = function (req, res) {
+//   let patientObjectId = req.body.patientObject._id
+//   let queryDIC = {patientId: patientObjectId}
+//   let opts = ''
+//   let fields = {'_id': 0}
+//   let populate = {path: 'doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
+
+//   DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
+//     if (err) {
+//       return res.status(500).send(err)
+//     } else if (itemsDIC.length !== 0) {
+//       for (let i = 0; i < itemsDIC.length; i++) {
+//         if (Number(itemsDIC[i].invalidFlag) === 0) {
+//           return res.json({message: '已申请主管医生，请等待审核!'})
+//         } else if (Number(itemsDIC[i].invalidFlag) === 1) {
+//           return res.json({message: '当前已有主管医生!', results: itemsDIC[i]})
+//         }
+//       }
+//     }
+//     res.json({message: '当前无主管医生且无申请!'})
+//   }, opts, fields, populate)
+// }
+exports.getDoctorsInCharge = function (req, res, next) {
   let patientObjectId = req.body.patientObject._id
   let queryDIC = {patientId: patientObjectId}
   let opts = ''
@@ -299,7 +321,20 @@ exports.getDoctorsInCharge = function (req, res) {
         if (Number(itemsDIC[i].invalidFlag) === 0) {
           return res.json({message: '已申请主管医生，请等待审核!'})
         } else if (Number(itemsDIC[i].invalidFlag) === 1) {
-          return res.json({message: '当前已有主管医生!', results: itemsDIC[i]})
+          // 用于区别是否是 vitalSign插入数据后进行警戒值提醒而获取主管医生 2017-08-22 lgf
+          if (req.isOutOfRange) {
+            req.body.userId = itemsDIC[i].doctorId.userId
+            req.body.sendBy = req.session.userId
+            // console.log('req.body.userId', req.body.userId)
+            // 定义警戒值消息类型为2
+            req.body.type = 2
+            req.body.title = '警戒值提醒'
+            req.body.description = req.body.patientObject.name + '患者的' + req.itemType + '项目超标,测量值为' + req.measureData + ',该项正常值为' + req.recommend
+            // console.log('req.body.description', req.body.description)
+            return next()
+          } else {
+            return res.json({message: '当前已有主管医生!', results: itemsDIC[i]})
+          }
         }
       }
     }
