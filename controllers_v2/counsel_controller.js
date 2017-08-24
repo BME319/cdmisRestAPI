@@ -525,7 +525,7 @@ exports.getStatus = function (req, res, next) {
   let statusInBody = req.body.status || null
   let changeType = req.body.changeType || null
   let type = req.query.type || req.body.type || null
-  if (changeType === null) {
+  if (changeType !== null) {
     if (status === null) {
       return res.json({result: '请填写status!'})
     } else {

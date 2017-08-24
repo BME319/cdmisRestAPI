@@ -1,18 +1,20 @@
-var	config = require('../config')
+// var config = require('../config')
 var webEntry = require('../settings').webEntry
 var Alluser = require('../models/alluser')
 var HealthInfo = require('../models/healthInfo')
 var LabtestImport = require('../models/labtestImport')
-var commonFunc = require('../middlewares/commonFunc')
+// var commonFunc = require('../middlewares/commonFunc')
 
 // 根据录入状态获取患者信息列表, 2017-07-05 GY
 exports.listByStatus = function (req, res) {
+  let labtestImportStatus
+  let fields = {}
   if (req.query.labtestImportStatus === null || req.query.labtestImportStatus === '' || req.query.labtestImportStatus === undefined) {
     return res.status(412).json({results: '请填写labtestImportStatus'})
   } else if (Number(req.query.labtestImportStatus) === 1) {
-    var labtestImportStatus = 1
+    labtestImportStatus = 1
     // 已录入的返回字段
-    var fields = {
+    fields = {
       'userId': 1,
       'name': 1,
       'latestImportUserId': 1,
@@ -22,24 +24,27 @@ exports.listByStatus = function (req, res) {
       'role': 1
     }
   } else if (Number(req.query.labtestImportStatus) === 0) {
-    var labtestImportStatus = 0
+    labtestImportStatus = 0
     // 未录入的返回字段
-    var fields = {
+    fields = {
       'userId': 1, 'name': 1, 'picUploadTime': 1, 'labtestImportStatus': 1, 'role': 1
     }
   } else {
     return res.status(412).json({results: '非法输入'})
   }
 
+  let limit
+  let skip
+
   if (req.query.limit === undefined) {
-    var limit = 0
+    limit = 0
   } else {
-    var limit = Number(req.query.limit)
+    limit = Number(req.query.limit)
   }
   if (req.query.skip === undefined) {
-    var skip = 0
+    skip = 0
   } else {
-    var skip = Number(req.query.skip)
+    skip = Number(req.query.skip)
   }
 
   var opts = {limit: limit, skip: skip}
@@ -72,20 +77,20 @@ exports.listByStatus = function (req, res) {
     limitUrl = 'limit=' + String(limit)
     skipUrl = 'skip=' + String(skip + limit)
   }
-  if (labtestImportStatusUrl != '' || limitUrl != '' || skipUrl != '') {
+  if (labtestImportStatusUrl !== '' || limitUrl !== '' || skipUrl !== '') {
     _Url = _Url + '?'
-    if (labtestImportStatusUrl != '') {
+    if (labtestImportStatusUrl !== '') {
       _Url = _Url + labtestImportStatusUrl + '&'
     }
-    if (limitUrl != '') {
+    if (limitUrl !== '') {
       _Url = _Url + limitUrl + '&'
     }
-    if (skipUrl != '') {
+    if (skipUrl !== '') {
       _Url = _Url + skipUrl + '&'
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/review/reviewInfo' + _Url
+  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/review/reviewInfo' + _Url
 
   Alluser.getSome(query, function (err, patients) {
     if (err) {
@@ -423,7 +428,7 @@ exports.updateUserLatest = function (req, res) {
       return res.status(500).send(err)
     } else if (items.length === 0) {
       var querylabtest = {userId: req.healthinfo.userId}
-      var opts = {sort: '-_id'}
+      var opts1 = {sort: '-_id'}
       LabtestImport.getOne(querylabtest, function (err, labtestItem) {
         if (err) {
           return res.status(500).send(err)
@@ -438,7 +443,7 @@ exports.updateUserLatest = function (req, res) {
             latestUploadTime: req.healthinfo.insertTime
           }
           // console.log(upObj)
-          var opts = {new: true, runValidators: true}
+          var opts2 = {new: true, runValidators: true}
           Alluser.updateOne(queryuser, upObj, function (err, upres) {
             if (err) {
               return res.status(500).send(err)
@@ -447,9 +452,9 @@ exports.updateUserLatest = function (req, res) {
             } else {
               return res.json({results: '图片录入状态修改成功'})
             }
-          }, opts)
+          }, opts2)
         }
-      })
+      }, opts1)
     } else {
       return res.json({results: '图片录入状态修改成功'})
     }

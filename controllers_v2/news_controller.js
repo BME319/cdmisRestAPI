@@ -51,8 +51,8 @@ exports.getNewsByReadOrNot = function (req, res) {
   var userRole = req.session.role
   // console.log(userRole)
   // var userRole = req.session.role
-  var type = req.query.type
-  var _readOrNot = req.query.readOrNot
+  var type = Number(req.query.type)
+  var _readOrNot = Number(req.query.readOrNot)
 
   var query = {}
 
@@ -70,7 +70,7 @@ exports.getNewsByReadOrNot = function (req, res) {
   query['readOrNot'] = _readOrNot
     // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
   var opts = {'sort': '-time'}
-
+  console.log(query)
   News.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -112,6 +112,9 @@ function insertOneNews (userId, sendBy, req, res) {
   }
   if (req.body.type !== null && req.body.type !== undefined) {
     newData['type'] = req.body.type
+    if (Number(req.body.type) === 15) {
+      newData['caseType'] = req.body.caseType
+    }
     query1['type'] = req.body.type
     query2['type'] = req.body.type
   }
@@ -311,6 +314,9 @@ exports.insertTeamNews = function (req, res) {
     }
     if (team1 === null) {
       var TeamId = req.body.type  // type是区别于大专家团队的 小团队标签，也记录在 teams 的 teamId 中
+      if (Number(TeamId) === 15) {
+        TeamId = Number(req.body.caseType)
+      }
       var query = {
         teamId: TeamId
       }

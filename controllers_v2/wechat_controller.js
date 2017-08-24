@@ -373,7 +373,7 @@ exports.addOrder = function (req, res, next) {
     spbill_create_ip: commonFunc.getClientIp(req),   // 终端IP
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
-    notify_url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/payResult',   // 通知地址
+    notify_url: 'http://' + webEntry.domain + ':4060/api/v2/wechat/payResult',   // 通知地址
     trade_type: req.body.trade_type    // 交易类型
     // openid: req.body.openid    // 用户标识
   }
@@ -397,7 +397,7 @@ exports.addOrder = function (req, res, next) {
     body: xmlString
   }, function (err, response, body) {
     var prepayId = ''
-    // console.log(body);
+    console.log(body)
 
     if (!err && response.statusCode === 200) {
       var parser = new xml2js.Parser()
@@ -507,7 +507,7 @@ exports.payResult = function (req, res) {
       } else {
             // res.json({results: item});
         var upObj
-        if (payRes.result_code === 'SUCCESS') {
+        if (payRes.result_code[0] === 'SUCCESS') {
           if (item.paystatus !== 2) {    // 非成功
             upObj = {
               paystatus: 2,

@@ -3,16 +3,16 @@ var mongoose = require('mongoose')
 
 var forumSchema = new mongoose.Schema({
   postId: String,
-  type: Number,
-  board: Number,
-  status: Number,
+  // type: Number,
+  // board: Number,
+  // status: Number,
   sponsorId: {
     type: String,
     ref: 'alluser'
   },
   sponsorName: String,
   title: String,
-  subject: String,
+  // subject: String,
   time: Date,
   content: [],
   skimNum: Number,
@@ -25,7 +25,7 @@ var forumSchema = new mongoose.Schema({
       userId: String,
       userName: String,
       time: Date,
-      depth: Number,
+      depth: {type: Number, enum: [1, 2]}, // 回复层级
       content: String,
       replies: [
         {
