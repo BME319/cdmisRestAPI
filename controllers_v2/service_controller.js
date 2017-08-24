@@ -599,8 +599,8 @@ exports.getDoctorsInCharge = function (req, res, next) {
           if (req.isOutOfRange) {
             req.body.userId = itemsDIC[i].userId
             req.body.sendBy = req.session.userId
-            // 定义警戒值消息类型为6
-            req.body.type = 6
+            // 定义警戒值消息类型为2
+            req.body.type = 2
             req.body.description = req.body.patientObject.name + '患者的' + req.itemType + '项目超标,测量值为' + req.measureData + ',该项正常值为' + req.recommend
             return next()
           } else {

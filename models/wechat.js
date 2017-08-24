@@ -59,8 +59,7 @@ Wechat.baseTokenManager = function (type) {
   // console.log(type || 'access_token');
   return function (req, res, next) {
     // console.log(req.headers);
-    // var query = {type: type || 'access_token', role: req.query.role || req.body.role}
-    var query = {type: type || 'access_token', role: req.session.role}
+    var query = {type: type || 'access_token', role: req.query.role || req.body.role}
     var appid = req.wxApiUserObject.appid
     var secret = req.wxApiUserObject.appsecret
 
