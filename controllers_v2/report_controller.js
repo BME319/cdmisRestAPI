@@ -327,9 +327,9 @@ exports.updateReport = function (req, res) {
       index.push(i)
       if (index.length === data.length) {  // data内的数据全部更新完再输出结果
         if (upmessage === null) {
-          return res.json({msg: '未修改！请检查项目填写是否正确！', data: {}, code: 0})
+          return res.json({msg: '未修改！请检查项目填写是否正确！', data: {}, code: 1})
         } else {
-          return res.json({msg: '修改成功！', data: {}, code: 1})
+          return res.json({msg: '修改成功！', data: {}, code: 0})
         }
         // if (upmessage.n !== 0 && upmessage.nModified === 0) {
         //   if (res !== undefined) {

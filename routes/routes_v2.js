@@ -26,8 +26,8 @@ var labtestImportCtrl = require('../controllers_v2/labtestImport_controller')
 var serviceCtrl = require('../controllers_v2/service_controller')
 var orderCtrl = require('../controllers_v2/order_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
-var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
-var expenseCtrl = require('../controllers_v2/expense_controller')
+// var counseltempCtrl = require('../controllers_v2/counseltemp_controller')
+// var expenseCtrl = require('../controllers_v2/expense_controller')
 var dictTypeOneCtrl = require('../controllers_v2/dictTypeOne_controller')
 var dictTypeTwoCtrl = require('../controllers_v2/dictTypeTwo_controller')
 var dictDistrictCtrl = require('../controllers_v2/dictDistrict_controller')
@@ -89,28 +89,1435 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl))
 
   // wf
-  app.get(version + '/alluser/count', tokenManager.verifyToken(), alluserCtrl.countAlluserList)
-  app.get(version + '/alluser/userList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(0))
-  app.get(version + '/alluser/doctorList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(1))
-  app.get(version + '/alluser/patientList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(2))
-  app.get(version + '/alluser/nurseList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(3))
-  app.get(version + '/alluser/insuranceList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(4))
-  app.get(version + '/alluser/healthList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(5))
-  app.get(version + '/alluser/adminList', tokenManager.verifyToken(), alluserCtrl.getAlluserList(6))
-  app.post(version + '/alluser/alluser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList)
+  /**
+   * @swagger
+   * definition:
+   *   User:
+   *     type: object
+   *     properties:
+   *       role:
+   *         type: string
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *   Doctor1:
+   *     type: object
+   *     properties:
+   *       role:
+   *         type: string
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       workUnit:
+   *         type: string
+   *       department:
+   *         type: string
+   *       title:
+   *         type: string
+   *       count1:
+   *         type: number
+   *       count2:
+   *         type: number
+   *       score:
+   *         type: number
+   *       description:
+   *         type: string
+   *       major:
+   *         type: string
+   *   Patient1:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       VIP:
+   *         type: number
+   *       IDNo:
+   *         type: string
+   *       class:
+   *         type: string
+   *       hypertension:
+   *         type: number
+   *       bloodType:
+   *         type: string
+   *       height:
+   *         type: string
+   *       weight:
+   *         type: number
+   *       class_info:
+   *             type: string
+   *       birthday:
+   *         type: string
+   *         format: date-time
+   *       allergic:
+   *         type: string
+   *   Nurse:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       workUnit:
+   *         type: string
+   *       department:
+   *         type: string
+   *       workAmounts:
+   *         type: number
+   *   Insurance:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       boardingTime:
+   *         type: string
+   *         format: date-time
+   *       workAmounts:
+   *         type: number
+   *       role:
+   *         type: string
+   *   Health:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       boardingTime:
+   *         type: string
+   *         format: date-time
+   *       workAmounts:
+   *         type: number
+   *   Admin:
+   *     type: object
+   *     properties:
+   *       userId:
+   *         type: string
+   *       name:
+   *         type: string
+   *       gender:
+   *         type: number
+   *       phoneNo:
+   *         type: string
+   *       creationTime:
+   *         type: string
+   *         format: date-time
+   *       workUnit:
+   *         type: number
+   */
+  /**
+   * @swagger
+   * /alluser/count:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型统计用户数量"
+   *     operationId: countAlluserList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role1"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "role2"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "string"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: "number"
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型统计用户数量 权限 admin
+  app.get(version + '/alluser/count', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.countAlluserList)
+  /**
+   * @swagger
+   * /alluser/userList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取用户列表"
+   *     operationId: getUserList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/User'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取用户列表 权限 admin
+  app.get(version + '/alluser/userList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(0))
+  /**
+   * @swagger
+   * /alluser/doctorList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取医生列表"
+   *     operationId: getDoctorList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Doctor'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取医生列表 权限 admin
+  app.get(version + '/alluser/doctorList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(1))
+  /**
+   * @swagger
+   * /alluser/patientList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取患者列表"
+   *     operationId: getPatientList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Patient1'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取患者列表 权限 admin
+  app.get(version + '/alluser/patientList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(2))
+  /**
+   * @swagger
+   * /alluser/nurseList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取护士列表"
+   *     operationId: getNurseList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Nurse'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取护士列表 权限 admin
+  app.get(version + '/alluser/nurseList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(3))
+  /**
+   * @swagger
+   * /alluser/insuranceList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取保险专员列表"
+   *     operationId: getInsuranceList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Insurance'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取保险专员列表 权限 admin
+  app.get(version + '/alluser/insuranceList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(4))
+  /**
+   * @swagger
+   * /alluser/healthList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取健康专员列表"
+   *     operationId: getHealthList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Health'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取健康专员列表 权限 admin
+  app.get(version + '/alluser/healthList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(5))
+  /**
+   * @swagger
+   * /alluser/adminList:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "根据类型获取管理员列表"
+   *     operationId: getAdminList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "授权信息"
+   *       required: true
+   *       type: "string"
+   *     - name: "limit"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "skip"
+   *       in: "query"
+   *       required: false
+   *       description: ""
+   *       type: "number"
+   *     - name: "userId"
+   *       in: "query"
+   *       required: false
+   *       description: "用户ID"
+   *       type: "string"
+   *     - name: "role"
+   *       in: "query"
+   *       required: false
+   *       description: "用户角色"
+   *       type: "string"
+   *     - name: "name"
+   *       in: "query"
+   *       required: false
+   *       description: "用户姓名"
+   *       type: "string"
+   *     - name: "phoneNo"
+   *       in: "query"
+   *       required: false
+   *       description: "用户手机号"
+   *       type: "string"
+   *     - name: "gender"
+   *       in: "query"
+   *       required: false
+   *       description: "性别"
+   *       type: "number"
+   *     - name: "class"
+   *       in: "query"
+   *       required: false
+   *       description: "疾病类型"
+   *       type: "string"
+   *     - name: "province"
+   *       in: "query"
+   *       required: false
+   *       description: "省"
+   *       type: "string"
+   *     - name: "city"
+   *       in: "query"
+   *       required: false
+   *       description: "市"
+   *       type: "string"
+   *     - name: "workUnit"
+   *       in: "query"
+   *       required: false
+   *       description: "工作单位"
+   *       type: "string"
+   *     - name: "title"
+   *       in: "query"
+   *       required: false
+   *       description: "职称"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 userList:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/definitions/Admin'
+   *       500:
+   *         description: Server internal error
+   */
+  // 根据类型获取管理员列表 权限 admin
+  app.get(version + '/alluser/adminList', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getAlluserList(6))
+  /**
+   * @swagger
+   * /alluser/alluser:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 更新用户信息
+   *     operationId: updateAlluserList
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           name:
+   *             type: "string"
+   *           gender:
+   *             type: "number"
+   *           phoneNo:
+   *             type: "string"
+   *           workUnit:
+   *             type: "string"
+   *           department:
+   *             type: "string"
+   *           workAmounts:
+   *             type: "number"
+   *           boardingTime:
+   *             type: "string"
+   *             format: date-time
+   *           creationTime:
+   *             type: "string"
+   *             format: date-time
+   *     responses:
+   *      200:
+   *         description: success
+   *      500:
+   *         description: Server internal error
+   */
+  // 更新用户信息 权限 admin
+  app.post(version + '/alluser/alluser', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkAlluser, alluserCtrl.updateAlluserList)
 
+  /**
+   * @swagger
+   * /alluser/register:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 用户注册
+   *     operationId: register
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "phoneNo"
+   *           - "password"
+   *           - "role"
+   *         properties:
+   *           phoneNo:
+   *             type: "string"
+   *           password:
+   *             type: "string"
+   *           role:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: Alluser Register Success!
+   *      400:
+   *        description: empty inputs
+   *      422:
+   *        description: Alluser Already Exist!
+   *      500:
+   *        description: Server internal error
+   */
+  // 用户注册 权限 医生/患者
   app.post(version + '/alluser/register', errorHandler.error, alluserCtrl.registerTest(acl), getNoMid.getNo(1), alluserCtrl.register(acl))
-  app.post(version + '/alluser/cancelUser', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.cancelAlluser)
-  app.post(version + '/alluser/unionid', alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
-  app.post(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
-  app.get(version + '/alluser/openId', tokenManager.verifyToken(), alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId)
+  /**
+   * @swagger
+   * /alluser/cancelUser:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: "删除用户"
+   *     operationId: cancelAlluser
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "userId"
+   *           - "invalidFlag"
+   *         properties:
+   *           userId:
+   *             type: "string"
+   *           invalidFlag:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: success!
+   *      500:
+   *        description: Server internal error
+   */
+  // 删除用户
+  app.post(version + '/alluser/cancelUser', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkAlluser, alluserCtrl.cancelAlluser)
+  /**
+   * @swagger
+   * /alluser/unionid:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 绑定微信账号
+   *     operationId: setMessageOpenId
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "phoneNo"
+   *           - "openId"
+   *         properties:
+   *           phoneNo:
+   *             type: "string"
+   *           openId:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: success!
+   *      403:
+   *        description: unionid不能为空/unionid已存在/用户不存在
+   *      422:
+   *        description: Alluser doesn't Exist!
+   *      500:
+   *        description: Server internal error
+   */
+  // 绑定微信账号 权限 医生/患者  修改：删除checkBinding操作，绑定微信后需要重新登录，调用login方法 2017-08-17 lgf
+  app.post(version + '/alluser/unionid', alluserCtrl.setOpenId, alluserCtrl.setOpenIdRes)
+  // app.post(version + '/alluser/unionid', alluserCtrl.setOpenId, alluserCtrl.checkBinding, alluserCtrl.setOpenIdRes)
+  /**
+   * @swagger
+   * /alluser/openId:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 写入用户openId
+   *     operationId: setMessageOpenId
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "userId"
+   *           - "openId"
+   *           - "type"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           userId:
+   *             type: "string"
+   *           openId:
+   *             type: "string"
+   *           type:
+   *             type: "number"
+   *     responses:
+   *      200:
+   *        description: success!
+   *      403:
+   *        description: openId不能为空
+   *      422:
+   *        description: plz input type
+   *      500:
+   *        description: Server internal error
+   */
+  // 写入用户openId 权限 医生/患者
+  app.post(version + '/alluser/openId', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
+  /**
+   * @swagger
+   * /alluser/openId:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: " 获取用户openId"
+   *     operationId: getMessageOpenId
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       required: true
+   *       description: "授权信息"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             doctorWechat:
+   *               type: string
+   *       201:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             patientWechat:
+   *               type: string
+   *       202:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             doctorApp:
+   *               type: string
+   *       203:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             patientApp:
+   *               type: string
+   *       412:
+   *         plz input type
+   *       500:
+   *         description: Server internal error
+   */
+  // 获取用户openId 权限 医生/患者
+  app.get(version + '/alluser/openId', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkAlluser, alluserCtrl.getMessageOpenId)
+  /**
+   * @swagger
+   * /alluser/reset:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 用户重置密码
+   *     operationId: reset
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "phoneNo"
+   *           - "password"
+   *         properties:
+   *           phoneNo:
+   *             type: "string"
+   *           password:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: password reset success!
+   *      422:
+   *        description: Alluser doesn't Exist!
+   *      500:
+   *        description: Server internal error
+   */
+  // 用户重置密码
   app.post(version + '/alluser/reset', alluserCtrl.reset)
-  app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest, alluserCtrl.checkBinding, alluserCtrl.login)
-  app.post(version + '/alluser/logout', tokenManager.verifyToken(), alluserCtrl.logout)
+  /**
+   * @swagger
+   * /alluser/login:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 用户登录
+   *     operationId: login
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "username"
+   *           - "password"
+   *           - "role"
+   *         properties:
+   *           username:
+   *             type: "string"
+   *           password:
+   *             type: "string"
+   *           role:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: login success
+   *      422:
+   *        description: 请输入用户名和密码
+   *      423:
+   *        description: Alluser doesn't Exist!
+   *      424:
+   *        description: Alluser password isn't correct!
+   *      425:
+   *        description: No authority!
+   *      500:
+   *        description: Server internal error
+   */
+  // 用户登录 修改：调整方法流程，先进行登录操作，获取token，再进行患者和医生/护士和患者的绑定 2017-08-17 lgf
+  app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest, alluserCtrl.login, alluserCtrl.checkBinding)
+  // app.post(version + '/alluser/login', alluserCtrl.openIdLoginTest, alluserCtrl.checkBinding, alluserCtrl.login)
+  /**
+   * @swagger
+   * /alluser/logout:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 用户登出
+   *     operationId: logout
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: logout success
+   *      422:
+   *        description: Alluser doesn't Exist
+   *      500:
+   *        description: Server internal error
+   */
+  // 用户登出 权限 医生/患者
+  app.post(version + '/alluser/logout', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.logout)
+  /**
+   * @swagger
+   * /alluser/userID:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: " 获取用户ID"
+   *     operationId: getAlluserID
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "username"
+   *       in: "query"
+   *       required: true
+   *       description: "用户ID,可以输入手机号或者unionid"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             AlluserId:
+   *               type: string
+   *             phoneNo:
+   *               type: string
+   *             roles:
+   *               type: string
+   *             openId:
+   *               type: string
+   *       412:
+   *         description: Alluser doesn't Exist
+   *       500:
+   *         description: Server internal error
+   */
+  // 获取用户ID
   app.get(version + '/alluser/userID', alluserCtrl.getAlluserID)
+  /**
+   * @swagger
+   * /alluser/sms:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 发送验证码
+   *     operationId: sendSMS
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "mobile"
+   *           - "smsType"
+   *         properties:
+   *           mobile:
+   *             type: "string"
+   *           smsType:
+   *             type: "number"
+   *           reason:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: success
+   *      201:
+   *        description: 您的邀请码已发送，请等待XXs后重新获取
+   *      412:
+   *        description: mobile and smsType input Error!
+   *      500:
+   *        description: Server internal error
+   */
+  // 发送验证码
   app.post(version + '/alluser/sms', alluserCtrl.sendSMS)
+  /**
+   * @swagger
+   * /alluser/sms:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: "校验验证码"
+   *     operationId: verifySMS
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "smsCode"
+   *       in: "query"
+   *       required: true
+   *       description: "验证码"
+   *       type: "number"
+   *     - name: "mobile"
+   *       in: "query"
+   *       required: true
+   *       description: "用户电话"
+   *       type: "string"
+   *     - name: "smsType"
+   *       in: "query"
+   *       required: true
+   *       description: "验证码类型"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: 验证码正确
+   *       412:
+   *         description: 验证码错误
+   *       422:
+   *         description: 没有验证码或验证码已过期
+   *       500:
+   *         description: Server internal error
+   */
+  // 校验验证码
   app.get(version + '/alluser/sms', alluserCtrl.verifySMS)
+  /**
+   * @swagger
+   * /alluser/agreement:
+   *   get:
+   *     tags:
+   *     - Alluser
+   *     summary: " 获取用户签署协议状态"
+   *     operationId: getAlluserAgreement
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "userId"
+   *       in: "query"
+   *       required: true
+   *       description: "用户ID"
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: success
+   *         schema:
+   *           type: object
+   *           properties:
+   *             agreement:
+   *               type: string
+   *       500:
+   *         description: Server internal error
+   */
+  // 获取用户签署协议状态
   app.get(version + '/alluser/agreement', alluserCtrl.getAlluserAgreement)
+  /**
+   * @swagger
+   * /alluser/agreement:
+   *   post:
+   *     tags:
+   *     - Alluser
+   *     summary: 修改用户签署协议状态
+   *     operationId: updateAlluserAgreement
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "userId"
+   *           - "agreement"
+   *         properties:
+   *           userId:
+   *             type: "string"
+   *           agreement:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *        description: success
+   *        schema:
+   *          type: object
+   *          properties:
+   *            agreement:
+   *              type: string
+   *      500:
+   *        description: Server internal error
+   */
+  // 修改用户签署协议状态
   app.post(version + '/alluser/agreement', alluserCtrl.updateAlluserAgreement)
 
   // 弃用，expense表已合并至 order表 2017-08-10 lgf
@@ -123,17 +1530,18 @@ module.exports = function (app, webEntry, acl) {
 
   // gy
   // review
-  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.postReviewInfo)
-  app.get(version + '/review/certificate', tokenManager.verifyToken(), reviewCtrl.getCertificate)
-  app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), reviewCtrl.getReviewInfo)
-  app.get(version + '/review/countByStatus', tokenManager.verifyToken(), reviewCtrl.countByStatus)
+  app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reviewCtrl.postReviewInfo(acl))
+  app.get(version + '/review/certificate', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reviewCtrl.getCertificate)
+  app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reviewCtrl.getReviewInfo)
+  app.get(version + '/review/countByStatus', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), reviewCtrl.countByStatus)
 
   // labtestImport
   app.get(version + '/labtestImport/listByStatus', tokenManager.verifyToken(), labtestImportCtrl.listByStatus)
   app.get(version + '/labtestImport/photoList', tokenManager.verifyToken(), labtestImportCtrl.photoList)
   app.post(version + '/labtestImport', tokenManager.verifyToken(), getNoMid.getNo(11), labtestImportCtrl.saveLabtest)
   app.post(version + '/labtestImport/edit', tokenManager.verifyToken(), labtestImportCtrl.editLabtest)
-  app.get(version + '/labtestImport', tokenManager.verifyToken(), labtestImportCtrl.getLabtest)
+  // 权限-医生
+  app.get(version + '/labtestImport', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), labtestImportCtrl.getLabtest)
   app.get(version + '/labtestImport/photoByLabtest', tokenManager.verifyToken(), labtestImportCtrl.photoByLabtest)
   app.post(version + '/labtestImport/labelphoto', tokenManager.verifyToken(), labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
   app.get(version + '/labtestImport/countByStatus', tokenManager.verifyToken(), labtestImportCtrl.countByStatus)
@@ -649,7 +2057,8 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/deleteSuspend', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSuspend)
   // 咨询问卷填写(新增自动转发功能) - acl 2017-08-10 患者
-  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  // app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counseltempCtrl.getSessionObject, counseltempCtrl.getDoctorObject, getNoMid.getNo(2), counseltempCtrl.saveQuestionaire, counseltempCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  app.post(version + '/counsel/questionaire', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), counselCtrl.getSessionObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire, counselCtrl.counselAutoRelay, orderCtrl.getOrderNo, orderCtrl.updateOrder)
 
   // YQC
   // comment
@@ -848,7 +2257,7 @@ module.exports = function (app, webEntry, acl) {
    *               items:
    *                 $ref: '#/definitions/Compliance'
    */
-  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getCompliance)
+  app.get(version + '/compliance/compliances', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), complianceCtrl.getCompliances)
   /** YQC 17-07-24 - acl 2017-08-04 患者
    * @swagger
    * /compliance/compliances:
@@ -2196,7 +3605,7 @@ module.exports = function (app, webEntry, acl) {
    *                     $ref: '#/definitions/Task'
    */
   app.get(version + '/tasks/task', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getUserTask)
-  /** YQC annotation 2017-07-28 - acl 2017-07-28 医生
+  /** YQC annotation 2017-07-28 - acl 2017-07-28 医生／2017-08-14 患者
    * @swagger
    * /tasks/task:
    *   post:
@@ -2317,7 +3726,7 @@ module.exports = function (app, webEntry, acl) {
    *                       type: "string"
    */
   app.get(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getPatientDetail)
-  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
+  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者 弃用
    * @swagger
    * /patient/detail:
    *   post:
@@ -2389,7 +3798,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.newPatientDetail)
+  // app.post(version + '/patient/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.newPatientDetail)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
    * @swagger
    * /patient/doctors:
@@ -2731,7 +4140,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/doctor/detail', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.insertDocBasic)
+  app.post(version + '/doctor/detail', doctorCtrl.insertDocBasic)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 医生
    * @swagger
    * /doctor/myPatients:
@@ -2813,7 +4222,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Doctor not found."
    */
   app.get(version + '/doctor/myPatientsByDate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getSessionObject, doctorCtrl.getPatientByDate)
-  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生
+  /** YQC annotation 2017-07-26 - acl 2017-08-04 医生／guest
    * @swagger
    * /doctor/detail:
    *   get:
@@ -2948,7 +4357,7 @@ module.exports = function (app, webEntry, acl) {
    */
   app.get(version + '/doctor/teamPatients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList)
   // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
-  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生
+  /** YQC annotation 2017-08-04 - acl 2017-08-04 医生／guest
    * @swagger
    * /doctor/editDetail:
    *   post:
@@ -4045,23 +5454,89 @@ module.exports = function (app, webEntry, acl) {
    *               items:
    *                 type: object
    *                 properties:
-   *                   gender:
-   *                     type: "string"
-   *                   phoneNo:
-   *                     type: "number"
-   *                   name:
-   *                     type: "string"
-   *                   userId:
-   *                     type: "string"
-   *                   birthday:
-   *                     type: "string"
-   *                     format: "date-time"
-   *                   VIP:
-   *                     type: "number"
+   *                   patientId:
+   *                     type: object
+   *                     properties:
+   *                       gender:
+   *                         type: "string"
+   *                       phoneNo:
+   *                         type: "number"
+   *                       name:
+   *                         type: "string"
+   *                       userId:
+   *                         type: "string"
+   *                       birthday:
+   *                         type: "string"
+   *                         format: "date-time"
+   *                       VIP:
+   *                         type: "number"
+   *                   currentAgent:
+   *                     type: object
+   *                     properties:
+   *                       phoneNo:
+   *                         type: "number"
+   *                       name:
+   *                         type: "string"
+   *                   latestFollowUp:
+   *                     type: object
+   *                     properties:
+   *                       content:
+   *                         type: "string"
+   *                   status:
+   *                     type: number
    *             code:
    *               type: number
    */
   app.get(version + '/policy/patients', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatients)
+  // 获取患者跟踪记录详情 权限insuranceC/insuranceA
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/history:
+   *   get:
+   *     tags:
+   *     - "policy"
+   *     summary: "获取患者跟踪记录详情"
+   *     description: ""
+   *     operationId: "history"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "patientId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   patientId:
+   *                     type: object
+   *                     properties:
+   *                       content:
+   *                         type: "string"
+   *                       time:
+   *                         type: "string"
+   *                         format: date-time
+   *                       photos:
+   *                         type: "array"
+   *                         items:
+   *                           type: string
+   *             code:
+   *               type: number
+   */
+  app.get(version + '/policy/history', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.getHistory)
   // 获取专员 权限insuranceC
   /** YQC annotation 2017-08-10
    * @swagger
@@ -4104,7 +5579,7 @@ module.exports = function (app, webEntry, acl) {
    *             code:
    *               type: number
    */
-  app.get(version + '/policy/agents', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getAgents)
+  app.get(version + '/policy/agents', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getAgents, policyCtrl.sortAgents)
   // 主管设置／更换专员 权限insuranceC
   /** YQC annotation 2017-08-10
    * @swagger
@@ -4217,6 +5692,51 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/policy/policy', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertPolicy)
+  // 获取患者保单详情 权限insuranceC/insuranceA
+  /** YQC annotation 2017-08-23
+   * @swagger
+   * /policy/policy:
+   *   get:
+   *     tags:
+   *     - "policy"
+   *     summary: "获取患者保单详情"
+   *     description: ""
+   *     operationId: "policy"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "patientId"
+   *       in: "query"
+   *       required: true
+   *       type: "string"
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token."
+   *       required: true
+   *       type: "string"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: object
+   *               properties:
+   *                 patientId:
+   *                   type: string
+   *                 content:
+   *                   type: "string"
+   *                 status:
+   *                   type: "number"
+   *                 photos:
+   *                   type: "array"
+   *                   items:
+   *                     type: string
+   *             code:
+   *               type: number
+   */
+  app.get(version + '/policy/policy', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.getPolicy)
   // 主管审核患者保单 权限insuranceC
   /** YQC annotation 2017-08-10
    * @swagger
@@ -4292,6 +5812,47 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/policy/agentOff', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getInsuranceAObject, policyCtrl.agentOff)
+  // 主管／专员修改个人信息
+  /** YQC annotation 2017-08-10
+   * @swagger
+   * /policy/info:
+   *   post:
+   *     tags:
+   *     - "policy"
+   *     summary: "主管／专员修改个人信息"
+   *     description: ""
+   *     operationId: "info"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           insuranceAId:
+   *             type: string
+   *           name:
+   *             type: string
+   *           gender:
+   *             type: number
+   *             enum:
+   *               - "1"
+   *               - "2"
+   *           phoneNo:
+   *             type: number
+   *           password:
+   *             type: string
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   */
+  app.post(version + '/policy/info', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), policyCtrl.editInfo)
 
   // lgf
   // account
@@ -4347,13 +5908,16 @@ module.exports = function (app, webEntry, acl) {
    *         default: 3
    *       incomeRecords:
    *         type: array
-   *         $ref: '#/definitions/IncomeRecords'
+   *         items:
+   *           $ref: '#/definitions/IncomeRecords'
    *       rechargeRecords:
    *         type: array
-   *         $ref: '#/definitions/RechargeRecords'
+   *         items:
+   *           $ref: '#/definitions/RechargeRecords'
    *       expenseRecords:
    *         type: array
-   *         $ref: '#/definitions/ExpenseRecords'
+   *         items:
+   *           $ref: '#/definitions/ExpenseRecords'
    *       times:
    *         type: array
    *         items:
@@ -5819,7 +7383,8 @@ module.exports = function (app, webEntry, acl) {
    *         description: Server internal error
    */
   // 护士端微信扫码绑定患者 权限 护士
-  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
+  app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient)
+  // app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
   /**
    * @swagger
    * /nurse/patientsList:
@@ -5860,6 +7425,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/department/docRepComment', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDocRepComment)
   // 获取科室点评患者周／月／季／年报数量
   app.get(version + '/department/departRepComment', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDepartRepComment)
+  // 获取地区点评患者周／月／季／年报数量
+  app.get(version + '/department/districtRepComment', tokenManager.verifyToken(), departmentReportTempCtrl.getPeriodTime, departmentReportTempCtrl.getDistrictRepComment)
 
   // jyf
   // 刷新token
@@ -6132,7 +7699,8 @@ module.exports = function (app, webEntry, acl) {
    *         type: integer
    */
 
-  app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictDistrictCtrl.getDistrict)
+  // app.get(version + '/dict/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictDistrictCtrl.getDistrict)
+  app.get(version + '/dict/district', dictDistrictCtrl.getDistrict)
   // 2017-07-24测试 权限：admin
   /**
    * @swagger
@@ -6192,7 +7760,8 @@ module.exports = function (app, webEntry, acl) {
    *       inputCode:
    *         type: string
    */
-  app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictHospitalCtrl.getHospital)
+  // app.get(version + '/dict/hospital', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), dictHospitalCtrl.getHospital)
+  app.get(version + '/dict/hospital', dictHospitalCtrl.getHospital)
 
   // devicedata
   // 2017-07-24测试 权限：patient
@@ -6317,10 +7886,10 @@ module.exports = function (app, webEntry, acl) {
 
   // 输入：微信用户授权的code 商户系统生成的订单号
 
-//   app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
+  // app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
 
   // 订单支付结果回调
-  app.post(version + '/wechat/payResult', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.payResult)
+  app.post(version + '/wechat/payResult', wechatCtrl.payResult)
   // 查询订单   orderNo
   app.get(version + '/wechat/getWechatOrder', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.getWechatOrder)
   // 关闭订单   orderNo
@@ -6332,11 +7901,11 @@ module.exports = function (app, webEntry, acl) {
   // 退款查询
   app.post('/wechat/refundquery', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
   // 消息模板
-  app.post(version + '/wechat/messageTemplate', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
+  app.post(version + '/wechat/messageTemplate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
   // 下载
   app.get(version + '/wechat/download', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.download)
   // 创建永久二维码
-  app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
+  app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
 
   // 接收微信服务器的post请求
   app.post(version + '/wechat', wechatCtrl.receiveTextMessage)
@@ -6424,7 +7993,7 @@ module.exports = function (app, webEntry, acl) {
    *       token:
    *         type: string
    */
-  app.get(version + '/version', tokenManager.verifyToken(), versionCtrl.getVersionInfo)
+  app.get(version + '/version', versionCtrl.getVersionInfo)
   app.post(version + '/version', tokenManager.verifyToken(), getNoMid.getNo(10), versionCtrl.insertVersionInfo)
 
   // niaodaifu
@@ -6525,9 +8094,9 @@ module.exports = function (app, webEntry, acl) {
   app.get('/devicedata/niaodaifu/loginparam', niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', getNoMid.getNo(11), niaodaifuCtrl.receiveData)
 
+  // swagger未调试
   // department
-
-  /**
+  /** JYF 2017-08-16
    * @swagger
    * /department/district:
    *   get:
@@ -6541,6 +8110,16 @@ module.exports = function (app, webEntry, acl) {
    *         description: 地区名
    *         in: query
    *         type: string
+   *       - name: portleader
+   *         description: 地区负责人
+   *         in: query
+   *         type: string
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
    *       - name: token
    *         in: query
    *         type: string
@@ -6561,44 +8140,1076 @@ module.exports = function (app, webEntry, acl) {
    *                     type: string
    */
   app.get(version + '/department/district', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDistrict)
+  /** JYF 2017-08-16
+   * @swagger
+   * /department/department:
+   *   get:
+   *     tags:
+   *       - department
+   *     description: 获取科室信息
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: district
+   *         description: 地区名
+   *         in: query
+   *         type: string
+   *       - name: portleader
+   *         description: 地区负责人
+   *         in: query
+   *         type: string
+   *       - name: department
+   *         description: 科室
+   *         in: query
+   *         type: string
+   *       - name: hospital
+   *         description: 医院
+   *         in: query
+   *         type: string
+   *       - name: departLeader
+   *         description: 科主任
+   *         in: query
+   *         type: string
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回科室信息
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 district:
+   *                   type: string
+   *                 portleader:
+   *                   type: array
+   *                   items:
+   *                     type: string
+   *                 department:
+   *                   type: string
+   *                 hospital:
+   *                   type: string
+   *                 departLeader:
+   *                   type: array
+   *                   items:
+   *                     type: string
+   */
   app.get(version + '/department/department', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDepartment)
+  /** JYF 2017-08-16
+   * @swagger
+   * /department/doctorlist:
+   *   get:
+   *     tags:
+   *       - department
+   *     description: 获取医生列表
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: district
+   *         description: 地区名
+   *         in: query
+   *         type: string
+   *       - name: department
+   *         description: 科室
+   *         in: query
+   *         type: string
+   *       - name: hospital
+   *         description: 医院
+   *         in: query
+   *         type: string
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回医生列表
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: object
+   *               properties:
+   *                 district:
+   *                   type: string
+   *                 department:
+   *                   type: string
+   *                 hospital:
+   *                   type: string
+   *                 doctors:
+   *                   type: array
+   *                   items:
+   *                     type: string
+   */
   app.get(version + '/department/doctorlist', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.getDoctorList)
+  /** JYF 2017-08-16
+   * @swagger
+   * /department/updatedistrict:
+   *   post:
+   *     tags:
+   *       - department
+   *     description: 更新地区信息
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             district:
+   *               type: string
+   *             new:
+   *               type: object
+   *               properties:
+   *                 newdistrict:
+   *                   type: string
+   *                 newportleader:
+   *                   type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/department/updatedistrict', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDistrict)
+  /** JYF 2017-08-16
+   * @swagger
+   * /department/updatedepartment:
+   *   post:
+   *     tags:
+   *       - department
+   *     description: 更新科室信息
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             district:
+   *               type: string
+   *             hospital:
+   *               type: string
+   *             department:
+   *               type: string
+   *             new:
+   *               type: object
+   *               properties:
+   *                 newdepartment:
+   *                   type: string
+   *                 newdepartLeader:
+   *                   type: array
+   *                 newdoctors:
+   *                   type: array
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/department/updatedepartment', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.updateDepartment)
+  /** JYF 2017-08-16
+   * @swagger
+   * /department/delete:
+   *   post:
+   *     tags:
+   *       - department
+   *     description: 删除记录
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             district:
+   *               type: string
+   *             hospital:
+   *               type: string
+   *             department:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/department/delete', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), departmentCtrl.deleteRecord)
 
   // 医生数据监控
+  /** JYF 2017-08-16
+   * @swagger
+   * /doctormonitor/distribution:
+   *   get:
+   *     tags:
+   *       - doctormonitor
+   *     description: 获取医生分布
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: startTime
+   *         in: query
+   *         type: string
+   *       - name: endTime
+   *         in: query
+   *         type: string
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回医生分布信息
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   _id:
+   *                     type: string
+   *                   count:
+   *                     type: integer
+   */
   app.get(version + '/doctormonitor/distribution', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getDistribution)
+  /** JYF 2017-08-16
+   * @swagger
+   * /doctormonitor/linegraph:
+   *   get:
+   *     tags:
+   *       - doctormonitor
+   *     description: 获取折线图数据
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: startTime
+   *         in: query
+   *         type: string
+   *       - name: endTime
+   *         in: query
+   *         type: string
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回医生折线图数据
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   _id:
+   *                     type: string
+   *                   count:
+   *                     type: integer
+   */
   app.get(version + '/doctormonitor/linegraph', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getLinegraph)
+  /** JYF 2017-08-16
+   * @swagger
+   * /doctormonitor/workload:
+   *   get:
+   *     tags:
+   *       - doctormonitor
+   *     description: 医生工作量
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: startTime
+   *         in: query
+   *         type: string
+   *       - name: endTime
+   *         in: query
+   *         type: string
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: date
+   *         in: query
+   *         type: string
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回医生工作量
+   */
   app.get(version + '/doctormonitor/workload', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getWorkload)
+  /** JYF 2017-08-16
+   * @swagger
+   * /doctormonitor/counseltimeout:
+   *   get:
+   *     tags:
+   *       - doctormonitor
+   *     description: 超时回复
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: startTime
+   *         in: query
+   *         type: string
+   *       - name: endTime
+   *         in: query
+   *         type: string
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回超时回复信息
+   */
   app.get(version + '/doctormonitor/counseltimeout', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getCounseltimeout)
+  /** JYF 2017-08-16
+   * @swagger
+   * /doctormonitor/score:
+   *   get:
+   *     tags:
+   *       - doctormonitor
+   *     description: 评分
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回医生评分
+   */
   app.get(version + '/doctormonitor/score', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getScore)
+  /** JYF 2017-08-16
+   * @swagger
+   * /doctormonitor/score:
+   *   get:
+   *     tags:
+   *       - doctormonitor
+   *     description: 评价详情
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: doctoruserId
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *       - name: startTime
+   *         in: query
+   *         type: string
+   *       - name: endTime
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回医生评价详情
+   */
   app.get(version + '/doctormonitor/comment', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getComment)
+  /** JYF 2017-08-16
+   * @swagger
+   * /doctormonitor/order:
+   *   get:
+   *     tags:
+   *       - doctormonitor
+   *     description: 收入统计
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: startTime
+   *         in: query
+   *         type: string
+   *       - name: endTime
+   *         in: query
+   *         type: string
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回医生评价详情
+   */
   app.get(version + '/doctormonitor/order', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), doctorMonitorCtrl.getOrder)
 
   // 患者数据监控
+  /** JYF 2017-08-16
+   * @swagger
+   * /patientmonitor/distribution:
+   *   get:
+   *     tags:
+   *       - patientmonitor
+   *     description: 获取患者分布
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: startTime
+   *         in: query
+   *         type: string
+   *       - name: endTime
+   *         in: query
+   *         type: string
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回患者分布信息
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   _id:
+   *                     type: string
+   *                   count:
+   *                     type: integer
+   */
   app.get(version + '/patientmonitor/distribution', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), patientMonitorCtrl.getDistribution)
+  /** JYF 2017-08-16
+   * @swagger
+   * /patientmonitor/linegraph:
+   *   get:
+   *     tags:
+   *       - patientmonitor
+   *     description: 获取折线图数据
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: startTime
+   *         in: query
+   *         type: string
+   *       - name: endTime
+   *         in: query
+   *         type: string
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回医生折线图数据
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   _id:
+   *                     type: string
+   *                   count:
+   *                     type: integer
+   */
   app.get(version + '/patientmonitor/linegraph', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), patientMonitorCtrl.getLinegraph)
+  /** JYF 2017-08-16
+   * @swagger
+   * /patientmonitor/insurance:
+   *   get:
+   *     tags:
+   *       - patientmonitor
+   *     description: 保险意向
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: startTime
+   *         in: query
+   *         type: string
+   *       - name: endTime
+   *         in: query
+   *         type: string
+   *       - name: province
+   *         in: query
+   *         type: string
+   *       - name: city
+   *         in: query
+   *         type: string
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回患者保险意向统计
+   */
   app.get(version + '/patientmonitor/insurance', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), patientMonitorCtrl.getInsurance)
+  /** JYF 2017-08-16
+   * @swagger
+   * /patientmonitor/patientsbyclass:
+   *   get:
+   *     tags:
+   *       - patientmonitor
+   *     description: 分类查询患者
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: classNo
+   *         in: query
+   *         type: string
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 相应类的患者列表
+   */
   app.get(version + '/patientmonitor/patientsbyclass', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), patientMonitorCtrl.getPatientsByClass)
 
   // 科室超时未回复查询
-  app.get(version + '/departmentcounsel', counseltimeoutCtrl.getDepartmentCounsel)
+  /** JYF 2017-08-16
+   * @swagger
+   * /departmentcounsel:
+   *   get:
+   *     tags:
+   *       - departmentcounsel
+   *     description: 科室超时未回复查询
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: date
+   *         in: query
+   *         type: string
+   *       - name: departLeaderId
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 科室超时未回复列表
+   */
+  app.get(version + '/departmentcounsel', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), counseltimeoutCtrl.getDepartmentCounsel)
 
   // 论坛
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/allposts:
+   *   get:
+   *     tags:
+   *       - forum
+   *     description: 获取全部帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: title
+   *         description: 标题
+   *         in: query
+   *         type: string
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回全部帖子或相应标题的帖子
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   favoritesstatus:
+   *                     type: integer
+   */
   app.get(version + '/forum/allposts', tokenManager.verifyToken(), forumCtrl.getAllposts)
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/mycollection:
+   *   get:
+   *     tags:
+   *       - forum
+   *     description: 获取我的收藏
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回我的收藏
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   avatar:
+   *                     type: string
+   */
   app.get(version + '/forum/mycollection', tokenManager.verifyToken(), forumCtrl.getMycollection)
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/myposts:
+   *   get:
+   *     tags:
+   *       - forum
+   *     description: 获取我的帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回我的帖子
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   avatar:
+   *                     type: string
+   */
   app.get(version + '/forum/myposts', tokenManager.verifyToken(), forumCtrl.getMyposts)
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/postcontent:
+   *   get:
+   *     tags:
+   *       - forum
+   *     description: 获取帖子详情
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: postId
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回帖子详情
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   avatar:
+   *                     type: string
+   *                   content:
+   *                     type: array
+   *                   replies:
+   *                     type: array
+   */
   app.get(version + '/forum/postcontent', tokenManager.verifyToken(), forumCtrl.getPostContent)
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/posting:
+   *   post:
+   *     tags:
+   *       - forum
+   *     description: 发新帖
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *             token:
+   *               type: string
+   *             title:
+   *               type: string
+   *             anonymous:
+   *               type: integer
+   *             content:
+   *               type: array
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forum/posting', tokenManager.verifyToken(), getNoMid.getNo(13), forumCtrl.forumPosting)
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/comment:
+   *   post:
+   *     tags:
+   *       - forum
+   *     description: 评论帖
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *             content:
+   *               type: array
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forum/comment', tokenManager.verifyToken(), getNoMid.getNo(14), forumCtrl.forumComment)
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/reply:
+   *   post:
+   *     tags:
+   *       - forum
+   *     description: 回复评论
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *             content:
+   *               type: array
+   *             commentId:
+   *               type: string
+   *             at:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forum/reply', tokenManager.verifyToken(), getNoMid.getNo(15), forumCtrl.forumReply)
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/favorite:
+   *   post:
+   *     tags:
+   *       - forum
+   *     description: 收藏帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forum/favorite', tokenManager.verifyToken(), forumCtrl.forumFavorite)
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/deletepost:
+   *   post:
+   *     tags:
+   *       - forum
+   *     description: 删除帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forum/deletepost', tokenManager.verifyToken(), forumCtrl.deletePost)
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/deletecomment:
+   *   post:
+   *     tags:
+   *       - forum
+   *     description: 删除帖子评论
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *             commentId:
+   *               type: string
+   *             replyId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forum/deletecomment', tokenManager.verifyToken(), forumCtrl.deleteComment)
+  /** JYF 2017-08-16
+   * @swagger
+   * /forum/deletefavorite:
+   *   post:
+   *     tags:
+   *       - forum
+   *     description: 取消收藏
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forum/deletefavorite', tokenManager.verifyToken(), forumCtrl.deleteFavorite)
 
   // 科主任报告
+  /** JYF 2017-08-16
+   * @swagger
+   * /departmentmonitor/patients:
+   *   get:
+   *     tags:
+   *       - departmentmonitor
+   *     description: 科室患者数
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: district
+   *         in: query
+   *         type: string
+   *       - name: department
+   *         in: query
+   *         type: string
+   *       - name: hospital
+   *         in: query
+   *         type: string
+   *       - name: startTime
+   *         in: query
+   *         type: string
+   *       - name: endTime
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 科室患者数
+   */
   app.get(version + '/departmentmonitor/patients', departmentMonitorCtrl.getPatientsCount)
   app.get(version + '/departmentmonitor/score', departmentMonitorCtrl.getScore)
   app.get(version + '/departmentmonitor/negcomment', departmentMonitorCtrl.getNegComment)

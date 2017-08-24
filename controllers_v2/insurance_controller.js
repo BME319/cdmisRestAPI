@@ -169,8 +169,12 @@ exports.setPrefer = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     } else {
+      let patientObject = req.body.patientObject || null
+      if (patientObject === null) {
+        return res.json({msg: '无权限', code: 1})
+      }
       let queryP = {
-        patientId: req.body.patientObject._id
+        patientId: patientObject._id
       }
       Policy.getSome(queryP, function (err, items) {
         if (err) {

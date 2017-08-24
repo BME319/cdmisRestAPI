@@ -13,6 +13,7 @@ var request = require('request')
 var jwt = require('jsonwebtoken')
 // var Patient = require('../models/patient')
 var commonFunc = require('../middlewares/commonFunc')
+var Errorlog = require('../models/errorlog')
 var Base64 = {
     // 转码表
   table: [
@@ -632,9 +633,9 @@ exports.insertAlluser = function (req, res) {
 }
 exports.registerTest = function (acl) {
   return function (req, res, next) {
-    var _phoneNo = req.query.phoneNo
-    var _password = req.query.password
-    var _role = req.query.role
+    var _phoneNo = req.body.phoneNo
+    var _password = req.body.password
+    var _role = req.body.role
     var query = {phoneNo: _phoneNo}
         // var _userNo = req.newId
     Alluser.getOne(query, function (err, item) {
@@ -650,6 +651,10 @@ exports.registerTest = function (acl) {
           if (item1 != null) {
             res.json({results: 1, userNo: '', mesg: 'Alluser Already Exist!'})
           } else {
+            if (_role === 'doctor') { // 医生注册时赋予临时角色
+              _role = 'guest'
+            }
+            // 在原有账号基础上增加新角色
             Alluser.updateOne(query, {$push: { role: _role }, $set: {password: _password}}, function (err, item2) {
               if (err) {
                 return res.status(500).send(err.errmsg)
@@ -673,6 +678,7 @@ exports.registerTest = function (acl) {
           }
         })
       } else {
+        // 该账号未被注册过
         next()
       }
     })
@@ -680,11 +686,15 @@ exports.registerTest = function (acl) {
 }
 exports.register = function (acl) {
   return function (req, res) {
-    var _phoneNo = req.query.phoneNo
-    var _password = req.query.password
-    var _role = req.query.role
+    var _phoneNo = req.body.phoneNo
+    var _password = req.body.password
+    var _role = req.body.role
         // var query = {phoneNo:_phoneNo};
     var _userNo = req.newId
+
+    if (_role === 'doctor') { // 医生注册时赋予临时角色
+      _role = 'guest'
+    }
 
     var userData = {
       phoneNo: _phoneNo,
@@ -779,8 +789,8 @@ exports.register = function (acl) {
 //     });
 // }
 exports.reset = function (req, res) {
-  var _phoneNo = req.query.phoneNo
-  var _password = req.query.password
+  var _phoneNo = req.body.phoneNo
+  var _password = req.body.password
   var query = {phoneNo: _phoneNo}
   Alluser.getOne(query, function (err, item) {
     if (err) {
@@ -798,6 +808,7 @@ exports.reset = function (req, res) {
     }
   })
 }
+// 已注册用户绑定微信号
 exports.setOpenId = function (req, res, next) {
   var _phoneNo = req.body.phoneNo
   var _openId = req.body.openId
@@ -825,6 +836,7 @@ exports.setOpenId = function (req, res, next) {
 exports.setOpenIdRes = function (req, res) {
   res.json({results: 'success!'})
 }
+// 校验用户是否绑定微信号进行登录
 exports.openIdLoginTest = function (req, res, next) {
     // 2017-06-07GY调试
     // console.log('openIdLoginTest_in');
@@ -843,7 +855,7 @@ exports.openIdLoginTest = function (req, res, next) {
       return res.status(500).send(err.errmsg)
     }
     if (item != null) {
-      openIdFlag = 1
+      openIdFlag = 1  // 已经绑定微信号，则将标志位置1
     }
     req.openIdFlag = openIdFlag
 
@@ -853,20 +865,22 @@ exports.openIdLoginTest = function (req, res, next) {
     next()
   })
 }
-exports.checkBinding = function (req, res, next) {
-    // 2017-06-07GY调试
-    // console.log('checkBinding_in');
+exports.checkBinding = function (req, res) {
+  // 2017-06-07GY调试
+  // console.log('checkBinding_in');
 
   var username = req.body.username
-    // console.log(username);
+  var role = req.body.role
+  // var query = {'userId': userId}
+  // console.log(username);
   var query = {
     $or: [
-            {userId: username},
-            {openId: username},
-            {phoneNo: username}
+      {userId: username},
+      {openId: username},
+      {phoneNo: username}
     ]
   }
-    // console.log(query);
+  // console.log(query);
 
   Alluser.getOne(query, function (err, item) {
     if (err) {
@@ -874,27 +888,50 @@ exports.checkBinding = function (req, res, next) {
     }
     if (item != null) {
       if (item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
-                // openId 存在
+        // openId 存在
         var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test}
-                // console.log(query);
+        // console.log(query);
         OpenIdTmp.getOne(query, function (err, item1) {
           if (err) {
             return res.status(500).send(err.errmsg)
           }
-                    // console.log({item1:item1});
-                    // if(item1 != null && item1.doctorAlluserId != null){
+          // console.log({item1:item1});
+          // if(item1 != null && item1.doctorAlluserId != null){
           if (item1 != null) {
-                        // console.log(1111);
+            // console.log(1111);
 
-                        // binding doctor
-            var jsondata = {
-              patientId: item.userId,
-              doctorId: item1.doctorAlluserId,
-              dpRelationTime: Date()
+            // binding doctor
+            // var jsondata = {
+            //   patientId: item.userId,
+            //   doctorId: item1.doctorAlluserId,
+            //   dpRelationTime: Date()
+            // }
+            // console.log(jsondata);
+            // 调用患者和医生/护士和患者的绑定方法 修改 2017-08-17 lgf
+            let jsondata = {}
+            let _url = ''
+            if (role === 'patient') {
+              // binding doctor
+              _url = 'http://' + webEntry.domain + ':4060/api/v2/patient/favoriteDoctor' + '?token=' + req.query.token || req.body.token
+              jsondata = {
+                patientId: item.userId,
+                doctorId: item1.doctorUserId,
+                dpRelationTime: new Date()
+              }
+            } else if (role === 'nurse') {
+              // binding patient
+              _url = 'http://' + webEntry.domain + ':4060/api/v2/nurse/bindingPatient' + '?token=' + req.query.token || req.body.token
+              jsondata = {
+                patientId: item1.doctorUserId,
+                nurseObjectId: item._id,
+                dpRelationTime: new Date()
+              }
+            } else {
+              res.json({results: req.results})
             }
-                        // console.log(jsondata);
             request({
-              url: 'http://' + webEntry.domain + ':4060/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
+              url: _url,
+              // url: 'http://' + webEntry.domain + ':4060/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
               method: 'POST',
               body: jsondata,
               json: true
@@ -902,56 +939,58 @@ exports.checkBinding = function (req, res, next) {
               if (err) {
                 return res.status(500).send(err.errmsg)
               }
-                            // 绑定成功后 删除OpenIdTmp表中的数据
-                            // console.log({query1:query});
+              // 绑定成功后 删除OpenIdTmp表中的数据
+              // console.log({query1:query});
               OpenIdTmp.remove(query, function (err) {
                 if (err) {
                   return res.status(500).send(err.errmsg)
                 }
 
-                                // 2017-06-07GY调试
-                                // console.log('checkBinding_out');
-
-                next()
-              })
-            })
-          } else {
-                        // console.log("No OpenIdTmp");
-                        // if(item1.doctorAlluserId === null){
-                        //     console.log(11112222);
-                        //      OpenIdTmp.remove(query,function(err){
-                        //         if (err) {
-                        //             return res.status(500).send(err.errmsg);
-                        //         }
-
-                        //         next();
-                        //     });
-                        // }
-                        // else{
-                        //     next();
-                        // }
-
-                        // 2017-06-07GY调试
-                        // console.log('checkBinding_out22');
-
-            next()
-          }
-        })
-      } else {
                 // 2017-06-07GY调试
                 // console.log('checkBinding_out');
 
-        next()
+                return res.json({results: req.results})
+              })
+            })
+          } else {
+            // console.log("No OpenIdTmp");
+            // if(item1.doctorAlluserId === null){
+            //     console.log(11112222);
+            //      OpenIdTmp.remove(query,function(err){
+            //         if (err) {
+            //             return res.status(500).send(err.errmsg);
+            //         }
+
+            //         next();
+            //     });
+            // }
+            // else{
+            //     next();
+            // }
+
+            // 2017-06-07GY调试
+            // console.log('checkBinding_out22');
+            // 无缓存绑定信息 2017-08-17 lgf 修改
+            // next()
+            res.json({results: req.results})
+          }
+        })
+      } else {
+        // 2017-06-07GY调试
+        // console.log('checkBinding_out');
+        // 未绑定微信号 2017-08-17 lgf 修改
+        // next()
+        res.json({results: req.results})
       }
     } else {
-            // 2017-06-07GY调试
-            // console.log('checkBinding_err_user_not_exist');
+      // 2017-06-07GY调试
+      // console.log('checkBinding_err_user_not_exist');
 
       res.json({results: 1, mesg: "Alluser doesn't Exist!"})
     }
   })
 }
-exports.login = function (req, res) {
+exports.login = function (req, res, next) {
     // 2017-06-07GY调试
   var username = req.body.username
   var password = req.body.password
@@ -963,8 +1002,8 @@ exports.login = function (req, res) {
     // var query = {phoneNo:_phoneNo};
   var query = {
     $or: [
-            {phoneNo: username},
-            {openId: username}
+      {phoneNo: username},
+      {openId: username}
     ]
   }
   var openIdFlag = req.openIdFlag
@@ -973,19 +1012,22 @@ exports.login = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     if (item === null) {
-            // 2017-06-07GY调试
-            // console.log('login_err_user_not_exist');
+      // 2017-06-07GY调试
+      // console.log('login_err_user_not_exist');
 
       res.json({results: 1, mesg: "Alluser doesn't Exist!"})
     } else {
+      if (role === 'doctor' && Number(item.reviewStatus) !== 1) {
+        role = 'guest'
+      }
       if (password !== item.password && openIdFlag === 0) {
-                // 2017-06-07GY调试
-                // console.log('login_err_password_not_correct');
+        // 2017-06-07GY调试
+        // console.log('login_err_password_not_correct');
 
         res.json({results: 1, mesg: "Alluser password isn't correct!"})
       } else if (item.role.indexOf(role) === -1) {
-                // 2017-06-07GY调试
-                // console.log('login_err_no_authority');
+        // 2017-06-07GY调试
+        // console.log('login_err_no_authority');
 
         res.json({results: 1, mesg: 'No authority!'})
       } else {
@@ -1024,7 +1066,7 @@ exports.login = function (req, res) {
             if (err) {
               return res.status(500).send(err.errmsg)
             }
-            var results = {
+            req.results = {
               status: 0,
               userId: item.userId,
               userName: item.name || '',
@@ -1038,7 +1080,9 @@ exports.login = function (req, res) {
                         // 2017-06-07GY调试
             // console.log('login_success')
 
-            res.json({results: results})
+            // res.json({results: results})
+            // 修改: 登录成功后进行checkBinding操作 2017-08-17 lgf
+            next()
           })
         })
       }
@@ -1047,7 +1091,8 @@ exports.login = function (req, res) {
 }
 
 exports.logout = function (req, res) {
-  var _userId = req.query.userId
+  // var _userId = req.query.userId
+  var _userId = req.session.userId  // session 修改 2017-08-16 lgf
   var query = {userId: _userId}
   Alluser.getOne(query, function (err, item) {
     if (err) {
@@ -1218,7 +1263,21 @@ exports.sendSMS = function (req, res) {
                 if (code === '000000') {
                   res.json({results: 0, mesg: "Alluser doesn't Exist!"})
                 } else {
-                  res.json({results: 1, mesg: {'ErrorCode': code}})
+                  // res.json({results: 1, mesg: {'ErrorCode': code}})
+                  var errData = {
+                    fieldInfo: 'sms',
+                    userInfo: _mobile,
+                    inputInfo: _smsType,
+                    errorInfo: code,
+                    errorTime: new Date()
+                  }
+                  var newErrorlog = new Errorlog(errData)
+                  newErrorlog.save(function (err, Info) {
+                    if (err) {
+                      return res.status(500).send(err.errmsg)
+                    }
+                    res.json({results: 1, mesg: {'ErrorCode': code}})
+                  })
                 }
                                 // console.log(json.resp.respCode);
               })
@@ -1249,7 +1308,7 @@ exports.verifySMS = function (req, res) {
   var now = new Date()
   var _mobile = req.query.mobile
   var _smsType = req.query.smsType
-  var _smsCode = req.query.smsCode
+  var _smsCode = Number(req.query.smsCode)
 
   var query = {'Expire': {'$gte': now.getTime()}, 'mobile': _mobile, 'smsType': _smsType}
   Sms.getOne(query, function (err, item) {
@@ -1307,10 +1366,30 @@ exports.getPhoneNoByRole = function (req, res) {
 exports.setTDCticket = function (req, res) {
   var TDCticket = req.results.ticket
   var TDCurl = req.results.url
-  var userId = req.body.userId
+  // var userId = req.body.userId
+  var userId = req.session.userId
+  var role = req.session.role
 
   var query = {userId: userId}
-  Alluser.updateOne(query, {$set: {TDCticket: TDCticket, TDCurl: TDCurl}}, function (err, item) {
+  var upObj = {}
+  if (role === 'doctor') {
+    upObj = {
+      $set: {
+        'docTDCticket': TDCticket,
+        'docTDCurl': TDCurl
+      }
+    }
+  } else if (role === 'patient') {
+    upObj = {
+      $set: {
+        'patTDCticket': TDCticket,
+        'patTDCurl': TDCurl
+      }
+    }
+  } else {
+    upObj = {}
+  }
+  Alluser.updateOne(query, upObj, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -1319,11 +1398,13 @@ exports.setTDCticket = function (req, res) {
 }
 
 exports.setMessageOpenId = function (req, res) {
-  var _type = req.body.type
+  var _type = req.body.type || null
   var _openId = req.body.openId
   var userId = req.body.userId
-  if (_type === '' || _type === undefined) {
+  if (_type === null) {
     return res.json({result: 1, msg: 'plz input type'})
+  } else {
+    _type = Number(_type)
   }
   if (_openId === undefined || _openId === null || _openId === '') {
     return res.status(403).send('openId不能为空')
@@ -1455,10 +1536,12 @@ exports.setMessageOpenId = function (req, res) {
 }
 
 exports.getMessageOpenId = function (req, res) {
-  var _type = req.query.type
+  var _type = req.query.type || null
   var userId = req.query.userId
-  if (_type === '' || _type === undefined) {
+  if (_type === null) {
     return res.json({result: 1, msg: 'plz input type'})
+  } else {
+    _type = Number(_type)
   }
   var query = {userId: userId}
 

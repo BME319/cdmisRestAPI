@@ -132,7 +132,8 @@ exports.getOrderNo = function (req, res, next) {
 }
 
 exports.insertOrder = function (req, res, next) {
-  var money = req.body.money || null
+  // var money = req.body.money || null
+  var money = req.body.money
   if (money === null || money === '') {
     return res.status(403).send('invalid input money')
   }

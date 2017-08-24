@@ -239,21 +239,21 @@ exports.getCounts = function (req, res, next) {
   var query = {
     userId: req.patientId
   }
-  req.body.modify = req.body.modify || null
-  if (req.body.modify === 0) {
+  let modify = req.body.modify || req.query.modify || null
+  if (modify === 0) {
     return res.json({result: '此处禁止输入0!'})
-  } else if (req.body.modify < -1) {
+  } else if (modify < -1) {
     return res.json({result: '非法输入!'})
-  } else if (req.body.modify !== null && req.body.modify !== '') {
+  } else if (modify !== null) {
     // console.log('here')
     // modify字符串转化为数字
-    req.modify = parseInt(req.body.modify, 10)
+    req.modify = parseInt(modify, 10)
     // req.modify = Number(req.body.modify)
   } else {
     // get 操作时body为null,modify置为0
     req.modify = 0
   }
-  console.log(req.body.modify)
+  console.log(modify)
   console.log(req.modify)
   // return res.json({modify: req.modify});
   // 查询单个患者账户信息
@@ -838,8 +838,7 @@ exports.getCountsRespective = function (req, res) {
             count1 += 1
           }
         }
-      }     
-
+      }
       return res.json({result: {count1: count1, count2: count2}})
     }
   })
