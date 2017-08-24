@@ -69,6 +69,11 @@ exports.getInsuranceAObject = function (req, res, next) {
 
 // 保险专员／主管获取患者列表 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-08 YQC
 exports.getPatients = function (req, res) {
+  let iAO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceAObject || null
+  if ((iAO || iCO) === null) {
+    return res.json({msg: '请检查输入', code: 1})
+  }
   let status = Number(req.query.status || null)
   let _name = req.query.name || null
   let _agentName = req.query.agentName || null
@@ -147,6 +152,12 @@ exports.getPatients = function (req, res) {
 
 // 保险专员／主管获取患者跟踪记录详情 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-17 YQC
 exports.getHistory = function (req, res) {
+  let iAO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceAObject || null
+  let pO = req.body.patientObject || null
+  if (((iAO || iCO) && pO) === null) {
+    return res.json({msg: '请检查输入', code: 1})
+  }
   let patientId = req.body.patientObject._id
   let query = {patientId: patientId, status: {$ne: 5}}
   let opts = ''
@@ -179,6 +190,10 @@ exports.getHistory = function (req, res) {
 
 // 保险主管获取专员列表 2017-08-08 YQC
 exports.getAgents = function (req, res, next) {
+  let iCO = req.body.insuranceAObject || null
+  if (iCO === null) {
+    return res.json({msg: '请检查输入', code: 1})
+  }
   let query = {role: 'insuranceA'}
   let _name = req.query.name || null
   if (_name) {
@@ -249,6 +264,13 @@ exports.sortAgents = function (req, res) {
 
 // 保险主管设置／更换专员 2017-08-08 YQC
 exports.setAgent = function (req, res) {
+  let iAO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceAObject || null
+  let pO = req.body.patientObject || null
+  if ((iAO && iCO && pO) === null) {
+    return res.json({msg: '请检查输入', code: 1})
+  }
+
   let reason = req.body.reason || null
   let now = new Date()
   let dayTemp = commonFunc.convertToFormatDate(new Date(now))
@@ -357,6 +379,12 @@ exports.editInfo = function (req, res) {
 
 // 跟踪记录录入 2017-08-08 YQC
 exports.insertFollowUp = function (req, res) {
+  let iAO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceAObject || null
+  let pO = req.body.patientObject || null
+  if (((iAO || iCO) && pO) === null) {
+    return res.json({msg: '请检查输入', code: 1})
+  }
   let content = req.body.content || null
   if (content === null) {
     return res.json({code: 1, msg: '请输入content'})
@@ -402,6 +430,12 @@ exports.insertFollowUp = function (req, res) {
 
 // 保单信息录入 2017-08-08 YQC
 exports.insertPolicy = function (req, res) {
+  let iAO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceAObject || null
+  let pO = req.body.patientObject || null
+  if (((iAO || iCO) && pO) === null) {
+    return res.json({msg: '请检查输入', code: 1})
+  }
   let content = req.body.content || null
   if (content === null) {
     return res.json({code: 1, msg: '请输入content'})
@@ -452,6 +486,12 @@ exports.insertPolicy = function (req, res) {
 
 // 保险专员／主管获取患者保单详情 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-23 YQC
 exports.getPolicy = function (req, res) {
+  let iAO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceAObject || null
+  let pO = req.body.patientObject || null
+  if (((iAO || iCO) && pO) === null) {
+    return res.json({msg: '请检查输入', code: 1})
+  }
   let patientId = req.body.patientObject._id
   let query = {patientId: patientId, status: {$ne: 5}}
   let opts = ''
@@ -471,6 +511,11 @@ exports.getPolicy = function (req, res) {
 
 // 审核保单 2017-08-08 YQC
 exports.reviewPolicy = function (req, res) {
+  let iCO = req.body.insuranceAObject || null
+  let pO = req.body.patientObject || null
+  if ((iCO && pO) === null) {
+    return res.json({msg: '请检查输入', code: 1})
+  }
   let reviewResult = req.body.reviewResult || null
   if (reviewResult === null) {
     return res.json({code: 1, msg: '请填写reviewResult!'})
@@ -483,8 +528,8 @@ exports.reviewPolicy = function (req, res) {
   let dayTemp = commonFunc.convertToFormatDate(new Date(now))
   let todayFormat = dayTemp.slice(0, 4) + '年' + dayTemp.slice(4, 6) + '月' + dayTemp.slice(6, 8) + '日'
   let rejectReason = req.body.rejectReason || null
-  let startTime = new Date(req.body.startTime || null)
-  let endTime = new Date(req.body.endTime || null)
+  let startTime = req.body.startTime || null
+  let endTime = req.body.endTime || null
   if (reviewResult === 'reject') {
     if (rejectReason === null) {
       return res.json({code: 1, msg: '请填写rejectReason!'})
@@ -506,21 +551,22 @@ exports.reviewPolicy = function (req, res) {
   } else if (reviewResult === 'consent') {
     if (startTime === null || endTime === null) {
       return res.json({code: 1, msg: '请填写startTime, endTime!'})
-    }
-    upObj = {
-      $push: {
-        followUps: {
-          content: todayFormat + ' 由"' + insuranceCObject.name + '"审核保单，审核通过，保单完成',
-          time: now,
-          agentId: insuranceCObject._id,
-          type: 3
+    } else {
+      upObj = {
+        $push: {
+          followUps: {
+            content: todayFormat + ' 由"' + insuranceCObject.name + '"审核保单，审核通过，保单完成',
+            time: now,
+            agentId: insuranceCObject._id,
+            type: 3
+          }
+        },
+        $set: {
+          status: 3,
+          startTime: new Date(startTime),
+          endTime: new Date(endTime),
+          supervisor: insuranceCObject._id
         }
-      },
-      $set: {
-        status: 3,
-        startTime: startTime,
-        endTime: endTime,
-        supervisor: insuranceCObject._id
       }
     }
   } else {
@@ -540,8 +586,8 @@ exports.reviewPolicy = function (req, res) {
       let upObjP = {
         $set: {
           VIP: 1,
-          VIPStartTime: startTime,
-          VIPEndTime: endTime
+          VIPStartTime: new Date(startTime),
+          VIPEndTime: new Date(endTime)
         }
       }
       Alluser.update(queryP, upObjP, function (err, upPat) {
@@ -559,6 +605,11 @@ exports.reviewPolicy = function (req, res) {
 
 // 注销专员 2017-08-08 YQC
 exports.agentOff = function (req, res) {
+  let iAO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceAObject || null
+  if ((iAO && iCO) === null) {
+    return res.json({msg: '请检查输入', code: 1})
+  }
   let insuranceAObject = req.body.insuranceAObject
   let insuranceCObject = req.body.insuranceCObject
   let now = new Date()

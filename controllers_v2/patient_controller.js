@@ -521,7 +521,6 @@ exports.editPatientDetail = function (req, res, next) {
     userId: patientId,
     role: 'patient'
   }
-  let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
 
   let upObj = {
   // revisionInfo:{
@@ -622,6 +621,7 @@ exports.editPatientDetail = function (req, res, next) {
       return res.json({result: '修改失败，不存在的患者ID！'})
     }
     let date = req.body.date || null   // 区别是通过vitalSign插入体重信息，还是通过修改个人信息插入体重信息
+
     let dataTime = req.body.datatime || null
     if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined && date === null && dataTime === null) {
       var queryVital = {
@@ -631,20 +631,20 @@ exports.editPatientDetail = function (req, res, next) {
         unit: 'kg',
         date: commonFunc.getNowDate()
       }
-      var upVital = {}
-      var opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
-      console.log(queryVital)
+      let upVital = {}
+      let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
+      // console.log(queryVital)
       VitalSign.updateOne(queryVital, upVital, function (err, upweight) {
         if (err) {
           return res.status(500).send(err.errmsg)
         } else {
-          var queryWeight = {
+          let queryWeight = {
             patientId: upPatient._id,
             type: upweight.type,
             code: upweight.code,
             date: new Date(upweight.date)
           }
-          var upWeight = {
+          let upWeight = {
             $push: {
               data: {
                 time: new Date(),
@@ -655,6 +655,8 @@ exports.editPatientDetail = function (req, res, next) {
           VitalSign.update(queryWeight, upWeight, function (err, updata) {
             if (err) {
               return res.status(500).send(err.message)
+            } else {
+              return res.json({result: '修改成功', results: upPatient})
             }
             return res.json({result: '修改成功', results: upPatient})
           })
@@ -665,7 +667,7 @@ exports.editPatientDetail = function (req, res, next) {
     } else {  // 修改除体重数据外的患者信息返回
       return res.json({result: '修改成功', results: upPatient})
     }
-  }, opts)
+  }, {new: true})
 }
 
 // 新增疾病进程

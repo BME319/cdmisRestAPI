@@ -53,20 +53,43 @@ exports.updateStatus = function (req, res) {
     // console.log(item.task);
     // 查询到用户任务记录
     if (item != null) {
-      var flag = 0
-      // 查询参数对应任务并将其状态修改
-      for (var i = 0; i < item.task.length; i++) {
-        if (item.task[i].type === type) {
-          for (var j = 0; j < item.task[i].details.length; j++) {
-            if (item.task[i].details[j].code === code) {
-                  // console.log(item.task[i].details[j].status);
-              item.task[i].details[j].status = status
-              flag = 1
-              break
+      if (item.task) {
+        if (item.task.constructor === Array && item.task.length) {
+          var flag = 0
+          // 查询参数对应任务并将其状态修改
+          for (var i = 0; i < item.task.length; i++) {
+            if (item.task[i].type === type) {
+              for (var j = 0; j < item.task[i].details.length; j++) {
+                if (item.task[i].details[j].code === code) {
+                      // console.log(item.task[i].details[j].status);
+                  item.task[i].details[j].status = status
+                  flag = 1
+                  break
+                }
+              }
+            }
+            if (flag) { 
+              break 
             }
           }
+          // modified by GY 2017-07-26 added `date`
+          var upObj = {
+            $set: {
+              task: item.task, 
+              date: new Date()
+            }
+          }
+    
+          Task.updateOne(query, upObj, function (err, task) {
+            if (err) {
+              return res.status(500).send(err.errmsg)
+            }
+    
+            res.json({results: 0})
+          })
+        } else {
+          return res.json({results: 1})
         }
-        if (flag === 1) { break }
       }
       // modified by GY 2017-07-26 added `date`
       var upObj = {
@@ -75,14 +98,6 @@ exports.updateStatus = function (req, res) {
           date: new Date()
         }
       }
-
-      Task.updateOne(query, upObj, function (err, task) {
-        if (err) {
-          return res.status(500).send(err.errmsg)
-        }
-
-        res.json({results: 0})
-      })
     } else { // 未查询到用户任务记录
       res.json({results: 1})
     }
@@ -101,39 +116,48 @@ exports.updateStartTime = function (req, res) {
   Task.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
-    }
-    var flag = 0
-    // res.json({results: item});
-    // console.log(item.task);
-    for (var i = 0; i < item.task.length; i++) {
-      if (item.task[i].type === type) {
-        for (var j = 0; j < item.task[i].details.length; j++) {
-          if (item.task[i].details[j].code === code) {
-            // console.log(item.task[i].details[j].status);
-            item.task[i].details[j].status = 1
-            item.task[i].details[j].startTime = startTime
-            flag = 1
-            break
+    } else if (item === null) {
+      return res.status(404).json({results: '该用户暂无任务'})
+    } else if (item.task) {
+      var flag = 0
+      // res.json({results: item});
+      // console.log(item.task);
+      if (item.task.length) {
+        for (var i = 0; i < item.task.length; i++) {
+          if (item.task[i].type === type) {
+            for (var j = 0; j < item.task[i].details.length; j++) {
+              if (item.task[i].details[j].code === code) {
+                // console.log(item.task[i].details[j].status);
+                item.task[i].details[j].status = 1
+                item.task[i].details[j].startTime = startTime
+                flag = 1
+                break
+              }
+            }
+          }
+          if (flag === 1) { break }
+        }
+        // modified by GY 2017-07-26 added `date`
+        var upObj = {
+          $set: {
+            task: item.task,
+            date: new Date()
           }
         }
+    
+        Task.updateOne(query, upObj, function (err, task) {
+          if (err) {
+            return res.status(500).send(err.errmsg)
+          }
+    
+          res.json({results: 0})
+        })
+      } else {
+        return res.status(404).json({results: '该用户暂无任务'})
       }
-      if (flag === 1) { break }
+    } else {
+      return res.status(404).json({results: '该用户暂无任务'})
     }
-    // modified by GY 2017-07-26 added `date`
-    var upObj = {
-      $set: {
-        task: item.task,
-        date: new Date()
-      }
-    }
-
-    Task.updateOne(query, upObj, function (err, task) {
-      if (err) {
-        return res.status(500).send(err.errmsg)
-      }
-
-      res.json({results: 0})
-    })
   })
 }
 
