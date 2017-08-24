@@ -190,16 +190,16 @@ exports.saveQuestionaire = function (req, res, next) {
   let visitDate = req.body.visitDate || null
   let diagnosis = req.body.diagnosis || null
   let diagnosisPhotoUrl = req.body.diagnosisPhotoUrl || null
-  if (hospital != null) {
+  if (hospital !== null) {
     counselData['hospital'] = hospital
   }
-  if (req.body.visitDate != null) {
+  if (visitDate !== null) {
     counselData['visitDate'] = new Date(visitDate)
   }
-  if (req.body.diagnosis != null) {
+  if (diagnosis !== null) {
     counselData['diagnosis'] = diagnosis
   }
-  if (req.body.diagnosisPhotoUrl != null) {
+  if (diagnosisPhotoUrl !== null) {
     counselData['diagnosisPhotoUrl'] = diagnosisPhotoUrl
   }
 

@@ -4,7 +4,7 @@ var apiRecordSchema = new mongoose.Schema({
   userId: String,
   time: Date,
   api: String,
-  method: String,
+  method: {type: String, enum: ['POST', 'GET']},
   role: String
 })
 

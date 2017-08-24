@@ -3,7 +3,7 @@ var mongoose = require('mongoose')
 
 var communicationSchema = new mongoose.Schema({
   messageNo: String,
-  messageType: Number,
+  messageType: {type: Number, enum: [1, 2]}, // 1单聊，2群聊
   sendStatus: Number,
   readStatus: Number,
   sendBy: String,
@@ -13,7 +13,7 @@ var communicationSchema = new mongoose.Schema({
   content: mongoose.Schema.Types.Mixed,
   // newsType: 11 医-患 12 医-医 13 医-团队
   newsType: {
-    type: String, 
+    type: String,
     enum: ['11', '12', '13']
   }
 })
