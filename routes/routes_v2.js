@@ -5066,7 +5066,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/doctor/PatientInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getPatientObject, doctorsInChargeCtrl.reviewPatientInCharge, doctorsInChargeCtrl.updateDoctorInCharge)
+  app.post(version + '/doctor/PatientInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getPatientObject, doctorsInChargeCtrl.reviewPatientInCharge, doctorsInChargeCtrl.updateDoctorInCharge, serviceCtrl.recharge)
   // 医生端 获取排班（工作排班与面诊加号排班）信息 2017-07-19
   /** YQC annotation 2017-07-20 - acl 2017-07-25 医生
    * @swagger
@@ -5416,7 +5416,7 @@ module.exports = function (app, webEntry, acl) {
    *       304:
    *         description: "Not Modified"
    */
-  app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.confirmPD)
+  app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.confirmPD, serviceCtrl.recharge)
 
   // PC端保险管理
   // 获取患者 权限insuranceC/insuranceA
@@ -7899,7 +7899,7 @@ module.exports = function (app, webEntry, acl) {
 
   // app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund)
   // 退款接口
-  app.post(version + '/wechat/refund', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
+  app.post(version + '/wechat/refund', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
   // 退款查询
   app.post('/wechat/refundquery', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
   // 消息模板
