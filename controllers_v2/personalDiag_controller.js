@@ -3,6 +3,8 @@ var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
 var Order = require('../models/order')
 var Account = require('../models/account')
+var request = require('request')
+var webEntry = require('../settings').webEntry
 
 /**
 医生端
@@ -438,7 +440,7 @@ exports.cancelBookedPds = function (req, res) {
         bookingDay: req.body.nmd,
         bookingTime: req.body.time
       }
-      PersonalDiag.update(queryPD, upObjPD, function (err, upItemsPD) { // 一天内停诊人工处理
+      PersonalDiag.update(queryPD, upObjPD, function (err, upItemsPD) { // 一天内排班取消人工处理
         if (err) {
           return res.status(500).send(err)
         } else {
@@ -450,18 +452,36 @@ exports.cancelBookedPds = function (req, res) {
     }
   }
 
-  let upObj = {$set: {status: 4}}
-  PersonalDiag.update(query, upObj, function (err, upItems) {
+  // let upObj = {$set: {status: 4}}
+  PersonalDiag.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
-    } else {
+    } else if (items.length === 0) {
       if (req.body.suspendFlag) {
-        return res.json({result: '停诊时间添加成功', results: upItems})
+        return res.json({msg: '停诊时间添加成功', code: 0})
       } else {
-        return res.json({result: '面诊排班删除成功', results: upItems})
+        return res.json({msg: '面诊排班删除成功', code: 0})
       }
+    } else {
+      return res.json({msg: '测试中，待退款', code: 0, data: items})
+      // for (let item in items) {
+      //   let toRefund = items[item]
+      //   // 调用退款接口
+      // }
     }
-  }, {multi: true})
+  })
+
+  // PersonalDiag.update(query, upObj, function (err, upItems) {
+  //   if (err) {
+  //     return res.status(500).send(err)
+  //   } else {
+  //     if (req.body.suspendFlag) {
+  //       return res.json({result: '停诊时间添加成功', results: upItems})
+  //     } else {
+  //       return res.json({result: '面诊排班删除成功', results: upItems})
+  //     }
+  //   }
+  // }, {multi: true})
 }
 
 // 删除面诊停诊时间 2017-07-15 GY
@@ -581,7 +601,7 @@ exports.getPDPatients = function (req, res) {
 
 // 确认收到面诊：personalDiag表修改
 // 输入：code；修改内容：personalDiag.status, time
-exports.confirmPD = function (req, res) {
+exports.confirmPD = function (req, res, next) {
   // let doctorObjectId = req.body.doctorObject._id
   // let patientObjectId = req.body.patientObject._id
   // let bookingDay = new Date(new Date(req.body.day).toDateString()) || null
@@ -607,15 +627,17 @@ exports.confirmPD = function (req, res) {
         return res.status(406).send('Wrong Code')
       } else {
         let upObj = {$set: {status: 1}}
-        PersonalDiag.update(query, upObj, function (err, upItem) {
+        PersonalDiag.updateOne(query, upObj, function (err, upItem) {
           if (err) {
             return res.status(500).send(err)
           } else if (upItem.nModified === 0) {
             return res.status(304).send('Not Modified')
           } else {
-            return res.status(201).send('Confirmation Success')
+            // return res.status(201).send('Confirmation Success')
+            req.body.perDiagObject = upItem
+            next()
           }
-        })
+        }, {new: true})
       }
     }
   })
@@ -894,8 +916,9 @@ exports.getMyPDs = function (req, res) {
 // 患者取消预约
 exports.cancelMyPD = function (req, res, next) {
   let diagId = req.body.diagId || null
-  if (diagId === null) {
-    return res.status(412).send('Please Check Input of diagId')
+  let appRole = req.body.appRole || null
+  if (diagId === null || appRole === null) {
+    return res.status(412).json({msg: 'Please Check Input of diagId, appRole', code: 1})
   }
   let query = {diagId: diagId}
   PersonalDiag.getOne(query, function (err, item) {
@@ -912,9 +935,9 @@ exports.cancelMyPD = function (req, res, next) {
           if (err) {
             return res.status(500).send(err)
           } else if (upItem.nModified === 0) {
-            return res.status(304).send('Not Modified')
+            return res.status(304).json({msg: 'Not Modified', code: 1})
           } else {
-            return res.status(201).send('Cancel Request Received')
+            return res.status(201).json({msg: 'Cancel Request Received', code: 1})
           }
         })
       } else { // 直接退款
@@ -923,7 +946,7 @@ exports.cancelMyPD = function (req, res, next) {
           if (err) {
             return res.status(500).send(err)
           } else if (upItem.nModified === 0) {
-            return res.status(304).send('Not Modified')
+            return res.status(304).json({msg: 'Not Modified', code: 1})
           } else {
             // return res.json({results: '取消成功'})
             req.body.PDInfo = item
@@ -939,6 +962,7 @@ exports.updatePDCapacityUp = function (req, res) {
   let doctorObjectId = req.body.PDInfo.doctorId
   let bookingDay = req.body.PDInfo.bookingDay
   let bookingTime = req.body.PDInfo.bookingTime
+  let appRole = req.body.appRole || null
 
   let queryD = {_id: doctorObjectId, availablePDs: {$elemMatch: {$and: [{availableDay: bookingDay}, {availableTime: bookingTime}]}}}
   let upDoc = {
@@ -951,10 +975,32 @@ exports.updatePDCapacityUp = function (req, res) {
     if (err) {
       return res.status(500).send(err)
     } else if (upDoctor.nModified === 0) {
-      return res.status(304).send('Not Modified')
+      return res.status(304).json({msg: 'Not Modified', code: 1})
     } else if (upDoctor.nModified !== 0) {
-      // return res.json({results: '面诊数量更新成功'})
-      return res.status(201).send('Cancel Success')
+      // return res.status(201).send('Cancel Success')
+      // 调用退款接口
+      return res.json({msg: '测试中，待退款', code: 0})
+      // let queryO = {perDiagObject: req.body.PDInfo._id}
+      // Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
+      //   if (err) {
+      //     return res.status(500).send(err)
+      //   } else {
+      //     let orderNo = itemO.orderNo
+      //     request({ // 调用微信退款接口
+      //       url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
+      //       method: 'POST',
+      //       body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
+      //       json: true
+      //     }, function (err, response) {
+      //       if (err) {
+      //         return res.status(500).send(err)
+      //       } else {
+      //         console.log(response)
+      //         return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
+      //       }
+      //     })
+      //   }
+      // })
     }
   }, opts)
 }
@@ -1070,19 +1116,4 @@ exports.autoOverduePD = function (req, res) {
       console.log(items.length + ' Entries Found, and ' + count + ' Entries Successfully Modified.')
     }
   })
-}
-
-// 给医生账户充值
-exports.recharge = function (req, res) {
-  let doctorId = req.body.doctorId
-  let money = Number(req.body.money)
-  let queryA = {userId: doctorId}
-  let upObjA = {$inc: {money: money}}
-  Account.updateOne(queryA, upObjA, function (err, upAccount) { // 给相应医生账户充值
-    if (err) {
-      return res.status(500).send(err)
-    } else {
-      return res.json({data: upAccount, code: 0})
-    }
-  }, {upsert: true, new: true})
 }

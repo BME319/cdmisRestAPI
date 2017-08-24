@@ -142,8 +142,8 @@ var taskCtrl = require('./controllers_v2/task_controller')
 schedule.scheduleJob('30 0 8 * * *', taskCtrl.remindChangeTask)
 
 var personalDiagCtrl = require('./controllers_v2/personalDiag_controller')
-// 每天00:01更新医生的可预约面诊availablePDs 2017-08-03 YQC
-schedule.scheduleJob('0 1 0 * * *', personalDiagCtrl.autoAvailablePD)
+// 每天23:00更新医生的可预约面诊availablePDs 2017-08-03 YQC
+schedule.scheduleJob('0 00 23 * * *', personalDiagCtrl.autoAvailablePD)
 
 // 每日23:30自动更新过期面诊PD YQC
 schedule.scheduleJob('0 30 23 * * *', personalDiagCtrl.autoOverduePD)
