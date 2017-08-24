@@ -521,7 +521,6 @@ exports.editPatientDetail = function (req, res) {
     userId: patientId,
     role: 'patient'
   }
-  let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
 
   let upObj = {
   // revisionInfo:{
@@ -624,27 +623,27 @@ exports.editPatientDetail = function (req, res) {
     let date = req.body.date || null   // 区别是通过vitalSign插入体重信息，还是通过修改个人信息插入体重信息
     let dateTime = req.body.datatime || null
     if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined && date === null && dateTime === null) {
-      var queryVital = {
+      let queryVital = {
         patientId: upPatient._id,
         type: 'Weight',
         code: 'Weight_1',
         unit: 'kg',
         date: commonFunc.getNowDate()
       }
-      var upVital = {}
-      var opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
-      console.log(queryVital)
+      let upVital = {}
+      let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
+      // console.log(queryVital)
       VitalSign.updateOne(queryVital, upVital, function (err, upweight) {
         if (err) {
           return res.status(500).send(err.errmsg)
         } else {
-          var queryWeight = {
+          let queryWeight = {
             patientId: upPatient._id,
             type: upweight.type,
             code: upweight.code,
             date: new Date(upweight.date)
           }
-          var upWeight = {
+          let upWeight = {
             $push: {
               data: {
                 time: new Date(),
@@ -655,13 +654,16 @@ exports.editPatientDetail = function (req, res) {
           VitalSign.update(queryWeight, upWeight, function (err, updata) {
             if (err) {
               return res.status(500).send(err.message)
+            } else {
+              return res.json({result: '修改成功', results: upPatient})
             }
           })
         }
       }, opts)
+    } else {
+      res.json({result: '修改成功', results: upPatient})
     }
-    res.json({result: '修改成功', results: upPatient})
-  }, opts)
+  }, {new: true})
 }
 
 // 新增疾病进程
