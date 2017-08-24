@@ -7,8 +7,8 @@ var consultationSchema = new mongoose.Schema({
   patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'patient'},
   time: Date,
   diseaseInfo: {type: mongoose.Schema.Types.ObjectId, ref: 'counsel'},
-  status: Number,
-  messages: [
+  status: {type: Number, enum: [1, 0]}, // 进行中／关闭
+  messages: [ // 好像并不在用
     {
       sender: String,
       receiver: String,
