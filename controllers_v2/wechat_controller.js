@@ -511,7 +511,7 @@ exports.payResult = function (req, res) {
           if (item.paystatus !== 2) {    // 非成功
             upObj = {
               paystatus: 2,
-              paytime: payRes.time_end
+              paytime: new Date(payRes.time_end)
             }
 
             Order.updateOne(query, {$set: upObj}, function (err, item) {
@@ -528,7 +528,7 @@ exports.payResult = function (req, res) {
           if (item.paystatus !== 3) {    // 非失败
             upObj = {
               paystatus: 3,
-              paytime: payRes.time_end
+              paytime: new Date(payRes.time_end)
             }
 
             Order.updateOne(query, {$set: upObj}, function (err, item) {

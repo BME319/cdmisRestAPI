@@ -5,21 +5,21 @@ var commentSchema = new mongoose.Schema({
   counselId: String,
   doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
   patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'patient'},
-  type: Number,
+  // type: Number,
   time: Date,
-  helpScore: Number,
-  attitudeScore: Number,
-  speedScore: Number,
+  // helpScore: Number,
+  // attitudeScore: Number,
+  // speedScore: Number,
   totalScore: {type: Number, default: 10},
-  topic: String,
-  expense: String,
-  content: String,
-  revisionInfo: {
-    operationTime: Date,
-    userId: String,
-    userName: String,
-    terminalIP: String
-  }
+  // topic: String,
+  // expense: String,
+  content: String // ,
+  // revisionInfo: {
+  //   operationTime: Date,
+  //   userId: String,
+  //   userName: String,
+  //   terminalIP: String
+  // }
 })
 
 var CommentModel = mongoose.model('comment', commentSchema)

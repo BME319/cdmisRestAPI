@@ -13,7 +13,7 @@ var communicationSchema = new mongoose.Schema({
   content: mongoose.Schema.Types.Mixed,
   // newsType: 11 医-患 12 医-医 13 医-团队
   newsType: {
-    type: String, 
+    type: String,
     enum: ['11', '12', '13']
   }
 })
