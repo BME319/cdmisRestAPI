@@ -260,7 +260,7 @@ exports.updateOrder = function (req, res) {
     if (err) {
       return res.status(500).send(err)
     }
-    if (paystatus === 2) {
+    if (paystatus === 2 && conselObject !== null) {
       var query1 = {
         userId: item.doctorId
       }
@@ -306,7 +306,7 @@ exports.updateOrder = function (req, res) {
       }
       // res.json({results: item, msg: 'success!'})
     }
-  })
+  }, {new: true})
 }
 
 // 修改订单状态前验证是否符合条件 2017-06-19 GY

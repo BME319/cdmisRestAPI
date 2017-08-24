@@ -8,8 +8,8 @@ var path = require('path')
 var config = require('../config')
 var webEntry = require('../settings').webEntry
 var commonFunc = require('../middlewares/commonFunc')
-var User = require('../models/user')
-var Doctor = require('../models/doctor')
+var Alluser = require('../models/alluser')
+// var Doctor = require('../models/doctor')
 var OpenIdTmp = require('../models/openId')
 var Order = require('../models/order')
 var Message = require('../models/message')
@@ -55,12 +55,12 @@ var wxApis = {
 
 // var wxApiUserObject = config.wxDeveloperConfig.zdyyszbzx;
 
-// 根据角色获取AppId 修改 从session中获取role 2017-08-17 lgf
+// 根据角色获取AppId
 exports.chooseAppId = function (req, res, next) {
   var role = req.query.role || req.body.role
   // var role = req.session.role
   // console.log("test1");
-  // console.log('role', role)
+  console.log('role', role)
   if (role === 'doctor') {
     req.wxApiUserObject = config.wxDeveloperConfig.sjkshz
     next()
@@ -900,7 +900,7 @@ exports.messageTemplate = function (req, res) {
     var query = {userId: req.body.userId}
     var role = req.query.role || req.body.role
 
-    User.getOne(query, function (err, item) {
+    Alluser.getOne(query, function (err, item) {
       if (err) {
         return res.status(500).send(err.errmsg)
       }
@@ -1081,8 +1081,8 @@ exports.receiveTextMessage = function (req, res) {
               results = err.errmsg
             } else {
               // results = 'success';
-              var query = { userId: doctorUserId }
-              Doctor.getOne(query, function (err, doctor) {
+              var query = {userId: doctorUserId, role: 'doctor'}
+              Alluser.getOne(query, function (err, doctor) {
                 if (err) {
                   results = err
                 }
@@ -1127,7 +1127,7 @@ exports.receiveTextMessage = function (req, res) {
                 }
 
                 request({
-                  url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                  url: 'http://' + webEntry.domain + ':4060/api/v2/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                   method: 'POST',
                   body: template,
                   json: true
