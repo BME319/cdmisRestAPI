@@ -452,7 +452,7 @@ exports.cancelBookedPds = function (req, res) {
     }
   }
 
-  // let upObj = {$set: {status: 4}}
+  let upObj = {$set: {status: 4}}
   PersonalDiag.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
@@ -463,25 +463,28 @@ exports.cancelBookedPds = function (req, res) {
         return res.json({msg: '面诊排班删除成功', code: 0})
       }
     } else {
-      return res.json({msg: '测试中，待退款', code: 0, data: items})
+      PersonalDiag.update(query, upObj, function (err, upItems) {
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          if (req.body.suspendFlag) {
+            console.log('停诊时间添加成功')
+            // return res.json({result: '停诊时间添加成功'})
+          } else {
+            console.log('面诊排班删除成功')
+            // return res.json({result: '面诊排班删除成功'})
+          }
+          return res.json({msg: '测试中，待退款', code: 0, data: items})
+        }
+      }, {multi: true})
+      
+      // return res.json({msg: '测试中，待退款', code: 0, data: items})
       // for (let item in items) {
       //   let toRefund = items[item]
       //   // 调用退款接口
       // }
     }
   })
-
-  // PersonalDiag.update(query, upObj, function (err, upItems) {
-  //   if (err) {
-  //     return res.status(500).send(err)
-  //   } else {
-  //     if (req.body.suspendFlag) {
-  //       return res.json({result: '停诊时间添加成功', results: upItems})
-  //     } else {
-  //       return res.json({result: '面诊排班删除成功', results: upItems})
-  //     }
-  //   }
-  // }, {multi: true})
 }
 
 // 删除面诊停诊时间 2017-07-15 GY
