@@ -90,7 +90,6 @@ exports.updateStatus = function (req, res) {
         } else {
           return res.json({results: 1})
         }
-        if (flag === 1) { break }
       }
       // modified by GY 2017-07-26 added `date`
       var upObj = {
