@@ -5,12 +5,12 @@ var counselSchema = new mongoose.Schema({
   counselId: {type: String, unique: true},
   doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-  type: Number,
+  type: {type: Number, enum: [1, 2, 6]}, // 咨询=1,问诊=2,加急咨询=6
   time: Date,
-  status: Number,
-  topic: String,
-  content: String,
-  title: String,
+  status: {type: Number, enum: [1, 0]}, // 进行中／关闭
+  topic: String, // 好像并不在用
+  content: String, // 好像并不在用
+  title: String, // 好像并不在用
   sickTime: String,
   visited: Number,
   hospital: String,
@@ -19,10 +19,10 @@ var counselSchema = new mongoose.Schema({
   diagnosisPhotoUrl: [String],
   symptom: String,
   symptomPhotoUrl: [String],
-  descirption: String,
+  descirption: String, // 好像并不在用
   help: String,
-  comment: String,
-  messages: [
+  comment: String, // 好像并不在用
+  messages: [ // 好像并不在用
     {
       sender: String,
       receiver: String,
