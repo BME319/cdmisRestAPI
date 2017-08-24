@@ -586,8 +586,8 @@ exports.reviewPolicy = function (req, res) {
       let upObjP = {
         $set: {
           VIP: 1,
-          VIPStartTime: startTime,
-          VIPEndTime: endTime
+          VIPStartTime: new Date(startTime),
+          VIPEndTime: new Date(endTime)
         }
       }
       Alluser.update(queryP, upObjP, function (err, upPat) {
