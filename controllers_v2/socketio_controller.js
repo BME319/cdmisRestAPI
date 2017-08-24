@@ -33,7 +33,7 @@ function messageSaveSend (data, url, sender) {
   data.msg['time'] = Date.now()
 
     // save data
-  var reqUrl = 'http://' + webEntry.domain + ':4060/api/v1/communication/communication'
+  var reqUrl = 'http://' + webEntry.domain + ':4060/api/v2/communication/communication'
   var jsondata = {
     messageType: messageType,
     sendBy: sendBy,
@@ -143,7 +143,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
         // console.log(receiver);
     request({
             // url: 'http://' + webEntry.domain + ':4060/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
-      url: 'http://' + webEntry.domain + ':4060/api/v1/communication/team?teamId=' + data.msg.teamId,
+      url: 'http://' + webEntry.domain + ':4060/api/v2/communication/team?teamId=' + data.msg.teamId,
       method: 'GET',
       json: true
     }, function (err, response) {
@@ -222,7 +222,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
                             // groupSend(data);
               request({
                                 // url: 'http://'+ webEntry.domain +':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
-                url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate',
+                url: 'http://' + webEntry.domain + ':4060/api/v2/wechat/messageTemplate',
                 method: 'POST',
                 body: template,
                 json: true
@@ -349,7 +349,7 @@ exports.chat = function (io, socket) {
     var role = data.role
         // var toUserId = data.to;
 
-    var url = 'http://' + webEntry.domain + ':4060/api/v1/wechat/download'
+    var url = 'http://' + webEntry.domain + ':4060/api/v2/wechat/download'
 
     if (clientType !== 'doctor' && clientType !== 'patient' && (contentType === 'image' || contentType === 'voice')) {           // image voice
       var mediaId = data.msg.content.mediaId

@@ -55,12 +55,12 @@ var wxApis = {
 
 // var wxApiUserObject = config.wxDeveloperConfig.zdyyszbzx;
 
-// 根据角色获取AppId 修改 从session中获取role 2017-08-17 lgf
+// 根据角色获取AppId
 exports.chooseAppId = function (req, res, next) {
   var role = req.query.role || req.body.role
   // var role = req.session.role
   // console.log("test1");
-  // console.log('role', role)
+  console.log('role', role)
   if (role === 'doctor') {
     req.wxApiUserObject = config.wxDeveloperConfig.sjkshz
     next()
@@ -1127,7 +1127,7 @@ exports.receiveTextMessage = function (req, res) {
                 }
 
                 request({
-                  url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                  url: 'http://' + webEntry.domain + ':4060/api/v2/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                   method: 'POST',
                   body: template,
                   json: true

@@ -54,7 +54,7 @@ Wechat.prototype.save = function (callback) {
   })
 }
 
-// base-access-token 修改 从session中获取role 2017-08-18 lgf
+// base-access-token
 Wechat.baseTokenManager = function (type) {
   // console.log(type || 'access_token');
   return function (req, res, next) {

@@ -91,7 +91,7 @@ exports.changeMessageStatus = function (req, res) {
 }
 
 exports.insertMessage = function (req, res) {
-  if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) { // insurance传入，不用修改，消息接收方为患者
+  if (req.body.userId === null || req.body.userId === '' || req.body.userId === undefined) { // insurance传入，不用修改，消息接收方为患者或医生
     return res.json({result: '请填写userId'})
   }
   if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
