@@ -69,7 +69,7 @@ exports.getPatientDetail = function (req, res) {
       // return res.json({results: item, recentDiagnosis:recentDiagnosis});
 
   // 取体征表中最近体重值
-      let queryWeight = {patientId: item._id, type: 'Weight'}
+      let queryWeight = {patientId: item._id, type: '体重'}
       let optsWeight = {sort: '-_id'}
       VitalSign.getSome(queryWeight, function (err, vitalitems) {
         if (err) {
@@ -507,7 +507,7 @@ exports.checkPatient = function (req, res, next) {
 
 // 修改患者个人信息 2017-04-06 GY
 // 修改 患者修改个人体重信息时加入体征测量数据的操作 2017-08-07 lgf
-exports.editPatientDetail = function (req, res) {
+exports.editPatientDetail = function (req, res, next) {
   let patientId
   if (req.session.role === 'doctor') {
     patientId = req.body.patientId || null
@@ -621,12 +621,13 @@ exports.editPatientDetail = function (req, res) {
       return res.json({result: '修改失败，不存在的患者ID！'})
     }
     let date = req.body.date || null   // 区别是通过vitalSign插入体重信息，还是通过修改个人信息插入体重信息
-    let dateTime = req.body.datatime || null
-    if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined && date === null && dateTime === null) {
-      let queryVital = {
+
+    let dataTime = req.body.datatime || null
+    if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined && date === null && dataTime === null) {
+      var queryVital = {
         patientId: upPatient._id,
-        type: 'Weight',
-        code: 'Weight_1',
+        type: '体重',
+        code: '体重',
         unit: 'kg',
         date: commonFunc.getNowDate()
       }
@@ -657,11 +658,14 @@ exports.editPatientDetail = function (req, res) {
             } else {
               return res.json({result: '修改成功', results: upPatient})
             }
+            return res.json({result: '修改成功', results: upPatient})
           })
         }
       }, opts)
-    } else {
-      res.json({result: '修改成功', results: upPatient})
+    } else if (date !== null && dataTime !== null) {  // 体征数据进行后续警戒值判断
+      return next()
+    } else {  // 修改除体重数据外的患者信息返回
+      return res.json({result: '修改成功', results: upPatient})
     }
   }, {new: true})
 }

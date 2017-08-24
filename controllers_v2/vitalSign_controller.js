@@ -7,6 +7,7 @@ var config = require('../config')
 var VitalSign = require('../models/vitalSign')
 var request = require('request')
 var Alluser = require('../models/alluser')
+var Report = require('../models/report')
 
 // 获取患者对象
 exports.getPatientObject = function (req, res, next) {
@@ -178,22 +179,28 @@ exports.insertData = function (req, res, next) {
         } else if (push.nModified === 0) {
           return res.json({result: '未成功修改！请检查输入是否符合要求！', results: push})
         } else if (push.nModified === 1) {
-          if (req.body.type === 'Weight') {
+          if (req.body.type === '体重') {
             req.body.weight = req.body.datavalue
             return next()
           } else {
-            return res.json({result: '新建或修改成功', results: push})
+            // 修改 其他体征值进行警戒值的判断 2017-08-22 lgf
+            req.result = push
+            return next()
+            // return res.json({result: '新建或修改成功', results: push})
           }
         }
       }, {new: true})
     } else if (update.nModified === 0) {
       return res.json({result: '未成功修改！请检查输入是否符合要求！', results: update})
     } else if (update.nModified === 1) {
-      if (req.body.type === 'Weight') {
+      if (req.body.type === '体重') {
         req.body.weight = req.body.datavalue
         return next()
       } else {
-        return res.json({result: '新建或修改成功', results: update})
+        // 修改 其他体征值进行警戒值的判断 2017-08-22 lgf
+        req.result = update
+        return next()
+        // return res.json({result: '新建或修改成功', results: update})
       }
     }
   })
@@ -213,4 +220,110 @@ exports.receiveBloodPressure = function (req, res) {
     }
     res.json({results: body})
   })
+}
+
+// 超出范围
+exports.outOfRange = function (req, res, next) {
+  req.itemType = req.body.type
+  let queryR = { userId: req.session.userId }
+  let opts = {sort: '-_id'} // _id降序，取该项最新报表中的建议范围
+  req.isOutOfRange = 0      // 超出范围标志，1-超出 0-未超出
+  switch (req.itemType) {
+    case '血压':
+      queryR['itemType'] = 'BloodPressure'
+      console.log('queryR', queryR)
+      Report.getSome(queryR, function (err, reports) {
+        if (err) {
+          return res.status(500).send(err.message)
+        }
+        let recommendValue1 = 110  // 默认值
+        let recommendValue2 = 140
+        let recommendValue3 = 60
+        let recommendValue4 = 90
+        if (reports.length !== 0) {
+          let _recommendValue1 = reports[0].recommendValue1 || null
+          let _recommendValue2 = reports[0].recommendValue2 || null
+          let _recommendValue3 = reports[0].recommendValue3 || null
+          let _recommendValue4 = reports[0].recommendValue4 || null
+          if (_recommendValue1 !== null) { recommendValue1 = _recommendValue1 }
+          if (_recommendValue1 !== null) { recommendValue2 = _recommendValue2 }
+          if (_recommendValue1 !== null) { recommendValue3 = _recommendValue3 }
+          if (_recommendValue1 !== null) { recommendValue4 = _recommendValue4 }
+        }
+        if (req.body.datavalue < recommendValue1 || req.body.datavalue > recommendValue2 || req.body.datavalue2 < recommendValue3 || req.body.datavalue2 > recommendValue4) {
+          req.isOutOfRange = 1
+          req.measureData = req.body.datavalue + '/' + req.body.datavalue2
+          req.recommend = String(recommendValue1) + '-' + String(recommendValue2) + '/' + String(recommendValue3) + '-' + String(recommendValue4)
+          return next()
+        } else {
+          return res.json({result: '新建或修改成功', results: req.result})
+        }
+      }, opts)
+      break
+    case '尿量':
+      queryR['itemType'] = 'Vol'
+      console.log('queryR', queryR)
+      Report.getSome(queryR, function (err, reports) {
+        if (err) {
+          return res.status(422).send(err.message)
+        }
+        let recommendValue1 = 500  // 默认值
+        if (req.body.datavalue < recommendValue1) {
+          req.isOutOfRange = 1
+          req.measureData = req.body.datavalue
+          req.recommend = 500
+          return next()
+        } else {
+          return res.json({result: '新建或修改成功', results: req.result})
+        }
+      }, opts)
+      break
+    case '体温':
+      queryR['itemType'] = 'Temperature'
+      console.log('queryR', queryR)
+      Report.getSome(queryR, function (err, reports) {
+        if (err) {
+          return res.status(422).send(err.message)
+        }
+        let recommendValue1 = 37.3  // 默认值
+        if (req.body.datavalue > recommendValue1) {
+          req.isOutOfRange = 1
+          req.measureData = req.body.datavalue
+          req.recommend = 37.3
+          return next()
+        } else {
+          return res.json({result: '新建或修改成功', results: req.result})
+        }
+      }, opts)
+      break
+    case '心率':
+      queryR['itemType'] = 'HeartRate'
+      console.log('queryR', queryR)
+      Report.getSome(queryR, function (err, reports) {
+        if (err) {
+          return res.status(422).send(err.message)
+        }
+        let recommendValue1 = 60  // 默认值
+        let recommendValue2 = 100
+        if (reports.length !== 0) {
+          let _recommendValue1 = reports[0].recommendValue1 || null
+          let _recommendValue2 = reports[0].recommendValue2 || null
+          if (_recommendValue1 !== null) { recommendValue1 = _recommendValue1 }
+          if (_recommendValue1 !== null) { recommendValue2 = _recommendValue2 }
+        }
+        if (req.body.datavalue < recommendValue1 || req.body.datavalue > recommendValue2) {
+          req.isOutOfRange = 1
+          req.measureData = req.body.datavalue
+          req.recommend = String(recommendValue1) + '-' + String(recommendValue2)
+          // console.log('req.measureData', req.measureData)
+          // console.log('req.recommend', req.recommend)
+          return next()
+        } else {
+          return res.json({result: '新建或修改成功', results: req.result})
+        }
+      }, opts)
+      break
+    default:
+      return res.json({result: '新建或修改成功', results: req.result})
+  }
 }

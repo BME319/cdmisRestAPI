@@ -103,7 +103,8 @@ function insertOneNews (userId, sendBy, req, res) {
   }
   var query1 = {
     userId: userId,
-    sendBy: sendBy
+    sendBy: sendBy,
+    userRole: req.body.userRole // 防止接收方的不同角色的相应news信息被覆盖
   }
   var query2 = {
     sendBy: userId,
@@ -251,7 +252,10 @@ exports.insertNews = function (req, res) {
   //   return res.json({result: '请填写sendBy'})
   // }
   if (req.body.readOrNot === null || req.body.readOrNot === '' || req.body.readOrNot === undefined) {
-    return res.json({resutl: '请填写readOrNot'})
+    return res.json({result: '请填写readOrNot'})
+  }
+  if (req.body.userRole === null || req.body.userRole === '' || req.body.userRole === undefined) {
+    return res.json({result: '请填写userRole'})
   }
   // var userId = req.body.userId
   // var userId = req.session.userId
@@ -292,6 +296,7 @@ exports.insertTeamNews = function (req, res) {
   var userId = req.body.userId
   // var sendBy = req.body.sendBy
   var sendBy = req.session.userId
+  req.body.userRole = 'doctor'  // 医生会诊定义接收方均为doctor角色
   req.body.readOrNot = 1
   insertOneNews(userId, sendBy, req, res) // 用户发送消息记录
   req.body.readOrNot = 0
