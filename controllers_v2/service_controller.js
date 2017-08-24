@@ -1,5 +1,7 @@
 var Alluser = require('../models/alluser')
 var Team = require('../models/team')
+var Order = require('../models/order')
+var Account = require('../models/account')
 
 // 获取对象 2017-07-22 YQC
 // 获取用户对象
@@ -331,4 +333,37 @@ exports.setRelayTarget = function (req, res) {
       }
     }
   }, opts)
+}
+
+// 获取订单信息并给医生账户充值 2017-08-24 YQC
+exports.recharge = function (req, res) {
+  let queryO = {}
+  let perDiagObject = req.body.perDiagObject || null
+  let docInChaObject = req.body.docInChaObject || null
+  if (perDiagObject !== null) {
+    queryO = {perDiagObject: perDiagObject._id}
+  } else if (docInChaObject !== null) {
+    queryO = {docInChaObject: docInChaObject._id}
+  } else {
+    return res.status(412).json({results: '请检查输入'})
+  }
+
+  Order.getOne(queryO, function (err, itemO) { // 获取相应订单的医生userId和订单金额
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      let doctorId = itemO.doctorId
+      let money = Number(itemO.money)
+      let queryA = {userId: doctorId}
+      let upObjA = {$inc: {money: money}}
+      let optsA = {upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true}
+      Account.updateOne(queryA, upObjA, function (err, upAccount) { // 给相应医生账户充值
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          return res.status(201).json({data: upAccount, code: 0, msg: 'Confirmation Success'})
+        }
+      }, optsA)
+    }
+  })
 }

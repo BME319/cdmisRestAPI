@@ -8,4 +8,5 @@ web.config
 #过滤文件夹  
 uploads/
 logs/
+certs/
 node_modules/  

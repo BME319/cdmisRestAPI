@@ -1127,7 +1127,7 @@ exports.receiveTextMessage = function (req, res) {
                 }
 
                 request({
-                  url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                  url: 'http://' + webEntry.domain + ':4060/api/v2/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                   method: 'POST',
                   body: template,
                   json: true

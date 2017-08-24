@@ -1,6 +1,9 @@
 var DoctorsInCharge = require('../models/doctorsInCharge')
 var Alluser = require('../models/alluser')
 var DpRelation = require('../models/dpRelation')
+var request = require('request')
+var webEntry = require('../settings').webEntry
+var Order = require('../models/order')
 
 /**
 医生端
@@ -53,9 +56,10 @@ exports.reviewPatientInCharge = function (req, res, next) {
     return res.json({code: 1, msg: '请填写reviewResult!'})
   }
   let rejectReason = req.body.rejectReason || null
+  let appRole = req.body.appRole || null
   if (reviewResult === 'reject') {
-    if (rejectReason === null) {
-      return res.json({code: 1, msg: '请填写rejectReason!'})
+    if (rejectReason === null || appRole === null) {
+      return res.json({code: 1, msg: '请填写rejectReason,appRole!'})
     }
   } else if (reviewResult !== 'consent') {
     return res.json({code: 1, msg: '请检查reviewResult的输入'})
@@ -110,12 +114,13 @@ exports.reviewPatientInCharge = function (req, res, next) {
   })
 }
 
-exports.updateDoctorInCharge = function (req, res) {
+exports.updateDoctorInCharge = function (req, res, next) {
   let start = req.body.serviceStart
   let end = req.body.serviceEnd
   let patientObjectId = req.body.patientObject._id
   let reviewResult = req.body.reviewResult || null
   let rejectReason = req.body.rejectReason || null
+  let appRole = req.body.appRole || null
 
   let query = {patientId: patientObjectId, invalidFlag: 0}
   let upObj
@@ -135,19 +140,43 @@ exports.updateDoctorInCharge = function (req, res) {
       }
     }
   }
-  DoctorsInCharge.update(query, upObj, function (err, upRelation) {
+  DoctorsInCharge.updateOne(query, upObj, function (err, upDIC) {
     if (err) {
       return res.status(500).send(err)
     }
-    if (upRelation.n === 0) {
+    if (upDIC === null) {
       return res.json({results: '找不到该患者'})
-    } else if (upRelation.nModified !== 1) {
-      return res.json({results: '该患者不需要审核'})
     } else {
-      // return res.json({results: '更新医生申请成功'})
-      return res.json({results: '审核完成'})
+      // return res.json({results: '审核完成'})
+      if (Number(upDIC.invalidFlag) === 1) { // 审核结果为通过，给医生账户充钱
+        req.body.docInChaObject = upDIC
+        next()
+      } else if (Number(upDIC.invalidFlag) === 3) { // 审核结果为拒绝，调用退款接口
+        return res.json({msg: '测试中，待退款', code: 0})
+        // let queryO = {docInChaObject: upDIC._id}
+        // Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
+        //   if (err) {
+        //     return res.status(500).send(err)
+        //   } else {
+        //     let orderNo = itemO.orderNo
+        //     request({ // 调用微信退款接口
+        //       url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
+        //       method: 'POST',
+        //       body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
+        //       json: true
+        //     }, function (err, response) {
+        //       if (err) {
+        //         return res.status(500).send(err)
+        //       } else {
+        //         console(response)
+        //         return res.json({msg: '审核成功，已拒绝患者并退款', data: upDIC, code: 0})
+        //       }
+        //     })
+        //   }
+        // })
+      }
     }
-  })
+  }, {new: true})
 }
 
 /**
