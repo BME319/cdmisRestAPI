@@ -134,18 +134,16 @@ exports.getCertificate = function (req, res) {
 // 根据是否审核获取信息列表 2017-07-05 GY
 // 2017-08-23 YQC 修改 输入reviewStatus-1-返回审核通过列表，0-返回审核拒绝／未审核列表
 exports.getReviewInfo = function (req, res) {
+  let status = req.query.reviewStatus || null
   let query = {}
-  if (req.query.reviewStatus === null || req.query.reviewStatus === '' || req.query.reviewStatus === undefined) {
+  if (status === null) {
     return res.status(412).json({results: '请填写reviewStatus'})
-  } else if (Number(req.query.reviewStatus) === 0) {
+  } else if (Number(status) === 0 || Number(status) === 2) {
     query = {
-      $or: [
-        {reviewStatus: 0},
-        {reviewStatus: 2}
-      ],
+      reviewStatus: Number(status),
       role: 'guest'
     }
-  } else if (Number(req.query.reviewStatus) === 1) {
+  } else if (Number(status) === 1) {
     query = {reviewStatus: 1, role: 'doctor'}
   } else {
     return res.status(412).json({results: '非法输入'})
@@ -231,12 +229,9 @@ exports.countByStatus = function (req, res) {
   let query = {}
   if (status === null) {
     return res.status(412).json({results: '请填写reviewStatus'})
-  } else if (Number(status) === 0) {
+  } else if (Number(status) === 0 || Number(status) === 2) {
     query = {
-      $or: [
-        {reviewStatus: 0},
-        {reviewStatus: 2}
-      ],
+      reviewStatus: Number(status),
       role: 'guest'
     }
   } else if (Number(status) === 1) {

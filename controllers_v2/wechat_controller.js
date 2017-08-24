@@ -8,8 +8,8 @@ var path = require('path')
 var config = require('../config')
 var webEntry = require('../settings').webEntry
 var commonFunc = require('../middlewares/commonFunc')
-var User = require('../models/user')
-var Doctor = require('../models/doctor')
+var Alluser = require('../models/alluser')
+// var Doctor = require('../models/doctor')
 var OpenIdTmp = require('../models/openId')
 var Order = require('../models/order')
 var Message = require('../models/message')
@@ -900,7 +900,7 @@ exports.messageTemplate = function (req, res) {
     var query = {userId: req.body.userId}
     var role = req.query.role || req.body.role
 
-    User.getOne(query, function (err, item) {
+    Alluser.getOne(query, function (err, item) {
       if (err) {
         return res.status(500).send(err.errmsg)
       }
@@ -1081,8 +1081,8 @@ exports.receiveTextMessage = function (req, res) {
               results = err.errmsg
             } else {
               // results = 'success';
-              var query = { userId: doctorUserId }
-              Doctor.getOne(query, function (err, doctor) {
+              var query = {userId: doctorUserId, role: 'doctor'}
+              Alluser.getOne(query, function (err, doctor) {
                 if (err) {
                   results = err
                 }

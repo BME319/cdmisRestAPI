@@ -4896,7 +4896,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.addDoctorInCharge, serviceCtrl.addPatientInCharge, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  app.post(version + '/patient/doctorInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, doctorsInChargeCtrl.addDoctorInCharge, doctorsInChargeCtrl.addPatientInCharge, orderCtrl.getOrderNo, orderCtrl.updateOrder)
   // 患者端 获取主管医生信息 2017-07-20 主管医生信息更换数据库表至DoctorsInCharge 2017-07-27
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
@@ -4924,7 +4924,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "UserId not found."
    */
-  app.get(version + '/patient/myDoctorsInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getDoctorsInCharge)
+  app.get(version + '/patient/myDoctorsInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, doctorsInChargeCtrl.getDoctorsInCharge)
   // 患者端 删除主管医生 2017-07-20 主管医生信息更换数据库表至DoctorsInCharge 2017-07-27
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
@@ -4952,7 +4952,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/cancelDoctorInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.deleteDoctorInCharge, serviceCtrl.deletePatientInCharge)
+  app.post(version + '/patient/cancelDoctorInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, doctorsInChargeCtrl.deleteDoctorInCharge, doctorsInChargeCtrl.deletePatientInCharge)
   // 患者端 判断关系 2017-07-21 主管医生信息更换数据库表至DoctorsInCharge 2017-07-27
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
@@ -4995,7 +4995,7 @@ module.exports = function (app, webEntry, acl) {
    *                 - "1"
    *               description: "1表示患者与医生之间为关注／被关注的关系，0则不是"
    */
-  app.get(version + '/services/relation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, serviceCtrl.relation)
+  app.get(version + '/services/relation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, doctorsInChargeCtrl.relation)
   // 医生端 获取主管医生待审核请求列表 2017-07-19
   /** YQC annotation 2017-07-25  - acl 2017-07-25 医生
    * @swagger
@@ -5027,7 +5027,7 @@ module.exports = function (app, webEntry, acl) {
    *             numberToReview:
    *               type: number
    */
-  app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getPatientsToReview)
+  app.get(version + '/doctor/myPatientsToReview', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorsInChargeCtrl.getPatientsToReview)
   // 医生端 审核主管患者 2017-07-21 主管医生信息更换数据库表至DoctorsInCharge 2017-07-27
   /** YQC annotation 2017-07-25 - acl 2017-07-25 医生
    * @swagger
@@ -5066,7 +5066,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/doctor/PatientInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getPatientObject, serviceCtrl.reviewPatientInCharge, serviceCtrl.updateDoctorInCharge)
+  app.post(version + '/doctor/PatientInCharge', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, serviceCtrl.getPatientObject, doctorsInChargeCtrl.reviewPatientInCharge, doctorsInChargeCtrl.updateDoctorInCharge)
   // 医生端 获取排班（工作排班与面诊加号排班）信息 2017-07-19
   /** YQC annotation 2017-07-20 - acl 2017-07-25 医生
    * @swagger

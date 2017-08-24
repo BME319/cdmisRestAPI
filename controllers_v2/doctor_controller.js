@@ -336,7 +336,7 @@ exports.getComments = function (req, res, next) {
   }
 
   let _Url = ''
-  let userIdUrl = 'userId=' + req.query.userId
+  let tokenUrl = 'token=' + req.query.token
   let limitUrl = ''
   let skipUrl = ''
 
@@ -346,10 +346,10 @@ exports.getComments = function (req, res, next) {
   if (skip !== 0) {
     skipUrl = 'skip=' + String(skip + limit)
   }
-  if (userIdUrl !== '' || limitUrl !== '' || skipUrl !== '') {
+  if (tokenUrl !== '' || limitUrl !== '' || skipUrl !== '') {
     _Url = _Url + '?'
-    if (userIdUrl !== '') {
-      _Url = _Url + userIdUrl + '&'
+    if (tokenUrl !== '') {
+      _Url = _Url + tokenUrl + '&'
     }
     if (limitUrl !== '') {
       _Url = _Url + limitUrl + '&'
@@ -359,7 +359,7 @@ exports.getComments = function (req, res, next) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/doctor/getDoctorInfo' + _Url
+  req.body.nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/doctor/detail' + _Url
 
   Comment.getSome(query, function (err, items) {
     if (err) {
