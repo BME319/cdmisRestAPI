@@ -90,8 +90,14 @@ exports.updateStatus = function (req, res) {
         } else {
           return res.json({results: 1})
         }
-      } else {
-        return res.json({results: 1})
+        if (flag === 1) { break }
+      }
+      // modified by GY 2017-07-26 added `date`
+      var upObj = {
+        $set: {
+          task: item.task,
+          date: new Date()
+        }
       }
     } else { // 未查询到用户任务记录
       res.json({results: 1})
@@ -345,7 +351,7 @@ exports.updateContent = function (req, res) {
         type: req.body.type,
         details: typeNew
       }
-    }, 
+    },
     $set: {
       date: new Date()
     }
@@ -362,7 +368,7 @@ exports.updateContent = function (req, res) {
   }, {new: true})
 }
 
-// 取3个月以上无操作的数据，提醒主管医生为其调整方案 2017-07-26 GY 
+// 取3个月以上无操作的数据，提醒主管医生为其调整方案 2017-07-26 GY
 exports.remindChangeTask = function () {
   // 设定时间线为当前的90天前
   let now = new Date()
@@ -374,10 +380,10 @@ exports.remindChangeTask = function () {
   let m = now.getMonth() + 1
   let d = now.getDate()
 
-  let timeline = now - 1000*60*60*24*90
+  let timeline = now - 1000 * 60 * 60 * 24 * 90
 
   function nextOrEnd (taskItems, index) {
-    if (index < taskItems.length-1) {
+    if (index < taskItems.length - 1) {
       sendMessage(taskItems, ++index)
     } else {
       console.log('auto_remind_change_task_success')
@@ -433,26 +439,26 @@ exports.remindChangeTask = function () {
                 let title = '主管患者任务方案调整提醒'
                 let description = '您的患者_' + patientItem.name + '_的任务方案已经90天未更新，请前往方案定制处调整方案'
                 let messageData = {
-                  messageId: messageId, 
-                  userId: doctorItem.userId, 
-                  sendBy: 'System', 
-                  readOrNot: 0, 
-                  type: 9, 
-                  time: now, 
-                  title: title, 
+                  messageId: messageId,
+                  userId: doctorItem.userId,
+                  sendBy: 'System',
+                  readOrNot: 0,
+                  type: 9,
+                  time: now,
+                  title: title,
                   description: description
                 }
                 let queryN = {
-                  userId: doctorItem.userId, 
-                  userRole: 'doctor', 
-                  sendBy: 'System', 
+                  userId: doctorItem.userId,
+                  userRole: 'doctor',
+                  sendBy: 'System',
                   type: 9
                 }
                 let upNews = {
-                  messageId: messageId, 
-                  readOrNot: 0, 
-                  time: now, 
-                  title: title, 
+                  messageId: messageId,
+                  readOrNot: 0,
+                  time: now,
+                  title: title,
                   description: description
                 }
                 let newsOpts = {upsert: true}

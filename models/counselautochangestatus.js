@@ -24,7 +24,7 @@ var counselautochangestatusSchema = new mongoose.Schema({
     }
   ],
   endTime: Date,
-  type: Number,
+  type: {type: Number, enum: [1, 2, 3, 6]}, // 1 咨询 2 问诊 3 咨询升级问诊 6 加急咨询
   // 超时类型：1为超过24小时，2为超过18小时
   timeouttype: Number
 })

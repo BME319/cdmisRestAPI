@@ -10,7 +10,7 @@ exports.uploadphoto = function () {
     filename: function (req, file, cb) {
          // 将保存文件名设置为 字段名 + 时间戳，比如 logo-1478521468943
          // cb(null, file.fieldname + '-' + Date.now());
-      var type = req.query.type
+      var type = req.body.type
       if (type === null || type === undefined) {
         type = ''
       }
@@ -25,7 +25,7 @@ exports.uploadphoto = function () {
 exports.upload = function (req, res) {
   var file = req.file
   var path = file.path
-  var type = req.query.type
+  var type = req.body.type
   if (type === null || type === undefined) {
     type = ''
   }
@@ -78,4 +78,11 @@ exports.upload = function (req, res) {
 //    });
 //   }
 //  });
+// }
+
+// exports.download = function (req, res) {
+//   var path = 'public/upload/file.txt'  // 文件存储的路径
+
+//   // filename:设置下载时文件的文件名，可不填，则为原名称
+//   res.download(filepath, filename)
 // }

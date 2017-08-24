@@ -1,5 +1,5 @@
 var Department = require('../models/department')
-var Alluser = require('../models/alluser')
+// var Alluser = require('../models/alluser')
 
 // 返回地区、地区负责人
 exports.getDistrict = function (req, res) {
@@ -12,7 +12,7 @@ exports.getDistrict = function (req, res) {
   // 若district为空，返回所有地区信息；若不为空，返回该地区信息
   if (district !== '') {
     query['district'] = {$regex: district}
-  } 
+  }
   if (portleader !== '') {
     query['portleader'] = portleader
   }
@@ -53,7 +53,7 @@ exports.getDepartment = function (req, res) {
   if (department !== '') {
     query['department'] = {$regex: department}
   } else {
-    query['department'] = {$ne:null}
+    query['department'] = {$ne: null}
   }
   if (hospital !== '') {
     query['hospital'] = {$regex: hospital}
@@ -88,8 +88,7 @@ exports.getDoctorList = function (req, res) {
     res.status(400).send('请输入科室')
   } else if (hospital === '') {
     res.status(400).send('请输入医院')
-  }
-    else {
+  } else {
     let query = {
       district: district,
       department: department,
@@ -104,7 +103,7 @@ exports.getDoctorList = function (req, res) {
       if (err) {
         res.status(500).send(err)
       }
-      if (Info !== null){
+      if (Info !== null) {
         res.json({results: Info.doctors})
       } else {
         res.status(500).send('没有医生')
@@ -127,15 +126,14 @@ exports.updateDistrict = function (req, res) {
       obj['district'] = newdistrict
     }
     if (newportleader !== '') {
-
       obj['portleader'] = newportleader
     }
     Department.update(query, obj, function (err, Info) {
-    if (err) {
-      res.status(500).send(err.errmsg)
-    }
-    res.json('更新成功')
-  }, {upsert: true, multi: true})
+      if (err) {
+        res.status(500).send(err.errmsg)
+      }
+      res.json('更新成功')
+    }, {upsert: true, multi: true})
   }
 }
 
@@ -161,10 +159,10 @@ exports.updateDepartment = function (req, res) {
     let query = {}
     let obj = {}
     Department.getSome(query1, null, function (err, Info) {
-      if (err){
+      if (err) {
         res.status(500).send(err)
       }
-      portleader = Info[0].portleader
+      let portleader = Info[0].portleader
       console.log('Info' + Info[0].department)
       if (Info[0].department !== undefined) {
         query = {
@@ -218,7 +216,7 @@ exports.deleteRecord = function (req, res) {
     query['department'] = department
   }
   Department.remove(query, function (err, Info) {
-    if(err){
+    if (err) {
       res.status(500).send(err)
     }
     res.json('删除成功')
@@ -236,4 +234,3 @@ function distinct (data) {
   }
   return arr
 }
-

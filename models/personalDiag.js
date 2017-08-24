@@ -1,7 +1,7 @@
 var mongoose = require('mongoose')
 
 var personalDiagSchema = new mongoose.Schema({
-  diagId: String, // 面诊编号
+  diagId: {type: String, unique: true}, // 面诊编号
   doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   code: String, // 验证码

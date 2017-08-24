@@ -182,7 +182,7 @@ exports.getDoctorLists = function (req, res) {
   var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/getDoctorLists' + _Url
 
   if (req.query.doctorId !== null && req.query.doctorId !== undefined && req.query.doctorId !== '') {
-    query = {userId: req.query.doctorId}
+    query = {userId: req.query.doctorId, role: 'doctor'}
     option = ''
     fields = docInfoForPat
   }
@@ -387,121 +387,123 @@ exports.checkPatient = function (req, res, next) {
   })
 }
 
-// 新建患者个人信息 2017-04-06 GY
-exports.newPatientDetail = function (req, res) {
-  let birthday = req.body.birthday || null
-  let bloodType = req.body.bloodType || null
-  let hypertension = req.body.hypertension || null
-  if (birthday == null) {
-    return res.json({result: '请填写birthday!'})
-  }
-  if (bloodType == null) {
-    return res.json({result: '请填写bloodType!'})
-  }
-  if (hypertension == null) {
-    return res.json({result: '请填写hypertension!'})
-  }
-  var patientData = {
-    userId: req.session.userId,
-    name: req.body.name || null,
-    gender: req.body.gender || null,
-    bloodType: bloodType,
-    hypertension: hypertension,
-    allergic: req.body.allergic || null,
-    class: req.body.class || null,
-    class_info: req.body.class_info || null,
-    birthday: new Date(birthday)
-  // revisionInfo:{
-  //   operationTime:new Date(),
-  //   userId:"gy",
-  //   userName:"gy",
-  //   terminalIP:"10.12.43.32"
-  // }
-  }
-  if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
-    patientData['photoUrl'] = req.body.photoUrl
-  }
-  if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
-    patientData['IDNo'] = req.body.IDNo
-  }
-  if (req.body.height !== null && req.body.height !== '' && req.body.height !== undefined) {
-    patientData['height'] = req.body.height
-  }
-  if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
-    patientData['weight'] = req.body.weight
-  }
-  if (req.body.occupation !== null && req.body.occupation !== '' && req.body.occupation !== undefined) {
-    patientData['occupation'] = req.body.occupation
-  }
-  if (req.body.nation !== null && req.body.nation !== '' && req.body.nation !== undefined) {
-    patientData['address.nation'] = req.body.nation
-  }
-  if (req.body.province !== null && req.body.province !== '' && req.body.province !== undefined) {
-    patientData['address.province'] = req.body.province
-  }
-  if (req.body.city !== null && req.body.city !== '' && req.body.city !== undefined) {
-    patientData['address.city'] = req.body.city
-  }
-  if (req.body.operationTime !== null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
-    patientData['operationTime'] = req.body.operationTime
-  }
-  if (req.body.lastVisit !== null && req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
-    if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
-      patientData['lastVisit.time'] = new Date(req.body.lastVisit.time)
+/** 新建患者个人信息 弃用
+  // 新建患者个人信息 2017-04-06 GY
+  exports.newPatientDetail = function (req, res) {
+    let birthday = req.body.birthday || null
+    let bloodType = req.body.bloodType || null
+    let hypertension = req.body.hypertension || null
+    if (birthday == null) {
+      return res.json({result: '请填写birthday!'})
     }
-    if (req.body.lastVisit.hospital !== null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
-      patientData['lastVisit.hospital'] = req.body.lastVisit.hospital
+    if (bloodType == null) {
+      return res.json({result: '请填写bloodType!'})
     }
-    if (req.body.lastVisit.diagnosis !== null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
-      patientData['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
+    if (hypertension == null) {
+      return res.json({result: '请填写hypertension!'})
     }
-  }
-  // return res.status(200).send(counselData);
-  var newPatient = new Alluser(patientData)
-  newPatient.save(function (err, patientInfo) {
-    if (err) {
-      return res.status(500).send(err.errmsg)
+    var patientData = {
+      userId: req.session.userId,
+      name: req.body.name || null,
+      gender: req.body.gender || null,
+      bloodType: bloodType,
+      hypertension: hypertension,
+      allergic: req.body.allergic || null,
+      class: req.body.class || null,
+      class_info: req.body.class_info || null,
+      birthday: new Date(birthday)
+    // revisionInfo:{
+    //   operationTime:new Date(),
+    //   userId:"gy",
+    //   userName:"gy",
+    //   terminalIP:"10.12.43.32"
+    // }
+    }
+    if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
+      patientData['photoUrl'] = req.body.photoUrl
+    }
+    if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
+      patientData['IDNo'] = req.body.IDNo
+    }
+    if (req.body.height !== null && req.body.height !== '' && req.body.height !== undefined) {
+      patientData['height'] = req.body.height
     }
     if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
-      let timenow = commonFunc.getNowFormatSecond()
-      let queryVital = {
-        patientId: patientInfo._id,
-        type: 'Weight',
-        code: 'Weight_1',
-        unit: 'kg',
-        date: commonFunc.getNowDate()
+      patientData['weight'] = req.body.weight
+    }
+    if (req.body.occupation !== null && req.body.occupation !== '' && req.body.occupation !== undefined) {
+      patientData['occupation'] = req.body.occupation
+    }
+    if (req.body.nation !== null && req.body.nation !== '' && req.body.nation !== undefined) {
+      patientData['address.nation'] = req.body.nation
+    }
+    if (req.body.province !== null && req.body.province !== '' && req.body.province !== undefined) {
+      patientData['address.province'] = req.body.province
+    }
+    if (req.body.city !== null && req.body.city !== '' && req.body.city !== undefined) {
+      patientData['address.city'] = req.body.city
+    }
+    if (req.body.operationTime !== null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
+      patientData['operationTime'] = req.body.operationTime
+    }
+    if (req.body.lastVisit !== null && req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
+      if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
+        patientData['lastVisit.time'] = new Date(req.body.lastVisit.time)
       }
-      let upObj = {}
-      let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
-      VitalSign.updateOne(queryVital, upObj, function (err, upweight) {
-        if (err) {
-          return res.status(500).send(err.errmsg)
-        } else {
-          let query = {
-            patientId: patientInfo._id,
-            type: upweight.type,
-            code: upweight.code,
-            date: new Date(upweight.date)
-          }
-          let upObj = {
-            $push: {
-              data: {
-                time: new Date(timenow),
-                value: req.body.weight
+      if (req.body.lastVisit.hospital !== null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
+        patientData['lastVisit.hospital'] = req.body.lastVisit.hospital
+      }
+      if (req.body.lastVisit.diagnosis !== null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
+        patientData['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
+      }
+    }
+    // return res.status(200).send(counselData);
+    var newPatient = new Alluser(patientData)
+    newPatient.save(function (err, patientInfo) {
+      if (err) {
+        return res.status(500).send(err.errmsg)
+      }
+      if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
+        let timenow = commonFunc.getNowFormatSecond()
+        let queryVital = {
+          patientId: patientInfo._id,
+          type: 'Weight',
+          code: 'Weight_1',
+          unit: 'kg',
+          date: commonFunc.getNowDate()
+        }
+        let upObj = {}
+        let opts = {new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true}
+        VitalSign.updateOne(queryVital, upObj, function (err, upweight) {
+          if (err) {
+            return res.status(500).send(err.errmsg)
+          } else {
+            let query = {
+              patientId: patientInfo._id,
+              type: upweight.type,
+              code: upweight.code,
+              date: new Date(upweight.date)
+            }
+            let upObj = {
+              $push: {
+                data: {
+                  time: new Date(timenow),
+                  value: req.body.weight
+                }
               }
             }
+            VitalSign.update(query, upObj, function (err, updata) {
+              if (err) {
+                return res.status(422).send(err.message)
+              }
+            })
           }
-          VitalSign.update(query, upObj, function (err, updata) {
-            if (err) {
-              return res.status(422).send(err.message)
-            }
-          })
-        }
-      }, opts)
-    }
-    res.json({result: '新建成功', results: patientInfo})
-  })
-}
+        }, opts)
+      }
+      res.json({result: '新建成功', results: patientInfo})
+    })
+  }
+*/
 
 // 修改患者个人信息 2017-04-06 GY
 // 修改 患者修改个人体重信息时加入体征测量数据的操作 2017-08-07 lgf
@@ -549,9 +551,13 @@ exports.editPatientDetail = function (req, res) {
   }
   if (req.body.height !== null && req.body.height !== '' && req.body.height !== undefined) {
     upObj['height'] = req.body.height
+  } else {
+    upObj['height'] = undefined
   }
   if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
     upObj['weight'] = req.body.weight
+  } else {
+    upObj['weight'] = undefined
   }
   if (req.body.occupation !== null && req.body.occupation !== '' && req.body.occupation !== undefined) {
     upObj['occupation'] = req.body.occupation
@@ -576,6 +582,8 @@ exports.editPatientDetail = function (req, res) {
   }
   if (req.body.operationTime !== null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
     upObj['operationTime'] = new Date(req.body.operationTime)
+  } else {
+    upObj['operationTime'] = undefined
   }
   if (req.body.hypertension !== null && req.body.hypertension !== '' && req.body.hypertension !== undefined) {
     upObj['hypertension'] = req.body.hypertension
@@ -586,13 +594,23 @@ exports.editPatientDetail = function (req, res) {
   if (req.body.lastVisit !== null && req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
     if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
       upObj['lastVisit.time'] = new Date(req.body.lastVisit.time)
+    } else {
+      upObj['lastVisit.time'] = undefined
     }
     if (req.body.lastVisit.hospital !== null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
       upObj['lastVisit.hospital'] = req.body.lastVisit.hospital
+    } else {
+      upObj['lastVisit.hospital'] = undefined
     }
     if (req.body.lastVisit.diagnosis !== null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
       upObj['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
+    } else {
+      upObj['lastVisit.diagnosis'] = undefined
     }
+  } else {
+    upObj['lastVisit.time'] = undefined
+    upObj['lastVisit.hospital'] = undefined
+    upObj['lastVisit.diagnosis'] = undefined
   }
 
   // return res.json({query: query, upObj: upObj});
