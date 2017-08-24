@@ -7897,9 +7897,9 @@ module.exports = function (app, webEntry, acl) {
 
   // app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund)
   // 退款接口
-  app.post(version + '/wechat/refund', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
+  app.post(version + '/wechat/refund', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
   // 退款查询
-  app.post('/wechat/refundquery', tokenManager.verifyToken(), aclChecking.Checking(acl), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
+  app.post('/wechat/refundquery', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
   // 消息模板
   app.post(version + '/wechat/messageTemplate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
   // 下载
