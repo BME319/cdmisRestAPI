@@ -51,7 +51,8 @@ exports.getNewsByReadOrNot = function (req, res) {
   var userRole = req.session.role
   // console.log(userRole)
   // var userRole = req.session.role
-  var type = Number(req.query.type)
+  // var type = Number(req.query.type)
+  let type = req.query.type
   var _readOrNot = Number(req.query.readOrNot)
 
   var query = {}
@@ -60,6 +61,8 @@ exports.getNewsByReadOrNot = function (req, res) {
     query['type'] = type
     if (type === 'chat') {
       query = {'$or': [{type: 11}, {type: 12}, {type: 13}, {type: 15}]}
+    } else {
+      type = Number(req.query.type)
     }
   }
   query['userId'] = userId
@@ -75,6 +78,7 @@ exports.getNewsByReadOrNot = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+    console.log('items', items)
     res.json({results: items})
   }, opts)
 }

@@ -597,11 +597,14 @@ exports.getDoctorsInCharge = function (req, res, next) {
         } else if (Number(itemsDIC[i].invalidFlag) === 1) {
           // 用于区别是否是 vitalSign插入数据后进行警戒值提醒而获取主管医生 2017-08-22 lgf
           if (req.isOutOfRange) {
-            req.body.userId = itemsDIC[i].userId
+            req.body.userId = itemsDIC[i].doctorId.userId
             req.body.sendBy = req.session.userId
+            // console.log('req.body.userId', req.body.userId)
             // 定义警戒值消息类型为2
             req.body.type = 2
+            req.body.title = '警戒值提醒'
             req.body.description = req.body.patientObject.name + '患者的' + req.itemType + '项目超标,测量值为' + req.measureData + ',该项正常值为' + req.recommend
+            // console.log('req.body.description', req.body.description)
             return next()
           } else {
             return res.json({message: '当前已有主管医生!', results: itemsDIC[i]})
