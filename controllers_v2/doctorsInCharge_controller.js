@@ -324,7 +324,7 @@ exports.getDoctorsInCharge = function (req, res, next) {
           // 用于区别是否是 vitalSign插入数据后进行警戒值提醒而获取主管医生 2017-08-22 lgf
           if (req.isOutOfRange) {
             req.body.userId = itemsDIC[i].doctorId.userId
-            req.body.sendBy = req.session.userId
+            req.body.sendBy = 'System'
             // console.log('req.body.userId', req.body.userId)
             // 定义警戒值消息类型为2
             req.body.type = 2
