@@ -49,6 +49,8 @@ exports.getReport = function (req, res) {
         startTime = new Date(endTime - 7 * 24 * 3600 * 1000)
         modify++
       }
+      req.startTime = new Date(startTime)
+      req.endTime = new Date(endTime)
       let startTimeYear = startTime.getFullYear()
       let startTimeMonth = startTime.getMonth() + 1
       let monthWeek = getMonthWeek(startTime.getDate())
@@ -113,6 +115,8 @@ exports.getReport = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     // console.log('item', item)
+    // console.log('req.startTime', req.startTime)
+    // console.log('req.endTime', req.endTime)
     if (item === null) {
       return res.json({results: '不存在该段时间的报告!'})
     } else {
@@ -178,7 +182,9 @@ exports.getReport = function (req, res) {
               }
             }
           }
-          return res.json({results: {item, lab, doctorReport, doctorComment, flag}})
+          let startTime = req.startTime
+          let endTime = req.endTime
+          return res.json({results: {item, lab, doctorReport, doctorComment, flag, startTime, endTime}})
         }
       }
     }
