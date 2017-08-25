@@ -9,8 +9,8 @@ var dictTypeOneSchema = new mongoose.Schema({
       inputCode: String,
       description: String,
       invalidFlag: Number
-    }]
-
+    }
+  ]
 })
 
 var dictTypeOneModel = mongoose.model('dictTypeOne', dictTypeOneSchema)
