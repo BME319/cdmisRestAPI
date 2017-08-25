@@ -1051,7 +1051,7 @@ exports.receiveTextMessage = function (req, res) {
         if (jsondata.xml.EventKey != null) {
           var doctorUserId
           //
-          console.log(jsondata)
+          console.log('jsondata', jsondata)
           var patientType
           if (jsondata.xml.Event === 'subscribe') {
             doctorUserId = jsondata.xml.EventKey[0].split('_')[1]
@@ -1074,7 +1074,7 @@ exports.receiveTextMessage = function (req, res) {
             time: time,
             patientType: patientType
           }
-          // console.log(openIdData);
+          console.log(openIdData);
           var newOpenIdTmp = new OpenIdTmp(openIdData)
           newOpenIdTmp.save(function (err, item) {
             if (err) {
