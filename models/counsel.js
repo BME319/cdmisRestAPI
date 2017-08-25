@@ -5,7 +5,7 @@ var counselSchema = new mongoose.Schema({
   counselId: {type: String, unique: true},
   doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
-  type: {type: Number, enum: [1, 2, 6]}, // 咨询=1,问诊=2,加急咨询=6
+  type: {type: Number, enum: [1, 2, 3, 6]}, // 咨询=1,问诊=2,咨询升级问诊=3,加急咨询=6
   time: Date,
   status: {type: Number, enum: [1, 0]}, // 进行中／关闭
   topic: String, // 好像并不在用
