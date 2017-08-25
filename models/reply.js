@@ -2,13 +2,26 @@
 var mongoose = require('mongoose')
 
 var replySchema = new mongoose.Schema({
+  postId: String,
   commentId: String,
+  // replyId: String,
   userId: String,
   userName: String,
   time: Date,
-  depth: Number,
+  depth: {type: Number, enum: [1, 2]}, // 回复层级
   content: String,
-  at: String
+  status: Number,
+  replies: [
+    {
+      replyId: String,
+      userId: String,
+      userName: String,
+      content: String,
+      time: Date,
+      status: Number,
+      at: String
+    }
+  ]
 })
 
 var replyModel = mongoose.model('reply', replySchema)
@@ -72,6 +85,19 @@ Reply.updateOne = function (query, obj, callback, opts, populate) {
     }
     callback(null, upreply)
   })
+}
+
+Reply.aggregate = function (array, callback) {
+  let _array = array || []
+  replyModel
+    .aggregate(_array)
+    .exec(function (err, results) {
+      if (err) {
+        return callback(err)
+      }
+      console.log(results)
+      callback(null, results)
+    })
 }
 
 module.exports = Reply

@@ -2,6 +2,7 @@ var Forum = require('../models/forum')
 var Alluser = require('../models/alluser')
 var Forumuserinfo = require('../models/forumuserinfo')
 var webEntry = require('../settings').webEntry
+var Reply = require('../models/reply')
 
 exports.forumPosting = function (req, res) {
   let userId = req.session.userId || ''
@@ -23,7 +24,7 @@ exports.forumPosting = function (req, res) {
         res.status(500).json({code: 1, msg: err.errmsg})
       }
       let name = alluserInfo.name
-      let obj = {postId: postId, sponsorId: userId, sponsorName: name, title: title, content: content, time: time, anonymous: anonymous, replyCount: 0, favoritesNum: 0}
+      let obj = {postId: postId, sponsorId: userId, sponsorName: name, title: title, content: content, time: time, anonymous: anonymous, replyCount: 0, favoritesNum: 0, status: 0}
       Forum.updateOne(query, obj, function (err, upforum) {
         if (err) {
           res.status(500).json({code: 1, msg: err.errmsg})
@@ -54,6 +55,7 @@ exports.getAllposts = function (req, res) {
   let skip = Number(req.query.skip)
   let title = req.query.title || '' 
   let array = [
+    {$match: {status: 0}},
     {
       $lookup: {
         from: 'allusers',
@@ -441,23 +443,17 @@ exports.getPostContent = function (req, res) {
       // console.log(results)
       let result1 = results[0]
       let array2 = [
-        {$match: {postId: postId}},
+        {$match: {postId: postId, status: 0}},
         {
           $project: {
-            'replies': 1
-          }
-        },
-        {$unwind: {path: '$replies', preserveNullAndEmptyArrays: true}},
-        {
-          $project: {
-            commentId: '$replies.commentId',
-            userId: '$replies.userId',
-            userName: '$replies.userName',
-            time: '$replies.time',
-            depth: '$replies.depth',
-            content: '$replies.content',
+            'commentId': 1,
+            'userId': 1,
+            'userName': 1,
+            'time': 1,
+            'depth': 1,
+            'content': 1,
             // at: '$replies.at'
-            replies: '$replies.replies'
+            'replies': 1
           }
         },
         {
@@ -477,13 +473,19 @@ exports.getPostContent = function (req, res) {
             'depth': 1,
             'content': 1,
             'at': 1,
-            'replies': 1,
+            'replies': {
+              $filter: {
+                input: '$replies',
+                as: 'replies',
+                cond: {$eq: ['$$replies.status', 0]}
+              }
+            },
             avatar: '$userinfo.photoUrl'
           }
         },
         {$unwind: {path: '$avatar', preserveNullAndEmptyArrays: true}}
       ]
-      Forum.aggregate(array2, function (err, results) {
+      Reply.aggregate(array2, function (err, results) {
         if (err) {
           res.status(500).json({code: 1, msg: err.errmsg})
         }
@@ -502,6 +504,7 @@ exports.forumComment = function (req, res) {
   let content = req.body.content || ''
   let postId = req.body.postId || ''
   let commentId = req.newId || ''
+  console.log(userId)
   if (content === '') {
     res.status(400).json({code: 1, msg: '评论内容不能为空'})
   } else {
@@ -510,27 +513,39 @@ exports.forumComment = function (req, res) {
       if (err) {
         res.status(500).json({code: 1, msg: err.errmsg})
       }
-      let name = alluserInfo.name
-      let obj = {
-        $push: {
-          replies: {
-            commentId: commentId,
-            userId: userId,
-            userName: name,
-            time: time,
-            depth: 1,
-            content: content
-            // at: postId
-          }
-        },
-        $inc: {replyCount: 1}
+      let name = ''
+      console.log(alluserInfo)
+      if (alluserInfo !== null){
+        name = alluserInfo.name
+      } else {
+        name = '未知'
       }
-      Forum.updateOne(query, obj, function (err, upforum) {
+      console.log('name:'+name)
+      let obj = {
+        $set: {
+          userId: userId,
+          userName: name,
+          time: time,
+          depth: 1,
+          content: content,
+          status: 0
+        }
+      }
+      query2 = {postId: postId, commentId: commentId}
+      Reply.updateOne(query2, obj, function (err, upreply) {
         if (err) {
           res.status(500).json({code: 1, msg: err.errmsg})
         }
-        res.json({code: 0, msg: 'success'})
-      })
+        obj2 = {
+          $inc: {replyCount: 1}
+        }
+        Forum.updateOne(query, obj2, function (err, upforum) {
+          if (err) {
+            res.status(500).json({code: 1, msg: err.errmsg})
+          }
+          res.json({code: 0, msg: 'success'})
+        })
+      }, {upsert: true})
     })
   }
 }
@@ -547,12 +562,12 @@ exports.forumReply = function (req, res) {
   if (content === '') {
     res.status(400).json({code: 1, msg: '回复评论内容不能为空'})
   } else {
-    let query1 = {postId: postId, 'replies.commentId': commentId}
-    Forum.getOne(query1, function (err, forumInfo) {
+    let query1 = {postId: postId, commentId: commentId}
+    Reply.getOne(query1, function (err, replyInfo) {
       if (err) {
         res.status(500).json({code: 1, msg: err.errmsg})
       }
-      if (forumInfo === null) {
+      if (replyInfo === null) {
         res.status(500).json({code: 1, msg: '该commentId不存在'})
       } else {
         // let query = {postId: postId}
@@ -560,11 +575,16 @@ exports.forumReply = function (req, res) {
           if (err) {
             res.status(500).json({code: 1, msg: err.errmsg})
           }
-          let name = alluserInfo.name
-          let query2 = {postId: postId, 'replies.commentId': commentId}
+          let name = ''
+          console.log(alluserInfo)
+          if (alluserInfo !== null){
+            name = alluserInfo.name
+          } else {
+            name = '未知'
+          }
           let obj = {
             $push: {
-              'replies.$.replies': {
+              replies: {
                 // commentId: commentId,
                 replyId: replyId,
                 userId: userId,
@@ -572,12 +592,12 @@ exports.forumReply = function (req, res) {
                 time: time,
                 // depth: 2,
                 content: content,
+                status: 0,
                 at: at
               }
             }
-            // $inc: {replyCount: 1}
           }
-          Forum.updateOne(query2, obj, function (err, upforum) {
+          Reply.updateOne(query1, obj, function (err, upreply) {
             if (err) {
               res.status(500).json({code: 1, msg: err.errmsg})
             }
@@ -636,7 +656,10 @@ exports.deletePost = function (req, res) {
     res.status(400).json({code: 1, msg: '请输入postId'})
   } else {
     let query = {postId: postId, sponsorId: userId}
-    Forum.removeOne(query, function (err, results) {
+    let obj = {
+      $set: {status: 1}
+    }
+    Forum.updateOne(query, obj, function (err, results) {
       if (err) {
         res.status(500).json({code: 1, msg: err.errmsg})
       }
@@ -663,43 +686,52 @@ exports.deleteComment = function (req, res) {
   // let userId = req.session.userId || ''
   let replyId = req.body.replyId || ''
   let commentId = req.body.commentId || ''
-  let query1 = {postId: postId, 'replies.commentId': commentId}
-  Forum.getOne(query1, function (err, forumInfo) {
+  let query1 = {postId: postId, commentId: commentId}
+  Reply.getOne(query1, function (err, replyInfo) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
-    if (forumInfo === null) {
+    if (replyInfo === null) {
       res.status(500).json({code: 1, msg: '该commentId不存在'})
     } else {
-      let query = {postId: postId}
       let obj = {}
       if (replyId !== '') {
-        query['replies.commentId'] = commentId
+        // query['replies.commentId'] = commentId
+        query['replies.replyId'] = replyId
         obj = {
-          $pull: {
-            'replies.$.replies': {
-              // commentId: commentId,
-              replyId: replyId
-            }
+          $set: {
+            'replies.$.status': 1
+          }
+        }
+        Reply.updateOne(query1, obj, function (err, upreply) {
+          if (err) {
+            res.status(500).json({code: 1, msg: err.errmsg})
+          }
+          res.json({code: 0, msg: 'success'})
+        })
+      } else {
+        obj = {
+          $set: {
+            status: 1
           }
           // $inc: {replyCount: -1}
         }
-      } else {
-        obj = {
-          $pull: {
-            replies: {
-              commentId: commentId
+        Reply.updateOne(query1, obj, function (err, upreply) {
+          if (err) {
+            res.status(500).json({code: 1, msg: err.errmsg})
+          }
+          query = {postId: postId}
+          obj2 = {
+            $inc: {replyCount: -1}
+          }
+          Forum.updateOne(query, obj2, function (err, upforum) {
+            if (err) {
+              res.status(500).json({code: 1, msg: err.errmsg})
             }
-          },
-          $inc: {replyCount: -1}
-        }
+            res.json({code: 0, msg: 'success'})
+          })
+        })
       }
-      Forum.updateOne(query, obj, function (err, upforum) {
-        if (err) {
-          res.status(500).json({code: 1, msg: err.errmsg})
-        }
-        res.json({code: 0, msg: 'success'})
-      })
     }
   })
 }
