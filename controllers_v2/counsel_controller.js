@@ -422,7 +422,7 @@ exports.counselAutoRelay = function (req, res, next) {
     })
   }
 
-  let teamIds = req.body.relayTarget
+  let teamIds = req.body.relayTarget || []
   // err标记
   let teamErrFlag = 0
   let consultationErrFlag = 0

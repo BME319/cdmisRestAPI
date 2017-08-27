@@ -1,5 +1,6 @@
 // var  config = require('../config')
 var Message = require('../models/message')
+var News = require('../models/news')
 
 // 根据类型查询消息链接 2017-04-05 GY
 exports.getMessages = function (req, res) {
@@ -142,7 +143,29 @@ exports.insertMessage = function (req, res) {
     } else {
       newResults = messageInfo
     }
-
-    res.json({result: '新建成功', newResults: newResults})
+    if (req.isOutOfRange === 1) {
+      let queryN = {
+        userId: req.body.userId,
+        userRole: 'doctor',
+        sendBy: req.body.sendBy,
+        type: req.body.type
+      }
+      let upNews = {
+        messageId: req.newId,
+        readOrNot: 0,
+        time: new Date(),
+        title: req.body.title,
+        description: req.body.description,
+        url: ''
+      }
+      News.update(queryN, upNews, function (err, upNewsRes) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        res.json({result: '新建成功', newResults: upNewsRes})
+      }, {upsert: true})
+    } else {
+      res.json({result: '新建成功', newResults: newResults})
+    }
   })
 }
