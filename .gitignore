@@ -10,3 +10,12 @@ uploads/
 logs/
 certs/
 node_modules/  
+
+#过滤deploy相关文件
+deploy.sh
+hahahahaha.log
+mongodb.conf
+mongodb/
+my-proxy.conf
+nginx/
+pre-setup.sh
