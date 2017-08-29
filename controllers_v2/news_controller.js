@@ -162,7 +162,7 @@ function insertOneNews (userId, sendBy, req, res) {
     sendBy: userId,
     userId: sendBy
   }
-  if (req.body.type !== null && req.body.type !== undefined) {
+  if (req.body.type !== null && req.body.type !== '' && req.body.type !== undefined) {
     newData['type'] = req.body.type
     if (Number(req.body.type) === 15) {
       newData['caseType'] = req.body.caseType
@@ -170,10 +170,10 @@ function insertOneNews (userId, sendBy, req, res) {
     query1['type'] = req.body.type
     query2['type'] = req.body.type
   }
-  if (req.body.userRole !== null && req.body.userRole !== undefined) {
+  if (req.body.userRole !== null && req.body.userRole !== '' && req.body.userRole !== undefined) {
     newData['userRole'] = req.body.userRole
   }
-  if (req.body.messageId !== null && req.body.messageId !== undefined) {
+  if (req.body.messageId !== null && req.body.messageId !== '' && req.body.messageId !== undefined) {
     newData['messageId'] = req.body.messageId
   }
   if (req.body.time !== null && req.body.time !== '' && req.body.time !== undefined) {
@@ -181,13 +181,13 @@ function insertOneNews (userId, sendBy, req, res) {
   } else {
     newData['time'] = new Date()
   }
-  if (req.body.title !== null && req.body.title !== undefined) {
+  if (req.body.title !== null && req.body.title !== '' && req.body.title !== undefined) {
     newData['title'] = req.body.title
   }
-  if (req.body.description !== null && req.body.description !== undefined) {
+  if (req.body.description !== null && req.body.description !== '' && req.body.description !== undefined) {
     newData['description'] = req.body.description
   }
-  if (req.body.url !== null && req.body.url !== undefined) {
+  if (req.body.url !== null && req.body.url !== '' && req.body.url !== undefined) {
     newData['url'] = req.body.url
   }
 
