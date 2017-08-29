@@ -86,7 +86,7 @@ if (userRole.indexOf('patient') !== -1) {
   for (let i = 0; i < myDoctor.length; i++) {
     query = {'doctorId': myDoctor[i].doctorId}
     let upObj = {
-      $pullAll: {
+      $pull: {
         patientsInCharge: {
           patientId: userObjectId
         }
@@ -247,9 +247,11 @@ if (userRole.indexOf('doctor') !== -1) {
   }
   upObj = {
     $pull: {  // pull不知道是否可以同时删除多个数组中的元素？
-      'portleader': userObjectId,
-      'doctors': userObjectId,
-      'departLeader': userObjectId
+      '$or': [
+        {'portleader': userObjectId},
+        {'doctors': userObjectId},
+        {'departLeader': userObjectId}
+      ]
     }
   }
   db.departments.update(query, upObj, {multi: true})
@@ -272,7 +274,7 @@ if (userRole.indexOf('doctor') !== -1) {
     ]
   }
   upObj = {
-    $pullAll: {
+    $pull: {
       doctorReport: {
         'doctorId': userObjectId
       },
