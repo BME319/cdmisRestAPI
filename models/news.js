@@ -6,9 +6,10 @@ var newsSchema = new mongoose.Schema({
   userId: String,
   userRole: String,
   sendBy: String,
-  readOrNot: Number,
   // sendReadOrNot: Number,
-  type: Number,
+  readOrNot: {type: Number, enum: [0, 1]}, // 0未读，1已读
+  // 支付1，警报2，任务3，患者保险消息5, 患者退款消息6, 医生提醒更新主管患者任务9, 群体教育消息8, 审核消息7
+  type: {type: Number, enum: [1, 2, 3, 5, 6, 7, 8, 9]},
   caseType: Number,
   time: Date,
   title: String,
