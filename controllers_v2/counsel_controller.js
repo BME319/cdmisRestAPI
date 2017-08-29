@@ -24,7 +24,7 @@ exports.getDoctorObject = function (req, res, next) {
     req.doctorId = doctorId
   }
   let query = {userId: doctorId, role: 'doctor'}
-  console.log(query)
+  // console.log(query)
   Alluser.getOne(query, function (err, doctor) {
     if (err) {
       return res.status(500).send(err)
@@ -37,7 +37,7 @@ exports.getDoctorObject = function (req, res, next) {
         req.body.relayTarget = doctor.relayTarget
       }
       req.body.doctorObject = doctor
-      console.log(req.body)
+      // console.log(req.body)
       next()
     }
   })
@@ -229,7 +229,7 @@ exports.counselAutoRelay = function (req, res, next) {
   if (!req.body.autoRelayFlag) {
     console.log('no_auto_relay')
     // return res.send('test_success')
-    next()
+    return next()
   }
 
   function add00 (m) {

@@ -121,8 +121,7 @@ exports.getOrderNo = function (req, res, next) {
   Order.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
-    }
-    if (item === null) {
+    } else if (item === null) {
       return res.status(404).json({result: '更新订单错误：无法查询到订单请重新尝试或联系管理员'})
     } else {
       req.body.orderNo = item.orderNo
