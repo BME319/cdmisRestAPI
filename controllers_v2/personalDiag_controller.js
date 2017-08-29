@@ -467,22 +467,45 @@ exports.cancelBookedPds = function (req, res) {
         if (err) {
           return res.status(500).send(err)
         } else {
-          if (req.body.suspendFlag) {
-            console.log('停诊时间添加成功')
-            // return res.json({result: '停诊时间添加成功'})
-          } else {
-            console.log('面诊排班删除成功')
-            // return res.json({result: '面诊排班删除成功'})
+          // return res.json({msg: '测试中，待退款', code: 0, data: items})
+          for (let item in items) {
+            let toRefund = items[item]
+            // 调用退款接口
+            let queryO = {perDiagObject: toRefund._id}
+            Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
+              if (err) {
+                return res.status(500).send(err)
+              } else {
+                let orderNo = itemO.orderNo
+                request({ // 调用微信退款接口
+                  url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
+                  method: 'POST',
+                  // body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
+                  body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
+                  json: true
+                }, function (err, response) {
+                  if (err) {
+                    return res.status(500).send(err)
+                  } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
+                    // return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
+                    console.log('用户"' + itemO.patientName + '"退款成功')
+                  } else {
+                    // return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
+                    console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                  }
+                })
+              }
+            })
           }
-          return res.json({msg: '测试中，待退款', code: 0, data: items})
+          if (req.body.suspendFlag) {
+            // console.log('停诊时间添加成功')
+            return res.json({result: '停诊时间添加成功'})
+          } else {
+            // console.log('面诊排班删除成功')
+            return res.json({result: '面诊排班删除成功'})
+          }
         }
       }, {multi: true})
-
-      // return res.json({msg: '测试中，待退款', code: 0, data: items})
-      // for (let item in items) {
-      //   let toRefund = items[item]
-      //   // 调用退款接口
-      // }
     }
   })
 }
@@ -965,7 +988,7 @@ exports.updatePDCapacityUp = function (req, res) {
   let doctorObjectId = req.body.PDInfo.doctorId
   let bookingDay = req.body.PDInfo.bookingDay
   let bookingTime = req.body.PDInfo.bookingTime
-  let appRole = req.body.appRole || null
+  // let appRole = req.body.appRole || null
 
   let queryD = {_id: doctorObjectId, availablePDs: {$elemMatch: {$and: [{availableDay: bookingDay}, {availableTime: bookingTime}]}}}
   let upDoc = {
@@ -982,28 +1005,30 @@ exports.updatePDCapacityUp = function (req, res) {
     } else if (upDoctor.nModified !== 0) {
       // return res.status(201).send('Cancel Success')
       // 调用退款接口
-      return res.json({msg: '测试中，待退款', code: 0})
-      // let queryO = {perDiagObject: req.body.PDInfo._id}
-      // Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
-      //   if (err) {
-      //     return res.status(500).send(err)
-      //   } else {
-      //     let orderNo = itemO.orderNo
-      //     request({ // 调用微信退款接口
-      //       url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
-      //       method: 'POST',
-      //       body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
-      //       json: true
-      //     }, function (err, response) {
-      //       if (err) {
-      //         return res.status(500).send(err)
-      //       } else {
-      //         console.log(response)
-      //         return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
-      //       }
-      //     })
-      //   }
-      // })
+      // return res.json({msg: '测试中，待退款', code: 0})
+      let queryO = {perDiagObject: req.body.PDInfo._id}
+      Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          let orderNo = itemO.orderNo
+          request({ // 调用微信退款接口
+            url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
+            method: 'POST',
+            // body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
+            body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
+            json: true
+          }, function (err, response) {
+            if (err) {
+              return res.status(500).send(err)
+            } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
+              return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
+            } else {
+              return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
+            }
+          })
+        }
+      })
     }
   }, opts)
 }

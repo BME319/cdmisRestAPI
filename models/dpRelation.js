@@ -17,13 +17,10 @@ var dpRelationSchema = new mongoose.Schema({
       patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       labels: [String],
       dpRelationTime: Date,
-      // 历史、当前、待审核、已拒绝
-      invalidFlag: Number,
+      invalidFlag: {type: Number, enum: [0, 1, 2, 3]}, // 2历史、1当前、0待审核、3已拒绝
       rejectReason: String,
-      // 时长数字类型以月为单位
-      length: Number,
-      // 有效的起止时间
-      start: Date,
+      length: Number, // 时长数字类型以月为单位
+      start: Date, // 有效的起止时间
       end: Date
     }
   ],

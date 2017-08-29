@@ -7066,6 +7066,8 @@ module.exports = function (app, webEntry, acl) {
    */
   // 通过消息状态获取消息 权限 医生/患者
   app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.getNewsByReadOrNot)
+  // 修改某种类型消息的已读和未读状态 权限 医生/患者
+  app.post(version + '/new/newsStatus', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.changeNewsStatus)
   /**
    * @swagger
    * /new/news:
@@ -7901,7 +7903,7 @@ module.exports = function (app, webEntry, acl) {
   // 退款接口
   app.post(version + '/wechat/refund', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
   // 退款查询
-  app.post('/wechat/refundquery', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
+  app.post(version + '/wechat/refundquery', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
   // 消息模板
   app.post(version + '/wechat/messageTemplate', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
   // 下载

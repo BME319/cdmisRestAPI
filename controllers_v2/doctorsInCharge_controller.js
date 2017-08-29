@@ -152,28 +152,29 @@ exports.updateDoctorInCharge = function (req, res, next) {
         req.body.docInChaObject = upDIC
         next()
       } else if (Number(upDIC.invalidFlag) === 3) { // 审核结果为拒绝，调用退款接口
-        return res.json({msg: '测试中，待退款', code: 0})
-        // let queryO = {docInChaObject: upDIC._id}
-        // Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
-        //   if (err) {
-        //     return res.status(500).send(err)
-        //   } else {
-        //     let orderNo = itemO.orderNo
-        //     request({ // 调用微信退款接口
-        //       url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
-        //       method: 'POST',
-        //       body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
-        //       json: true
-        //     }, function (err, response) {
-        //       if (err) {
-        //         return res.status(500).send(err)
-        //       } else {
-        //         console(response)
-        //         return res.json({msg: '审核成功，已拒绝患者并退款', data: upDIC, code: 0})
-        //       }
-        //     })
-        //   }
-        // })
+        // return res.json({msg: '测试中，待退款', code: 0})
+        let queryO = {docInChaObject: upDIC._id}
+        Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
+          if (err) {
+            return res.status(500).send(err)
+          } else {
+            let orderNo = itemO.orderNo
+            request({ // 调用微信退款接口
+              url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
+              method: 'POST',
+              body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
+              json: true
+            }, function (err, response) {
+              if (err) {
+                return res.status(500).send(err)
+              } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
+                return res.json({msg: '审核成功，已拒绝患者并退款', data: upDIC, code: 0})
+              } else {
+                return res.json({msg: '审核成功，已拒绝患者但退款失败，请联系管理员', data: upDIC, code: 1})
+              }
+            })
+          }
+        })
       }
     }
   }, {new: true})
@@ -324,7 +325,7 @@ exports.getDoctorsInCharge = function (req, res, next) {
           // 用于区别是否是 vitalSign插入数据后进行警戒值提醒而获取主管医生 2017-08-22 lgf
           if (req.isOutOfRange) {
             req.body.userId = itemsDIC[i].doctorId.userId
-            req.body.sendBy = req.session.userId
+            req.body.sendBy = 'System'
             // console.log('req.body.userId', req.body.userId)
             // 定义警戒值消息类型为2
             req.body.type = 2
