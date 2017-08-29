@@ -345,12 +345,6 @@ exports.addOrder = function (req, res, next) {
   // console.log(orderObject);
   // console.log(req.body);
   var currentDate = new Date()
-  if (currentDate <= new Date('2017-07-24')) {
-    return res.json({ results: {
-      status: 0,
-      msg: '现在为免费体验期，不收取任何费用'
-    }})
-  }
   var ymdhms = moment(currentDate).format('YYYYMMDDhhmmss')
   var outTradeNo = orderObject.orderNo
   var totalFee = parseInt(orderObject.money)
@@ -1074,7 +1068,7 @@ exports.receiveTextMessage = function (req, res) {
             time: time,
             patientType: patientType
           }
-          console.log(openIdData);
+          console.log(openIdData)
           var newOpenIdTmp = new OpenIdTmp(openIdData)
           newOpenIdTmp.save(function (err, item) {
             if (err) {
