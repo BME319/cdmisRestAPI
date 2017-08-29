@@ -88,7 +88,7 @@ app.all('*', function (req, res, next) {
 
 // 路由设置
 // routes(app, webEntry, acl);
-routesV1(app, webEntry, acl)
+// routesV1(app, webEntry, acl)
 routesV2(app, webEntry, acl)
 
 app.use('/public', express.static('./public')).use('/lib', express.static('../lib'))
