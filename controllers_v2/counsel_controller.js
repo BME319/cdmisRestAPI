@@ -471,6 +471,7 @@ exports.changeCounselStatus = function (req, res, next) {
   }
   if (req.body.status != null) {
     upObj['status'] = req.body.status
+    upObj['endTime'] = new Date()
   }
 
   // return res.json({query: query, upObj: upObj});
