@@ -7910,9 +7910,9 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
 
   // 接收微信服务器的post请求
-  app.post(version + '/wechat', wechatCtrl.receiveTextMessage)
+  app.post('/wechat', wechatCtrl.receiveTextMessage)
   // 接收微信服务器的get请求
-  app.get(version + '/wechat', wechatCtrl.getServerSignature)
+  app.get('/wechat', wechatCtrl.getServerSignature)
 
   // 自定义菜单
   app.post(version + '/wechat/createCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createCustomMenu)
