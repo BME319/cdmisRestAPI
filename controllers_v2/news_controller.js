@@ -73,12 +73,12 @@ exports.getNewsByReadOrNot = function (req, res) {
   query['readOrNot'] = _readOrNot
     // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
   var opts = {'sort': '-time'}
-  console.log(query)
+  // console.log(query)
   News.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    console.log('items', items)
+    // console.log('items', items)
     res.json({results: items})
   }, opts)
 }
@@ -191,7 +191,7 @@ function insertOneNews (userId, sendBy, req, res) {
     newData['url'] = req.body.url
   }
 
- // return res.json({messageData:messageData})
+  // return res.json({messageData:messageData})
   // 根据发送者和接收者的身份插入新的消息记录
   News.getOne(query1, function (err, item1) {
     if (err) {
@@ -199,98 +199,98 @@ function insertOneNews (userId, sendBy, req, res) {
         // console.log(2);
         return res.status(500).send(err.errmsg)
       }
-            // return 500;
+      // return 500;
     }
     if (item1 === null) {
-         // console.log(123);
+      // console.log(123);
       News.getOne(query2, function (err, item2) {
         if (err) {
           if (res !== undefined) {
             // console.log(3);
             return res.status(500).send(err.errmsg)
           }
-              // return 500;
+          // return 500;
         }
         if (item2 === null) {
-           // 无对应历史消息记录，insert
+          // 无对应历史消息记录，insert
           var newnew = new News(newData)
           newnew.save(function (err, newInfo) {
             if (err) {
               if (res !== undefined) {
-        // console.log(4);
-        // console.log(err);
+              // console.log(4);
+              // console.log(err);
                 return res.status(500).send(err.errmsg)
               }
-         // return 500;
+              // return 500;
             }
             var newResults = newInfo
             if (res !== undefined) {
               res.json({result: '新建成功', newResults: newResults})
             }
-      // return 0;
+            // return 0;
           })
         } else {
-           // 有对应历史消息记录，update query2
+          // 有对应历史消息记录，update query2
           News.update(query2, newData, function (err, upmessage) {
             if (err) {
               if (res !== undefined) {
                 return res.status(422).send(err.message)
               }
-       // return 422;
+              // return 422;
             }
 
             if (upmessage.n !== 0 && upmessage.nModified === 0) {
               if (res !== undefined) {
                 return res.json({result: '未修改！请检查修改目标是否与原来一致！', results: upmessage})
               }
-       // return 1;
+              // return 1;
             }
             if (upmessage.n !== 0 && upmessage.nModified !== 0) {
               if (upmessage.n === upmessage.nModified) {
                 if (res !== undefined) {
                   return res.json({result: '全部更新成功', results: upmessage})
                 }
-        // return 0;
+                // return 0;
               }
               if (res !== undefined) {
                 return res.json({result: '未全部更新！', results: upmessage})
               }
-       // return 2;
+              // return 2;
             }
           })
         }
       })
     } else {
-         // update query1
-   // return res.json({query: query, upObj: upObj});
+      // update query1
+      // return res.json({query: query, upObj: upObj});
       News.update(query1, newData, function (err, upmessage) {
         if (err) {
           if (res !== undefined) {
             return res.status(422).send(err.message)
           }
-     // return 422;
+          // return 422;
         }
 
         if (upmessage.n !== 0 && upmessage.nModified === 0) {
           if (res !== undefined) {
             return res.json({result: '未修改！请检查修改目标是否与原来一致！', results: upmessage})
           }
-     // return 1;
+          // return 1;
         }
         if (upmessage.n !== 0 && upmessage.nModified !== 0) {
           if (upmessage.n === upmessage.nModified) {
             if (res !== undefined) {
               return res.json({result: '全部更新成功', results: upmessage})
             }
-      // return 0;
+            // return 0;
           }
           if (res !== undefined) {
             return res.json({result: '未全部更新！', results: upmessage})
           }
-     // return 2;
+          // return 2;
         }
       })
-         // res.json({results: item});
+      // res.json({results: item});
     }
   })
 }
@@ -389,7 +389,7 @@ exports.insertTeamNews = function (req, res) {
         // sendMesg
           Doctors = team2.members
           Doctors.push({'userId': team2.sponsorId})
-          console.log(Doctors)
+          // console.log(Doctors)
           for (var i = 0; i < Doctors.length; i++) {
             DocId = Doctors[i].userId
             // if (DocId !== req.body.sendBy) {
