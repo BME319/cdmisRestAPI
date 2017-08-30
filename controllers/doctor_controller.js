@@ -909,13 +909,13 @@ exports.getPatientByDate = function(req, res) {
 }
 
 function sortVIPpinyin(a, b) {
-    var flag = 0;
-    if (a.patientId == null) {
-	    a.patientId = {
-	    	VIP:0,
-	    	name:''
-	    };
-	   }
+  var flag = 0;
+  if (a.patientId == null) {
+	  a.patientId = {
+	    VIP:0,
+	    name:''
+	  };
+	}
 	if (b.patientId == null) {
 	    b.patientId={
 	    	VIP:0,
@@ -924,21 +924,68 @@ function sortVIPpinyin(a, b) {
 	}
 	// console.log(a.patientId.VIP);
 	if (a.patientId.VIP == null || a.patientId.VIP == undefined) {
-	    a.patientId.VIP = 0;
-	   }
-	if (b.patientId.VIP == null || a.patientId.VIP == undefined) {
-	    b.patientId.VIP = 0;
+	  a.patientId.VIP = 0;
 	}
+	if (b.patientId.VIP == null || a.patientId.VIP == undefined) {
+	  b.patientId.VIP = 0;
+	}
+	if (a.labels) {
+		if (a.labels.constructor === Array && a.labels.length) {
+			if (a.labels[0].group == null || a.labels[0].group == undefined) {
+				a.labels[0].group = 0
+				a.labels[0].groupTime = new Date('2017-08-01')
+			}
+		} else {
+			a.labels = undefined
+			a.labels = []
+			a.labels[0].group = 0
+			a.labels[0].groupTime = new Date('2017-08-01')
+		}
+	} else {
+		a.labels = []
+		a.labels[0].group = 0
+		a.labels[0].groupTime = new Date('2017-08-01')
+	}
+	if (b.labels) {
+		if (b.labels.constructor === Array && b.labels.length) {
+			if (b.labels[0].group == null || b.labels[0].group == undefined) {
+				b.labels[0].group = 0
+				b.labels[0].groupTime = new Date('2017-08-01')
+			}
+		} else {
+			b.labels = undefined
+			b.labels = []
+			b.labels[0].group = 0
+			b.labels[0].groupTime = new Date('2017-08-01')
+		}
+	} else {
+		b.labels = []
+		b.labels[0].group = 0
+		b.labels[0].groupTime = new Date('2017-08-01')
+	}
+
 	if (b.patientId.VIP - a.patientId.VIP > 0) {
-	    flag = 1;
+	  flag = 1;
 	}
 	else if (b.patientId.VIP - a.patientId.VIP < 0) {
-	    flag = -1;
+	  flag = -1;
+	}
+	else if (b.labels[0].group - a.labels[0].group) {
+		flag = 1
+	}
+	else if (b.labels[0].group - a.labels[0].group < 0) {
+		flag = -1
+	}
+	else if (b.labels[0].groupTime - a.labels[0].groupTime) {
+		flag = 1
+	}
+	else if (b.labels[0].groupTime - a.labels[0].groupTime < 0) {
+		flag = -1
 	}
 	else {
-	    flag = pinyin.compare(a.patientId.name, b.patientId.name);
+	  flag = pinyin.compare(a.patientId.name, b.patientId.name);
 	}
-	   return flag;
+	return flag;
 } 
 
 exports.checkDoctor = function(req, res, next) {
@@ -992,7 +1039,7 @@ exports.getPatientList = function(req, res) {
 	if (_name) {
 		populate['match'] = {'name': nameReg};
 	}
-	console.log(populate);
+	// console.log(populate);
 	// console.log(query);
 	DpRelation.getOne(query, function(err, item) {
 		if (err) {
