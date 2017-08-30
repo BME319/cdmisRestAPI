@@ -93,7 +93,7 @@ exports.getHealthDetail = function (req, res) {
         url.push(item.url[i].photo)
       }
     }
-    console.log('item', item)
+    // console.log('item', item)
     return res.json({results: {time, insertTime, type, label, userId, description, comments, url}})
   }, opts, fields)
 }
@@ -196,7 +196,7 @@ exports.insertHealthInfo = function (req, res) {
         urlObjTmp['photoId'] = healthInfoData.userId + insertTimestr + add0(i)
         urlObj.push(urlObjTmp)
       }
-      console.log('urlObj', urlObj)
+      // console.log('urlObj', urlObj)
       healthInfoData['url'] = urlObj
     } else {
       return res.status(412).json({results: 'url需要是数组'})
