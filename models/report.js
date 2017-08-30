@@ -37,7 +37,7 @@ var reportSchema = new mongoose.Schema({
   recommendValue13: Number, // 建议值13
   recommendValue14: Number, // 建议值14
   averageBMI: Number, // 平均BMI
-  changeRatio: Number, // 增比 %
+  changeRatio: Number, // 体重增比 %
   changeRatioBMI: Number, // BMI增比 %
   drugRegimen: String, // 用药方案
   drugConcentration: Number, // 药物浓度

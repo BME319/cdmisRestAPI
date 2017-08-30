@@ -44,8 +44,7 @@ var forumSchema = new mongoose.Schema({
   // ],
   favoritesNum: Number,
   transferNum: Number,
-  // 1为匿名
-  anonymous: Number
+  anonymous: {type: Number, enum: [1, 0]} // 1为匿名
 })
 
 var forumModel = mongoose.model('forum', forumSchema)
