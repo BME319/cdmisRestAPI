@@ -161,7 +161,7 @@ exports.getAllposts = function (req, res) {
     }
     Url = Url.substr(0, Url.length - 1)
   }
-  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/forum/allposts' + Url
+  let nexturl = webEntry.domain + '/api/v2/forum/allposts' + Url
   // let nexturl = 'localhost:4060/api/v2/forum/allposts' + Url
 
   Forum.aggregate(array, function (err, results) {
