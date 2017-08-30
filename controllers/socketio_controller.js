@@ -63,7 +63,7 @@ function messageSaveSend (data, url, sender) {
   data.msg['time'] = Date.now()
 
     // save data
-  var url = 'http://' + webEntry.domain + ':4060/api/v1/communication/communication'
+  var url = 'http://' + webEntry.domain + '/api/v1/communication/communication'
   var jsondata = {
     messageType: messageType,
     sendBy: sendBy,
@@ -184,7 +184,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
         // console.log(receiver);
     request({
             // url: 'http://' + webEntry.domain + ':4060/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
-      url: 'http://' + webEntry.domain + ':4060/api/v1/communication/team?teamId=' + data.msg.teamId,
+      url: 'http://' + webEntry.domain + '/api/v1/communication/team?teamId=' + data.msg.teamId,
       method: 'GET',
       json: true
     }, function (err, response) {
@@ -278,7 +278,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
                             // groupSend(data);
             request({
                                 // url: 'http://'+ webEntry.domain +':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
-              url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate',
+              url: 'http://' + webEntry.domain + '/api/v1/wechat/messageTemplate',
               method: 'POST',
               body: template,
               json: true
@@ -417,8 +417,7 @@ exports.chat = function (io, socket) {
     var role = data.role
     var test = data.msg.test
         // var toUserId = data.to;
-
-    var url = 'http://' + webEntry.domain + ':4060/api/v1/wechat/download'
+    var url = 'http://' + webEntry.domain + '/api/v1/wechat/download'
 
     // receive from sender
     if (test == 'test') {
@@ -444,7 +443,6 @@ exports.chat = function (io, socket) {
       } else {
         name = data.to + data.msg.createTimeInMillis + '.mp3'
       }
-
             // download
       request({
                 // url: url + '?serverId=' + mediaId + '&name=' + name + '&role=' + role + '?token=' + req.query.token || req.body.token,

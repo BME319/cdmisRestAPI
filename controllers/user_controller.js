@@ -572,7 +572,7 @@ exports.checkBinding = function (req, res, next) {
                         // console.log(jsondata);
 
                         request({
-                          url: 'http://' + webEntry.domain + ':4060/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
+                          url: 'http://' + webEntry.domain + '/api/v1/patient/bindingMyDoctor' + '?token=' + req.query.token || req.body.token,
                           method: 'POST',
                           body: jsondata,
                           json: true
@@ -1086,6 +1086,7 @@ exports.setMessageOpenId = function (req, res) {
         }
       }
     }
+
 
     if (_mesgOid != null && _mesgOid != undefined) {
       var upObj = {

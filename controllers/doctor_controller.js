@@ -867,53 +867,55 @@ exports.getPatientByDate = function(req, res) {
     		};
     		// return res.json({result:dpRelationData});
     		var newDpRelation = new DpRelation(dpRelationData);
-			newDpRelation.save(function(err, dpRelationInfo) {
-				if (err) {
-      				return res.status(500).send(err.errmsg);
-    			}
-    			// return res.json({result: '暂无患者2!'});
-			});
-			return res.json({result: '暂无患者!'});
-    	}
+				newDpRelation.save(function(err, dpRelationInfo) {
+					if (err) {
+								return res.status(500).send(err.errmsg);
+						}
+						// return res.json({result: '暂无患者2!'});
+				});
+				return res.json({result: '暂无患者!'});
+    	} else if (item.patients) {
+				var patientsitem = [];
+				var dpTimeFormat = null;
+				var j = 0;
+				if (item.patients.length == 0) {
+					return res.json({result:'暂无患者!'});
+				}
+				else if (item.patients.length != 0) {
+					for (var i = item.patients.length - 1; i >= 0; i--) {
+						if (item.patients[i].patientId != null) {
+							if (item.patients[i].dpRelationTime == undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='') {
+								item.patients[i].dpRelationTime = new Date('2017-05-15');
+							}
+							dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime);
+							if (dpTimeFormat == date) {
+								patientsitem[j] = item.patients[i];
+								j++;
+							}
+						}    			
+					}
 
-    	var patientsitem = [];
-    	var dpTimeFormat = null;
-    	var j = 0;
-    	if (item.patients.length == 0) {
-    		return res.json({result:'暂无患者!'});
-    	}
-    	else if (item.patients.length != 0) {
-    		for (var i = item.patients.length - 1; i >= 0; i--) {
-    			if (item.patients[i].patientId != null) {
-    				if (item.patients[i].dpRelationTime == undefined || item.patients[i].dpRelationTime == null || item.patients[i].dpRelationTime =='') {
-    					item.patients[i].dpRelationTime = new Date('2017-05-15');
-    				}
-    				dpTimeFormat = commonFunc.convertToFormatDate(item.patients[i].dpRelationTime);
-    				if (dpTimeFormat == date) {
-    					patientsitem[j] = item.patients[i];
-    					j++;
-    				}
-    			}    			
-    		}
+					patientsitem = patientsitem.sort(sortVIPpinyin);
+				}
 
-    		patientsitem = patientsitem.sort(sortVIPpinyin);
-    	}
+				//2017-06-07GY调试用
+				// console.log({method:'getPatientByDate', resultCount:patientsitem.length});
 
-    	//2017-06-07GY调试用
-	    // console.log({method:'getPatientByDate', resultCount:patientsitem.length});
-
-    	res.json({results2:patientsitem});
+				res.json({results2:patientsitem});
+			} else {
+				return res.json({result: '暂无患者!'})
+			}
 	}, opts, fields, populate);
 }
 
 function sortVIPpinyin(a, b) {
-    var flag = 0;
-    if (a.patientId == null) {
-	    a.patientId = {
-	    	VIP:0,
-	    	name:''
-	    };
-	   }
+  var flag = 0;
+  if (a.patientId == null) {
+	  a.patientId = {
+	    VIP:0,
+	    name:''
+	  };
+	}
 	if (b.patientId == null) {
 	    b.patientId={
 	    	VIP:0,
@@ -922,21 +924,72 @@ function sortVIPpinyin(a, b) {
 	}
 	// console.log(a.patientId.VIP);
 	if (a.patientId.VIP == null || a.patientId.VIP == undefined) {
-	    a.patientId.VIP = 0;
-	   }
-	if (b.patientId.VIP == null || a.patientId.VIP == undefined) {
-	    b.patientId.VIP = 0;
+	  a.patientId.VIP = 0;
 	}
+	if (b.patientId.VIP == null || a.patientId.VIP == undefined) {
+	  b.patientId.VIP = 0;
+	}
+	if (a.labels) {
+		if (a.labels.constructor === Array && a.labels.length) {
+			if (a.labels[0].group == null || a.labels[0].group == undefined) {
+				a.labels[0].group = 0
+				a.labels[0].groupTime = new Date('2017-08-01')
+			}
+		} else {
+			a.labels = undefined
+			a.labels = []
+			a.labels[0] = {}
+			a.labels[0].group = 0
+			a.labels[0].groupTime = new Date('2017-08-01')
+		}
+	} else {
+		a.labels = []
+		a.labels[0] = {}
+		a.labels[0].group = 0
+		a.labels[0].groupTime = new Date('2017-08-01')
+	}
+	if (b.labels) {
+		if (b.labels.constructor === Array && b.labels.length) {
+			if (b.labels[0].group == null || b.labels[0].group == undefined) {
+				b.labels[0].group = 0
+				b.labels[0].groupTime = new Date('2017-08-01')
+			}
+		} else {
+			b.labels = undefined
+			b.labels = []
+			b.labels[0] = {}
+			b.labels[0].group = 0
+			b.labels[0].groupTime = new Date('2017-08-01')
+		}
+	} else {
+		b.labels = []
+		b.labels[0] = {}
+		b.labels[0].group = 0
+		b.labels[0].groupTime = new Date('2017-08-01')
+	}
+
 	if (b.patientId.VIP - a.patientId.VIP > 0) {
-	    flag = 1;
+	  flag = 1;
 	}
 	else if (b.patientId.VIP - a.patientId.VIP < 0) {
-	    flag = -1;
+	  flag = -1;
+	}
+	else if (b.labels[0].group - a.labels[0].group) {
+		flag = 1
+	}
+	else if (b.labels[0].group - a.labels[0].group < 0) {
+		flag = -1
+	}
+	else if (b.labels[0].groupTime - a.labels[0].groupTime) {
+		flag = 1
+	}
+	else if (b.labels[0].groupTime - a.labels[0].groupTime < 0) {
+		flag = -1
 	}
 	else {
-	    flag = pinyin.compare(a.patientId.name, b.patientId.name);
+	  flag = pinyin.compare(a.patientId.name, b.patientId.name);
 	}
-	   return flag;
+	return flag;
 } 
 
 exports.checkDoctor = function(req, res, next) {
@@ -979,7 +1032,7 @@ exports.getPatientList = function(req, res) {
 		_skip=0;
 	}
 	var opts = '';
-	var fields = {'_id':0, 'patients.patientId':1, 'patients.dpRelationTime':1};
+	var fields = {'_id':0, 'patients.patientId':1, 'patients.dpRelationTime':1, 'patients.labels':1};
 	//通过子表查询主表，定义主表查询路径及输出内容
 	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
 	// if(_name!=""&&_name!=undefined){
@@ -990,7 +1043,7 @@ exports.getPatientList = function(req, res) {
 	if (_name) {
 		populate['match'] = {'name': nameReg};
 	}
-	console.log(populate);
+	// console.log(populate);
 	// console.log(query);
 	DpRelation.getOne(query, function(err, item) {
 		if (err) {
@@ -1009,15 +1062,14 @@ exports.getPatientList = function(req, res) {
     		};
     		// return res.json({result:dpRelationData});
     		var newDpRelation = new DpRelation(dpRelationData);
-			newDpRelation.save(function(err, dpRelationInfo) {
-				if (err) {
-      				return res.status(500).send(err.errmsg);
-    			}
-    			// return res.json({result: '暂无患者2!'});
-			});
-			return res.json({results: {patients:[]}});
-    	}
-    	else{
+				newDpRelation.save(function(err, dpRelationInfo) {
+					if (err) {
+								return res.status(500).send(err.errmsg);
+						}
+						// return res.json({result: '暂无患者2!'});
+				});
+				return res.json({results: {patients:[]}});
+    	} else if (item.patients.constructor === Array) {
 	    	var patients = [];
 	    	// console.log(item);
 	    	// item.patients=item.patients.sort(sortVIPpinyin);
@@ -1054,7 +1106,9 @@ exports.getPatientList = function(req, res) {
 	    	// console.log({method:'getPatientList', resultCount:patients.length});
 
 	    	res.json({results: item1});
-	    }
+	    } else {
+				return res.json({results: {patients:[]}});
+			}
 	}, opts, fields, populate);
 	// });
 }
