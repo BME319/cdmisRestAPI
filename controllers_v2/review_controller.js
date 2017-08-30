@@ -208,7 +208,7 @@ exports.getReviewInfo = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/review/reviewInfo' + _Url
+  var nexturl = webEntry.domain + '/api/v2/review/reviewInfo' + _Url
 
   Alluser.getSome(query, function (err, items) {
     if (err) {

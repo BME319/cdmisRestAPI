@@ -478,7 +478,7 @@ exports.cancelBookedPds = function (req, res) {
               } else {
                 let orderNo = itemO.orderNo
                 request({ // 调用微信退款接口
-                  url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
+                  url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
                   method: 'POST',
                   // body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
                   body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
@@ -1013,7 +1013,7 @@ exports.updatePDCapacityUp = function (req, res) {
         } else {
           let orderNo = itemO.orderNo
           request({ // 调用微信退款接口
-            url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
+            url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
             method: 'POST',
             // body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
             body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},

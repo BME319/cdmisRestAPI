@@ -179,7 +179,7 @@ exports.getDoctorLists = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/getDoctorLists' + _Url
+  var nexturl = webEntry.domain + '/api/v2/patient/getDoctorLists' + _Url
 
   if (req.query.doctorId !== null && req.query.doctorId !== undefined && req.query.doctorId !== '') {
     query = {userId: req.query.doctorId, role: 'doctor'}
@@ -280,7 +280,7 @@ exports.getMyFavoriteDoctors = function (req, res) {
     _Url = _Url.substr(0, _Url.length - 1)
   }
 
-  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/myFavoriteDoctors' + _Url
+  let nexturl = webEntry.domain + '/api/v2/patient/myFavoriteDoctors' + _Url
   Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
