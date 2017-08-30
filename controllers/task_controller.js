@@ -120,6 +120,7 @@ exports.updateStartTime = function(req, res) {
         return res.status(404).json({results:'该用户暂无任务'})
       } else if (item.task) {
         flag = 0;
+
       	// res.json({results: item});
         // console.log(item.task);
         if (item.task.length) {
@@ -148,7 +149,6 @@ exports.updateStartTime = function(req, res) {
             if (err) {
                   return res.status(500).send(err.errmsg);
               }
-
               res.json({results: 0});
         
           });
@@ -158,6 +158,7 @@ exports.updateStartTime = function(req, res) {
       } else {
         return res.status(404).json({results:'该用户暂无任务'})
       }
+
   	});
 	
 }
