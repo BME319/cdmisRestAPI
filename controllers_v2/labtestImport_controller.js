@@ -90,7 +90,7 @@ exports.listByStatus = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/review/reviewInfo' + _Url
+  let nexturl = webEntry.domain + '/api/v2/review/reviewInfo' + _Url
 
   Alluser.getSome(query, function (err, patients) {
     if (err) {
