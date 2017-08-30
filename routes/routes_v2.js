@@ -5417,6 +5417,10 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Not Modified"
    */
   app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), personalDiagCtrl.confirmPD, serviceCtrl.recharge)
+  // 获取需要人工处理退款的面诊列表
+  // app.get(version + '/services/manualRefundList', personalDiagCtrl.manualRefundList)
+  // 人工处理面诊退款
+  // app.post(version + '/services/manualRefund', personalDiagCtrl.manualRefund)
 
   // PC端保险管理
   // 获取患者 权限insuranceC/insuranceA
