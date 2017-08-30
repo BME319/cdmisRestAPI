@@ -86,7 +86,7 @@ exports.getOrder = function (req, res) {
       }
       _Url = _Url.substr(0, _Url.length - 1)
     }
-    var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/order/order' + _Url
+    var nexturl = webEntry.domain + '/api/v2/order/order' + _Url
   }
   Order.getSome(query, function (err, item) {
     if (err) {

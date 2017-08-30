@@ -161,7 +161,7 @@ exports.getAllposts = function (req, res) {
     }
     Url = Url.substr(0, Url.length - 1)
   }
-  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/forum/allposts' + Url
+  let nexturl = webEntry.domain + '/api/v2/forum/allposts' + Url
   // let nexturl = 'localhost:4060/api/v2/forum/allposts' + Url
 
   Forum.aggregate(array, function (err, results) {
@@ -257,7 +257,7 @@ exports.getMycollection = function (req, res) {
     }
     Url = Url.substr(0, Url.length - 1)
   }
-  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/forum/mycollection' + Url
+  let nexturl = webEntry.domain + '/api/v2/forum/mycollection' + Url
 
   Forumuserinfo.aggregate(array, function (err, results) {
     if (err) {
@@ -349,7 +349,7 @@ exports.getMyposts = function (req, res) {
     }
     Url = Url.substr(0, Url.length - 1)
   }
-  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/forum/myposts' + Url
+  let nexturl = webEntry.domain + '/api/v2/forum/myposts' + Url
   Forumuserinfo.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
