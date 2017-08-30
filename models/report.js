@@ -70,9 +70,9 @@ var reportSchema = new mongoose.Schema({
       content: String,
       insertTime: Date
     }
-  ]
+  ],
   // labTest: String, // 化验_周报月报文本
-  // labTestArray: [], // 化验_季报年报检查项目数组
+  labTestArray: [] // 化验_季报年报检查项目数组，存储各项目最大值、最小值
   // labTestNewItem: String // 化验_建议新增项目
 })
 
