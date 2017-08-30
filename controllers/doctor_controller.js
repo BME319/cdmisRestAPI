@@ -938,11 +938,13 @@ function sortVIPpinyin(a, b) {
 		} else {
 			a.labels = undefined
 			a.labels = []
+			a.labels[0] = {}
 			a.labels[0].group = 0
 			a.labels[0].groupTime = new Date('2017-08-01')
 		}
 	} else {
 		a.labels = []
+		a.labels[0] = {}
 		a.labels[0].group = 0
 		a.labels[0].groupTime = new Date('2017-08-01')
 	}
@@ -955,11 +957,13 @@ function sortVIPpinyin(a, b) {
 		} else {
 			b.labels = undefined
 			b.labels = []
+			b.labels[0] = {}
 			b.labels[0].group = 0
 			b.labels[0].groupTime = new Date('2017-08-01')
 		}
 	} else {
 		b.labels = []
+		b.labels[0] = {}
 		b.labels[0].group = 0
 		b.labels[0].groupTime = new Date('2017-08-01')
 	}
@@ -1028,7 +1032,7 @@ exports.getPatientList = function(req, res) {
 		_skip=0;
 	}
 	var opts = '';
-	var fields = {'_id':0, 'patients.patientId':1, 'patients.dpRelationTime':1};
+	var fields = {'_id':0, 'patients.patientId':1, 'patients.dpRelationTime':1, 'patients.labels':1};
 	//通过子表查询主表，定义主表查询路径及输出内容
 	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
 	// if(_name!=""&&_name!=undefined){
