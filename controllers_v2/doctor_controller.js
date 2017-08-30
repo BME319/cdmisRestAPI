@@ -624,27 +624,10 @@ exports.getRecentDoctorList = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     if (item == null) {
-      // return res.json({result:'请先与其他医生或患者建立联系!'});
-      var dpRelationData = {
-        doctorId: req.body.doctorObject._id
-    //   revisionInfo:{
-  //   operationTime:new Date(),
-  //   userId:"gy",
-  //   userName:"gy",
-  //   terminalIP:"10.12.43.32"
-  // }
-      }
-      // return res.json({result:dpRelationData});
-      var newDpRelation = new DpRelation(dpRelationData)
-      newDpRelation.save(function (err, dpRelationInfo) {
-        if (err) {
-          return res.status(500).send(err.errmsg)
-        }
-      // return res.json({result: '暂无患者2!'});
-      })
       return res.json({results: {doctors: []}})
+    } else {
+      return res.json({results: item.doctors.sort(sortTime)})
     }
-    res.json({results: item.doctors.sort(sortTime)})
   }, opts, fields, populate)
 }
 
@@ -954,24 +937,6 @@ exports.getPatientList = function (req, res) {
     let patients = []
     let patientsInCharge = []
     if (item == null) {
-    // return res.json({result:'请先与其他医生或患者建立联系!'});
-      var dpRelationData = {
-        doctorId: req.body.doctorObject._id // ,
-        // revisionInfo: {
-        //   operationTime: new Date(),
-        //   userId: 'gy',
-        //   userName: 'gy',
-        //   terminalIP: '10.12.43.32'
-        // }
-      }
-      // return res.json({result:dpRelationData});
-      var newDpRelation = new DpRelation(dpRelationData)
-      newDpRelation.save(function (err, dpRelationInfo) {
-        if (err) {
-          return res.status(500).send(err.errmsg)
-        }
-      // return res.json({result: '暂无患者2!'});
-      })
       return res.json({results: {patients: [], patientsInCharge: []}})
     } else {
       // console.log(item);
@@ -1059,24 +1024,6 @@ exports.getPatientByDate = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     } else if (item == null) {
-    // return res.json({result:'请先与其他医生或患者建立联系!'});
-      var dpRelationData = {
-        doctorId: req.body.doctorObject._id // ,
-        // revisionInfo: {
-        //   operationTime: new Date(),
-        //   userId: 'gy',
-        //   userName: 'gy',
-        //   terminalIP: '10.12.43.32'
-        // }
-      }
-      // return res.json({result:dpRelationData});
-      var newDpRelation = new DpRelation(dpRelationData)
-      newDpRelation.save(function (err, dpRelationInfo) {
-        if (err) {
-          return res.status(500).send(err.errmsg)
-        }
-      // return res.json({result: '暂无患者2!'});
-      })
       return res.json({results: {patients: [], patientsInCharge: []}})
     } else {
       let patients = []
