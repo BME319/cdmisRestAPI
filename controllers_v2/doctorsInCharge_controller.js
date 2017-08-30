@@ -12,7 +12,6 @@ var Order = require('../models/order')
 exports.getPatientsToReview = function (req, res) {
   let doctorId = req.session.userId
   let queryD = {userId: doctorId, role: 'doctor'}
-  let doctorObjectId
   Alluser.getOne(queryD, function (err, itemD) {
     if (err) {
       return res.status(500).send(err)
@@ -20,7 +19,7 @@ exports.getPatientsToReview = function (req, res) {
     if (itemD === null) {
       return res.json({results: '医生不存在！'})
     }
-    doctorObjectId = itemD._id
+    let doctorObjectId = itemD._id
 
     let queryR = {doctorId: doctorObjectId}
     let opts = ''
@@ -29,19 +28,22 @@ exports.getPatientsToReview = function (req, res) {
     DpRelation.getOne(queryR, function (err, itemR) {
       if (err) {
         return res.status(500).send(err)
-      }
-      let listToFilter = itemR.patientsInCharge || []
-      let patientsList = []
-      for (let i = 0; i < listToFilter.length; i++) {
-        console.log(Number(listToFilter[i].invalidFlag))
-        if (Number(listToFilter[i].invalidFlag) === 0) {
-          patientsList.push(listToFilter[i])
-        }
-      }
-      if (patientsList.length === 0) {
-        return res.json({results: '无主管医生服务待审核的患者！', numberToReview: patientsList.length})
+      } else if (itemR === null) {
+        return res.json({results: '无主管医生服务待审核的患者！', numberToReview: 0})
       } else {
-        res.json({results: patientsList, numberToReview: patientsList.length})
+        let listToFilter = itemR.patientsInCharge || []
+        let patientsList = []
+        for (let i = 0; i < listToFilter.length; i++) {
+          // console.log(Number(listToFilter[i].invalidFlag))
+          if (Number(listToFilter[i].invalidFlag) === 0) {
+            patientsList.push(listToFilter[i])
+          }
+        }
+        if (patientsList.length === 0) {
+          return res.json({results: '无主管医生服务待审核的患者！', numberToReview: patientsList.length})
+        } else {
+          res.json({results: patientsList, numberToReview: patientsList.length})
+        }
       }
     }, opts, fields, populate)
   })
