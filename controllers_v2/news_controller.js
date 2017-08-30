@@ -58,11 +58,11 @@ exports.getNewsByReadOrNot = function (req, res) {
   var query = {}
 
   if (type !== null && type !== '' && type !== undefined) {
-    query['type'] = type
     if (type === 'chat') {
       query = {'$or': [{type: 11}, {type: 12}, {type: 13}, {type: 15}]}
     } else {
       type = Number(req.query.type)
+      query['type'] = type
     }
   }
   query['userId'] = userId
@@ -73,13 +73,61 @@ exports.getNewsByReadOrNot = function (req, res) {
   query['readOrNot'] = _readOrNot
     // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
   var opts = {'sort': '-time'}
-  console.log(query)
+  // console.log(query)
   News.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    console.log('items', items)
+    // console.log('items', items)
     res.json({results: items})
+  }, opts)
+}
+
+// 修改某种类型消息的已读和未读状态
+exports.changeNewsStatus = function (req, res) {
+  let type = req.body.type || null
+  let query = {
+    userId: req.session.userId,
+    userRole: req.session.role
+  }
+  // 允许使用messageId修改一条消息的已读未读状态
+  let messageId = req.body.messageId || null
+  if (messageId !== null) {
+    query['messageId'] = messageId
+  }
+  if (type === null) {
+    return res.json({resutl: '请填写type'})
+  } else {
+    if (type === 'chat') {
+      query = {'$or': [{type: 11}, {type: 12}, {type: 13}, {type: 15}]}
+    } else {
+      type = Number(req.body.type)
+      query['type'] = type
+    }
+  }
+
+  var upObj = {
+    readOrNot: 1  // 置为已读
+  }
+
+  var opts = {
+    'multi': true, 'new': true
+  }
+
+  News.update(query, upObj, function (err, upmessage) {
+    if (err) {
+      return res.status(422).send(err.message)
+    }
+
+    if (upmessage.n !== 0 && upmessage.nModified === 0) {
+      return res.json({result: '未修改！请检查修改目标是否与原来一致！', results: upmessage})
+    }
+    if (upmessage.n !== 0 && upmessage.nModified !== 0) {
+      if (upmessage.n === upmessage.nModified) {
+        return res.json({result: '全部更新成功', results: upmessage})
+      }
+      return res.json({result: '未全部更新！', results: upmessage})
+    }
   }, opts)
 }
 
@@ -114,7 +162,7 @@ function insertOneNews (userId, sendBy, req, res) {
     sendBy: userId,
     userId: sendBy
   }
-  if (req.body.type !== null && req.body.type !== undefined) {
+  if (req.body.type !== null && req.body.type !== '' && req.body.type !== undefined) {
     newData['type'] = req.body.type
     if (Number(req.body.type) === 15) {
       newData['caseType'] = req.body.caseType
@@ -122,10 +170,10 @@ function insertOneNews (userId, sendBy, req, res) {
     query1['type'] = req.body.type
     query2['type'] = req.body.type
   }
-  if (req.body.userRole !== null && req.body.userRole !== undefined) {
+  if (req.body.userRole !== null && req.body.userRole !== '' && req.body.userRole !== undefined) {
     newData['userRole'] = req.body.userRole
   }
-  if (req.body.messageId !== null && req.body.messageId !== undefined) {
+  if (req.body.messageId !== null && req.body.messageId !== '' && req.body.messageId !== undefined) {
     newData['messageId'] = req.body.messageId
   }
   if (req.body.time !== null && req.body.time !== '' && req.body.time !== undefined) {
@@ -133,17 +181,17 @@ function insertOneNews (userId, sendBy, req, res) {
   } else {
     newData['time'] = new Date()
   }
-  if (req.body.title !== null && req.body.title !== undefined) {
+  if (req.body.title !== null && req.body.title !== '' && req.body.title !== undefined) {
     newData['title'] = req.body.title
   }
-  if (req.body.description !== null && req.body.description !== undefined) {
+  if (req.body.description !== null && req.body.description !== '' && req.body.description !== undefined) {
     newData['description'] = req.body.description
   }
-  if (req.body.url !== null && req.body.url !== undefined) {
+  if (req.body.url !== null && req.body.url !== '' && req.body.url !== undefined) {
     newData['url'] = req.body.url
   }
 
- // return res.json({messageData:messageData})
+  // return res.json({messageData:messageData})
   // 根据发送者和接收者的身份插入新的消息记录
   News.getOne(query1, function (err, item1) {
     if (err) {
@@ -151,98 +199,98 @@ function insertOneNews (userId, sendBy, req, res) {
         // console.log(2);
         return res.status(500).send(err.errmsg)
       }
-            // return 500;
+      // return 500;
     }
     if (item1 === null) {
-         // console.log(123);
+      // console.log(123);
       News.getOne(query2, function (err, item2) {
         if (err) {
           if (res !== undefined) {
             // console.log(3);
             return res.status(500).send(err.errmsg)
           }
-              // return 500;
+          // return 500;
         }
         if (item2 === null) {
-           // 无对应历史消息记录，insert
+          // 无对应历史消息记录，insert
           var newnew = new News(newData)
           newnew.save(function (err, newInfo) {
             if (err) {
               if (res !== undefined) {
-        // console.log(4);
-        // console.log(err);
+              // console.log(4);
+              // console.log(err);
                 return res.status(500).send(err.errmsg)
               }
-         // return 500;
+              // return 500;
             }
             var newResults = newInfo
             if (res !== undefined) {
               res.json({result: '新建成功', newResults: newResults})
             }
-      // return 0;
+            // return 0;
           })
         } else {
-           // 有对应历史消息记录，update query2
+          // 有对应历史消息记录，update query2
           News.update(query2, newData, function (err, upmessage) {
             if (err) {
               if (res !== undefined) {
                 return res.status(422).send(err.message)
               }
-       // return 422;
+              // return 422;
             }
 
             if (upmessage.n !== 0 && upmessage.nModified === 0) {
               if (res !== undefined) {
                 return res.json({result: '未修改！请检查修改目标是否与原来一致！', results: upmessage})
               }
-       // return 1;
+              // return 1;
             }
             if (upmessage.n !== 0 && upmessage.nModified !== 0) {
               if (upmessage.n === upmessage.nModified) {
                 if (res !== undefined) {
                   return res.json({result: '全部更新成功', results: upmessage})
                 }
-        // return 0;
+                // return 0;
               }
               if (res !== undefined) {
                 return res.json({result: '未全部更新！', results: upmessage})
               }
-       // return 2;
+              // return 2;
             }
           })
         }
       })
     } else {
-         // update query1
-   // return res.json({query: query, upObj: upObj});
+      // update query1
+      // return res.json({query: query, upObj: upObj});
       News.update(query1, newData, function (err, upmessage) {
         if (err) {
           if (res !== undefined) {
             return res.status(422).send(err.message)
           }
-     // return 422;
+          // return 422;
         }
 
         if (upmessage.n !== 0 && upmessage.nModified === 0) {
           if (res !== undefined) {
             return res.json({result: '未修改！请检查修改目标是否与原来一致！', results: upmessage})
           }
-     // return 1;
+          // return 1;
         }
         if (upmessage.n !== 0 && upmessage.nModified !== 0) {
           if (upmessage.n === upmessage.nModified) {
             if (res !== undefined) {
               return res.json({result: '全部更新成功', results: upmessage})
             }
-      // return 0;
+            // return 0;
           }
           if (res !== undefined) {
             return res.json({result: '未全部更新！', results: upmessage})
           }
-     // return 2;
+          // return 2;
         }
       })
-         // res.json({results: item});
+      // res.json({results: item});
     }
   })
 }
@@ -295,7 +343,7 @@ exports.insertTeamNews = function (req, res) {
   //   return res.json({result: '请填写sendBy'})
   // }
   if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
-    return res.json({resutl: '请填写type'})
+    return res.json({result: '请填写type'})
   }
   var userId = req.body.userId
   // var sendBy = req.body.sendBy
@@ -341,7 +389,7 @@ exports.insertTeamNews = function (req, res) {
         // sendMesg
           Doctors = team2.members
           Doctors.push({'userId': team2.sponsorId})
-          console.log(Doctors)
+          // console.log(Doctors)
           for (var i = 0; i < Doctors.length; i++) {
             DocId = Doctors[i].userId
             // if (DocId !== req.body.sendBy) {

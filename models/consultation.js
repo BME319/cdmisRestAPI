@@ -3,12 +3,12 @@ var mongoose = require('mongoose')
 
 var consultationSchema = new mongoose.Schema({
   consultationId: {type: String, unique: true},
-  sponsorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
-  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'patient'},
+  sponsorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   time: Date,
   diseaseInfo: {type: mongoose.Schema.Types.ObjectId, ref: 'counsel'},
-  status: Number,
-  messages: [
+  status: {type: Number, enum: [1, 0]}, // 进行中／关闭
+  messages: [ // 好像并不在用
     {
       sender: String,
       receiver: String,

@@ -10,9 +10,9 @@ var taskSchema = new mongoose.Schema({
   task: [
     {
       _id: 0,
-      type: {type: String},
+      type: {type: String, enum: ['Measure', 'ReturnVisit', 'LabTest', 'SpecialEvaluate']},
       details: [{
-        code: String,
+        code: String, // 详见tasks模板。。。
         instruction: String,
         content: String,
         startTime: Date,

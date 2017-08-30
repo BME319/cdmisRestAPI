@@ -121,8 +121,7 @@ exports.getOrderNo = function (req, res, next) {
   Order.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
-    }
-    if (item === null) {
+    } else if (item === null) {
       return res.status(404).json({result: '更新订单错误：无法查询到订单请重新尝试或联系管理员'})
     } else {
       req.body.orderNo = item.orderNo
@@ -189,10 +188,18 @@ exports.insertOrder = function (req, res, next) {
         return res.status(403).send('服务费用不匹配!')
       } else {
         var paystatus
-        if (trueMoney === 0) {
+        if (trueMoney === 0 || freeFlag === 1) {
           paystatus = 2
         } else {
           paystatus = 0
+        }
+        var currentDate = new Date()
+        if (currentDate <= new Date('2017-09-01')) {
+          paystatus = 2
+          // return res.json({ results: {
+          //   status: 0,
+          //   msg: '现在为免费体验期，不收取任何费用'
+          // }})
         }
         var orderData = {
           userId: req.session.userId,
@@ -224,6 +231,11 @@ exports.insertOrder = function (req, res, next) {
                     // res.json({results: item});
           if (trueMoney === 0) {
             return res.json({results: {status: 1, msg: '支付金额为0，无需进行支付'}})
+          } else if (freeFlag === 1) {
+            // 有免费次数
+            return res.json({results: {status: 1, msg: '本次服务免费'}})
+          } else if (currentDate <= new Date('2017-09-01')) {
+            return res.json({results: {status: 1, msg: '现在为免费体验期，不收取任何费用'}})
           } else {
             req.orderObject = item
             next()

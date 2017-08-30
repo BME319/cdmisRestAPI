@@ -239,7 +239,7 @@ function saveBPdata (patient, req, results, res) {
   }
   console.log(query)
   console.log(upObj)
-  
+
   // 更新血压记录
   VitalSign.update(query, upObj, function (err, updata) {
     if (err) {
@@ -298,7 +298,7 @@ function saveBPdata (patient, req, results, res) {
         description: req.body.pulse
       }
       // 更新compliance
-      Compliance.updateOne(complianceQuery1, upObj, function (err, upCompliance) {
+      Compliance.update(complianceQuery1, upObj, function (err, upCompliance) {
         if (err) {
           return res.status(500).send(err.message)
         }

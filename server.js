@@ -24,7 +24,7 @@ var config = require('./' + _config)
 var dbUri = webEntry.dbUri
 var restPort = webEntry.restPort
     // routes = require('./routes/'+route),     // 2017年6月22日停止使用
-var routesV1 = require('./routes/routes_v1')
+// var routesV1 = require('./routes/routes_v1')  // 2017年8月24日停止使用
 var routesV2 = require('./routes/routes_v2')
 
 // 数据库连接
@@ -34,7 +34,7 @@ if (typeof (db.db) === 'undefined') {
 }
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', function () {
-  console.log(domain + ' MongoDB connected!')
+  console.log(dbUri + ' MongoDB connected!')
 })
 
 acl = new acl(new acl.mongodbBackend(db.db, 'rbac_'))
@@ -88,7 +88,7 @@ app.all('*', function (req, res, next) {
 
 // 路由设置
 // routes(app, webEntry, acl);
-routesV1(app, webEntry, acl)
+// routesV1(app, webEntry, acl)
 routesV2(app, webEntry, acl)
 
 app.use('/public', express.static('./public')).use('/lib', express.static('../lib'))

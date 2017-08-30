@@ -5,7 +5,7 @@ var forumSchema = new mongoose.Schema({
   postId: String,
   // type: Number,
   // board: Number,
-  // status: Number,
+  status: Number,
   sponsorId: {
     type: String,
     ref: 'alluser'
@@ -18,32 +18,33 @@ var forumSchema = new mongoose.Schema({
   skimNum: Number,
   likesNum: Number,
   replyCount: Number,
-  replies: [
-    {
-      commentId: String,
-      // replyId: String,
-      userId: String,
-      userName: String,
-      time: Date,
-      depth: {type: Number, enum: [1, 2]}, // 回复层级
-      content: String,
-      replies: [
-        {
-          replyId: String,
-          userId: String,
-          userName: String,
-          content: String,
-          time: Date,
-          at: String
-        }
-      ]
-      // at: String
-    }
-  ],
+  // replies: [
+  //   {
+  //     commentId: String,
+  //     // replyId: String,
+  //     userId: String,
+  //     userName: String,
+  //     time: Date,
+  //     depth: {type: Number, enum: [1, 2]}, // 回复层级
+  //     content: String,
+  //     status: Number,
+  //     replies: [
+  //       {
+  //         replyId: String,
+  //         userId: String,
+  //         userName: String,
+  //         content: String,
+  //         time: Date,
+  //         status: Number,
+  //         at: String
+  //       }
+  //     ]
+  //     // at: String
+  //   }
+  // ],
   favoritesNum: Number,
   transferNum: Number,
-  // 1为匿名
-  anonymous: Number
+  anonymous: {type: Number, enum: [1, 0]} // 1为匿名
 })
 
 var forumModel = mongoose.model('forum', forumSchema)

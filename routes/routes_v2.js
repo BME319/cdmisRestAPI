@@ -7066,6 +7066,8 @@ module.exports = function (app, webEntry, acl) {
    */
   // 通过消息状态获取消息 权限 医生/患者
   app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.getNewsByReadOrNot)
+  // 修改某种类型消息的已读和未读状态 权限 医生/患者
+  app.post(version + '/new/newsStatus', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), newsCtrl.changeNewsStatus)
   /**
    * @swagger
    * /new/news:
@@ -7910,9 +7912,9 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
 
   // 接收微信服务器的post请求
-  app.post(version + '/wechat', wechatCtrl.receiveTextMessage)
+  app.post('/wechat', wechatCtrl.receiveTextMessage)
   // 接收微信服务器的get请求
-  app.get(version + '/wechat', wechatCtrl.getServerSignature)
+  app.get('/wechat', wechatCtrl.getServerSignature)
 
   // 自定义菜单
   app.post(version + '/wechat/createCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createCustomMenu)

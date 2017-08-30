@@ -3,8 +3,8 @@ var mongoose = require('mongoose')
 
 var healthInfoSchema = new mongoose.Schema({
   userId: String,
-  // type == 'Health_002'时为化验
-  type: String,
+  // 'Health_001'为检查,'Health_002'为化验,'Health_003'为用药,'Health_004'为病例
+  type: {type: String, enum: ['Health_001', 'Health_002', 'Health_003', 'Health_004']},
   insertTime: Date,
   time: Date,
   // 修改原url字段
@@ -16,7 +16,7 @@ var healthInfoSchema = new mongoose.Schema({
       // 图片实际链接
       photo: String,
       // 图片录入状态，0未录入，1已录入
-      status: {type: Number, default: 0},
+      status: {type: Number, default: 0, enum: [0, 1]},
       photoType: String
       // 图片与数据是一对多的关系
       // resultId: [
@@ -27,12 +27,12 @@ var healthInfoSchema = new mongoose.Schema({
       // ]
     }
   ],
-  label: String,
+  label: {type: String, enum: ['检查', '化验', '用药', '病例']}, // 这个字段和type不是重复了嘛。。。
   description: String,
   comments: String,
   // resultId: {type: mongoose.Schema.Types.ObjectId, ref:'labtestResult'},
   // 数据录入状态，0未录入，1已录入
-  importStatus: {type: Number, default: 0},
+  importStatus: {type: Number, default: 0, enum: [0, 1]},
   revisionInfo: {
     operationTime: Date,
     userId: String,

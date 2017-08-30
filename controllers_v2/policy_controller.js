@@ -70,7 +70,7 @@ exports.getInsuranceAObject = function (req, res, next) {
 // 保险专员／主管获取患者列表 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-08 YQC
 exports.getPatients = function (req, res) {
   let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceCObject || null
   if ((iAO || iCO) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
@@ -153,7 +153,7 @@ exports.getPatients = function (req, res) {
 // 保险专员／主管获取患者跟踪记录详情 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-17 YQC
 exports.getHistory = function (req, res) {
   let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceCObject || null
   let pO = req.body.patientObject || null
   if (((iAO || iCO) && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
@@ -190,7 +190,7 @@ exports.getHistory = function (req, res) {
 
 // 保险主管获取专员列表 2017-08-08 YQC
 exports.getAgents = function (req, res, next) {
-  let iCO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceCObject || null
   if (iCO === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
@@ -265,7 +265,7 @@ exports.sortAgents = function (req, res) {
 // 保险主管设置／更换专员 2017-08-08 YQC
 exports.setAgent = function (req, res) {
   let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceCObject || null
   let pO = req.body.patientObject || null
   if ((iAO && iCO && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
@@ -380,7 +380,7 @@ exports.editInfo = function (req, res) {
 // 跟踪记录录入 2017-08-08 YQC
 exports.insertFollowUp = function (req, res) {
   let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceCObject || null
   let pO = req.body.patientObject || null
   if (((iAO || iCO) && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
@@ -431,7 +431,7 @@ exports.insertFollowUp = function (req, res) {
 // 保单信息录入 2017-08-08 YQC
 exports.insertPolicy = function (req, res) {
   let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceCObject || null
   let pO = req.body.patientObject || null
   if (((iAO || iCO) && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
@@ -487,7 +487,7 @@ exports.insertPolicy = function (req, res) {
 // 保险专员／主管获取患者保单详情 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-23 YQC
 exports.getPolicy = function (req, res) {
   let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceCObject || null
   let pO = req.body.patientObject || null
   if (((iAO || iCO) && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
@@ -511,7 +511,7 @@ exports.getPolicy = function (req, res) {
 
 // 审核保单 2017-08-08 YQC
 exports.reviewPolicy = function (req, res) {
-  let iCO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceCObject || null
   let pO = req.body.patientObject || null
   if ((iCO && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
@@ -606,7 +606,7 @@ exports.reviewPolicy = function (req, res) {
 // 注销专员 2017-08-08 YQC
 exports.agentOff = function (req, res) {
   let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceAObject || null
+  let iCO = req.body.insuranceCObject || null
   if ((iAO && iCO) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
