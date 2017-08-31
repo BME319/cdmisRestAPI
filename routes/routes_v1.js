@@ -17,6 +17,7 @@ var Wechat = require('../models/wechat');
 var getNoMid = require('../middlewares/getNoMid'),
     tokenManager = require('../middlewares/tokenManager'),
     aclChecking = require('../middlewares/aclChecking');
+var errorHandler = require('../middlewares/errorHandler')
 
 // controllers
 var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
@@ -69,204 +70,206 @@ module.exports = function(app,webEntry, acl) {
     res.send("Server Root");
   });
 // tokenManager.verifyToken(),
-  // csq 
-  app.get(version + '/token/refresh', tokenManager.refreshToken);
 
-  app.get(version + '/dict/typeTwo', dictTypeTwoCtrl.getCategory);
-  app.get(version + '/dict/typeTwo/codes', dictTypeTwoCtrl.getTypes);
+  app.post('/test', accountCtrl.test);
+  // csq 
+  app.get(version + '/token/refresh', errorHandler.error, tokenManager.refreshToken);
+
+  app.get(version + '/dict/typeTwo', errorHandler.error, dictTypeTwoCtrl.getCategory);
+  app.get(version + '/dict/typeTwo/codes', errorHandler.error, dictTypeTwoCtrl.getTypes);
   // app.get(version + '/user', userCtrl.getUserList);
   // app.get(version + '/user/insert', userCtrl.insertUser);
   // app.get(version + '/user/one',  userCtrl.getUser);
 
-  app.get(version + '/dict/typeOne',  dictTypeOneCtrl.getCategory);
-  app.get(version + '/dict/district',  dictDistrictCtrl.getDistrict);
-  app.get(version + '/dict/hospital',  dictHospitalCtrl.getHospital);
-  app.get(version + '/tasks',  taskCtrl.getTasks);
-  app.post(version + '/tasks/status',  taskCtrl.updateStatus);
-  app.post(version + '/tasks/time',  taskCtrl.updateStartTime);
+  app.get(version + '/dict/typeOne',  errorHandler.error, dictTypeOneCtrl.getCategory);
+  app.get(version + '/dict/district', errorHandler.error,  dictDistrictCtrl.getDistrict);
+  app.get(version + '/dict/hospital', errorHandler.error,  dictHospitalCtrl.getHospital);
+  app.get(version + '/tasks', errorHandler.error,  taskCtrl.getTasks);
+  app.post(version + '/tasks/status', errorHandler.error,  taskCtrl.updateStatus);
+  app.post(version + '/tasks/time', errorHandler.error,  taskCtrl.updateStartTime);
 
   // app.post(version + '/compliance', complianceCtrl.insertOne);
-  app.get(version + '/compliance',  complianceCtrl.getComplianceByDay);
+  app.get(version + '/compliance', errorHandler.error,  complianceCtrl.getComplianceByDay);
 
   // wf
   // -------------------------------------------- 注册时如何验证用户 ------------------------------------------------------
-  app.post(version + '/user/register', userCtrl.registerTest,getNoMid.getNo(1), userCtrl.register);
+  app.post(version + '/user/register', errorHandler.error, userCtrl.registerTest,getNoMid.getNo(1), userCtrl.register);
   // -------------------------------------------------------------------------------------------------------------------
 
-  app.post(version + '/user/unionid', userCtrl.setOpenId, userCtrl.checkBinding, userCtrl.setOpenIdRes);
-  app.post(version + '/user/openId', userCtrl.checkUser, userCtrl.setMessageOpenId);
-  app.get(version + '/user/openId', userCtrl.checkUser, userCtrl.getMessageOpenId);
+  app.post(version + '/user/unionid', errorHandler.error, userCtrl.setOpenId, userCtrl.checkBinding, userCtrl.setOpenIdRes);
+  app.post(version + '/user/openId', errorHandler.error, userCtrl.checkUser, userCtrl.setMessageOpenId);
+  app.get(version + '/user/openId', errorHandler.error, userCtrl.checkUser, userCtrl.getMessageOpenId);
 
   // app.post('/user/registerWithOpenId',userCtrl.registerWithOpenIdTest,getNoMid.getNo(1), userCtrl.registerWithOpenId);
 
   // ------------------------------------------------------------------------------------------------------------
-  app.post(version + '/user/reset', userCtrl.reset);
+  app.post(version + '/user/reset', errorHandler.error, userCtrl.reset);
   // ------------------------------------------------------------------------------------------------------------
 
-  app.post(version + '/user/login', userCtrl.openIdLoginTest,userCtrl.checkBinding,userCtrl.login);
-  app.post(version + '/user/logout',  userCtrl.logout);
+  app.post(version + '/user/login', errorHandler.error, userCtrl.openIdLoginTest,userCtrl.checkBinding,userCtrl.login);
+  app.post(version + '/user/logout', errorHandler.error,  userCtrl.logout);
 
-  app.get(version + '/user/userID',  userCtrl.getUserID);
+  app.get(version + '/user/userID', errorHandler.error,  userCtrl.getUserID);
   // app.get(version + '/user/getUserIDbyOpenId',  userCtrl.getUserIDbyOpenId);
   // app.get(version + '/user/TDCticket',  userCtrl.getUserTDCticket);
 
-  app.post(version + '/user/sms',  userCtrl.sendSMS);
-  app.get(version + '/user/sms',  userCtrl.verifySMS);
-  app.get(version + '/user/agreement',  userCtrl.getUserAgreement);
-  app.post(version + '/user/agreement',  userCtrl.updateUserAgreement);
-  app.get(version + '/healthInfo/healthInfos',  healthInfoCtrl.getAllHealthInfo);
-  app.get(version + '/healthInfo/healthDetail',  healthInfoCtrl.getHealthDetail);
-  app.post(version + '/healthInfo/healthInfo',  healthInfoCtrl.insertHealthInfo);
-  app.post(version + '/healthInfo/healthDetail',  healthInfoCtrl.modifyHealthDetail);
-  app.post(version + '/healthInfo/deleteHealthDetail',  healthInfoCtrl.deleteHealthDetail);
+  app.post(version + '/user/sms', errorHandler.error,  userCtrl.sendSMS);
+  app.get(version + '/user/sms', errorHandler.error,  userCtrl.verifySMS);
+  app.get(version + '/user/agreement', errorHandler.error,  userCtrl.getUserAgreement);
+  app.post(version + '/user/agreement', errorHandler.error,  userCtrl.updateUserAgreement);
+  app.get(version + '/healthInfo/healthInfos', errorHandler.error,  healthInfoCtrl.getAllHealthInfo);
+  app.get(version + '/healthInfo/healthDetail', errorHandler.error,  healthInfoCtrl.getHealthDetail);
+  app.post(version + '/healthInfo/healthInfo', errorHandler.error,  healthInfoCtrl.insertHealthInfo);
+  app.post(version + '/healthInfo/healthDetail', errorHandler.error,  healthInfoCtrl.modifyHealthDetail);
+  app.post(version + '/healthInfo/deleteHealthDetail', errorHandler.error,  healthInfoCtrl.deleteHealthDetail);
   // app.get(version + '/dictNumber/getNo', getNoMid.getNo(), dictNumberCtrl.getNo);
   // app.get(version + '/user/getIp', userCtrl.getIp); 
-  app.post(version + '/upload',  loadCtrl.uploadphoto(), loadCtrl.upload);
+  app.post(version + '/upload', errorHandler.error,  loadCtrl.uploadphoto(), loadCtrl.upload);
   // app.get(version + '/download',loadCtrl.download);
 
 
   //routes updated by GY
   //说明：测试需要，post方法返回的均为post内容，测试通过需要修改为成功或失败
   //doctor_Info
-  app.post(version + '/doctor/detail',  doctorCtrl.insertDocBasic);
+  app.post(version + '/doctor/detail', errorHandler.error,  doctorCtrl.insertDocBasic);
   //需要查询class字典表（待定）
 
-  app.get(version + '/doctor/mypatients',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
+  app.get(version + '/doctor/mypatients', errorHandler.error,  doctorCtrl.getDoctorObject, doctorCtrl.getPatientList);
   // app.get(version + '/doctor/getDoctorInfo', doctorCtrl.getDoctorObject, doctorCtrl.getDoctorInfo);
-  app.get(version + '/doctor/detail',  doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
-  app.get(version + '/doctor/myTeams',  doctorCtrl.getTeams);
-  app.get(version + '/doctor/teamPatients',  doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
+  app.get(version + '/doctor/detail', errorHandler.error,  doctorCtrl.getDoctorObject, doctorCtrl.getCount1AndCount2, doctorCtrl.getComments, doctorCtrl.getDoctorInfo);
+  app.get(version + '/doctor/myTeams', errorHandler.error,  doctorCtrl.getTeams);
+  app.get(version + '/doctor/teamPatients', errorHandler.error,  doctorCtrl.getTeamObject, doctorCtrl.getGroupPatientList);
   // app.get(version + '/doctor/team', doctorCtrl.getTeamObject, doctorCtrl.getTeam);
-  app.post(version + '/doctor/editDetail',  doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember);
+  app.post(version + '/doctor/editDetail', errorHandler.error,  doctorCtrl.editDoctorDetail, doctorCtrl.updateTeamSponsor, doctorCtrl.updateTeamMember);
 
-  app.get(version + '/doctor/myRecentDoctors',  doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList);
-  app.get(version + '/doctor/myPatientsByDate',  doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate);
-  app.post(version + '/doctor/schedule',  doctorCtrl.insertSchedule);
-  app.post(version + '/doctor/deleteSchedule',  doctorCtrl.deleteSchedule);
-  app.get(version + '/doctor/schedules',  doctorCtrl.getSchedules);
-  app.post(version + '/doctor/suspendTime',  doctorCtrl.insertSuspendTime);
+  app.get(version + '/doctor/myRecentDoctors', errorHandler.error,  doctorCtrl.getDoctorObject, doctorCtrl.getRecentDoctorList);
+  app.get(version + '/doctor/myPatientsByDate', errorHandler.error,  doctorCtrl.getDoctorObject, doctorCtrl.getPatientByDate);
+  app.post(version + '/doctor/schedule', errorHandler.error,  doctorCtrl.insertSchedule);
+  app.post(version + '/doctor/deleteSchedule', errorHandler.error,  doctorCtrl.deleteSchedule);
+  app.get(version + '/doctor/schedules', errorHandler.error,  doctorCtrl.getSchedules);
+  app.post(version + '/doctor/suspendTime', errorHandler.error,  doctorCtrl.insertSuspendTime);
 
-  app.post(version + '/doctor/deleteSuspendTime', doctorCtrl.deleteSuspendTime);
-  app.get(version + '/doctor/suspendTime', doctorCtrl.getSuspendTime);
-  app.get(version + '/doctor/numbers', doctorCtrl.getDocNum);
+  app.post(version + '/doctor/deleteSuspendTime', errorHandler.error, doctorCtrl.deleteSuspendTime);
+  app.get(version + '/doctor/suspendTime', errorHandler.error, doctorCtrl.getSuspendTime);
+  app.get(version + '/doctor/numbers', errorHandler.error, doctorCtrl.getDocNum);
 
 
-  app.get(version + '/doctor/AliPayAccount', doctorCtrl.getAliPayAccount);
-  app.post(version + '/doctor/AliPayAccount', doctorCtrl.editAliPayAccount);
+  app.get(version + '/doctor/AliPayAccount', errorHandler.error, doctorCtrl.getAliPayAccount);
+  app.post(version + '/doctor/AliPayAccount', errorHandler.error, doctorCtrl.editAliPayAccount);
 
   //counsel
-  app.get(version + '/counsel/counsels', doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
-  app.post(version + '/counsel/questionaire', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire);
-  app.post(version + '/counsel/changeCounselStatus', counselCtrl.changeCounselStatus);
-  app.get(version + '/counsel/status',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus);
+  app.get(version + '/counsel/counsels', errorHandler.error, doctorCtrl.getDoctorObject, counselCtrl.getCounsels);
+  app.post(version + '/counsel/questionaire', errorHandler.error, counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(2), counselCtrl.saveQuestionaire);
+  app.post(version + '/counsel/changeCounselStatus', errorHandler.error, counselCtrl.changeCounselStatus);
+  app.get(version + '/counsel/status',  errorHandler.error, counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus);
 
-  app.post(version + '/counsel/status',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus);
-  app.post(version + '/counsel/type',  counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType);
-  app.post(version + '/counsel/score', counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
+  app.post(version + '/counsel/status',  errorHandler.error, counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselStatus, counselCtrl.changeConsultationStatus);
+  app.post(version + '/counsel/type',  errorHandler.error, counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType);
+  app.post(version + '/counsel/score', errorHandler.error, counselCtrl.getPatientObject, counselCtrl.getDoctorObject, getNoMid.getNo(3), counselCtrl.insertCommentScore);
 
 
   //patient_Info
-  app.get(version + '/patient/detail',  patientCtrl.getPatientDetail);
+  app.get(version + '/patient/detail',  errorHandler.error, patientCtrl.getPatientDetail);
 
-  app.get(version + '/patient/myDoctors',  patientCtrl.getPatientObject, patientCtrl.getMyDoctor);
-  app.post(version + '/patient/diagnosis',  patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail);
-  app.get(version + '/patient/doctors',  patientCtrl.getDoctorLists);
-  app.post(version + '/patient/detail',  patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
-  app.post(version + '/patient/editDetail', patientCtrl.editPatientDetail);
-  app.get(version + '/patient/counselRecords', patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
+  app.get(version + '/patient/myDoctors',  errorHandler.error, patientCtrl.getPatientObject, patientCtrl.getMyDoctor);
+  app.post(version + '/patient/diagnosis',  errorHandler.error, patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail);
+  app.get(version + '/patient/doctors', errorHandler.error,  patientCtrl.getDoctorLists);
+  app.post(version + '/patient/detail', errorHandler.error,  patientCtrl.checkPatientId, patientCtrl.newPatientDetail);
+  app.post(version + '/patient/editDetail', errorHandler.error, patientCtrl.editPatientDetail);
+  app.get(version + '/patient/counselRecords', errorHandler.error, patientCtrl.getPatientObject, patientCtrl.getCounselRecords);
   // app.post(version + '/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
   // app.post(version + '/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient);
 
-  app.post(version + '/patient/bindingMyDoctor', patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
-  app.post(version + '/patient/changeVIP', patientCtrl.changeVIP);
-  app.post(version + '/patient/wechatPhotoUrl', patientCtrl.wechatPhotoUrl);
+  app.post(version + '/patient/bindingMyDoctor', errorHandler.error, patientCtrl.debindingDoctor, patientCtrl.bindingMyDoctor, patientCtrl.bindingPatient, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
+  app.post(version + '/patient/changeVIP', errorHandler.error, patientCtrl.changeVIP);
+  app.post(version + '/patient/wechatPhotoUrl', errorHandler.error, patientCtrl.wechatPhotoUrl);
 
   //comment_query
-  app.get(version + '/comment/getComments', doctorCtrl.getDoctorObject, commentCtrl.getCommentsByDoc);
-  app.get(version + '/comment/getCommentsByC', commentCtrl.getCommentsByCounselId);
+  app.get(version + '/comment/getComments', errorHandler.error, doctorCtrl.getDoctorObject, commentCtrl.getCommentsByDoc);
+  app.get(version + '/comment/getCommentsByC', errorHandler.error, commentCtrl.getCommentsByCounselId);
   //vitalSign_query
-  app.get(version + '/vitalSign/vitalSigns',  patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns);
-  app.post(version + '/vitalSign/vitalSign', vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData);
+  app.get(version + '/vitalSign/vitalSigns',  errorHandler.error, patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns);
+  app.post(version + '/vitalSign/vitalSign', errorHandler.error, vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData);
 
 
   //account_Info
   //需要和user表连接
   //无法输出expenseRecords数据，暂时无法解决问题
-  app.get(version + '/account/getAccountInfo',  accountCtrl.getAccountInfo);
-  app.get(version + '/account/counts',  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts);
-  app.post(version + '/account/counts',  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts);
+  app.get(version + '/account/getAccountInfo', errorHandler.error,  accountCtrl.getAccountInfo);
+  app.get(version + '/account/counts', errorHandler.error,  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts);
+  app.post(version + '/account/counts', errorHandler.error,  accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts, accountCtrl.modifyCounts);
   // app.post(version + '/account/rechargeDoctor', accountCtrl.rechargeDoctor);
-  app.post(version + '/account/updateFreeTime',  accountCtrl.checkPatient, accountCtrl.updateFreeTime);
-  app.get(version + '/account/getCountsRespective',  accountCtrl.checkPatient, accountCtrl.getCountsRespective);
+  app.post(version + '/account/updateFreeTime', errorHandler.error,  accountCtrl.checkPatient, accountCtrl.updateFreeTime);
+  app.get(version + '/account/getCountsRespective', errorHandler.error,  accountCtrl.checkPatient, accountCtrl.getCountsRespective);
   
-  app.post(version + '/expense/rechargeDoctor',  accountCtrl.checkPatient, doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor);
+  app.post(version + '/expense/rechargeDoctor', errorHandler.error,  accountCtrl.checkPatient, doctorCtrl.checkDoctor, expenseCtrl.rechargeDoctor);
 
-  app.get(version + '/expense/docRecords',  doctorCtrl.checkDoctor, expenseCtrl.getDocRecords);
+  app.get(version + '/expense/docRecords', errorHandler.error,  doctorCtrl.checkDoctor, expenseCtrl.getDocRecords);
 
   //message
-  app.get(version + '/message/messages',  messageCtrl.getMessages);
-  app.post(version + '/message/status',  messageCtrl.changeMessageStatus);
-  app.post(version + '/message/message',  getNoMid.getNo(6), messageCtrl.insertMessage);
+  app.get(version + '/message/messages', errorHandler.error,  messageCtrl.getMessages);
+  app.post(version + '/message/status', errorHandler.error,  messageCtrl.changeMessageStatus);
+  app.post(version + '/message/message', errorHandler.error,  getNoMid.getNo(6), messageCtrl.insertMessage);
 
   //new
-  app.get(version + '/new/news',  newsCtrl.getNews);
-  app.get(version + '/new/newsByReadOrNot',  newsCtrl.getNewsByReadOrNot);
-  app.post(version + '/new/news',  newsCtrl.insertNews);
-  app.post(version + '/new/teamNews',  newsCtrl.insertTeamNews);
+  app.get(version + '/new/news', errorHandler.error,  newsCtrl.getNews);
+  app.get(version + '/new/newsByReadOrNot', errorHandler.error,  newsCtrl.getNewsByReadOrNot);
+  app.post(version + '/new/news', errorHandler.error,  newsCtrl.insertNews);
+  app.post(version + '/new/teamNews', errorHandler.error,  newsCtrl.insertTeamNews);
   
   //communication
-  app.get(version + '/communication/counselReport',  communicationCtrl.getCounselReport);
-  app.post(version + '/communication/insertMember',  communicationCtrl.insertMember, communicationCtrl.updateNumber);
-  app.post(version + '/communication/removeMember',  communicationCtrl.removeMember, communicationCtrl.updateNumber);
+  app.get(version + '/communication/counselReport', errorHandler.error,  communicationCtrl.getCounselReport);
+  app.post(version + '/communication/insertMember', errorHandler.error,  communicationCtrl.insertMember, communicationCtrl.updateNumber);
+  app.post(version + '/communication/removeMember', errorHandler.error,  communicationCtrl.removeMember, communicationCtrl.updateNumber);
   // app.post(version + '/communication/newTeam', getNoMid.getNo(4), communicationCtrl.newTeam);
-  app.post(version + '/communication/team',  communicationCtrl.newTeam);
-  app.post(version + '/communication/deleteTeam',  communicationCtrl.deleteTeam);
-  app.get(version + '/communication/team',  communicationCtrl.getTeam);
+  app.post(version + '/communication/team', errorHandler.error,  communicationCtrl.newTeam);
+  app.post(version + '/communication/deleteTeam', errorHandler.error,  communicationCtrl.deleteTeam);
+  app.get(version + '/communication/team', errorHandler.error,  communicationCtrl.getTeam);
   // app.post(version + '/communication/newConsultation', getNoMid.getNo(5), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
-  app.post(version + '/communication/consultation',  communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
+  app.post(version + '/communication/consultation', errorHandler.error,  communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
 
-  app.post(version + '/communication/conclusion',  communicationCtrl.conclusion);
-  app.post(version + '/communication/updateLastTalkTime',  communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime);
+  app.post(version + '/communication/conclusion', errorHandler.error,  communicationCtrl.conclusion);
+  app.post(version + '/communication/updateLastTalkTime', errorHandler.error,  communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime);
   //app.get(version + '/communication/getMessages');
 
-  app.get(version + '/communication/consultation',  communicationCtrl.getConsultation);
-  app.post(version + '/communication/communication',  getNoMid.getNo(8),communicationCtrl.postCommunication);
-  app.get(version + '/communication/communication',  communicationCtrl.getCommunication);
+  app.get(version + '/communication/consultation', errorHandler.error, errorHandler.error,  communicationCtrl.getConsultation);
+  app.post(version + '/communication/communication', errorHandler.error,  getNoMid.getNo(8),communicationCtrl.postCommunication);
+  app.get(version + '/communication/communication',  errorHandler.error, communicationCtrl.getCommunication);
 
   // 临时接口：给原数据写入newsType字段
   // app.get(version + '/communication/updateNewsType', communicationCtrl.addnewsType);
 
   //task
 
-  app.post(version + '/tasks/taskModel',  taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel);
-  app.get(version + '/tasks/task',  taskCtrl.getUserTask);
-  app.post(version + '/tasks/task',  taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent);
+  app.post(version + '/tasks/taskModel', errorHandler.error,  taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel);
+  app.get(version + '/tasks/task', errorHandler.error,  taskCtrl.getUserTask);
+  app.post(version + '/tasks/task', errorHandler.error,  taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent);
 
   //compliance
-  app.post(version + '/compliance',  complianceCtrl.getCompliance, complianceCtrl.updateCompliance);
+  app.post(version + '/compliance', errorHandler.error,  complianceCtrl.getCompliance, complianceCtrl.updateCompliance);
 
   //insurance
-  app.post(version + '/insurance/message',  insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage);
-  app.get(version + '/insurance/message',  insuranceCtrl.getInsMsg);
-  app.post(version + '/insurance/prefer',  insuranceCtrl.setPrefer);
-  app.get(version + '/insurance/prefer',  insuranceCtrl.getPrefer);
+  app.post(version + '/insurance/message', errorHandler.error,  insuranceCtrl.updateInsuranceMsg, insuranceCtrl.updateMsgCount, getNoMid.getNo(6), messageCtrl.insertMessage);
+  app.get(version + '/insurance/message', errorHandler.error,  insuranceCtrl.getInsMsg);
+  app.post(version + '/insurance/prefer', errorHandler.error,  insuranceCtrl.setPrefer);
+  app.get(version + '/insurance/prefer', errorHandler.error,  insuranceCtrl.getPrefer);
 
   //advice
-  app.post(version + '/advice/postAdvice',  adviceCtrl.postAdvice);
-  app.get(version + '/advice/getAdvice',  adviceCtrl.getAdvice);
+  app.post(version + '/advice/postAdvice', errorHandler.error,  adviceCtrl.postAdvice);
+  app.get(version + '/advice/getAdvice', errorHandler.error,  adviceCtrl.getAdvice);
 
   //labtestResult
-  app.post(version + '/labtestResult/post',  labtestResultCtrl.postLabtestResult);
-  app.post(version + '/labtestResult/update',  labtestResultCtrl.updateLabtestResult);
-  app.post(version + '/labtestResult/delete',  labtestResultCtrl.deleteLabtestResult);
+  app.post(version + '/labtestResult/post', errorHandler.error,  labtestResultCtrl.postLabtestResult);
+  app.post(version + '/labtestResult/update', errorHandler.error,  labtestResultCtrl.updateLabtestResult);
+  app.post(version + '/labtestResult/delete', errorHandler.error,  labtestResultCtrl.deleteLabtestResult);
   
   //user
-  app.get(version + '/user/getPhoneNoByRole',  userCtrl.getPhoneNoByRole);
+  app.get(version + '/user/getPhoneNoByRole', errorHandler.error,  userCtrl.getPhoneNoByRole);
 
   // order
   // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
-  app.post(version + '/order/order',  orderCtrl.updateOrder);
-  app.get(version + '/order/order',   orderCtrl.getOrder);
+  app.post(version + '/order/order', errorHandler.error,  orderCtrl.updateOrder);
+  app.get(version + '/order/order',  errorHandler.error,  orderCtrl.getOrder);
 
   // // weixin wechatCtrl
   // app.get(version + '/wechat/settingConfig', wechatCtrl.getAccessTokenMid,wechatCtrl.wxJsApiTicket, wechatCtrl.settingConfig);
@@ -280,52 +283,52 @@ module.exports = function(app,webEntry, acl) {
 
 
   // weixin wechatCtrl
-  app.get(version + '/wechat/settingConfig', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.settingConfig);
+  app.get(version + '/wechat/settingConfig', errorHandler.error, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.settingConfig);
 
   // 获取用户基本信息
-  app.get(version + '/wechat/getUserInfo', wechatCtrl.chooseAppId,wechatCtrl.gettokenbycode,wechatCtrl.getuserinfo);
-  app.get(version + '/wechat/gettokenbycode', wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken);
+  app.get(version + '/wechat/getUserInfo', errorHandler.error, wechatCtrl.chooseAppId,wechatCtrl.gettokenbycode,wechatCtrl.getuserinfo);
+  app.get(version + '/wechat/gettokenbycode', errorHandler.error, wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken);
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
   // 输入：微信用户授权的code 商户系统生成的订单号 
   // app.get(version + '/wechat/addOrder', wechatCtrl.gettokenbycode, wechatCtrl.getPaymentOrder, wechatCtrl.addOrder,wechatCtrl.getPaySign);
-  app.post(version + '/wechat/addOrder',  getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign);
+  app.post(version + '/wechat/addOrder', errorHandler.error,  getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign);
  
   // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
   // 订单支付结果回调 
-  app.post(version + '/wechat/payResult', wechatCtrl.payResult);
+  app.post(version + '/wechat/payResult', errorHandler.error, wechatCtrl.payResult);
   // 查询订单   orderNo 
-  app.get(version + '/wechat/getWechatOrder',  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.getWechatOrder);
+  app.get(version + '/wechat/getWechatOrder', errorHandler.error,  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.getWechatOrder);
   // 关闭订单   orderNo 
-  app.get(version + '/wechat/closeWechatOrder',  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.closeWechatOrder);
+  app.get(version + '/wechat/closeWechatOrder', errorHandler.error,  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.closeWechatOrder);
   
   // 退款接口
-  app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund);
+  app.post(version + '/wechat/refund', errorHandler.error, orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund);
   // 退款查询
-  app.post('/wechat/refundquery', orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus());
+  app.post('/wechat/refundquery', errorHandler.error, orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus());
   // app.post('/test/test', wechatCtrl.testxml);
 
   // app.post(version + '/wechat/notif',wechatCtrl.register);
   // 消息模板
-  app.post(version + '/wechat/messageTemplate',  wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
+  app.post(version + '/wechat/messageTemplate', errorHandler.error,  wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.messageTemplate);
   // 下载
-  app.get(version + '/wechat/download',  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.download);
+  app.get(version + '/wechat/download', errorHandler.error,  wechatCtrl.chooseAppId,Wechat.baseTokenManager("access_token"), wechatCtrl.download);
   // 创建永久二维码
-  app.post(version + '/wechat/createTDCticket',  wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createTDCticket, userCtrl.setTDCticket);
+  app.post(version + '/wechat/createTDCticket', errorHandler.error,  wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createTDCticket, userCtrl.setTDCticket);
 
   // 接收微信服务器的post请求
-  app.post('/wechat', wechatCtrl.receiveTextMessage);
+  app.post('/wechat', errorHandler.error, wechatCtrl.receiveTextMessage);
   // 接收微信服务器的get请求
-  app.get('/wechat', wechatCtrl.getServerSignature);
+  app.get('/wechat', errorHandler.error, wechatCtrl.getServerSignature);
 
   // jpush
-  app.post(version + '/jm/users',  jpushCtrl.register);
-  app.post(version + '/jm/groups',  jpushCtrl.createGroup);
-  app.post(version + '/jm/groups/members',  jpushCtrl.updateGroup);
+  app.post(version + '/jm/users', errorHandler.error,  jpushCtrl.register);
+  app.post(version + '/jm/groups', errorHandler.error,  jpushCtrl.createGroup);
+  app.post(version + '/jm/groups/members', errorHandler.error,  jpushCtrl.updateGroup);
 
   // 自定义菜单
-  app.post(version + '/wechat/createCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createCustomMenu);
-  app.get(version + '/wechat/getCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.getCustomMenu);
-  app.get(version + '/wechat/deleteCustomMenu', wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.deleteCustomMenu);
+  app.post(version + '/wechat/createCustomMenu', errorHandler.error, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.createCustomMenu);
+  app.get(version + '/wechat/getCustomMenu', errorHandler.error, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.getCustomMenu);
+  app.get(version + '/wechat/deleteCustomMenu', errorHandler.error, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.deleteCustomMenu);
 
   //获取二维码相关方法
   // app.get(version + '/getAllDoctors', tokenManager.verifyToken(), getQRcodeCtrl.getAllDoctors);
@@ -344,8 +347,8 @@ module.exports = function(app,webEntry, acl) {
   //   res.send("Get User: " + req.param("userid"));
   // });
 
-  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl));
-  app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl));
+  app.post(version + '/acl/userRoles', errorHandler.error, tokenManager.verifyToken(), aclsettingCtrl.addUserRoles(acl));
+  app.post(version + '/acl/removeUserRoles', errorHandler.error, tokenManager.verifyToken(), aclsettingCtrl.removeUserRoles(acl));
   app.get(version + '/acl/userRoles', tokenManager.verifyToken(), aclsettingCtrl.userRoles(acl));
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), aclsettingCtrl.hasRole(acl));
 
@@ -363,13 +366,15 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), aclsettingCtrl.areAnyRolesAllowed(acl));
   app.get(version + '/acl/resources', tokenManager.verifyToken(), aclsettingCtrl.whatResources(acl));
 
-  app.post(version + '/devicedata/BPDevice/binding', devicedataCtrl.bindingDevice);
-  app.post(version + '/devicedata/BPDevice/debinding', devicedataCtrl.debindingDevice);
-  app.post(version + '/devicedata/BPDevice/data', devicedataCtrl.receiveBloodPressure);
-  app.get(version + '/devicedata/devices', devicedataCtrl.getDeviceInfo);
+  app.post(version + '/devicedata/BPDevice/binding', errorHandler.error, devicedataCtrl.bindingDevice);
+  app.post(version + '/devicedata/BPDevice/debinding', errorHandler.error, devicedataCtrl.debindingDevice);
+  app.post(version + '/devicedata/BPDevice/data', errorHandler.error, errorHandler.error, devicedataCtrl.receiveBloodPressure);
+  app.get(version + '/devicedata/devices', errorHandler.error, devicedataCtrl.getDeviceInfo);
 
-  app.get(version + '/version', versionCtrl.getVersionInfo);
-  app.post(version + '/version', getNoMid.getNo(10), versionCtrl.insertVersionInfo);
+  app.get(version + '/version', errorHandler.error, versionCtrl.getVersionInfo);
+  app.post(version + '/version', errorHandler.error, getNoMid.getNo(10), versionCtrl.insertVersionInfo);
+
+  app.post(version + '/log', errorHandler.error, errorHandler.insertLog)
 
 
 };

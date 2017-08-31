@@ -221,7 +221,7 @@ exports.gettokenbycode = function(req,res,next) {//获取用户信息的access_t
     }, function (err, response, body) {
         if (err) return res.status(401).send('换取网页授权access_token失败!');
         
-    console.log(body);
+    // console.log(body);
           var wechatData = {
             access_token: body.access_token, //获取用户信息的access_token
             expires_in: body.expires_in,
@@ -383,7 +383,7 @@ exports.addOrder = function(req, res, next) {
     spbill_create_ip: commonFunc.getClientIp(req),   // 终端IP
     time_start: ymdhms,     // 交易起始时间
     // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
-    notify_url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/payResult',   // 通知地址
+    notify_url: 'http://' + webEntry.domain + '/api/v1/wechat/payResult',   // 通知地址
     trade_type: req.body.trade_type    // 交易类型
     // openid: req.body.openid    // 用户标识
   };
@@ -419,7 +419,7 @@ exports.addOrder = function(req, res, next) {
       // 微信生成的预支付会话标识，用于后续接口调用中使用，该值有效期为2小时
       prepay_id = data.xml.prepay_id;
       req.prepay_id = prepay_id;
-      console.log(prepay_id);
+      // console.log(prepay_id);
       next();
 
       // res.redirect('/zbtong/?#/shopping/wxpay/'+ orderObject.oid +'/' + data.xml.prepay_id);
@@ -806,7 +806,7 @@ exports.messageTemplate = function(req, res) {
             return res.status(400).send('user do not exist');
           }
           if(item.MessageOpenId === null){
-            // console.log("open 11");
+            console.log("open 11");
             // return res.status(400).send('openId do not exist');
             res.json({results:{"errcode" : 0,"errmsg" : "ok"}});
           }
@@ -822,7 +822,7 @@ exports.messageTemplate = function(req, res) {
           }
     
           if(messageOpenId === null){
-            // console.log("open 22");
+            console.log("open 22");
             // return res.status(400).send('openId do not exist');
             res.json({results:{"errcode" : 0,"errmsg" : "ok"}});
           }
@@ -840,6 +840,7 @@ exports.messageTemplate = function(req, res) {
               json:true
             }, function(err, response, body){
               if (!err && response.statusCode == 200) {   
+                console.log(body)
                 res.json({results:body});
               }
               else{
@@ -858,6 +859,7 @@ exports.messageTemplate = function(req, res) {
         json:true
       }, function(err, response, body){
         if (!err && response.statusCode == 200) {   
+          console.log(body)
           res.json({results:body});
         }
         else{
@@ -883,6 +885,7 @@ exports.download = function(req, res) {
   
   var fileurl = wxApis.download + '?access_token=' + token + '&media_id=' + serverId;
   var dir = "./uploads/photos";
+  console.log(fileurl)
 
   request({
     url: fileurl,
@@ -943,6 +946,7 @@ exports.receiveTextMessage = function(req, res) {
     // console.log("partial: " + body);
   });
   req.on('end',function(){
+    // console.log("*************************** finish : body ********************************");
     // console.log("finish: " + body);
     var parser = new xml2js.Parser();
     var jsondata = {};
@@ -952,18 +956,19 @@ exports.receiveTextMessage = function(req, res) {
     });
     MsgType = jsondata.xml.MsgType;
 
-    console.log(jsondata);
+    // console.log(jsondata);
     // console.log((jsondata.xml.EventKey[0] == '' || jsondata.xml.EventKey[0] == null));
     // 事件推送
     if(MsgType == 'event'){
       // 扫描带参数二维码事件    用户未关注时，进行关注后的事件推送 || 用户已关注时的事件推送
       if(jsondata.xml.Event == 'subscribe' || jsondata.xml.Event == 'SCAN'){   
         // do something
-        console.log("inin");
+        // console.log("*************************** inin ********************************");
+        // console.log("inin");
         if(jsondata.xml.EventKey[0] != null && jsondata.xml.EventKey[0] != ''){
     
           var doctor_userId;
-          // 
+          // console.log("*************************** jsondata ********************************");
           // console.log(jsondata);
 
           var patientType;
@@ -978,7 +983,7 @@ exports.receiveTextMessage = function(req, res) {
             // 已注册
             patientType = 1;
           }
-          // console.log(doctor_userId);
+          console.log(doctor_userId);
           // 暂存医生和患者的openId
           var patient_openId = jsondata.xml.FromUserName;       
           var time = new Date();
@@ -989,6 +994,7 @@ exports.receiveTextMessage = function(req, res) {
             time: time,
             patientType: patientType
           };
+          // console.log("*************************** openIdData ********************************");
           // console.log(openIdData);
           var newOpenIdTmp = new OpenIdTmp(openIdData);
           newOpenIdTmp.save(function(err, item) {
@@ -1000,81 +1006,176 @@ exports.receiveTextMessage = function(req, res) {
             }
             else{
               // results = 'success';
-              var query = { userId: doctor_userId };
-              Doctor.getOne(query, function (err, doctor) {
-                if (err) {
-                  results = err;
-                  res.statusCode = 500;
+              // var query = { userId: doctor_userId };
+              // Doctor.getOne(query, function (err, doctor) {
+              //   if (err) {
+              //     results = err;
+              //     res.statusCode = 500;
+              //     res.write(results);
+              //     res.end();
+              //   }
+              //   if (doctor == null) {
+              //     results = 'doctor not exist';
+              //     res.statusCode = 500;
+              //     res.write(results);
+              //     res.end();
+              //   }
+              //   // console.log("*************************** doctor ********************************");
+              //   // console.log(doctor)
+              //   var name = doctor.name;
+              //   var title = doctor.title;
+              //   var workUnit = doctor.workUnit;
+
+              //   var template = {
+              //     "userId": patient_openId,         
+              //     "role": "patient",
+              //     "postdata": {
+              //       "touser": patient_openId,
+              //       "template_id": "43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg",
+              //       "url": '',
+              //       "data": {
+              //         "first": {
+              //           "value": "您现在已经绑定" + name + "医生为您的主管医生。",//医生姓名
+              //           "color": "#173177"
+              //         },
+              //         "keyword1": {
+              //           "value": name, //医生姓名
+              //           "color": "#173177"
+              //         },
+              //         "keyword2": {
+              //           "value": title, //医生职称
+              //           "color": "#173177"
+              //         },
+              //         "keyword3": {
+              //           "value": workUnit, //所在医院
+              //           "color": "#173177"
+              //         },
+
+              //         "remark": {
+              //           "value": "点击底栏【肾事管家】按钮进行注册，注册登录后可查看主管医生详情，并进行咨询问诊。",
+              //           "color": "#173177"
+              //         }
+              //       }
+              //     }
+              //   };
+
+              //   request({
+              //     url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+              //     method: 'POST',
+              //     body:template,
+              //     json:true
+              //   }, function(err, response){
+              //     if(err){
+              //       results = err;
+              //     }
+              //     else{
+
+              //       if( jsondata.xml.Event == 'SCAN'){
+              //         results = 'success';
+              //       }
+              //       else{
+              //         // results = "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~";
+              //         results = "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
+
+              //       }
+
+              //     }
+
+              //   });
+              // });
+
+              if( jsondata.xml.Event == 'SCAN'){
+                results = 'success';
+              }
+              else{
+                // 扫码关注
+                // console.log("*************************** jsondata ********************************");
+                // console.log(jsondata);
+                var ToUserName = jsondata.xml.ToUserName[0];    // 开发者微信号
+                var FromUserName = jsondata.xml.FromUserName[0];  // 发送方帐号（一个OpenID）
+                var CreateTime = parseInt(jsondata.xml.CreateTime[0]); 
+                // console.log(CreateTime);
+                // var date = new Date();
+
+                // console.log(ToUserName)
+                // console.log(FromUserName)
+
+                if(ToUserName === 'gh_38a170c4a996'){
+                  // 医生服务号的开发者微信号
+                  var res_json = {
+                    ToUserName: FromUserName,
+                    FromUserName: ToUserName,
+                    // ToUserName: ToUserName,
+                    // FromUserName: FromUserName,
+                    CreateTime: CreateTime,
+                    MsgType: 'text',
+                    // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+                    Content: "您好，欢迎关注肾健康守护者联盟! \n 慢性肾病的专业管理及医护人员的学习交流平台"
+                  };
+                  console.log(res_json);
+                  var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+                  var xmlString = xmlBuilder.buildObject(res_json);
+                  // console.log(xmlString);
+                  results = xmlString;
+                  // console.log("*************************** results ********************************")
+                  // console.log(results)
+                  res.statusCode = 200;
                   res.write(results);
                   res.end();
+                  
+
                 }
-                if (doctor == null) {
-                  results = 'doctor not exist';
-                  res.statusCode = 500;
+                else if (ToUserName === 'gh_b55234d77eb3'){
+                  // 肾事管家的开发者微信号
+                  var res_json = {
+                    ToUserName: FromUserName,
+                    FromUserName: ToUserName,
+                    // ToUserName: ToUserName,
+                    // FromUserName: FromUserName,
+                    CreateTime: CreateTime,
+                    MsgType: 'text',
+                    // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+                    Content: "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
+                  };
+                  console.log(res_json);
+                  var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+                  var xmlString = xmlBuilder.buildObject(res_json);
+                  // console.log(xmlString);
+                  results = xmlString;
+                  // console.log("*************************** results ********************************")
+                  // console.log(results)
+                  res.statusCode = 200;
                   res.write(results);
                   res.end();
+                  
                 }
-                var name = doctor.name;
-                var title = doctor.title;
-                var workUnit = doctor.workUnit;
+                else{
+                  var res_json = {
+                    ToUserName: FromUserName,
+                    FromUserName: ToUserName,
+                    // ToUserName: ToUserName,
+                    // FromUserName: FromUserName,
+                    CreateTime: CreateTime,
+                    MsgType: 'text',
+                    // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+                    Content: "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
+                  };
+                  console.log(res_json);
+                  var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+                  var xmlString = xmlBuilder.buildObject(res_json);
+                  // console.log(xmlString);
+                  results = xmlString;
+                  // console.log("*************************** results ********************************")
+                  // console.log(results)
+                  res.statusCode = 200;
+                  res.write(results);
+                  res.end();
 
-                var template = {
-                  "userId": patient_openId,         
-                  "role": "patient",
-                  "postdata": {
-                    "touser": patient_openId,
-                    "template_id": "43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg",
-                    "url": '',
-                    "data": {
-                      "first": {
-                        "value": "您现在已经绑定" + name + "医生为您的主管医生。",//医生姓名
-                        "color": "#173177"
-                      },
-                      "keyword1": {
-                        "value": name, //医生姓名
-                        "color": "#173177"
-                      },
-                      "keyword2": {
-                        "value": title, //医生职称
-                        "color": "#173177"
-                      },
-                      "keyword3": {
-                        "value": workUnit, //所在医院
-                        "color": "#173177"
-                      },
+                }
 
-                      "remark": {
-                        "value": "点击底栏【肾事管家】按钮进行注册，注册登录后可查看主管医生详情，并进行咨询问诊。",
-                        "color": "#173177"
-                      }
-                    }
-                  }
-                };
+              }
 
-                request({
-                  url: 'http://' + webEntry.domain + ':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
-                  method: 'POST',
-                  body:template,
-                  json:true
-                }, function(err, response){
-                  if(err){
-                    results = err;
-                  }
-                  else{
-
-                    if( jsondata.xml.Event == 'SCAN'){
-                      results = 'success';
-                    }
-                    else{
-                      results = "您好，欢迎关注肾事管家~让每一位慢性肾病患者得到有效管理。找名医进行咨询问诊，请点击底栏【肾事管家】~定制私人肾病全程管理方案，请点击底栏【全程管理】~";
-                    }
-
-                  }
-
-                });
-
-
-              });
+              
 
           
                      
@@ -1083,30 +1184,91 @@ exports.receiveTextMessage = function(req, res) {
           });
         }
         else if(jsondata.xml.EventKey[0] == '' || jsondata.xml.EventKey[0] == null){
-          // console.log("in");
+          // 手动关注
+          // console.log("*************************** jsondata ********************************");
+          // console.log(jsondata);
           var ToUserName = jsondata.xml.ToUserName[0];    // 开发者微信号
           var FromUserName = jsondata.xml.FromUserName[0];  // 发送方帐号（一个OpenID）
           var CreateTime = parseInt(jsondata.xml.CreateTime[0]); 
           // console.log(CreateTime);
           // var date = new Date();
 
-          var res_json = {
-            ToUserName: FromUserName,
-            FromUserName: ToUserName,
-            // ToUserName: ToUserName,
-            // FromUserName: FromUserName,
-            CreateTime: CreateTime,
-            MsgType: 'text',
-            Content: "您好，欢迎关注肾事管家~让每一位慢性肾病患者得到有效管理。找名医进行咨询问诊，请点击底栏【肾事管家】~定制私人肾病全程管理方案，请点击底栏【全程管理】~"
-          };
-          // console.log(res_json);
-          var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
-          var xmlString = xmlBuilder.buildObject(res_json);
-          // console.log(xmlString);
-          results = xmlString;
-          res.statusCode = 200;
-          res.write(results);
-          res.end();
+          // console.log(ToUserName)
+          // console.log(FromUserName)
+
+          if(ToUserName === 'gh_38a170c4a996'){
+            // 医生服务号的开发者微信号
+            var res_json = {
+              ToUserName: FromUserName,
+              FromUserName: ToUserName,
+              // ToUserName: ToUserName,
+              // FromUserName: FromUserName,
+              CreateTime: CreateTime,
+              MsgType: 'text',
+              // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+              Content: "您好，欢迎关注肾健康守护者联盟! \n 慢性肾病的专业管理及医护人员的学习交流平台"
+            };
+            console.log(res_json);
+            var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+            var xmlString = xmlBuilder.buildObject(res_json);
+            // console.log(xmlString);
+            results = xmlString;
+            // console.log("*************************** results ********************************")
+            // console.log(results)
+            res.statusCode = 200;
+            res.write(results);
+            res.end();
+            
+
+          }
+          else if (ToUserName === 'gh_b55234d77eb3'){
+            // 肾事管家的开发者微信号
+            var res_json = {
+              ToUserName: FromUserName,
+              FromUserName: ToUserName,
+              // ToUserName: ToUserName,
+              // FromUserName: FromUserName,
+              CreateTime: CreateTime,
+              MsgType: 'text',
+              // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+              Content: "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
+            };
+            console.log(res_json);
+            var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+            var xmlString = xmlBuilder.buildObject(res_json);
+            // console.log(xmlString);
+            results = xmlString;
+            // console.log("*************************** results ********************************")
+            // console.log(results)
+            res.statusCode = 200;
+            res.write(results);
+            res.end();
+            
+          }
+          else{
+            var res_json = {
+              ToUserName: FromUserName,
+              FromUserName: ToUserName,
+              // ToUserName: ToUserName,
+              // FromUserName: FromUserName,
+              CreateTime: CreateTime,
+              MsgType: 'text',
+              // Content: "您好，欢迎关注肾事管家~ \n 让每一位慢性肾病患者得到有效管理。\n 找名医进行咨询问诊，请点击底栏【肾事管家】~ \n 定制私人肾病全程管理方案，请点击底栏【全程管理】~"
+              Content: "您好，欢迎关注肾事管家~ \n \n 让每一位慢性肾病患者得到有效管理。\n \n 找名医进行咨询问诊，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patient&#wechat_redirect'>【肾事管家】 </a> ~ \n \n 定制私人肾病全程管理方案，请点击底栏<a href='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=patientinsurance&#wechat_redirect'>【全程管理】</a> ~"
+            };
+            console.log(res_json);
+            var xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true});
+            var xmlString = xmlBuilder.buildObject(res_json);
+            // console.log(xmlString);
+            results = xmlString;
+            // console.log("*************************** results ********************************")
+            // console.log(results)
+            res.statusCode = 200;
+            res.write(results);
+            res.end();
+
+          }
+          
         }
         else{
           // EventKey为空
