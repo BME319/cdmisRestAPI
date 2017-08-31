@@ -21,6 +21,9 @@ exports.setServiceSchedule = function (req, res, next) {
   if (day === null || time === null || total === null || place === null) {
     return res.status(412).json({results: '请输入day, time, total, place'})
   }
+  if (Number(total) <= 0) {
+    return res.status(412).json({results: '请调用删除排班的方法'})
+  }
   let query = {userId: req.session.userId, serviceSchedules: {$elemMatch: {$and: [{day: day}, {time: time}]}}}
   let upObj = {}
   Alluser.getOne(query, function (err, item) {
