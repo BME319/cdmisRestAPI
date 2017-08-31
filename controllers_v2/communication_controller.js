@@ -633,7 +633,7 @@ exports.postCommunication = function (req, res) {
     if (msg.targetType === 'single') { // 点对点交流记录
           // console.log("111");
       request({
-        url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/new/news' + '?token=' + req.query.token || req.body.token,
+        url: 'http://' + webEntry.domain + '/api/v2/new/news' + '?token=' + req.query.token || req.body.token,
         method: 'POST',
         body: bodyGen(msg, communicationInfo['messageNo']),
         json: true
@@ -643,7 +643,7 @@ exports.postCommunication = function (req, res) {
       })
     } else { // team群发记录
       request({
-        url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/new/teamNews' + '?token=' + req.query.token || req.body.token,
+        url: 'http://' + webEntry.domain + '/api/v2/new/teamNews' + '?token=' + req.query.token || req.body.token,
         method: 'POST',
         body: bodyGen(msg, communicationInfo['_id']),
         json: true
@@ -729,7 +729,7 @@ exports.getCommunication = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/communication/getCommunication' + _Url
+  var nexturl = webEntry.domain + '/api/v2/communication/getCommunication' + _Url
 
   if (messageType === 2) {
     var query = {receiver: id2}

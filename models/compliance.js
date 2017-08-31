@@ -72,4 +72,19 @@ Compliance.updateOne = function (query, obj, callback, opts, populate) {
   })
 }
 
+Compliance.update = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var populate = populate || ''
+
+  complianceModel
+    .update(query, obj, options)
+    .populate(populate)
+    .exec(function (err, upcompliance) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, upcompliance)
+    })
+}
+
 module.exports = Compliance

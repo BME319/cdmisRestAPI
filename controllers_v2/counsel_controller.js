@@ -369,7 +369,7 @@ exports.counselAutoRelay = function (req, res, next) {
             }
             // 需要插入news表卧槽好多我先调已经存在的接口好了
             request({
-              url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/new/teamNews' + '?token=' + req.query.token || req.body.token,
+              url: 'http://' + webEntry.domain + '/api/v2/new/teamNews' + '?token=' + req.query.token || req.body.token,
               method: 'POST',
               body: newsData,
               json: true
@@ -471,6 +471,7 @@ exports.changeCounselStatus = function (req, res, next) {
   }
   if (req.body.status != null) {
     upObj['status'] = req.body.status
+    upObj['endTime'] = new Date()
   }
 
   // return res.json({query: query, upObj: upObj});

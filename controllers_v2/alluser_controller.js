@@ -912,7 +912,7 @@ exports.checkBinding = function (req, res) {
             let _url = ''
             if (role === 'patient') {
               // binding doctor
-              _url = 'http://' + webEntry.domain + ':4060/api/v2/patient/favoriteDoctor' + '?token=' + req.query.token || req.body.token
+              _url = 'http://' + webEntry.domain + '/api/v2/patient/favoriteDoctor' + '?token=' + req.query.token || req.body.token
               jsondata = {
                 patientId: item.userId,
                 doctorId: item1.doctorUserId,
@@ -920,7 +920,7 @@ exports.checkBinding = function (req, res) {
               }
             } else if (role === 'nurse') {
               // binding patient
-              _url = 'http://' + webEntry.domain + ':4060/api/v2/nurse/bindingPatient' + '?token=' + req.query.token || req.body.token
+              _url = 'http://' + webEntry.domain + '/api/v2/nurse/bindingPatient' + '?token=' + req.query.token || req.body.token
               jsondata = {
                 patientId: item1.doctorUserId,
                 nurseObjectId: item._id,
@@ -1074,7 +1074,8 @@ exports.login = function (req, res, next) {
               PhotoUrl: item.photoUrl,
               mesg: 'login success!',
               token: token,
-              refreshToken: refreshToken
+              refreshToken: refreshToken,
+              reviewStatus: item.reviewStatus
             }
 
                         // 2017-06-07GY调试
