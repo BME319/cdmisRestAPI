@@ -637,18 +637,17 @@ exports.insertSchedule = function (req, res) {
   let doctorId = req.session.userId
   let _day = req.body.day || null
   let _time = req.body.time || null
-  if (_day == null) {
-    return res.json({msg: 'Please input schedule day!'})
-  }
-  if (_time == null) {
-    return res.json({msg: 'Please input schedule time!'})
+  let _place = req.body.place || null
+  if (_day === null || _time === null || _place === null) {
+    return res.json({msg: 'Please input schedule day/time/place!'})
   }
   let query = {userId: doctorId, role: 'doctor'}
   let upObj = {
     $addToSet: {
       schedules: {
         day: _day,
-        time: _time
+        time: _time,
+        place: _place
       }
     }
   }
