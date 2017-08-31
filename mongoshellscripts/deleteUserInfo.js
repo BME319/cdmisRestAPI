@@ -1,5 +1,7 @@
 
-var dbUrl = '121.43.107.106:28000/cdmis'
+// var dbUrl = '121.43.107.106:28000/cdmis'
+// var dbUrl = 'localhost:27018/cdmis' // 本地代码调试
+var dbUrl = 'localhost:28000/cdmis' // 服务器代码调试
 print(dbUrl)
 db = connect(dbUrl)
 db.auth('rest', 'zjubme319')
