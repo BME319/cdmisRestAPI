@@ -913,13 +913,17 @@ function sortVIPpinyin(a, b) {
   if (a.patientId == null) {
 	  a.patientId = {
 	    VIP:0,
-	    name:''
+			name:'', 
+			group: 0, 
+			groupTime: new Date('2017-08-01')
 	  };
 	}
 	if (b.patientId == null) {
 	    b.patientId={
 	    	VIP:0,
-	    	name:''
+	    	name:'', 
+				group: 0, 
+				groupTime: new Date('2017-08-01')
 	    };
 	}
 	// console.log(a.patientId.VIP);
@@ -929,44 +933,56 @@ function sortVIPpinyin(a, b) {
 	if (b.patientId.VIP == null || a.patientId.VIP == undefined) {
 	  b.patientId.VIP = 0;
 	}
-	if (a.labels) {
-		if (a.labels.constructor === Array && a.labels.length) {
-			if (a.labels[0].group == null || a.labels[0].group == undefined) {
-				a.labels[0].group = 0
-				a.labels[0].groupTime = new Date('2017-08-01')
-			}
-		} else {
-			a.labels = undefined
-			a.labels = []
-			a.labels[0] = {}
-			a.labels[0].group = 0
-			a.labels[0].groupTime = new Date('2017-08-01')
-		}
-	} else {
-		a.labels = []
-		a.labels[0] = {}
-		a.labels[0].group = 0
-		a.labels[0].groupTime = new Date('2017-08-01')
+	if (a.patientId.group == null || a.patientId.group == undefined) {
+	  a.patientId.group = 0;
 	}
-	if (b.labels) {
-		if (b.labels.constructor === Array && b.labels.length) {
-			if (b.labels[0].group == null || b.labels[0].group == undefined) {
-				b.labels[0].group = 0
-				b.labels[0].groupTime = new Date('2017-08-01')
-			}
-		} else {
-			b.labels = undefined
-			b.labels = []
-			b.labels[0] = {}
-			b.labels[0].group = 0
-			b.labels[0].groupTime = new Date('2017-08-01')
-		}
-	} else {
-		b.labels = []
-		b.labels[0] = {}
-		b.labels[0].group = 0
-		b.labels[0].groupTime = new Date('2017-08-01')
+	if (b.patientId.group == null || a.patientId.group == undefined) {
+	  b.patientId.group = 0;
 	}
+	if (a.patientId.groupTime == null || a.patientId.groupTime == undefined) {
+	  a.patientId.groupTime = new Date('2017-08-01');
+	}
+	if (b.patientId.groupTime == null || a.patientId.groupTime == undefined) {
+	  b.patientId.groupTime = new Date('2017-08-01');
+	}
+	// if (a.labels) {
+	// 	if (a.labels.constructor === Array && a.labels.length) {
+	// 		if (a.labels[0].group == null || a.labels[0].group == undefined) {
+	// 			a.labels[0].group = 0
+	// 			a.labels[0].groupTime = new Date('2017-08-01')
+	// 		}
+	// 	} else {
+	// 		a.labels = undefined
+	// 		a.labels = []
+	// 		a.labels[0] = {}
+	// 		a.labels[0].group = 0
+	// 		a.labels[0].groupTime = new Date('2017-08-01')
+	// 	}
+	// } else {
+	// 	a.labels = []
+	// 	a.labels[0] = {}
+	// 	a.labels[0].group = 0
+	// 	a.labels[0].groupTime = new Date('2017-08-01')
+	// }
+	// if (b.labels) {
+	// 	if (b.labels.constructor === Array && b.labels.length) {
+	// 		if (b.labels[0].group == null || b.labels[0].group == undefined) {
+	// 			b.labels[0].group = 0
+	// 			b.labels[0].groupTime = new Date('2017-08-01')
+	// 		}
+	// 	} else {
+	// 		b.labels = undefined
+	// 		b.labels = []
+	// 		b.labels[0] = {}
+	// 		b.labels[0].group = 0
+	// 		b.labels[0].groupTime = new Date('2017-08-01')
+	// 	}
+	// } else {
+	// 	b.labels = []
+	// 	b.labels[0] = {}
+	// 	b.labels[0].group = 0
+	// 	b.labels[0].groupTime = new Date('2017-08-01')
+	// }
 
 	if (b.patientId.VIP - a.patientId.VIP > 0) {
 	  flag = 1;
@@ -974,16 +990,16 @@ function sortVIPpinyin(a, b) {
 	else if (b.patientId.VIP - a.patientId.VIP < 0) {
 	  flag = -1;
 	}
-	else if (b.labels[0].group - a.labels[0].group) {
+	else if (b.patientId.group - a.patientId.group) {
 		flag = 1
 	}
-	else if (b.labels[0].group - a.labels[0].group < 0) {
+	else if (b.patientId.group - a.patientId.group < 0) {
 		flag = -1
 	}
-	else if (b.labels[0].groupTime - a.labels[0].groupTime) {
+	else if (b.patientId.groupTime - a.patientId.groupTime) {
 		flag = 1
 	}
-	else if (b.labels[0].groupTime - a.labels[0].groupTime < 0) {
+	else if (b.patientId.groupTime - a.patientId.groupTime < 0) {
 		flag = -1
 	}
 	else {

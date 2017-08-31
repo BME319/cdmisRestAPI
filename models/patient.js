@@ -21,6 +21,8 @@ var patientSchema = new mongoose.Schema({
 	class_info: [String], 
 	operationTime: Date, 
 	VIP: {type:Number, default:0}, 
+	group: {type:Number, default:0}, 
+	groupTime: Date, 
 	hypertension: Number,
 	allergic: String, 
 	doctors: [

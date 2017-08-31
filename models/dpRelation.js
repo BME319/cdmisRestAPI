@@ -6,14 +6,15 @@ var dpRelationSchema = new mongoose.Schema({
 	patients: [
 	  {
 	  	_id:0, 
-	  	patientId: {type: mongoose.Schema.Types.ObjectId, ref:'patient'}, 
-	  	labels: [
-				{
-					_id:0, 
-					group:Number, 
-					groupTime:Date
-				}
-			],
+      patientId: {type: mongoose.Schema.Types.ObjectId, ref:'patient'}, 
+      labels: [String], 
+	  	// labels: [
+			// 	{
+			// 		_id:0, 
+			// 		group:Number, 
+			// 		groupTime:Date
+			// 	}
+			// ],
 	  	dpRelationTime:Date
 	  }
 	], 
