@@ -34,7 +34,7 @@ if (typeof(db.db) === 'undefined') {
 }
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
-  console.log(domain + ' MongoDB connected!');
+  console.log(dbUri + ' MongoDB connected!');
   
 });
 
