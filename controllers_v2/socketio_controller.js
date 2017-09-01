@@ -44,7 +44,7 @@ function messageSaveSend (data, url, sender) {
   console.log(jsondata)
   request({
         // url: url + '?token=' + req.query.token || req.body.token,
-    url: reqUrl,
+    url: reqUrl + '?token=' + req.query.token || req.body.token,
     method: 'POST',
     body: jsondata,
     json: true
