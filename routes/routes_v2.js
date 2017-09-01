@@ -4755,6 +4755,40 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.editAliPayAccount)
+    /** GY 患者入组/解除入组
+   * @swagger
+   * /doctor/groupPatient:
+   *   post:
+   *     tags:
+   *     - "doctor"
+   *     summary: "groupPatient"
+   *     description: ""
+   *     operationId: "groupPatient"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "patientId"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *           patientId:
+   *             type: "string"
+   *     responses:
+   *      200:
+   *         description: "Operation success."
+   *      404: 
+   *         description: "object not found"
+   *      400: 
+   *         description: "authorization not satisfied"
+   */
+  app.post(version + '/doctor/groupPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.groupPatient)
   // 患者端 关注医生 2017-07-18
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
