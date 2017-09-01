@@ -4755,7 +4755,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/doctor/AliPayAccount', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), doctorCtrl.editAliPayAccount)
-    /** GY 患者入组/解除入组
+  /** GY 患者入组/解除入组
    * @swagger
    * /doctor/groupPatient:
    *   post:
