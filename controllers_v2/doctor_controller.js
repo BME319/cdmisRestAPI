@@ -852,13 +852,17 @@ function sortVIPpinyin (a, b) {
   if (a.patientId == null) {
     a.patientId = {
       VIP: 0,
-      name: ''
+      name: '', 
+      group: 0, 
+      groupTime: new Date('2017-08-01')
     }
   }
   if (b.patientId == null) {
     b.patientId = {
       VIP: 0,
-      name: ''
+      name: '', 
+      group: 0, 
+      groupTime: new Date('2017-08-01')
     }
   }
   // console.log(a.patientId.VIP);
@@ -871,6 +875,14 @@ function sortVIPpinyin (a, b) {
   if (b.patientId.VIP - a.patientId.VIP > 0) {
     flag = 1
   } else if (b.patientId.VIP - a.patientId.VIP < 0) {
+    flag = -1
+  } else if (b.patientId.group - a.patientId.group > 0) {
+    flag = 1
+  } else if (b.patientId.group - a.patientId.group < 0) {
+    flag = -1
+  } else if (b.patientId.groupTime - a.patientId.groupTime > 0) {
+    flag = 1
+  } else if (b.patientId.groupTime - a.patientId.groupTime < 0) {
     flag = -1
   } else {
     flag = pinyin.compare(a.patientId.name, b.patientId.name)

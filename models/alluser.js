@@ -142,6 +142,9 @@ var alluserSchema = new mongoose.Schema({
   VIP: {type: Number, default: 0, enum: [0, 1]},
   VIPStartTime: Date,
   VIPEndTime: Date,
+  // 入组相关
+  group: {type: Number, default: 0, enum: [0, 1]}, 
+  groupTime: Date, 
   hypertension: Number,
   allergic: String,
   // 关注医生字段
