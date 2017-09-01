@@ -81,7 +81,52 @@ exports.getPatientDetail = function (req, res) {
         } else {
           patientWeight = vitalitems[0].data[vitalitems[0].data.length - 1].value
         }
-        return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis})
+        if (req.session.role === 'doctor') {
+          let queryDPR = {doctorId: req.session._id}
+          DpRelation.getOne(queryDPR, function(err, dpitem) {
+            if (err) {
+              return res.status(500).send(err)
+            } else if (dpitem === null) {
+              return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'none'})
+            } else {
+              let patientFlag = 0
+              let patientChargeFlag = 0
+              if (dpitem.patients) {
+                if (dpitem.patients.length) {
+                  for (let i = 0; i < dpitem.patients.length; i++) {
+                    if (JSON.stringify(dpitem.patients[i].patientId) === JSON.stringify(item._id)) {
+                      patientFlag = 1
+                      break
+                    }
+                  }
+                }
+              }
+              if (dpitem.patientsInCharge) {
+                if (dpitem.patientsInCharge.length) {
+                  for (let i = 0; i < dpitem.patientsInCharge.length; i++) {
+                    if (JSON.stringify(dpitem.patientsInCharge[i].patientId) == JSON.stringify(item._id)) {
+                      patientChargeFlag = 1
+                      break
+                    }
+                  }
+                }
+              }
+              if (!patientFlag && !patientChargeFlag) {
+                return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'none'})
+              } else if (!patientFlag && patientChargeFlag) {
+                return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'charge'})
+              } else if (patientFlag && !patientChargeFlag) {
+                return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'follow'})
+              } else if (patientFlag && patientChargeFlag) {
+                return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'charge_and_follow'})
+              } else {
+                return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'error'})
+              }
+            }
+          })
+        } else {
+          return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis})
+        }        
       }, optsWeight)
     }
       // res.json({results: item});
