@@ -3556,7 +3556,7 @@ module.exports = function (app, webEntry, acl) {
    *                   items:
    *                     $ref: '#/definitions/Task'
    */
-  app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
+  app.post(version + '/tasks/taskModel', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.dprelation(['charge']), taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者/医生
    * @swagger
    * /tasks/task:
@@ -3663,7 +3663,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/tasks/task', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
+  app.post(version + '/tasks/task', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.dprelation(['charge']), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
   // patient 2017-07-17
   /** YQC annotation 2017-07-27 - acl 2017-07-26 患者 - acl 2017-07-28 医生
    * @swagger
@@ -4016,7 +4016,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/patient/diagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getDoctorObject, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
+  app.post(version + '/patient/diagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), patientCtrl.getDoctorObject, alluserCtrl.dprelation(['charge', 'follow']), patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 管理员
    * @swagger
    * /patient/changeVIP:
@@ -7374,7 +7374,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: Server internal error
    */
   // 医生点评患者的报表信息 权限 医生
-  app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, alluserCtrl.getAlluserObject, reportCtrl.updateReport)
+  app.post(version + '/report/report', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkPatient, alluserCtrl.getAlluserObject, alluserCtrl.dprelation(['charge']), reportCtrl.updateReport)
   /**
    * @swagger
    * definition:
