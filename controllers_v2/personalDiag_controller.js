@@ -1145,3 +1145,56 @@ exports.autoOverduePD = function (req, res) {
     }
   })
 }
+
+/**
+人工处理
+*/
+// 获取需要人工处理退款的面诊列表
+exports.manualRefundList = function (req, res) {
+  let status = req.query.status || null
+  let query = {status: status}
+  if (status !== null) {
+    status = Number(status)
+    if (status !== 5 && status !== 6) {
+      return res.json({msg: '请检查status输入', code: 1})
+    } else {
+      query = {status: status}
+    }
+  } else {
+    query = {$or: [{status: 5}, {status: 6}]}
+  }
+
+  PersonalDiag.getSome(query, function (err, items) {
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      let listPD = []
+      for (let item in items) {
+        listPD.push(items[item]._id)
+      }
+      let queryO = {perDiagObject: {$in: listPD}}
+      let opts = ''
+      let fields = {_id: 0, orderNo: 1, money: 1, paystatus: 1}
+      let populate = {
+        path: 'perDiagObject',
+        select: {_id: 0, code: 0},
+        populate: [
+          {path: 'patientId', select: {'_id': 0, 'name': 1, 'phoneNo': 1, 'gender': 1}},
+          {path: 'doctorId', select: {'_id': 0, 'name': 1, 'phoneNo': 1, 'gender': 1}}
+        ]
+      }
+      Order.getSome(queryO, function (err, itemsO) {
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          return res.json({data: itemsO, code: 0})
+        }
+      }, opts, fields, populate)
+    }
+  })
+}
+
+// // 人工处理面诊退款
+// exports.manualRefundList = function (req, res) {
+
+// }

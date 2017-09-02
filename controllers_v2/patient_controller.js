@@ -1113,7 +1113,7 @@ exports.wechatPhotoUrl = function (req, res) {
   if (req.query.wechatPhotoUrl === null || req.query.wechatPhotoUrl === '' || req.query.wechatPhotoUrl === undefined) {
     return res.json({results: '请填写wechatPhotoUrl'})
   }
-  let query = {userId: req.session.userId}
+  let query = {userId: req.query.patientId}
   let newPhotoUrl = req.query.wechatPhotoUrl
   Alluser.getOne(query, function (err, item) {
     if (err) {

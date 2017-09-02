@@ -1075,7 +1075,8 @@ exports.login = function (req, res, next) {
               PhotoUrl: item.photoUrl,
               mesg: 'login success!',
               token: token,
-              refreshToken: refreshToken
+              refreshToken: refreshToken,
+              reviewStatus: item.reviewStatus
             }
 
                         // 2017-06-07GY调试

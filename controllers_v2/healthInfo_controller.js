@@ -93,7 +93,7 @@ exports.getHealthDetail = function (req, res) {
         url.push(item.url[i].photo)
       }
     }
-    console.log('item', item)
+    // console.log('item', item)
     return res.json({results: {time, insertTime, type, label, userId, description, comments, url}})
   }, opts, fields)
 }
@@ -165,12 +165,13 @@ exports.insertHealthInfo = function (req, res) {
     }
   }
   // 自动生成图片ID
-  let urlObj = [
-    {
-      photo: '',
-      photoId: ''
-    }
-  ]
+  // let urlObj = [
+  //   {
+  //     photo: '',
+  //     photoId: ''
+  //   }
+  // ]
+  let urlObj = []
   function add0 (m) {
     return m < 10 ? '0' + m : m
   }
@@ -188,11 +189,14 @@ exports.insertHealthInfo = function (req, res) {
         return res.status(412).json({results: '最多一次上传10张图片'})
       }
       for (let i = 0; i < req.body.url.length; i++) {
+        let urlObjTmp = {}
         // console.log(req.body.url[i].photo)
-        urlObj[i].photo = req.body.url[i]
+        urlObjTmp['photo'] = req.body.url[i]
         // console.log(urlObj[i].photo)
-        urlObj[i].photoId = healthInfoData.userId + insertTimestr + add0(i)
+        urlObjTmp['photoId'] = healthInfoData.userId + insertTimestr + add0(i)
+        urlObj.push(urlObjTmp)
       }
+      // console.log('urlObj', urlObj)
       healthInfoData['url'] = urlObj
     } else {
       return res.status(412).json({results: 'url需要是数组'})
@@ -266,12 +270,13 @@ exports.modifyHealthDetail = function (req, res) {
     }
   }
   var upObj = {}
-  let urlObj = [
-    {
-      photo: '',
-      photoId: ''
-    }
-  ]
+  let urlObj = []
+  // let urlObj = [
+  //   {
+  //     photo: '',
+  //     photoId: ''
+  //   }
+  // ]
   let insertTime = new Date(req.body.insertTime)
   function add0 (m) {
     return m < 10 ? '0' + m : m
@@ -291,8 +296,10 @@ exports.modifyHealthDetail = function (req, res) {
         return res.status(412).json({results: '最多一次上传10张图片'})
       }
       for (let i = 0; i < req.body.url.length; i++) {
-        urlObj[i].photo = req.body.url[i]
-        urlObj[i].photoId = req.session.userId + insertTimestr + add0(i)  // 需要确认是谁进行健康信息的修改
+        let urlObjTmp = {}
+        urlObjTmp['photo'] = req.body.url[i]
+        urlObjTmp['photoId'] = req.session.userId + insertTimestr + add0(i)  // 需要确认是谁进行健康信息的修改
+        urlObj.push(urlObjTmp)
       }
       upObj['url'] = urlObj
     } else {
