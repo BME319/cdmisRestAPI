@@ -113,13 +113,11 @@ exports.getPatientDetail = function (req, res) {
               }
               if (!patientFlag && !patientChargeFlag) {
                 return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'none'})
-              } else if (!patientFlag && patientChargeFlag) {
+              } else if (patientChargeFlag) {
                 return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'charge'})
               } else if (patientFlag && !patientChargeFlag) {
                 return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'follow'})
-              } else if (patientFlag && patientChargeFlag) {
-                return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'charge_and_follow'})
-              } else {
+              }else {
                 return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'error'})
               }
             }
