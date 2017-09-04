@@ -3365,7 +3365,7 @@ module.exports = function (app, webEntry, acl) {
    *       404:
    *         description: "target not found."
    */
-  app.post(version + '/communication/massToPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getMassTargets, communicationCtrl.massCommunication)
+  app.post(version + '/communication/massToPatient', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.getMassTargets, communicationCtrl.massCommunication)
   // task 2017-07-14
   /** YQC annotation 2017-08-10 - acl 2017-08-10 患者／医生
    * @swagger
