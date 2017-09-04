@@ -10,6 +10,7 @@ uploads/
 logs/
 certs/
 node_modules/  
+mongoscriptslogs/
 
 #过滤deploy相关文件
 deploy.sh
