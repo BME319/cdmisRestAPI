@@ -834,13 +834,17 @@ function sortVIPpinyin (a, b) {
   if (a.patientId == null) {
     a.patientId = {
       VIP: 0,
-      name: ''
+      name: '', 
+      group: 0, 
+      groupTime: new Date('2017-08-01')
     }
   }
   if (b.patientId == null) {
     b.patientId = {
       VIP: 0,
-      name: ''
+      name: '', 
+      group: 0, 
+      groupTime: new Date('2017-08-01')
     }
   }
   // console.log(a.patientId.VIP);
@@ -853,6 +857,14 @@ function sortVIPpinyin (a, b) {
   if (b.patientId.VIP - a.patientId.VIP > 0) {
     flag = 1
   } else if (b.patientId.VIP - a.patientId.VIP < 0) {
+    flag = -1
+  } else if (b.patientId.group - a.patientId.group > 0) {
+    flag = 1
+  } else if (b.patientId.group - a.patientId.group < 0) {
+    flag = -1
+  } else if (b.patientId.groupTime - a.patientId.groupTime > 0) {
+    flag = 1
+  } else if (b.patientId.groupTime - a.patientId.groupTime < 0) {
     flag = -1
   } else {
     flag = pinyin.compare(a.patientId.name, b.patientId.name)
@@ -1108,6 +1120,81 @@ exports.getAliPayAccount = function (req, res) {
       } else {
         return res.json({results: item.aliPayAccount})
       }
+    }
+  })
+}
+
+// 患者入组标记 GY 2017-09-01
+exports.groupPatient = function(req, res) {
+  let query = {userId: req.body.patientId}
+  Alluser.getOne(query, function (err, patientItem) {
+    if (err) {
+      return res.status(500).send(err)
+    } else if (patientItem === null) {
+      return res.status(404).json({
+        data: {}, 
+        code: 1, 
+        msg: '找不到userId'
+      })
+    } else if (patientItem.role.indexOf('patient') === -1) {
+      return res.status(404).json({
+        data: {}, 
+        code: 1, 
+        msg: '找不到patientId'
+      })
+    } else {
+      let queryDoc = {
+        doctorId: req.session._id, 
+        $or: [
+          {patients: {$elemMatch: {patientId: patientItem._id}}}, 
+          {patientsInCharge: {$elemMatch: {patientId: patientItem._id}}}
+        ]
+      }
+      DpRelation.getOne(queryDoc, function (err, dpitem) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (dpitem === null) {
+          return res.status(400).json({
+            data: {}, 
+            code: 1, 
+            msg: '与该患者无任何联系没有操作权限'
+          })
+        } else {
+          let upObj = {
+            group: (!patientItem.group)
+          }
+          if (upObj.group) {
+            upObj['groupTime'] = new Date()
+          }
+          let opts = {
+            new: true, 
+            fields: {
+              userId: 1, 
+              name: 1, 
+              group: 1, 
+              groupTime: 1
+            }
+          }
+          Alluser.updateOne(query, upObj, function (err, upitem) {
+            if (err) {
+              return res.status(500).send(err)
+            } else if (upitem === null) {
+              return res.status(500).send('更新错误')
+            } else {
+              let ret = {
+                data: upitem, 
+                code: 0
+              }
+              if (ret.data.group) {
+                ret['msg'] = '入组成功'
+              } else {
+                ret['msg'] = '解除入组成功'
+              }
+              return res.json(ret)
+            }
+          }, opts)
+        }
+      })
     }
   })
 }

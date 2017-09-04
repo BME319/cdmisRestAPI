@@ -193,7 +193,7 @@ exports.getMycollection = function (req, res) {
         as: 'collections'
       }
     },
-    {$unwind: {path: '$collections', preserveNullAndEmptyArrays: true}},
+    {$unwind: {path: '$collections', preserveNullAndEmptyArrays: false}},
     {
       $project: {
         postId: '$collections.postId',
@@ -203,7 +203,8 @@ exports.getMycollection = function (req, res) {
         time: '$collections.time',
         anonymous: '$collections.anonymous',
         replyCount: '$collections.replyCount',
-        favoritesNum: '$collections.favoritesNum'
+        favoritesNum: '$collections.favoritesNum',
+        status: '$collections.status'
       }
     },
     {
@@ -225,9 +226,11 @@ exports.getMycollection = function (req, res) {
         'anonymous': 1,
         'replyCount': 1,
         'favoritesNum': 1,
+        'status': 1,
         avatar: '$userinfo.photoUrl'
       }
     },
+    {$match: {status: 0}},
     {$sort: {time: -1}},
     {$skip: skip},
     {$limit: limit}
@@ -287,9 +290,10 @@ exports.getMyposts = function (req, res) {
         as: 'collections'
       }
     },
-    {$unwind: {path: '$collections', preserveNullAndEmptyArrays: true}},
+    {$unwind: {path: '$collections', preserveNullAndEmptyArrays: false}},
     {
       $project: {
+        '_id': 0,
         postId: '$collections.postId',
         sponsorId: '$collections.sponsorId',
         sponsorName: '$collections.sponsorName',

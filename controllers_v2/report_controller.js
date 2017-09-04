@@ -42,6 +42,7 @@ exports.getReport = function (req, res) {
     let endTime
     if (type === 'week') {  // '周报'
       let currentTimeDay = currentTime.getDay()
+      if (currentTimeDay === 0) { currentTimeDay = 7 } // 周日从0置为7
       startTimeTemp = new Date(currentTime - (currentTimeDay - 1) * 24 * 3600 * 1000)
       startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')  // 本周一零点
       while (modify !== 0) {
@@ -408,6 +409,7 @@ exports.getVitalSigns = function (req, res, next) {
       // let endTime = new Date(timeTemp)
       if (showType === 'week') {
         let currentTimeDay = currentTime.getDay()
+        if (currentTimeDay === 0) { currentTimeDay = 7 } // 周日从0置为7
         startTimeTemp = new Date(currentTime - (currentTimeDay - 1) * 24 * 3600 * 1000)
         startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')  // 本周一零点
         // console.log('startTime', startTime)

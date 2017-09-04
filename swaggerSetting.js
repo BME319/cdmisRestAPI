@@ -6,7 +6,7 @@ var swaggerDefinition = {
     version: '2.0.0',
     description: '肾事管家'
   },
-  host: '121.43.107.106:4060',
+  host: 'docker2.haihonghospitalmanagement.com',
   basePath: '/api/v2'
 }
 

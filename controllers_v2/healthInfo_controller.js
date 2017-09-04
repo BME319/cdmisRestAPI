@@ -9,6 +9,7 @@ exports.getAllHealthInfo = function (req, res) {
   var _userId = req.session.userId
   var _role = req.session.role
   var patientId = req.query.patientId || null
+  var _type = req.query.type || null
   var query = {}
   if (_role === 'patient') {
     query['userId'] = _userId
@@ -18,6 +19,9 @@ exports.getAllHealthInfo = function (req, res) {
     } else {
       query['userId'] = patientId
     }
+  }
+  if (_type !== null) {
+    query['type'] = _type
   }
   // var opts = {sort:-"time"};
   var opts = {'sort': {'time': -1, 'revisionInfo.operationTime': -1}}
