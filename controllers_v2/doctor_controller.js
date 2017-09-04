@@ -443,6 +443,14 @@ exports.editDoctorDetail = function (req, res, next) {
   //   terminalIP:"10.12.43.32"
   // }
   }
+  if (req.session.role === 'guest') {
+    upObj = {
+      $set: {
+        reviewStatus: 0
+      }
+    }
+  }
+
   if (req.body.certificatePhotoUrl !== null && req.body.certificatePhotoUrl !== '' && req.body.certificatePhotoUrl !== undefined) {
     upObj['certificatePhotoUrl'] = req.body.certificatePhotoUrl
   }
