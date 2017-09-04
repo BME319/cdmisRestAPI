@@ -1744,7 +1744,8 @@ exports.dprelation = function (type) {
         }
       })
     } else {
-      return res.status(401).send('与患者无任何联系没有操作权限')
+      // 患者本身也有权限
+      next()
     }
   }
 }
