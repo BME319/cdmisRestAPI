@@ -701,7 +701,7 @@ exports.deleteComment = function (req, res) {
       let obj = {}
       if (replyId !== '') {
         // query['replies.commentId'] = commentId
-        query['replies.replyId'] = replyId
+        query1['replies.replyId'] = replyId
         obj = {
           $set: {
             'replies.$.status': 1
