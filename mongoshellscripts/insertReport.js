@@ -1032,14 +1032,20 @@ if (currentDate === 1) {
       // 从周报中获取超出范围次数
       let startTimeTmp = new Date(lastMonth)
       let endTimeTmp = new Date(lastMonth.getTime() + (7 - lastMonth.getDay()) * 24 * 3600 * 1000)  // 周日零点
-      let yesterDay = new Date(currentTime - 24 * 3600 * 1000)
+      if (lastMonth.getDay() === 0) {
+        endTimeTmp = new Date(lastMonth)
+      }
+      let yesterDay = new Date(currentTime.getTime() - 24 * 3600 * 1000)
       // print('startTimeTmp', startTimeTmp)
       // print('endTimeTmp', endTimeTmp)
       // print('yesterDay', yesterDay)
       outOfRangeTimes1 = 0
       outOfRangeTime1 = []
       while (Number(startTimeTmp.getTime()) <= Number(yesterDay.getTime())) {
-        let timeTmp = new Date(startTimeTmp - (startTimeTmp.getDay() - 1) * 24 * 3600 * 1000)
+        let timeTmp = new Date(startTimeTmp.getTime() - (startTimeTmp.getDay() - 1) * 24 * 3600 * 1000)
+        if (startTimeTmp.getDay() === 0) {
+          timeTmp = new Date(startTimeTmp)
+        }
         let timeTmpY = timeTmp.getFullYear()
         let timeTmpM = timeTmp.getMonth() + 1
         if (timeTmpM < 10) { timeTmpM = '0' + timeTmpM }
@@ -1522,6 +1528,9 @@ if (currentDate === 1) {
       // 从周报中获取超出范围次数
       let startTimeTmp = new Date(lastMonth)
       let endTimeTmp = new Date(lastMonth.getTime() + (7 - lastMonth.getDay()) * 24 * 3600 * 1000)  // 周日零点
+      if (lastMonth.getDay() === 0) {
+        endTimeTmp = new Date(lastMonth)
+      }
       let yesterDay = new Date(currentTime.getTime() - 24 * 3600 * 1000)
       // print('startTimeTmp', startTimeTmp)
       // print('endTimeTmp', endTimeTmp)
@@ -1530,6 +1539,9 @@ if (currentDate === 1) {
       outOfRangeTime1 = []
       while (Number(startTimeTmp.getTime()) <= Number(yesterDay.getTime())) {
         let timeTmp = new Date(startTimeTmp - (startTimeTmp.getDay() - 1) * 24 * 3600 * 1000)
+        if (startTimeTmp.getDay() === 0) {
+          timeTmp = new Date(startTimeTmp)
+        }
         let timeTmpY = timeTmp.getFullYear()
         let timeTmpM = timeTmp.getMonth() + 1
         if (timeTmpM < 10) { timeTmpM = '0' + timeTmpM }
