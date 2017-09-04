@@ -764,7 +764,7 @@ exports.getCommunication = function (req, res) {
   // };
       query['newsType'] = newsType
     }
-    console.log(query)
+    // console.log(query)
 
     Communication.getSome(query, function (err, items) {
       if (err) {
@@ -1070,6 +1070,8 @@ exports.massCommunication = function (req, res, next) {
           type: 8
         },
         update: {
+          time: now, 
+          title: title, 
           description: description,
           readOrNot: 0,
           messageId: communicationDatas[i].messageId
