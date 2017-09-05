@@ -19,7 +19,8 @@ var replySchema = new mongoose.Schema({
       content: String,
       time: Date,
       status: Number,
-      at: String
+      at: String,
+      atName: String
     }
   ]
 })
