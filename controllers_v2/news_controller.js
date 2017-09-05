@@ -19,7 +19,8 @@ exports.getNews = function (req, res) {
   // console.log(type)
 
   // 查询所有与用户相关的消息记录，并按照时间降序排列
-  var query = {'$or': [{userId: userId}, {sendBy: userId}]}
+  // var query = {'$or': [{userId: userId}, {sendBy: userId}]}
+  var query = {'userId': userId}
   query['userRole'] = userRole
   if (type !== null && type !== '' && type !== undefined) {
     query['type'] = type
