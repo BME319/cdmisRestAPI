@@ -7472,6 +7472,7 @@ module.exports = function (app, webEntry, acl) {
 
   // jyf
   // 刷新token
+  // 09-06 前端说憋加token YQC
   /**
    * @swagger
    * /token/refresh:
@@ -7493,7 +7494,7 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: 错误信息
    */
-  app.get(version + '/token/refresh', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), tokenManager.refreshToken)
+  app.get(version + '/token/refresh', tokenManager.refreshToken)
 
   // dict
   // 2017-07-24测试 权限：admin
