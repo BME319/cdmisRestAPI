@@ -248,12 +248,10 @@ if (userRole.indexOf('doctor') !== -1) {
     'hospital': workUnit
   }
   upObj = {
-    $pull: {  // pull不知道是否可以同时删除多个数组中的元素？
-      '$or': [
-        {'portleader': userObjectId},
-        {'doctors': userObjectId},
-        {'departLeader': userObjectId}
-      ]
+    $pull: {
+      'portleader': userObjectId,
+      'doctors': userObjectId,
+      'departLeader': userObjectId
     }
   }
   db.departments.update(query, upObj, {multi: true})

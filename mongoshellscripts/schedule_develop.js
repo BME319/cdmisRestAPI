@@ -1,6 +1,7 @@
 // var webEntry = require('../settings').webEntry
 // var dbUri = webEntry.dbUri
-var dbUrl = '121.43.107.106:28000/cdmis'
+// var dbUrl = '121.43.107.106:28000/cdmis'
+var dbUrl = 'localhost:28000/cdmis' // 服务器代码调试
 // print(dbUrl);
 
 db = connect(dbUrl)
