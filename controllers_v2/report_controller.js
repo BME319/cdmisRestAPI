@@ -47,7 +47,7 @@ exports.getReport = function (req, res) {
       startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')  // 本周一零点
       while (modify !== 0) {
         endTime = new Date(startTime)
-        startTime = new Date(endTime - 7 * 24 * 3600 * 1000)
+        startTime = new Date(endTime.getTime() - 7 * 24 * 3600 * 1000)
         modify++
       }
       req.startTime = new Date(startTime)
