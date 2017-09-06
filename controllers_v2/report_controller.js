@@ -98,6 +98,7 @@ exports.getReport = function (req, res) {
     // console.log('endTime', endTime)
     // console.log('time', time)
     query['time'] = time
+    req.time = time
   } else {
     return res.json({result: '请填写time!'})
   }
@@ -121,7 +122,8 @@ exports.getReport = function (req, res) {
     if (item === null) {
       let startTime = req.startTime
       let endTime = req.endTime
-      return res.json({results: '不存在该段时间的报告!', startTime, endTime})
+      let time = req.time
+      return res.json({results: '不存在该段时间的报告!', startTime, endTime, time})
     } else {
       let doctorReport = ''
       let doctorComment = ''
