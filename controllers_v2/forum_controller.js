@@ -586,26 +586,38 @@ exports.forumReply = function (req, res) {
           } else {
             name = '未知'
           }
-          let obj = {
-            $push: {
-              replies: {
-                // commentId: commentId,
-                replyId: replyId,
-                userId: userId,
-                userName: name,
-                time: time,
-                // depth: 2,
-                content: content,
-                status: 0,
-                at: at
-              }
-            }
-          }
-          Reply.updateOne(query1, obj, function (err, upreply) {
+          Alluser.getOne({userId: at}, function (err, alluserInfo1) {
             if (err) {
               res.status(500).json({code: 1, msg: err.errmsg})
             }
-            res.json({code: 0, msg: 'success'})
+            let atname = ''
+            if (alluserInfo1 !== null){
+              atname = alluserInfo1.name
+            } else {
+              atname = '未知'
+            }
+            let obj = {
+              $push: {
+                replies: {
+                  // commentId: commentId,
+                  replyId: replyId,
+                  userId: userId,
+                  userName: name,
+                  time: time,
+                  // depth: 2,
+                  content: content,
+                  status: 0,
+                  at: at,
+                  atName: atname
+                }
+              }
+            }
+            Reply.updateOne(query1, obj, function (err, upreply) {
+              if (err) {
+                res.status(500).json({code: 1, msg: err.errmsg})
+              }
+              res.json({code: 0, msg: 'success'})
+            })
           })
         })
       }
