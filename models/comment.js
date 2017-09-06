@@ -100,4 +100,15 @@ Comment.aggregate = function (array, callback) {
     })
 }
 
+Comment.count = function (query, callback) {
+  CommentModel
+    .count(query)
+    .exec(function (err, num) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, num)
+    })
+}
+
 module.exports = Comment
