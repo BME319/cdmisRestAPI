@@ -11,6 +11,7 @@ var Comment = require('../models/comment')
 var Consultation = require('../models/consultation')
 var Team = require('../models/team')
 var Communication = require('../models/communication')
+var Counselautochangestatus = require('../models/counselautochangestatus')
 var webEntry = require('../settings').webEntry
 var request = require('request')
 
@@ -640,4 +641,122 @@ exports.insertCommentScore = function (req, res) {
       res.json({result: '成功', commentresults: commentInfo, CounselResults: upCounsel})
     }, {new: true})
   })
+}
+
+exports.counselAutoEndMsg = function (req, res) {
+  let currentTime = new Date('2017/09/07')
+  let startTime = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), '00', '00', '00')
+  let endTime = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), '08', '00', '00')
+  console.log('startTime', startTime)
+  console.log('endTime', endTime)
+  let query = {
+    'endTime': {$gte: startTime, $lt: endTime} // >= <
+  }
+  var fields = {}
+  var opts = {}
+  var populate = [{'path': 'doctorId', 'select': {'userId': 1, 'openId': 1, 'name': 1}}, {'path': 'patientId', 'select': {'userId': 1, 'openId': 1, 'name': 1}}]
+  Counselautochangestatus.getSome(query, function (err, timeoutCounsels) {
+    if (err) {
+      console.log(err.message)
+    }
+    if (timeoutCounsels.length === 0) {
+      console.log('昨日不存在超时咨询或问诊的记录！')
+    } else {
+      // console.log(timeoutCounsels[0])
+      // console.log(timeoutCounsels.length)
+      for (let i = 0; i < 1; i++) {
+        let doctorOpenId = timeoutCounsels[i].doctorId.openId
+        let patientOpenId = timeoutCounsels[i].patientId.openId
+        var template = {
+          'userId': '',
+          'role': 'doctor',
+          'postdata': {
+            'touser': doctorOpenId,
+            'template_id': '43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg',
+            'url': '',
+            'data': {
+              'first': {
+                'value': '您现在已经绑定' + timeoutCounsels[i].doctorId.name + '医生为您的主管医生。', // 医生姓名
+                'color': '#173177'
+              },
+              'keyword1': {
+                'value': timeoutCounsels[i].doctorId.name, // 医生姓名
+                'color': '#173177'
+              },
+              'keyword2': {
+                'value': 'title', // 医生职称
+                'color': '#173177'
+              },
+              'keyword3': {
+                'value': 'workUnit', // 所在医院
+                'color': '#173177'
+              },
+
+              'remark': {
+                'value': '点击底栏【肾事管家】按钮进行注册，注册登录后可查看主管医生详情，并进行咨询问诊。',
+                'color': '#173177'
+              }
+            }
+          }
+        }
+        // request({
+        //   url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+        //   method: 'POST',
+        //   body: template,
+        //   json: true
+        // }, function (err, response) {
+        //   if (!err && response.statusCode === 200) {
+        //     res.json({results: 'success!'})
+        //   } else {
+        //     res.status(500).send('Error')
+        //   }
+        // })
+
+        var template2 = {
+          'userId': '',
+          'role': 'patient',
+          'postdata': {
+            'touser': patientOpenId,
+            'template_id': '43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg',
+            'url': '',
+            'data': {
+              'first': {
+                'value': '您现在已经绑定' + timeoutCounsels[i].doctorId.name + '医生为您的主管医生。', // 医生姓名
+                'color': '#173177'
+              },
+              'keyword1': {
+                'value': timeoutCounsels[i].doctorId.name, // 医生姓名
+                'color': '#173177'
+              },
+              'keyword2': {
+                'value': 'title', // 医生职称
+                'color': '#173177'
+              },
+              'keyword3': {
+                'value': 'workUnit', // 所在医院
+                'color': '#173177'
+              },
+
+              'remark': {
+                'value': '点击底栏【肾事管家】按钮进行注册，注册登录后可查看主管医生详情，并进行咨询问诊。',
+                'color': '#173177'
+              }
+            }
+          }
+        }
+        // request({
+        //   url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+        //   method: 'POST',
+        //   body: template2,
+        //   json: true
+        // }, function (err, response) {
+        //   if (!err && response.statusCode === 200) {
+        //     res.json({results: 'success!'})
+        //   } else {
+        //     res.status(500).send('Error')
+        //   }
+        // })
+      }
+    }
+  }, opts, fields, populate)
 }

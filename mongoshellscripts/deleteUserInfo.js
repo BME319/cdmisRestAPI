@@ -9,9 +9,9 @@ db.auth('rest', 'zjubme319')
 var query = {'userId': 'U201701241752'}
 var fields = ''
 var user = db.allusers.find(query, fields).toArray()
-// if (user.length === 0) {
-//   return 0
-// }
+if (user.length === 0) {
+  printjson({'result': 'delete_fail, alluser do not exist'})
+}
 var userObjectId = user[0]._id
 var userId = user[0].userId
 var userOpenId = user[0].openId
