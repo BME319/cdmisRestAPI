@@ -1859,9 +1859,10 @@ exports.successMessage = function (req, res, next) {
       let json = evil(resdata)
       code = json.resp.respCode
       if (code === '000000') {
-        res.json({results: 0, mesg: 'Booking Success and Message Sent!'})
+        // res.json({results: 0, mesg: 'Booking Success and Message Sent!'})
+        console.log({results: 0, mesg: 'Booking Success and Message Sent!'})
       } else {
-        res.json({results: 1, mesg: {'ErrorCode': code}})
+        return res.json({results: 1, mesg: {'ErrorCode': code}})
       }
     })
   })

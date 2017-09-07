@@ -58,10 +58,9 @@ exports.reviewPatientInCharge = function (req, res, next) {
     return res.json({code: 1, msg: '请填写reviewResult!'})
   }
   let rejectReason = req.body.rejectReason || null
-  let appRole = req.body.appRole || null
   if (reviewResult === 'reject') {
-    if (rejectReason === null || appRole === null) {
-      return res.json({code: 1, msg: '请填写rejectReason,appRole!'})
+    if (rejectReason === null) {
+      return res.json({code: 1, msg: '请填写rejectReason!'})
     }
   } else if (reviewResult !== 'consent') {
     return res.json({code: 1, msg: '请检查reviewResult的输入'})
@@ -122,7 +121,6 @@ exports.updateDoctorInCharge = function (req, res, next) {
   let patientObjectId = req.body.patientObject._id
   let reviewResult = req.body.reviewResult || null
   let rejectReason = req.body.rejectReason || null
-  let appRole = req.body.appRole || null
 
   let query = {patientId: patientObjectId, invalidFlag: 0}
   let upObj
@@ -164,7 +162,7 @@ exports.updateDoctorInCharge = function (req, res, next) {
             request({ // 调用微信退款接口
               url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
               method: 'POST',
-              body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
+              body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
               json: true
             }, function (err, response) {
               if (err) {

@@ -483,7 +483,6 @@ exports.cancelBookedPds = function (req, res) {
                 request({ // 调用微信退款接口
                   url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
                   method: 'POST',
-                  // body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
                   body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
                   json: true
                 }, function (err, response) {
@@ -945,9 +944,8 @@ exports.getMyPDs = function (req, res) {
 // 患者取消预约
 exports.cancelMyPD = function (req, res, next) {
   let diagId = req.body.diagId || null
-  let appRole = req.body.appRole || null
-  if (diagId === null || appRole === null) {
-    return res.status(412).json({msg: 'Please Check Input of diagId, appRole', code: 1})
+  if (diagId === null) {
+    return res.status(412).json({msg: 'Please Check Input of diagId', code: 1})
   }
   let query = {diagId: diagId}
   PersonalDiag.getOne(query, function (err, item) {
@@ -991,7 +989,6 @@ exports.updatePDCapacityUp = function (req, res) {
   let doctorObjectId = req.body.PDInfo.doctorId
   let bookingDay = req.body.PDInfo.bookingDay
   let bookingTime = req.body.PDInfo.bookingTime
-  // let appRole = req.body.appRole || null
 
   let queryD = {_id: doctorObjectId, availablePDs: {$elemMatch: {$and: [{availableDay: bookingDay}, {availableTime: bookingTime}]}}}
   let upDoc = {
@@ -1018,7 +1015,6 @@ exports.updatePDCapacityUp = function (req, res) {
           request({ // 调用微信退款接口
             url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
             method: 'POST',
-            // body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
             body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
             json: true
           }, function (err, response) {
