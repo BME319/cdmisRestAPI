@@ -187,14 +187,16 @@ exports.updateAvailablePD1 = function (req, res, next) {
   if (req.body.deleteFlag) {
     upObjD1 = {
       $set: {
-        'availablePDs.$.total': 0
+        'availablePDs.$.total': 0,
+        'availablePDs.$.count': 0
       }
     }
   } else {
     upObjD1 = {
       $set: {
         'availablePDs.$.total': total,
-        'availablePDs.$.place': place
+        'availablePDs.$.place': place,
+        'availablePDs.$.count': 0
       }
     }
     if (req.body.nextSuspend) {
@@ -245,14 +247,16 @@ exports.updateAvailablePD2 = function (req, res, next) {
   if (req.body.deleteFlag) {
     upObjD2 = {
       $set: {
-        'availablePDs.$.total': 0
+        'availablePDs.$.total': 0,
+        'availablePDs.$.count': 0
       }
     }
   } else {
     upObjD2 = {
       $set: {
         'availablePDs.$.total': total,
-        'availablePDs.$.place': place
+        'availablePDs.$.place': place,
+        'availablePDs.$.count': 0
       }
     }
     if (req.body.nextNextSuspend) {
