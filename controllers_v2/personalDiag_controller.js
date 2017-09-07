@@ -702,7 +702,7 @@ exports.updatePDCapacityDown = function (req, res, next) {
       let availablePDsList = itemD.availablePDs || []
       let availablePD = null
       for (let i = 0; i < availablePDsList.length; i++) {
-        if (String(availablePDsList[i].availableDay) === String(bookingDay) && String(availablePDsList[i].availableTime) === String(bookingTime)) {
+        if (new Date(availablePDsList[i].availableDay).toDateString() === new Date(bookingDay).toDateString() && new Date(availablePDsList[i].availableTime).toDateString() === new Date(bookingTime).toDateString()) {
           availablePD = availablePDsList[i]
           break
         }
@@ -873,7 +873,7 @@ exports.sortAndTagPDs = function (req, res) {
     } else if (itemsPD.length !== 0) {
       for (let i = 0; i < itemsPD.length; i++) {
         for (let k = 0; k < returns.length; k++) {
-          if (String(itemsPD[i].bookingDay) === String(new Date(new Date(returns[k].availableDay).toDateString())) && itemsPD[i].bookingTime === returns[k].availableTime) {
+          if (new Date(itemsPD[i].bookingDay).toDateString() === new Date(returns[k].availableDay).toDateString() && itemsPD[i].bookingTime === returns[k].availableTime) {
             returns[k]['diagId'] = itemsPD[i].diagId
           }
         }
