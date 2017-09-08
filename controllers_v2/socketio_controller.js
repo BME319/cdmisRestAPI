@@ -41,7 +41,7 @@ function messageSaveSend (data, url, sender) {
     sendDateTime: data.msg.createTimeInMillis,
     content: data.msg
   }
-  console.log(jsondata)
+  // console.log(jsondata)
   request({
         // url: url + '?token=' + req.query.token || req.body.token,
     url: reqUrl,
@@ -53,7 +53,7 @@ function messageSaveSend (data, url, sender) {
       console.log(err)
             // do-something
     } else {
-      console.log(response)
+      // console.log(response)
             // console.log(response.body);
             // send message
             /// send to sendBy
@@ -293,7 +293,7 @@ exports.chat = function (io, socket) {
       userWechatPatientList[userId] = nickname
     } else {
       console.log('newUser not match')
-      console.log(data)
+      // console.log(data)
             // do
     }
 
