@@ -156,6 +156,6 @@ schedule.scheduleJob('0 0 8 * * *', counseltimeoutCtrl.autoCounselNews)
 var departmentMonitorCtrl = require('./controllers_v2/departmentMonitor_controller')
 schedule.scheduleJob('0 0 23 * * *', departmentMonitorCtrl.autoDepartmentDaily)
 
-// 每天7:30自动推送给患者和医生咨询或问诊超时自动结束的微信模板消息 2017-09-07 lgf
+// 每天8:00自动推送给患者和医生咨询或问诊超时自动结束的微信模板消息 2017-09-07 lgf
 var counselCtrl = require('./controllers_v2/counsel_controller')
-schedule.scheduleJob('0 30 7 * * *', counselCtrl.counselAutoEndMsg)
+schedule.scheduleJob('30 0 8 * * *', counselCtrl.counselAutoEndMsg)

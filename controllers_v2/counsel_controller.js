@@ -643,9 +643,10 @@ exports.insertCommentScore = function (req, res) {
   })
 }
 
-exports.counselAutoEndMsg = function (req, res) {
-  let currentTime = new Date('2017/09/07')
-  let startTime = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), '00', '00', '00')
+exports.counselAutoEndMsg = function () {
+  let currentTime = new Date()
+  let timeTmp = new Date(currentTime.getTime() - 24 * 3600 * 1000)
+  let startTime = new Date(timeTmp.getFullYear(), timeTmp.getMonth(), timeTmp.getDate(), '08', '00', '00')
   let endTime = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), '08', '00', '00')
   console.log('startTime', startTime)
   console.log('endTime', endTime)
