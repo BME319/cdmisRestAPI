@@ -1,5 +1,5 @@
 
-var socketioCtrl = require('../controllers/socketio_controller')
+var socketioCtrl = require('../controllers_v2/socketio_controller')
 
 module.exports = function (io, webEntry) {
     // Initializes and retrieves the given Namespace
