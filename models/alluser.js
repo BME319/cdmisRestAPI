@@ -105,8 +105,9 @@ var alluserSchema = new mongoose.Schema({
   schedules: [
     {
       _id: 0,
-      day: String,
-      time: String
+      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta', 'Sun']},
+      time: {type: String, enum: ['Morning', 'Afternoon']},
+      place: String
     }
   ],
   suspendTime: [

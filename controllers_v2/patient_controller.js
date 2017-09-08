@@ -225,7 +225,7 @@ exports.getDoctorLists = function (req, res) {
   var nexturl = webEntry.domain + '/api/v2/patient/getDoctorLists' + _Url
 
   if (req.query.doctorId !== null && req.query.doctorId !== undefined && req.query.doctorId !== '') {
-    query = {userId: req.query.doctorId, role: 'doctor'}
+    query = {userId: req.query.doctorId, role: 'doctor', reviewStatus: 1}
     option = ''
     fields = docInfoForPat
   }

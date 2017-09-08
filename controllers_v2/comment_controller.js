@@ -31,20 +31,31 @@ exports.getDoctorObject = function (req, res, next) {
 // 注释 患者根据doctorId查询医生评价
 // 注释 承接doctorObject._id；输出结果，相应医生的评价
 exports.getCommentsByDoc = function (req, res) {
-  // 参数设置 隐藏患者ID信息
+  // 参数设置 模糊患者手机号码
   let doctorObject = req.body.doctorObject
   let query = {doctorId: doctorObject._id}
-  let opts = ''
-  let fields = {'_id': 0, 'revisionInfo': 0}
-  let populate = {path: 'patientId', select: {'_id': 0, 'revisionInfo': 0}}
+  let skip = req.query.skip || null
+  let limit = req.query.limit || null
+  let opts = {skip: Number(skip), limit: Number(limit)}
+  let fields = {'_id': 0, 'time': 1, 'totalScore': 1, 'patientId': 1}
+  let populate = {path: 'patientId', select: {'_id': 0, 'phoneNo': 1}}
 
-  // 调用评价获取函数Comment.getSome，不出错返回评价内容，出错码500，服务器内部错误？
-  Comment.getSome(query, function (err, item) {
+  Comment.count(query, function (err, numC) {
     if (err) {
       return res.status(500).send(err)
+    } else {
+      Comment.getSome(query, function (err, items) {
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          for (let item in items) {
+            items[item].patientId.phoneNo = items[item].patientId.phoneNo.slice(0, 3) + '*******' + items[item].patientId.phoneNo.slice(-1)
+          }
+          return res.json({results: items, num: numC, code: 0})
+        }
+      }, opts, fields, populate)
     }
-    res.json({results: item})
-  }, opts, fields, populate)
+  })
 }
 
 // 注释 输入，counselId；输出，相应评价条目

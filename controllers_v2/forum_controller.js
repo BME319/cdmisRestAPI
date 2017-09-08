@@ -193,7 +193,7 @@ exports.getMycollection = function (req, res) {
         as: 'collections'
       }
     },
-    {$unwind: {path: '$collections', preserveNullAndEmptyArrays: true}},
+    {$unwind: {path: '$collections', preserveNullAndEmptyArrays: false}},
     {
       $project: {
         postId: '$collections.postId',
@@ -203,7 +203,8 @@ exports.getMycollection = function (req, res) {
         time: '$collections.time',
         anonymous: '$collections.anonymous',
         replyCount: '$collections.replyCount',
-        favoritesNum: '$collections.favoritesNum'
+        favoritesNum: '$collections.favoritesNum',
+        status: '$collections.status'
       }
     },
     {
@@ -225,9 +226,11 @@ exports.getMycollection = function (req, res) {
         'anonymous': 1,
         'replyCount': 1,
         'favoritesNum': 1,
+        'status': 1,
         avatar: '$userinfo.photoUrl'
       }
     },
+    {$match: {status: 0}},
     {$sort: {time: -1}},
     {$skip: skip},
     {$limit: limit}
@@ -287,9 +290,10 @@ exports.getMyposts = function (req, res) {
         as: 'collections'
       }
     },
-    {$unwind: {path: '$collections', preserveNullAndEmptyArrays: true}},
+    {$unwind: {path: '$collections', preserveNullAndEmptyArrays: false}},
     {
       $project: {
+        '_id': 0,
         postId: '$collections.postId',
         sponsorId: '$collections.sponsorId',
         sponsorName: '$collections.sponsorName',
@@ -582,26 +586,38 @@ exports.forumReply = function (req, res) {
           } else {
             name = '未知'
           }
-          let obj = {
-            $push: {
-              replies: {
-                // commentId: commentId,
-                replyId: replyId,
-                userId: userId,
-                userName: name,
-                time: time,
-                // depth: 2,
-                content: content,
-                status: 0,
-                at: at
-              }
-            }
-          }
-          Reply.updateOne(query1, obj, function (err, upreply) {
+          Alluser.getOne({userId: at}, function (err, alluserInfo1) {
             if (err) {
               res.status(500).json({code: 1, msg: err.errmsg})
             }
-            res.json({code: 0, msg: 'success'})
+            let atname = ''
+            if (alluserInfo1 !== null){
+              atname = alluserInfo1.name
+            } else {
+              atname = '未知'
+            }
+            let obj = {
+              $push: {
+                replies: {
+                  // commentId: commentId,
+                  replyId: replyId,
+                  userId: userId,
+                  userName: name,
+                  time: time,
+                  // depth: 2,
+                  content: content,
+                  status: 0,
+                  at: at,
+                  atName: atname
+                }
+              }
+            }
+            Reply.updateOne(query1, obj, function (err, upreply) {
+              if (err) {
+                res.status(500).json({code: 1, msg: err.errmsg})
+              }
+              res.json({code: 0, msg: 'success'})
+            })
           })
         })
       }
@@ -697,7 +713,7 @@ exports.deleteComment = function (req, res) {
       let obj = {}
       if (replyId !== '') {
         // query['replies.commentId'] = commentId
-        query['replies.replyId'] = replyId
+        query1['replies.replyId'] = replyId
         obj = {
           $set: {
             'replies.$.status': 1

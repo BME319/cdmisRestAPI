@@ -47,9 +47,15 @@ exports.postReviewInfo = function (acl) {
             reviewDate: reviewDate,
             adminId: adminId
           }
-          if (req.body.reviewContent !== null && req.body.reviewContent !== '' && req.body.reviewContent !== undefined) {
-            upObj['reviewContent'] = req.body.reviewContent
+          let reviewContent = req.body.reviewContent || null
+          if (status === 2) {
+            if (reviewContent === null) {
+              return res.status(412).json({results: '请填写reviewContent'})
+            } else {
+              upObj['reviewContent'] = reviewContent
+            }
           }
+
           var opts = {
             new: true,
             fields: {
@@ -115,7 +121,8 @@ exports.getCertificate = function (req, res) {
     'city': 1,
     'workUnit': 1,
     'department': 1,
-    'title': 1
+    'title': 1,
+    'phoneNo': 1
   }
   Alluser.getOne(query, function (err, item) {
     if (err) {

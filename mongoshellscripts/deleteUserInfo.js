@@ -1,5 +1,7 @@
 
-var dbUrl = '121.43.107.106:28000/cdmis'
+// var dbUrl = '121.43.107.106:28000/cdmis'
+// var dbUrl = 'localhost:27018/cdmis' // 本地代码调试
+var dbUrl = 'localhost:28000/cdmis' // 服务器代码调试
 print(dbUrl)
 db = connect(dbUrl)
 db.auth('rest', 'zjubme319')
@@ -246,12 +248,10 @@ if (userRole.indexOf('doctor') !== -1) {
     'hospital': workUnit
   }
   upObj = {
-    $pull: {  // pull不知道是否可以同时删除多个数组中的元素？
-      '$or': [
-        {'portleader': userObjectId},
-        {'doctors': userObjectId},
-        {'departLeader': userObjectId}
-      ]
+    $pull: {
+      'portleader': userObjectId,
+      'doctors': userObjectId,
+      'departLeader': userObjectId
     }
   }
   db.departments.update(query, upObj, {multi: true})

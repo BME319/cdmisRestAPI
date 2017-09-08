@@ -14,20 +14,23 @@ exports.getMessages = function (req, res) {
 
   // var userId = req.query.userId
   var userId = req.session.userId
+  var userRole = req.session.role
   var type = req.query.type  // 选填
-
-  if (userId === null || userId === '' || userId === undefined) {
-    return res.json({result: '请填写userId!'})
-  }
 
   var query
   query = {userId: userId}
 
   if (type !== null && type !== '' && type !== undefined) {
     query['type'] = type
+  } else { // type未填写时根据用户角色返回对应对色的type信息
+    if (userRole === 'doctor') {
+      query = {'$or': [{'type': 2}, {'type': 9}]}
+    } else {
+      query = {'$or': [{'type': 1}, {'type': 3}, {'type': 5}, {'type': 6}, {'type': 7}, {'type': 8}]}
+    }
   }
 
-    // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
+  // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
   var opts = {'sort': '-_id'}
 
   Message.getSome(query, function (err, items) {
