@@ -159,20 +159,27 @@ exports.updateDoctorInCharge = function (req, res, next) {
             return res.status(500).send(err)
           } else {
             let orderNo = itemO.orderNo
-            request({ // 调用微信退款接口
-              url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
-              method: 'POST',
-              body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
-              json: true
-            }, function (err, response) {
-              if (err) {
-                return res.status(500).send(err)
-              } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
-                return res.json({msg: '审核成功，已拒绝患者并退款', data: upDIC, code: 0})
-              } else {
-                return res.json({msg: '审核成功，已拒绝患者但退款失败，请联系管理员', data: upDIC, code: 1})
-              }
-            })
+            let money = itemO.money || null
+            if (Number(money) !== 0) {
+              request({ // 调用微信退款接口
+                url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
+                method: 'POST',
+                body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
+                json: true
+              }, function (err, response) {
+                if (err) {
+                  return res.status(500).send(err)
+                } else if ((response.body.results || null) === null) {
+                  return res.json({msg: '审核成功，已拒绝患者但退款失败，微信接口调用失败，请联系管理员', data: upDIC, code: 1})
+                } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
+                  return res.json({msg: '审核成功，已拒绝患者并退款', data: upDIC, code: 0})
+                } else {
+                  return res.json({msg: '审核成功，已拒绝患者但退款失败，请联系管理员', data: upDIC, code: 1})
+                }
+              })
+            } else {
+              return res.json({msg: '审核成功，已拒绝患者', data: upDIC, code: 0})
+            }
           }
         })
       }
