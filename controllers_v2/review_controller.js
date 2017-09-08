@@ -114,6 +114,7 @@ exports.getCertificate = function (req, res) {
     'name': 1,
     'gender': 1,
     'certificatePhotoUrl': 1,
+    'practisingPhotoUrl': 1,
     'description': 1,
     'major': 1,
     'role': 1,

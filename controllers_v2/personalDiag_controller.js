@@ -22,16 +22,16 @@ exports.setServiceSchedule = function (req, res, next) {
     return res.status(412).json({results: '请输入day, time, total, place'})
   }
   if (Number(total) <= 0) {
-    return res.status(412).json({results: '请调用删除排班的方法'})
+    return res.status(412).json({results: '请调用"删除排班"或"设置面诊停诊"的方法'})
   }
-  let query = {userId: req.session.userId, serviceSchedules: {$elemMatch: {$and: [{day: day}, {time: time}]}}}
-  let upObj = {}
+  let query = {userId: req.session.userId, role: 'doctor', serviceSchedules: {$elemMatch: {$and: [{day: day}, {time: time}]}}}
   Alluser.getOne(query, function (err, item) {
+    let upObj = {}
+    let opts = {new: true, runValidators: true, setDefaultsOnInsert: true}
     if (err) {
       return res.status(500).send(err)
     } else if (item === null) { // 排班不存在，添加排班
-      // return res.status(404).json({results: '找不到对象'})
-      query = {userId: req.session.userId}
+      query = {userId: req.session.userId, role: 'doctor'}
       upObj = {
         $push: {
           serviceSchedules: {
@@ -50,16 +50,16 @@ exports.setServiceSchedule = function (req, res, next) {
         }
       }
     }
-    Alluser.update(query, upObj, function (err, upItem) {
+    Alluser.updateOne(query, upObj, function (err, upItem) {
       if (err) {
         return res.status(500).send(err)
-      } else if (upItem.n === 0) {
+      } else if (upItem === null) {
         return res.status(404).json({results: '找不到对象'})
       } else {
         // return res.status(201).json({results: upItem})
         next()
       }
-    })
+    }, opts)
   })
 }
 
@@ -73,12 +73,12 @@ exports.deleteServiceSchedule = function (req, res, next) {
     return res.status(412).json({results: '请输入day, time'})
   }
   let query = {userId: req.session.userId, serviceSchedules: {$elemMatch: {$and: [{day: day}, {time: time}]}}}
-  let upObj = {}
   Alluser.getOne(query, function (err, item) {
+    let upObj = {}
+    let opts = {new: true, runValidators: true, setDefaultsOnInsert: true}
     if (err) {
       return res.status(500).send(err)
-    } else if (item === null) { // 排班不存在，添加排班
-      // return res.status(404).json({results: '找不到对象'})
+    } else if (item === null) { // 排班不存在，设置面诊总量为零
       query = {userId: req.session.userId}
       upObj = {
         $push: {
@@ -89,31 +89,33 @@ exports.deleteServiceSchedule = function (req, res, next) {
           }
         }
       }
-    } else { // 排班存在，更新排班
+    } else { // 排班存在，更新面诊总量为零
       upObj = {
         $set: {
           'serviceSchedules.$.total': 0
         }
       }
     }
-    Alluser.update(query, upObj, function (err, upItem) {
+    Alluser.updateOne(query, upObj, function (err, upItem) {
       if (err) {
         return res.status(500).send(err)
-      } else if (upItem.n === 0) {
+      } else if (upItem === null) {
         return res.status(404).json({results: '找不到对象'})
+      // } else if (item === null) {
+      //   return res.json({msg: '面诊排班删除成功', code: 0})
       } else {
         // return res.status(201).json({results: upItem})
         req.body.deleteFlag = 1
         next()
       }
-    })
+    }, opts)
   })
 }
 
 // YQC 2017-07-28
 exports.getDaysToUpdate = function (req, res, next) {
   let day = req.body.day || null
-  let today = new Date(new Date().toDateString())
+  let now = new Date()
   let nextDayNo
   switch (day) {
     case 'Mon':
@@ -140,19 +142,24 @@ exports.getDaysToUpdate = function (req, res, next) {
     default:
       return res.json({message: 'Wrong Input'})
   }
-  let nextModDay = new Date(today)
-  if (today.getDay() > nextDayNo) {
-    nextModDay.setDate(nextModDay.getDate() + 7 - today.getDay() + nextDayNo)
+  let nextModDay = new Date(now)
+  if (now.getDay() > nextDayNo) {
+    nextModDay.setDate(nextModDay.getDate() + 7 - now.getDay() + nextDayNo)
   } else {
-    nextModDay.setDate(nextModDay.getDate() - today.getDay() + nextDayNo)
+    nextModDay.setDate(nextModDay.getDate() - now.getDay() + nextDayNo)
   }
+  nextModDay = new Date(nextModDay.getFullYear(), nextModDay.getMonth(), nextModDay.getDate(), '00', '00', '00')
+  console.log(nextModDay)
 
-  let nextNextModDay = new Date(today)
-  if (today.getDay() > nextDayNo) {
-    nextNextModDay.setDate(nextNextModDay.getDate() + 14 - today.getDay() + nextDayNo)
+  let nextNextModDay = new Date(now)
+  if (now.getDay() > nextDayNo) {
+    nextNextModDay.setDate(nextNextModDay.getDate() + 14 - now.getDay() + nextDayNo)
   } else {
-    nextNextModDay.setDate(nextNextModDay.getDate() + 7 - today.getDay() + nextDayNo)
+    nextNextModDay.setDate(nextNextModDay.getDate() + 7 - now.getDay() + nextDayNo)
   }
+  nextNextModDay = new Date(nextNextModDay.getFullYear(), nextNextModDay.getMonth(), nextNextModDay.getDate(), '00', '00', '00')
+  console.log(nextNextModDay)
+
   req.body.nmd = nextModDay
   req.body.nnmd = nextNextModDay
   let query = {userId: req.session.userId, role: 'doctor'}
@@ -185,6 +192,7 @@ exports.updateAvailablePD1 = function (req, res, next) {
   let queryD1 = {userId: req.session.userId, availablePDs: {$elemMatch: {$and: [{availableDay: nextModDay}, {availableTime: time}]}}}
   let upObjD1
   if (req.body.deleteFlag) {
+    total = 0
     upObjD1 = {
       $set: {
         'availablePDs.$.total': 0,
@@ -245,6 +253,7 @@ exports.updateAvailablePD2 = function (req, res, next) {
   let queryD2 = {userId: req.session.userId, availablePDs: {$elemMatch: {$and: [{availableDay: nextNextModDay}, {availableTime: time}]}}}
   let upObjD2
   if (req.body.deleteFlag) {
+    total = 0
     upObjD2 = {
       $set: {
         'availablePDs.$.total': 0,
@@ -484,22 +493,29 @@ exports.cancelBookedPds = function (req, res) {
                 return res.status(500).send(err)
               } else {
                 let orderNo = itemO.orderNo
-                request({ // 调用微信退款接口
-                  url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
-                  method: 'POST',
-                  body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
-                  json: true
-                }, function (err, response) {
-                  if (err) {
-                    return res.status(500).send(err)
-                  } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
-                    // return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
-                    console.log('用户"' + itemO.patientName + '"退款成功')
-                  } else {
-                    // return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
-                    console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
-                  }
-                })
+                let money = itemO.money || null
+                if (Number(money) !== 0) {
+                  request({ // 调用微信退款接口
+                    url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
+                    method: 'POST',
+                    body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
+                    json: true
+                  }, function (err, response) {
+                    if (err) {
+                      return res.status(500).send(err)
+                    } else if ((response.body.results || null) === null) {
+                      console.log('微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                    } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
+                      // return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
+                      console.log('用户"' + itemO.patientName + '"退款成功')
+                    } else {
+                      // return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
+                      console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                    }
+                  })
+                } else {
+                  console.log('用户"' + itemO.patientName + '"面诊取消成功')
+                }
               }
             })
           }
@@ -1016,20 +1032,27 @@ exports.updatePDCapacityUp = function (req, res) {
           return res.status(500).send(err)
         } else {
           let orderNo = itemO.orderNo
-          request({ // 调用微信退款接口
-            url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
-            method: 'POST',
-            body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
-            json: true
-          }, function (err, response) {
-            if (err) {
-              return res.status(500).send(err)
-            } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
-              return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
-            } else {
-              return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
-            }
-          })
+          let money = itemO.money || null
+          if (Number(money) !== 0) {
+            request({ // 调用微信退款接口
+              url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
+              method: 'POST',
+              body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
+              json: true
+            }, function (err, response) {
+              if (err) {
+                return res.status(500).send(err)
+              } else if ((response.body.results || null) === null) {
+                return res.json({msg: '取消成功，微信退款接口调用失败，请联系管理员', data: req.body.PDInfo, code: 1})
+              } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
+                return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
+              } else {
+                return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
+              }
+            })
+          } else {
+            return res.json({msg: '取消成功', data: req.body.PDInfo, code: 0})
+          }
         }
       })
     }
