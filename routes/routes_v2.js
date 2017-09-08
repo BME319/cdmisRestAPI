@@ -3267,7 +3267,8 @@ module.exports = function (app, webEntry, acl) {
    *               type: object
    *               $ref: '#/definitions/Communication'
    */
-  app.post(version + '/communication/communication', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(8), communicationCtrl.postCommunication)
+  // app.post(version + '/communication/communication', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(8), communicationCtrl.postCommunication)
+  app.post(version + '/communication/communication', getNoMid.getNo(8), communicationCtrl.postCommunication)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生/患者
    * @swagger
    * /communication/communication:
