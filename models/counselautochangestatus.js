@@ -73,4 +73,19 @@ Counselautochangestatus.getOne = function (query, callback) {
     })
 }
 
+Counselautochangestatus.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
+  counselautochangestatusModel
+  .find(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, results) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, results)
+  })
+}
+
 module.exports = Counselautochangestatus
