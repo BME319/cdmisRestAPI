@@ -18,18 +18,8 @@ exports.Checking = function (acl, numPathComponents, userId, actions) {
     var _actions = actions
     var url, resource
 
-    // if ((req.session) && (req.session.userId)) {
-    //   _userId = req.session.userId
-    // } else if ((req.user) && (req.user.userId)) {
-    //   _userId = req.user.userId
-    // } else {
-    //   next(new HttpError(401, 'User not authenticated'))
-    //   return
-    // }
-    if ((req.session) && (typeof(req.session) == 'object') && (req.session.userId)) {
+    if ((req.session) && (req.session.userId)) {
       _userId = req.session.userId
-    } else if ((req.session) && (typeof(req.session) == 'string')) {
-      _userId = JSON.parse(req.session).userId
     } else if ((req.user) && (req.user.userId)) {
       _userId = req.user.userId
     } else {
