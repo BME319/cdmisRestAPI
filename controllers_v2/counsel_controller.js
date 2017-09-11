@@ -87,18 +87,12 @@ exports.getCounsels = function (req, res) {
     if (err) {
       return res.status(500).send(err)
     }
-    // console.log(item)
     let item1 = []
     for (let i = 0; i < item.length; i++) {
-      console.log('for')
       if (item[i].patientId != null) {
-        console.log('if1')
-        console.log(_skip)
         if (_skip > 0) {
           _skip--
         } else {
-          console.log('else')
-          console.log(_limit)
           if (!_limit) {
             item1.push(item[i])
           } else {
