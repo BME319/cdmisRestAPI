@@ -964,26 +964,26 @@ exports.getMassTargets = function (req, res, next) {
         case 'FOLLOW':
           for (let i = 0; i < doctorItem.patients.length; i++) {
             if (doctorItem.patients[i].patientId !== null) {
-              targets[i] = doctorItem.patients[i].patientId
+              targets.push(doctorItem.patients[i].patientId)
             }
           }
           break
         case 'INCHARGE':
           for (let i = 0; i < doctorItem.patientsInCharge.length; i++) {
             if (doctorItem.patientsInCharge[i].patientId !== null) {
-              targets[i] = doctorItem.patientsInCharge[i].patientId
+              targets.push(doctorItem.patientsInCharge[i].patientId)
             }
           }
           break
         case 'ALL':
           for (let i = 0; i < doctorItem.patients.length; i++) {
             if (doctorItem.patients[i].patientId) {
-              targets[i] = doctorItem.patients[i].patientId
+              targets.push(doctorItem.patients[i].patientId)
             }
           }
           for (let j = 0; j < doctorItem.patientsInCharge.length; j++) {
             if (doctorItem.patientsInCharge[j].patientId) {
-              targets[doctorItem.patients.length + j] = doctorItem.patientsInCharge[j].patientId
+              targets.push(doctorItem.patientsInCharge[j].patientId)
             }
           }
           break
@@ -994,6 +994,7 @@ exports.getMassTargets = function (req, res, next) {
         return res.status(404).json({results: '无有效群发目标'})
       } else {
         req.massTarget = targets
+        console.log(req.massTarget)
         next()
       }
     }
