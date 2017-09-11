@@ -163,7 +163,7 @@ exports.updateDepartment = function (req, res) {
         res.status(500).send(err)
       }
       let portleader = Info[0].portleader
-      console.log('Info' + Info[0].department)
+      // console.log('Info' + Info[0].department)
       if (Info[0].department !== undefined) {
         query = {
           department: department,
