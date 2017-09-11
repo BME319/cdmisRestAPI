@@ -48,10 +48,20 @@ exports.getCommentsByDoc = function (req, res) {
         if (err) {
           return res.status(500).send(err)
         } else {
+          let returns = []
           for (let item in items) {
-            items[item].patientId.phoneNo = items[item].patientId.phoneNo.slice(0, 3) + '*******' + items[item].patientId.phoneNo.slice(-1)
+            if ((items[item].patientId || null) === null) {
+              let temp = {}
+              temp.patientId = {phoneNo: '***********'}
+              temp.time = items[item].time
+              temp.totalScore = items[item].totalScore
+              returns.push(temp)
+            } else {
+              items[item].patientId.phoneNo = items[item].patientId.phoneNo.slice(0, 3) + '*******' + items[item].patientId.phoneNo.slice(-1)
+              returns.push(items[item])
+            }
           }
-          return res.json({results: items, num: numC, code: 0})
+          return res.json({results: returns, num: numC, code: 0})
         }
       }, opts, fields, populate)
     }
