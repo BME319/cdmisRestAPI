@@ -880,7 +880,7 @@ exports.bindingFavoriteDoctor = function (req, res, next) {
             return res.status(500).send(err)
           }
           let favoriteDoctorsList = itemP.doctors
-          console.log(favoriteDoctorsList)
+          // console.log(favoriteDoctorsList)
           for (let i = 0; i < favoriteDoctorsList.length; i++) {
             if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
               return res.json({result: '已关注该医生!'})
@@ -917,7 +917,7 @@ exports.bindingFavoriteDoctor = function (req, res, next) {
             return res.status(500).send(err)
           }
           let favoriteDoctorsList = itemP.doctors
-          console.log(favoriteDoctorsList)
+          // console.log(favoriteDoctorsList)
           for (let i = 0; i < favoriteDoctorsList.length; i++) {
             if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
               return res.json({result: '已关注该医生!'})

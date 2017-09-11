@@ -136,14 +136,14 @@ exports.debindingDevice = function (req, res) {
 
 // 接收血压数据
 exports.receiveBloodPressure = function (req, res) {
-  console.log('receiveBloodPressure')
+  // console.log('receiveBloodPressure')
   // var res_data = req.body;
   // console.log(res_data);
   var sn = req.body.sn
   var imei = req.body.imei
   var deviceId = sn + imei
   var query = {deviceId: deviceId}
-  console.log(sn)
+  // console.log(sn)
 
   var results = {
     'code': 10,
@@ -165,7 +165,7 @@ exports.receiveBloodPressure = function (req, res) {
     } else {
       // 获取设备对应的患者ID
       var userId = item.userId
-      console.log(userId)
+      // console.log(userId)
       var querypatient = {
         userId: userId
       }
@@ -237,8 +237,8 @@ function saveBPdata (patient, req, results, res) {
       }
     }
   }
-  console.log(query)
-  console.log(upObj)
+  // console.log(query)
+  // console.log(upObj)
 
   // 更新血压记录
   VitalSign.update(query, upObj, function (err, updata) {
@@ -246,7 +246,7 @@ function saveBPdata (patient, req, results, res) {
       // return res.status(422).send(err.message);
       res.json(results)
     }
-    console.log(updata)
+    // console.log(updata)
     // if (updata.nModified == 0) {
     // console.log('err3');
     // res.json(results);
@@ -279,12 +279,12 @@ function saveBPdata (patient, req, results, res) {
         // return res.status(422).send(err.message);
         res.json(results)
       }
-      console.log(updata)
+      // console.log(updata)
 
-      if (err) {
-        // return res.status(422).send(err.message);
-        res.json(results)
-      }
+      // if (err) {
+      //   // return res.status(422).send(err.message);
+      //   res.json(results)
+      // }
 
       var complianceQuery1 = {
         userId: patient.userId,
@@ -337,7 +337,7 @@ function saveBPdata (patient, req, results, res) {
               results.code = 1
               results.status = 'success'
               results.msg = '提交成功'
-              console.log('提交成功')
+              // console.log('提交成功')
               res.json(results)
             })
           } else if (complianceitem != null) {
@@ -357,7 +357,7 @@ function saveBPdata (patient, req, results, res) {
               results.code = 1
               results.status = 'success'
               results.msg = '提交成功'
-              console.log('提交成功')
+              // console.log('提交成功')
               res.json(results)
             })
           }

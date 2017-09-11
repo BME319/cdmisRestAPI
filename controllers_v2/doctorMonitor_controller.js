@@ -101,12 +101,12 @@ exports.getLinegraph = function (req, res) {
         {$match: {city: city}}
       )
     }
-    console.log(array)
+    // console.log(array)
     Alluser.aggregate(array, function (err, results) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      console.log(results)
+      // console.log(results)
       res.json({results: results})
     })
   }
@@ -568,7 +568,7 @@ exports.getWorkload = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      console.log(results)
+      // console.log(results)
       limit = Number(limit)
       skip = Number(skip)
       res.json({results: results.slice(skip, limit + skip)})
@@ -781,7 +781,7 @@ exports.getScore = function (req, res) {
     if (err) {
       res.status(500).send(err.errmsg)
     }
-    console.log(results)
+    // console.log(results)
     limit = Number(limit)
     skip = Number(skip)
     res.json({results: results.slice(skip, limit + skip)})
