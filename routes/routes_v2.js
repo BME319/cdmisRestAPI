@@ -2684,7 +2684,7 @@ module.exports = function (app, webEntry, acl) {
    *               properties:
    *                 $ref: '#/definitions/Counsel'
    */
-  app.get(version + '/communication/counselReport', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getCounselReport)
+  app.get(version + '/communication/counselReport', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.getCounselReport)
   // app.post(version + '/communication/newTeam', tokenManager.verifyToken(), getNoMid.getNo(4), communicationCtrl.newTeam)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
@@ -2762,7 +2762,7 @@ module.exports = function (app, webEntry, acl) {
    *                   type: "number"
    *                   default: "1"
    */
-  app.post(version + '/communication/team', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.newTeam)
+  app.post(version + '/communication/team', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.newTeam)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
    * /communication/deleteTeam:
@@ -2822,7 +2822,7 @@ module.exports = function (app, webEntry, acl) {
    *                   items:
    *                     $ref: '#/definitions/TeamMember'
    */
-  app.post(version + '/communication/deleteTeam', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.deleteTeam)
+  app.post(version + '/communication/deleteTeam', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.deleteTeam)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
    * /communication/team:
@@ -2878,7 +2878,7 @@ module.exports = function (app, webEntry, acl) {
    *                   items:
    *                     $ref: '#/definitions/TeamMember'
    */
-  app.get(version + '/communication/team', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getTeam)
+  app.get(version + '/communication/team', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.getTeam)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
    * /communication/consultation:
@@ -2944,7 +2944,7 @@ module.exports = function (app, webEntry, acl) {
    *                   type: "string"
    *                   format: date-time
    */
-  app.post(version + '/communication/consultation', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation)
+  app.post(version + '/communication/consultation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation)
   // app.post(version + '/communication/consultation', tokenManager.verifyToken(), getNoMid.getNo(5), communicationCtrl.checkTeam, communicationCtrl.checkCounsel, communicationCtrl.checkPatient, communicationCtrl.checkDoctor, communicationCtrl.newConsultation);
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
@@ -2999,7 +2999,7 @@ module.exports = function (app, webEntry, acl) {
    *                   items:
    *                     $ref: '#/definitions/Message'
    */
-  app.get(version + '/communication/consultation', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getConsultation)
+  app.get(version + '/communication/consultation', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.getConsultation)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
    * /communication/conclusion:
@@ -3055,7 +3055,7 @@ module.exports = function (app, webEntry, acl) {
    *                 conclusion:
    *                   type: "string"
    */
-  app.post(version + '/communication/conclusion', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.conclusion)
+  app.post(version + '/communication/conclusion', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.conclusion)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
    * /communication/insertMember:
@@ -3120,7 +3120,7 @@ module.exports = function (app, webEntry, acl) {
    *                   items:
    *                     $ref: '#/definitions/TeamMember'
    */
-  app.post(version + '/communication/insertMember', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.insertMember, communicationCtrl.updateNumber)
+  app.post(version + '/communication/insertMember', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.insertMember, communicationCtrl.updateNumber)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
    * /communication/removeMember:
@@ -3183,7 +3183,7 @@ module.exports = function (app, webEntry, acl) {
    *                   items:
    *                     $ref: '#/definitions/TeamMember'
    */
-  app.post(version + '/communication/removeMember', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.removeMember, communicationCtrl.updateNumber)
+  app.post(version + '/communication/removeMember', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.removeMember, communicationCtrl.updateNumber)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
    * /communication/updateLastTalkTime:
@@ -3220,7 +3220,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 1), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
+  app.post(version + '/communication/updateLastTalkTime', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), communicationCtrl.getDoctor1Object, communicationCtrl.getDoctor2Object, communicationCtrl.removeDoctor, communicationCtrl.removeDoctor2, communicationCtrl.updateLastTalkTime2, communicationCtrl.updateLastTalkTime)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生/患者
    * @swagger
    * /communication/communication:
