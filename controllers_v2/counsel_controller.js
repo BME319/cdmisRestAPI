@@ -48,7 +48,7 @@ exports.getDoctorObject = function (req, res, next) {
 // 注释 输入，status，type，name，skip，limit，承接doctorObject；输出，问诊信息
 exports.getCounsels = function (req, res) {
   // 查询条件
-  console.log(req.body.doctorObject)
+  // console.log(req.body.doctorObject)
   let _doctorId = req.body.doctorObject._id || null
   let _status = req.query.status || null
   let _type = req.query.type || null
@@ -648,8 +648,8 @@ exports.counselAutoEndMsg = function () {
   let timeTmp = new Date(currentTime.getTime() - 24 * 3600 * 1000)
   let startTime = new Date(timeTmp.getFullYear(), timeTmp.getMonth(), timeTmp.getDate(), '08', '00', '00')
   let endTime = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), '08', '00', '00')
-  console.log('startTime', startTime)
-  console.log('endTime', endTime)
+  // console.log('startTime', startTime)
+  // console.log('endTime', endTime)
   let query = {
     'endTime': {$gte: startTime, $lt: endTime} // >= <
   }
