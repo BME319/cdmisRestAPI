@@ -31,7 +31,7 @@ exports.getPeriodTime = function (req, res, next) {
       }
     }
     if (reportType === 'month') {
-      console.log('reportType', reportType)
+      // console.log('reportType', reportType)
       startTime.setDate(1)
       startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate(), '00', '00', '00')
       while (modify !== 0) {
@@ -66,8 +66,8 @@ exports.getPeriodTime = function (req, res, next) {
   }
   req.startTime = new Date(startTime)
   req.endTime = new Date(endTime)
-  console.log('startTime', req.startTime)
-  console.log('endTime', req.endTime)
+  // console.log('startTime', req.startTime)
+  // console.log('endTime', req.endTime)
   next()
 }
 
@@ -86,9 +86,9 @@ exports.getDocCounsel = function (req, res) {
   } else {
     startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
   }
-  console.log('modify', modify)
-  console.log('startTimeTmp', startTimeTmp)
-  console.log('endTimeTmp', endTimeTmp)
+  // console.log('modify', modify)
+  // console.log('startTimeTmp', startTimeTmp)
+  // console.log('endTimeTmp', endTimeTmp)
 
   let days = Math.ceil((endTime - startTime) / (24 * 3600 * 1000))
   for (let k = 0; k < days; k++) {
@@ -97,7 +97,7 @@ exports.getDocCounsel = function (req, res) {
       'type': type,
       'time': {$gte: startTimeTmp, $lt: endTimeTmp}
     }
-    console.log('queryC', queryC)
+    // console.log('queryC', queryC)
     PersonalDiag.getSome(queryC, function (err, items) {
       if (err) {
         return res.status(500).send(err)
@@ -128,9 +128,9 @@ exports.getDocPD = function (req, res) {
   } else {
     startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
   }
-  console.log('modify', modify)
-  console.log('startTimeTmp', startTimeTmp)
-  console.log('endTimeTmp', endTimeTmp)
+  // console.log('modify', modify)
+  // console.log('startTimeTmp', startTimeTmp)
+  // console.log('endTimeTmp', endTimeTmp)
 
   let days = Math.ceil((endTime - startTime) / (24 * 3600 * 1000))
   for (let k = 0; k < days; k++) {
@@ -142,7 +142,7 @@ exports.getDocPD = function (req, res) {
       ],
       'creatTime': {$gte: startTimeTmp, $lt: endTimeTmp}
     }
-    console.log('queryPD', queryPD)
+    // console.log('queryPD', queryPD)
     PersonalDiag.getSome(queryPD, function (err, items) {
       if (err) {
         return res.status(500).send(err)
@@ -173,9 +173,9 @@ exports.getDocRepComment = function (req, res) {
   } else {
     startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
   }
-  console.log('modify', modify)
-  console.log('startTimeTmp', startTimeTmp)
-  console.log('endTimeTmp', endTimeTmp)
+  // console.log('modify', modify)
+  // console.log('startTimeTmp', startTimeTmp)
+  // console.log('endTimeTmp', endTimeTmp)
 
   let days = Math.ceil((endTime - startTime) / (24 * 3600 * 1000))
   for (let k = 0; k < days; k++) {
@@ -204,7 +204,7 @@ exports.getDocRepComment = function (req, res) {
           // 'type': 'week',                   // 周月季年点评数分开存？
           // 'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
         }
-        console.log('queryR', queryR)
+        // console.log('queryR', queryR)
         Report.getSome(queryR, function (err, items) {
           if (err) {
             return res.status(500).send(err)
@@ -290,9 +290,9 @@ exports.getDepartmentCounsel = function (req, res) {
     } else {
       startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
     }
-    console.log('modify', modify)
-    console.log('startTimeTmp', startTimeTmp)
-    console.log('endTimeTmp', endTimeTmp)
+    // console.log('modify', modify)
+    // console.log('startTimeTmp', startTimeTmp)
+    // console.log('endTimeTmp', endTimeTmp)
 
     // while (endTimeTmp.getTime() !== startTime.getTime()) {
     let days = Math.ceil((endTime - startTime) / (24 * 3600 * 1000))
@@ -307,7 +307,7 @@ exports.getDepartmentCounsel = function (req, res) {
           'type': type,
           'time': {$gte: startTimeTmp, $lt: endTimeTmp}
         }
-        console.log('queryC', queryC)
+        // console.log('queryC', queryC)
         Counsel.getSome(queryC, function (err, items) {
           if (err) {
             return res.status(500).send(err)
@@ -378,9 +378,9 @@ exports.getDepartmentPD = function (req, res) {
     } else {
       startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
     }
-    console.log('modify', modify)
-    console.log('startTimeTmp', startTimeTmp)
-    console.log('endTimeTmp', endTimeTmp)
+    // console.log('modify', modify)
+    // console.log('startTimeTmp', startTimeTmp)
+    // console.log('endTimeTmp', endTimeTmp)
 
     let days = Math.ceil((endTime - startTime) / (24 * 3600 * 1000))
     for (let k = 0; k < days; k++) {
@@ -396,7 +396,7 @@ exports.getDepartmentPD = function (req, res) {
           ],
           'creatTime': {$gte: startTimeTmp, $lt: endTimeTmp}
         }
-        console.log('queryPD', queryPD)
+        // console.log('queryPD', queryPD)
         PersonalDiag.getSome(queryPD, function (err, items) {
           if (err) {
             return res.status(500).send(err)
@@ -467,9 +467,9 @@ exports.getDepartRepComment = function (req, res) {
     } else {
       startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
     }
-    console.log('modify', modify)
-    console.log('startTimeTmp', startTimeTmp)
-    console.log('endTimeTmp', endTimeTmp)
+    // console.log('modify', modify)
+    // console.log('startTimeTmp', startTimeTmp)
+    // console.log('endTimeTmp', endTimeTmp)
 
     let startT = []
     let endT = []
@@ -500,14 +500,14 @@ exports.getDepartRepComment = function (req, res) {
           'doctorReport.doctorId': doctorObjectId,
           'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
         }
-        console.log('queryR', queryR)
+        // console.log('queryR', queryR)
         Report.getSome(queryR, function (err, items) {
           if (err) {
             return res.status(500).send(err)
           }
           let day = days - k
-          console.log('day', day)
-          console.log('items', items)
+          // console.log('day', day)
+          // console.log('items', items)
           let sumWeekTmp = 0
           let sumMonthTmp = 0
           let sumSeasonTmp = 0
@@ -534,13 +534,13 @@ exports.getDepartRepComment = function (req, res) {
             if (items[j].type === 'season') {
               for (let n = 0; n < items[j].doctorReport.length; n++) {
                 let insertTime = new Date(items[j].doctorReport[n].insertTime)
-                console.log('startTimeTmp1', startTimeTmp1)
-                console.log('insertTime', insertTime)
-                console.log('endTimeTmp1', endTimeTmp1)
-                console.log(Number(insertTime.getTime()) < Number(endTimeTmp1.getTime()))
+                // console.log('startTimeTmp1', startTimeTmp1)
+                // console.log('insertTime', insertTime)
+                // console.log('endTimeTmp1', endTimeTmp1)
+                // console.log(Number(insertTime.getTime()) < Number(endTimeTmp1.getTime()))
                 if (Number(insertTime.getTime()) >= Number(startTimeTmp1.getTime()) && Number(insertTime.getTime()) < Number(endTimeTmp1.getTime())) {
                   sumSeasonTmp++
-                  console.log('sumSeasonTmp', sumSeasonTmp)
+                  // console.log('sumSeasonTmp', sumSeasonTmp)
                 }
               }
             }
@@ -637,9 +637,9 @@ exports.getDistrictRepComment = function (req, res) {
           } else {
             startTimeTmp = new Date(endTimeTmp - 24 * 3600 * 1000)
           }
-          console.log('modify', modify)
-          console.log('startTimeTmp', startTimeTmp)
-          console.log('endTimeTmp', endTimeTmp)
+          // console.log('modify', modify)
+          // console.log('startTimeTmp', startTimeTmp)
+          // console.log('endTimeTmp', endTimeTmp)
 
           let startT = []
           let endT = []
@@ -665,14 +665,14 @@ exports.getDistrictRepComment = function (req, res) {
                 'doctorReport.doctorId': doctorObjectId,
                 'doctorReport.insertTime': {$gte: startTimeTmp, $lt: endTimeTmp}
               }
-              console.log('queryR', queryR)
+              // console.log('queryR', queryR)
               Report.getSome(queryR, function (err, items) {
                 if (err) {
                   return res.status(500).send(err)
                 }
                 let day = days - k
-                console.log('day', day)
-                console.log('items', items)
+                // console.log('day', day)
+                // console.log('items', items)
                 let sumWeekTmp = 0
                 let sumMonthTmp = 0
                 let sumSeasonTmp = 0
@@ -699,13 +699,13 @@ exports.getDistrictRepComment = function (req, res) {
                   if (items[j].type === 'season') {
                     for (let n = 0; n < items[j].doctorReport.length; n++) {
                       let insertTime = new Date(items[j].doctorReport[n].insertTime)
-                      console.log('startTimeTmp1', startTimeTmp1)
-                      console.log('insertTime', insertTime)
-                      console.log('endTimeTmp1', endTimeTmp1)
-                      console.log(Number(insertTime.getTime()) < Number(endTimeTmp1.getTime()))
+                      // console.log('startTimeTmp1', startTimeTmp1)
+                      // console.log('insertTime', insertTime)
+                      // console.log('endTimeTmp1', endTimeTmp1)
+                      // console.log(Number(insertTime.getTime()) < Number(endTimeTmp1.getTime()))
                       if (Number(insertTime.getTime()) >= Number(startTimeTmp1.getTime()) && Number(insertTime.getTime()) < Number(endTimeTmp1.getTime())) {
                         sumSeasonTmp++
-                        console.log('sumSeasonTmp', sumSeasonTmp)
+                        // console.log('sumSeasonTmp', sumSeasonTmp)
                       }
                     }
                   }
