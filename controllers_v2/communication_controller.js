@@ -977,12 +977,12 @@ exports.getMassTargets = function (req, res, next) {
           break
         case 'ALL':
           for (let i = 0; i < doctorItem.patients.length; i++) {
-            if (doctorItem.patients[i].patientId !== null) {
+            if (doctorItem.patients[i].patientId) {
               targets[i] = doctorItem.patients[i].patientId
             }
           }
           for (let j = 0; j < doctorItem.patientsInCharge.length; j++) {
-            if (doctorItem.patientsInCharge[j].patientId !== null) {
+            if (doctorItem.patientsInCharge[j].patientId) {
               targets[doctorItem.patients.length + j] = doctorItem.patientsInCharge[j].patientId
             }
           }

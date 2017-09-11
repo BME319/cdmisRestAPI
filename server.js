@@ -155,3 +155,7 @@ schedule.scheduleJob('0 0 8 * * *', counseltimeoutCtrl.autoCounselNews)
 // 每天23:00自动统计当日科室医生工作量 2017-08-11 JYF
 var departmentMonitorCtrl = require('./controllers_v2/departmentMonitor_controller')
 schedule.scheduleJob('0 0 23 * * *', departmentMonitorCtrl.autoDepartmentDaily)
+
+// 每天8:00自动推送给患者和医生咨询或问诊超时自动结束的微信模板消息 2017-09-07 lgf
+var counselCtrl = require('./controllers_v2/counsel_controller')
+schedule.scheduleJob('30 0 8 * * *', counselCtrl.counselAutoEndMsg)

@@ -702,7 +702,8 @@ exports.register = function (acl) {
       password: _password,
       role: _role,
       userId: _userNo,
-      invalidFlag: 0
+      invalidFlag: 0,
+      creationTime: new Date()
     }
     var newAlluser = new Alluser(userData)
     newAlluser.save(function (err, Info) {
@@ -1058,7 +1059,8 @@ exports.login = function (req, res, next) {
                     // JSON.stringify(userPayload),
           var refreshtokenData = {
             refreshtoken: refreshToken,
-            userPayload: JSON.stringify(userPayload)
+            userPayload: JSON.stringify(userPayload), 
+            userId: user.userId
           }
                     // console.log(refreshtokenData);
 
