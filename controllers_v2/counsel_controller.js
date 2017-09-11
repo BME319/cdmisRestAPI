@@ -62,10 +62,10 @@ exports.getCounsels = function (req, res) {
   }
   // type和status可以为空
   if (_status != null) {
-    query['_status'] = _status
+    query['status'] = _status
   }
   if (_type != null) {
-    query['_type'] = _type
+    query['type'] = _type
   }
   // if(_name!=""&&_name!=undefined){
   //   query["patientId.name"]=_name;
