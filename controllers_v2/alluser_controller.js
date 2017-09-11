@@ -1725,7 +1725,7 @@ exports.dprelation = function (type) {
               if (dpitem.patientsInCharge) {
                 if (dpitem.patientsInCharge.length) {
                   for (let i = 0; i < dpitem.patientsInCharge.length; i++) {
-                    if (JSON.stringify(dpitem.patientsInCharge[i].patientId) == JSON.stringify(item._id)) {
+                    if (JSON.stringify(dpitem.patientsInCharge[i].patientId) === JSON.stringify(item._id)) {
                       patientChargeFlag = 1
                       break
                     }
