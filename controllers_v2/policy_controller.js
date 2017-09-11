@@ -141,7 +141,7 @@ exports.getPatients = function (req, res) {
           itemTemp['patientId'] = items[item].patientId
           itemTemp['currentAgent'] = items[item].currentAgent
           itemTemp['status'] = items[item].status
-          console.log(itemTemp)
+          // console.log(itemTemp)
           returns.push(itemTemp)
         }
       }

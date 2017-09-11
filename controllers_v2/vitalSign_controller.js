@@ -231,7 +231,7 @@ exports.outOfRange = function (req, res, next) {
   switch (req.itemType) {
     case '血压':
       queryR['itemType'] = 'BloodPressure'
-      console.log('queryR', queryR)
+      // console.log('queryR', queryR)
       Report.getSome(queryR, function (err, reports) {
         if (err) {
           return res.status(500).send(err.message)
@@ -262,7 +262,7 @@ exports.outOfRange = function (req, res, next) {
       break
     case '尿量':
       queryR['itemType'] = 'Vol'
-      console.log('queryR', queryR)
+      // console.log('queryR', queryR)
       Report.getSome(queryR, function (err, reports) {
         if (err) {
           return res.status(422).send(err.message)
@@ -282,7 +282,7 @@ exports.outOfRange = function (req, res, next) {
       break
     case '体温':
       queryR['itemType'] = 'Temperature'
-      console.log('queryR', queryR)
+      // console.log('queryR', queryR)
       Report.getSome(queryR, function (err, reports) {
         if (err) {
           return res.status(422).send(err.message)
@@ -300,7 +300,7 @@ exports.outOfRange = function (req, res, next) {
       break
     case '心率':
       queryR['itemType'] = 'HeartRate'
-      console.log('queryR', queryR)
+      // console.log('queryR', queryR)
       Report.getSome(queryR, function (err, reports) {
         if (err) {
           return res.status(422).send(err.message)
