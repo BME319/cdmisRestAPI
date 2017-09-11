@@ -98,7 +98,7 @@ exports.bindingPatient = function (req, res) {
     // console.log('patientId', patientId)
     if (item !== null) {
       var patientsList = item.patients
-      console.log('patientsList', patientsList)
+      // console.log('patientsList', patientsList)
       for (let i = 0; i < patientsList.length; i++) {
         if (String(patientsList[i].patientId) === String(patientId)) {
           req.isBinding = 1 // 是否绑定过该患者的标志，1表示已绑定过 0表示未绑定过
