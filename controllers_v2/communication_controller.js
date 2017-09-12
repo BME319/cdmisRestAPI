@@ -983,7 +983,9 @@ exports.getMassTargets = function (req, res, next) {
           }
           for (let j = 0; j < doctorItem.patientsInCharge.length; j++) {
             if (doctorItem.patientsInCharge[j].patientId) {
-              targets.push(doctorItem.patientsInCharge[j].patientId)
+              if (targets.indexOf(doctorItem.patientsInCharge[j].patientId) === -1) {
+                targets.push(doctorItem.patientsInCharge[j].patientId)
+              }
             }
           }
           break
