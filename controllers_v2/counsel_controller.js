@@ -527,6 +527,9 @@ exports.getStatus = function (req, res, next) {
   // }
   let status = req.body.status || req.query.status || null
   let statusInBody = req.body.status || null
+  if (req.body.status === 0) {
+    statusInBody = 1
+  }
   let changeType = req.body.changeType || null
   let type = req.query.type || req.body.type || null
   if (changeType !== null) {

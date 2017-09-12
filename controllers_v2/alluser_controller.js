@@ -705,6 +705,14 @@ exports.register = function (acl) {
       invalidFlag: 0,
       creationTime: new Date()
     }
+    if (_role === 'patient') {
+      // 患者注册时需要填写姓名
+      let _name = req.body.name || null
+      if (_name === null) {
+        return res.status(400).send('name_needed')
+      }
+      userData['name'] = _name
+    }
     var newAlluser = new Alluser(userData)
     newAlluser.save(function (err, Info) {
       if (err) {
