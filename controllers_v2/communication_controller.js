@@ -960,6 +960,7 @@ exports.getMassTargets = function (req, res, next) {
       return res.status(404).json({results: '暂无关注或主管的患者'})
     } else {
       let targets = []
+      let targetsUserId = []
       switch (target) {
         case 'FOLLOW':
           for (let i = 0; i < doctorItem.patients.length; i++) {
@@ -979,11 +980,14 @@ exports.getMassTargets = function (req, res, next) {
           for (let i = 0; i < doctorItem.patients.length; i++) {
             if (doctorItem.patients[i].patientId) {
               targets.push(doctorItem.patients[i].patientId)
+              targetsUserId.push(doctorItem.patients[i].patientId.userId)
             }
           }
           for (let j = 0; j < doctorItem.patientsInCharge.length; j++) {
             if (doctorItem.patientsInCharge[j].patientId) {
-              targets.push(doctorItem.patientsInCharge[j].patientId)
+              if (targetsUserId.indexOf(doctorItem.patientsInCharge[j].patientId.userId) === -1) {
+                targets.push(doctorItem.patientsInCharge[j].patientId)
+              }
             }
           }
           break
@@ -994,6 +998,7 @@ exports.getMassTargets = function (req, res, next) {
         return res.status(404).json({results: '无有效群发目标'})
       } else {
         req.massTarget = targets
+        console.log(targets)
         next()
       }
     }

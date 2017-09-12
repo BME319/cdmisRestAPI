@@ -96,7 +96,7 @@ Reply.aggregate = function (array, callback) {
       if (err) {
         return callback(err)
       }
-      console.log(results)
+      // console.log(results)
       callback(null, results)
     })
 }
