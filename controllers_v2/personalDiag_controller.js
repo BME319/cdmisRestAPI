@@ -469,6 +469,12 @@ exports.cancelBookedPds = function (req, res) {
   }
 
   let upObj = {$set: {status: 4}}
+  let opts = ''
+  let fields = {_id: 1, doctorId: 1, patientId: 1, bookingDay: 1, bookingTime: 1}
+  let populate = [
+    {path: 'doctorId', select: {_id: 0, name: 1}},
+    {path: 'patientId', select: {_id: 0, phoneNo: 1}}
+  ]
   PersonalDiag.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
@@ -512,6 +518,33 @@ exports.cancelBookedPds = function (req, res) {
                       // return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
                       console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                     }
+                    if ((toRefund.patientId || null) !== null) {
+                      if ((toRefund.patientId.phoneNo || null) !== null) {
+                        request({ // 调用短信发送接口
+                          url: 'http://' + webEntry.domain + '/api/v2/services/message',
+                          method: 'POST',
+                          body: {
+                            'phoneNo': toRefund.patientId.phoneNo,
+                            'doctorName': toRefund.doctorId.name,
+                            'day': new Date(toRefund.bookingDay).toLocaleDateString(),
+                            'time': toRefund.bookingTime,
+                            'orderMoney': Number(money),
+                            'orderNo': orderNo,
+                            'token': req.body.token,
+                            'cancelFlag': 1
+                          },
+                          json: true
+                        }, function (err, response) {
+                          if (err) {
+                            return res.status(500).send(err)
+                          } else if (Number(response.body.results) === 0) {
+                            console.log('用户"' + itemO.patientName + '"短信发送成功')
+                          } else {
+                            console.log('用户"' + itemO.patientName + '"短信发送失败')
+                          }
+                        })
+                      }
+                    }
                   })
                 } else {
                   console.log('用户"' + itemO.patientName + '"面诊取消成功')
@@ -529,7 +562,7 @@ exports.cancelBookedPds = function (req, res) {
         }
       }, {multi: true})
     }
-  })
+  }, opts, fields, populate)
 }
 
 // 删除面诊停诊时间 2017-07-15 GY
@@ -800,6 +833,7 @@ exports.newPersonalDiag = function (req, res, next) {
           req.body.type = 5
           req.body.code = code
           req.body.smsType = 5
+          req.body.successFlag = 1
           next()
         }
       })

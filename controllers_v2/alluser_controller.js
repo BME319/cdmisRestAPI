@@ -1814,26 +1814,48 @@ exports.getDoctorObject = function (req, res, next) {
   })
 }
 
-exports.successMessage = function (req, res, next) {
+exports.serviceMessage = function (req, res, next) {
   let token = '86cf8733b80a31fd7deb7b3147a226d0'
   let accountSid = '43b82098fcec135770091f446f6b7367'
   let appId = 'af8afab59dd04001a4b5b37bcc419ec3'
-  let templateId = '112436'
-
+  let templateId
   let now = new Date()
-  let mobile = req.body.patientObject.phoneNo || null
-  let doctorName = req.body.doctorObject.name || null
-  let bookingDay = req.body.day || null
-  let bookingTime = req.body.time || null
-  let PDPlace = req.body.place || null
-  let confirmCode = req.body.code || null
-  let PDTime
-  if (bookingTime === 'Morning') {
-    PDTime = bookingDay.slice(0, 4) + '-' + bookingDay.slice(5, 7) + '-' + bookingDay.slice(8, 10) + '上午'
+  let mobile
+  let doctorName
+  let param
+  if (Number(req.body.cancelFlag) === 1) {
+    templateId = '142743'
+    mobile = req.body.phoneNo || null
+    doctorName = req.body.doctorName || null
+    let bookingDay = new Date(req.body.day).toLocaleDateString()
+    let bookingTime = req.body.time || null
+    let PDTime
+    if (bookingTime === 'Morning') {
+      PDTime = bookingDay + '上午'
+    } else {
+      PDTime = bookingDay + '下午'
+    }
+    let orderMoney = req.body.orderMoney
+    let orderNo = req.body.orderNo
+    param = doctorName + ',' + PDTime + ',' + orderMoney + ',' + orderNo
+  } else if (Number(req.body.successFlag) === 1) {
+    templateId = '112436'
+    mobile = req.body.patientObject.phoneNo || null
+    doctorName = req.body.doctorObject.name || null
+    let bookingDay = new Date(req.body.day).toLocaleDateString()
+    let bookingTime = req.body.time || null
+    let PDPlace = req.body.place || null
+    let confirmCode = req.body.code || null
+    let PDTime
+    if (bookingTime === 'Morning') {
+      PDTime = bookingDay + '上午'
+    } else {
+      PDTime = bookingDay + '下午'
+    }
+    param = doctorName + ',' + PDTime + ',' + PDPlace + ',' + confirmCode
   } else {
-    PDTime = bookingDay.slice(0, 4) + '-' + bookingDay.slice(5, 7) + '-' + bookingDay.slice(8, 10) + '下午'
+    return res.json({code: 1, meg: '请填写successFlag／cancelFlag!'})
   }
-  let param = doctorName + ',' + PDTime + ',' + PDPlace + ',' + confirmCode
 
   let JSONData = '{' + '"' + 'templateSMS' + '"' + ':' + '{' + '"' + 'appId' + '"' + ':' + '"' + appId + '"' + ',' + '"' + 'param' + '"' + ':' + '"' + param + '"' + ',' + '"' + 'templateId' + '"' + ':' + '"' + templateId + '"' + ',' + '"' + 'to' + '"' + ':' + '"' + mobile + '"' + '}' + '}'
   let timestamp = now.getFullYear() + commonFunc.paddNum(now.getMonth() + 1) + commonFunc.paddNum(now.getDate()) + now.getHours() + now.getMinutes() + now.getSeconds()
@@ -1862,7 +1884,11 @@ exports.successMessage = function (req, res, next) {
       code = json.resp.respCode
       if (code === '000000') {
         // res.json({results: 0, mesg: 'Booking Success and Message Sent!'})
-        console.log({results: 0, mesg: 'Booking Success and Message Sent!'})
+        if (Number(req.body.cancelFlag) === 1) {
+          return res.json({results: 0, mesg: 'Cancel Success and Message Sent!'})
+        } else if (Number(req.body.successFlag) === 1) {
+          console.log({results: 0, mesg: 'Booking Success and Message Sent!'})
+        }
       } else {
         return res.json({results: 1, mesg: {'ErrorCode': code}})
       }
@@ -1874,5 +1900,7 @@ exports.successMessage = function (req, res, next) {
   })
   requests.write(JSONData)
   requests.end()
-  next()
+  if (Number(req.body.successFlag) === 1) {
+    next()
+  }
 }
