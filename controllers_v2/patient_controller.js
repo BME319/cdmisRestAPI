@@ -1121,7 +1121,16 @@ exports.wechatPhotoUrl = function (req, res) {
     }
     if (item == null) {
       return res.json({results: '不存在的患者ID'})
-    } else if (item.photoUrl === undefined) {
+    } else if (!item.photoUrl) {
+      var upObj = {photoUrl: newPhotoUrl}
+      Alluser.updateOne(query, upObj, function (err, upItem) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        return res.json({results: '头像已更新', editResults: upItem})
+      })
+    } else if (item.photoUrl.indexOf('wx.qlogo.cn') && (item.photoUrl !== newPhotoUrl)) {
+      // 如果微信头像更新地址，相应字段也应该更新
       var upObj = {photoUrl: newPhotoUrl}
       Alluser.updateOne(query, upObj, function (err, upItem) {
         if (err) {
