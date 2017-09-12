@@ -53,7 +53,7 @@ ApiRecord.getSome = function (query, fields, callback, populate, opts) {
       if (err) {
         return callback(err)
       }
-      console.log(apiRecordInfos)
+      // console.log(apiRecordInfos)
       callback(null, apiRecordInfos)
     })
 }
@@ -116,7 +116,7 @@ ApiRecord.aggregate = function (array, callback) {
       if (err) {
         return callback(err)
       }
-      console.log(results)
+      // console.log(results)
       callback(null, results)
     })
 }
