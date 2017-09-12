@@ -70,7 +70,7 @@ Department.getSome = function (query, fields, callback, populate, opts) {
       if (err) {
         return callback(err)
       }
-      console.log(departmentInfos)
+      // console.log(departmentInfos)
       callback(null, departmentInfos)
     })
 }
@@ -133,7 +133,7 @@ Department.aggregate = function (array, callback) {
       if (err) {
         return callback(err)
       }
-      console.log(results)
+      // console.log(results)
       callback(null, results)
     })
 }
