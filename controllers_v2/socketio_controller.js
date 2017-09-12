@@ -127,7 +127,6 @@ function messageSaveSend (data, url, sender) {
 }
 
 function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWechatServer, data) {
-  var test = data.msg.test
   if (messageType === 1) {       // 单聊
     var online = false
     if (userAppServer.hasOwnProperty(receiver)) {         // 用户在线
@@ -159,16 +158,16 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
         var sponsorId = response.body.results.sponsorId
         var members = response.body.results.members
         members.push({'userId': sponsorId})
-        console.log(members)
-        console.log(members.length)
+        // console.log(members)
+        // console.log(members.length)
 
         for (var idx in members) {
          // var online = false
-          console.log(members[idx])
+          // console.log(members[idx])
 
           if (userAppServer.hasOwnProperty(members[idx].userId)) {         // 用户在线
             // online = true
-            console.log(idx)
+            // console.log(idx)
                         // console.log(member.userId);
             if (members[idx].userId !== sendBy) {
                             // console.log(member.userId);
@@ -178,7 +177,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
                     // console.log(member);
           if (userWechatServer.hasOwnProperty(members[idx].userId)) {         // 用户在线
             // online = true
-            console.log(idx)
+            // console.log(idx)
                         // console.log(member.userId);
             if (members[idx].userId !== sendBy) {
                             // console.log(member.userId);
@@ -236,7 +235,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
                 }
               }
             }
-            console.log(idx)
+            // console.log(idx)
 
                             // groupSend(data);
             request({
