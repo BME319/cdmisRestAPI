@@ -56,7 +56,7 @@ function getSign (appkey, appsecret, atime) {
 
 exports.receiveData = function (req, res) {
   console.log('receiveNiaodaifu')
-  console.log(req.body)
+  // console.log(req.body)
 
   var userbind = req.body.userbind
   var desc = req.body.desc

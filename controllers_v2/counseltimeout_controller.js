@@ -97,7 +97,7 @@ exports.getDepartmentCounsel = function (req, res) {
   let date = req.query.date || ''
   let enddate = new Date(date)
   let startdate = new Date((enddate / 1000 - 86400) * 1000)
-  console.log(typeof (departLeaderId))
+  // console.log(typeof (departLeaderId))
 
   let array = [
     {$match: {endTime: {$gte: startdate, $lt: enddate}}},

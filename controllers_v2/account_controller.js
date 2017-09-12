@@ -41,7 +41,7 @@ exports.checkPatient = function (req, res, next) {
     // req.patientId = req.body.patientId
     req.patientId = req.session.userId
     req.role = req.session.role
-    console.log(req.session)
+    // console.log(req.session)
   }
   // } else {
   //   req.patientId = req.query.patientId
@@ -56,7 +56,7 @@ exports.checkPatient = function (req, res, next) {
     if (item === null) {
       return res.json({result: '不存在的患者ID'})
     } else {
-      console.log('checkPatient successful!')
+      // console.log('checkPatient successful!')
       next()
     }
   })
@@ -253,8 +253,8 @@ exports.getCounts = function (req, res, next) {
     // get 操作时body为null,modify置为0
     req.modify = 0
   }
-  console.log(modify)
-  console.log(req.modify)
+  // console.log(modify)
+  // console.log(req.modify)
   // return res.json({modify: req.modify});
   // 查询单个患者账户信息
   Account.getOne(query, function (err, item) {

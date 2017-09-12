@@ -11,7 +11,7 @@ exports.autoDepartmentDaily = function (req, res) {
   let d = date.getDate()
   let startTime = new Date(y + '-' + m + '-' + d)
   let endTime = new Date((startTime / 1000 + 86400) * 1000)
-  console.log(y, m, d, startTime)
+  // console.log(y, m, d, startTime)
   let array = [
     {$match: {department: {$ne: null}}},
     {

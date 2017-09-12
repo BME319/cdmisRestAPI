@@ -168,7 +168,7 @@ exports.getAllposts = function (req, res) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
-    console.log(results)
+    // console.log(results)
     res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
   })
 }
@@ -358,7 +358,7 @@ exports.getMyposts = function (req, res) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
-    console.log(results)
+    // console.log(results)
     res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
   })
 }
@@ -508,7 +508,7 @@ exports.forumComment = function (req, res) {
   let content = req.body.content || ''
   let postId = req.body.postId || ''
   let commentId = req.newId || ''
-  console.log(userId)
+  // console.log(userId)
   if (content === '') {
     res.status(400).json({code: 1, msg: '评论内容不能为空'})
   } else {
@@ -518,13 +518,13 @@ exports.forumComment = function (req, res) {
         res.status(500).json({code: 1, msg: err.errmsg})
       }
       let name = ''
-      console.log(alluserInfo)
+      // console.log(alluserInfo)
       if (alluserInfo !== null){
         name = alluserInfo.name
       } else {
         name = '未知'
       }
-      console.log('name:'+name)
+      // console.log('name:'+name)
       let obj = {
         $set: {
           userId: userId,
@@ -580,7 +580,7 @@ exports.forumReply = function (req, res) {
             res.status(500).json({code: 1, msg: err.errmsg})
           }
           let name = ''
-          console.log(alluserInfo)
+          // console.log(alluserInfo)
           if (alluserInfo !== null){
             name = alluserInfo.name
           } else {

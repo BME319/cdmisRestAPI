@@ -63,7 +63,7 @@ function messageSaveSend (data, url, sender) {
             // console.log("wechat_doctor:  "+Object.keys(userWechatDoctorServer));
             // console.log("wechat_patient:  "+Object.keys(userWechatPatientServer));
 
-      data.msg['messageId'] = response.body.messageNo
+      data.msg['messageId'] = response.body.newResults.messageNo
 
       sender.emit('messageRes', {msg: data.msg})
 

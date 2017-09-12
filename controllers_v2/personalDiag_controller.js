@@ -149,7 +149,7 @@ exports.getDaysToUpdate = function (req, res, next) {
     nextModDay.setDate(nextModDay.getDate() - now.getDay() + nextDayNo)
   }
   nextModDay = new Date(nextModDay.getFullYear(), nextModDay.getMonth(), nextModDay.getDate(), '00', '00', '00')
-  console.log(nextModDay)
+  // console.log(nextModDay)
 
   let nextNextModDay = new Date(now)
   if (now.getDay() > nextDayNo) {
@@ -158,7 +158,7 @@ exports.getDaysToUpdate = function (req, res, next) {
     nextNextModDay.setDate(nextNextModDay.getDate() + 7 - now.getDay() + nextDayNo)
   }
   nextNextModDay = new Date(nextNextModDay.getFullYear(), nextNextModDay.getMonth(), nextNextModDay.getDate(), '00', '00', '00')
-  console.log(nextNextModDay)
+  // console.log(nextNextModDay)
 
   req.body.nmd = nextModDay
   req.body.nnmd = nextNextModDay
@@ -234,12 +234,12 @@ exports.updateAvailablePD1 = function (req, res, next) {
         if (err) {
           return res.status(500).send(err)
         } else {
-          console.log('OK-11')
+          // console.log('OK-11')
           next()
         }
       })
     } else {
-      console.log('OK-1')
+      // console.log('OK-1')
       next()
     }
   })
@@ -295,7 +295,7 @@ exports.updateAvailablePD2 = function (req, res, next) {
         if (err) {
           return res.status(500).send(err)
         } else {
-          console.log('OK-21')
+          // console.log('OK-21')
           if (req.body.deleteFlag) {
             next()
           } else {
@@ -304,7 +304,7 @@ exports.updateAvailablePD2 = function (req, res, next) {
         }
       })
     } else {
-      console.log('OK-2')
+      // console.log('OK-2')
       if (req.body.deleteFlag) {
         next()
       } else {
