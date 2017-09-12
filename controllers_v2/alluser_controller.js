@@ -702,7 +702,8 @@ exports.register = function (acl) {
       password: _password,
       role: _role,
       userId: _userNo,
-      invalidFlag: 0
+      invalidFlag: 0,
+      creationTime: new Date()
     }
     var newAlluser = new Alluser(userData)
     newAlluser.save(function (err, Info) {
@@ -1726,7 +1727,7 @@ exports.dprelation = function (type) {
               if (dpitem.patientsInCharge) {
                 if (dpitem.patientsInCharge.length) {
                   for (let i = 0; i < dpitem.patientsInCharge.length; i++) {
-                    if (JSON.stringify(dpitem.patientsInCharge[i].patientId) == JSON.stringify(item._id)) {
+                    if (JSON.stringify(dpitem.patientsInCharge[i].patientId) === JSON.stringify(item._id)) {
                       patientChargeFlag = 1
                       break
                     }

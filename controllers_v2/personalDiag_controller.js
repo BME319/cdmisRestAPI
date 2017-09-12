@@ -24,7 +24,7 @@ exports.setServiceSchedule = function (req, res, next) {
   if (Number(total) <= 0) {
     return res.status(412).json({results: '请调用"删除排班"或"设置面诊停诊"的方法'})
   }
-  let query = {userId: req.session.userId, role: 'doctor', serviceSchedules: {$elemMatch: {$and: [{day: day}, {time: time}]}}}
+  let query = {userId: req.session.userId, serviceSchedules: {$elemMatch: {$and: [{day: day}, {time: time}]}}}
   Alluser.getOne(query, function (err, item) {
     let upObj = {}
     let opts = {new: true, runValidators: true, setDefaultsOnInsert: true}
@@ -699,14 +699,19 @@ exports.confirmPD = function (req, res, next) {
 // 返回：personalDiag.code, endTime
 exports.updatePDCapacityDown = function (req, res, next) {
   let doctorId = req.body.doctorId || null
-  let today = new Date(new Date().toDateString())
-  let bookingDay = new Date(new Date(req.body.day).toDateString()) || null
+  let today = new Date().toLocaleDateString()
+  let bookingDay = req.body.day || null
   let bookingTime = req.body.time || null
-  if (doctorId === null || bookingDay === null || bookingTime === null || bookingDay < today) {
+  if (doctorId === null || bookingDay === null || bookingTime === null) {
     return res.json({results: '请检查doctorId,day,time输入'})
+  } else {
+    bookingDay = new Date(req.body.day).toLocaleDateString()
+    if (bookingDay < today) {
+      return res.json({results: '请检查day输入正确'})
+    }
   }
 
-  let queryD = {userId: doctorId, availablePDs: {$elemMatch: {$and: [{availableDay: bookingDay}, {availableTime: bookingTime}, {suspendFlag: 0}]}}}
+  let queryD = {userId: doctorId, availablePDs: {$elemMatch: {$and: [{availableDay: new Date(bookingDay)}, {availableTime: bookingTime}, {suspendFlag: 0}]}}}
   let fieldsD = {_id: 0, availablePDs: 1}
   Alluser.getOne(queryD, function (err, itemD) {
     if (err) {
@@ -717,33 +722,34 @@ exports.updatePDCapacityDown = function (req, res, next) {
       // return res.send(itemD)
       let availablePDsList = itemD.availablePDs || []
       let availablePD = null
-      for (let i = 0; i < availablePDsList.length; i++) {
-        if (new Date(availablePDsList[i].availableDay).toDateString() === new Date(bookingDay).toDateString() && new Date(availablePDsList[i].availableTime).toDateString() === new Date(bookingTime).toDateString()) {
+      for (let i = 0; i < availablePDsList.length; i++) { // 取出该时段面诊信息
+        if (new Date(availablePDsList[i].availableDay).toDateString() === new Date(bookingDay).toDateString() && String(availablePDsList[i].availableTime) === String(bookingTime)) {
           availablePD = availablePDsList[i]
           break
         }
       }
-      let count = availablePD.count || 0
-      let total = availablePD.total || 0
+
+      let count = Number(availablePD.count || null)
+      let total = Number(availablePD.total || null)
       req.body.place = availablePD.place
       if (count < total) { // 存在余量，可预约面诊
         let upDoc = {
-          $set: {
-            'availablePDs.$.count': count + 1
+          $inc: {
+            'availablePDs.$.count': 1
           }
         }
         Alluser.update(queryD, upDoc, function (err, upDoctor) { // 占个号
           if (err) {
             return res.status(500).send(err)
-          } else if (upDoctor.nModified === 0) {
-            return res.json({results: '面诊数量未更新成功，请检查输入'})
-          } else if (upDoctor.nModified !== 0) {
+          } else if (upDoctor.nModified !== 1) {
+            return res.json({results: '面诊数量未更新成功，请检查输入', code: 1})
+          } else if (upDoctor.nModified === 1) {
             // return res.json({results: '面诊数量更新成功'})
             next()
           }
         })
       } else { // 可预约面诊数量为零
-        return res.json({results: '该时段预约已满，请更换预约时间'})
+        return res.json({results: '该时段预约已满，请更换预约时间', code: 1})
       }
     }
   }, fieldsD)
@@ -752,11 +758,11 @@ exports.updatePDCapacityDown = function (req, res, next) {
 exports.newPersonalDiag = function (req, res, next) {
   let doctorObjectId = req.body.doctorObject._id
   let patientObjectId = req.body.patientObject._id
-  let bookingDay = new Date(new Date(req.body.day).toDateString())
+  let bookingDay = new Date(req.body.day).toLocaleDateString()
   let bookingTime = req.body.time
   let place = req.body.place
 
-  let queryPD = {doctorId: doctorObjectId, patientId: patientObjectId, bookingDay: bookingDay, bookingTime: bookingTime, status: 0}
+  let queryPD = {doctorId: doctorObjectId, patientId: patientObjectId, bookingDay: new Date(bookingDay), bookingTime: bookingTime, status: 0}
   PersonalDiag.getOne(queryPD, function (err, itemPD) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -775,7 +781,7 @@ exports.newPersonalDiag = function (req, res, next) {
         diagId: req.newId,
         doctorId: doctorObjectId,
         patientId: patientObjectId,
-        bookingDay: bookingDay,
+        bookingDay: new Date(bookingDay),
         bookingTime: bookingTime,
         place: place,
         code: code,
@@ -889,7 +895,7 @@ exports.sortAndTagPDs = function (req, res) {
     } else if (itemsPD.length !== 0) {
       for (let i = 0; i < itemsPD.length; i++) {
         for (let k = 0; k < returns.length; k++) {
-          if (new Date(itemsPD[i].bookingDay).toDateString() === new Date(returns[k].availableDay).toDateString() && itemsPD[i].bookingTime === returns[k].availableTime) {
+          if (new Date(itemsPD[i].bookingDay).toDateString() === new Date(returns[k].availableDay).toDateString() && String(itemsPD[i].bookingTime) === String(returns[k].availableTime)) {
             returns[k]['diagId'] = itemsPD[i].diagId
           }
         }

@@ -580,7 +580,7 @@ exports.forumReply = function (req, res) {
             res.status(500).json({code: 1, msg: err.errmsg})
           }
           let name = ''
-          console.log(alluserInfo)
+          // console.log(alluserInfo)
           if (alluserInfo !== null){
             name = alluserInfo.name
           } else {

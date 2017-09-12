@@ -61,7 +61,7 @@ var alluserSchema = new mongoose.Schema({
   serviceSchedules: [
     {
       _id: 0,
-      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta', 'Sun']},
+      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']},
       time: {type: String, enum: ['Morning', 'Afternoon']},
       total: Number, // 医生可以设置的某时段面诊总数
       place: String
@@ -105,7 +105,7 @@ var alluserSchema = new mongoose.Schema({
   schedules: [
     {
       _id: 0,
-      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta', 'Sun']},
+      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']},
       time: {type: String, enum: ['Morning', 'Afternoon']},
       place: String
     }
@@ -144,8 +144,8 @@ var alluserSchema = new mongoose.Schema({
   VIPStartTime: Date,
   VIPEndTime: Date,
   // 入组相关
-  group: {type: Number, default: 0, enum: [0, 1]}, 
-  groupTime: Date, 
+  group: {type: Number, default: 0, enum: [0, 1]},
+  groupTime: Date,
   hypertension: Number,
   allergic: String,
   // 关注医生字段

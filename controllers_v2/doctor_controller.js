@@ -650,8 +650,16 @@ exports.insertSchedule = function (req, res) {
     return res.json({msg: 'Please input schedule day/time/place!'})
   }
   let query = {userId: doctorId, role: 'doctor'}
-  let upObj = {
-    $addToSet: {
+  let upObj1 = {
+    $pull: {
+      schedules: {
+        day: _day,
+        time: _time
+      }
+    }
+  }
+  let upObj2 = {
+    $push: {
       schedules: {
         day: _day,
         time: _time,
@@ -660,18 +668,21 @@ exports.insertSchedule = function (req, res) {
     }
   }
   // return res.json({query: query, upObj: upObj});
-  Alluser.update(query, upObj, function (err, upDoctor) {
+  Alluser.updateOne(query, upObj1, function (err, upDoctor1) {
     if (err) {
       return res.status(422).send(err.message)
+    } else if (upDoctor1 === null) {
+      return res.json({msg: '不存在的doctor！', data: upDoctor1, code: 1})
+    } else {
+      Alluser.updateOne(query, upObj2, function (err, upDoctor2) {
+        if (err) {
+          return res.status(422).send(err.message)
+        } else {
+          return res.json({msg: '设置成功', data: upDoctor2, code: 0})
+        }
+      }, {new: true, runValidators: true})
     }
-    if (upDoctor.nModified === 0) {
-      return res.json({msg: '未成功修改！请检查输入是否符合要求！', results: upDoctor})
-    }
-    if (upDoctor.nModified === 1) {
-      return res.json({msg: '修改成功', results: upDoctor})
-    }
-    res.json({results: upDoctor})
-  }, {new: true})
+  }, {new: true, runValidators: true})
 }
 
 // 删除医生排班 承接session.userId，输入日期与时间，输出删除排班
@@ -1000,19 +1011,21 @@ exports.getPatientsList = function (req, res) {
     } else {
       let pCList = []
       let pCListUserId = []
-      for (let ii = 0; ii < item.patientsInCharge.length; ii++) {
-        if (item.patientsInCharge[ii].invalidFlag === 1 && item.patientsInCharge[ii].patientId !== null) {
-          pCList.push(item.patientsInCharge[ii])
-          pCListUserId.push(item.patientsInCharge[ii].patientId.userId)
+      let patientsInCharge = item.patientsInCharge || []
+      for (let ii = 0; ii < patientsInCharge.length; ii++) {
+        if (patientsInCharge[ii].invalidFlag === 1 && patientsInCharge[ii].patientId !== null) {
+          pCList.push(patientsInCharge[ii])
+          pCListUserId.push(patientsInCharge[ii].patientId.userId)
         }
       }
       pCList.sort(sortVIPpinyin)
 
       let pList = []
-      for (let jj = 0; jj < item.patients.length; jj++) {
-        if (item.patients[jj].patientId !== null) {
-          if (pCListUserId.indexOf(item.patients[jj].patientId.userId) === -1) {
-            pList.push(item.patients[jj])
+      let patients = item.patients || []
+      for (let jj = 0; jj < patients.length; jj++) {
+        if (patients[jj].patientId !== null) {
+          if (pCListUserId.indexOf(patients[jj].patientId.userId) === -1) {
+            pList.push(patients[jj])
           }
         }
       }
