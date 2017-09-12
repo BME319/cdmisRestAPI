@@ -13,7 +13,7 @@ var Team = require('../models/team')
 var Communication = require('../models/communication')
 var Counselautochangestatus = require('../models/counselautochangestatus')
 var webEntry = require('../settings').webEntry
-var request = require('request'),
+var request = require('request')
 var commonFunc = require('../middlewares/commonFunc')
 
 // 获取医生ID对象，并添加自动转发标记 2017-07-15 GY
