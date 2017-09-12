@@ -1107,7 +1107,7 @@ module.exports = function (app, webEntry, acl) {
    *     tags:
    *     - Alluser
    *     summary: 绑定微信账号
-   *     operationId: setMessageOpenId
+   *     operationId: setUnionId
    *     produces:
    *     - "application/json"
    *     parameters:
@@ -1178,7 +1178,7 @@ module.exports = function (app, webEntry, acl) {
    *        description: Server internal error
    */
   // 写入用户openId 权限 医生/患者
-  app.post(version + '/alluser/openId', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
+  app.post(version + '/alluser/openId', alluserCtrl.checkAlluser, alluserCtrl.setMessageOpenId)
   /**
    * @swagger
    * /alluser/openId:
