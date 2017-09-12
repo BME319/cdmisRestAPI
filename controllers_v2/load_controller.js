@@ -14,7 +14,12 @@ exports.uploadphoto = function () {
       if (type === null || type === undefined) {
         type = ''
       }
-      cb(null, type + file.originalname)
+      let rename = req.body.rename || null
+      if (rename) {
+        cb(null, type + file.originalname + '-' + Date.now())
+      } else {
+        cb(null, type + file.originalname)
+      }
     }
   })
   var upload = multer({ storage: storage })
@@ -30,6 +35,10 @@ exports.upload = function (req, res) {
     type = ''
   }
   var pathResized = file.destination + '/resized' + type + file.originalname
+  let rename = req.body.rename || null 
+  if (rename) {
+    pathResized = pathResized + '-' + Date.now()
+  }
  // console.log(path_resized)
 
   images(path)                     // Load image from file
