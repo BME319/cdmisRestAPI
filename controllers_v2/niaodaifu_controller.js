@@ -22,7 +22,7 @@ exports.getLoginParam = function (req, res) {
     appsecret = config.niaodaifuDevConfig.Android.appSecret
   } else if (client === 'iOS') {
     appkey = config.niaodaifuDevConfig.iOS.appid
-    appsecret = config.niaodaifuDevConfig.Android.appSecret
+    appsecret = config.niaodaifuDevConfig.iOS.appSecret
   } else {
     return res.status(403).send('client输入不正确')
   }
