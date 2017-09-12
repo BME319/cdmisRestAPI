@@ -21,14 +21,17 @@ exports.setServiceSchedule = function (req, res, next) {
   if (day === null || time === null || total === null || place === null) {
     return res.status(412).json({results: '请输入day, time, total, place'})
   }
+  if (Number(total) <= 0) {
+    return res.status(412).json({results: '请调用"删除排班"或"设置面诊停诊"的方法'})
+  }
   let query = {userId: req.session.userId, serviceSchedules: {$elemMatch: {$and: [{day: day}, {time: time}]}}}
-  let upObj = {}
   Alluser.getOne(query, function (err, item) {
+    let upObj = {}
+    let opts = {new: true, runValidators: true, setDefaultsOnInsert: true}
     if (err) {
       return res.status(500).send(err)
     } else if (item === null) { // 排班不存在，添加排班
-      // return res.status(404).json({results: '找不到对象'})
-      query = {userId: req.session.userId}
+      query = {userId: req.session.userId, role: 'doctor'}
       upObj = {
         $push: {
           serviceSchedules: {
@@ -47,16 +50,16 @@ exports.setServiceSchedule = function (req, res, next) {
         }
       }
     }
-    Alluser.update(query, upObj, function (err, upItem) {
+    Alluser.updateOne(query, upObj, function (err, upItem) {
       if (err) {
         return res.status(500).send(err)
-      } else if (upItem.n === 0) {
+      } else if (upItem === null) {
         return res.status(404).json({results: '找不到对象'})
       } else {
         // return res.status(201).json({results: upItem})
         next()
       }
-    })
+    }, opts)
   })
 }
 
@@ -70,12 +73,12 @@ exports.deleteServiceSchedule = function (req, res, next) {
     return res.status(412).json({results: '请输入day, time'})
   }
   let query = {userId: req.session.userId, serviceSchedules: {$elemMatch: {$and: [{day: day}, {time: time}]}}}
-  let upObj = {}
   Alluser.getOne(query, function (err, item) {
+    let upObj = {}
+    let opts = {new: true, runValidators: true, setDefaultsOnInsert: true}
     if (err) {
       return res.status(500).send(err)
-    } else if (item === null) { // 排班不存在，添加排班
-      // return res.status(404).json({results: '找不到对象'})
+    } else if (item === null) { // 排班不存在，设置面诊总量为零
       query = {userId: req.session.userId}
       upObj = {
         $push: {
@@ -86,31 +89,33 @@ exports.deleteServiceSchedule = function (req, res, next) {
           }
         }
       }
-    } else { // 排班存在，更新排班
+    } else { // 排班存在，更新面诊总量为零
       upObj = {
         $set: {
           'serviceSchedules.$.total': 0
         }
       }
     }
-    Alluser.update(query, upObj, function (err, upItem) {
+    Alluser.updateOne(query, upObj, function (err, upItem) {
       if (err) {
         return res.status(500).send(err)
-      } else if (upItem.n === 0) {
+      } else if (upItem === null) {
         return res.status(404).json({results: '找不到对象'})
+      // } else if (item === null) {
+      //   return res.json({msg: '面诊排班删除成功', code: 0})
       } else {
         // return res.status(201).json({results: upItem})
         req.body.deleteFlag = 1
         next()
       }
-    })
+    }, opts)
   })
 }
 
 // YQC 2017-07-28
 exports.getDaysToUpdate = function (req, res, next) {
   let day = req.body.day || null
-  let today = new Date(new Date().toDateString())
+  let now = new Date()
   let nextDayNo
   switch (day) {
     case 'Mon':
@@ -137,19 +142,24 @@ exports.getDaysToUpdate = function (req, res, next) {
     default:
       return res.json({message: 'Wrong Input'})
   }
-  let nextModDay = new Date(today)
-  if (today.getDay() > nextDayNo) {
-    nextModDay.setDate(nextModDay.getDate() + 7 - today.getDay() + nextDayNo)
+  let nextModDay = new Date(now)
+  if (now.getDay() > nextDayNo) {
+    nextModDay.setDate(nextModDay.getDate() + 7 - now.getDay() + nextDayNo)
   } else {
-    nextModDay.setDate(nextModDay.getDate() - today.getDay() + nextDayNo)
+    nextModDay.setDate(nextModDay.getDate() - now.getDay() + nextDayNo)
   }
+  nextModDay = new Date(nextModDay.getFullYear(), nextModDay.getMonth(), nextModDay.getDate(), '00', '00', '00')
+  // console.log(nextModDay)
 
-  let nextNextModDay = new Date(today)
-  if (today.getDay() > nextDayNo) {
-    nextNextModDay.setDate(nextNextModDay.getDate() + 14 - today.getDay() + nextDayNo)
+  let nextNextModDay = new Date(now)
+  if (now.getDay() > nextDayNo) {
+    nextNextModDay.setDate(nextNextModDay.getDate() + 14 - now.getDay() + nextDayNo)
   } else {
-    nextNextModDay.setDate(nextNextModDay.getDate() + 7 - today.getDay() + nextDayNo)
+    nextNextModDay.setDate(nextNextModDay.getDate() + 7 - now.getDay() + nextDayNo)
   }
+  nextNextModDay = new Date(nextNextModDay.getFullYear(), nextNextModDay.getMonth(), nextNextModDay.getDate(), '00', '00', '00')
+  // console.log(nextNextModDay)
+
   req.body.nmd = nextModDay
   req.body.nnmd = nextNextModDay
   let query = {userId: req.session.userId, role: 'doctor'}
@@ -182,16 +192,19 @@ exports.updateAvailablePD1 = function (req, res, next) {
   let queryD1 = {userId: req.session.userId, availablePDs: {$elemMatch: {$and: [{availableDay: nextModDay}, {availableTime: time}]}}}
   let upObjD1
   if (req.body.deleteFlag) {
+    total = 0
     upObjD1 = {
       $set: {
-        'availablePDs.$.total': 0
+        'availablePDs.$.total': 0,
+        'availablePDs.$.count': 0
       }
     }
   } else {
     upObjD1 = {
       $set: {
         'availablePDs.$.total': total,
-        'availablePDs.$.place': place
+        'availablePDs.$.place': place,
+        'availablePDs.$.count': 0
       }
     }
     if (req.body.nextSuspend) {
@@ -221,12 +234,12 @@ exports.updateAvailablePD1 = function (req, res, next) {
         if (err) {
           return res.status(500).send(err)
         } else {
-          console.log('OK-11')
+          // console.log('OK-11')
           next()
         }
       })
     } else {
-      console.log('OK-1')
+      // console.log('OK-1')
       next()
     }
   })
@@ -240,16 +253,19 @@ exports.updateAvailablePD2 = function (req, res, next) {
   let queryD2 = {userId: req.session.userId, availablePDs: {$elemMatch: {$and: [{availableDay: nextNextModDay}, {availableTime: time}]}}}
   let upObjD2
   if (req.body.deleteFlag) {
+    total = 0
     upObjD2 = {
       $set: {
-        'availablePDs.$.total': 0
+        'availablePDs.$.total': 0,
+        'availablePDs.$.count': 0
       }
     }
   } else {
     upObjD2 = {
       $set: {
         'availablePDs.$.total': total,
-        'availablePDs.$.place': place
+        'availablePDs.$.place': place,
+        'availablePDs.$.count': 0
       }
     }
     if (req.body.nextNextSuspend) {
@@ -279,7 +295,7 @@ exports.updateAvailablePD2 = function (req, res, next) {
         if (err) {
           return res.status(500).send(err)
         } else {
-          console.log('OK-21')
+          // console.log('OK-21')
           if (req.body.deleteFlag) {
             next()
           } else {
@@ -288,7 +304,7 @@ exports.updateAvailablePD2 = function (req, res, next) {
         }
       })
     } else {
-      console.log('OK-2')
+      // console.log('OK-2')
       if (req.body.deleteFlag) {
         next()
       } else {
@@ -477,23 +493,29 @@ exports.cancelBookedPds = function (req, res) {
                 return res.status(500).send(err)
               } else {
                 let orderNo = itemO.orderNo
-                request({ // 调用微信退款接口
-                  url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
-                  method: 'POST',
-                  // body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
-                  body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
-                  json: true
-                }, function (err, response) {
-                  if (err) {
-                    return res.status(500).send(err)
-                  } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
-                    // return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
-                    console.log('用户"' + itemO.patientName + '"退款成功')
-                  } else {
-                    // return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
-                    console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
-                  }
-                })
+                let money = itemO.money || null
+                if (Number(money) !== 0) {
+                  request({ // 调用微信退款接口
+                    url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
+                    method: 'POST',
+                    body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
+                    json: true
+                  }, function (err, response) {
+                    if (err) {
+                      return res.status(500).send(err)
+                    } else if ((response.body.results || null) === null) {
+                      console.log('微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                    } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
+                      // return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
+                      console.log('用户"' + itemO.patientName + '"退款成功')
+                    } else {
+                      // return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
+                      console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                    }
+                  })
+                } else {
+                  console.log('用户"' + itemO.patientName + '"面诊取消成功')
+                }
               }
             })
           }
@@ -677,14 +699,19 @@ exports.confirmPD = function (req, res, next) {
 // 返回：personalDiag.code, endTime
 exports.updatePDCapacityDown = function (req, res, next) {
   let doctorId = req.body.doctorId || null
-  let today = new Date(new Date().toDateString())
-  let bookingDay = new Date(new Date(req.body.day).toDateString()) || null
+  let today = new Date().toLocaleDateString()
+  let bookingDay = req.body.day || null
   let bookingTime = req.body.time || null
-  if (doctorId === null || bookingDay === null || bookingTime === null || bookingDay < today) {
+  if (doctorId === null || bookingDay === null || bookingTime === null) {
     return res.json({results: '请检查doctorId,day,time输入'})
+  } else {
+    bookingDay = new Date(req.body.day).toLocaleDateString()
+    if (bookingDay < today) {
+      return res.json({results: '请检查day输入正确'})
+    }
   }
 
-  let queryD = {userId: doctorId, availablePDs: {$elemMatch: {$and: [{availableDay: bookingDay}, {availableTime: bookingTime}, {suspendFlag: 0}]}}}
+  let queryD = {userId: doctorId, availablePDs: {$elemMatch: {$and: [{availableDay: new Date(bookingDay)}, {availableTime: bookingTime}, {suspendFlag: 0}]}}}
   let fieldsD = {_id: 0, availablePDs: 1}
   Alluser.getOne(queryD, function (err, itemD) {
     if (err) {
@@ -695,33 +722,34 @@ exports.updatePDCapacityDown = function (req, res, next) {
       // return res.send(itemD)
       let availablePDsList = itemD.availablePDs || []
       let availablePD = null
-      for (let i = 0; i < availablePDsList.length; i++) {
-        if (String(availablePDsList[i].availableDay) === String(bookingDay) && String(availablePDsList[i].availableTime) === String(bookingTime)) {
+      for (let i = 0; i < availablePDsList.length; i++) { // 取出该时段面诊信息
+        if (new Date(availablePDsList[i].availableDay).toDateString() === new Date(bookingDay).toDateString() && String(availablePDsList[i].availableTime) === String(bookingTime)) {
           availablePD = availablePDsList[i]
           break
         }
       }
-      let count = availablePD.count || 0
-      let total = availablePD.total || 0
+
+      let count = Number(availablePD.count || null)
+      let total = Number(availablePD.total || null)
       req.body.place = availablePD.place
       if (count < total) { // 存在余量，可预约面诊
         let upDoc = {
-          $set: {
-            'availablePDs.$.count': count + 1
+          $inc: {
+            'availablePDs.$.count': 1
           }
         }
         Alluser.update(queryD, upDoc, function (err, upDoctor) { // 占个号
           if (err) {
             return res.status(500).send(err)
-          } else if (upDoctor.nModified === 0) {
-            return res.json({results: '面诊数量未更新成功，请检查输入'})
-          } else if (upDoctor.nModified !== 0) {
+          } else if (upDoctor.nModified !== 1) {
+            return res.json({results: '面诊数量未更新成功，请检查输入', code: 1})
+          } else if (upDoctor.nModified === 1) {
             // return res.json({results: '面诊数量更新成功'})
             next()
           }
         })
       } else { // 可预约面诊数量为零
-        return res.json({results: '该时段预约已满，请更换预约时间'})
+        return res.json({results: '该时段预约已满，请更换预约时间', code: 1})
       }
     }
   }, fieldsD)
@@ -730,11 +758,11 @@ exports.updatePDCapacityDown = function (req, res, next) {
 exports.newPersonalDiag = function (req, res, next) {
   let doctorObjectId = req.body.doctorObject._id
   let patientObjectId = req.body.patientObject._id
-  let bookingDay = new Date(new Date(req.body.day).toDateString())
+  let bookingDay = new Date(req.body.day).toLocaleDateString()
   let bookingTime = req.body.time
   let place = req.body.place
 
-  let queryPD = {doctorId: doctorObjectId, patientId: patientObjectId, bookingDay: bookingDay, bookingTime: bookingTime, status: 0}
+  let queryPD = {doctorId: doctorObjectId, patientId: patientObjectId, bookingDay: new Date(bookingDay), bookingTime: bookingTime, status: 0}
   PersonalDiag.getOne(queryPD, function (err, itemPD) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -753,7 +781,7 @@ exports.newPersonalDiag = function (req, res, next) {
         diagId: req.newId,
         doctorId: doctorObjectId,
         patientId: patientObjectId,
-        bookingDay: bookingDay,
+        bookingDay: new Date(bookingDay),
         bookingTime: bookingTime,
         place: place,
         code: code,
@@ -867,7 +895,7 @@ exports.sortAndTagPDs = function (req, res) {
     } else if (itemsPD.length !== 0) {
       for (let i = 0; i < itemsPD.length; i++) {
         for (let k = 0; k < returns.length; k++) {
-          if (String(itemsPD[i].bookingDay) === String(new Date(new Date(returns[k].availableDay).toDateString())) && itemsPD[i].bookingTime === returns[k].availableTime) {
+          if (new Date(itemsPD[i].bookingDay).toDateString() === new Date(returns[k].availableDay).toDateString() && String(itemsPD[i].bookingTime) === String(returns[k].availableTime)) {
             returns[k]['diagId'] = itemsPD[i].diagId
           }
         }
@@ -942,9 +970,8 @@ exports.getMyPDs = function (req, res) {
 // 患者取消预约
 exports.cancelMyPD = function (req, res, next) {
   let diagId = req.body.diagId || null
-  let appRole = req.body.appRole || null
-  if (diagId === null || appRole === null) {
-    return res.status(412).json({msg: 'Please Check Input of diagId, appRole', code: 1})
+  if (diagId === null) {
+    return res.status(412).json({msg: 'Please Check Input of diagId', code: 1})
   }
   let query = {diagId: diagId}
   PersonalDiag.getOne(query, function (err, item) {
@@ -988,7 +1015,6 @@ exports.updatePDCapacityUp = function (req, res) {
   let doctorObjectId = req.body.PDInfo.doctorId
   let bookingDay = req.body.PDInfo.bookingDay
   let bookingTime = req.body.PDInfo.bookingTime
-  // let appRole = req.body.appRole || null
 
   let queryD = {_id: doctorObjectId, availablePDs: {$elemMatch: {$and: [{availableDay: bookingDay}, {availableTime: bookingTime}]}}}
   let upDoc = {
@@ -1012,21 +1038,27 @@ exports.updatePDCapacityUp = function (req, res) {
           return res.status(500).send(err)
         } else {
           let orderNo = itemO.orderNo
-          request({ // 调用微信退款接口
-            url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/wechat/refund',
-            method: 'POST',
-            // body: {'role': appRole, 'orderNo': orderNo, 'token': req.body.token},
-            body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
-            json: true
-          }, function (err, response) {
-            if (err) {
-              return res.status(500).send(err)
-            } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
-              return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
-            } else {
-              return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
-            }
-          })
+          let money = itemO.money || null
+          if (Number(money) !== 0) {
+            request({ // 调用微信退款接口
+              url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
+              method: 'POST',
+              body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
+              json: true
+            }, function (err, response) {
+              if (err) {
+                return res.status(500).send(err)
+              } else if ((response.body.results || null) === null) {
+                return res.json({msg: '取消成功，微信退款接口调用失败，请联系管理员', data: req.body.PDInfo, code: 1})
+              } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
+                return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
+              } else {
+                return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
+              }
+            })
+          } else {
+            return res.json({msg: '取消成功', data: req.body.PDInfo, code: 0})
+          }
         }
       })
     }
@@ -1145,3 +1177,56 @@ exports.autoOverduePD = function (req, res) {
     }
   })
 }
+
+/**
+人工处理
+*/
+// 获取需要人工处理退款的面诊列表
+exports.manualRefundList = function (req, res) {
+  let status = req.query.status || null
+  let query = {status: status}
+  if (status !== null) {
+    status = Number(status)
+    if (status !== 5 && status !== 6) {
+      return res.json({msg: '请检查status输入', code: 1})
+    } else {
+      query = {status: status}
+    }
+  } else {
+    query = {$or: [{status: 5}, {status: 6}]}
+  }
+
+  PersonalDiag.getSome(query, function (err, items) {
+    if (err) {
+      return res.status(500).send(err)
+    } else {
+      let listPD = []
+      for (let item in items) {
+        listPD.push(items[item]._id)
+      }
+      let queryO = {perDiagObject: {$in: listPD}}
+      let opts = ''
+      let fields = {_id: 0, orderNo: 1, money: 1, paystatus: 1}
+      let populate = {
+        path: 'perDiagObject',
+        select: {_id: 0, code: 0},
+        populate: [
+          {path: 'patientId', select: {'_id': 0, 'name': 1, 'phoneNo': 1, 'gender': 1}},
+          {path: 'doctorId', select: {'_id': 0, 'name': 1, 'phoneNo': 1, 'gender': 1}}
+        ]
+      }
+      Order.getSome(queryO, function (err, itemsO) {
+        if (err) {
+          return res.status(500).send(err)
+        } else {
+          return res.json({data: itemsO, code: 0})
+        }
+      }, opts, fields, populate)
+    }
+  })
+}
+
+// // 人工处理面诊退款
+// exports.manualRefundList = function (req, res) {
+
+// }

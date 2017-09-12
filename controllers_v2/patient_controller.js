@@ -81,7 +81,50 @@ exports.getPatientDetail = function (req, res) {
         } else {
           patientWeight = vitalitems[0].data[vitalitems[0].data.length - 1].value
         }
-        return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis})
+        if (req.session.role === 'doctor') {
+          let queryDPR = {doctorId: req.session._id}
+          DpRelation.getOne(queryDPR, function(err, dpitem) {
+            if (err) {
+              return res.status(500).send(err)
+            } else if (dpitem === null) {
+              return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'none'})
+            } else {
+              let patientFlag = 0
+              let patientChargeFlag = 0
+              if (dpitem.patients) {
+                if (dpitem.patients.length) {
+                  for (let i = 0; i < dpitem.patients.length; i++) {
+                    if (JSON.stringify(dpitem.patients[i].patientId) === JSON.stringify(item._id)) {
+                      patientFlag = 1
+                      break
+                    }
+                  }
+                }
+              }
+              if (dpitem.patientsInCharge) {
+                if (dpitem.patientsInCharge.length) {
+                  for (let i = 0; i < dpitem.patientsInCharge.length; i++) {
+                    if (JSON.stringify(dpitem.patientsInCharge[i].patientId) == JSON.stringify(item._id)) {
+                      patientChargeFlag = 1
+                      break
+                    }
+                  }
+                }
+              }
+              if (!patientFlag && !patientChargeFlag) {
+                return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'none'})
+              } else if (patientChargeFlag) {
+                return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'charge'})
+              } else if (patientFlag && !patientChargeFlag) {
+                return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'follow'})
+              }else {
+                return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'error'})
+              }
+            }
+          })
+        } else {
+          return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis})
+        }        
       }, optsWeight)
     }
       // res.json({results: item});
@@ -179,10 +222,10 @@ exports.getDoctorLists = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/getDoctorLists' + _Url
+  var nexturl = webEntry.domain + '/api/v2/patient/getDoctorLists' + _Url
 
   if (req.query.doctorId !== null && req.query.doctorId !== undefined && req.query.doctorId !== '') {
-    query = {userId: req.query.doctorId, role: 'doctor'}
+    query = {userId: req.query.doctorId, role: 'doctor', reviewStatus: 1}
     option = ''
     fields = docInfoForPat
   }
@@ -280,7 +323,7 @@ exports.getMyFavoriteDoctors = function (req, res) {
     _Url = _Url.substr(0, _Url.length - 1)
   }
 
-  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/patient/myFavoriteDoctors' + _Url
+  let nexturl = webEntry.domain + '/api/v2/patient/myFavoriteDoctors' + _Url
   Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
@@ -837,7 +880,7 @@ exports.bindingFavoriteDoctor = function (req, res, next) {
             return res.status(500).send(err)
           }
           let favoriteDoctorsList = itemP.doctors
-          console.log(favoriteDoctorsList)
+          // console.log(favoriteDoctorsList)
           for (let i = 0; i < favoriteDoctorsList.length; i++) {
             if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
               return res.json({result: '已关注该医生!'})
@@ -874,7 +917,7 @@ exports.bindingFavoriteDoctor = function (req, res, next) {
             return res.status(500).send(err)
           }
           let favoriteDoctorsList = itemP.doctors
-          console.log(favoriteDoctorsList)
+          // console.log(favoriteDoctorsList)
           for (let i = 0; i < favoriteDoctorsList.length; i++) {
             if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
               return res.json({result: '已关注该医生!'})
@@ -1070,7 +1113,7 @@ exports.wechatPhotoUrl = function (req, res) {
   if (req.query.wechatPhotoUrl === null || req.query.wechatPhotoUrl === '' || req.query.wechatPhotoUrl === undefined) {
     return res.json({results: '请填写wechatPhotoUrl'})
   }
-  let query = {userId: req.session.userId}
+  let query = {userId: req.query.patientId}
   let newPhotoUrl = req.query.wechatPhotoUrl
   Alluser.getOne(query, function (err, item) {
     if (err) {

@@ -1,5 +1,7 @@
 
-var dbUrl = '121.43.107.106:28000/cdmis'
+// var dbUrl = '121.43.107.106:28000/cdmis'
+// var dbUrl = 'localhost:27018/cdmis' // 本地代码调试
+var dbUrl = 'localhost:28000/cdmis' // 服务器代码调试
 print(dbUrl)
 db = connect(dbUrl)
 db.auth('rest', 'zjubme319')
@@ -7,9 +9,9 @@ db.auth('rest', 'zjubme319')
 var query = {'userId': 'U201701241752'}
 var fields = ''
 var user = db.allusers.find(query, fields).toArray()
-// if (user.length === 0) {
-//   return 0
-// }
+if (user.length === 0) {
+  printjson({'result': 'delete_fail, alluser do not exist'})
+}
 var userObjectId = user[0]._id
 var userId = user[0].userId
 var userOpenId = user[0].openId
@@ -86,7 +88,7 @@ if (userRole.indexOf('patient') !== -1) {
   for (let i = 0; i < myDoctor.length; i++) {
     query = {'doctorId': myDoctor[i].doctorId}
     let upObj = {
-      $pullAll: {
+      $pull: {
         patientsInCharge: {
           patientId: userObjectId
         }
@@ -246,7 +248,7 @@ if (userRole.indexOf('doctor') !== -1) {
     'hospital': workUnit
   }
   upObj = {
-    $pull: {  // pull不知道是否可以同时删除多个数组中的元素？
+    $pull: {
       'portleader': userObjectId,
       'doctors': userObjectId,
       'departLeader': userObjectId
@@ -272,7 +274,7 @@ if (userRole.indexOf('doctor') !== -1) {
     ]
   }
   upObj = {
-    $pullAll: {
+    $pull: {
       doctorReport: {
         'doctorId': userObjectId
       },

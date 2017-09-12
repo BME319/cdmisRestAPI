@@ -27,7 +27,7 @@ exports.getReport = function (req, res) {
   } else {
     return res.json({result: '请填写type!'})
   }
-  console.log('type', type)
+  // console.log('type', type)
   if (modify !== null && modify !== '') {
     modify = Number(modify)
   } else {
@@ -42,15 +42,16 @@ exports.getReport = function (req, res) {
     let endTime
     if (type === 'week') {  // '周报'
       let currentTimeDay = currentTime.getDay()
-      startTimeTemp = new Date(currentTime - (currentTimeDay - 1) * 24 * 3600 * 1000)
+      if (currentTimeDay === 0) { currentTimeDay = 7 } // 周日从0置为7
+      startTimeTemp = new Date(currentTime.getTime() - (currentTimeDay - 1) * 24 * 3600 * 1000)
       startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')  // 本周一零点
       while (modify !== 0) {
         endTime = new Date(startTime)
-        startTime = new Date(endTime - 7 * 24 * 3600 * 1000)
+        startTime = new Date(endTime.getTime() - 7 * 24 * 3600 * 1000)
         modify++
       }
       req.startTime = new Date(startTime)
-      req.endTime = new Date(endTime)
+      req.endTime = new Date(endTime.getTime() - 24 * 3600 * 1000)
       let startTimeYear = startTime.getFullYear()
       let startTimeMonth = startTime.getMonth() + 1
       let monthWeek = getMonthWeek(startTime.getDate())
@@ -97,6 +98,7 @@ exports.getReport = function (req, res) {
     // console.log('endTime', endTime)
     // console.log('time', time)
     query['time'] = time
+    req.time = time
   } else {
     return res.json({result: '请填写time!'})
   }
@@ -118,7 +120,10 @@ exports.getReport = function (req, res) {
     // console.log('req.startTime', req.startTime)
     // console.log('req.endTime', req.endTime)
     if (item === null) {
-      return res.json({results: '不存在该段时间的报告!'})
+      let startTime = req.startTime
+      let endTime = req.endTime
+      let time = req.time
+      return res.json({results: '不存在该段时间的报告!', startTime, endTime, time})
     } else {
       let doctorReport = ''
       let doctorComment = ''
@@ -322,8 +327,8 @@ exports.updateReport = function (req, res) {
     if (recommendValue14 !== -1) {
       upData['recommendValue14'] = recommendValue14
     }
-    console.log(query)
-    console.log(upData)
+    // console.log(query)
+    // console.log(upData)
     Report.updateOne(query, upData, function (err, upmessage) {
       if (err) {
         if (res !== undefined) {
@@ -408,7 +413,8 @@ exports.getVitalSigns = function (req, res, next) {
       // let endTime = new Date(timeTemp)
       if (showType === 'week') {
         let currentTimeDay = currentTime.getDay()
-        startTimeTemp = new Date(currentTime - (currentTimeDay - 1) * 24 * 3600 * 1000)
+        if (currentTimeDay === 0) { currentTimeDay = 7 } // 周日从0置为7
+        startTimeTemp = new Date(currentTime.getTime() - (currentTimeDay - 1) * 24 * 3600 * 1000)
         startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')  // 本周一零点
         // console.log('startTime', startTime)
       }
@@ -417,7 +423,7 @@ exports.getVitalSigns = function (req, res, next) {
         startTimeTemp.setDate(1)
         // console.log(startTimeTemp.getDate())
         startTime = new Date(startTimeTemp.getFullYear(), startTimeTemp.getMonth(), startTimeTemp.getDate(), '00', '00', '00')
-        console.log('startTime', startTime)
+        // console.log('startTime', startTime)
       }
       if (showType === 'season') {
         let startTimeTempY = currentTime.getFullYear()

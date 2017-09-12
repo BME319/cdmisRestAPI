@@ -90,7 +90,7 @@ exports.listByStatus = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  let nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/review/reviewInfo' + _Url
+  let nexturl = webEntry.domain + '/api/v2/review/reviewInfo' + _Url
 
   Alluser.getSome(query, function (err, patients) {
     if (err) {
@@ -165,7 +165,7 @@ exports.saveLabtest = function (req, res) {
   if (req.body.insertTime === null || req.body.insertTime === '' || req.body.insertTime === undefined) {
     return res.status(412).json({results: '请输入图片上传时间insertTime'})
   }
-  console.log(req.session)
+  // console.log(req.session)
   if (req.session.role.indexOf('health') === -1) {
     return res.status(401).json({results: '没有权限'})
   }
@@ -260,7 +260,7 @@ exports.getLabtest = function (req, res) {
     query['time'] = new Date(req.query.time)
   }
   var opts = {}
-  console.log(req.query.sort)
+  // console.log(req.query.sort)
   if (req.query.sort !== null && req.query.sort !== '' && req.query.sort !== undefined) {
     if (req.query.sort === '-time') {
       opts['sort'] = '-time'

@@ -37,7 +37,7 @@ var reportSchema = new mongoose.Schema({
   recommendValue13: Number, // 建议值13
   recommendValue14: Number, // 建议值14
   averageBMI: Number, // 平均BMI
-  changeRatio: Number, // 增比 %
+  changeRatio: Number, // 体重增比 %
   changeRatioBMI: Number, // BMI增比 %
   drugRegimen: String, // 用药方案
   drugConcentration: Number, // 药物浓度
@@ -70,9 +70,9 @@ var reportSchema = new mongoose.Schema({
       content: String,
       insertTime: Date
     }
-  ]
+  ],
   // labTest: String, // 化验_周报月报文本
-  // labTestArray: [], // 化验_季报年报检查项目数组
+  labTestArray: [] // 化验_季报年报检查项目数组，存储各项目最大值、最小值
   // labTestNewItem: String // 化验_建议新增项目
 })
 

@@ -106,21 +106,21 @@ exports.getPatients = function (req, res) {
   let fields = {_id: 0, patientId: 1, followUps: 1, currentAgent: 1, status: 1}
   // 通过子表查询主表，定义主表查询路径及输出内容
   let populate = [
-    {path: 'patientId', select: {'_id': 0, 'userId': 1, 'name': 1, 'gender': 1, 'phoneNo': 1, 'VIP': 1, 'birthday': 1}},
+    {path: 'patientId', match: {}, select: {'_id': 0, 'userId': 1, 'name': 1, 'gender': 1, 'phoneNo': 1, 'VIP': 1, 'birthday': 1}},
     {path: 'currentAgent', select: {'_id': 0, 'name': 1, 'phoneNo': 1}},
     {path: 'followUps.agentId', select: {'_id': 0, 'name': 1, 'phoneNo': 1, 'userId': 1, 'gender': 1}}
   ]
   // 模糊搜索
   if (_name) {
     let nameReg = new RegExp(_name)
-    populate[0]['match'] = {'name': nameReg}
+    populate[0]['match']['name'] = nameReg
   }
   if (_gender) {
-    populate[0]['match'] = {'gender': _gender}
+    populate[0]['match']['gender'] = _gender
   }
   if (_phone) {
     let phoneReg = new RegExp(_phone)
-    populate[0]['match'] = {'phoneNo': phoneReg}
+    populate[0]['match']['phoneNo'] = phoneReg
   }
   if (_agentName) {
     let agentNameReg = new RegExp(_agentName)
@@ -141,7 +141,7 @@ exports.getPatients = function (req, res) {
           itemTemp['patientId'] = items[item].patientId
           itemTemp['currentAgent'] = items[item].currentAgent
           itemTemp['status'] = items[item].status
-          console.log(itemTemp)
+          // console.log(itemTemp)
           returns.push(itemTemp)
         }
       }
@@ -190,10 +190,6 @@ exports.getHistory = function (req, res) {
 
 // 保险主管获取专员列表 2017-08-08 YQC
 exports.getAgents = function (req, res, next) {
-  let iCO = req.body.insuranceCObject || null
-  if (iCO === null) {
-    return res.json({msg: '请检查输入', code: 1})
-  }
   let query = {role: 'insuranceA'}
   let _name = req.query.name || null
   if (_name) {
@@ -533,19 +529,20 @@ exports.reviewPolicy = function (req, res) {
   if (reviewResult === 'reject') {
     if (rejectReason === null) {
       return res.json({code: 1, msg: '请填写rejectReason!'})
-    }
-    upObj = {
-      $push: {
-        followUps: {
-          content: todayFormat + ' 由"' + insuranceCObject.name + '"审核保单，审核不通过，原因为"' + rejectReason + '"，请继续跟进',
-          time: now,
-          agentId: insuranceCObject._id,
-          type: 3
+    } else {
+      upObj = {
+        $push: {
+          followUps: {
+            content: todayFormat + ' 由"' + insuranceCObject.name + '"审核保单，审核不通过，原因为"' + rejectReason + '"，请继续跟进',
+            time: now,
+            agentId: insuranceCObject._id,
+            type: 3
+          }
+        },
+        $set: {
+          status: 4,
+          supervisor: insuranceCObject._id
         }
-      },
-      $set: {
-        status: 4,
-        supervisor: insuranceCObject._id
       }
     }
   } else if (reviewResult === 'consent') {
@@ -573,14 +570,12 @@ exports.reviewPolicy = function (req, res) {
     return res.json({code: 1, msg: '请检查reviewResult输入!'})
   }
 
-  Policy.update(query, upObj, function (err, upItem) {
+  Policy.updateOne(query, upObj, function (err, upItem) {
     if (err) {
       return res.status(500).send(err)
-    } else if (upItem.n === 0) {
+    } else if (upItem === null) {
       return res.json({code: 1, msg: '未找到该患者的待审核保单'})
-    } else if (upItem.nModified === 0) {
-      return res.json({code: 1, msg: '保单审核未成功'})
-    } else {
+    } else if (Number(upItem.status) === 3) {
       // return res.json({code: 0, msg: '保单审核成功'})
       let queryP = {_id: patientObject._id, role: 'patient'}
       let upObjP = {
@@ -599,8 +594,10 @@ exports.reviewPolicy = function (req, res) {
           return res.json({code: 0, msg: '保单审核成功'})
         }
       })
+    } else {
+      return res.json({code: 0, msg: '保单审核成功'})
     }
-  })
+  }, {new: true})
 }
 
 // 注销专员 2017-08-08 YQC

@@ -19,7 +19,8 @@ var replySchema = new mongoose.Schema({
       content: String,
       time: Date,
       status: Number,
-      at: String
+      at: String,
+      atName: String
     }
   ]
 })
@@ -95,7 +96,7 @@ Reply.aggregate = function (array, callback) {
       if (err) {
         return callback(err)
       }
-      console.log(results)
+      // console.log(results)
       callback(null, results)
     })
 }

@@ -5,7 +5,7 @@ var alluserSchema = new mongoose.Schema({
   userId: {type: String, unique: true},
   name: String,
   birthday: Date,
-  gender: Number,
+  gender: {type: Number, enum: [1, 2, 3, 4]}, // 1-male,2-female,3-others,4-unknown
   IDNo: String,
   openId: {type: String, unique: true, sparse: true}, // UnionId
   phoneNo: String,
@@ -13,11 +13,11 @@ var alluserSchema = new mongoose.Schema({
   agreement: String,
   photoUrl: String,
   role: [String],
-  loginStatus: Number,
+  loginStatus: {type: Number, enum: [0, 1]},
   lastLogin: Date,
   // TDCticket: String,  // 患者和医生的二维码分别存储
   // TDCurl: String,
-  invalidFlag: Number,
+  invalidFlag: {type: Number, enum: [0, 1]},
   MessageOpenId: {
     doctorWechat: String,
     patientWechat: String,
@@ -51,17 +51,17 @@ var alluserSchema = new mongoose.Schema({
   description: String,
   score: Number,
   // 1: 咨询 2: 问诊 3: 加急咨询 4: 主管医生 5: 面诊服务
-  // 状态： 默认1   1为开启，0为关闭
-  counselStatus1: {type: Number, default: 0},
-  counselStatus2: {type: Number, default: 0},
-  counselStatus3: {type: Number, default: 0},
-  counselStatus4: {type: Number, default: 0},
-  counselStatus5: {type: Number, default: 0},
+  // 状态： 默认0   1为开启，0为关闭
+  counselStatus1: {type: Number, default: 0, enum: [0, 1]},
+  counselStatus2: {type: Number, default: 0, enum: [0, 1]},
+  counselStatus3: {type: Number, default: 0, enum: [0, 1]},
+  counselStatus4: {type: Number, default: 0, enum: [0, 1]},
+  counselStatus5: {type: Number, default: 0, enum: [0, 1]},
   // 医生设置的面诊排班（模板）（医生设置）
   serviceSchedules: [
     {
       _id: 0,
-      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sta', 'Sun']},
+      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']},
       time: {type: String, enum: ['Morning', 'Afternoon']},
       total: Number, // 医生可以设置的某时段面诊总数
       place: String
@@ -94,7 +94,7 @@ var alluserSchema = new mongoose.Schema({
   count1: {type: Number, default: 0},
   count2: {type: Number, default: 0},
   // 是否自动转发及转发目标 0不自动转发，1自动转发
-  autoRelay: {type: Number, default: 0},
+  autoRelay: {type: Number, default: 0, enum: [0, 1]},
   relayTarget: [
     {
       _id: 0,
@@ -105,8 +105,9 @@ var alluserSchema = new mongoose.Schema({
   schedules: [
     {
       _id: 0,
-      day: String,
-      time: String
+      day: {type: String, enum: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']},
+      time: {type: String, enum: ['Morning', 'Afternoon']},
+      place: String
     }
   ],
   suspendTime: [
@@ -117,7 +118,7 @@ var alluserSchema = new mongoose.Schema({
     }
   ],
   // 状态定义：0未审核，1审核通过，2审核拒绝
-  reviewStatus: {type: Number, default: 0},
+  reviewStatus: {type: Number, default: 0, enum: [0, 1, 2]},
   reviewDate: Date,
   adminId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   reviewContent: String,
@@ -128,18 +129,23 @@ var alluserSchema = new mongoose.Schema({
   height: String,
   weight: String,
   occupation: String,
-  bloodType: Number,
+  bloodType: {type: Number, enum: [1, 2, 3, 4, 5]}, // 1-A,2-B,3-O,4-AB,5-others
   address: {
     nation: String,
     province: String,
     city: String
   },
-  class: String,
-  class_info: [String],
+  // 1 肾移植，2 ckd1-2期，3 ckd3-4期，4 ckd5期未透析，5 血透，6 腹透
+  class: {type: String, enum: ['class_1', 'class_2', 'class_3', 'class_4', 'class_5', 'class_6']},
+  // 意义详见表dicttypetwos
+  class_info: [{type: String, enum: ['stage_1', 'stage_2', 'stage_3', 'stage_4', 'stage_5', 'stage_6', 'stage_7', 'stage_8', 'stage_9', 'stage_10', 'stage_11']}],
   operationTime: Date,
-  VIP: {type: Number, default: 0},
+  VIP: {type: Number, default: 0, enum: [0, 1]},
   VIPStartTime: Date,
   VIPEndTime: Date,
+  // 入组相关
+  group: {type: Number, default: 0, enum: [0, 1]},
+  groupTime: Date,
   hypertension: Number,
   allergic: String,
   // 关注医生字段
@@ -148,7 +154,7 @@ var alluserSchema = new mongoose.Schema({
       _id: 0,
       doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
       firstTime: Date,
-      invalidFlag: Number
+      invalidFlag: {type: Number, default: 0, enum: [0, 1]}
     }
   ],
   // 主管医生字段 改用doctorsInCharge表
@@ -186,7 +192,7 @@ var alluserSchema = new mongoose.Schema({
   },
   // 健康专员录入时需要的字段，属于patient信息
   // 化验结果是否录入，0未录入，1已录入
-  labtestImportStatus: {type: Number},
+  labtestImportStatus: {type: Number, enum: [0, 1]},
   // 未录入相关
   // 最早的上传图片的时间
   earliestUploadTime: {type: Date},
@@ -303,7 +309,7 @@ Alluser.aggregate = function (array, callback) {
       if (err) {
         return callback(err)
       }
-      console.log(results)
+      // console.log(results)
       callback(null, results)
     })
 }

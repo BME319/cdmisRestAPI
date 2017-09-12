@@ -65,7 +65,7 @@ exports.getNo = function (setType) {
           }
           var query1 = {type: _numberingType, date: _KeyDate}
           // console.log(query1)
-          Numbering.updateOne(query1, {$inc: {number:1}}, function (err, item1) {
+          Numbering.updateOne(query1, {$inc: {number: 1}}, function (err, item1) {
             if (err) {
               return res.status(500).send(err.errmsg)
             }
@@ -97,7 +97,6 @@ exports.getNo = function (setType) {
             var _Ret = _Initial + _Date + _Seq
             req.newId = _Ret
             return next()
-
           }, {upsert: true})
         }
       })

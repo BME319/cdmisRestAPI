@@ -2,20 +2,24 @@ var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 var dictTypeTwoSchema = new Schema({
   category: {type: String, index: 1, required: true, unique: true},
-  contents: [{
-    _id: false,
-    type: {type: String},
-    typeName: {type: String},
-    details: [
-      {
-        _id: false,
-        code: String,
-        name: String,
-        inputCode: String,
-        description: String,
-        invalidFlag: Number}]
-  }]}
-)
+  contents: [
+    {
+      _id: false,
+      type: {type: String},
+      typeName: {type: String},
+      details: [
+        {
+          _id: false,
+          code: String,
+          name: String,
+          inputCode: String,
+          description: String,
+          invalidFlag: Number
+        }
+      ]
+    }
+  ]
+})
 
 var dictTypeTwoModel = mongoose.model('dictTypeTwo', dictTypeTwoSchema)
 

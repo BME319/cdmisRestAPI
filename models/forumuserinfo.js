@@ -2,8 +2,18 @@ var mongoose = require('mongoose')
 
 var forumuserinfoSchema = new mongoose.Schema({
   userId: String,
-  posts:[],
-  favorites:[]
+  posts: [
+    {
+      postId: String,
+      time: Date
+    }
+  ],
+  favorites: [
+    {
+      postId: String,
+      time: Date
+    }
+  ]
 })
 
 var forumuserinfoModel = mongoose.model('forumuserinfo', forumuserinfoSchema)
@@ -77,7 +87,7 @@ Forumuserinfo.aggregate = function (array, callback) {
       if (err) {
         return callback(err)
       }
-      console.log(results)
+      // console.log(results)
       callback(null, results)
     })
 }

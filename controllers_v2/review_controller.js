@@ -47,9 +47,15 @@ exports.postReviewInfo = function (acl) {
             reviewDate: reviewDate,
             adminId: adminId
           }
-          if (req.body.reviewContent !== null && req.body.reviewContent !== '' && req.body.reviewContent !== undefined) {
-            upObj['reviewContent'] = req.body.reviewContent
+          let reviewContent = req.body.reviewContent || null
+          if (status === 2) {
+            if (reviewContent === null) {
+              return res.status(412).json({results: '请填写reviewContent'})
+            } else {
+              upObj['reviewContent'] = reviewContent
+            }
           }
+
           var opts = {
             new: true,
             fields: {
@@ -108,6 +114,7 @@ exports.getCertificate = function (req, res) {
     'name': 1,
     'gender': 1,
     'certificatePhotoUrl': 1,
+    'practisingPhotoUrl': 1,
     'description': 1,
     'major': 1,
     'role': 1,
@@ -115,7 +122,8 @@ exports.getCertificate = function (req, res) {
     'city': 1,
     'workUnit': 1,
     'department': 1,
-    'title': 1
+    'title': 1,
+    'phoneNo': 1
   }
   Alluser.getOne(query, function (err, item) {
     if (err) {
@@ -208,7 +216,7 @@ exports.getReviewInfo = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/review/reviewInfo' + _Url
+  var nexturl = webEntry.domain + '/api/v2/review/reviewInfo' + _Url
 
   Alluser.getSome(query, function (err, items) {
     if (err) {

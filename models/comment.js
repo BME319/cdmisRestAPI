@@ -95,8 +95,19 @@ Comment.aggregate = function (array, callback) {
       if (err) {
         return callback(err)
       }
-      console.log(results)
+      // console.log(results)
       callback(null, results)
+    })
+}
+
+Comment.count = function (query, callback) {
+  CommentModel
+    .count(query)
+    .exec(function (err, num) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, num)
     })
 }
 

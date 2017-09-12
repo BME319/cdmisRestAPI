@@ -58,7 +58,7 @@ DepartmentDaily.getSome = function (query, fields, callback, populate, opts) {
       if (err) {
         return callback(err)
       }
-      console.log(departmentDailyInfos)
+      // console.log(departmentDailyInfos)
       callback(null, departmentDailyInfos)
     })
 }
@@ -121,7 +121,7 @@ DepartmentDaily.aggregate = function (array, callback) {
       if (err) {
         return callback(err)
       }
-      console.log(results)
+      // console.log(results)
       callback(null, results)
     })
 }

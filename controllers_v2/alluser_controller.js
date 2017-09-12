@@ -1,5 +1,6 @@
 var config = require('../config')
 var Alluser = require('../models/alluser')
+var DpRelation = require('../models/dpRelation')
 var OpenIdTmp = require('../models/openId')
 // var DictNumber = require('../models/dictNumber')
 // var Numbering = require('../models/numbering')
@@ -701,7 +702,8 @@ exports.register = function (acl) {
       password: _password,
       role: _role,
       userId: _userNo,
-      invalidFlag: 0
+      invalidFlag: 0,
+      creationTime: new Date()
     }
     var newAlluser = new Alluser(userData)
     newAlluser.save(function (err, Info) {
@@ -912,7 +914,7 @@ exports.checkBinding = function (req, res) {
             let _url = ''
             if (role === 'patient') {
               // binding doctor
-              _url = 'http://' + webEntry.domain + ':4060/api/v2/patient/favoriteDoctor' + '?token=' + req.query.token || req.body.token
+              _url = 'http://' + webEntry.domain + '/api/v2/patient/favoriteDoctor' + '?token=' + req.query.token || req.body.token
               jsondata = {
                 patientId: item.userId,
                 doctorId: item1.doctorUserId,
@@ -920,7 +922,7 @@ exports.checkBinding = function (req, res) {
               }
             } else if (role === 'nurse') {
               // binding patient
-              _url = 'http://' + webEntry.domain + ':4060/api/v2/nurse/bindingPatient' + '?token=' + req.query.token || req.body.token
+              _url = 'http://' + webEntry.domain + '/api/v2/nurse/bindingPatient' + '?token=' + req.query.token || req.body.token
               jsondata = {
                 patientId: item1.doctorUserId,
                 nurseObjectId: item._id,
@@ -1057,7 +1059,8 @@ exports.login = function (req, res, next) {
                     // JSON.stringify(userPayload),
           var refreshtokenData = {
             refreshtoken: refreshToken,
-            userPayload: JSON.stringify(userPayload)
+            userPayload: JSON.stringify(userPayload), 
+            userId: user.userId
           }
                     // console.log(refreshtokenData);
 
@@ -1074,7 +1077,8 @@ exports.login = function (req, res, next) {
               PhotoUrl: item.photoUrl,
               mesg: 'login success!',
               token: token,
-              refreshToken: refreshToken
+              refreshToken: refreshToken,
+              reviewStatus: item.reviewStatus
             }
 
                         // 2017-06-07GY调试
@@ -1690,6 +1694,64 @@ exports.checkDoctor = function (req, res, next) {
   })
 }
 
+// 验证主管、关注患者 GY 2017-09-01
+exports.dprelation = function (type) {
+  return function (req, res, next) {
+    if (req.session.role === 'doctor') {
+      let query = {doctorId: req.session._id}
+      DpRelation.getOne(query, function (err, dpitem) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (dpitem === null) {
+          return res.status(401).send('与患者无任何联系没有操作权限')
+        } else {
+          let patientId = req.body.patientId || req.query.patientId || req.body.userId || req.query.userId
+          Alluser.getOne({userId: patientId}, function (err, item) {
+            if (err) {
+              return res.status(500).send(err)
+            } else if (item === null) {
+              return res.status(500).send('not_found!')
+            } else {
+              let patientFlag = 0
+              let patientChargeFlag = 0
+              if (dpitem.patients) {
+                if (dpitem.patients.length) {
+                  for (let i = 0; i < dpitem.patients.length; i++) {
+                    if (JSON.stringify(dpitem.patients[i].patientId) === JSON.stringify(item._id)) {
+                      patientFlag = 1
+                      break
+                    }
+                  }
+                }
+              }
+              if (dpitem.patientsInCharge) {
+                if (dpitem.patientsInCharge.length) {
+                  for (let i = 0; i < dpitem.patientsInCharge.length; i++) {
+                    if (JSON.stringify(dpitem.patientsInCharge[i].patientId) === JSON.stringify(item._id)) {
+                      patientChargeFlag = 1
+                      break
+                    }
+                  }
+                }
+              }
+              if ((type.indexOf('charge') + 1) && patientChargeFlag) {
+                next()
+              } else if ((type.indexOf('follow') + 1) && patientFlag) {
+                next()
+              } else {
+                return res.status(401).send('权限不足')
+              }
+            }
+          })
+        }
+      })
+    } else {
+      // 患者本身也有权限
+      next()
+    }
+  }
+}
+
 exports.getAlluserObject = function (req, res, next) {
   var userId = req.session.userId
   var query = {
@@ -1799,9 +1861,10 @@ exports.successMessage = function (req, res, next) {
       let json = evil(resdata)
       code = json.resp.respCode
       if (code === '000000') {
-        res.json({results: 0, mesg: 'Booking Success and Message Sent!'})
+        // res.json({results: 0, mesg: 'Booking Success and Message Sent!'})
+        console.log({results: 0, mesg: 'Booking Success and Message Sent!'})
       } else {
-        res.json({results: 1, mesg: {'ErrorCode': code}})
+        return res.json({results: 1, mesg: {'ErrorCode': code}})
       }
     })
   })

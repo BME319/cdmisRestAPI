@@ -3,6 +3,7 @@ var mongoose = require('mongoose')
 
 var refreshtokenSchema = new mongoose.Schema({
   refreshtoken: String,
+  userId:String,
   userPayload: String,
   createAt: {
     type: Date,
@@ -54,6 +55,14 @@ Refreshtoken.removeOne = function (query, callback, opts) {
       return callback(err)
     }
     callback(null, refreshtokenInfo)
+  })
+}
+
+Refreshtoken.remove = function (query, callback) {
+  refreshtokenModel
+  .remove(query)
+  .exec(function (err) {
+    callback(err)
   })
 }
 

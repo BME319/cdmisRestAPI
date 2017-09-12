@@ -633,7 +633,7 @@ exports.postCommunication = function (req, res) {
     if (msg.targetType === 'single') { // 点对点交流记录
           // console.log("111");
       request({
-        url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/new/news' + '?token=' + req.query.token || req.body.token,
+        url: 'http://' + webEntry.domain + '/api/v2/new/news' + '?token=' + req.query.token || req.body.token,
         method: 'POST',
         body: bodyGen(msg, communicationInfo['messageNo']),
         json: true
@@ -643,7 +643,7 @@ exports.postCommunication = function (req, res) {
       })
     } else { // team群发记录
       request({
-        url: 'http://' + webEntry.domain + ':' + webEntry.restPort + '/api/v2/new/teamNews' + '?token=' + req.query.token || req.body.token,
+        url: 'http://' + webEntry.domain + '/api/v2/new/teamNews' + '?token=' + req.query.token || req.body.token,
         method: 'POST',
         body: bodyGen(msg, communicationInfo['_id']),
         json: true
@@ -729,7 +729,7 @@ exports.getCommunication = function (req, res) {
     }
     _Url = _Url.substr(0, _Url.length - 1)
   }
-  var nexturl = webEntry.domain + ':' + webEntry.restPort + '/api/v2/communication/getCommunication' + _Url
+  var nexturl = webEntry.domain + '/api/v2/communication/getCommunication' + _Url
 
   if (messageType === 2) {
     var query = {receiver: id2}
@@ -764,7 +764,7 @@ exports.getCommunication = function (req, res) {
   // };
       query['newsType'] = newsType
     }
-    console.log(query)
+    // console.log(query)
 
     Communication.getSome(query, function (err, items) {
       if (err) {
@@ -964,26 +964,28 @@ exports.getMassTargets = function (req, res, next) {
         case 'FOLLOW':
           for (let i = 0; i < doctorItem.patients.length; i++) {
             if (doctorItem.patients[i].patientId !== null) {
-              targets[i] = doctorItem.patients[i].patientId
+              targets.push(doctorItem.patients[i].patientId)
             }
           }
           break
         case 'INCHARGE':
           for (let i = 0; i < doctorItem.patientsInCharge.length; i++) {
             if (doctorItem.patientsInCharge[i].patientId !== null) {
-              targets[i] = doctorItem.patientsInCharge[i].patientId
+              targets.push(doctorItem.patientsInCharge[i].patientId)
             }
           }
           break
         case 'ALL':
           for (let i = 0; i < doctorItem.patients.length; i++) {
-            if (doctorItem.patients[i].patientId !== null) {
-              targets[i] = doctorItem.patients[i].patientId
+            if (doctorItem.patients[i].patientId) {
+              targets.push(doctorItem.patients[i].patientId)
             }
           }
           for (let j = 0; j < doctorItem.patientsInCharge.length; j++) {
-            if (doctorItem.patientsInCharge[j].patientId !== null) {
-              targets[doctorItem.patients.length + j] = doctorItem.patientsInCharge[j].patientId
+            if (doctorItem.patientsInCharge[j].patientId) {
+              if (targets.indexOf(doctorItem.patientsInCharge[j].patientId) === -1) {
+                targets.push(doctorItem.patientsInCharge[j].patientId)
+              }
             }
           }
           break
@@ -1070,6 +1072,8 @@ exports.massCommunication = function (req, res, next) {
           type: 8
         },
         update: {
+          time: now, 
+          title: title, 
           description: description,
           readOrNot: 0,
           messageId: communicationDatas[i].messageId
