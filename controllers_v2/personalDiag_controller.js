@@ -440,20 +440,20 @@ exports.cancelBookedPds = function (req, res) {
       query = {
         doctorId: doctorObjectId,
         status: 0,
-        $or: [{bookingDay: req.body.nmd}, {bookingDay: req.body.nnmd}],
+        $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
         bookingTime: req.body.time
       }
     } else { // 排班取消时间紧迫
       query = {
         doctorId: doctorObjectId,
         status: 0,
-        bookingDay: req.body.nnmd,
+        bookingDay: new Date(req.body.nnmd),
         bookingTime: req.body.time
       }
       let queryPD = {
         doctorId: doctorObjectId,
         status: 0,
-        bookingDay: req.body.nmd,
+        bookingDay: new Date(req.body.nmd),
         bookingTime: req.body.time
       }
       PersonalDiag.update(queryPD, upObjPD, function (err, upItemsPD) { // 一天内排班取消人工处理
@@ -469,6 +469,12 @@ exports.cancelBookedPds = function (req, res) {
   }
 
   let upObj = {$set: {status: 4}}
+  let opts = ''
+  let fields = {_id: 1, doctorId: 1, patientId: 1, bookingDay: 1, bookingTime: 1}
+  let populate = [
+    {path: 'doctorId', select: {_id: 0, name: 1}},
+    {path: 'patientId', select: {_id: 0, phoneNo: 1}}
+  ]
   PersonalDiag.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
@@ -512,6 +518,33 @@ exports.cancelBookedPds = function (req, res) {
                       // return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
                       console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                     }
+                    if ((toRefund.patientId || null) !== null) {
+                      if ((toRefund.patientId.phoneNo || null) !== null) {
+                        request({ // 调用短信发送接口
+                          url: 'http://' + webEntry.domain + '/api/v2/services/message',
+                          method: 'POST',
+                          body: {
+                            'phoneNo': toRefund.patientId.phoneNo,
+                            'doctorName': toRefund.doctorId.name,
+                            'day': new Date(toRefund.bookingDay).toLocaleDateString(),
+                            'time': toRefund.bookingTime,
+                            'orderMoney': Number(money),
+                            'orderNo': orderNo,
+                            'token': req.body.token,
+                            'cancelFlag': 1
+                          },
+                          json: true
+                        }, function (err, response) {
+                          if (err) {
+                            return res.status(500).send(err)
+                          } else if (Number(response.body.results) === 0) {
+                            console.log('用户"' + itemO.patientName + '"短信发送成功')
+                          } else {
+                            console.log('用户"' + itemO.patientName + '"短信发送失败')
+                          }
+                        })
+                      }
+                    }
                   })
                 } else {
                   console.log('用户"' + itemO.patientName + '"面诊取消成功')
@@ -521,15 +554,15 @@ exports.cancelBookedPds = function (req, res) {
           }
           if (req.body.suspendFlag) {
             // console.log('停诊时间添加成功')
-            return res.json({result: '停诊时间添加成功'})
+            return res.json({result: '停诊时间添加成功', code: 0})
           } else {
             // console.log('面诊排班删除成功')
-            return res.json({result: '面诊排班删除成功'})
+            return res.json({result: '面诊排班删除成功', code: 0})
           }
         }
       }, {multi: true})
     }
-  })
+  }, opts, fields, populate)
 }
 
 // 删除面诊停诊时间 2017-07-15 GY
@@ -800,6 +833,7 @@ exports.newPersonalDiag = function (req, res, next) {
           req.body.type = 5
           req.body.code = code
           req.body.smsType = 5
+          req.body.successFlag = 1
           next()
         }
       })

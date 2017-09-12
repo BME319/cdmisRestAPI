@@ -5244,7 +5244,7 @@ module.exports = function (app, webEntry, acl) {
    *       200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, personalDiagCtrl.updatePDCapacityDown, personalDiagCtrl.newPersonalDiag, alluserCtrl.successMessage, orderCtrl.getOrderNo, orderCtrl.updateOrder)
+  app.post(version + '/services/personalDiagnosis', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), getNoMid.getNo(12), serviceCtrl.getSessionObject, serviceCtrl.getDoctorObject, personalDiagCtrl.updatePDCapacityDown, personalDiagCtrl.newPersonalDiag, alluserCtrl.serviceMessage, orderCtrl.getOrderNo, orderCtrl.updateOrder)
   // 患者端 取消面诊服务
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
@@ -5457,6 +5457,8 @@ module.exports = function (app, webEntry, acl) {
   // app.get(version + '/services/manualRefundList', personalDiagCtrl.manualRefundList)
   // 人工处理面诊退款
   // app.post(version + '/services/manualRefund', personalDiagCtrl.manualRefund)
+  // 服务相关短信测试
+  app.post(version + '/services/message', tokenManager.verifyToken(), aclChecking.Checking(acl, 2), alluserCtrl.serviceMessage)
 
   // PC端保险管理
   // 获取患者 权限insuranceC/insuranceA
