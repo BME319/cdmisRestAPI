@@ -56,7 +56,7 @@ exports.getPatientDetail = function (req, res) {
     }
     if (item == null) {
       return res.json({results: item})
-    } else if (item.name === undefined) {
+    } else if (item.IDNo === undefined) {
       return res.json({results: '没有填写个人信息'})
     } else {
       // 输出最新的诊断内容
