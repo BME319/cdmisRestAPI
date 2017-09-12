@@ -1,7 +1,6 @@
 var domain = require('domain')
 var fs = require('fs')
 var bunyan = require('bunyan')
-var commonFunc = require('../middlewares/commonFunc')
 
 var log = bunyan.createLogger({
   name: 'kidney',
@@ -32,7 +31,6 @@ var log = bunyan.createLogger({
 // domain来处理异常
 exports.error = function (req, res, next) {
   var d = domain.create()
-  log.info(req.method + ' ' + req.url)
   // 监听domain的错误事件
   d.on('error', function (err) {
     // logger.error(err)
@@ -44,7 +42,7 @@ exports.error = function (req, res, next) {
     // console.log(req)
     log.error('= ------------------------------------------------------------')
     log.error(err)
-    log.error(req.method + ' ' + req.url)
+    log.error(req.url)
     log.error(req.query || req.body)
     log.error(req.session)
     // log.error({
@@ -65,45 +63,4 @@ exports.error = function (req, res, next) {
   d.add(req)
   d.add(res)
   d.run(next)
-}
-
-exports.insertLog = function (req, res) {
-  var errStack = req.body.errStack || null
-  var method = req.body.method || null
-  var apiUrl = req.body.url || null
-  var args = req.body.args || null
-  var user = req.body.userId || null
-  var role = req.body.role || null
-  var ip = commonFunc.getClientIp(req)
-  var webState = req.body.webState
-  var userProxy = req.body.userProxy
-
-  // var data = 'method: ' + method + "\n"
-  // data = data + 'apiUrl: ' + apiUrl + '\n' + 'args: ' + args + '\n' + 'user: ' + user + '\n' + 'role: ' + role + '\n' + 'ip: ' + ip + '\n' + 'webState: ' + webState + '\n' + 'userProxy: ' + userProxy + '\n' + 'err: ' + errStack + '\n'
-
-  var data = {
-    method: method,
-    apiUrl: apiUrl,
-    args: args,
-    user: user,
-    role: role,
-    ip: ip,
-    webState: webState,
-    userProxy: userProxy,
-    time: new Date(),
-    err: errStack
-  }
-
-  fs.appendFile('./logs/log4front.json', JSON.stringify(data, null, 4), 'utf8', function (appendErr) {
-    if (appendErr) {
-      console.log(appendErr)
-    }
-    res.json({results: {msg: '日志记录成功', code: 0, data: ''}})
-  })
-
-    // log.error('= ------------------------------------------------------------')
-    // log.error(errStack)
-    // log.error(req.url)
-    // log.error(req.query || req.body)
-    // log.error(req.session)
 }
