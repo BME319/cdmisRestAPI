@@ -63,10 +63,10 @@ exports.getCounsels = function (req, res) {
   }
   // type和status可以为空
   if (_status != null) {
-    query['status'] = _status
+    query['status'] = Number(_status)
   }
   if (_type != null) {
-    query['type'] = _type
+    query['type'] = Number(_type)
   }
   // if(_name!=""&&_name!=undefined){
   //   query["patientId.name"]=_name;
@@ -94,10 +94,10 @@ exports.getCounsels = function (req, res) {
         if (_skip > 0) {
           _skip--
         } else {
-          if (_limit === '' || _limit === undefined) {
+          if (!_limit) {
             item1.push(item[i])
           } else {
-            if (_limit > 0) {
+            if (_limit) {
               item1.push(item[i])
               _limit--
             }
