@@ -440,20 +440,20 @@ exports.cancelBookedPds = function (req, res) {
       query = {
         doctorId: doctorObjectId,
         status: 0,
-        $or: [{bookingDay: req.body.nmd}, {bookingDay: req.body.nnmd}],
+        $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
         bookingTime: req.body.time
       }
     } else { // 排班取消时间紧迫
       query = {
         doctorId: doctorObjectId,
         status: 0,
-        bookingDay: req.body.nnmd,
+        bookingDay: new Date(req.body.nnmd),
         bookingTime: req.body.time
       }
       let queryPD = {
         doctorId: doctorObjectId,
         status: 0,
-        bookingDay: req.body.nmd,
+        bookingDay: new Date(req.body.nmd),
         bookingTime: req.body.time
       }
       PersonalDiag.update(queryPD, upObjPD, function (err, upItemsPD) { // 一天内排班取消人工处理
@@ -554,10 +554,10 @@ exports.cancelBookedPds = function (req, res) {
           }
           if (req.body.suspendFlag) {
             // console.log('停诊时间添加成功')
-            return res.json({result: '停诊时间添加成功'})
+            return res.json({result: '停诊时间添加成功', code: 0})
           } else {
             // console.log('面诊排班删除成功')
-            return res.json({result: '面诊排班删除成功'})
+            return res.json({result: '面诊排班删除成功', code: 0})
           }
         }
       }, {multi: true})
