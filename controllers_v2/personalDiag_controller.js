@@ -1070,7 +1070,7 @@ exports.updatePDCapacityUp = function (req, res) {
       Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
         if (err) {
           return res.status(500).send(err)
-        } else {
+        } else if (itemO !== null) {
           let orderNo = itemO.orderNo
           let money = itemO.money || null
           if (Number(money) !== 0) {
@@ -1093,6 +1093,8 @@ exports.updatePDCapacityUp = function (req, res) {
           } else {
             return res.json({msg: '取消成功', data: req.body.PDInfo, code: 0})
           }
+        } else {
+          return res.json({msg: '取消成功，退款失败，无法查询订单号', data: req.body.PDInfo, code: 0})
         }
       })
     }
