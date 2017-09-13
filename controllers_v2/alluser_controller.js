@@ -1826,9 +1826,9 @@ exports.serviceMessage = function (req, res, next) {
   let bookingTime = req.body.time || null
   let PDTime
   if (bookingTime === 'Morning') {
-    PDTime = bookingDay.getFullYear() + '-' + Number(bookingDay.getMonth() + 1) + '-' + bookingDay.getDate() + '上午'
+    PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日上午'
   } else if (bookingTime === 'Afternoon') {
-    PDTime = bookingDay.getFullYear() + '-' + Number(bookingDay.getMonth() + 1) + '-' + bookingDay.getDate() + '下午'
+    PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日下午'
   } else {
     return res.json({code: 1, msg: 'Wrong Input!'})
   }
