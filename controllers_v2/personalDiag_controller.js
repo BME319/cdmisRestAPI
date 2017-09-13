@@ -321,10 +321,8 @@ exports.setServiceSuspend = function (req, res, next) {
   let end = req.body.end || null
   let today = new Date(new Date().toDateString())
   let startOfStart = new Date(new Date(start).toDateString())
-  let endOfEnd = new Date(end)
-  endOfEnd.setDate(endOfEnd.getDate() + 1)
-  endOfEnd = new Date(endOfEnd.toDateString())
-  endOfEnd.setMilliseconds(endOfEnd.getMilliseconds() - 1)
+  let endOfEnd = new Date(new Date(end).toDateString())
+  endOfEnd.setMilliseconds(endOfEnd.getMilliseconds() + 999)
   let upObj = {}
   if (start === null || end === null) {
     return res.status(412).json({results: '请输入start, end'})
@@ -408,10 +406,8 @@ exports.cancelBookedPds = function (req, res) {
     let today = new Date(now.toDateString())
     let tomorrow = new Date(today)
     tomorrow.setDate(tomorrow.getDate() + 1)
-    let endOfTomorrow = new Date(tomorrow)
-    endOfTomorrow.setDate(endOfTomorrow.getDate() + 1)
-    endOfTomorrow = new Date(endOfTomorrow.toDateString())
-    endOfTomorrow.setMilliseconds(endOfTomorrow.getMilliseconds() - 1)
+    let endOfTomorrow = new Date(new Date(tomorrow).toDateString())
+    endOfTomorrow.setMilliseconds(endOfTomorrow.getMilliseconds() + 999)
     if (new Date(startOfStart) - now > 86400000) {
       query = {
         doctorId: doctorObjectId,
@@ -571,10 +567,8 @@ exports.deleteServiceSuspend = function (req, res) {
   let start = req.body.start || null
   let end = req.body.end || null
   let startOfStart = new Date(new Date(start).toDateString())
-  let endOfEnd = new Date(end)
-  endOfEnd.setDate(endOfEnd.getDate() + 1)
-  endOfEnd = new Date(endOfEnd.toDateString())
-  endOfEnd.setMilliseconds(endOfEnd.getMilliseconds() - 1)
+  let endOfEnd = new Date(new Date(end).toDateString())
+  endOfEnd.setMilliseconds(endOfEnd.getMilliseconds() + 999)
   let pullObj = {}
   if (start === null || end === null) {
     return res.status(412).json({results: '请输入start, end'})
