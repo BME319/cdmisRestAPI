@@ -58,6 +58,7 @@ var patientMonitorCtrl = require('../controllers_v2/patientMonitor_controller')
 var counseltimeoutCtrl = require('../controllers_v2/counseltimeout_controller')
 var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 var forumCtrl = require('../controllers_v2/forum_controller')
+var forumpCtrl = require('../controllers_v2/forump_controller')
 var departmentMonitorCtrl = require('../controllers_v2/departmentMonitor_controller')
 var policyCtrl = require('../controllers_v2/policy_controller')
 var districtMonitorCtrl = require('../controllers_v2/districtMonitor_controller')
@@ -9226,6 +9227,20 @@ module.exports = function (app, webEntry, acl) {
    *         description: 返回成功消息
    */
   app.post(version + '/forum/deletefavorite', tokenManager.verifyToken(), errorHandler.error, forumCtrl.deleteFavorite)
+
+  // 患者论坛
+  app.get(version + '/forump/allposts', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getAllposts)
+  app.get(version + '/forump/mycollection', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getMycollection)
+  app.get(version + '/forump/myposts', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getMyposts)
+  app.get(version + '/forump/postcontent', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getPostContent)
+  app.post(version + '/forump/posting', tokenManager.verifyToken(), errorHandler.error, getNoMid.getNo(13), forumpCtrl.forumpPosting)
+  app.post(version + '/forump/comment', tokenManager.verifyToken(), errorHandler.error, getNoMid.getNo(14), forumpCtrl.forumpComment)
+  app.post(version + '/forump/reply', tokenManager.verifyToken(), errorHandler.error, getNoMid.getNo(15), forumpCtrl.forumpReply)
+  app.post(version + '/forump/favorite', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.forumpFavorite)
+  app.post(version + '/forump/deletepost', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deletePost)
+  app.post(version + '/forump/deletecomment', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deleteComment)
+  app.post(version + '/forump/deletefavorite', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deleteFavorite)
+
 
   // 科主任报告
   /** JYF 2017-08-16
