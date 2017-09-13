@@ -489,7 +489,7 @@ exports.payResult = function (req, res) {
     console.log(jsondata)
     var payRes = jsondata.xml
     var paytime = payRes.time_end[0]
-    paytime = paytime.substr(0, 4) + '-' + paytime.substr(4, 6) + '-' + paytime.substr(6, 8) + 'T' + paytime.substr(8, 10) + ':' + paytime.substr(10, 12) + ':' + paytime.substr(12, 14)
+    paytime = paytime.substr(0, 4) + '-' + paytime.substr(4, 2) + '-' + paytime.substr(6, 2) + 'T' + paytime.substr(8, 2) + ':' + paytime.substr(10, 2) + ':' + paytime.substr(12, 2)
 
     var orderNo = payRes.out_trade_no[0].split('-')[0]
 
