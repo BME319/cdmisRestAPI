@@ -466,7 +466,7 @@ exports.cancelBookedPds = function (req, res) {
 
   let upObj = {$set: {status: 4}}
   let opts = ''
-  let fields = {_id: 1, doctorId: 1, patientId: 1, bookingDay: 1, bookingTime: 1}
+  let fields = {_id: 1, doctorId: 1, patientId: 1, bookingDay: 1, bookingTime: 1, diagId: 1}
   let populate = [
     {path: 'doctorId', select: {_id: 0, name: 1}},
     {path: 'patientId', select: {_id: 0, phoneNo: 1}}
@@ -493,7 +493,7 @@ exports.cancelBookedPds = function (req, res) {
             Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
               if (err) {
                 return res.status(500).send(err)
-              } else {
+              } else if (itemO !== null) {
                 let orderNo = itemO.orderNo
                 let money = itemO.money || null
                 if (Number(money) !== 0) {
@@ -545,6 +545,8 @@ exports.cancelBookedPds = function (req, res) {
                 } else {
                   console.log('用户"' + itemO.patientName + '"面诊取消成功')
                 }
+              } else {
+                console.log('order for ' + toRefund.diagId + ' not found')
               }
             })
           }
@@ -1185,6 +1187,8 @@ exports.autoOverduePD = function (req, res) {
             Order.getOne(queryO, function (err, itemO) { // 获取相应订单的医生userId和订单金额
               if (err) {
                 console.log(err)
+              } else if (itemO === null) {
+                console.log('order for ' + itemPD.diagId + ' not found')
               } else {
                 let doctorId = itemO.doctorId
                 let money = Number(itemO.money)
