@@ -292,28 +292,30 @@ exports.addPatientInCharge = function (req, res, next) {
 
 // 2017-07-20 YQC
 // 获取患者的主管医生服务的状态
-// exports.getDoctorsInCharge = function (req, res) {
-//   let patientObjectId = req.body.patientObject._id
-//   let queryDIC = {patientId: patientObjectId}
-//   let opts = ''
-//   let fields = {'_id': 0}
-//   let populate = {path: 'doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
+/**
+  exports.getDoctorsInCharge = function (req, res) {
+    let patientObjectId = req.body.patientObject._id
+    let queryDIC = {patientId: patientObjectId}
+    let opts = ''
+    let fields = {'_id': 0}
+    let populate = {path: 'doctorId', select: {'_id': 0, 'IDNo': 0, 'revisionInfo': 0, 'teams': 0}}
 
-//   DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
-//     if (err) {
-//       return res.status(500).send(err)
-//     } else if (itemsDIC.length !== 0) {
-//       for (let i = 0; i < itemsDIC.length; i++) {
-//         if (Number(itemsDIC[i].invalidFlag) === 0) {
-//           return res.json({message: '已申请主管医生，请等待审核!'})
-//         } else if (Number(itemsDIC[i].invalidFlag) === 1) {
-//           return res.json({message: '当前已有主管医生!', results: itemsDIC[i]})
-//         }
-//       }
-//     }
-//     res.json({message: '当前无主管医生且无申请!'})
-//   }, opts, fields, populate)
-// }
+    DoctorsInCharge.getSome(queryDIC, function (err, itemsDIC) {
+      if (err) {
+        return res.status(500).send(err)
+      } else if (itemsDIC.length !== 0) {
+        for (let i = 0; i < itemsDIC.length; i++) {
+          if (Number(itemsDIC[i].invalidFlag) === 0) {
+            return res.json({message: '已申请主管医生，请等待审核!'})
+          } else if (Number(itemsDIC[i].invalidFlag) === 1) {
+            return res.json({message: '当前已有主管医生!', results: itemsDIC[i]})
+          }
+        }
+      }
+      res.json({message: '当前无主管医生且无申请!'})
+    }, opts, fields, populate)
+  }
+*/
 exports.getDoctorsInCharge = function (req, res, next) {
   let patientObjectId = req.body.patientObject._id
   let queryDIC = {patientId: patientObjectId}
@@ -442,4 +444,54 @@ exports.relation = function (req, res) {
       res.json({DIC: DICRelation, FD: FDRelation})
     })
   })
+}
+
+/**
+过期取消主管关系
+*/
+exports.autoRelease = function (req, res) {
+  console.log('主管服务过期自动取消 ' + new Date())
+  let today = new Date(new Date().toDateString())
+  let endOfToday = new Date(today)
+  endOfToday.setHours(today.getHours() + 23)
+  let query = {end: {$lte: endOfToday}, invalidFlag: 1}
+  let upObj = {$set: {invalidFlag: 2}}
+  let opts = ''
+  let fields = {_id: 1, patientId: 1, doctorId: 1}
+  let populate = [
+    {path: 'patientId', select: {'_id': 1, 'name': 1}},
+    {path: 'doctorId', select: {'_id': 1, 'name': 1}}
+  ]
+  DoctorsInCharge.getSome(query, function (err, items) { // 获取需要自动核销的PD
+    if (err) {
+      console.log(err)
+    } else {
+      for (let item in items) {
+        let toRelease = items[item]
+        DoctorsInCharge.updateOne({_id: toRelease._id}, upObj, function (err, upDIC) {
+          if (err) {
+            console.log(err)
+          } else {
+            if ((toRelease.doctorId || null) !== null && (toRelease.patientId || null) !== null) {
+              let queryR = {doctorId: toRelease.doctorId._id, patientsInCharge: {$elemMatch: {$and: [{patientId: toRelease.patientId._id}, {invalidFlag: 1}]}}}
+              let upObjR = {
+                $set: {
+                  'patientsInCharge.$.invalidFlag': 2
+                }
+              }
+              DpRelation.updateOne(queryR, upObjR, function (err, upRelation) {
+                if (err) {
+                  console.log(err)
+                } else {
+                  console.log(toRelease.doctorId.name + '医生与' + toRelease.patientId.name + '患者主管服务到期取消成功')
+                }
+              })
+            } else {
+              console.log('This DIC entry ' + toRelease._id + ' has ERROR!')
+            }
+          }
+        })
+      }
+    }
+  }, opts, fields, populate)
 }
