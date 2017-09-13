@@ -1821,37 +1821,30 @@ exports.serviceMessage = function (req, res, next) {
   let templateId
   let now = new Date()
   let mobile
-  let doctorName
   let param
+  let bookingDay = new Date(new Date(req.body.day).toLocaleDateString())
+  let bookingTime = req.body.time || null
+  let PDTime
+  if (bookingTime === 'Morning') {
+    PDTime = bookingDay.getFullYear() + '-' + Number(bookingDay.getMonth() + 1) + '-' + bookingDay.getDate() + '上午'
+  } else if (bookingTime === 'Afternoon') {
+    PDTime = bookingDay.getFullYear() + '-' + Number(bookingDay.getMonth() + 1) + '-' + bookingDay.getDate() + '下午'
+  } else {
+    return res.json({code: 1, msg: 'Wrong Input!'})
+  }
   if (Number(req.body.cancelFlag) === 1) {
     templateId = '142743'
     mobile = req.body.phoneNo || null
-    doctorName = req.body.doctorName || null
-    let bookingDay = new Date(req.body.day).toLocaleDateString()
-    let bookingTime = req.body.time || null
-    let PDTime
-    if (bookingTime === 'Morning') {
-      PDTime = bookingDay + '上午'
-    } else {
-      PDTime = bookingDay + '下午'
-    }
+    let doctorName = req.body.doctorName || null
     let orderMoney = req.body.orderMoney
     let orderNo = req.body.orderNo
     param = doctorName + ',' + PDTime + ',' + orderMoney + ',' + orderNo
   } else if (Number(req.body.successFlag) === 1) {
     templateId = '112436'
     mobile = req.body.patientObject.phoneNo || null
-    doctorName = req.body.doctorObject.name || null
-    let bookingDay = new Date(req.body.day).toLocaleDateString()
-    let bookingTime = req.body.time || null
+    let doctorName = req.body.doctorObject.name || null
     let PDPlace = req.body.place || null
     let confirmCode = req.body.code || null
-    let PDTime
-    if (bookingTime === 'Morning') {
-      PDTime = bookingDay + '上午'
-    } else {
-      PDTime = bookingDay + '下午'
-    }
     param = doctorName + ',' + PDTime + ',' + PDPlace + ',' + confirmCode
   } else {
     return res.json({code: 1, meg: '请填写successFlag／cancelFlag!'})
