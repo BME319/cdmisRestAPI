@@ -488,6 +488,8 @@ exports.payResult = function (req, res) {
     })
     console.log(jsondata)
     var payRes = jsondata.xml
+    var paytime = payRes.time_end[0]
+    paytime = paytime.substr(0, 4) + '-' + paytime.substr(4, 6) + '-' + paytime.substr(6, 8) + 'T' + paytime.substr(8, 10) + ':' + paytime.substr(10, 12) + ':' + paytime.substr(12, 14)
 
     var orderNo = payRes.out_trade_no[0].split('-')[0]
 
@@ -505,7 +507,7 @@ exports.payResult = function (req, res) {
           if (item.paystatus !== 2) {    // 非成功
             upObj = {
               paystatus: 2,
-              paytime: new Date(payRes.time_end)
+              paytime: new Date(paytime)
             }
 
             Order.updateOne(query, {$set: upObj}, function (err, item) {
@@ -522,7 +524,7 @@ exports.payResult = function (req, res) {
           if (item.paystatus !== 3) {    // 非失败
             upObj = {
               paystatus: 3,
-              paytime: new Date(payRes.time_end)
+              paytime: new Date(paytime)
             }
 
             Order.updateOne(query, {$set: upObj}, function (err, item) {
