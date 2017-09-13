@@ -1836,7 +1836,7 @@ exports.serviceMessage = function (req, res, next) {
     templateId = '142743'
     mobile = req.body.phoneNo || null
     let doctorName = req.body.doctorName || null
-    let orderMoney = req.body.orderMoney
+    let orderMoney = Number(req.body.orderMoney) / 10
     let orderNo = req.body.orderNo
     param = doctorName + ',' + PDTime + ',' + orderMoney + ',' + orderNo
   } else if (Number(req.body.successFlag) === 1) {
