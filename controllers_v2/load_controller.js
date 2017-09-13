@@ -10,15 +10,15 @@ exports.uploadphoto = function () {
     filename: function (req, file, cb) {
          // 将保存文件名设置为 字段名 + 时间戳，比如 logo-1478521468943
          // cb(null, file.fieldname + '-' + Date.now());
-      var type = req.body.type
-      if (type === null || type === undefined) {
+      var type = req.query.type || null
+      if (type === null) {
         type = ''
       }
-      let rename = req.body.rename || null
+      let rename = req.query.rename || null
       if (rename) {
-        cb(null, type + file.originalname + '-' + Date.now())
+        cb(null, type + file.fieldname + '-' + Date.now() + '.' + file.originalname.split('.').pop())
       } else {
-        cb(null, type + file.originalname)
+        cb(null, file.originalname)
       }
     }
   })
@@ -30,15 +30,11 @@ exports.uploadphoto = function () {
 exports.upload = function (req, res) {
   var file = req.file
   var path = file.path
-  var type = req.body.type
-  if (type === null || type === undefined) {
-    type = ''
-  }
-  var pathResized = file.destination + '/resized' + type + file.originalname
-  let rename = req.body.rename || null 
-  if (rename) {
-    pathResized = pathResized + '-' + Date.now()
-  }
+  // var type = req.query.type || null
+  // if (type === null || type === undefined) {
+  //   type = ''
+  // }
+  var pathResized = file.destination + '/resized' + file.filename
  // console.log(path_resized)
 
   images(path)                     // Load image from file
