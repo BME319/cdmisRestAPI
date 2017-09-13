@@ -17,7 +17,7 @@ var orderSchema = new mongoose.Schema({
     notes: String
   },
   // paystatus: 0：生成商户订单成功；1：生成预付单成功；2：支付成功；3：支付失败；4：取消订单；5：订单超时；6：退款处理中；7：退款关闭；8：退款异常；9：退款成功
-  paystatus: {type: Number, enum: [1, 2, 3, 4, 5, 6, 7, 8, 9]},
+  paystatus: {type: Number, enum: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]},
   paytime: Date,
   refundNo: String, // 退款单号
   refundAppTime: Date, // 退款申请时间
@@ -117,7 +117,7 @@ Order.removeOne = function (query, callback, opts) {
 
 Order.aggregate = function (array, callback) {
   let _array = array || []
-  orderModel  
+  orderModel
     .aggregate(_array)
     .exec(function (err, results) {
       if (err) {

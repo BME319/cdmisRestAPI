@@ -70,7 +70,7 @@ module.exports = function (app, webEntry, acl) {
   // });
 
   // csq
-  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.addUserRoles(acl), errorHandler.error, alluserCtrl.changerole)
+  app.post(version + '/acl/userRoles', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
   app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
   app.get(version + '/acl/userRoles', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.userRoles(acl))
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.hasRole(acl))
@@ -4786,9 +4786,9 @@ module.exports = function (app, webEntry, acl) {
    *     responses:
    *      200:
    *         description: "Operation success."
-   *      404: 
+   *      404:
    *         description: "object not found"
-   *      400: 
+   *      400:
    *         description: "authorization not satisfied"
    */
   app.post(version + '/doctor/groupPatient', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), doctorCtrl.groupPatient)
