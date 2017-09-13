@@ -143,10 +143,14 @@ schedule.scheduleJob('30 0 8 * * *', taskCtrl.remindChangeTask)
 
 var personalDiagCtrl = require('./controllers_v2/personalDiag_controller')
 // 每天23:00更新医生的可预约面诊availablePDs 2017-08-03 YQC
-schedule.scheduleJob('0 00 23 * * *', personalDiagCtrl.autoAvailablePD)
+schedule.scheduleJob('0 0 23 * * *', personalDiagCtrl.autoAvailablePD)
 
 // 每日23:30自动更新过期面诊PD YQC
 schedule.scheduleJob('0 30 23 * * *', personalDiagCtrl.autoOverduePD)
+
+var doctorsInChargeCtrl = require('./controllers_v2/doctorsInCharge_controller')
+// 每日23:30自动更新过期主管服务 2017-09-13 YQC
+schedule.scheduleJob('0 30 23 * * *', doctorsInChargeCtrl.autoRelease)
 
 // 每天08:00自动推送科室咨询超时未回复 2017-08-05 JYF
 var counseltimeoutCtrl = require('./controllers_v2/counseltimeout_controller')
