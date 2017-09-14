@@ -316,7 +316,13 @@ exports.insertNews = function (req, res) {
   // var sendBy = req.body.sendBy
   var userId = req.body.userId
   // var sendBy = req.session.userId
-  var sendBy = req.session.userId || req.body.sendBy
+  var sendBy
+  if (req.session) {
+    sendBy = req.session.userId
+  } else {
+    sendBy = req.body.sendBy
+  }
+  // var sendBy = req.session.userId || req.body.sendBy
   return insertOneNews(userId, sendBy, req, res)
  // console.log(status_code);
  // if(status_code === 0){
@@ -351,7 +357,13 @@ exports.insertTeamNews = function (req, res) {
   var userId = req.body.userId
   // var sendBy = req.body.sendBy
   // var sendBy = req.session.userId
-  var sendBy = req.session.userId || req.body.sendBy
+  var sendBy
+  if (req.session) {
+    sendBy = req.session.userId
+  } else {
+    sendBy = req.body.sendBy
+  }
+  // var sendBy = req.session.userId || req.body.sendBy
   req.body.userRole = 'doctor'  // 医生会诊定义接收方均为doctor角色
   req.body.readOrNot = 1
   insertOneNews(userId, sendBy, req, res) // 用户发送消息记录
