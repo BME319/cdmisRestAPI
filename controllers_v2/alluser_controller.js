@@ -675,7 +675,7 @@ exports.registerTest = function (acl) {
                 return res.status(400).send('empty inputs')
               }
                             // res.json({results: 0,userNo:item.userId,mesg:"Alluser Register Success!"});
-            })
+            }, {new: true, runValidators: true})
           }
         })
       } else {
@@ -1830,16 +1830,19 @@ exports.serviceMessage = function (req, res, next) {
   let now = new Date()
   let mobile
   let param
-  let bookingDay = new Date(new Date(req.body.day).toLocaleDateString())
-  let bookingTime = req.body.time || null
   let PDTime
-  if (bookingTime === 'Morning') {
-    PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日上午'
-  } else if (bookingTime === 'Afternoon') {
-    PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日下午'
-  } else {
-    return res.json({code: 1, msg: 'Wrong Input!'})
+  if (Number(req.body.cancelFlag) === 1 || Number(req.body.successFlag) === 1) {
+    let bookingDay = new Date(new Date(req.body.day).toLocaleDateString())
+    let bookingTime = req.body.time || null
+    if (bookingTime === 'Morning') {
+      PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日上午'
+    } else if (bookingTime === 'Afternoon') {
+      PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日下午'
+    } else {
+      return res.json({code: 1, msg: 'Wrong Input!'})
+    }
   }
+
   if (Number(req.body.cancelFlag) === 1) {
     templateId = '142743'
     mobile = req.body.phoneNo || null
@@ -1854,8 +1857,14 @@ exports.serviceMessage = function (req, res, next) {
     let PDPlace = req.body.place || null
     let confirmCode = req.body.code || null
     param = doctorName + ',' + PDTime + ',' + PDPlace + ',' + confirmCode
+  } else if (Number(req.body.rejectFlag) === 1) {
+    templateId = '149559'
+    mobile = req.body.phoneNo || null
+    let doctorName = req.body.doctorName || null
+    let reason = req.body.reason || null
+    param = doctorName + ',' + reason
   } else {
-    return res.json({code: 1, meg: '请填写successFlag／cancelFlag!'})
+    return res.json({code: 1, meg: '请填写successFlag／cancelFlag／rejectFlag!'})
   }
 
   let JSONData = '{' + '"' + 'templateSMS' + '"' + ':' + '{' + '"' + 'appId' + '"' + ':' + '"' + appId + '"' + ',' + '"' + 'param' + '"' + ':' + '"' + param + '"' + ',' + '"' + 'templateId' + '"' + ':' + '"' + templateId + '"' + ',' + '"' + 'to' + '"' + ':' + '"' + mobile + '"' + '}' + '}'
@@ -1887,6 +1896,8 @@ exports.serviceMessage = function (req, res, next) {
         // res.json({results: 0, mesg: 'Booking Success and Message Sent!'})
         if (Number(req.body.cancelFlag) === 1) {
           return res.json({results: 0, mesg: 'Cancel Success and Message Sent!'})
+        } else if (Number(req.body.rejectFlag) === 1) {
+          return res.json({results: 0, mesg: 'Reject Success and Message Sent!'})
         } else if (Number(req.body.successFlag) === 1) {
           console.log({results: 0, mesg: 'Booking Success and Message Sent!'})
         }

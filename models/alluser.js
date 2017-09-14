@@ -12,7 +12,7 @@ var alluserSchema = new mongoose.Schema({
   password: String,
   agreement: String,
   photoUrl: String,
-  role: [String],
+  role: [{type: String, enum: ['Leader', 'master', 'doctor', 'patient', 'nurse', 'insuranceA', 'insuranceR', 'insuranceC', 'health', 'admin', 'guest']}],
   loginStatus: {type: Number, enum: [0, 1]},
   lastLogin: Date,
   // TDCticket: String,  // 患者和医生的二维码分别存储
