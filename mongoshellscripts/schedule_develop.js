@@ -42,7 +42,9 @@ function schedule () {
       let cmupat = db.allusers.find({_id: counselItem[i].patientId}).toArray()[0].userId
       let count_of_reply = db.communications.find({sendBy:cmudoc, receiver:cmupat, sendDateTime:{$gt:counselItem[i].time}}).toArray().length
             // 插入科主任、结束时间、超时类型、更改状态为0
-      db.counselautochangestatuses.update({counselId: counselItem[i].counselId}, {$set: {departLeader: departmentItem[0].departLeader, status: 0, endTime: now, timeouttype: 1, reply: count_of_reply}})
+      if (departmentItem.length !== 0) {
+        db.counselautochangestatuses.update({counselId: counselItem[i].counselId}, {$set: {departLeader: departmentItem[0].departLeader, status: 0, endTime: now, timeouttype: 1, reply: count_of_reply}})
+      }
             // 更改counsel表的状态为0，插入结束时间
       db.counsels.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now}})
             // 更改consultation表状态
