@@ -6,6 +6,21 @@ var Account = require('../models/account')
 var request = require('request')
 var webEntry = require('../settings').webEntry
 
+var getToken = function (headers) {
+  if (headers && headers.authorization) {
+    var authorization = headers.authorization
+    var part = authorization.split(' ')
+    if (part.length === 2) {
+      var token = part[1]
+      return token
+    } else {
+      return null
+    }
+  } else {
+    return null
+  }
+}
+
 /**
 医生端
 */
@@ -500,14 +515,14 @@ exports.cancelBookedPds = function (req, res) {
                   request({ // 调用微信退款接口
                     url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
                     method: 'POST',
-                    body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
+                    body: {'role': 'appPatient', 'orderNo': orderNo, 'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token)},
                     json: true
-                  }, function (err, response) {
+                  }, function (err, responseR) {
                     if (err) {
                       return res.status(500).send(err)
-                    } else if ((response.body.results || null) === null) {
+                    } else if ((responseR.body.results || null) === null) {
                       console.log('微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
-                    } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
+                    } else if (responseR.body.results.xml.return_code === 'SUCCESS' && responseR.body.results.xml.return_msg === 'OK') {
                       // return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
                       console.log('用户"' + itemO.patientName + '"退款成功')
                     } else {
@@ -526,14 +541,14 @@ exports.cancelBookedPds = function (req, res) {
                             'time': toRefund.bookingTime,
                             'orderMoney': Number(money),
                             'orderNo': orderNo,
-                            'token': req.body.token,
+                            'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token),
                             'cancelFlag': 1
                           },
                           json: true
-                        }, function (err, response) {
+                        }, function (err, responseM) {
                           if (err) {
                             return res.status(500).send(err)
-                          } else if (Number(response.body.results) === 0) {
+                          } else if (Number(responseM.body.results) === 0) {
                             console.log('用户"' + itemO.patientName + '"短信发送成功')
                           } else {
                             console.log('用户"' + itemO.patientName + '"短信发送失败')
@@ -1073,7 +1088,7 @@ exports.updatePDCapacityUp = function (req, res) {
             request({ // 调用微信退款接口
               url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
               method: 'POST',
-              body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
+              body: {'role': 'appPatient', 'orderNo': orderNo, 'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token)},
               json: true
             }, function (err, response) {
               if (err) {

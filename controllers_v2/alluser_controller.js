@@ -1862,7 +1862,9 @@ exports.serviceMessage = function (req, res, next) {
     mobile = req.body.phoneNo || null
     let doctorName = req.body.doctorName || null
     let reason = req.body.reason || null
-    param = doctorName + ',' + reason
+    let orderMoney = Number(req.body.orderMoney) / 100
+    let orderNo = req.body.orderNo
+    param = doctorName + ',' + reason + ',' + orderMoney + ',' + orderNo
   } else {
     return res.json({code: 1, meg: '请填写successFlag／cancelFlag／rejectFlag!'})
   }
