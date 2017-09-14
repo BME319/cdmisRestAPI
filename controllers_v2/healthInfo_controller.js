@@ -24,7 +24,7 @@ exports.getAllHealthInfo = function (req, res) {
     query['type'] = _type
   }
   // var opts = {sort:-"time"};
-  var opts = {'sort': {'time': -1, 'revisionInfo.operationTime': -1}}
+  var opts = {'sort': {'time': -1, 'insertTime': -1, 'revisionInfo.operationTime': -1}}
   var fields = {'_id': 0, 'revisionInfo': 0, 'importStatus': 0, 'url.photoId': 0, 'url._id': 0, 'url.status': 0}
   // var fields = {'_id':0};
   // var populate = {'path': 'resultId'}
