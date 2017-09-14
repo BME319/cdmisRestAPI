@@ -4792,6 +4792,8 @@ module.exports = function (app, webEntry, acl) {
    *         description: "authorization not satisfied"
    */
   app.post(version + '/doctor/groupPatient', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), doctorCtrl.groupPatient)
+  app.get(version + '/doctor/doctor', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), doctorCtrl.getDoctor)
+
   // 患者端 关注医生 2017-07-18
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
