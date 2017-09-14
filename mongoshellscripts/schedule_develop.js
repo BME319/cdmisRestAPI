@@ -2,6 +2,7 @@
 // var dbUri = webEntry.dbUri
 // var dbUrl = '121.43.107.106:28000/cdmis'
 var dbUrl = 'localhost:28000/cdmis' // 服务器代码调试
+// var dbUrl = 'localhost:27017/cdmis' // myMongoDB调试
 // print(dbUrl);
 
 db = connect(dbUrl)
@@ -9,7 +10,7 @@ db = connect(dbUrl)
 
 db.auth('rest', 'zjubme319')
 
-// print(dbUrl)
+print(dbUrl)
 
 function add0 (m) {
   return m < 10 ? '0' + m : m
@@ -18,7 +19,7 @@ function add0 (m) {
 function schedule () {
   let counselItem = db.counsels.find({status: 1}).toArray()
   let now = new Date()
-  print(counselItem);
+  // print(counselItem);
 
   let y = now.getFullYear()
   let m = now.getMonth() + 1
@@ -42,7 +43,11 @@ function schedule () {
       let cmupat = db.allusers.find({_id: counselItem[i].patientId}).toArray()[0].userId
       let count_of_reply = db.communications.find({sendBy:cmudoc, receiver:cmupat, sendDateTime:{$gt:counselItem[i].time}}).toArray().length
             // 插入科主任、结束时间、超时类型、更改状态为0
-      db.counselautochangestatuses.update({counselId: counselItem[i].counselId}, {$set: {departLeader: departmentItem[0].departLeader, status: 0, endTime: now, timeouttype: 1, reply: count_of_reply}})
+      if (departmentItem.length === 0) { // 若该医生不存在科室
+        db.counselautochangestatuses.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now, timeouttype: 1, reply: count_of_reply}})
+      } else {
+        db.counselautochangestatuses.update({counselId: counselItem[i].counselId}, {$set: {departLeader: departmentItem[0].departLeader, status: 0, endTime: now, timeouttype: 1, reply: count_of_reply}})
+      }
             // 更改counsel表的状态为0，插入结束时间
       db.counsels.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now}})
             // 更改consultation表状态

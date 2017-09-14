@@ -60,7 +60,7 @@ exports.chooseAppId = function (req, res, next) {
   var role = req.query.role || req.body.role
   // var role = req.session.role
   // console.log("test1");
-  console.log('role', role)
+  // console.log('role', role)
   if (role === 'doctor') {
     req.wxApiUserObject = config.wxDeveloperConfig.sjkshz
     next()
@@ -208,7 +208,7 @@ exports.gettokenbycode = function (req, res, next) {
 
   var code = paramObject.code
   var state = paramObject.state
-  console.log(code)
+  // console.log(code)
   var url = wxApis.oauth_access_token + '?appid=' + req.wxApiUserObject.appid +
             '&secret=' + req.wxApiUserObject.appsecret +
             '&code=' + code +
@@ -220,7 +220,7 @@ exports.gettokenbycode = function (req, res, next) {
   }, function (err, response, body) {
     if (err) return res.status(401).send('换取网页授权access_token失败!')
 
-    console.log(body)
+    // console.log(body)
     var wechatData = {
       access_token: body.access_token,
       // express_in为凭证有效时间
@@ -391,7 +391,7 @@ exports.addOrder = function (req, res, next) {
     body: xmlString
   }, function (err, response, body) {
     var prepayId = ''
-    console.log(body)
+    // console.log(body)
 
     if (!err && response.statusCode === 200) {
       var parser = new xml2js.Parser()
@@ -403,7 +403,7 @@ exports.addOrder = function (req, res, next) {
       // 微信生成的预支付会话标识，用于后续接口调用中使用，该值有效期为2小时
       prepayId = data.xml.prepay_id
       req.prepay_id = prepayId
-      console.log(prepayId)
+      // console.log(prepayId)
       next()
 
       // res.redirect('/zbtong/?#/shopping/wxpay/'+ orderObject.oid +'/' + data.xml.prepay_id);
@@ -469,7 +469,7 @@ exports.getPaySign = function (req, res, next) {
 
 // 支付结果通知
 exports.payResult = function (req, res) {
-  console.log('payResult111')
+  // console.log('payResult111')
 
   var body = ''
   var results = ''
@@ -479,14 +479,14 @@ exports.payResult = function (req, res) {
     // console.log("partial: " + body);
   })
   req.on('end', function () {
-    console.log('finish: ' + body)
+    // console.log('finish: ' + body)
     var parser = new xml2js.Parser()
     var jsondata = {}
 
     parser.parseString(body, function (err, result) {
       jsondata = result || {}
     })
-    console.log(jsondata)
+    // console.log(jsondata)
     var payRes = jsondata.xml
     var paytime = payRes.time_end[0]
     paytime = paytime.substr(0, 4) + '-' + paytime.substr(4, 2) + '-' + paytime.substr(6, 2) + 'T' + paytime.substr(8, 2) + ':' + paytime.substr(10, 2) + ':' + paytime.substr(12, 2)

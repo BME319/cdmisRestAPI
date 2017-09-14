@@ -1379,3 +1379,19 @@ exports.groupPatient = function (req, res) {
     }
   })
 }
+
+exports.getDoctor = function (req, res) {
+  let userId = req.query.userId || ''
+  let query = {userId: userId}
+  let fields = {userId: 1, name: 1, photoUrl: 1, title: 1, workUnit: 1, department: 1, major: 1, description: 1}
+  if (userId === '') {
+    res.status(500).send('请输入userId')
+  } else {
+    Alluser.getOne(query, function (err, alluserinfo) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      return res.json({results: alluserinfo})
+    },'',fields)
+  }
+}
