@@ -157,7 +157,7 @@ exports.updateDoctorInCharge = function (req, res, next) {
         Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
           if (err) {
             return res.status(500).send(err)
-          } else {
+          } else if (itemO !== null) {
             let orderNo = itemO.orderNo
             let money = itemO.money || null
             if (Number(money) !== 0) {
@@ -180,6 +180,8 @@ exports.updateDoctorInCharge = function (req, res, next) {
             } else {
               return res.json({msg: '审核成功，已拒绝患者', data: upDIC, code: 0})
             }
+          } else {
+            return res.json({msg: '审核成功，已拒绝患者，退款失败，无法查询订单号', data: upDIC, code: 0})
           }
         })
       }
