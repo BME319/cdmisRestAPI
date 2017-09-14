@@ -337,7 +337,7 @@ exports.getDoctorsInCharge = function (req, res, next) {
             // 定义警戒值消息类型为2
             req.body.type = 2
             req.body.title = '警戒值提醒'
-            req.body.description = req.body.patientObject.name + '患者的' + req.itemType + '项目超标,测量值为' + req.measureData + ',该项正常值为' + req.recommend
+            req.body.description = req.body.patientObject.name + '患者的' + req.itemType + '项目不达标,测量值为' + req.measureData + ',该项正常值为' + req.recommend
             // console.log('req.body.description', req.body.description)
             return next()
           } else {

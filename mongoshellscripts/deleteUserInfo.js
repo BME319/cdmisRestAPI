@@ -1,13 +1,13 @@
 
 // var dbUrl = '121.43.107.106:28000/cdmis'
-// var dbUrl = 'localhost:27017/cdmis' // myMongoDB调试
+var dbUrl = 'localhost:27017/cdmis' // myMongoDB调试
 // var dbUrl = 'localhost:27018/cdmis' // 本地代码调试
-var dbUrl = 'localhost:28000/cdmis' // 服务器代码调试
+// var dbUrl = 'localhost:28000/cdmis' // 服务器代码调试
 print(dbUrl)
 db = connect(dbUrl)
-db.auth('rest', 'zjubme319')
+// db.auth('rest', 'zjubme319')
 
-var query = {'userId': 'U201708150001'}
+var query = {'userId': 'U201708170004'}
 var fields = ''
 var user = db.allusers.find(query, fields).toArray()
 if (user.length === 0) {
@@ -31,20 +31,20 @@ if (user.length === 0) {
   // 删除患者
   if (userRole.indexOf('patient') !== -1) {
     query = {'userId': userId}
-    db.reports.remove(query)
-    printjson({'result': 'delete_success', 'model': 'report', 'delete_item': ''})
-    db.accounts.remove(query)
-    printjson({'result': 'delete_success', 'model': 'account', 'delete_item': ''})
+    let reportResult = db.reports.remove(query)
+    printjson({'result': 'delete_success', 'model': 'report', 'delete_item': reportResult})
+    let accountResult = db.accounts.remove(query)
+    printjson({'result': 'delete_success', 'model': 'account', 'delete_item': accountResult})
 
     query = {'userId': userId, 'role': 'patient'}
-    db.apiRecords.remove(query)
-    printjson({'result': 'delete_success', 'model': 'apiRecord', 'delete_item': ''})
-    db.advices.remove(query)
-    printjson({'result': 'delete_success', 'model': 'advice', 'delete_item': ''})
+    let apiRecordResult = db.apiRecords.remove(query)
+    printjson({'result': 'delete_success', 'model': 'apiRecord', 'delete_item': apiRecordResult})
+    let adviceResult = db.advices.remove(query)
+    printjson({'result': 'delete_success', 'model': 'advice', 'delete_item': adviceResult})
 
     query = {'patientId': userObjectId}
-    db.comments.remove(query)
-    printjson({'result': 'delete_success', 'model': 'comment', 'delete_item': ''})
+    let commentResult = db.comments.remove(query)
+    printjson({'result': 'delete_success', 'model': 'comment', 'delete_item': commentResult})
 
     query = {
       '$or': [
@@ -52,10 +52,10 @@ if (user.length === 0) {
         {'receiver': userId}
       ]
     }
-    db.communications.remove(query)
-    printjson({'result': 'delete_success', 'model': 'communication', 'delete_item': ''})
-    db.messages.remove(query)
-    printjson({'result': 'delete_success', 'model': 'message', 'delete_item': ''})
+    let communicationResult = db.communications.remove(query)
+    printjson({'result': 'delete_success', 'model': 'communication', 'delete_item': communicationResult})
+    let messageResult = db.messages.remove(query)
+    printjson({'result': 'delete_success', 'model': 'message', 'delete_item': messageResult})
 
     query = {
       '$or': [
@@ -63,24 +63,24 @@ if (user.length === 0) {
         {'receiver': userId, userRole: 'patient'}
       ]
     }
-    db.news.remove(query)
-    printjson({'result': 'delete_success', 'model': 'new', 'delete_item': ''})
+    let newResult = db.news.remove(query)
+    printjson({'result': 'delete_success', 'model': 'new', 'delete_item': newResult})
 
     query = {'userId': userId}
-    db.compliances.remove(query)
-    printjson({'result': 'delete_success', 'model': 'compliance', 'delete_item': ''})
+    let complianceResult = db.compliances.remove(query)
+    printjson({'result': 'delete_success', 'model': 'compliance', 'delete_item': complianceResult})
 
     query = {'patientId': userObjectId}
-    db.consultations.remove(query)
-    printjson({'result': 'delete_success', 'model': 'consultation', 'delete_item': ''})
-    db.counsels.remove(query)
-    printjson({'result': 'delete_success', 'model': 'counsel', 'delete_item': ''})
-    db.counselautochangestatuses.remove(query)
-    printjson({'result': 'delete_success', 'model': 'counselautochangestatus', 'delete_item': ''})
+    let consultationResult = db.consultations.remove(query)
+    printjson({'result': 'delete_success', 'model': 'consultation', 'delete_item': consultationResult})
+    let counselResult = db.counsels.remove(query)
+    printjson({'result': 'delete_success', 'model': 'counsel', 'delete_item': counselResult})
+    let counselautochangestatusResult = db.counselautochangestatuses.remove(query)
+    printjson({'result': 'delete_success', 'model': 'counselautochangestatus', 'delete_item': counselautochangestatusResult})
 
     let myDoctor = db.doctorsincharges.find({'patientId': userObjectId}, fields).toArray()
-    db.doctorsincharges.remove(query)
-    printjson({'result': 'delete_success', 'model': 'doctorsincharge', 'delete_item': ''})
+    let doctorsinchargeResult = db.doctorsincharges.remove(query)
+    printjson({'result': 'delete_success', 'model': 'doctorsincharge', 'delete_item': doctorsinchargeResult})
 
     for (let i = 0; i < myDoctor.length; i++) {
       query = {'doctorId': myDoctor[i].doctorId}
@@ -93,7 +93,7 @@ if (user.length === 0) {
       }
       db.dprelations.update(query, upObj)     // 删除该患者在主管医生中的当前和历史申请记录
     }
-    printjson({'result': 'delete_success', 'model': 'dprelation_patientsInCharge', 'delete_item': ''})
+    printjson({'result': 'delete_success', 'model': 'dprelation_patientsInCharge', 'delete_item': myDoctor.length})
 
     let favoriteDoctorsList = user[0].doctors // 患者关注的医生列表
     for (let i = 0; i < favoriteDoctorsList.length; i++) {
@@ -107,36 +107,37 @@ if (user.length === 0) {
       }
       db.dprelations.update(query, upObj)
     }
-    printjson({'result': 'delete_success', 'model': 'dprelation_patients', 'delete_item': ''})
+    printjson({'result': 'delete_success', 'model': 'dprelation_patients', 'delete_item': favoriteDoctorsList.length})
 
     query = {'userId': userId}
-    db.devices.remove(query)
+    let deviceResult = db.devices.remove(query)
+    printjson({'result': 'delete_success', 'model': 'device', 'delete_item': deviceResult})
 
     query = {'patientId': userId}
-    db.insurancemsgs.remove(query)
-    printjson({'result': 'delete_success', 'model': 'insurancemsg', 'delete_item': ''})
+    let insurancemsgResult = db.insurancemsgs.remove(query)
+    printjson({'result': 'delete_success', 'model': 'insurancemsg', 'delete_item': insurancemsgResult})
 
     query = {'userId': userId}
-    db.healthinfos.remove(query)
-    printjson({'result': 'delete_success', 'model': 'healthinfo', 'delete_item': ''})
-    db.labtestimports.remove(query)
-    printjson({'result': 'delete_success', 'model': 'labtestimport', 'delete_item': ''})
-    db.orders.remove(query)
-    printjson({'result': 'delete_success', 'model': 'order', 'delete_item': ''})
-    db.tasks.remove(query)
-    printjson({'result': 'delete_success', 'model': 'task', 'delete_item': ''})
+    let healthinfoResult = db.healthinfos.remove(query)
+    printjson({'result': 'delete_success', 'model': 'healthinfo', 'delete_item': healthinfoResult})
+    let labtestimportResult = db.labtestimports.remove(query)
+    printjson({'result': 'delete_success', 'model': 'labtestimport', 'delete_item': labtestimportResult})
+    let orderResult = db.orders.remove(query)
+    printjson({'result': 'delete_success', 'model': 'order', 'delete_item': orderResult})
+    let taskResult = db.tasks.remove(query)
+    printjson({'result': 'delete_success', 'model': 'task', 'delete_item': taskResult})
 
     query = {'patientOpenId': userOpenId}
-    db.openids.remove(query)
-    printjson({'result': 'delete_success', 'model': 'openid', 'delete_item': ''})
+    let openidResult = db.openids.remove(query)
+    printjson({'result': 'delete_success', 'model': 'openid', 'delete_item': openidResult})
 
     query = {'patientId': userObjectId}
-    db.personaldiags.remove(query)
-    printjson({'result': 'delete_success', 'model': 'personaldiag', 'delete_item': ''})
-    db.policies.remove(query)
-    printjson({'result': 'delete_success', 'model': 'policy', 'delete_item': ''})
-    db.vitalsigns.remove(query)
-    printjson({'result': 'delete_success', 'model': 'vitalsign', 'delete_item': ''})
+    let personaldiagResult = db.personaldiags.remove(query)
+    printjson({'result': 'delete_success', 'model': 'personaldiag', 'delete_item': personaldiagResult})
+    let policyResult = db.policies.remove(query)
+    printjson({'result': 'delete_success', 'model': 'policy', 'delete_item': policyResult})
+    let vitalsignResult = db.vitalsigns.remove(query)
+    printjson({'result': 'delete_success', 'model': 'vitalsign', 'delete_item': vitalsignResult})
   }
 
   // 删除医生
@@ -180,10 +181,10 @@ if (user.length === 0) {
     }
     // 删除该医生所有医患关系记录
     query = {'doctorId': userObjectId}
-    db.dprelations.remove(query)
-    printjson({'result': 'delete_success', 'model': 'dprelation'})
-    db.doctorsincharges.remove(query)
-    printjson({'result': 'delete_success', 'model': 'doctorsincharge'})
+    let dprelationResult = db.dprelations.remove(query)
+    printjson({'result': 'delete_success', 'model': 'dprelation', 'delete_item': dprelationResult})
+    let doctorsinchargeResult = db.doctorsincharges.remove(query)
+    printjson({'result': 'delete_success', 'model': 'doctorsincharge', 'delete_item': doctorsinchargeResult})
 
     query = {}
     let upObj = {
@@ -193,22 +194,22 @@ if (user.length === 0) {
         }
       }
     }
-    db.accounts.update(query, upObj, {multi: true}) // 删除患者中的咨询该医生的记录
-    printjson({'result': 'update_success', 'model': 'account'})
+    let accountResult = db.accounts.update(query, upObj, {multi: true}) // 删除患者中的咨询该医生的记录
+    printjson({'result': 'update_success', 'model': 'account', 'delete_item': accountResult})
 
     query = {'userId': userId}
-    db.accounts.remove(query)        // 删除医生账户，存在问题，患者和医生共用一个账户，没有role区分
-    printjson({'result': 'delete_success', 'model': 'account'})
+    accountResult = db.accounts.remove(query)        // 删除医生账户，存在问题，患者和医生共用一个账户，没有role区分
+    printjson({'result': 'delete_success', 'model': 'account', 'delete_item': accountResult})
 
     query = {'userId': userId, 'role': 'doctor'}
-    db.apiRecords.remove(query)
-    printjson({'result': 'delete_success', 'model': 'apiRecord'})
-    db.advices.remove(query)
-    printjson({'result': 'delete_success', 'model': 'advice'})
+    let apiRecordResult = db.apiRecords.remove(query)
+    printjson({'result': 'delete_success', 'model': 'apiRecord', 'delete_item': apiRecordResult})
+    let adviceResult = db.advices.remove(query)
+    printjson({'result': 'delete_success', 'model': 'advice', 'delete_item': adviceResult})
 
     query = {'doctorId': userObjectId}
-    db.comments.remove(query)
-    printjson({'result': 'delete_success', 'model': 'comment'})
+    let commentResult = db.comments.remove(query)
+    printjson({'result': 'delete_success', 'model': 'comment', 'delete_item': commentResult})
 
     query = {
       '$or': [
@@ -216,10 +217,10 @@ if (user.length === 0) {
         {'receiver': userId}
       ]
     }
-    db.communications.remove(query)
-    printjson({'result': 'delete_success', 'model': 'communication'})
-    db.messages.remove(query)
-    printjson({'result': 'delete_success', 'model': 'message'})
+    let communicationResult = db.communications.remove(query)
+    printjson({'result': 'delete_success', 'model': 'communication', 'delete_item': communicationResult})
+    let messageResult = db.messages.remove(query)
+    printjson({'result': 'delete_success', 'model': 'message', 'delete_item': messageResult})
 
     query = {
       '$or': [
@@ -227,19 +228,19 @@ if (user.length === 0) {
         {'receiver': userId, userRole: 'doctor'}
       ]
     }
-    db.news.remove(query)
-    printjson({'result': 'delete_success', 'model': 'new'})
+    let newResult = db.news.remove(query)
+    printjson({'result': 'delete_success', 'model': 'new', 'delete_item': newResult})
 
     query = {'doctorId': userObjectId}
-    db.counsels.remove(query)
-    printjson({'result': 'delete_success', 'model': 'counsel'})
-    db.counselautochangestatuses.remove(query)
-    printjson({'result': 'delete_success', 'model': 'counselautochangestatus'})
+    let counselResult = db.counsels.remove(query)
+    printjson({'result': 'delete_success', 'model': 'counsel', 'delete_item': counselResult})
+    let counselautochangestatusResult = db.counselautochangestatuses.remove(query)
+    printjson({'result': 'delete_success', 'model': 'counselautochangestatus', 'delete_item': counselautochangestatusResult})
 
     // 如果医生为团队发起人,则删除表，其他医生团队成员不需要修改
     query = {'sponsorId': userObjectId}
-    db.consultations.remove(query)
-    printjson({'result': 'delete_success', 'model': 'consultation'})
+    let consultationResult = db.consultations.remove(query)
+    printjson({'result': 'delete_success', 'model': 'consultation', 'delete_item': consultationResult})
 
     // let district = user[0].district
     // let department = user[0].department
@@ -261,22 +262,22 @@ if (user.length === 0) {
         'departLeader': userObjectId
       }
     }
-    db.departments.update(query, upObj, {multi: true})
-    printjson({'result': 'delete_success', 'model': 'department'})
+    let departmentResult = db.departments.update(query, upObj, {multi: true})
+    printjson({'result': 'delete_success', 'model': 'department', 'delete_item': departmentResult})
 
     query = {'doctorId': userObjectId}
-    db.personaldiags.remove(query)
-    printjson({'result': 'delete_success', 'model': 'personaldiag'})
+    let personaldiagResult = db.personaldiags.remove(query)
+    printjson({'result': 'delete_success', 'model': 'personaldiag', 'delete_item': personaldiagResult})
 
     query = {'doctorId': userId}
-    db.insurancemsgs.remove(query)
-    printjson({'result': 'delete_success', 'model': 'insurancemsg'})
-    db.orders.remove(query)
-    printjson({'result': 'delete_success', 'model': 'order'})
+    let insurancemsgResult = db.insurancemsgs.remove(query)
+    printjson({'result': 'delete_success', 'model': 'insurancemsg', 'delete_item': insurancemsgResult})
+    let orderResult = db.orders.remove(query)
+    printjson({'result': 'delete_success', 'model': 'order', 'delete_item': orderResult})
 
     query = {'doctorUserId': userId}
-    db.openids.remove(query)
-    printjson({'result': 'delete_success', 'model': 'openid'})
+    let openidResult = db.openids.remove(query)
+    printjson({'result': 'delete_success', 'model': 'openid', 'delete_item': openidResult})
 
     query = {
       '$or': [
@@ -294,8 +295,8 @@ if (user.length === 0) {
         }
       }
     }
-    db.reports.update(query, upObj, {multi: true})
-    printjson({'result': 'delete_success', 'model': 'report'})
+    let reportResult = db.reports.update(query, upObj, {multi: true})
+    printjson({'result': 'delete_success', 'model': 'report', 'delete_item': reportResult})
 
     // 若该医生为team sponsor，删除该团队，并且删除该团队的群聊天记录
     query = {'sponsorId': userId}
@@ -304,8 +305,8 @@ if (user.length === 0) {
       db.communications.remove({'receiver': teamId[i].teamId})
       printjson({'result': 'delete_success', 'model': 'communication', 'delete_item': teamId[i].teamId})
     }
-    db.teams.remove(query)
-    printjson({'result': 'delete_success', 'model': 'team'})
+    let teamResult = db.teams.remove(query)
+    printjson({'result': 'delete_success', 'model': 'team', 'delete_item': teamResult})
 
     // 若为其他成员，则在team中删除该成员
     query = {'members.userId': userId}
@@ -319,8 +320,8 @@ if (user.length === 0) {
         number: -1
       }
     }
-    db.teams.update(query, upObj, {multi: true})
-    printjson({'result': 'update_success', 'model': 'team'})
+    teamResult = db.teams.update(query, upObj, {multi: true})
+    printjson({'result': 'update_success', 'model': 'team', 'delete_item': teamResult})
   }
 
   // v2 alluser
