@@ -7180,6 +7180,9 @@ module.exports = function (app, webEntry, acl) {
    */
   // 插入news 权限 医生/患者
   app.post(version + '/new/news', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.insertNews)
+  // socket可用 暂时路由
+  app.post(version + '/new/newstemp', newsCtrl.insertNews)
+  app.post(version + '/new/teamNewstemp', newsCtrl.insertTeamNews)
   /**
    * @swagger
    * /new/teamNews:
