@@ -6961,6 +6961,8 @@ module.exports = function (app, webEntry, acl) {
    */
   // 获取订单信息 权限 医生/患者
   app.get(version + '/order/order', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), orderCtrl.getOrder)
+  // 查询患者是否存在已付款但未提交咨询问卷 权限 患者
+  app.get(version + '/order/counsel', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), orderCtrl.checkCounsel)
 
   // load
   /**
