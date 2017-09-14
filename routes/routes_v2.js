@@ -4792,6 +4792,8 @@ module.exports = function (app, webEntry, acl) {
    *         description: "authorization not satisfied"
    */
   app.post(version + '/doctor/groupPatient', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), doctorCtrl.groupPatient)
+  app.get(version + '/doctor/doctor', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), doctorCtrl.getDoctor)
+
   // 患者端 关注医生 2017-07-18
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
@@ -6961,6 +6963,8 @@ module.exports = function (app, webEntry, acl) {
    */
   // 获取订单信息 权限 医生/患者
   app.get(version + '/order/order', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), orderCtrl.getOrder)
+  // 查询患者是否存在已付款但未提交咨询问卷 权限 患者
+  app.get(version + '/order/counsel', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), orderCtrl.checkCounsel)
 
   // load
   /**

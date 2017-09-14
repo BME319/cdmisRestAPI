@@ -404,3 +404,24 @@ exports.refundChangeStatus = function (status) {
     }, opts)
   }
 }
+
+// 查询患者是否已付款但未填写咨询问卷 2017-09-14 JYF
+exports.checkCounsel = function (req, res) {
+  let userId = req.session.userId
+  let array = [
+    {$match: {userId: userId, paystatus: 1, conselObject: {$eq: null}}},
+    {$project: {'type': 1, '_id': 0}}
+  ]
+  Order.aggregate(array, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    }
+    if (item === null || item.length === 0) {
+      res.status(500).send('nonexistence')
+    }
+    else {
+      
+      res.json({results: item})
+    }
+  })
+}
