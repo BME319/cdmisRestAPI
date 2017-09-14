@@ -5,6 +5,21 @@ var request = require('request')
 var webEntry = require('../settings').webEntry
 var Order = require('../models/order')
 
+var getToken = function (headers) {
+  if (headers && headers.authorization) {
+    var authorization = headers.authorization
+    var part = authorization.split(' ')
+    if (part.length === 2) {
+      var token = part[1]
+      return token
+    } else {
+      return null
+    }
+  } else {
+    return null
+  }
+}
+
 /**
 医生端
 */
@@ -140,11 +155,14 @@ exports.updateDoctorInCharge = function (req, res, next) {
       }
     }
   }
+  let populate = [
+    {path: 'doctorId', select: {_id: 0, name: 1}},
+    {path: 'patientId', select: {_id: 0, phoneNo: 1}}
+  ]
   DoctorsInCharge.updateOne(query, upObj, function (err, upDIC) {
     if (err) {
       return res.status(500).send(err)
-    }
-    if (upDIC === null) {
+    } else if (upDIC === null) {
       return res.json({results: '找不到该患者'})
     } else {
       // return res.json({results: '审核完成'})
@@ -157,34 +175,66 @@ exports.updateDoctorInCharge = function (req, res, next) {
         Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
           if (err) {
             return res.status(500).send(err)
-          } else {
+          } else if (itemO !== null) {
             let orderNo = itemO.orderNo
             let money = itemO.money || null
             if (Number(money) !== 0) {
               request({ // 调用微信退款接口
                 url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
                 method: 'POST',
-                body: {'role': 'appPatient', 'orderNo': orderNo, 'token': req.body.token},
+                body: {'role': 'appPatient', 'orderNo': orderNo, 'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token)},
                 json: true
-              }, function (err, response) {
+              }, function (err, responseR) {
                 if (err) {
                   return res.status(500).send(err)
-                } else if ((response.body.results || null) === null) {
-                  return res.json({msg: '审核成功，已拒绝患者但退款失败，微信接口调用失败，请联系管理员', data: upDIC, code: 1})
-                } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
-                  return res.json({msg: '审核成功，已拒绝患者并退款', data: upDIC, code: 0})
+                } else if ((responseR.body.results || null) === null) {
+                  // return res.json({msg: '审核成功，已拒绝患者但退款失败，微信接口调用失败，请联系管理员', data: upDIC, code: 1})
+                  console.log('微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                } else if (responseR.body.results.xml.return_code === 'SUCCESS' && responseR.body.results.xml.return_msg === 'OK') {
+                  // return res.json({msg: '审核成功，已拒绝患者并退款', data: upDIC, code: 0})
+                  console.log('用户"' + itemO.patientName + '"退款成功')
                 } else {
-                  return res.json({msg: '审核成功，已拒绝患者但退款失败，请联系管理员', data: upDIC, code: 1})
+                  // return res.json({msg: '审核成功，已拒绝患者但退款失败，请联系管理员', data: upDIC, code: 1})
+                  console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                 }
+                if ((upDIC.patientId || null) !== null) {
+                  if ((upDIC.patientId.phoneNo || null) !== null) {
+                    request({ // 调用短信发送接口
+                      url: 'http://' + webEntry.domain + '/api/v2/services/message',
+                      method: 'POST',
+                      body: {
+                        'phoneNo': upDIC.patientId.phoneNo,
+                        'doctorName': upDIC.doctorId.name,
+                        'reason': upDIC.rejectReason,
+                        'orderMoney': Number(money),
+                        'orderNo': orderNo,
+                        'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token),
+                        'rejectFlag': 1
+                      },
+                      json: true
+                    }, function (err, responseM) {
+                      if (err) {
+                        return res.status(500).send(err)
+                      } else if (Number(responseM.body.results) === 0) {
+                        console.log('用户"' + itemO.patientName + '"短信发送成功')
+                      } else {
+                        console.log('用户"' + itemO.patientName + '"短信发送失败')
+                      }
+                    })
+                  }
+                }
+                return res.json({msg: '审核成功，已拒绝患者', data: upDIC, code: 0})
               })
             } else {
               return res.json({msg: '审核成功，已拒绝患者', data: upDIC, code: 0})
             }
+          } else {
+            return res.json({msg: '审核成功，已拒绝患者，退款失败，无法查询订单号', data: upDIC, code: 0})
           }
         })
       }
     }
-  }, {new: true})
+  }, {new: true}, populate)
 }
 
 /**
