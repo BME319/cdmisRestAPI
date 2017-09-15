@@ -65,60 +65,64 @@ function messageSaveSend (data, url, sender) {
             // console.log("wechat_doctor:  "+Object.keys(userWechatDoctorServer));
             // console.log("wechat_patient:  "+Object.keys(userWechatPatientServer));
 
-      data.msg['messageId'] = response.body.newResults.messageNo
-
-      sender.emit('messageRes', {msg: data.msg})
-
-            // if(client == 'doctor'){
-            //     if(userAppDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
-            //         // console.log("messageRes to [doctor]: "+sendBy)
-            //         userAppDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
-            //         // sender.emit('messageRes',{msg:data.msg});
-            //     }
-            //     else{           // 用户不在线
-            //         // socket.emit("err",{msg:"对方已经下线或者断开连接"})
-            //     }
-            // }
-            // else if(client == 'patient'){
-            //     if(userAppPatientServer.hasOwnProperty(sendBy)){         // 用户在线
-            //         // console.log("messageRes to [patient]: "+sendBy)
-            //         userAppPatientServer[sendBy].emit('messageRes',{msg:data.msg});
-            //         // sender.emit('messageRes',{msg:data.msg});
-            //     }
-            //     else{           // 用户不在线
-            //         // socket.emit("err",{msg:"对方已经下线或者断开连接"})
-            //     }
-            // }
-            // else if(client == 'wechatdoctor'){
-
-            //       if(userWechatDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
-            //         // console.log("messageRes to [wechatdoctor]: "+sendBy)
-            //         userWechatDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
-            //         // sender.emit('messageRes',{msg:data.msg});
-            //     }
-            //     else{           // 用户不在线
-            //         // socket.emit("err",{msg:"对方已经下线或者断开连接"})
-            //     }
-            // }
-            // else if(client == 'wechatpatient'){
-            //     if(userWechatPatientServer.hasOwnProperty(sendBy)){         // 用户在线
-            //         // console.log("messageRes to [wechatpatient]: "+sendBy)
-            //         userWechatPatientServer[sendBy].emit('messageRes',{msg:data.msg});
-            //         // sender.emit('messageRes',{msg:data.msg});
-            //     }
-            //     else{           // 用户不在线
-            //         // socket.emit("err",{msg:"对方已经下线或者断开连接"})
-            //     }
-            // }
-            // else{
-            //     // do
-            // }
-
-            /// send to receiver
-      if (targetRole === 'doctor') {
-        sendToReceiver(messageType, receiver, sendBy, userAppDoctorServer, userWechatDoctorServer, data)
-      } else if (targetRole === 'patient') {
-        sendToReceiver(messageType, receiver, sendBy, userAppPatientServer, userWechatPatientServer, data)
+      if (response.body.newResults) {
+        data.msg['messageId'] = response.body.newResults.messageNo
+        
+        sender.emit('messageRes', {msg: data.msg})
+        
+                    // if(client == 'doctor'){
+                    //     if(userAppDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
+                    //         // console.log("messageRes to [doctor]: "+sendBy)
+                    //         userAppDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
+                    //         // sender.emit('messageRes',{msg:data.msg});
+                    //     }
+                    //     else{           // 用户不在线
+                    //         // socket.emit("err",{msg:"对方已经下线或者断开连接"})
+                    //     }
+                    // }
+                    // else if(client == 'patient'){
+                    //     if(userAppPatientServer.hasOwnProperty(sendBy)){         // 用户在线
+                    //         // console.log("messageRes to [patient]: "+sendBy)
+                    //         userAppPatientServer[sendBy].emit('messageRes',{msg:data.msg});
+                    //         // sender.emit('messageRes',{msg:data.msg});
+                    //     }
+                    //     else{           // 用户不在线
+                    //         // socket.emit("err",{msg:"对方已经下线或者断开连接"})
+                    //     }
+                    // }
+                    // else if(client == 'wechatdoctor'){
+        
+                    //       if(userWechatDoctorServer.hasOwnProperty(sendBy)){         // 用户在线
+                    //         // console.log("messageRes to [wechatdoctor]: "+sendBy)
+                    //         userWechatDoctorServer[sendBy].emit('messageRes',{msg:data.msg});
+                    //         // sender.emit('messageRes',{msg:data.msg});
+                    //     }
+                    //     else{           // 用户不在线
+                    //         // socket.emit("err",{msg:"对方已经下线或者断开连接"})
+                    //     }
+                    // }
+                    // else if(client == 'wechatpatient'){
+                    //     if(userWechatPatientServer.hasOwnProperty(sendBy)){         // 用户在线
+                    //         // console.log("messageRes to [wechatpatient]: "+sendBy)
+                    //         userWechatPatientServer[sendBy].emit('messageRes',{msg:data.msg});
+                    //         // sender.emit('messageRes',{msg:data.msg});
+                    //     }
+                    //     else{           // 用户不在线
+                    //         // socket.emit("err",{msg:"对方已经下线或者断开连接"})
+                    //     }
+                    // }
+                    // else{
+                    //     // do
+                    // }
+        
+                    /// send to receiver
+        if (targetRole === 'doctor') {
+          sendToReceiver(messageType, receiver, sendBy, userAppDoctorServer, userWechatDoctorServer, data)
+        } else if (targetRole === 'patient') {
+          sendToReceiver(messageType, receiver, sendBy, userAppPatientServer, userWechatPatientServer, data)
+        } else {
+        
+        }
       } else {
 
       }
