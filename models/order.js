@@ -25,7 +25,7 @@ var orderSchema = new mongoose.Schema({
   // patientName: String,
 
   // time: Date,
-  type: {type: Number, enum: [1, 2, 3, 4, 5, 6]}, // 1 咨询,2 问诊,3 加急咨询,4 主管医生,5 面诊,6 咨询升级问诊
+  type: {type: Number, enum: [1, 2, 3, 4, 5, 6, 7]}, // 1 咨询,2 问诊,3 加急咨询,4 主管医生,5 面诊,6 咨询升级问诊
   freeFlag: {type: Number, enum: [0, 1]}, // 0收费，1免费
   docInChaObject: {type: mongoose.Schema.Types.ObjectId, ref: 'doctorsInCharge'},
   conselObject: {type: mongoose.Schema.Types.ObjectId, ref: 'counsel'},
