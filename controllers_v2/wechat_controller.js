@@ -797,14 +797,14 @@ exports.autoRefundQuery = function (req, res) {
       body: xmlString
     }, function (err, response, body) {
       if (err) {
-        console.log(err)
-        console.log('debug_label_2')
+        console.log(new Date(), err)
+        // console.log(new Date(), 'debug_label_2')
         if (rolesIndex < wxApiUserObject.length - 1) {
           refundQuery(orderNosIndex, ++rolesIndex)
         } else if (orderNosIndex < orderNos.length - 1) {
           refundQuery(++orderNosIndex, 0)
         } else {
-          console.log('auto_refund_query_success')
+          console.log(new Date(), 'auto_refund_query_success')
         }
       } else {
         let jsondata
@@ -812,7 +812,7 @@ exports.autoRefundQuery = function (req, res) {
           jsondata = result || {}
         })
         if (jsondata.xml.return_code === 'SUCCESS' && jsondata.xml.result_code === 'SUCCESS') {
-          console.log(jsondata.xml)
+          console.log(new Date(), jsondata.xml)
           // 修改数据库中订单状态
           let queryOrder = {orderNo: orderNos[orderNosIndex]}
           let upObj = {
@@ -821,27 +821,27 @@ exports.autoRefundQuery = function (req, res) {
           }
           Order.updateOne(queryOrder, upObj, function (err, uporder) {
             if (err) {
-              console.log(err)
-              console.log('debug_label_3')
+              console.log(new Date(), err)
+              // console.log(new Date(), 'debug_label_3')
             }
             if (rolesIndex < wxApiUserObject.length - 1) {
               refundQuery(orderNosIndex, ++rolesIndex)
             } else if (orderNosIndex < orderNos.length - 1) {
               refundQuery(++orderNosIndex, 0)
             } else {
-              console.log('auto_refund_query_success')
+              console.log(new Date(), 'auto_refund_query_success')
             }
           })
         } else {
           // return res.status(404).json({results: jsondata.xml})
-          console.log(jsondata.xml)
-          console.log('debug_label_1')
+          console.log(new Date(), jsondata.xml)
+          // console.log('debug_label_1')
           if (rolesIndex < wxApiUserObject.length - 1) {
             refundQuery(orderNosIndex, ++rolesIndex)
           } else if (orderNosIndex < orderNos.length - 1) {
             refundQuery(++orderNosIndex, 0)
           } else {
-            console.log('auto_refund_query_success')
+            console.log(new Date(), 'auto_refund_query_success')
           }
         }
       }
@@ -849,14 +849,14 @@ exports.autoRefundQuery = function (req, res) {
   }
 
   Order.getSome(query, function (err, orderItems) {
-    if (err) { console.log('getOrderItemErr') }
+    if (err) { console.log(new Date(), 'getOrderItemErr') }
     // console.log(orderItems)
     if (orderItems.length > 0) {
       for (let i = 0; i < orderItems.length; i++) { orderNos[i] = orderItems[i].orderNo }
-      console.log(orderNos)
+      // console.log(orderNos)
       refundQuery(0, 0)
     } else {
-      console.log('auto_refund_query_success')
+      console.log(new Date(), 'auto_refund_query_success')
     }
   })
 }
