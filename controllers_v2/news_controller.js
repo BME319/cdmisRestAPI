@@ -167,7 +167,8 @@ function insertOneNews (userId, sendBy, req, res) {
   if (req.body.type !== null && req.body.type !== '' && req.body.type !== undefined) {
     newData['type'] = req.body.type
     if (Number(req.body.type) === 15) {
-      newData['caseType'] = Number(req.body.caseType)
+      let caseType = req.body.caseType || 0
+      newData['caseType'] = Number(caseType)
     }
     query1['type'] = req.body.type
     query2['type'] = req.body.type
