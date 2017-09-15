@@ -386,7 +386,7 @@ exports.remindChangeTask = function () {
     if (index < taskItems.length - 1) {
       sendMessage(taskItems, ++index)
     } else {
-      console.log('auto_remind_change_task_success')
+      console.log(new Date(), 'auto_remind_change_task_success')
     }
   }
 
@@ -398,12 +398,12 @@ exports.remindChangeTask = function () {
     Alluser.getOne(queryP, function (err, patientItem) {
       if (err) {
         let warningGetPatient = queryP.userId + '_querying_error'
-        console.log(warningGetPatient)
-        console.log(err)
+        console.log(new Date(), warningGetPatient)
+        console.log(new Date(), err)
         nextOrEnd(taskItems, index)
       } else if (patientItem === null) {
         let warningPatientNotFound = queryP.userId + '_not_found'
-        console.log(warningPatientNotFound)
+        console.log(new Date(), warningPatientNotFound)
         nextOrEnd(taskItems, index)
       } else {
         DoctorsInCharge.getOne({patientId: patientItem._id, invalidFlag: 1}, function (err, doctorsInChargeInfo) {
@@ -415,12 +415,12 @@ exports.remindChangeTask = function () {
           Alluser.getOne(queryD, function (err, doctorItem) {
             if (err) {
               let warningGetDoctor = queryP.userId + '_`s_doctor_querying_error'
-              console.log(warningGetDoctor)
-              console.log(err)
+              console.log(new Date(), warningGetDoctor)
+              console.log(new Date(), err)
               nextOrEnd(taskItems, index)
             } else if (doctorItem === null) {
               let warningDoctorItemNotFound = queryP.userId + '_`s_doctor_item_not_found'
-              console.log(warningDoctorItemNotFound)
+              console.log(new Date(), warningDoctorItemNotFound)
               nextOrEnd(taskItems, index)
             } else {
               // 调试用输出
@@ -459,8 +459,8 @@ exports.remindChangeTask = function () {
               newMessage.save(function (err, messageInfo) {
                 if (err) {
                   let warningMessage = queryP.userId + '_`s_doctor_message_not_received'
-                  console.log(warningMessage)
-                  console.log(err)
+                  console.log(new Date(), warningMessage)
+                  console.log(new Date(), err)
                   nextOrEnd(taskItems, index)
                 } else {
                   // 调试用输出
@@ -468,8 +468,8 @@ exports.remindChangeTask = function () {
                   News.update(queryN, upNews, function (err, upNewsRes) {
                     if (err) {
                       let warningNews = queryP.userId + '_`s_doctor_news_not_sent'
-                      console.log(warningNews)
-                      console.log(err)
+                      console.log(new Date(), warningNews)
+                      console.log(new Date(), err)
                       nextOrEnd(taskItems, index)
                     } else {
                       // 调试用输出
@@ -493,12 +493,12 @@ exports.remindChangeTask = function () {
   }
   Task.getSome(queryT, function (err, taskItems) {
     if (err) {
-      console.log('task_querying_error')
-      console.log('need_to_contact_admin')
+      console.log(new Date(), 'task_querying_error')
+      console.log(new Date(), 'need_to_contact_admin')
       console.log(err)
     } else if (taskItems.length === 0) {
-      console.log('task_querying_success')
-      console.log('no_need_to_send_message')
+      console.log(new Date(), 'task_querying_success')
+      console.log(new Date(), 'no_need_to_send_message')
     } else {
       sendMessage(taskItems, 0)
     }
