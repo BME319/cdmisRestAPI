@@ -130,6 +130,31 @@ exports.getOrderNo = function (req, res, next) {
   })
 }
 
+exports.getchangeOrderNo = function (req, res, next) {
+  var doctorId = req.body.doctorId || null
+  var patientId = req.body.patientId || null
+  var paystatus = Number(2)
+  var type = req.body.newtype || null
+  if (type !== null) {
+    type = Number(type)
+  }
+  // var _orderNo = req.query.orderNo || null
+  if (doctorId === null || patientId === null) {
+    return res.json({result: 1, msg: '请输入doctorId、patientId'})
+  }
+  var query = {userId: patientId, doctorId: doctorId, paystatus: paystatus, type: type}
+  Order.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    } else if (item === null) {
+      return res.status(404).json({result: '更新订单错误：无法查询到订单请重新尝试或联系管理员'})
+    } else {
+      req.body.orderNo = item.orderNo
+      next()
+    }
+  })
+}
+
 exports.insertOrder = function (req, res, next) {
   // var money = req.body.money || null
   var money = req.body.money
@@ -181,6 +206,9 @@ exports.insertOrder = function (req, res, next) {
       } else if (req.body.class === '06') {
         // 加急咨询
         trueMoney = doctor.charge3 * 100
+      } else if (req.body.class === '07') {
+        // 咨询升级加急咨询
+        trueMoney = doctor.charge3 * 100 - doctor.charge1 * 100
       } else {
         return res.status(403).send('服务类型不存在!')
       }
@@ -408,8 +436,10 @@ exports.refundChangeStatus = function (status) {
 // 查询患者是否已付款但未填写咨询问卷 2017-09-14 JYF
 exports.checkCounsel = function (req, res) {
   let userId = req.session.userId
+  let doctorId = req.query.doctorId
   let array = [
-    {$match: {userId: userId, paystatus: 1, conselObject: {$eq: null}}},
+    {$match: {userId: userId, doctorId: doctorId, paystatus: 2, conselObject: {$eq: null}}},
+    {$match: {$or: [{type: 1}, {type: 2}, {type: 3}, {type: 6}, {type: 7}]}},
     {$project: {'type': 1, '_id': 0}}
   ]
   Order.aggregate(array, function (err, item) {
@@ -417,10 +447,8 @@ exports.checkCounsel = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     if (item === null || item.length === 0) {
-      res.status(500).send('nonexistence')
-    }
-    else {
-      
+      res.json({msg:'nonexistence'})
+    } else {
       res.json({results: item})
     }
   })

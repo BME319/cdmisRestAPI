@@ -2600,7 +2600,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: object
    *               $ref: '#/definitions/Counsel'
    */
-  app.post(version + '/counsel/type', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType)
+  app.post(version + '/counsel/type', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), counselCtrl.getPatientObject, counselCtrl.getDoctorObject, counselCtrl.getStatus, counselCtrl.changeCounselType, orderCtrl.getchangeOrderNo, orderCtrl.updateOrder)
   // 评价医生
   /** YQC annotation 2017-08-10 - acl 2017-08-10 患者
    * @swagger
