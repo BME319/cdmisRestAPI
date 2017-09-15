@@ -568,6 +568,7 @@ exports.getStatus = function (req, res, next) {
       var counsels = []
       counsels = items.sort(sortTime)
       req.body.counselId = counsels[0].counselId
+      req.body.conselObject = counsels[0]._id
       if (statusInBody === null && changeType === null) {
         return res.json({result: counsels[0]})
       } else {
@@ -579,7 +580,7 @@ exports.getStatus = function (req, res, next) {
 }
 
 // 注释 更改问诊类型 输入，type，changetype，counselId；输出，更新成功或失败
-exports.changeCounselType = function (req, res) {
+exports.changeCounselType = function (req, res, next) {
   // 若类型为1 更改类型标识为True 写入查询和更新参数 否则返回错误
   let query = {}
   let upObj = {}
@@ -591,6 +592,7 @@ exports.changeCounselType = function (req, res) {
     upObj = {
       type: 3
     }
+    req.body.type = 3
   } else if (req.body.type === 1 && req.body.changeType === 'type7') {
     // type7 咨询转加急咨询
     query = {
@@ -599,6 +601,7 @@ exports.changeCounselType = function (req, res) {
     upObj = {
       type: 7
     }
+    req.body.type = 7
   } else {
     return res.json({result: '不可更改的类型!'})
   }
@@ -611,7 +614,8 @@ exports.changeCounselType = function (req, res) {
     if (upCounsel == null) {
       return res.json({result: '修改失败，不存在的counselId！'})
     }
-    res.json({result: '修改成功', editResults: upCounsel})
+    // res.json({result: '修改成功', editResults: upCounsel})
+    next()
   }, {new: true})
 }
 
