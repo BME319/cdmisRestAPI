@@ -555,7 +555,7 @@ exports.getStatus = function (req, res, next) {
   }
 
   var opts = ''
-  var fields = {'_id': 0, 'messages': 0, 'revisionInfo': 0}
+  var fields = {'messages': 0, 'revisionInfo': 0}
   var populate = {path: 'patientId doctorId', select: {'_id': 0, 'userId': 1, 'name': 1}}
 
   Counsel.getSome(query, function (err, items) {
