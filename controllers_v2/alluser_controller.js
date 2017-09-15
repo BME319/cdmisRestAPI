@@ -1030,6 +1030,13 @@ exports.login = function (req, res, next) {
       if (role === 'doctor' && Number(item.reviewStatus) !== 1) {
         role = 'guest'
       }
+      if (role === 'PC') {         // PC端登录 修改默认输入角色为'PC'，并赋值 userPayload 中 role 为该用户的所有角色 2017-09-15 lgf
+        var roles = item.role
+        var _role = 'PC'
+        if (roles.length !== 0) {  // 其实用户至少有一个角色，默认以第一个角色登录
+          role = roles[0]
+        }
+      }
       if (password !== item.password && openIdFlag === 0) {
         // 2017-06-07GY调试
         // console.log('login_err_password_not_correct');
@@ -1050,13 +1057,32 @@ exports.login = function (req, res, next) {
 
                     // csq 返回token信息
                     // console.log(user);
-          var userPayload = {
-            _id: user._id,
-            userId: user.userId,
-            name: user.name,
-            role: role,
-            exp: Date.now() + config.TOKEN_EXPIRATION * 1000
+          var userPayload = {}
+          if (_role === 'PC') {
+            userPayload = {
+              _id: user._id,
+              userId: user.userId,
+              name: user.name,
+              role: user.role,
+              exp: Date.now() + config.TOKEN_EXPIRATION * 1000
+            }
+          } else {
+            userPayload = {
+              _id: user._id,
+              userId: user.userId,
+              name: user.name,
+              role: role,
+              exp: Date.now() + config.TOKEN_EXPIRATION * 1000
+            }
           }
+          // console.log('userPayload', userPayload)
+          // var userPayload = {
+          //   _id: user._id,
+          //   userId: user.userId,
+          //   name: user.name,
+          //   role: role,
+          //   exp: Date.now() + config.TOKEN_EXPIRATION * 1000
+          // }
                     //  console.log(Date.now());
                     // console.log( Date.now() + 60 * 3 * 1000);
           var token = jwt.sign(userPayload, config.tokenSecret, {algorithm: 'HS256'}, {expiresIn: config.TOKEN_EXPIRATION})
