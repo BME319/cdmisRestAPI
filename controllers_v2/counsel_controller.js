@@ -592,7 +592,7 @@ exports.changeCounselType = function (req, res, next) {
     upObj = {
       type: 3
     }
-    req.body.type = 3
+    req.body.newtype = 3
   } else if (req.body.type === 1 && req.body.changeType === 'type7') {
     // type7 咨询转加急咨询
     query = {
@@ -601,7 +601,7 @@ exports.changeCounselType = function (req, res, next) {
     upObj = {
       type: 7
     }
-    req.body.type = 7
+    req.body.newtype = 7
   } else {
     return res.json({result: '不可更改的类型!'})
   }
