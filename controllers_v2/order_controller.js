@@ -417,7 +417,7 @@ exports.checkCounsel = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     if (item === null || item.length === 0) {
-      res.status(500).send('nonexistence')
+      res.json('nonexistence')
     }
     else {
       
