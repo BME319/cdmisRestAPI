@@ -130,6 +130,31 @@ exports.getOrderNo = function (req, res, next) {
   })
 }
 
+exports.getchangeOrderNo = function (req, res, next) {
+  var doctorId = req.body.doctorId || null
+  var patientId = req.body.patientId || null
+  var paystatus = Number(2)
+  var type = req.body.newtype || null
+  if (type !== null) {
+    type = Number(type)
+  }
+  // var _orderNo = req.query.orderNo || null
+  if (doctorId === null || patientId === null) {
+    return res.json({result: 1, msg: '请输入doctorId、patientId'})
+  }
+  var query = {userId: patientId, doctorId: doctorId, paystatus: paystatus, type: type}
+  Order.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err.errmsg)
+    } else if (item === null) {
+      return res.status(404).json({result: '更新订单错误：无法查询到订单请重新尝试或联系管理员'})
+    } else {
+      req.body.orderNo = item.orderNo
+      next()
+    }
+  })
+}
+
 exports.insertOrder = function (req, res, next) {
   // var money = req.body.money || null
   var money = req.body.money
