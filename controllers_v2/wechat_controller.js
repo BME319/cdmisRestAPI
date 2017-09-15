@@ -14,6 +14,8 @@ var OpenIdTmp = require('../models/openId')
 var Order = require('../models/order')
 var Message = require('../models/message')
 var News = require('../models/news')
+var Counselautochangestatus = require('../models/counselautochangestatus')
+var Counsel = require('../models/counsel')
 
 // appid: wx8a6a43fb9585fb7c;secret: b23a4696c3b0c9b506891209d2856ab2
 
@@ -795,14 +797,14 @@ exports.autoRefundQuery = function (req, res) {
       body: xmlString
     }, function (err, response, body) {
       if (err) {
-        console.log(err)
-        console.log('debug_label_2')
+        console.log(new Date(), err)
+        // console.log(new Date(), 'debug_label_2')
         if (rolesIndex < wxApiUserObject.length - 1) {
           refundQuery(orderNosIndex, ++rolesIndex)
         } else if (orderNosIndex < orderNos.length - 1) {
           refundQuery(++orderNosIndex, 0)
         } else {
-          console.log('auto_refund_query_success')
+          console.log(new Date(), 'auto_refund_query_success')
         }
       } else {
         let jsondata
@@ -810,7 +812,7 @@ exports.autoRefundQuery = function (req, res) {
           jsondata = result || {}
         })
         if (jsondata.xml.return_code === 'SUCCESS' && jsondata.xml.result_code === 'SUCCESS') {
-          console.log(jsondata.xml)
+          console.log(new Date(), jsondata.xml)
           // 修改数据库中订单状态
           let queryOrder = {orderNo: orderNos[orderNosIndex]}
           let upObj = {
@@ -819,27 +821,27 @@ exports.autoRefundQuery = function (req, res) {
           }
           Order.updateOne(queryOrder, upObj, function (err, uporder) {
             if (err) {
-              console.log(err)
-              console.log('debug_label_3')
+              console.log(new Date(), err)
+              // console.log(new Date(), 'debug_label_3')
             }
             if (rolesIndex < wxApiUserObject.length - 1) {
               refundQuery(orderNosIndex, ++rolesIndex)
             } else if (orderNosIndex < orderNos.length - 1) {
               refundQuery(++orderNosIndex, 0)
             } else {
-              console.log('auto_refund_query_success')
+              console.log(new Date(), 'auto_refund_query_success')
             }
           })
         } else {
           // return res.status(404).json({results: jsondata.xml})
-          console.log(jsondata.xml)
-          console.log('debug_label_1')
+          console.log(new Date(), jsondata.xml)
+          // console.log('debug_label_1')
           if (rolesIndex < wxApiUserObject.length - 1) {
             refundQuery(orderNosIndex, ++rolesIndex)
           } else if (orderNosIndex < orderNos.length - 1) {
             refundQuery(++orderNosIndex, 0)
           } else {
-            console.log('auto_refund_query_success')
+            console.log(new Date(), 'auto_refund_query_success')
           }
         }
       }
@@ -847,16 +849,168 @@ exports.autoRefundQuery = function (req, res) {
   }
 
   Order.getSome(query, function (err, orderItems) {
-    if (err) { console.log('getOrderItemErr') }
+    if (err) { console.log(new Date(), 'getOrderItemErr') }
     // console.log(orderItems)
     if (orderItems.length > 0) {
       for (let i = 0; i < orderItems.length; i++) { orderNos[i] = orderItems[i].orderNo }
-      console.log(orderNos)
+      // console.log(orderNos)
       refundQuery(0, 0)
     } else {
-      console.log('auto_refund_query_success')
+      console.log(new Date(), 'auto_refund_query_success')
     }
   })
+}
+
+// 超时结束并且未回复的咨询退款 2017-09-14 GY
+exports.autoRefundCounsel = function () {
+  function add0 (m) {
+    return m < 10 ? '0' + m : m
+  }
+  function add00 (m) {
+    return m < 10 ? '00' + m : (m < 100 ? '0' + m : m)
+  }
+  let now = new Date()
+  let y = now.getFullYear()
+  let m = now.getMonth() + 1
+  let d = now.getDate()
+  let h = now.getHours()
+
+  let start_zone = now - 60 * 60 * 1000 - 2 * 60 * 1000
+  // let start_zone = now - 24 * 60 * 60 * 1000
+  let queryCounselId = {
+    endTime: {$gt:start_zone, $lt:now}, 
+    reply: 0
+  }
+  let fieldCACS = {counselId: 1}
+  // 根据时间区间和0回复查询counselId，得到需要退款的咨询ID(array)
+  Counselautochangestatus.getSome(queryCounselId, function (err, counselItems) {
+    if (err) {
+      console.log(new Date(), err)
+    } else if (counselItems.length === 0) {
+      console.log(now, 'auto_refund_success:_no_counsels_auto_ended')
+    } else {
+      let counselIds = []
+      let counsel_ids = []
+      // 遍历需要退款的ID，依次退款
+      for (let i = 0; i < counselItems.length; i++) {
+        if (counselItems[i].counselId) {
+          let querycounsel_id = {counselId: counselItems[i].counselId}
+          // 根据counselId查询counsels表中的_id
+          Counsel.getOne(querycounsel_id, function (err, CounselItem) {
+            if (err) {
+              console.log(new Date(), err)
+              if (i === counselItems.length-1) {
+                console.log(new Date(), 'auto_refund_success:_finish')
+              }
+            } else if (CounselItem === null) {
+              console.log(new Date(), 'counselId_' + counselItems[i].counselId + '_not_found')
+              if (i === counselItems.length-1) {
+                console.log(new Date(), 'auto_refund_success:_finish')
+              }
+            } else {
+              // 注意order表里字段名：conselObject不是counselObject
+              let queryOrder = {conselObject: CounselItem._id}
+              // 根据counsels表中的_id查询需要进行退款的orderNo
+              Order.getOne(queryOrder, function (err, orderItem) {
+                if (err) {
+                  console.log(new Date(), err)
+                  if (i === counselItems.length-1) {
+                    console.log(new Date(), 'auto_refund_success:_finish')
+                  }
+                } else if (orderItem === null) {
+                  console.log(new Date(), 'counsel_id_' + CounselItem._id + '_not_found')
+                  if (i === counselItems.length-1) {
+                    console.log(new Date(), 'auto_refund_success:_finish')
+                  }
+                } else {
+                  // 验证订单支付状态
+                  if (orderItem.paystatus === 2) {
+                    // 生成退款单号
+                    let refundNo = 'Rauto' + y + add0(m) + add0(d) + add0(h) + add00(i)
+                    // 尝试在所有商户提交退款请求
+                    for (let value in config.wxDeveloperConfig) {
+                      if (config.wxDeveloperConfig[value].pfxpath) {
+                        // 请求参数
+                        let paramData = {
+                          appid: config.wxDeveloperConfig[value].appid,   // 公众账号ID
+                          mch_id: config.wxDeveloperConfig[value].merchantid,   // 商户号
+                          nonce_str: commonFunc.randomString(32),   // 随机字符串
+                          sign_type: 'MD5',
+                          out_trade_no: orderItem.orderNo,     // 商户订单号
+                          out_refund_no: refundNo,
+                          total_fee: orderItem.money,
+                          refund_fee: orderItem.money
+                        }
+
+                        let signStr = commonFunc.rawSort(paramData)
+                        signStr = signStr + '&key=' + config.wxDeveloperConfig[value].merchantkey
+
+                        paramData.sign = commonFunc.convertToMD5(signStr, true)    // 签名
+                        let xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
+                        let xmlString = xmlBuilder.buildObject(paramData)
+
+                        // 读取商户证书
+                        let pfxpath = config.wxDeveloperConfig[value].pfxpath
+
+                        // console.log(wxApis.refund);
+                        // console.log(xmlString);
+                        // console.log(pfxpath);
+                        // console.log(req.wxApiUserObject.merchantid);
+                        // return res.json({result: 'finish'});
+
+                        request({
+                          url: wxApis.refund,
+                          method: 'POST',
+                          body: xmlString,
+                          agentOptions: {
+                            pfx: fs.readFileSync(pfxpath),
+                            passphrase: config.wxDeveloperConfig[value].merchantid
+                          }
+                        }, function (err, response, body) {
+                          if (err) {
+                            console.log(new Date(), err)
+                          } else {
+                            // return res.json({results: body});
+                            var jsondata
+                            xml2js.parseString(body, { explicitArray: false, ignoreAttrs: true }, function (err, result) {
+                              jsondata = result || {}
+                            })
+                            // return res.json({results: jsondata})
+                            console.log(new Date(), jsondata)
+                            // console.log(value)
+                            if (i === counselItems.length-1 && value === 'appsjkshz') {
+                              console.log(new Date(), 'auto_refund_success:_finish')
+                            }
+                            // if (jsondata.xml.result_code === 'SUCCESS') {
+                            //   break
+                            // }
+                          }
+                        })
+                      } else {
+                        // console.log(value)
+                        if (i === counselItems.length-1 && value === 'appsjkshz') {
+                          console.log(new Date(), 'auto_refund_success:_finish')
+                        }
+                      }
+                    }
+                  } else {
+                    console.log('order_paystatus_error:_not_allowed_refund')
+                    if (i === counselItems.length-1) {
+                      console.log(new Date(), 'auto_refund_success:_finish')
+                    }
+                  }
+                }
+              })
+            }
+          })
+        } else {
+          if (i === counselItems.length-1) {
+            console.log(new Date(), 'auto_refund_success:_finish')
+          }
+        }
+      }
+    }
+  }, '', fieldCACS)
 }
 
 // 测试函数用的
