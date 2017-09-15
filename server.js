@@ -163,3 +163,6 @@ schedule.scheduleJob('0 0 23 * * *', departmentMonitorCtrl.autoDepartmentDaily)
 // 每天8:00自动推送给患者和医生咨询或问诊超时自动结束的微信模板消息 2017-09-07 lgf
 var counselCtrl = require('./controllers_v2/counsel_controller')
 schedule.scheduleJob('30 0 8 * * *', counselCtrl.counselAutoEndMsg)
+
+// 每个小时的57分，将超时结束并且未回复的咨询退款 2017-09-14 GY
+schedule.scheduleJob('0 57 * * * *', wechatCtrl.autoRefundCounsel)
