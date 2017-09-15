@@ -181,6 +181,9 @@ exports.insertOrder = function (req, res, next) {
       } else if (req.body.class === '06') {
         // 加急咨询
         trueMoney = doctor.charge3 * 100
+      } else if (req.body.class === '07') {
+        // 咨询升级加急咨询
+        trueMoney = doctor.charge3 * 100 - doctor.charge1 * 100
       } else {
         return res.status(403).send('服务类型不存在!')
       }
@@ -420,9 +423,7 @@ exports.checkCounsel = function (req, res) {
     }
     if (item === null || item.length === 0) {
       res.json({msg:'nonexistence'})
-    }
-    else {
-      
+    } else {
       res.json({results: item})
     }
   })
