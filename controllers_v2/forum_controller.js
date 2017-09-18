@@ -279,7 +279,8 @@ exports.getMyposts = function (req, res) {
     {
       $project: {
         'userId': 1,
-        posts: '$posts.postId'
+        posts: '$posts.postId',
+        favorites: '$favorites.postId'
       }
     },
     {
@@ -301,7 +302,8 @@ exports.getMyposts = function (req, res) {
         time: '$collections.time',
         anonymous: '$collections.anonymous',
         replyCount: '$collections.replyCount',
-        favoritesNum: '$collections.favoritesNum'
+        favoritesNum: '$collections.favoritesNum',
+        'favorites': 1
       }
     },
     {
@@ -322,7 +324,26 @@ exports.getMyposts = function (req, res) {
         'title': 1,
         'replyCount': 1,
         'favoritesNum': 1,
-        avatar: '$userinfo.photoUrl'
+        avatar: '$userinfo.photoUrl',
+        'favorites': 1
+      }
+    },
+    {
+      $project: {
+        'postId': 1,
+        'sponsorId': 1,
+        'sponsorName': 1,
+        'time': 1,
+        'title': 1,
+        'replyCount': 1,
+        'favoritesNum': 1,
+        'avatar': 1,
+        favoritesstatus: {
+          $cond: {if: {$in: ['$postId', '$favorites']},
+            then: 1,
+            else: 0
+          }
+        }
       }
     },
     {$sort: {time: -1}},
