@@ -88,6 +88,7 @@ exports.getNewsByReadOrNot = function (req, res) {
 // 修改某种类型消息的已读和未读状态
 exports.changeNewsStatus = function (req, res) {
   let type = req.body.type || null
+  let sendBy = req.body.sendBy || null
   let query = {
     userId: req.session.userId,
     userRole: req.session.role
@@ -106,6 +107,9 @@ exports.changeNewsStatus = function (req, res) {
       type = Number(req.body.type)
       query['type'] = type
     }
+  }
+  if (sendBy !== null) { // 在群聊时，填写团队名或者病历号
+    query['sendBy'] = sendBy
   }
 
   var upObj = {
