@@ -798,6 +798,7 @@ function bodyGen (msg, MESSAGE_ID) {
   var msgType = msg.contentType
   var isSingle = msg.targetType === 'single'
   var receiver = msg.targetID
+  var teamId = msg.teamId || null
   var sender = isID(msg.fromID) || isID(msg.fromName)
   // var content = {}
   var desc = ''
@@ -805,6 +806,7 @@ function bodyGen (msg, MESSAGE_ID) {
   var body = {
     userId: receiver,
     sendBy: sender,
+    teamId: teamId, 
     type: msg.newsType,
     title: '',
     description: '',
