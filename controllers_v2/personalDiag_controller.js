@@ -575,7 +575,7 @@ exports.cancelBookedPds = function (req, res) {
                         messageId: 'M' + nowstr + item,
                         readOrNot: 0,
                         time: now,
-                        title: new Date(toRefund.bookingDay).toLocaleDateString() + ',' + toRefund.doctorId.name + '面诊停诊',
+                        title: new Date(toRefund.bookingDay).toLocaleDateString() + ',' + toRefund.doctorId.name + '医生面诊服务停诊',
                         description: '您预约' + toRefund.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + orderNo + '。'
                       }
                       let newmessage = new Message(newData)
