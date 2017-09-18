@@ -1093,7 +1093,7 @@ exports.login = function (req, res, next) {
                     // JSON.stringify(userPayload),
           var refreshtokenData = {
             refreshtoken: refreshToken,
-            userPayload: JSON.stringify(userPayload), 
+            userPayload: JSON.stringify(userPayload),
             userId: user.userId
           }
                     // console.log(refreshtokenData);

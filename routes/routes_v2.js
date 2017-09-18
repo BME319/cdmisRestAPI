@@ -9248,7 +9248,6 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/forump/deletecomment', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deleteComment)
   app.post(version + '/forump/deletefavorite', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deleteFavorite)
 
-
   // 科主任报告
   /** JYF 2017-08-16
    * @swagger

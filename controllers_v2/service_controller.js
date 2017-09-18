@@ -353,7 +353,8 @@ exports.recharge = function (req, res) {
       return res.status(500).send(err)
     } else {
       let doctorId = itemO.doctorId
-      let money = Number(itemO.money)
+      // let money = Number(itemO.money)
+      let money = Number(itemO.money) / 100
       let queryA = {userId: doctorId}
       let upObjA = {$inc: {money: money}}
       let optsA = {upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true}

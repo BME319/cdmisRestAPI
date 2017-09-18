@@ -300,13 +300,15 @@ exports.updateOrder = function (req, res) {
     if (err) {
       return res.status(500).send(err)
     }
-    if (paystatus === 2 && conselObject !== null) {
+    console.log(item.paystatus)
+    console.log(conselObject)
+    if (item.paystatus === 2 && conselObject !== null) {
       var query1 = {
         userId: item.doctorId
       }
       Account.getOne(query1, function (err, item1) {
         if (err) {
-          return res.status(500).send(err.errmsg)
+          return res.status(500).send(err)
         }
         if (item1 === null) {
           var accountData = {
@@ -316,19 +318,21 @@ exports.updateOrder = function (req, res) {
           var newAccount = new Account(accountData)
           newAccount.save(function (err, accountInfo) {
             if (err) {
-              return res.status(500).send(err.errmsg)
+              return res.status(500).send(err)
             } else {
               res.json({result: 'success!'})
             }
           })
         } else {
-          var _money1 = item.money + item1.money
           var upObj = {
-            $set: {money: _money1 / 100}
+            $inc: {
+              money: item.money / 100
+              // money: item.money
+            }
           }
           Account.update(query1, upObj, function (err, upaccount) {
             if (err) {
-              return res.status(500).send(err.errmsg)
+              return res.status(500).send(err)
             }
             if (upaccount.nModified === 0) {
               return res.json({result: '请获取账户信息确认是否修改成功'})
