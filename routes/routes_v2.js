@@ -6047,7 +6047,7 @@ module.exports = function (app, webEntry, acl) {
    *       500:
    *         description: Server internal error
    */
-  // 查询咨询免费次数，或者咨询某个医生的次数 权限 患者
+  // 查询咨询免费次数，或者咨询某个医生的次数 权限 患者/医生
   app.get(version + '/account/counts', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), accountCtrl.checkPatient, accountCtrl.checkDoctor, accountCtrl.getCounts)
   /**
    * @swagger

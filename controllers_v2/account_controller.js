@@ -46,8 +46,28 @@ exports.checkPatient = function (req, res, next) {
   // } else {
   //   req.patientId = req.query.patientId
   // }
+  if (req.session.role === 'patient') {
+    if (req.session.userId === null || req.session.userId === '' || req.session.userId === undefined) {
+      return res.json({result: '请填写patientId!'})
+    } else {
+      req.patientId = req.session.userId
+      req.role = req.session.role
+    }
+  } else if (req.session.role === 'doctor') {
+    // req.doctorId = req.session.userId
+    if (!req.query.patientId && !req.body.patientId) {
+        return res.status(412).json({result: '请填写patientId!'})
+    } else if (req.body.patientId) {
+      req.patientId = req.body.patientId
+    } else {
+      req.patientId = req.query.patientId
+    }
+  } else {
+    return res.status(412).send('token_role_not_available')
+  }
   // 判断患者ID是否存在
-  var query = {userId: req.patientId, role: req.role}
+  // var query = {userId: req.patientId, role: req.role}
+  let query = {userId: req.patientId, role: 'patient'}
   // Patient.getOne(query, function (err, item) {
   Alluser.getOne(query, function (err, item) {
     if (err) {
@@ -102,7 +122,12 @@ exports.checkDoctor = function (req, res, next) {
     } else {
     // req.doctorId = req.body.doctorId
     // 判断医生ID是否存在
-      req.doctorId = req.body.doctorId
+      if (req.session.role === 'doctor') {
+        req.doctorId = req.session.userId
+      } else {
+        req.doctorId = req.body.doctorId
+      }
+      // req.doctorId = req.body.doctorId
       var query = {userId: req.doctorId, role: 'doctor'}
       // Doctor.getOne(query, function (err, item) {
       Alluser.getOne(query, function (err, item) {
