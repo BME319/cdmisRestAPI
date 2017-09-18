@@ -326,7 +326,8 @@ exports.updateOrder = function (req, res) {
         } else {
           var upObj = {
             $inc: {
-              money: item.money
+              money: item.money / 100
+              // money: item.money
             }
           }
           Account.update(query1, upObj, function (err, upaccount) {

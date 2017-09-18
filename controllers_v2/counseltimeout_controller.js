@@ -86,7 +86,7 @@ exports.autoCounselNews = function (req, res) {
               return res.status(500).send(err.errmsg)
             }
           }
-        })
+        }, {upsert: true})
       })
     }
   })
