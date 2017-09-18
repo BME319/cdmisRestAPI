@@ -369,7 +369,7 @@ exports.insertTeamNews = function (req, res) {
   req.body.readOrNot = 1
   insertOneNews(userId, sendBy, req, res) // 用户发送消息记录
   req.body.readOrNot = 0
-  var TeamId = userId
+  var TeamId = req.body.teamId || userId
   var query = {
     teamId: TeamId
   }
