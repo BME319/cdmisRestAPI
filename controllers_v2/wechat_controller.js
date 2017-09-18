@@ -492,6 +492,8 @@ exports.payResult = function (req, res) {
     var payRes = jsondata.xml
     var paytime = payRes.time_end[0]
     paytime = paytime.substr(0, 4) + '-' + paytime.substr(4, 2) + '-' + paytime.substr(6, 2) + 'T' + paytime.substr(8, 2) + ':' + paytime.substr(10, 2) + ':' + paytime.substr(12, 2)
+    paytime = new Date(paytime)
+    paytime = new Date(paytime.valueOf() - 8 * 60 * 60 * 1000)
 
     var orderNo = payRes.out_trade_no[0].split('-')[0]
 
@@ -509,7 +511,7 @@ exports.payResult = function (req, res) {
           if (item.paystatus !== 2) {    // 非成功
             upObj = {
               paystatus: 2,
-              paytime: new Date(paytime)
+              paytime: paytime
             }
 
             Order.updateOne(query, {$set: upObj}, function (err, item) {
@@ -526,7 +528,7 @@ exports.payResult = function (req, res) {
           if (item.paystatus !== 3) {    // 非失败
             upObj = {
               paystatus: 3,
-              paytime: new Date(paytime)
+              paytime: paytime
             }
 
             Order.updateOne(query, {$set: upObj}, function (err, item) {
@@ -878,7 +880,7 @@ exports.autoRefundCounsel = function () {
   let start_zone = now - 60 * 60 * 1000 - 2 * 60 * 1000
   // let start_zone = now - 24 * 60 * 60 * 1000
   let queryCounselId = {
-    endTime: {$gt:start_zone, $lt:now}, 
+    endTime: {$gt: start_zone, $lt: now},
     reply: 0
   }
   let fieldCACS = {counselId: 1}
@@ -899,12 +901,12 @@ exports.autoRefundCounsel = function () {
           Counsel.getOne(querycounsel_id, function (err, CounselItem) {
             if (err) {
               console.log(new Date(), err)
-              if (i === counselItems.length-1) {
+              if (i === counselItems.length - 1) {
                 console.log(new Date(), 'auto_refund_success:_finish')
               }
             } else if (CounselItem === null) {
               console.log(new Date(), 'counselId_' + counselItems[i].counselId + '_not_found')
-              if (i === counselItems.length-1) {
+              if (i === counselItems.length - 1) {
                 console.log(new Date(), 'auto_refund_success:_finish')
               }
             } else {
@@ -914,12 +916,12 @@ exports.autoRefundCounsel = function () {
               Order.getOne(queryOrder, function (err, orderItem) {
                 if (err) {
                   console.log(new Date(), err)
-                  if (i === counselItems.length-1) {
+                  if (i === counselItems.length - 1) {
                     console.log(new Date(), 'auto_refund_success:_finish')
                   }
                 } else if (orderItem === null) {
                   console.log(new Date(), 'counsel_id_' + CounselItem._id + '_not_found')
-                  if (i === counselItems.length-1) {
+                  if (i === counselItems.length - 1) {
                     console.log(new Date(), 'auto_refund_success:_finish')
                   }
                 } else {
@@ -978,7 +980,7 @@ exports.autoRefundCounsel = function () {
                             // return res.json({results: jsondata})
                             console.log(new Date(), jsondata)
                             // console.log(value)
-                            if (i === counselItems.length-1 && value === 'appsjkshz') {
+                            if (i === counselItems.length - 1 && value === 'appsjkshz') {
                               console.log(new Date(), 'auto_refund_success:_finish')
                             }
                             // if (jsondata.xml.result_code === 'SUCCESS') {
@@ -988,14 +990,14 @@ exports.autoRefundCounsel = function () {
                         })
                       } else {
                         // console.log(value)
-                        if (i === counselItems.length-1 && value === 'appsjkshz') {
+                        if (i === counselItems.length - 1 && value === 'appsjkshz') {
                           console.log(new Date(), 'auto_refund_success:_finish')
                         }
                       }
                     }
                   } else {
                     console.log('order_paystatus_error:_not_allowed_refund')
-                    if (i === counselItems.length-1) {
+                    if (i === counselItems.length - 1) {
                       console.log(new Date(), 'auto_refund_success:_finish')
                     }
                   }
@@ -1004,7 +1006,7 @@ exports.autoRefundCounsel = function () {
             }
           })
         } else {
-          if (i === counselItems.length-1) {
+          if (i === counselItems.length - 1) {
             console.log(new Date(), 'auto_refund_success:_finish')
           }
         }
