@@ -51,11 +51,12 @@ exports.getCommentsByDoc = function (req, res) {
           let returns = []
           for (let item in items) {
             if ((items[item].patientId || null) === null) {
-              let temp = {}
-              temp.patientId = {phoneNo: '***********'}
-              temp.time = items[item].time
-              temp.totalScore = items[item].totalScore
-              returns.push(temp)
+              // 09-19 YQC 前端要求patient不存在时不显示该条评价
+              // let temp = {}
+              // temp.patientId = {phoneNo: '***********'}
+              // temp.time = items[item].time
+              // temp.totalScore = items[item].totalScore
+              // returns.push(temp)
             } else {
               items[item].patientId.phoneNo = items[item].patientId.phoneNo.slice(0, 3) + '*******' + items[item].patientId.phoneNo.slice(-1)
               returns.push(items[item])
