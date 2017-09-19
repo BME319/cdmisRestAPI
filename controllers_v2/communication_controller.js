@@ -815,6 +815,9 @@ function bodyGen (msg, MESSAGE_ID) {
     userRole: msg.targetRole,
     messageId: MESSAGE_ID // 从post communication/postCommunication response取
   }
+  if (body.type === 15) {
+    body['caseType'] = Number(body.teamId) || 0
+  }
   if (msgType === 'custom') {
     if (msg.content.contentStringMap) {
       msgType = msg.content.contentStringMap.type
