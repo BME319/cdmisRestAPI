@@ -20,8 +20,12 @@ exports.getSessionObject = function (req, res, next) {
         req.body.insuranceCObjectS = user
         roleFlag = 0
       }
+      if (req.session.role === 'admin' || req.session.role.indexOf('admin') !== -1) {
+        req.body.adminObjectS = user
+        roleFlag = 0
+      }
       if (roleFlag) {
-        return res.status(400).send('Role of the User is not a insuranceA / insuranceC')
+        return res.status(400).send('Role of the User is not a insuranceA / insuranceC / admin')
       } else {
         return next()
       }
@@ -71,7 +75,8 @@ exports.getInsuranceAObject = function (req, res, next) {
 exports.getPatients = function (req, res) {
   let iAOS = req.body.insuranceAObjectS || null
   let iCOS = req.body.insuranceCObjectS || null
-  if ((iAOS || iCOS) === null) {
+  let iAdminOS = req.body.adminObjectS || null
+  if ((iAOS || iCOS || iAdminOS) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
   let status = req.query.status || null
@@ -154,8 +159,9 @@ exports.getPatients = function (req, res) {
 exports.getHistory = function (req, res) {
   let iAOS = req.body.insuranceAObjectS || null
   let iCOS = req.body.insuranceCObjectS || null
+  let iAdminOS = req.body.adminObjectS || null
   let pO = req.body.patientObject || null
-  if (((iAOS || iCOS) && pO) === null) {
+  if (((iAOS || iCOS || iAdminOS) && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
   let query = {patientId: pO._id, status: {$ne: 5}}
@@ -473,8 +479,9 @@ exports.insertPolicy = function (req, res) {
 exports.getPolicy = function (req, res) {
   let iAOS = req.body.insuranceAObjectS || null
   let iCOS = req.body.insuranceCObjectS || null
+  let iAdminOS = req.body.adminObjectS || null
   let pO = req.body.patientObject || null
-  if (((iAOS || iCOS) && pO) === null) {
+  if (((iAOS || iCOS || iAdminOS) && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
   let query = {patientId: pO._id, status: {$ne: 5}}
