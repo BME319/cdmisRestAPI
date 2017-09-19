@@ -280,7 +280,7 @@ exports.getMyposts = function (req, res) {
       $project: {
         'userId': 1,
         posts: '$posts.postId',
-        favorites: '$favorites.postId'
+        favorites: {$ifNull: ['$favorites.postId', []]}
       }
     },
     {
