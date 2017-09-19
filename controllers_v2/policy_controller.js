@@ -8,23 +8,27 @@ exports.getSessionObject = function (req, res, next) {
   Alluser.getOne(query, function (err, user) {
     if (err) {
       return res.status(500).send(err)
-    }
-    if (user === null) {
+    } else if (user === null) {
       return res.status(404).send('User Not Found')
-    } else if (req.session.role === 'patient') {
-      req.body.patientObject = user
-      next()
-    } else if (req.session.role === 'doctor') {
-      req.body.doctorObject = user
-      next()
-    } else if (req.session.role === 'insuranceA') {
-      req.body.insuranceAObject = user
-      next()
-    } else if (req.session.role === 'insuranceC') {
-      req.body.insuranceCObject = user
-      next()
     } else {
-      return res.status(400).send('Role of the User is not a doctor / patient / insuranceA / insuranceC')
+      let roleFlag = 1
+      if (req.session.role === 'insuranceA' || req.session.role.indexOf('insuranceA') !== -1) {
+        req.body.insuranceAObjectS = user
+        roleFlag = 0
+      }
+      if (req.session.role === 'insuranceC' || req.session.role.indexOf('insuranceC') !== -1) {
+        req.body.insuranceCObjectS = user
+        roleFlag = 0
+      }
+      if (req.session.role === 'admin' || req.session.role.indexOf('admin') !== -1) {
+        req.body.adminObjectS = user
+        roleFlag = 0
+      }
+      if (roleFlag) {
+        return res.status(400).send('Role of the User is not a insuranceA / insuranceC / admin')
+      } else {
+        return next()
+      }
     }
   })
 }
@@ -69,28 +73,29 @@ exports.getInsuranceAObject = function (req, res, next) {
 
 // 保险专员／主管获取患者列表 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-08 YQC
 exports.getPatients = function (req, res) {
-  let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceCObject || null
-  if ((iAO || iCO) === null) {
+  let iAOS = req.body.insuranceAObjectS || null
+  let iCOS = req.body.insuranceCObjectS || null
+  let iAdminOS = req.body.adminObjectS || null
+  if ((iAOS || iCOS || iAdminOS) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
-  let status = Number(req.query.status || null)
+  let status = req.query.status || null
   let _name = req.query.name || null
   let _agentName = req.query.agentName || null
   let _gender = req.query.gender || null
   if (_gender !== null) {
-    if (_gender !== 1 && _gender !== 2) {
+    if (Number(_gender) !== 1 && Number(_gender) !== 2) {
       return res.json({msg: '请确认gender的输入是否正确', code: 1})
     }
   }
   let _phone = req.query.phoneNo || null
 
   let query = {}
-  if (req.session.role === 'insuranceA') {
-    query['currentAgent'] = req.body.insuranceAObject._id
+  if (req.session.role === 'insuranceA' || (iAOS !== null && iCOS === null)) { // 专员只能获取自己负责的患者
+    query['currentAgent'] = iAOS._id
   }
-  if ((status !== null || status !== undefined || status !== '') && status !== 9) { // 输入9返回所有患者列表
-    query['status'] = status
+  if ((status !== null) && Number(status) !== 9) { // 输入9返回所有患者列表
+    query['status'] = Number(status)
   }
 
   let opts = ''
@@ -152,23 +157,23 @@ exports.getPatients = function (req, res) {
 
 // 保险专员／主管获取患者跟踪记录详情 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-17 YQC
 exports.getHistory = function (req, res) {
-  let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceCObject || null
+  let iAOS = req.body.insuranceAObjectS || null
+  let iCOS = req.body.insuranceCObjectS || null
+  let iAdminOS = req.body.adminObjectS || null
   let pO = req.body.patientObject || null
-  if (((iAO || iCO) && pO) === null) {
+  if (((iAOS || iCOS || iAdminOS) && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
-  let patientId = req.body.patientObject._id
-  let query = {patientId: patientId, status: {$ne: 5}}
+  let query = {patientId: pO._id, status: {$ne: 5}}
   let opts = ''
   let skip = req.query.skip || null
   let limit = req.query.limit || null
-  let flag = 0
+  let countFlag = 0
   if (limit !== null && skip !== null) {
     limit = Number(limit)
     skip = Number(skip)
-  } else if (limit === null && skip === null) {
-    flag = 1
+  } else if (limit === null && skip === null) { // limit skip 未输入，返回计数
+    countFlag = 1
   } else {
     return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
   }
@@ -178,9 +183,9 @@ exports.getHistory = function (req, res) {
   Policy.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
-    } else if (req.session.role === 'insuranceA' && String(item.currentAgent) !== String(req.body.insuranceAObject._id)) {
-      res.json({msg: '非负责该用户的保险专员', code: 1})
-    } else if (flag === 1) {
+    } else if ((req.session.role === 'insuranceA' || (iAOS !== null && iCOS === null)) && String(item.currentAgent) !== String(iAOS._id)) {
+      res.json({msg: '非负责该用户的保险专员', code: 1}) // 专员只能获取自己负责的患者跟踪记录
+    } else if (countFlag === 1) {
       res.json({data: item.followUps.length, code: 0})
     } else {
       res.json({data: item.followUps.reverse().slice(skip, skip + limit), code: 0})
@@ -204,7 +209,7 @@ exports.getAgents = function (req, res, next) {
   if (limit !== null && skip !== null) {
     req.limit = limit
     req.skip = skip
-  } else if (limit === null && skip === null) {
+  } else if (limit === null && skip === null) { // limit skip 未输入，返回全部专员列表
     req.full = 1
   } else {
     return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
@@ -235,7 +240,7 @@ exports.getAgents = function (req, res, next) {
             returns.push(itemTemp)
             req.returns = returns
             if (req.returns.length === items.length) {
-              next()
+              return next()
             }
           }
         })
@@ -254,16 +259,16 @@ exports.sortAgents = function (req, res) {
   if (req.full) {
     res.json({data: returns, code: 0})
   } else {
-    res.json({data: returns.slice(req.skip, req.skip + req.limit), code: 0})
+    res.json({data: returns.slice(Number(req.skip), Number(req.skip) + Number(req.limit)), code: 0})
   }
 }
 
 // 保险主管设置／更换专员 2017-08-08 YQC
 exports.setAgent = function (req, res) {
+  let iCOS = req.body.insuranceCObjectS || null
   let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceCObject || null
   let pO = req.body.patientObject || null
-  if ((iAO && iCO && pO) === null) {
+  if ((iAO && iCOS && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
 
@@ -271,34 +276,27 @@ exports.setAgent = function (req, res) {
   let now = new Date()
   let dayTemp = commonFunc.convertToFormatDate(new Date(now))
   let todayFormat = dayTemp.slice(0, 4) + '年' + dayTemp.slice(4, 6) + '月' + dayTemp.slice(6, 8) + '日'
-  let patientObject = req.body.patientObject
-  let insuranceAObject = req.body.insuranceAObject
-  let insuranceCObject = req.body.insuranceCObject
-  let query = {patientId: patientObject._id, status: {$ne: 5}}
+  let query = {patientId: pO._id, status: {$ne: 5}}
   let upObj = {
     $set: {
-      currentAgent: insuranceAObject._id
+      currentAgent: iAO._id
     }
   }
   Policy.updateOne(query, upObj, function (err, upP) {
     let formerAgent = upP.currentAgent
     if (err) {
       return res.status(500).send(err)
-    } else if (String(formerAgent) === String(insuranceAObject._id)) {
+    } else if (String(formerAgent) === String(iAO._id)) {
       return res.json({code: 1, msg: '专员不需改变'})
     } else {
-      // res.json({date: upP})
-      let followUp = {time: now, type: 2, agentId: insuranceCObject._id}
-      // let agent = {startTime: now, agentId: insuranceAObject._id}
+      let followUp = {time: now, type: 2, agentId: iCOS._id}
       let upAF
-      // if (upP.agents.length === 0) {
-      if (upP.currentAgent === null || upP.currentAgent === undefined || upP.currentAgent === '') {
+      if ((upP.currentAgent || null) === null) {
         reason = '新用户分配专员'
-        followUp['content'] = todayFormat + ' "' + insuranceCObject.name + '"主管因"' + reason + '"分配专员"' + insuranceAObject.name + '"'
+        followUp['content'] = todayFormat + ' "' + iCOS.name + '"主管因"' + reason + '"分配专员"' + iAO.name + '"'
         upAF = {
           $addToSet: {
-            followUps: followUp // ,
-            // agents: agent
+            followUps: followUp
           },
           $set: {status: 1}
         }
@@ -310,11 +308,10 @@ exports.setAgent = function (req, res) {
           }
         })
       } else if (reason !== null) {
-        followUp['content'] = todayFormat + ' "' + insuranceCObject.name + '"主管因"' + reason + '"更换专员为"' + insuranceAObject.name + '"'
+        followUp['content'] = todayFormat + ' "' + iCOS.name + '"主管因"' + reason + '"更换专员为"' + iAO.name + '"'
         upAF = {
           $addToSet: {
-            followUps: followUp // ,
-            // agents: agent
+            followUps: followUp
           }
         }
         Policy.updateOne(query, upAF, function (err, upAF) {
@@ -339,11 +336,11 @@ exports.setAgent = function (req, res) {
 
 exports.editInfo = function (req, res) {
   let query = {userId: req.session.userId}
-  if (req.session.role === 'insuranceC') {
+  if (req.session.role === 'insuranceC' || req.session.role.indexOf('insuranceC') !== -1) {
     // 主管角色，输入insuranceAId参数则修改某专员信息，不输入则修改自己的信息
     let insuranceAId = req.body.insuranceAId || null
     if (insuranceAId !== null) {
-      query = {userId: insuranceAId}
+      query = {userId: insuranceAId, role: 'insuranceA'}
     }
   }
   let upObj = {}
@@ -375,10 +372,10 @@ exports.editInfo = function (req, res) {
 
 // 跟踪记录录入 2017-08-08 YQC
 exports.insertFollowUp = function (req, res) {
-  let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceCObject || null
+  let iAOS = req.body.insuranceAObjectS || null
+  let iCOS = req.body.insuranceCObjectS || null
   let pO = req.body.patientObject || null
-  if (((iAO || iCO) && pO) === null) {
+  if (((iAOS || iCOS) && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
   let content = req.body.content || null
@@ -389,15 +386,14 @@ exports.insertFollowUp = function (req, res) {
   let now = new Date()
   let dayTemp = commonFunc.convertToFormatDate(new Date(now))
   let todayFormat = dayTemp.slice(0, 4) + '年' + dayTemp.slice(4, 6) + '月' + dayTemp.slice(6, 8) + '日'
-  let insuranceObject = req.body.insuranceCObject || req.body.insuranceAObject
-  let patientObject = req.body.patientObject
-  let query = {patientId: patientObject, status: {$ne: 5}}
+  let insuranceObject = iAOS || iCOS
+  let query = {patientId: pO._id, status: {$ne: 5}}
   Policy.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
     } else if (item === null) {
       return res.json({code: 1, msg: '未找到该患者的意向'})
-    } else if (req.session.role === 'insuranceA' && String(item.currentAgent) !== String(insuranceObject._id)) {
+    } else if ((req.session.role === 'insuranceA' || (iAOS !== null && iCOS === null)) && String(item.currentAgent) !== String(insuranceObject._id)) {
       return res.json({code: 1, msg: '不是该患者的负责专员'})
     } else {
       let upObj = {
@@ -426,10 +422,10 @@ exports.insertFollowUp = function (req, res) {
 
 // 保单信息录入 2017-08-08 YQC
 exports.insertPolicy = function (req, res) {
-  let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceCObject || null
+  let iAOS = req.body.insuranceAObjectS || null
+  let iCOS = req.body.insuranceCObjectS || null
   let pO = req.body.patientObject || null
-  if (((iAO || iCO) && pO) === null) {
+  if (((iAOS || iCOS) && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
   let content = req.body.content || null
@@ -440,15 +436,14 @@ exports.insertPolicy = function (req, res) {
   let now = new Date()
   let dayTemp = commonFunc.convertToFormatDate(new Date(now))
   let todayFormat = dayTemp.slice(0, 4) + '年' + dayTemp.slice(4, 6) + '月' + dayTemp.slice(6, 8) + '日'
-  let insuranceObject = req.body.insuranceCObject || req.body.insuranceAObject
-  let patientObject = req.body.patientObject
-  let query = {patientId: patientObject, status: {$in: [0, 1, 4]}}
+  let insuranceObject = iAOS || iCOS
+  let query = {patientId: pO._id, status: {$in: [0, 1, 4]}}
   Policy.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
     } else if (item === null) {
       return res.json({code: 1, msg: '未找到该患者的意向'})
-    } else if (req.session.role === 'insuranceA' && String(item.currentAgent) !== String(insuranceObject._id)) {
+    } else if ((req.session.role === 'insuranceA' || (iAOS !== null && iCOS === null)) && String(item.currentAgent) !== String(insuranceObject._id)) {
       return res.json({code: 1, msg: '不是该患者的负责专员'})
     } else {
       let upObj = {
@@ -482,23 +477,23 @@ exports.insertPolicy = function (req, res) {
 
 // 保险专员／主管获取患者保单详情 专员只能获取自己负责的患者，主管可获取所有患者 2017-08-23 YQC
 exports.getPolicy = function (req, res) {
-  let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceCObject || null
+  let iAOS = req.body.insuranceAObjectS || null
+  let iCOS = req.body.insuranceCObjectS || null
+  let iAdminOS = req.body.adminObjectS || null
   let pO = req.body.patientObject || null
-  if (((iAO || iCO) && pO) === null) {
+  if (((iAOS || iCOS || iAdminOS) && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
-  let patientId = req.body.patientObject._id
-  let query = {patientId: patientId, status: {$ne: 5}}
+  let query = {patientId: pO._id, status: {$ne: 5}}
   let opts = ''
 
-  let fields = {_id: 0, patientId: 1, content: 1, photos: 1, status: 1}
+  let fields = {_id: 0, patientId: 1, content: 1, photos: 1, status: 1, currentAgent: 1}
 
   Policy.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
-    } else if (req.session.role === 'insuranceA' && String(item.currentAgent) !== String(req.body.insuranceAObject._id)) {
-      res.json({msg: '非负责该用户的保险专员', code: 1})
+    } else if ((req.session.role === 'insuranceA' || (iAOS !== null && iCOS === null)) && String(item.currentAgent) !== String(iAOS._id)) {
+      res.json({msg: '非负责该用户的保险专员', code: 1}) // 专员只能获取自己负责的患者的保单信息
     } else {
       res.json({data: item, code: 0})
     }
@@ -507,18 +502,16 @@ exports.getPolicy = function (req, res) {
 
 // 审核保单 2017-08-08 YQC
 exports.reviewPolicy = function (req, res) {
-  let iCO = req.body.insuranceCObject || null
+  let iCOS = req.body.insuranceCObjectS || null
   let pO = req.body.patientObject || null
-  if ((iCO && pO) === null) {
+  if ((iCOS && pO) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
   let reviewResult = req.body.reviewResult || null
   if (reviewResult === null) {
     return res.json({code: 1, msg: '请填写reviewResult!'})
   }
-  let insuranceCObject = req.body.insuranceCObject
-  let patientObject = req.body.patientObject
-  let query = {patientId: patientObject, status: 2}
+  let query = {patientId: pO._id, status: 2}
   let upObj
   let now = new Date()
   let dayTemp = commonFunc.convertToFormatDate(new Date(now))
@@ -533,15 +526,15 @@ exports.reviewPolicy = function (req, res) {
       upObj = {
         $push: {
           followUps: {
-            content: todayFormat + ' 由"' + insuranceCObject.name + '"审核保单，审核不通过，原因为"' + rejectReason + '"，请继续跟进',
+            content: todayFormat + ' 由"' + iCOS.name + '"审核保单，审核不通过，原因为"' + rejectReason + '"，请继续跟进',
             time: now,
-            agentId: insuranceCObject._id,
+            agentId: iCOS._id,
             type: 3
           }
         },
         $set: {
           status: 4,
-          supervisor: insuranceCObject._id
+          supervisor: iCOS._id
         }
       }
     }
@@ -552,17 +545,17 @@ exports.reviewPolicy = function (req, res) {
       upObj = {
         $push: {
           followUps: {
-            content: todayFormat + ' 由"' + insuranceCObject.name + '"审核保单，审核通过，保单完成',
+            content: todayFormat + ' 由"' + iCOS.name + '"审核保单，审核通过，保单完成',
             time: now,
-            agentId: insuranceCObject._id,
+            agentId: iCOS._id,
             type: 3
           }
         },
         $set: {
           status: 3,
-          startTime: new Date(startTime),
-          endTime: new Date(endTime),
-          supervisor: insuranceCObject._id
+          startTime: new Date(new Date(startTime).toLocaleDateString()),
+          endTime: new Date(new Date(endTime).toLocaleDateString()),
+          supervisor: iCOS._id
         }
       }
     }
@@ -577,12 +570,12 @@ exports.reviewPolicy = function (req, res) {
       return res.json({code: 1, msg: '未找到该患者的待审核保单'})
     } else if (Number(upItem.status) === 3) {
       // return res.json({code: 0, msg: '保单审核成功'})
-      let queryP = {_id: patientObject._id, role: 'patient'}
+      let queryP = {_id: pO._id, role: 'patient'}
       let upObjP = {
         $set: {
           VIP: 1,
-          VIPStartTime: new Date(startTime),
-          VIPEndTime: new Date(endTime)
+          VIPStartTime: new Date(new Date(startTime).toLocaleDateString()),
+          VIPEndTime: new Date(new Date(endTime).toLocaleDateString())
         }
       }
       Alluser.update(queryP, upObjP, function (err, upPat) {
@@ -603,22 +596,20 @@ exports.reviewPolicy = function (req, res) {
 // 注销专员 2017-08-08 YQC
 exports.agentOff = function (req, res) {
   let iAO = req.body.insuranceAObject || null
-  let iCO = req.body.insuranceCObject || null
-  if ((iAO && iCO) === null) {
+  let iCOS = req.body.insuranceCObjectS || null
+  if ((iAO && iCOS) === null) {
     return res.json({msg: '请检查输入', code: 1})
   }
-  let insuranceAObject = req.body.insuranceAObject
-  let insuranceCObject = req.body.insuranceCObject
   let now = new Date()
   let dayTemp = commonFunc.convertToFormatDate(new Date(now))
   let todayFormat = dayTemp.slice(0, 4) + '年' + dayTemp.slice(4, 6) + '月' + dayTemp.slice(6, 8) + '日'
   let followUp = {
     time: now,
     type: 2,
-    agentId: insuranceCObject._id,
-    content: todayFormat + ' "' + insuranceCObject.name + '"主管注销保险专员"' + insuranceAObject.name + '"，请尽快分配新保险专员'
+    agentId: iCOS._id,
+    content: todayFormat + ' "' + iCOS.name + '"主管注销保险专员"' + iAO.name + '"，请尽快分配新保险专员'
   }
-  let query = {currentAgent: insuranceAObject._id, status: {$ne: 5}}
+  let query = {currentAgent: iAO._id, status: {$ne: 5}}
   let upObj = {
     $unset: {currentAgent: 1},
     $set: {status: 0},
