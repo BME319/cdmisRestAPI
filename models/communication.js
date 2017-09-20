@@ -8,6 +8,14 @@ var communicationSchema = new mongoose.Schema({
   readStatus: Number,
   sendBy: String,
   receiver: String,
+  sendByRole: {    // 用以单聊时区别用户（同时具有医患角色）的聊天记录
+    type: String,
+    enum: ['doctor', 'patient']
+  },
+  receiverRole: {  // 同上
+    type: String,
+    enum: ['doctor', 'patient']
+  },
   sendDateTime: Date,
   title: String,
   content: mongoose.Schema.Types.Mixed,
