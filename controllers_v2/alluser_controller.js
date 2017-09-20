@@ -1027,8 +1027,10 @@ exports.login = function (req, res, next) {
 
       res.json({results: 1, mesg: "Alluser doesn't Exist!"})
     } else {
-      if (role === 'doctor' && Number(item.reviewStatus) !== 1) {
-        role = 'guest'
+      if (role === 'doctor') { // 医生登录，判断角色无医生且审核未通过则赋值guest角色
+        if (item.role.indexOf('doctor') === -1 && Number(item.reviewStatus) !== 1) {
+          role = 'guest'
+        }
       }
       if (role === 'PC') {         // PC端登录 修改默认输入角色为'PC'，并赋值 userPayload 中 role 为该用户的所有角色 2017-09-15 lgf
         var roles = item.role
