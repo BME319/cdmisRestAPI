@@ -1530,7 +1530,7 @@ module.exports = function (app, webEntry, acl) {
   // app.post(version + '/report', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 1), reportCtrl.updateReport)
 
   // gy
-  // review
+  // review acl - admin
   app.post(version + '/review/reviewInfo', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 1), reviewCtrl.postReviewInfo(acl))
   app.get(version + '/review/certificate', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 1), reviewCtrl.getCertificate)
   app.get(version + '/review/reviewInfo', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 1), reviewCtrl.getReviewInfo)
@@ -5464,7 +5464,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/services/message', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), alluserCtrl.serviceMessage)
 
   // PC端保险管理
-  // 获取患者 权限insuranceC/insuranceA
+  // 获取患者 权限insuranceC/insuranceA/admin
   /** YQC annotation 2017-08-10
    * @swagger
    * /policy/patients:
@@ -5535,7 +5535,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: number
    */
   app.get(version + '/policy/patients', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatients)
-  // 获取患者跟踪记录详情 权限insuranceC/insuranceA
+  // 获取患者跟踪记录详情 权限insuranceC/insuranceA/admin
   /** YQC annotation 2017-08-10
    * @swagger
    * /policy/history:
@@ -5584,7 +5584,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: number
    */
   app.get(version + '/policy/history', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.getHistory)
-  // 获取专员 权限insuranceC
+  // 获取专员 权限insuranceC/admin
   /** YQC annotation 2017-08-10
    * @swagger
    * /policy/agents:
@@ -5739,7 +5739,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/policy/policy', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), policyCtrl.getSessionObject, policyCtrl.getPatientObject, policyCtrl.insertPolicy)
-  // 获取患者保单详情 权限insuranceC/insuranceA
+  // 获取患者保单详情 权限insuranceC/insuranceA/admin
   /** YQC annotation 2017-08-23
    * @swagger
    * /policy/policy:
