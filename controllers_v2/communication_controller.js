@@ -611,12 +611,20 @@ exports.postCommunication = function (req, res) {
     messageType: req.body.messageType,
     sendBy: req.body.sendBy,
     receiver: req.body.receiver,
-    sendByRole: req.body.content.clientType,
-    receiverRole: req.body.content.targetRole,
+    // sendByRole: req.body.content.clientType, // 区分微信端和app端，doctor,patient,wechatdoctor,wechatpatient
+    receiverRole: req.body.content.targetRole,  // 不区分微信端和app端，doctor,patient
     sendDateTime: req.body.content.createTimeInMillis,
     content: req.body.content,
     newsType: req.body.content.newsType
   }
+
+  let sendByRole = req.body.content.clientType
+  if (sendByRole === 'wechatdoctor') {
+    sendByRole = 'doctor'
+  } else if (sendByRole === 'wechatpatient') {
+    sendByRole = 'patient'
+  }
+  commmunicationData['sendByRole'] = sendByRole
 
   var newCommunication = new Communication(commmunicationData)
   newCommunication.save(function (err, communicationInfo) {
@@ -749,12 +757,12 @@ exports.getCommunication = function (req, res) {
       }
     }, opts)
   } else if (messageType === 1) {    // 单聊，获取聊天记录时增加收发方的角色
-    query = {
-      $or: [
-        {sendBy: id1, receiver: id2},
-        {sendBy: id2, receiver: id1}
-      ]
-    }
+    // query = {
+    //   $or: [
+    //     {sendBy: id1, receiver: id2},
+    //     {sendBy: id2, receiver: id1}
+    //   ]
+    // }
     if (newsType !== null) {
       // query = {
       //   $or: [
@@ -766,13 +774,32 @@ exports.getCommunication = function (req, res) {
       //   {'content.newsType': newsType}
       //   ]
       // };
-      query['newsType'] = Number(newsType)
+      // query['newsType'] = Number(newsType)
+      query = {newsType: Number(newsType)}
       if (Number(newsType) === 11) {          // 医-患
-        query['receiverRole'] = req.query.receiverRole
-        query['sendByRole'] = req.query.sendByRole
+        query = {
+          $or: [
+            {
+              sendBy: id1,
+              sendByRole: req.query.sendByRole,
+              receiver: id2,
+              receiverRole: req.query.receiverRole
+            },
+            {
+              sendBy: id2,
+              sendByRole: req.query.receiverRole,
+              receiver: id1,
+              receiverRole: req.query.sendByRole
+            }
+          ]
+        }
       } else if (Number(newsType) === 12) {   // 医-医
-        query['receiverRole'] = 'doctor'
-        query['sendByRole'] = 'doctor'
+        query = {
+          $or: [
+            {sendBy: id1, receiver: id2, sendByRole: 'doctor', receiverRole: 'doctor'},
+            {sendBy: id2, receiver: id1, sendByRole: 'doctor', receiverRole: 'doctor'}
+          ]
+        }
       }
     }
     // console.log(query)
