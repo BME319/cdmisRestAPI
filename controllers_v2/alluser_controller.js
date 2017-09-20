@@ -1112,7 +1112,8 @@ exports.login = function (req, res, next) {
               mesg: 'login success!',
               token: token,
               refreshToken: refreshToken,
-              reviewStatus: item.reviewStatus
+              reviewStatus: item.reviewStatus,
+              role: item.role
             }
 
                         // 2017-06-07GY调试
