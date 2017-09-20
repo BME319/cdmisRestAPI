@@ -611,10 +611,20 @@ exports.postCommunication = function (req, res) {
     messageType: req.body.messageType,
     sendBy: req.body.sendBy,
     receiver: req.body.receiver,
+    // sendByRole: req.body.content.clientType, // 区分微信端和app端，doctor,patient,wechatdoctor,wechatpatient
+    receiverRole: req.body.content.targetRole,  // 不区分微信端和app端，doctor,patient
     sendDateTime: req.body.content.createTimeInMillis,
     content: req.body.content,
     newsType: req.body.content.newsType
   }
+
+  let sendByRole = req.body.content.clientType
+  if (sendByRole === 'wechatdoctor') {
+    sendByRole = 'doctor'
+  } else if (sendByRole === 'wechatpatient') {
+    sendByRole = 'patient'
+  }
+  commmunicationData['sendByRole'] = sendByRole
 
   var newCommunication = new Communication(commmunicationData)
   newCommunication.save(function (err, communicationInfo) {
@@ -688,7 +698,7 @@ exports.getCommunication = function (req, res) {
   var messageType = Number(req.query.messageType)
   var id1 = req.query.id1
   var id2 = req.query.id2
-  var newsType = req.query.newsType
+  var newsType = req.query.newsType || null
 
   var limit = Number(req.query.limit)
   var skip = Number(req.query.skip)
@@ -733,7 +743,7 @@ exports.getCommunication = function (req, res) {
   }
   var nexturl = webEntry.domain + '/api/v2/communication/getCommunication' + _Url
 
-  if (messageType === 2) {
+  if (messageType === 2) {           // 群聊
     var query = {receiver: id2}
 
     Communication.getSome(query, function (err, items) {
@@ -746,25 +756,51 @@ exports.getCommunication = function (req, res) {
         return res.json({results: items, nexturl: nexturl})
       }
     }, opts)
-  } else if (messageType === 1) {
-    query = {
-      $or: [
-  {sendBy: id1, receiver: id2},
-  {sendBy: id2, receiver: id1}
-      ]
-    }
-    if (newsType !== undefined) {
-  // query = {
-  //   $or: [
-  //   {sendBy: id1, receiver: id2},
-  //   {sendBy: id2, receiver: id1}
-  //   ],
-  //   $or: [
-  //   {'newsType': newsType},
-  //   {'content.newsType': newsType}
-  //   ]
-  // };
-      query['newsType'] = newsType
+  } else if (messageType === 1) {    // 单聊，获取聊天记录时增加收发方的角色
+    // query = {
+    //   $or: [
+    //     {sendBy: id1, receiver: id2},
+    //     {sendBy: id2, receiver: id1}
+    //   ]
+    // }
+    if (newsType !== null) {
+      // query = {
+      //   $or: [
+      //   {sendBy: id1, receiver: id2},
+      //   {sendBy: id2, receiver: id1}
+      //   ],
+      //   $or: [
+      //   {'newsType': newsType},
+      //   {'content.newsType': newsType}
+      //   ]
+      // };
+      // query['newsType'] = Number(newsType)
+      query = {newsType: Number(newsType)}
+      if (Number(newsType) === 11) {          // 医-患
+        query = {
+          $or: [
+            {
+              sendBy: id1,
+              sendByRole: req.query.sendByRole,
+              receiver: id2,
+              receiverRole: req.query.receiverRole
+            },
+            {
+              sendBy: id2,
+              sendByRole: req.query.receiverRole,
+              receiver: id1,
+              receiverRole: req.query.sendByRole
+            }
+          ]
+        }
+      } else if (Number(newsType) === 12) {   // 医-医
+        query = {
+          $or: [
+            {sendBy: id1, receiver: id2, sendByRole: 'doctor', receiverRole: 'doctor'},
+            {sendBy: id2, receiver: id1, sendByRole: 'doctor', receiverRole: 'doctor'}
+          ]
+        }
+      }
     }
     // console.log(query)
 
@@ -806,7 +842,7 @@ function bodyGen (msg, MESSAGE_ID) {
   var body = {
     userId: receiver,
     sendBy: sender,
-    teamId: teamId, 
+    teamId: teamId,
     type: msg.newsType,
     title: '',
     description: '',
@@ -814,6 +850,9 @@ function bodyGen (msg, MESSAGE_ID) {
     url: '',
     userRole: msg.targetRole,
     messageId: MESSAGE_ID // 从post communication/postCommunication response取
+  }
+  if (body.type === 15) {
+    body['caseType'] = Number(body.teamId) || 0
   }
   if (msgType === 'custom') {
     if (msg.content.contentStringMap) {
@@ -1079,8 +1118,8 @@ exports.massCommunication = function (req, res, next) {
           type: 8
         },
         update: {
-          time: now, 
-          title: title, 
+          time: now,
+          title: title,
           description: description,
           readOrNot: 0,
           messageId: communicationDatas[i].messageId
