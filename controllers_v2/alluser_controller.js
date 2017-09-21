@@ -897,6 +897,7 @@ exports.checkBinding = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     if (item != null) {
+      // 需要修改 nurseWechat是共用patientWechat或者doctorWechat，还是加一个nurseWechat字段？ 2017-09-21
       if (item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
         // openId 存在
         var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test}
