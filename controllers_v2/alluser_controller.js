@@ -910,10 +910,17 @@ exports.checkBinding = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     if (item != null) {
-      // 需要修改 nurseWechat是共用patientWechat或者doctorWechat，还是加一个nurseWechat字段？ 2017-09-21
-      if (item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
+      // 修改 nurseWechat暂时共用doctorWechat字段 2017-09-21 lgf
+      // if (item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
+      if (item.MessageOpenId != null) {
         // openId 存在
-        var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test}
+        var query = {}
+        if (role === 'patient' && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
+          query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test}
+        }
+        if (role === 'nurse' && (item.MessageOpenId.doctorWechat != null || item.MessageOpenId.test != null)) {
+          query = {patientOpenId: item.MessageOpenId.doctorWechat || item.MessageOpenId.test}
+        }
         // console.log(query);
         OpenIdTmp.getOne(query, function (err, item1) {
           if (err) {
@@ -936,7 +943,7 @@ exports.checkBinding = function (req, res) {
             let _url = ''
             if (role === 'patient') {
               // binding doctor
-              _url = 'http://' + webEntry.domain + '/api/v2/patient/favoriteDoctor' + '?token=' + req.query.token || req.body.token
+              _url = 'http://' + webEntry.domain + '/api/v2/patient/favoriteDoctor' + '?token=' + req.token
               jsondata = {
                 patientId: item.userId,
                 doctorId: item1.doctorUserId,
@@ -944,7 +951,7 @@ exports.checkBinding = function (req, res) {
               }
             } else if (role === 'nurse') {
               // binding patient
-              _url = 'http://' + webEntry.domain + '/api/v2/nurse/bindingPatient' + '?token=' + req.query.token || req.body.token
+              _url = 'http://' + webEntry.domain + '/api/v2/nurse/bindingPatient' + '?token=' + req.token
               jsondata = {
                 patientId: item1.doctorUserId,
                 nurseObjectId: item._id,
@@ -1102,7 +1109,7 @@ exports.login = function (req, res, next) {
                     //  console.log(Date.now());
                     // console.log( Date.now() + 60 * 3 * 1000);
           var token = jwt.sign(userPayload, config.tokenSecret, {algorithm: 'HS256'}, {expiresIn: config.TOKEN_EXPIRATION})
-
+          req.token = token
           var sha1 = crypto.createHash('sha1')
           var refreshToken = sha1.update(token).digest('hex')
 
