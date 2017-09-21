@@ -111,7 +111,9 @@ function schedule () {
         messageNo: messageNo,
         messageType: 1,
         sendBy: sendBy,
+        sendByRole: 'doctor',
         receiver: receiver,
+        receiverRole: 'patient',
         sendDateTime: sendDateTime,
         newsType: '11',
         content: msgJson
