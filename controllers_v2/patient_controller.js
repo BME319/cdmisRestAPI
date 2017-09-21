@@ -865,82 +865,47 @@ exports.bindingFavoriteDoctor = function (req, res, next) {
     if (doctorId.substr(0, 1) === 'h') {  // 扫码获取医生docTDCUrl，再读取userId
       queryD['docTDCurl'] = doctorId
       // console.log('queryD', queryD)
-      Alluser.getOne(queryD, function (err, itemD) {
-        if (err) {
-          return res.status(500).send(err)
-        }
-        if (itemD == null) {
-          return res.json({result: '不存在的医生ID2!'})
-        }
-
-        let doctorObjectId = itemD._id
-        let queryP = {userId: patientId, role: 'patient'}
-        Alluser.getOne(queryP, function (err, itemP) {
-          if (err) {
-            return res.status(500).send(err)
-          }
-          let favoriteDoctorsList = itemP.doctors
-          // console.log(favoriteDoctorsList)
-          for (let i = 0; i < favoriteDoctorsList.length; i++) {
-            if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
-              return res.json({result: '已关注该医生!'})
-            }
-          }
-
-          let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0}
-          favoriteDoctorsList.push(doctorNew)
-          let upObj = {$set: {doctors: favoriteDoctorsList}}
-          Alluser.updateOne(queryP, upObj, function (err, upPatient) {
-            if (err) {
-              return res.status(500).send(err)
-            }
-            req.body.doctorObjectId = doctorObjectId
-            req.body.patientObjectId = upPatient._id
-            next()
-          })
-        })
-      })
     } else if (doctorId.substr(0, 1) === 'U') { // 点击关注按钮直接获取医生的userId
       queryD['userId'] = doctorId
-      Alluser.getOne(queryD, function (err, itemD) {
+    } else {
+      return res.json({result: '请检查doctorId输入！'})
+    }
+  }
+  Alluser.getOne(queryD, function (err, itemD) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (itemD == null) {
+      return res.json({result: '不存在的医生ID!'})
+    }
+
+    let doctorObjectId = itemD._id
+    let queryP = {userId: patientId, role: 'patient'}
+    Alluser.getOne(queryP, function (err, itemP) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      let favoriteDoctorsList = itemP.doctors
+      // console.log(favoriteDoctorsList)
+      for (let i = 0; i < favoriteDoctorsList.length; i++) {
+        if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
+          return res.json({result: '已关注该医生!'})
+        }
+      }
+
+      let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0}
+      favoriteDoctorsList.push(doctorNew)
+      let upObj = {$set: {doctors: favoriteDoctorsList}}
+      Alluser.updateOne(queryP, upObj, function (err, upPatient) {
         if (err) {
           return res.status(500).send(err)
         }
-        if (itemD == null) {
-          return res.json({result: '不存在的医生ID!'})
-        }
-
-        let doctorObjectId = itemD._id
-        let queryP = {userId: patientId, role: 'patient'}
-        Alluser.getOne(queryP, function (err, itemP) {
-          if (err) {
-            return res.status(500).send(err)
-          }
-          let favoriteDoctorsList = itemP.doctors
-          // console.log(favoriteDoctorsList)
-          for (let i = 0; i < favoriteDoctorsList.length; i++) {
-            if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
-              return res.json({result: '已关注该医生!'})
-            }
-          }
-
-          let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0}
-          favoriteDoctorsList.push(doctorNew)
-          let upObj = {$set: {doctors: favoriteDoctorsList}}
-          Alluser.updateOne(queryP, upObj, function (err, upPatient) {
-            if (err) {
-              return res.status(500).send(err)
-            }
-            req.body.doctorObjectId = doctorObjectId
-            req.body.patientObjectId = upPatient._id
-            next()
-          })
-        })
+        req.body.doctorObjectId = doctorObjectId
+        req.body.patientObjectId = upPatient._id
+        next()
       })
-    } else {
-      return res.json({result: '不存在的医生ID！'})
-    }
-  }
+    })
+  })
 }
 
 // DpRelation表中医生绑定患者
