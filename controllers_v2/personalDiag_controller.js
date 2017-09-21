@@ -1093,28 +1093,28 @@ exports.cancelMyPD = function (req, res, next) {
       if (new Date() >= sixInBD) { // 申请退款
         // return res.status(406).send('Exceeds the Time Limit')
         let upObj = {$set: {status: 5}}
-        PersonalDiag.update(query, upObj, function (err, upItem) {
+        PersonalDiag.updateOne(query, upObj, function (err, upItem) {
           if (err) {
             return res.status(500).send(err)
           } else if (upItem.nModified === 0) {
             return res.status(304).json({msg: 'Not Modified', code: 1})
           } else {
-            return res.status(201).json({msg: 'Cancel Request Received', code: 1})
+            return res.status(201).json({msg: 'Cancel Request Received', code: 1, data: upItem})
           }
-        })
+        }, {new: true})
       } else { // 直接退款
         let upObj = {$set: {status: 3}}
-        PersonalDiag.update(query, upObj, function (err, upItem) {
+        PersonalDiag.updateOne(query, upObj, function (err, upItem) {
           if (err) {
             return res.status(500).send(err)
           } else if (upItem.nModified === 0) {
             return res.status(304).json({msg: 'Not Modified', code: 1})
           } else {
             // return res.json({results: '取消成功'})
-            req.body.PDInfo = item
+            req.body.PDInfo = upItem
             next()
           }
-        })
+        }, {new: true})
       }
     }
   })
