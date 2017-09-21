@@ -249,7 +249,13 @@ exports.getAlluserAgreement = function (req, res) {
   var _userId = req.query.userId
   var query = {userId: _userId}
   var opts = ''
-  var fields = {'agreement': 1}
+  var fields = {}
+  var _role = req.body.role
+  if (_role === 'patient') {
+    fields = {'agreementPat': 1}
+  } else if (_role === 'doctor') {
+    fields = {'agreementDoc': 1}
+  }
   Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -261,7 +267,14 @@ exports.updateAlluserAgreement = function (req, res) {
   var _userId = req.body.userId
   var _agreement = req.body.agreement
   var query = {userId: _userId}
-  Alluser.updateOne(query, {$set: {agreement: _agreement}}, function (err, item1) {
+  var _role = req.body.role
+  var upObj = {}
+  if (_role === 'patient') {
+    upObj = {$set: {agreementPat: _agreement}}
+  } else if (_role === 'doctor') {
+    upObj = {$set: {agreementDoc: _agreement}}
+  }
+  Alluser.updateOne(query, upObj, function (err, item1) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -897,6 +910,7 @@ exports.checkBinding = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     if (item != null) {
+      // 需要修改 nurseWechat是共用patientWechat或者doctorWechat，还是加一个nurseWechat字段？ 2017-09-21
       if (item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
         // openId 存在
         var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test}
@@ -1114,7 +1128,8 @@ exports.login = function (req, res, next) {
               mesg: 'login success!',
               token: token,
               refreshToken: refreshToken,
-              reviewStatus: item.reviewStatus
+              reviewStatus: item.reviewStatus,
+              role: item.role
             }
 
                         // 2017-06-07GY调试

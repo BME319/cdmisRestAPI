@@ -255,7 +255,7 @@ exports.counselAutoRelay = function (req, res, next) {
     Team.getOne(queryteam, function (err, teamitem) {
       if (err) {
         teamErrFlag = 1
-        console.log(err)
+        console.log(new Date(), 'teamErr', err)
       }
       teamitem = teamitem || null
       if (teamitem === null) {
@@ -312,6 +312,7 @@ exports.counselAutoRelay = function (req, res, next) {
         newConsultation.save(function (err, consultationInfo) {
           if (err) {
             consultationErrFlag = 1
+            console.log(new Date(), 'consultationErr', err)
           }
           // 生成咨询时，医生与患者页面的卡片消息模板
           let msgContent = {
@@ -356,6 +357,7 @@ exports.counselAutoRelay = function (req, res, next) {
           newCommunication.save(function (err, communicationInfo) {
             if (err) {
               communicationErrFlag = 1
+              console.log(new Date(), 'communicationErr', err)
             }
             let newsData = {
               messageId: communicationData.messageNo,
@@ -378,6 +380,7 @@ exports.counselAutoRelay = function (req, res, next) {
             }, function (err, response) {
               if (err) {
                 newsErrFlag = 1
+                console.log(new Date(), 'newsErr', err)
               }
               if (index < teamIds.length - 1) {
                 relayOne(++index)
