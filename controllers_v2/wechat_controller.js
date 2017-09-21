@@ -1064,6 +1064,7 @@ exports.messageTemplate = function (req, res) {
         return res.status(400).send('openId do not exist')
       }
       var messageOpenId
+      // 患者或者医生在app绑定微信，是否也需要进行模板消息推送(暂时只在微信端推送消息模板)
       if (role === 'doctor') {
         messageOpenId = item.MessageOpenId.doctorWechat
       } else if (role === 'patient') {

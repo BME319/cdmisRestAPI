@@ -10,7 +10,9 @@ var alluserSchema = new mongoose.Schema({
   openId: {type: String, unique: true, sparse: true}, // UnionId
   phoneNo: String,
   password: String,
-  agreement: String,
+  // agreement: String,  // 患者和医生签署协议状态分别储存, 0是已签，1是未签
+  agreementPat: String,  // 患者
+  agreementDoc: String,  // 医生
   photoUrl: String,
   role: [{type: String, enum: ['Leader', 'master', 'doctor', 'patient', 'nurse', 'insuranceA', 'insuranceR', 'insuranceC', 'health', 'admin', 'guest']}],
   loginStatus: {type: Number, enum: [0, 1]},
