@@ -5,6 +5,8 @@ var Order = require('../models/order')
 var Account = require('../models/account')
 var request = require('request')
 var webEntry = require('../settings').webEntry
+var Message = require('../models/message')
+var News = require('../models/news')
 
 var getToken = function (headers) {
   if (headers && headers.authorization) {
@@ -483,8 +485,8 @@ exports.cancelBookedPds = function (req, res) {
   let opts = ''
   let fields = {_id: 1, doctorId: 1, patientId: 1, bookingDay: 1, bookingTime: 1, diagId: 1}
   let populate = [
-    {path: 'doctorId', select: {_id: 0, name: 1}},
-    {path: 'patientId', select: {_id: 0, phoneNo: 1}}
+    {path: 'doctorId', select: {_id: 0, name: 1, userId: 1}},
+    {path: 'patientId', select: {_id: 0, phoneNo: 1, userId: 1}}
   ]
   PersonalDiag.getSome(query, function (err, items) {
     if (err) {
@@ -500,6 +502,8 @@ exports.cancelBookedPds = function (req, res) {
         if (err) {
           return res.status(500).send(err)
         } else {
+          let now = new Date()
+          let nowstr = now.getFullYear() + add0(now.getMonth() + 1) + add0(now.getDate()) + add0(now.getHours()) + add0(now.getMinutes()) + add0(now.getSeconds())
           // return res.json({msg: '测试中，待退款', code: 0, data: items})
           for (let item in items) {
             let toRefund = items[item]
@@ -519,7 +523,8 @@ exports.cancelBookedPds = function (req, res) {
                     json: true
                   }, function (err, responseR) {
                     if (err) {
-                      return res.status(500).send(err)
+                      console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                      console.log(err)
                     } else if ((responseR.body.results || null) === null) {
                       console.log('微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                     } else if (responseR.body.results.xml.return_code === 'SUCCESS' && responseR.body.results.xml.return_msg === 'OK') {
@@ -547,14 +552,58 @@ exports.cancelBookedPds = function (req, res) {
                           json: true
                         }, function (err, responseM) {
                           if (err) {
-                            return res.status(500).send(err)
+                            console.log('用户"' + itemO.patientName + '"短信发送失败,服务器err')
+                            console.log(err)
                           } else if (Number(responseM.body.results) === 0) {
                             console.log('用户"' + itemO.patientName + '"短信发送成功')
                           } else {
-                            console.log('用户"' + itemO.patientName + '"短信发送失败')
+                            console.log('用户"' + itemO.patientName + '"短信发送失败,接口返回err')
                           }
                         })
                       }
+                      let bookingDay = new Date(new Date(toRefund.bookingDay).toLocaleDateString())
+                      let PDTime
+                      if (toRefund.bookingTime === 'Morning') {
+                        PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日上午'
+                      } else if (toRefund.bookingTime === 'Afternoon') {
+                        PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日下午'
+                      }
+                      let newData = {
+                        userId: toRefund.patientId.userId,
+                        sendBy: toRefund.doctorId.userId,
+                        type: 7,
+                        messageId: 'M' + nowstr + item,
+                        readOrNot: 0,
+                        time: now,
+                        title: new Date(toRefund.bookingDay).toLocaleDateString() + ',' + toRefund.doctorId.name + '医生面诊服务停诊',
+                        description: '您预约' + toRefund.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + orderNo + '。'
+                      }
+                      let newmessage = new Message(newData)
+                      newmessage.save(function (err, newInfo) {
+                        if (err) {
+                          console.log(err)
+                        }
+                        let query = {userId: toRefund.patientId.userId, sendBy: toRefund.doctorId.userId}
+                        let obj = {
+                          $set: {
+                            messageId: 'M' + nowstr + item,
+                            readOrNot: 0,
+                            userRole: 'patient',
+                            type: 7,
+                            time: now,
+                            title: new Date(toRefund.bookingDay).toLocaleDateString() + ',' + toRefund.doctorId.name + '面诊停诊',
+                            description: '您预约' + toRefund.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + orderNo + '。'
+                          }
+                        }
+                        News.updateOne(query, obj, function (err, upnews) {
+                          if (err) {
+                            console.log('用户"' + itemO.patientName + '"消息推送失败')
+                            console.log(err)
+                          } else {
+                            console.log('用户"' + itemO.patientName + '"消息推送成功')
+                          }
+                        }, {upsert: true})
+                      })
                     }
                   })
                 } else {
@@ -576,6 +625,10 @@ exports.cancelBookedPds = function (req, res) {
       }, {multi: true})
     }
   }, opts, fields, populate)
+}
+
+function add0 (m) {
+  return m < 10 ? '0' + m : m
 }
 
 // 删除面诊停诊时间 2017-07-15 GY
