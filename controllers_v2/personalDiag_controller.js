@@ -954,8 +954,8 @@ exports.getAvailablePD = function (req, res, next) {
       for (let ii = today; ii < twoWeeksLater; ii.setDate(ii.getDate() + 1)) {
         for (let kk in period) {
           let objTemp = {}
-          let dayTemp = new Date(ii).toLocaleDateString()
-          objTemp['availableDay'] = dayTemp.split('-')[0] + '-' + add0(dayTemp.split('-')[1]) + '-' + add0(dayTemp.split('-')[2])
+          let dayTemp = new Date(new Date(ii).toLocaleDateString())
+          objTemp['availableDay'] = dayTemp.getFullYear() + '-' + add0(dayTemp.getMonth() + 1) + '-' + add0(dayTemp.getDate())
           objTemp['availableTime'] = period[kk]
           objTemp['margin'] = 0
           returns.push(objTemp)
@@ -973,8 +973,8 @@ exports.getAvailablePD = function (req, res, next) {
       let returns = []
       for (let j = 0; j < availablePDsArray.length; j++) {
         let objTemp = {}
-        let dayTemp = new Date(availablePDsArray[j].availableDay).toLocaleDateString()
-        objTemp['availableDay'] = dayTemp.split('-')[0] + '-' + add0(dayTemp.split('-')[1]) + '-' + add0(dayTemp.split('-')[2])
+        let dayTemp = new Date(new Date(availablePDsArray[j].availableDay).toLocaleDateString())
+        objTemp['availableDay'] = dayTemp.getFullYear() + '-' + add0(dayTemp.getMonth() + 1) + '-' + add0(dayTemp.getDate())
         objTemp['availableTime'] = availablePDsArray[j].availableTime
         objTemp['suspendFlag'] = availablePDsArray[j].suspendFlag
         objTemp['margin'] = availablePDsArray[j].total - availablePDsArray[j].count
@@ -1027,8 +1027,8 @@ exports.sortAndTagPDs = function (req, res) {
 
         let objTemp = {}
         if (flag === 0) {
-          let dayTemp = new Date(ii).toLocaleDateString()
-          objTemp['availableDay'] = dayTemp.split('-')[0] + '-' + add0(dayTemp.split('-')[1]) + '-' + add0(dayTemp.split('-')[2])
+          let dayTemp = new Date(new Date(ii).toLocaleDateString())
+          objTemp['availableDay'] = dayTemp.getFullYear() + '-' + add0(dayTemp.getMonth() + 1) + '-' + add0(dayTemp.getDate())
           objTemp['availableTime'] = period[kk]
           objTemp['margin'] = 0
           returns.push(objTemp)
@@ -1044,7 +1044,7 @@ exports.sortAndTagPDs = function (req, res) {
         return -1
       }
     })
-    console.log(returns)
+    // console.log(returns)
     return res.status(200).json({results: returns})
   })
 }
