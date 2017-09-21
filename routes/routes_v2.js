@@ -63,6 +63,7 @@ var departmentMonitorCtrl = require('../controllers_v2/departmentMonitor_control
 var policyCtrl = require('../controllers_v2/policy_controller')
 var districtMonitorCtrl = require('../controllers_v2/districtMonitor_controller')
 var departmentReportTempCtrl = require('../controllers_v2/departmentReportTemp_controller')
+var testCtrl = require('../controllers_v2/convert_to_async')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -4825,6 +4826,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), patientCtrl.bindingFavoriteDoctor, patientCtrl.bindingFavoritePatient)
+  // app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), testCtrl.test)
   // 患者端 取关医生 2017-07-21
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
