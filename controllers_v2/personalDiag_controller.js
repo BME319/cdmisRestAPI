@@ -425,18 +425,23 @@ exports.cancelBookedPds = function (req, res) {
     tomorrow.setDate(tomorrow.getDate() + 1)
     let endOfTomorrow = new Date(new Date(tomorrow).toDateString())
     endOfTomorrow.setMilliseconds(endOfTomorrow.getMilliseconds() + 999)
+    query = {
+      doctorId: doctorObjectId,
+      status: 0,
+      $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
+    }
     if (new Date(startOfStart) - now > 86400000) {
-      query = {
-        doctorId: doctorObjectId,
-        status: 0,
-        $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
-      }
+      // query = {
+      //   doctorId: doctorObjectId,
+      //   status: 0,
+      //   $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
+      // }
     } else { // 停诊时间紧迫
-      query = {
-        doctorId: doctorObjectId,
-        status: 0,
-        $and: [{bookingDay: {$gte: endOfTomorrow}}, {bookingDay: {$lt: endOfEnd}}]
-      }
+      // query = {
+      //   doctorId: doctorObjectId,
+      //   status: 0,
+      //   $and: [{bookingDay: {$gte: endOfTomorrow}}, {bookingDay: {$lt: endOfEnd}}]
+      // }
       let queryPD = {$and: [{bookingDay: {$gte: today}}, {bookingDay: {$lte: endOfTomorrow}}], doctorId: doctorObjectId, status: 0}
       PersonalDiag.update(queryPD, upObjPD, function (err, upItemsPD) { // 一天内停诊人工处理
         if (err) {
@@ -449,20 +454,26 @@ exports.cancelBookedPds = function (req, res) {
       }, {multi: true})
     }
   } else { // 删除排班取消面诊
+    query = {
+      doctorId: doctorObjectId,
+      status: 0,
+      $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
+      bookingTime: req.body.time
+    }
     if (new Date(req.body.nmd) - now > 86400000) {
-      query = {
-        doctorId: doctorObjectId,
-        status: 0,
-        $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
-        bookingTime: req.body.time
-      }
+      // query = {
+      //   doctorId: doctorObjectId,
+      //   status: 0,
+      //   $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
+      //   bookingTime: req.body.time
+      // }
     } else { // 排班取消时间紧迫
-      query = {
-        doctorId: doctorObjectId,
-        status: 0,
-        bookingDay: new Date(req.body.nnmd),
-        bookingTime: req.body.time
-      }
+      // query = {
+      //   doctorId: doctorObjectId,
+      //   status: 0,
+      //   bookingDay: new Date(req.body.nnmd),
+      //   bookingTime: req.body.time
+      // }
       let queryPD = {
         doctorId: doctorObjectId,
         status: 0,
@@ -474,7 +485,7 @@ exports.cancelBookedPds = function (req, res) {
           return res.status(500).send(err)
         } else {
           if (upItemsPD.n !== upItemsPD.nModified) {
-            return res.json({result: '停诊时间添加失败', results: upItemsPD})
+            return res.json({result: '取消面诊添加失败', results: upItemsPD})
           }
         }
       }, {multi: true})
