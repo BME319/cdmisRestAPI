@@ -8,7 +8,7 @@ var newsSchema = new mongoose.Schema({
   sendBy: String,
   // sendReadOrNot: Number,
   readOrNot: {type: Number, enum: [0, 1]}, // 0未读，1已读
-  // 支付1，警报2，任务3，患者保险消息5, 患者退款消息6, 审核消息7, 群体教育消息8, 医生提醒更新主管患者任务9 聊天消息：医-患11 医-医12 医-团队13 咨询超时14 团队病历消息15(二期暂时未添加)
+  // 支付1，警报2，任务3，患者保险消息5, 患者退款消息6, 审核消息7, 群体教育消息8, 医生提醒更新主管患者任务9 聊天消息：医-患11 医-医12 医-团队13 咨询超时14 团队病历消息15
   type: {type: Number, enum: [1, 2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]},
   caseType: Number,
   time: Date,

@@ -4,6 +4,7 @@ var DpRelation = require('../models/dpRelation')
 var request = require('request')
 var webEntry = require('../settings').webEntry
 var Order = require('../models/order')
+var async = require('async')
 
 var getToken = function (headers) {
   if (headers && headers.authorization) {
@@ -499,12 +500,12 @@ exports.relation = function (req, res) {
 /**
 过期取消主管关系
 */
-exports.autoRelease = function (req, res) {
+exports.autoRelease = function () {
   console.log('主管服务过期自动取消 ' + new Date())
-  let today = new Date(new Date().toDateString())
+  let today = new Date(new Date().toLocaleDateString())
   let endOfToday = new Date(today)
-  endOfToday.setHours(today.getHours() + 23)
-  let query = {end: {$lte: endOfToday}, invalidFlag: 1}
+  endOfToday.setHours(today.getHours() + 24)
+  let query = {end: {$lt: endOfToday}, invalidFlag: 1}
   let upObj = {$set: {invalidFlag: 2}}
   let opts = ''
   let fields = {_id: 1, patientId: 1, doctorId: 1}
@@ -512,36 +513,51 @@ exports.autoRelease = function (req, res) {
     {path: 'patientId', select: {'_id': 1, 'name': 1}},
     {path: 'doctorId', select: {'_id': 1, 'name': 1}}
   ]
+  let autoRelease = function (item, callback) {
+    async.parallel({
+      updateDIC: function (callback) {
+        DoctorsInCharge.updateOne({_id: item._id}, upObj, function (err, upDIC) {
+          callback(err)
+        })
+      },
+      updateDPR: function (callback) {
+        if ((item.doctorId || null) !== null && (item.patientId || null) !== null) {
+          let queryR = {doctorId: item.doctorId._id, patientsInCharge: {$elemMatch: {$and: [{patientId: item.patientId._id}, {invalidFlag: 1}]}}}
+          let upObjR = {
+            $set: {
+              'patientsInCharge.$.invalidFlag': 2
+            }
+          }
+          DpRelation.updateOne(queryR, upObjR, function (err, upRelation) {
+            callback(err)
+          })
+        } else {
+          console.log('The DIC entry ' + item._id + ' has ERROR!')
+        }
+      }
+    }, function (err) {
+      if (err) {
+        console.log(new Date() + ' ' + item.doctorId.name + '医生与' + item.patientId.name + '患者主管服务到期取消失败，原因为：\n' + err)
+      } else {
+        console.log(new Date() + ' ' + item.doctorId.name + '医生与' + item.patientId.name + '患者主管服务到期取消成功')
+      }
+      callback(err)
+    })
+  }
+
   DoctorsInCharge.getSome(query, function (err, items) { // 获取需要自动核销的PD
     if (err) {
       console.log(err)
+    } else if (items.length > 0) {
+      async.each(items, autoRelease, function (err) {
+        if (err) {
+          console.log(new Date() + ' ' + new Date().toLocaleDateString() + ' 主管服务过期自动取消未完成，原因为：\n' + err)
+        } else {
+          console.log(new Date() + ' ' + new Date().toLocaleDateString() + ' 主管服务过期自动取消完成')
+        }
+      })
     } else {
-      for (let item in items) {
-        let toRelease = items[item]
-        DoctorsInCharge.updateOne({_id: toRelease._id}, upObj, function (err, upDIC) {
-          if (err) {
-            console.log(err)
-          } else {
-            if ((toRelease.doctorId || null) !== null && (toRelease.patientId || null) !== null) {
-              let queryR = {doctorId: toRelease.doctorId._id, patientsInCharge: {$elemMatch: {$and: [{patientId: toRelease.patientId._id}, {invalidFlag: 1}]}}}
-              let upObjR = {
-                $set: {
-                  'patientsInCharge.$.invalidFlag': 2
-                }
-              }
-              DpRelation.updateOne(queryR, upObjR, function (err, upRelation) {
-                if (err) {
-                  console.log(err)
-                } else {
-                  console.log(toRelease.doctorId.name + '医生与' + toRelease.patientId.name + '患者主管服务到期取消成功')
-                }
-              })
-            } else {
-              console.log('This DIC entry ' + toRelease._id + ' has ERROR!')
-            }
-          }
-        })
-      }
+      console.log(new Date().toLocaleDateString() + ' 无主管服务过期')
     }
   }, opts, fields, populate)
 }
