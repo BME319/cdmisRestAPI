@@ -4826,7 +4826,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), patientCtrl.bindingFavoriteDoctor, patientCtrl.bindingFavoritePatient)
-  // app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), testCtrl.test)
+  // app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), testCtrl.favoriteDoctorAsyncTest)
   // 患者端 取关医生 2017-07-21
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
@@ -5458,10 +5458,10 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Not Modified"
    */
   app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.confirmPD, serviceCtrl.recharge)
-  // 获取需要人工处理退款的面诊列表
-  // app.get(version + '/services/manualRefundList', personalDiagCtrl.manualRefundList)
-  // 人工处理面诊退款
-  // app.post(version + '/services/manualRefund', personalDiagCtrl.manualRefund)
+  // 获取需要人工处理退款与／或通知的面诊列表 - acl 2017-09-21 admin
+  app.get(version + '/services/manualRefundList', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.manualRefundAndNoticeList)
+  // 人工处理面诊退款与通知 - acl 2017-09-21 admin
+  app.post(version + '/services/manualRefund', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.manualRefundAndNotice)
   // 服务相关短信测试
   app.post(version + '/services/message', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), alluserCtrl.serviceMessage)
 

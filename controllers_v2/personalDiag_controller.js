@@ -416,6 +416,7 @@ exports.cancelBookedPds = function (req, res) {
   let doctorObjectId = req.body.doctorObject._id
   let now = new Date()
   let query = {}
+  let queryU = {}
   let upObjPD = {$set: {status: 6}}
   if (req.body.suspendFlag) { // 设置停诊取消面诊
     let startOfStart = req.body.startOfStart
@@ -426,6 +427,11 @@ exports.cancelBookedPds = function (req, res) {
     let endOfTomorrow = new Date(new Date(tomorrow).toDateString())
     endOfTomorrow.setMilliseconds(endOfTomorrow.getMilliseconds() + 999)
     query = {
+      doctorId: doctorObjectId,
+      status: {$in: [0, 6]},
+      $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
+    }
+    queryU = {
       doctorId: doctorObjectId,
       status: 0,
       $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
@@ -455,6 +461,12 @@ exports.cancelBookedPds = function (req, res) {
     }
   } else { // 删除排班取消面诊
     query = {
+      doctorId: doctorObjectId,
+      status: {$in: [0, 6]},
+      $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
+      bookingTime: req.body.time
+    }
+    queryU = {
       doctorId: doctorObjectId,
       status: 0,
       $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
@@ -509,7 +521,7 @@ exports.cancelBookedPds = function (req, res) {
         return res.json({msg: '面诊排班删除成功', code: 0})
       }
     } else {
-      PersonalDiag.update(query, upObj, function (err, upItems) {
+      PersonalDiag.update(queryU, upObj, function (err, upItems) {
         if (err) {
           return res.status(500).send(err)
         } else {
@@ -1013,7 +1025,6 @@ exports.sortAndTagPDs = function (req, res) {
     let period = ['Morning', 'Afternoon']
     for (let ii = today; ii < twoWeeksLater; ii.setDate(ii.getDate() + 1)) {
       for (let kk in period) {
-        console.log(ii, kk)
         let flag = Number
         for (let jj = 0; jj < returns.length; jj++) {
           flag = 0
@@ -1044,7 +1055,6 @@ exports.sortAndTagPDs = function (req, res) {
         return -1
       }
     })
-    console.log(returns)
     return res.status(200).json({results: returns})
   })
 }
@@ -1084,7 +1094,7 @@ exports.cancelMyPD = function (req, res, next) {
   if (diagId === null) {
     return res.status(412).json({msg: 'Please Check Input of diagId', code: 1})
   }
-  let query = {diagId: diagId}
+  let query = {diagId: diagId, status: 0}
   PersonalDiag.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
@@ -1297,9 +1307,9 @@ exports.autoOverduePD = function (req, res) {
 人工处理
 */
 // 获取需要人工处理退款的面诊列表
-exports.manualRefundList = function (req, res) {
+exports.manualRefundAndNoticeList = function (req, res) {
   let status = req.query.status || null
-  let query = {status: status}
+  let query
   if (status !== null) {
     status = Number(status)
     if (status !== 5 && status !== 6) {
@@ -1321,7 +1331,16 @@ exports.manualRefundList = function (req, res) {
       }
       let queryO = {perDiagObject: {$in: listPD}}
       let opts = ''
-      let fields = {_id: 0, orderNo: 1, money: 1, paystatus: 1}
+      let skip = req.query.skip || null
+      let limit = req.query.limit || null
+      if (limit !== null && skip !== null) {
+        opts = {limit: Number(limit), skip: Number(skip), sort: '_id'}
+      } else if (limit === null && skip === null) {
+        opts = {sort: '_id'}
+      } else {
+        return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
+      }
+      let fields = {_id: 0, orderNo: 1, money: 1, paystatus: 1, perDiagObject: 1}
       let populate = {
         path: 'perDiagObject',
         select: {_id: 0, code: 0},
@@ -1342,6 +1361,68 @@ exports.manualRefundList = function (req, res) {
 }
 
 // // 人工处理面诊退款
-// exports.manualRefundList = function (req, res) {
-
-// }
+exports.manualRefundAndNotice = function (req, res) {
+  let diagId = req.body.diagId || null
+  if (diagId === null) {
+    return res.json({code: 1, msg: '请填写diagId!'})
+  }
+  let reviewResult = req.body.reviewResult || null
+  if (reviewResult === null) {
+    return res.json({code: 1, msg: '请填写reviewResult!'})
+  }
+  let queryPD = {diagId: diagId}
+  let upObj
+  if (reviewResult === 'consent') {
+    upObj = {$set: {status: 8}}
+    queryPD['status'] = 5
+  } else if (reviewResult === 'reject') {
+    upObj = {$set: {status: 7}}
+    queryPD['status'] = 5
+  } else if (reviewResult === 'notice') {
+    upObj = {$set: {status: 9}}
+    queryPD['status'] = 6
+  } else {
+    return res.json({code: 1, msg: '请检查reviewResult的输入'})
+  }
+  PersonalDiag.updateOne(queryPD, upObj, function (err, upPD) {
+    if (err) {
+      return res.status(500).send(err)
+    } else if (upPD === null) {
+      return res.json({msg: '数据错误，请检查输入', code: 1})
+    } else if (Number(upPD.status) === 8) {
+      let queryO = {perDiagObject: upPD._id}
+      Order.getOne(queryO, function (err, itemO) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (itemO !== null) {
+          let orderNo = itemO.orderNo
+          let money = itemO.money || null
+          if (Number(money) !== 0) {
+            request({ // 调用微信退款接口
+              url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
+              method: 'POST',
+              body: {'role': 'appPatient', 'orderNo': orderNo, 'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token)},
+              json: true
+            }, function (err, responseR) {
+              if (err) {
+                return res.status(500).send(err)
+              } else if ((responseR.body.results || null) === null) {
+                return res.json({msg: '同意患者退款，退款失败，微信接口调用失败，请联系管理员', code: 1})
+              } else if (responseR.body.results.xml.return_code === 'SUCCESS' && responseR.body.results.xml.return_msg === 'OK') {
+                return res.json({msg: '同意患者退款，退款成功', code: 0})
+              } else {
+                return res.json({msg: '同意患者退款，退款失败，请联系管理员', code: 1})
+              }
+            })
+          }
+        }
+      })
+    } else if (Number(upPD.status) === 7) {
+      return res.json({msg: '拒绝患者退款，请联系患者表明拒绝理由', code: 0})
+    } else if (Number(upPD.status) === 9) {
+      return res.json({msg: '通知患者完毕', code: 0})
+    } else {
+      return res.json({msg: '数据错误，请检查输入', code: 1})
+    }
+  }, {new: true})
+}
