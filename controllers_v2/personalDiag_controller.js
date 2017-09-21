@@ -534,91 +534,91 @@ exports.cancelBookedPds = function (req, res) {
                     json: true
                   }, function (err, responseR) {
                     if (err) {
-                      console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                      console.log(itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                       console.log(err)
                     } else if ((responseR.body.results || null) === null) {
-                      console.log('微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                      console.log(itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败（微信接口调用失败），订单号为"' + itemO.orderNo + '"')
                     } else if (responseR.body.results.xml.return_code === 'SUCCESS' && responseR.body.results.xml.return_msg === 'OK') {
                       // return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
-                      console.log('用户"' + itemO.patientName + '"退款成功')
+                      console.log(itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款成功')
                     } else {
                       // return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
-                      console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
-                    }
-                    if ((toRefund.patientId || null) !== null) {
-                      if ((toRefund.patientId.phoneNo || null) !== null) {
-                        request({ // 调用短信发送接口
-                          url: 'http://' + webEntry.domain + '/api/v2/services/message',
-                          method: 'POST',
-                          body: {
-                            'phoneNo': toRefund.patientId.phoneNo,
-                            'doctorName': toRefund.doctorId.name,
-                            'day': new Date(toRefund.bookingDay).toLocaleDateString(),
-                            'time': toRefund.bookingTime,
-                            'orderMoney': Number(money),
-                            'orderNo': orderNo,
-                            'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token),
-                            'cancelFlag': 1
-                          },
-                          json: true
-                        }, function (err, responseM) {
-                          if (err) {
-                            console.log('用户"' + itemO.patientName + '"短信发送失败,服务器err')
-                            console.log(err)
-                          } else if (Number(responseM.body.results) === 0) {
-                            console.log('用户"' + itemO.patientName + '"短信发送成功')
-                          } else {
-                            console.log('用户"' + itemO.patientName + '"短信发送失败,接口返回err')
-                          }
-                        })
-                      }
-                      let bookingDay = new Date(new Date(toRefund.bookingDay).toLocaleDateString())
-                      let PDTime
-                      if (toRefund.bookingTime === 'Morning') {
-                        PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日上午'
-                      } else if (toRefund.bookingTime === 'Afternoon') {
-                        PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日下午'
-                      }
-                      let newData = {
-                        userId: toRefund.patientId.userId,
-                        sendBy: toRefund.doctorId.userId,
-                        type: 7,
-                        messageId: 'M' + nowstr + item,
-                        readOrNot: 0,
-                        time: now,
-                        title: new Date(toRefund.bookingDay).toLocaleDateString() + ',' + toRefund.doctorId.name + '医生面诊服务停诊',
-                        description: '您预约' + toRefund.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + orderNo + '。'
-                      }
-                      let newmessage = new Message(newData)
-                      newmessage.save(function (err, newInfo) {
-                        if (err) {
-                          console.log(err)
-                        }
-                        let query = {userId: toRefund.patientId.userId, sendBy: toRefund.doctorId.userId}
-                        let obj = {
-                          $set: {
-                            messageId: 'M' + nowstr + item,
-                            readOrNot: 0,
-                            userRole: 'patient',
-                            type: 7,
-                            time: now,
-                            title: new Date(toRefund.bookingDay).toLocaleDateString() + ',' + toRefund.doctorId.name + '面诊停诊',
-                            description: '您预约' + toRefund.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + orderNo + '。'
-                          }
-                        }
-                        News.updateOne(query, obj, function (err, upnews) {
-                          if (err) {
-                            console.log('用户"' + itemO.patientName + '"消息推送失败')
-                            console.log(err)
-                          } else {
-                            console.log('用户"' + itemO.patientName + '"消息推送成功')
-                          }
-                        }, {upsert: true})
-                      })
+                      console.log(itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                     }
                   })
                 } else {
-                  console.log('用户"' + itemO.patientName + '"面诊取消成功')
+                  console.log(itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"订单免费，无需退款')
+                }
+                if ((toRefund.patientId || null) !== null) {
+                  if ((toRefund.patientId.phoneNo || null) !== null) {
+                    request({ // 调用短信发送接口
+                      url: 'http://' + webEntry.domain + '/api/v2/services/message',
+                      method: 'POST',
+                      body: {
+                        'phoneNo': toRefund.patientId.phoneNo,
+                        'doctorName': toRefund.doctorId.name,
+                        'day': new Date(toRefund.bookingDay).toLocaleDateString(),
+                        'time': toRefund.bookingTime,
+                        'orderMoney': Number(money),
+                        'orderNo': orderNo,
+                        'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token),
+                        'cancelFlag': 1
+                      },
+                      json: true
+                    }, function (err, responseM) {
+                      if (err) {
+                        console.log('用户"' + itemO.patientName + '"短信发送失败,服务器err')
+                        console.log(err)
+                      } else if (Number(responseM.body.results) === 0) {
+                        console.log('用户"' + itemO.patientName + '"短信发送成功')
+                      } else {
+                        console.log('用户"' + itemO.patientName + '"短信发送失败,接口返回err')
+                      }
+                    })
+                  }
+                  let bookingDay = new Date(new Date(toRefund.bookingDay).toLocaleDateString())
+                  let PDTime
+                  if (toRefund.bookingTime === 'Morning') {
+                    PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日上午'
+                  } else if (toRefund.bookingTime === 'Afternoon') {
+                    PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日下午'
+                  }
+                  let newData = {
+                    userId: toRefund.patientId.userId,
+                    sendBy: toRefund.doctorId.userId,
+                    type: 7,
+                    messageId: 'M' + nowstr + item,
+                    readOrNot: 0,
+                    time: now,
+                    title: new Date(toRefund.bookingDay).toLocaleDateString() + ',' + toRefund.doctorId.name + '医生面诊服务停诊',
+                    description: '您预约' + toRefund.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + orderNo + '。'
+                  }
+                  let newmessage = new Message(newData)
+                  newmessage.save(function (err, newInfo) {
+                    if (err) {
+                      console.log(err)
+                    }
+                    let query = {userId: toRefund.patientId.userId, sendBy: toRefund.doctorId.userId}
+                    let obj = {
+                      $set: {
+                        messageId: 'M' + nowstr + item,
+                        readOrNot: 0,
+                        userRole: 'patient',
+                        type: 7,
+                        time: now,
+                        title: new Date(toRefund.bookingDay).toLocaleDateString() + ',' + toRefund.doctorId.name + '面诊停诊',
+                        description: '您预约' + toRefund.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + orderNo + '。'
+                      }
+                    }
+                    News.updateOne(query, obj, function (err, upnews) {
+                      if (err) {
+                        console.log('用户"' + itemO.patientName + '"消息推送失败')
+                        console.log(err)
+                      } else {
+                        console.log('用户"' + itemO.patientName + '"消息推送成功')
+                      }
+                    }, {upsert: true})
+                  })
                 }
               } else {
                 console.log('order for ' + toRefund.diagId + ' not found')
@@ -938,7 +938,7 @@ exports.newPersonalDiag = function (req, res, next) {
 // 患者获取某医生可预约面诊
 exports.getAvailablePD = function (req, res, next) {
   let doctorId = req.query.doctorId
-  let today = new Date(new Date().toDateString())
+  let today = new Date(new Date().toLocaleDateString())
   let twoWeeksLater = new Date(today)
   twoWeeksLater.setDate(twoWeeksLater.getDate() + 14)
 
@@ -954,8 +954,8 @@ exports.getAvailablePD = function (req, res, next) {
       for (let ii = today; ii < twoWeeksLater; ii.setDate(ii.getDate() + 1)) {
         for (let kk in period) {
           let objTemp = {}
-          let dayTemp = commonFunc.convertToFormatDate(new Date(ii))
-          objTemp['availableDay'] = dayTemp.slice(0, 4) + '-' + dayTemp.slice(4, 6) + '-' + dayTemp.slice(6, 8)
+          let dayTemp = new Date(ii).toLocaleDateString()
+          objTemp['availableDay'] = dayTemp.split('-')[0] + '-' + add0(dayTemp.split('-')[1]) + '-' + add0(dayTemp.split('-')[2])
           objTemp['availableTime'] = period[kk]
           objTemp['margin'] = 0
           returns.push(objTemp)
@@ -973,8 +973,8 @@ exports.getAvailablePD = function (req, res, next) {
       let returns = []
       for (let j = 0; j < availablePDsArray.length; j++) {
         let objTemp = {}
-        let dayTemp = commonFunc.convertToFormatDate(new Date(availablePDsArray[j].availableDay))
-        objTemp['availableDay'] = dayTemp.slice(0, 4) + '-' + dayTemp.slice(4, 6) + '-' + dayTemp.slice(6, 8)
+        let dayTemp = new Date(availablePDsArray[j].availableDay).toLocaleDateString()
+        objTemp['availableDay'] = dayTemp.split('-')[0] + '-' + add0(dayTemp.split('-')[1]) + '-' + add0(dayTemp.split('-')[2])
         objTemp['availableTime'] = availablePDsArray[j].availableTime
         objTemp['suspendFlag'] = availablePDsArray[j].suspendFlag
         objTemp['margin'] = availablePDsArray[j].total - availablePDsArray[j].count
@@ -989,7 +989,7 @@ exports.getAvailablePD = function (req, res, next) {
 
 exports.sortAndTagPDs = function (req, res) {
   let returns = req.body.returns
-  let today = new Date(new Date().toDateString())
+  let today = new Date(new Date().toLocaleDateString())
   let twoWeeksLater = new Date(today)
   twoWeeksLater.setDate(twoWeeksLater.getDate() + 14)
   let queryPD = {
@@ -1004,7 +1004,7 @@ exports.sortAndTagPDs = function (req, res) {
     } else if (itemsPD.length !== 0) {
       for (let i = 0; i < itemsPD.length; i++) {
         for (let k = 0; k < returns.length; k++) {
-          if (new Date(itemsPD[i].bookingDay).toDateString() === new Date(returns[k].availableDay).toDateString() && String(itemsPD[i].bookingTime) === String(returns[k].availableTime)) {
+          if (new Date(itemsPD[i].bookingDay).toLocaleDateString() === new Date(returns[k].availableDay).toLocaleDateString() && String(itemsPD[i].bookingTime) === String(returns[k].availableTime)) {
             returns[k]['diagId'] = itemsPD[i].diagId
           }
         }
@@ -1013,12 +1013,13 @@ exports.sortAndTagPDs = function (req, res) {
     let period = ['Morning', 'Afternoon']
     for (let ii = today; ii < twoWeeksLater; ii.setDate(ii.getDate() + 1)) {
       for (let kk in period) {
+        console.log(ii, kk)
         let flag = Number
         for (let jj = 0; jj < returns.length; jj++) {
           flag = 0
           // console.log(new Date(returns[jj].availableDay).toDateString(), ii.toDateString())
           // console.log(returns[jj].availableTime, period[kk])
-          if (new Date(returns[jj].availableDay).toDateString() === ii.toDateString() & returns[jj].availableTime === period[kk]) {
+          if (new Date(returns[jj].availableDay).toLocaleDateString() === ii.toLocaleDateString() & returns[jj].availableTime === period[kk]) {
             flag = 1
             break
           }
@@ -1026,8 +1027,8 @@ exports.sortAndTagPDs = function (req, res) {
 
         let objTemp = {}
         if (flag === 0) {
-          let dayTemp = commonFunc.convertToFormatDate(new Date(ii))
-          objTemp['availableDay'] = dayTemp.slice(0, 4) + '-' + dayTemp.slice(4, 6) + '-' + dayTemp.slice(6, 8)
+          let dayTemp = new Date(ii).toLocaleDateString()
+          objTemp['availableDay'] = dayTemp.split('-')[0] + '-' + add0(dayTemp.split('-')[1]) + '-' + add0(dayTemp.split('-')[2])
           objTemp['availableTime'] = period[kk]
           objTemp['margin'] = 0
           returns.push(objTemp)
@@ -1035,14 +1036,15 @@ exports.sortAndTagPDs = function (req, res) {
       }
     }
     returns.sort(function (x, y) {
-      if (x.availableDay > y.availableDay) {
+      if (new Date(x.availableDay) > new Date(y.availableDay)) {
         return 1
-      } else if (x.availableDay === y.availableDay) {
+      } else if (new Date(x.availableDay) === new Date(y.availableDay)) {
         return x.availableTime > y.availableTime ? -1 : 1
-      } else if (x.availableDay < y.availableDay) {
+      } else if (new Date(x.availableDay) < new Date(y.availableDay)) {
         return -1
       }
     })
+    console.log(returns)
     return res.status(200).json({results: returns})
   })
 }
