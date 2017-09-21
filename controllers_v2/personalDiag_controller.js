@@ -1044,7 +1044,7 @@ exports.sortAndTagPDs = function (req, res) {
         return -1
       }
     })
-    console.log(returns)
+    // console.log(returns)
     return res.status(200).json({results: returns})
   })
 }
