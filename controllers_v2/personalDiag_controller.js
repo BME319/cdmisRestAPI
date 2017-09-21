@@ -412,7 +412,7 @@ exports.suspendAvailablePds = function (req, res, next) {
 }
 
 // 已预约面诊取消
-exports.cancelBookedPds = function (req, res) {
+exports.cancelBookedPdsStep1 = function (req, res, next) {
   let doctorObjectId = req.body.doctorObject._id
   let now = new Date()
   let query = {}
@@ -455,6 +455,10 @@ exports.cancelBookedPds = function (req, res) {
         } else {
           if (upItemsPD.n !== upItemsPD.nModified) {
             return res.json({result: '停诊时间添加失败', results: upItemsPD})
+          } else {
+            req.body.query = query
+            req.body.queryU = queryU
+            return next()
           }
         }
       }, {multi: true})
@@ -498,12 +502,18 @@ exports.cancelBookedPds = function (req, res) {
         } else {
           if (upItemsPD.n !== upItemsPD.nModified) {
             return res.json({result: '取消面诊添加失败', results: upItemsPD})
+          } else {
+            req.body.query = query
+            req.body.queryU = queryU
+            return next()
           }
         }
       }, {multi: true})
     }
   }
+}
 
+exports.cancelBookedPdsStep2 = function (req, res) {
   let upObj = {$set: {status: 4}}
   let opts = ''
   let fields = {_id: 1, doctorId: 1, patientId: 1, bookingDay: 1, bookingTime: 1, diagId: 1}
@@ -511,7 +521,7 @@ exports.cancelBookedPds = function (req, res) {
     {path: 'doctorId', select: {_id: 0, name: 1, userId: 1}},
     {path: 'patientId', select: {_id: 0, phoneNo: 1, userId: 1}}
   ]
-  PersonalDiag.getSome(query, function (err, items) {
+  PersonalDiag.getSome(req.body.query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
     } else if (items.length === 0) {
@@ -521,7 +531,7 @@ exports.cancelBookedPds = function (req, res) {
         return res.json({msg: '面诊排班删除成功', code: 0})
       }
     } else {
-      PersonalDiag.update(queryU, upObj, function (err, upItems) {
+      PersonalDiag.update(req.body.queryU, upObj, function (err, upItems) {
         if (err) {
           return res.status(500).send(err)
         } else {
@@ -531,7 +541,7 @@ exports.cancelBookedPds = function (req, res) {
           for (let item in items) {
             let toRefund = items[item]
             // 调用退款接口
-            let queryO = {perDiagObject: toRefund._id}
+            let queryO = {perDiagObject: toRefund._id, paystatus: 2}
             Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
               if (err) {
                 return res.status(500).send(err)
@@ -633,7 +643,7 @@ exports.cancelBookedPds = function (req, res) {
                   })
                 }
               } else {
-                console.log('order for ' + toRefund.diagId + ' not found')
+                console.log('order for ' + toRefund.diagId + ' no need to refund')
               }
             })
           }
@@ -649,7 +659,6 @@ exports.cancelBookedPds = function (req, res) {
     }
   }, opts, fields, populate)
 }
-
 function add0 (m) {
   return m < 10 ? '0' + m : m
 }
