@@ -1055,12 +1055,16 @@ exports.sortAndTagPDs = function (req, res) {
         }
       }
     }
+    console.log(returns)
     returns.sort(function (x, y) {
-      if (new Date(x.availableDay) > new Date(y.availableDay)) {
+      if (x.availableDay > y.availableDay) {
+        console.log('x>y', x.availableDay, y.availableDay)
         return 1
-      } else if (new Date(x.availableDay) === new Date(y.availableDay)) {
-        return x.availableTime > y.availableTime ? -1 : 1
-      } else if (new Date(x.availableDay) < new Date(y.availableDay)) {
+      } else if (x.availableDay === y.availableDay) {
+        console.log('x=y', x.availableDay, x.availableTime, y.availableTime, String(x.availableTime) > String(y.availableTime))
+        return String(x.availableTime) > String(y.availableTime) ? -1 : 1
+      } else if (x.availableDay < y.availableDay) {
+        console.log('x<y', x.availableDay, y.availableDay)
         return -1
       }
     })
