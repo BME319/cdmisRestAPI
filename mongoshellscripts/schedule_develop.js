@@ -32,6 +32,10 @@ function schedule () {
   for (let i = 0; i < counselItem.length; i++) {
     let lastTime = now - counselItem[i].time
 
+    if (counselItem[i].type == 6 && lastTime > (1000 * 60 * 60 * 2)) {
+      db.counsels.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now}})
+    }
+
         // if (lastTime > (1000*60*60*24)) {
     if (lastTime > (1000 * 60 * 60 * 24)) {
             // 插入超时未回复表
