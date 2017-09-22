@@ -889,7 +889,7 @@ exports.bindingFavoriteDoctor = function (req, res, next) {
       // console.log(favoriteDoctorsList)
       for (let i = 0; i < favoriteDoctorsList.length; i++) {
         if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
-          return res.json({result: '已关注该医生!'})
+          return res.json({result: '关注成功（已关注该医生）'})
         }
       }
 
@@ -927,37 +927,35 @@ exports.bindingFavoritePatient = function (req, res) {
       }
     }
   }
-  DpRelation.update(query, upObj, function (err, upRelation) {
+  DpRelation.getOne(query, function (err, itemR) {
     if (err) {
       return res.status(422).send(err)
-    }
-    if (upRelation.n === 0) {
-      let dpRelationData = {
-        doctorId: doctorObjectId
-      }
-      // return res.json({result:dpRelationData});
-      var newDpRelation = new DpRelation(dpRelationData)
-      newDpRelation.save(function (err, dpRelationInfo) {
-        if (err) {
-          return res.status(500).send(err)
+    } else if (itemR !== null) {
+      let favoritePatientList = itemR.patients || []
+      for (let i = 0; i < favoritePatientList.length; i++) {
+        if (String(favoritePatientList[i].patientId) === String(patientObjectId)) {
+          return res.json({result: '关注成功（已添加该患者）'})
         }
-        DpRelation.update(query, upObj, function (err, upRelation) {
-          if (err) {
-            return res.status(422).send(err)
-          } else if (upRelation.nModified === 0) {
-            return res.json({result: '未关注成功！请检查输入是否符合要求！'})
-          } else if (upRelation.nModified === 1) {
-            return res.json({result: '关注成功', results: upRelation})
-          }
-        }, {new: true})
-      })
-    } else if (upRelation.nModified === 0) {
-      return res.json({result: '未关注成功！请检查输入是否符合要求！'})
-    } else if (upRelation.nModified === 1) {
-      return res.json({result: '关注成功', results: upRelation})
+      }
+      DpRelation.updateOne(query, upObj, function (err, upRelation) {
+        if (err) {
+          return res.status(422).send(err)
+        } else {
+          return res.json({result: '关注成功'})
+        }
+      // res.json({results: uprelation});
+      }, {new: true, upsert: true})
+    } else {
+      DpRelation.updateOne(query, upObj, function (err, upRelation) {
+        if (err) {
+          return res.status(422).send(err)
+        } else {
+          return res.json({result: '关注成功'})
+        }
+      // res.json({results: uprelation});
+      }, {new: true, upsert: true})
     }
-  // res.json({results: uprelation});
-  }, {new: true})
+  })
 }
 
 // 解绑关注医生 在alluser表patient_info部分doctors字段添加记录
