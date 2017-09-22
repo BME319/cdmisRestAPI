@@ -1291,7 +1291,7 @@ exports.autoOverduePD = function (req, res) {
                 console.log('order for ' + itemPD.diagId + ' not found')
               } else {
                 let doctorId = itemO.doctorId
-                let money = Number(itemO.money)
+                let money = Number(itemO.money) / 100
                 let queryA = {userId: doctorId}
                 let upObjA = {$inc: {money: money}}
                 Account.updateOne(queryA, upObjA, function (err, upAccount) { // 给相应医生账户充值

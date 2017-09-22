@@ -513,7 +513,7 @@ exports.autoRelease = function () {
     {path: 'patientId', select: {'_id': 1, 'name': 1}},
     {path: 'doctorId', select: {'_id': 1, 'name': 1}}
   ]
-  let autoRelease = function (item, callback) {
+  let autoReleaseFun = function (item, callback) {
     async.parallel({
       updateDIC: function (callback) {
         DoctorsInCharge.updateOne({_id: item._id}, upObj, function (err, upDIC) {
@@ -549,7 +549,7 @@ exports.autoRelease = function () {
     if (err) {
       console.log(err)
     } else if (items.length > 0) {
-      async.each(items, autoRelease, function (err) {
+      async.each(items, autoReleaseFun, function (err) {
         if (err) {
           console.log(new Date() + ' ' + new Date().toLocaleDateString() + ' 主管服务过期自动取消未完成，原因为：\n' + err)
         } else {
