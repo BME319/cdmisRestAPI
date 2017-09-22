@@ -214,9 +214,9 @@ exports.bindingPatientAsyncTest = function (req, res) {
   })
 }
 
-// ------ POST new/newstemp ------
+// ------ POST new/news(temp) ------
 
-// ------ POST new/teamNewstemp ------
+// ------ POST new/teamNews(temp) ------
 
 // ------ POST wechat/refund ------ 未调试
 exports.wechatRefundAsync = function (req, res, callback) {
