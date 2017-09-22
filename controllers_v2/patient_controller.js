@@ -928,23 +928,20 @@ exports.bindingFavoritePatient = function (req, res) {
     }
   }
   DpRelation.getOne(query, function (err, itemR) {
+    let flag = 0
     if (err) {
       return res.status(422).send(err)
     } else if (itemR !== null) {
       let favoritePatientList = itemR.patients || []
       for (let i = 0; i < favoritePatientList.length; i++) {
         if (String(favoritePatientList[i].patientId) === String(patientObjectId)) {
-          return res.json({result: '关注成功（已添加该患者）'})
+          flag = 1
+          break
         }
       }
-      DpRelation.updateOne(query, upObj, function (err, upRelation) {
-        if (err) {
-          return res.status(422).send(err)
-        } else {
-          return res.json({result: '关注成功'})
-        }
-      // res.json({results: uprelation});
-      }, {new: true, upsert: true})
+    }
+    if (flag) {
+      return res.json({result: '关注成功（已添加该患者）'})
     } else {
       DpRelation.updateOne(query, upObj, function (err, upRelation) {
         if (err) {
