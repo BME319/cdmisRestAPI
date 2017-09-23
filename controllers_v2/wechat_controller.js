@@ -999,7 +999,7 @@ exports.autoRefundCounsel = function () {
                       }
                     }
                   } else {
-                    console.log('order_paystatus_error:_not_allowed_refund')
+                    console.log(new Date(), 'order_paystatus_error:_not_allowed_refund')
                     if (i === counselItems.length - 1) {
                       console.log(new Date(), 'auto_refund_success:_finish')
                     }
