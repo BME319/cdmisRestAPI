@@ -3,7 +3,7 @@ var News = require('../models/news')
 var Counselautochangestatus = require('../models/counselautochangestatus')
 var webEntry = require('../settings').webEntry
 
-exports.autoCounselNews = function (req, res) {
+exports.autoCounselNews = function () {
   let enddate = new Date()
   let startdate = new Date((enddate / 1000 - 86400) * 1000)
   let y = enddate.getFullYear()
@@ -44,8 +44,9 @@ exports.autoCounselNews = function (req, res) {
   ]
   Counselautochangestatus.aggregate(array, function (err, results) {
     if (err) {
-      res.status(500).send(err.errmsg)
+      console.log(new Date(), err)
     }
+    console.log(results)
     // res.json({results: results})
     for (let i = 0; i < results.length; i++) {
       let newData = {
@@ -64,7 +65,7 @@ exports.autoCounselNews = function (req, res) {
       newmessage.save(function (err, newInfo) {
         if (err) {
           if (res !== undefined) {
-            return res.status(500).send(err.errmsg)
+            console.log(new Date(), err)
           }
         }
         let query = {userId: results[i]._id, sendBy: 'U201700000000'}
@@ -83,8 +84,11 @@ exports.autoCounselNews = function (req, res) {
         News.updateOne(query, obj, function (err, upnews) {
           if (err) {
             if (res !== undefined) {
-              return res.status(500).send(err.errmsg)
+              console.log(new Date(), err)
             }
+          }
+          else if (i === results.length - 1) {
+            console.log(new Date(), 'autoCounselNews_success')
           }
         }, {upsert: true})
       })
