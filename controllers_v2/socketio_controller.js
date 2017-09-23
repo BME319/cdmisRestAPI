@@ -3,6 +3,7 @@ var request = require('request')
 var webEntry = require('../settings').webEntry
 
 var commonFunc = require('../middlewares/commonFunc')
+var config = require('../config')
 
 var userWechatPatientServer = {}
 var userWechatPatientList = {}
@@ -211,7 +212,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
                 'userId': members[idx].userId,          // data.msg.content.doctorId, //医生的UID
                 'role': 'doctor',
                 'postdata': {
-                  'template_id': 'cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k',
+                  'template_id': config.wxTemplateIdConfig.sendToReceiver, // 'cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k',
                   'url': actionUrl,
                   'data': {
                     'first': {

@@ -806,7 +806,8 @@ exports.autoRefundQuery = function (req, res) {
         } else if (orderNosIndex < orderNos.length - 1) {
           refundQuery(++orderNosIndex, 0)
         } else {
-          console.log(new Date(), 'auto_refund_query_success')
+          let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
+          console.log(new Date(), info)
         }
       } else {
         let jsondata
@@ -831,7 +832,8 @@ exports.autoRefundQuery = function (req, res) {
             } else if (orderNosIndex < orderNos.length - 1) {
               refundQuery(++orderNosIndex, 0)
             } else {
-              console.log(new Date(), 'auto_refund_query_success')
+              let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
+              console.log(new Date(), info)
             }
           })
         } else {
@@ -843,7 +845,8 @@ exports.autoRefundQuery = function (req, res) {
           } else if (orderNosIndex < orderNos.length - 1) {
             refundQuery(++orderNosIndex, 0)
           } else {
-            console.log(new Date(), 'auto_refund_query_success')
+            let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
+            console.log(new Date(), info)
           }
         }
       }
@@ -858,7 +861,7 @@ exports.autoRefundQuery = function (req, res) {
       // console.log(orderNos)
       refundQuery(0, 0)
     } else {
-      console.log(new Date(), 'auto_refund_query_success')
+      console.log(new Date(), 'auto_refund_query_success:_no_order_need_to_query')
     }
   })
 }
