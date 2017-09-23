@@ -16,6 +16,7 @@ exports.getMessages = function (req, res) {
   var userId = req.session.userId
   var userRole = req.session.role
   var type = req.query.type  // 选填
+  let readOrNot = Number(req.query.readOrNot) || 0 // 根据readOrNot取message
 
   var query
   query = {userId: userId}
@@ -28,6 +29,9 @@ exports.getMessages = function (req, res) {
     } else {
       query = {'$or': [{'type': 1}, {'type': 3}, {'type': 5}, {'type': 6}, {'type': 7}, {'type': 8}]}
     }
+  }
+  if (req.query.readOrNot) {
+    query['readOrNot'] = readOrNot
   }
 
   // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
