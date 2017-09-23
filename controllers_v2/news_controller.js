@@ -1,6 +1,7 @@
 // var config = require('../config')
 var Team = require('../models/team')
 var News = require('../models/news')
+var Message = require('../models/message')
 
 // 根据类型查询消息链接 2017-04-05 GY
 exports.getNews = function (req, res) {
@@ -112,8 +113,42 @@ exports.changeNewsStatus = function (req, res) {
     query['sendBy'] = sendBy
   }
 
-  var upObj = {
-    readOrNot: 1  // 置为已读
+  // var upObj = {
+  //   readOrNot: 1  // 置为已读
+  // }
+  let upObj = {}
+  if (type === 14) {
+    query['readOrNot'] = 0 //查找未读
+    Message.getSome(query, function(err, messages) {
+      if (err) {
+        res.status(500).send(err)
+      } else if (messages.length === 0) {
+        upObj['readOrNot'] = 1
+        var opts = {
+          'multi': true, 'new': true
+        }
+      
+        News.update(query, upObj, function (err, upmessage) {
+          if (err) {
+            return res.status(422).send(err.message)
+          }
+      
+          if (upmessage.n !== 0 && upmessage.nModified === 0) {
+            return res.json({result: '未修改！请检查修改目标是否与原来一致！', results: upmessage})
+          }
+          if (upmessage.n !== 0 && upmessage.nModified !== 0) {
+            if (upmessage.n === upmessage.nModified) {
+              return res.json({result: '全部更新成功', results: upmessage})
+            }
+            return res.json({result: '未全部更新！', results: upmessage})
+          }
+        }, opts)
+      } else {
+        console.log('changeNewsStatus_failed:_type14_not_all_read')
+      }
+    })
+  } else {
+    upObj['readOrNot'] = 1
   }
 
   var opts = {
