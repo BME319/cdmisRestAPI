@@ -773,7 +773,7 @@ exports.refundquery = function (req, res, next) {
 }
 
 // 扫描订单 调用微信退款查询接口 更改订单状态 2017-07-16 GY
-exports.autoRefundQuery = function (req, res) {
+exports.autoRefundQuery = function () {
   let query = {paystatus: 6}
   let orderNos = []
   let wxApiUserObject = [config.wxDeveloperConfig.ssgj, config.wxDeveloperConfig.appssgj]
