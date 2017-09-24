@@ -1,6 +1,6 @@
 var PersonalDiag = require('../models/personalDiag')
 var Alluser = require('../models/alluser')
-var commonFunc = require('../middlewares/commonFunc')
+// var commonFunc = require('../middlewares/commonFunc')
 var Order = require('../models/order')
 var Account = require('../models/account')
 var request = require('request')
@@ -437,6 +437,9 @@ exports.cancelBookedPdsStep1 = function (req, res, next) {
       $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
     }
     if (new Date(startOfStart) - now > 86400000) {
+      req.body.query = query
+      req.body.queryU = queryU
+      return next()
       // query = {
       //   doctorId: doctorObjectId,
       //   status: 0,
@@ -477,6 +480,9 @@ exports.cancelBookedPdsStep1 = function (req, res, next) {
       bookingTime: req.body.time
     }
     if (new Date(req.body.nmd) - now > 86400000) {
+      req.body.query = query
+      req.body.queryU = queryU
+      return next()
       // query = {
       //   doctorId: doctorObjectId,
       //   status: 0,
@@ -643,7 +649,7 @@ exports.cancelBookedPdsStep2 = function (req, res) {
                   })
                 }
               } else {
-                console.log('order for ' + toRefund.diagId + ' no need to refund')
+                // console.log('order for ' + toRefund.diagId + ' no need to refund')
               }
             })
           }
@@ -1291,7 +1297,7 @@ exports.autoOverduePD = function (req, res) {
                 console.log('order for ' + itemPD.diagId + ' not found')
               } else {
                 let doctorId = itemO.doctorId
-                let money = Number(itemO.money)
+                let money = Number(itemO.money) / 100
                 let queryA = {userId: doctorId}
                 let upObjA = {$inc: {money: money}}
                 Account.updateOne(queryA, upObjA, function (err, upAccount) { // 给相应医生账户充值

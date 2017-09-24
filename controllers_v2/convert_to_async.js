@@ -420,7 +420,7 @@ exports.wechatRefundAsync = function (req, res, callback) {
 
 // ------ POST communication/communication ------
 
-// ------ GET communication/team ------
+// ------ GET communication/team ------ 本来就没必要request我觉得
 
 // ------ POST wechat/messageTemplate ------
 

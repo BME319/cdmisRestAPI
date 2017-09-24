@@ -313,7 +313,7 @@ exports.updateOrder = function (req, res) {
         if (item1 === null) {
           var accountData = {
             userId: item.doctorId,
-            money: item.money
+            money: item.money / 100
           }
           var newAccount = new Account(accountData)
           newAccount.save(function (err, accountInfo) {
