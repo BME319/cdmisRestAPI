@@ -834,13 +834,13 @@ exports.confirmPD = function (req, res, next) {
 // 返回：personalDiag.code, endTime
 exports.updatePDCapacityDown = function (req, res, next) {
   let doctorId = req.body.doctorId || null
-  let today = new Date().toLocaleDateString()
+  let today = new Date(new Date().toLocaleDateString())
   let bookingDay = req.body.day || null
   let bookingTime = req.body.time || null
   if (doctorId === null || bookingDay === null || bookingTime === null) {
     return res.json({results: '请检查doctorId,day,time输入'})
   } else {
-    bookingDay = new Date(req.body.day).toLocaleDateString()
+    bookingDay = new Date(new Date(req.body.day).toLocaleDateString())
     if (bookingDay < today) {
       return res.json({results: '请检查day输入正确'})
     }
