@@ -778,7 +778,7 @@ exports.refundquery = function (req, res, next) {
 }
 
 // 扫描订单 调用微信退款查询接口 更改订单状态 2017-07-16 GY
-exports.autoRefundQuery = function (req, res) {
+exports.autoRefundQuery = function () {
   let query = {paystatus: 6}
   let orderNos = []
   let wxApiUserObject = [config.wxDeveloperConfig.ssgj, config.wxDeveloperConfig.appssgj]
@@ -811,7 +811,8 @@ exports.autoRefundQuery = function (req, res) {
         } else if (orderNosIndex < orderNos.length - 1) {
           refundQuery(++orderNosIndex, 0)
         } else {
-          console.log(new Date(), 'auto_refund_query_success')
+          let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
+          console.log(new Date(), info)
         }
       } else {
         let jsondata
@@ -836,7 +837,8 @@ exports.autoRefundQuery = function (req, res) {
             } else if (orderNosIndex < orderNos.length - 1) {
               refundQuery(++orderNosIndex, 0)
             } else {
-              console.log(new Date(), 'auto_refund_query_success')
+              let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
+              console.log(new Date(), info)
             }
           })
         } else {
@@ -848,7 +850,8 @@ exports.autoRefundQuery = function (req, res) {
           } else if (orderNosIndex < orderNos.length - 1) {
             refundQuery(++orderNosIndex, 0)
           } else {
-            console.log(new Date(), 'auto_refund_query_success')
+            let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
+            console.log(new Date(), info)
           }
         }
       }
@@ -863,7 +866,7 @@ exports.autoRefundQuery = function (req, res) {
       // console.log(orderNos)
       refundQuery(0, 0)
     } else {
-      console.log(new Date(), 'auto_refund_query_success')
+      console.log(new Date(), 'auto_refund_query_success:_no_order_need_to_query')
     }
   })
 }
@@ -1001,7 +1004,7 @@ exports.autoRefundCounsel = function () {
                       }
                     }
                   } else {
-                    console.log('order_paystatus_error:_not_allowed_refund')
+                    console.log(new Date(), 'order_paystatus_error:_not_allowed_refund')
                     if (i === counselItems.length - 1) {
                       console.log(new Date(), 'auto_refund_success:_finish')
                     }

@@ -16,6 +16,7 @@ exports.getMessages = function (req, res) {
   var userId = req.session.userId
   var userRole = req.session.role
   var type = req.query.type  // 选填
+  let readOrNot = Number(req.query.readOrNot) || 0 // 根据readOrNot取message
 
   var query
   query = {userId: userId}
@@ -28,6 +29,9 @@ exports.getMessages = function (req, res) {
     } else {
       query = {'$or': [{'type': 1}, {'type': 3}, {'type': 5}, {'type': 6}, {'type': 7}, {'type': 8}]}
     }
+  }
+  if (req.query.readOrNot) {
+    query['readOrNot'] = readOrNot
   }
 
   // 注意'_id'的生成算法包含时间，因此直接用'_id'进行降序排列
@@ -63,9 +67,43 @@ exports.changeMessageStatus = function (req, res) {
     query['messageId'] = messageId
   } else {
     if (req.body.type === null || req.body.type === '' || req.body.type === undefined) {
-      return res.json({resutl: '请填写type'})
+      return res.json({result: '请填写type'})
     }
+    let type = Number(req.body.type) || 0
     query['type'] = req.body.type
+    if (type === 14) {
+      let query14 = {
+        userId: req.session.userId, 
+        type: type, 
+        readOrNot: 0
+      }
+      Message.getSome(query14, function (err, notread) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (notread.length === 0) {
+          upObj['readOrNot'] = 1
+          var opts = {
+            'multi': true, 'new': true
+          }
+          News.update(query14, upObj, function (err, upmessage) {
+            if (err) {
+              return res.status(422).send(err.message)
+            }
+            if (upmessage.n !== 0 && upmessage.nModified === 0) {
+              // return res.json({result: '未修改！请检查修改目标是否与原来一致！', results: upmessage})
+            }
+            if (upmessage.n !== 0 && upmessage.nModified !== 0) {
+              if (upmessage.n === upmessage.nModified) {
+                // return res.json({result: '全部更新成功', results: upmessage})
+              }
+              // return res.json({result: '未全部更新！', results: upmessage})
+            }
+          }, opts)
+        } else {
+          // console.log('changeNewsStatus_failed:_type14_not_all_read')
+        }
+      })
+    }
   }
 
   var upObj = {

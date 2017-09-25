@@ -32,7 +32,7 @@ function schedule () {
   for (let i = 0; i < counselItem.length; i++) {
     let lastTime = now - counselItem[i].time
 
-    if (counselItem[i].type == 6 && lastTime > (1000 * 60 * 60 * 2)) {
+    if (counselItem[i].type === 6 && lastTime > (1000 * 60 * 60 * 2)) {
       db.counsels.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now}})
     }
 
@@ -85,6 +85,14 @@ function schedule () {
           info: '已满24小时，问诊自动结束',
           docId: messagedoc[0].userId,    // 医生id
           counseltype: 2,
+          counselId: counselItem[i].counselId
+        }
+      } else if (counselItem[i].type === 6) {
+        endlMsg = {
+          type: 'endl',
+          info: '已满2小时，加急咨询自动结束',
+          docId: messagedoc[0].userId,    // 医生id
+          counseltype: 6,
           counselId: counselItem[i].counselId
         }
       }

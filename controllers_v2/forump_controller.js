@@ -285,7 +285,7 @@ exports.getMyposts = function (req, res) {
     },
     {
       $lookup: {
-        from: 'forums',
+        from: 'forumps',
         localField: 'posts',
         foreignField: 'postId',
         as: 'collections'
