@@ -3,6 +3,10 @@ var Alluser = require('../models/alluser')
 var OpenIdTmp = require('../models/openId')
 var DpRelation = require('../models/dpRelation')
 
+var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
+
+var async = require('async')
+
 // 获取护士推送保险信息的患者列表  2017-08-01 lgf
 exports.getInsurancePatientsList = function (req, res) {
   var nurseId = req.userObject._id
@@ -143,6 +147,90 @@ exports.deleteOpenIdTmp = function (req, res) {
       return res.json({data: {}, msg: '已绑定过该患者!', code: 1})
     } else {
       return res.json({data: {}, msg: '绑定患者成功！', code: 0})
+    }
+  })
+}
+
+// async改写 ------ POST nurse/bindingPatient ------ 已调试 ------ 2017-09-25 YQC
+exports.bindingPatientAsync = function (params, callback) {
+  let patientId = params.patientId || null
+  if (patientId === null) {
+    let err = '请填写patientId!'
+    return callback(err)
+  }
+  let queryP = {userId: patientId, role: 'patient'}
+  let nurseId = params.nurseObjectId || null
+  if (nurseId === null) {
+    let err = '请填写nurseObjectId!'
+    return callback(err)
+  }
+  let queryN = {doctorId: nurseId}
+
+  let dpRelationTime = params.dpRelationTime || null
+  if (dpRelationTime === null) {
+    dpRelationTime = new Date()
+  } else {
+    dpRelationTime = new Date(dpRelationTime)
+  }
+
+  async.auto({
+    getNurse: function (callback) {
+      DpRelation.getOne(queryN, function (err, itemN) {
+        return callback(err, itemN)
+      })
+    },
+    getPatient: function (callback) {
+      Alluser.getOne(queryP, function (err, itemP) {
+        if (itemP) {
+          return callback(err, itemP)
+        } else {
+          let err = '不存在的患者ID!'
+          return callback(err)
+        }
+      })
+    },
+    updateBP: ['getNurse', 'getPatient', function (results, callback) {
+      let itemN = results.getNurse || null
+      if (itemN !== null) {
+        let patientsList = itemN.patients || []
+        for (let i = 0; i < patientsList.length; i++) {
+          if (String(patientsList[i].patientId) === String(results.getPatient._id)) {
+            let err = '已绑定过该患者!'
+            return callback(err)
+          }
+        }
+      }
+
+      let patientObjectId = results.getPatient._id
+      let upObj = {
+        $push: {
+          patients: {
+            patientId: patientObjectId,
+            dpRelationTime: dpRelationTime
+          }
+        }
+      }
+      DpRelation.updateOne(queryN, upObj, function (err, upRelation) {
+        return callback(err, upRelation)
+      }, {new: true, upsert: true})
+    }]
+  }, function (err, results) {
+    return callback(err, results)
+  })
+}
+
+// async改写 调用bindingPatientAsync方式与结果处理 ------ 2017-09-25 YQC
+exports.bindingPatientAsyncTest = function (req, res) {
+  let params = {
+    patientId: req.query.patientId || req.body.patientId || null, // 患者userId
+    nurseObjectId: req.session._id || null, // 护士_id
+    dpRelationTime: req.body.dpRelationTime || null // 绑定时间
+  }
+  nurseInsuranceWorkCtrl.bindingPatientAsync(params, function (err, results) {
+    if (err) {
+      return res.json({msg: err, data: results, code: 1})
+    } else {
+      return res.json({msg: '绑定成功', data: results, code: 0})
     }
   })
 }

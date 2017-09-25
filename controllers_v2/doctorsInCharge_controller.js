@@ -501,7 +501,7 @@ exports.relation = function (req, res) {
 过期取消主管关系
 */
 exports.autoRelease = function () {
-  console.log('主管服务过期自动取消 ' + new Date())
+  console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + '"主管服务过期自动取消"进程开始 ---')
   let today = new Date(new Date().toLocaleDateString())
   let endOfToday = new Date(today)
   endOfToday.setHours(today.getHours() + 24)
@@ -532,14 +532,14 @@ exports.autoRelease = function () {
             callback(err)
           })
         } else {
-          console.log('The DIC entry ' + item._id + ' has ERROR!')
+          console.log(new Date() + ' --- 主管服务过期自动取消 --- ' + 'The DIC entry ' + item._id + ' has ERROR!')
         }
       }
     }, function (err) {
       if (err) {
-        console.log(new Date() + ' ' + item.doctorId.name + '医生与' + item.patientId.name + '患者主管服务到期取消失败，原因为：\n' + err)
+        console.log(new Date() + ' --- 主管服务过期自动取消 --- ' + item.doctorId.name + '医生与' + item.patientId.name + '患者主管服务到期取消失败，原因为：\n' + err)
       } else {
-        console.log(new Date() + ' ' + item.doctorId.name + '医生与' + item.patientId.name + '患者主管服务到期取消成功')
+        console.log(new Date() + ' --- 主管服务过期自动取消 --- ' + item.doctorId.name + '医生与' + item.patientId.name + '患者主管服务到期取消成功')
       }
       callback(err)
     })
@@ -547,17 +547,17 @@ exports.autoRelease = function () {
 
   DoctorsInCharge.getSome(query, function (err, items) { // 获取需要自动核销的PD
     if (err) {
-      console.log(err)
+      console.log(new Date() + ' --- 主管服务过期自动取消 --- ' + err)
     } else if (items.length > 0) {
       async.each(items, autoReleaseFun, function (err) {
         if (err) {
-          console.log(new Date() + ' ' + new Date().toLocaleDateString() + ' 主管服务过期自动取消未完成，原因为：\n' + err)
+          console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + '"主管服务过期自动取消"进程结束，任务未全部完成，原因为：\n' + err)
         } else {
-          console.log(new Date() + ' ' + new Date().toLocaleDateString() + ' 主管服务过期自动取消完成')
+          console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + '"主管服务过期自动取消"进程结束，任务全部完成 ---')
         }
       })
     } else {
-      console.log(new Date().toLocaleDateString() + ' 无主管服务过期')
+      console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + '无主管服务过期,"主管服务过期自动取消"进程结束 ---')
     }
   }, opts, fields, populate)
 }

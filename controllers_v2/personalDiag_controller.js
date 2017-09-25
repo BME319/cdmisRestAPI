@@ -202,7 +202,7 @@ exports.getDaysToUpdate = function (req, res, next) {
 
 // YQC 2017-07-28
 exports.updateAvailablePD1 = function (req, res, next) {
-  let nextModDay = new Date(req.body.nmd)
+  let nextModDay = new Date(new Date(req.body.nmd).toLocaleDateString())
   let time = req.body.time || null
   let total = req.body.total || null
   let place = req.body.place || null
@@ -263,7 +263,7 @@ exports.updateAvailablePD1 = function (req, res, next) {
 }
 // YQC 2017-07-28
 exports.updateAvailablePD2 = function (req, res, next) {
-  let nextNextModDay = new Date(req.body.nnmd)
+  let nextNextModDay = new Date(new Date(req.body.nnmd).toLocaleDateString())
   let time = req.body.time || null
   let total = req.body.total || null
   let place = req.body.place || null
@@ -336,9 +336,9 @@ exports.setServiceSuspend = function (req, res, next) {
   let query = {userId: req.session.userId}
   let start = req.body.start || null
   let end = req.body.end || null
-  let today = new Date(new Date().toDateString())
-  let startOfStart = new Date(new Date(start).toDateString())
-  let endOfEnd = new Date(new Date(end).toDateString())
+  let today = new Date(new Date().toLocaleDateString())
+  let startOfStart = new Date(new Date(start).toLocaleDateString())
+  let endOfEnd = new Date(new Date(end).toLocaleDateString())
   endOfEnd.setMilliseconds(endOfEnd.getMilliseconds() + 999)
   let upObj = {}
   if (start === null || end === null) {
@@ -421,10 +421,10 @@ exports.cancelBookedPdsStep1 = function (req, res, next) {
   if (req.body.suspendFlag) { // 设置停诊取消面诊
     let startOfStart = req.body.startOfStart
     let endOfEnd = req.body.endOfEnd
-    let today = new Date(now.toDateString())
+    let today = new Date(now.toLocaleDateString())
     let tomorrow = new Date(today)
     tomorrow.setDate(tomorrow.getDate() + 1)
-    let endOfTomorrow = new Date(new Date(tomorrow).toDateString())
+    let endOfTomorrow = new Date(new Date(tomorrow).toLocaleDateString())
     endOfTomorrow.setMilliseconds(endOfTomorrow.getMilliseconds() + 999)
     query = {
       doctorId: doctorObjectId,
@@ -674,8 +674,8 @@ exports.deleteServiceSuspend = function (req, res) {
   let query = {userId: req.session.userId}
   let start = req.body.start || null
   let end = req.body.end || null
-  let startOfStart = new Date(new Date(start).toDateString())
-  let endOfEnd = new Date(new Date(end).toDateString())
+  let startOfStart = new Date(new Date(start).toLocaleDateString())
+  let endOfEnd = new Date(new Date(end).toLocaleDateString())
   endOfEnd.setMilliseconds(endOfEnd.getMilliseconds() + 999)
   let pullObj = {}
   if (start === null || end === null) {
@@ -768,7 +768,7 @@ exports.getPDPatients = function (req, res) {
     queryPD.status = status
   }
   if (queryDay !== null) {
-    queryPD.bookingDay = new Date(new Date(queryDay).toDateString())
+    queryPD.bookingDay = new Date(new Date(queryDay).toLocaleDateString())
   }
   if (queryTime !== null) {
     queryPD.bookingTime = queryTime
@@ -787,7 +787,7 @@ exports.getPDPatients = function (req, res) {
 exports.confirmPD = function (req, res, next) {
   // let doctorObjectId = req.body.doctorObject._id
   // let patientObjectId = req.body.patientObject._id
-  // let bookingDay = new Date(new Date(req.body.day).toDateString()) || null
+  // let bookingDay = new Date(new Date(req.body.day).toLocaleDateString()) || null
   // let bookingTime = req.body.time || null
   let diagId = req.body.diagId || null
   let code = req.body.code || null
@@ -858,7 +858,7 @@ exports.updatePDCapacityDown = function (req, res, next) {
       let availablePDsList = itemD.availablePDs || []
       let availablePD = null
       for (let i = 0; i < availablePDsList.length; i++) { // 取出该时段面诊信息
-        if (new Date(availablePDsList[i].availableDay).toDateString() === new Date(bookingDay).toDateString() && String(availablePDsList[i].availableTime) === String(bookingTime)) {
+        if (new Date(availablePDsList[i].availableDay).toLocaleDateString() === new Date(bookingDay).toLocaleDateString() && String(availablePDsList[i].availableTime) === String(bookingTime)) {
           availablePD = availablePDsList[i]
           break
         }
@@ -1043,7 +1043,7 @@ exports.sortAndTagPDs = function (req, res) {
         let flag = Number
         for (let jj = 0; jj < returns.length; jj++) {
           flag = 0
-          // console.log(new Date(returns[jj].availableDay).toDateString(), ii.toDateString())
+          // console.log(new Date(returns[jj].availableDay).toLocaleDateString(), ii.toLocaleDateString())
           // console.log(returns[jj].availableTime, period[kk])
           if (new Date(returns[jj].availableDay).toLocaleDateString() === ii.toLocaleDateString() & returns[jj].availableTime === period[kk]) {
             flag = 1
@@ -1087,7 +1087,7 @@ exports.getMyPDs = function (req, res) {
     queryPD.status = status
   }
   if (queryDay !== null) {
-    queryPD.bookingDay = new Date(new Date(queryDay).toDateString())
+    queryPD.bookingDay = new Date(new Date(queryDay).toLocaleDateString())
   }
   if (queryTime !== null) {
     queryPD.bookingTime = queryTime
@@ -1207,9 +1207,9 @@ exports.updatePDCapacityUp = function (req, res) {
 每日更新系列
 */
 // 每日更新所有医生两周后当天的面诊可预约 YQC 2017-07-29
-exports.autoAvailablePD = function (req, res) {
-  console.log(new Date())
-  let today = new Date(new Date().toDateString())
+exports.autoAvailablePD = function () {
+  console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + '"每日更新所有医生两周后当天的面诊可预约列表"进程开始')
+  let today = new Date(new Date().toLocaleDateString())
   let twoWeeksLater = new Date(today)
   twoWeeksLater.setDate(twoWeeksLater.getDate() + 14)
   let todayNo = new Date().toDateString().split(' ')[0]
@@ -1217,10 +1217,10 @@ exports.autoAvailablePD = function (req, res) {
   let query = {'serviceSchedules.day': todayNo}
   Alluser.getSome(query, function (err, items) {
     if (err) {
-      console.log(err)
+      console.log(new Date() + ' --- 每日更新所有医生两周后当天的面诊可预约列表 --- ' + err)
     } else {
       if (items.length === 0) {
-        console.log('auto_available_personal_diagnosis_update_complete-0')
+        console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + ' --- "每日更新所有医生两周后当天的面诊可预约列表"进程结束 --- ' + 'auto_available_personal_diagnosis_update_complete-zero')
       } else {
         for (let i = 0; i < items.length; i++) { // 遍历所有当天需要新增面诊的医生
           let itemDoc = items[i]
@@ -1253,33 +1253,33 @@ exports.autoAvailablePD = function (req, res) {
               }
               Alluser.update(queryD, upObj, function (err, upItem) {
                 if (err) {
-                  console.log(err)
+                  console.log(new Date() + ' --- 每日更新所有医生两周后当天的面诊可预约列表 --- ' + err)
                 } else if (upItem.nModified === 1) {
-                  console.log(doctorId + '-' + twoWeeksLater.toDateString() + '-' + sSDoc[j].time + '-PD-Auto-Update-Complete-1')
+                  console.log(new Date() + ' --- 每日更新所有医生两周后当天的面诊可预约列表 --- ' + doctorId + '-' + twoWeeksLater.toLocaleDateString() + '-' + sSDoc[j].time + '-PD-Auto-Update-Complete-Succeed')
                 } else {
-                  console.log(doctorId + '-' + twoWeeksLater.toDateString() + '-' + sSDoc[j].time + '-PD-Auto-Update-Complete-0')
+                  console.log(new Date() + ' --- 每日更新所有医生两周后当天的面诊可预约列表 --- ' + doctorId + '-' + twoWeeksLater.toLocaleDateString() + '-' + sSDoc[j].time + '-PD-Auto-Update-Complete-Fail')
                 }
               })
             }
           }
         }
-        console.log('auto_available_personal_diagnosis_update_complete-all')
+        console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + ' --- "每日更新所有医生两周后当天的面诊可预约列表"进程结束 --- ' + 'auto_available_personal_diagnosis_update_complete-all')
       }
     }
   })
 }
 
 // 每日核销过期面诊PD
-exports.autoOverduePD = function (req, res) {
-  console.log(new Date())
-  let today = new Date(new Date().toDateString())
+exports.autoOverduePD = function () {
+  console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + '"过期面诊自动核销"进程开始')
+  let today = new Date(new Date().toLocaleDateString())
   let middleOfToday = new Date(today)
   middleOfToday.setHours(today.getHours() + 12)
   let query = {endTime: {$lte: middleOfToday}, status: 0}
   let upObj = {$set: {status: 2}}
   PersonalDiag.getSome(query, function (err, items) { // 获取需要自动核销的PD
     if (err) {
-      console.log(err)
+      console.log(new Date() + ' --- 过期面诊自动核销 --- ' + err)
     } else {
       let count = 0
       for (let item in items) { // 遍历所有需要自动核销的PD
@@ -1287,14 +1287,14 @@ exports.autoOverduePD = function (req, res) {
         let PDId = itemPD._id
         PersonalDiag.updateOne({_id: PDId}, upObj, function (err, upPD) { // 修改PD状态
           if (err) {
-            console.log(err)
+            console.log(new Date() + ' --- 过期面诊自动核销 --- ' + err)
           } else {
             let queryO = {perDiagObject: PDId}
             Order.getOne(queryO, function (err, itemO) { // 获取相应订单的医生userId和订单金额
               if (err) {
-                console.log(err)
+                console.log(new Date() + ' --- 过期面诊自动核销 --- ' + err)
               } else if (itemO === null) {
-                console.log('order for ' + itemPD.diagId + ' not found')
+                console.log(new Date() + ' --- 过期面诊自动核销 --- ' + 'order for ' + itemPD.diagId + ' not found')
               } else {
                 let doctorId = itemO.doctorId
                 let money = Number(itemO.money) / 100
@@ -1302,9 +1302,9 @@ exports.autoOverduePD = function (req, res) {
                 let upObjA = {$inc: {money: money}}
                 Account.updateOne(queryA, upObjA, function (err, upAccount) { // 给相应医生账户充值
                   if (err) {
-                    console.log(err)
+                    console.log(new Date() + ' --- 过期面诊自动核销 --- ' + err)
                   } else {
-                    console.log(doctorId + 'recharges with' + money)
+                    console.log(new Date() + ' --- 过期面诊自动核销 --- ' + doctorId + 'recharges with' + money)
                     count++
                   }
                 }, {upsert: true})
@@ -1313,7 +1313,7 @@ exports.autoOverduePD = function (req, res) {
           }
         })
       }
-      console.log(items.length + ' Entries Found, and ' + count + ' Entries Successfully Modified.')
+      console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + ' "过期面诊自动核销"进程结束 --- \n' + items.length + ' Entries Found, and ' + count + ' Entries Successfully Modified.')
     }
   })
 }
