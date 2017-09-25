@@ -1327,13 +1327,13 @@ exports.manualRefundAndNoticeList = function (req, res) {
   let query
   if (status !== null) {
     status = Number(status)
-    if (status !== 5 && status !== 6) {
+    if (status !== 5 && status !== 6 && status !== 7 && status !== 8 && status !== 9) {
       return res.json({msg: '请检查status输入', code: 1})
     } else {
       query = {status: status}
     }
   } else {
-    query = {$or: [{status: 5}, {status: 6}]}
+    query = {$or: [{status: 5}, {status: 6}, {status: 7}, {status: 8}, {status: 9}]}
   }
 
   PersonalDiag.getSome(query, function (err, items) {
