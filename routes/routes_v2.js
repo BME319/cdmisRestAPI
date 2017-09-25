@@ -63,7 +63,7 @@ var departmentMonitorCtrl = require('../controllers_v2/departmentMonitor_control
 var policyCtrl = require('../controllers_v2/policy_controller')
 var districtMonitorCtrl = require('../controllers_v2/districtMonitor_controller')
 var departmentReportTempCtrl = require('../controllers_v2/departmentReportTemp_controller')
-var testCtrl = require('../controllers_v2/convert_to_async')
+// var testCtrl = require('../controllers_v2/convert_to_async')
 
 module.exports = function (app, webEntry, acl) {
   // app.get('/', function(req, res){
@@ -4826,7 +4826,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: "Operation success."
    */
   app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), patientCtrl.bindingFavoriteDoctor, patientCtrl.bindingFavoritePatient)
-  // app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), testCtrl.favoriteDoctorAsyncTest)
+  // app.post(version + '/patient/favoriteDoctor', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), patientCtrl.favoriteDoctorAsyncTest)
   // 患者端 取关医生 2017-07-21
   /** YQC annotation 2017-07-25 - acl 2017-07-25 患者
    * @swagger
@@ -7440,6 +7440,7 @@ module.exports = function (app, webEntry, acl) {
    */
   // 护士端微信扫码绑定患者 权限 护士
   app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient)
+  // app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.bindingPatientAsyncTest)
   // app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), nurseInsuranceWorkCtrl.checkBinding, alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient, nurseInsuranceWorkCtrl.deleteOpenIdTmp)
   /**
    * @swagger
@@ -7955,6 +7956,7 @@ module.exports = function (app, webEntry, acl) {
   // app.post(version + '/wechat/refund', orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund)
   // 退款接口
   app.post(version + '/wechat/refund', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), orderCtrl.checkPayStatus('refund'), getNoMid.getNo(9), orderCtrl.refundChangeStatus('refundApplication'), wechatCtrl.chooseAppId, wechatCtrl.refund, wechatCtrl.refundMessage)
+  // app.post(version + '/wechat/refund', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), wechatCtrl.wechatRefundAsyncTest)
   // 退款查询
   app.post(version + '/wechat/refundquery', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), orderCtrl.checkPayStatus('refundquery'), wechatCtrl.chooseAppId, wechatCtrl.refundquery, orderCtrl.refundChangeStatus())
   // 消息模板
