@@ -1951,10 +1951,14 @@ exports.serviceMessage = function (req, res, next) {
         } else if (Number(req.body.rejectFlag) === 1) {
           return res.json({results: 0, mesg: 'Reject Success and Message Sent!'})
         } else if (Number(req.body.successFlag) === 1) {
-          console.log({results: 0, mesg: 'Booking Success and Message Sent!'})
+          console.log(new Date() + ' --- 面诊预约短信发送 --- ' + mobile + ' Booking Success and Message Sent!')
         }
       } else {
-        return res.json({results: 1, mesg: {'ErrorCode': code}})
+        if (Number(req.body.successFlag) === 1) {
+          console.log(new Date() + ' --- 面诊预约短信发送 --- ' + mobile + ' Booking Success and Message Error! ErrorCode: \n' + code)
+        } else {
+          return res.json({results: 1, mesg: {'ErrorCode': code}})
+        }
       }
     })
   })

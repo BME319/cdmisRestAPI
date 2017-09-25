@@ -190,13 +190,13 @@ exports.updateDoctorInCharge = function (req, res, next) {
                   return res.status(500).send(err)
                 } else if ((responseR.body.results || null) === null) {
                   // return res.json({msg: '审核成功，已拒绝患者但退款失败，微信接口调用失败，请联系管理员', data: upDIC, code: 1})
-                  console.log('微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                  console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                 } else if (responseR.body.results.xml.return_code === 'SUCCESS' && responseR.body.results.xml.return_msg === 'OK') {
                   // return res.json({msg: '审核成功，已拒绝患者并退款', data: upDIC, code: 0})
-                  console.log('用户"' + itemO.patientName + '"退款成功')
+                  console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"退款成功')
                 } else {
                   // return res.json({msg: '审核成功，已拒绝患者但退款失败，请联系管理员', data: upDIC, code: 1})
-                  console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                  console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                 }
                 if ((upDIC.patientId || null) !== null) {
                   if ((upDIC.patientId.phoneNo || null) !== null) {
@@ -217,9 +217,9 @@ exports.updateDoctorInCharge = function (req, res, next) {
                       if (err) {
                         return res.status(500).send(err)
                       } else if (Number(responseM.body.results) === 0) {
-                        console.log('用户"' + itemO.patientName + '"短信发送成功')
+                        console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"短信发送成功')
                       } else {
-                        console.log('用户"' + itemO.patientName + '"短信发送失败')
+                        console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"短信发送失败,接口返回err:' + responseM.body.mesg)
                       }
                     })
                   }

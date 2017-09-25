@@ -562,20 +562,20 @@ exports.cancelBookedPdsStep2 = function (req, res) {
                     json: true
                   }, function (err, responseR) {
                     if (err) {
-                      console.log(itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                      console.log(new Date() + ' --- 面诊取消退款 --- "' + itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                       console.log(err)
                     } else if ((responseR.body.results || null) === null) {
-                      console.log(itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败（微信接口调用失败），订单号为"' + itemO.orderNo + '"')
+                      console.log(new Date() + ' --- 面诊取消退款 --- "' + itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败（微信接口调用失败），订单号为"' + itemO.orderNo + '"')
                     } else if (responseR.body.results.xml.return_code === 'SUCCESS' && responseR.body.results.xml.return_msg === 'OK') {
                       // return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
-                      console.log(itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款成功')
+                      console.log(new Date() + ' --- 面诊取消退款 --- "' + itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款成功')
                     } else {
                       // return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
-                      console.log(itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                      console.log(new Date() + ' --- 面诊取消退款 --- "' + itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                     }
                   })
                 } else {
-                  console.log(itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"订单免费，无需退款')
+                  console.log(new Date() + ' --- 面诊取消退款 --- "' + itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"订单免费，无需退款')
                 }
                 if ((toRefund.patientId || null) !== null) {
                   if ((toRefund.patientId.phoneNo || null) !== null) {
@@ -595,12 +595,12 @@ exports.cancelBookedPdsStep2 = function (req, res) {
                       json: true
                     }, function (err, responseM) {
                       if (err) {
-                        console.log('用户"' + itemO.patientName + '"短信发送失败,服务器err')
+                        console.log(new Date() + ' --- 面诊取消短信发送 --- 用户"' + itemO.patientName + '"短信发送失败,服务器err')
                         console.log(err)
                       } else if (Number(responseM.body.results) === 0) {
-                        console.log('用户"' + itemO.patientName + '"短信发送成功')
+                        console.log(new Date() + ' --- 面诊取消短信发送 --- 用户"' + itemO.patientName + '"短信发送成功')
                       } else {
-                        console.log('用户"' + itemO.patientName + '"短信发送失败,接口返回err')
+                        console.log(new Date() + ' --- 面诊取消短信发送 --- 用户"' + itemO.patientName + '"短信发送失败,接口返回err:' + responseM.body.mesg)
                       }
                     })
                   }
@@ -640,10 +640,10 @@ exports.cancelBookedPdsStep2 = function (req, res) {
                     }
                     News.updateOne(query, obj, function (err, upnews) {
                       if (err) {
-                        console.log('用户"' + itemO.patientName + '"消息推送失败')
+                        console.log(new Date() + ' --- 面诊取消站内消息推送 --- 用户"' + itemO.patientName + '"消息推送失败')
                         console.log(err)
                       } else {
-                        console.log('用户"' + itemO.patientName + '"消息推送成功')
+                        console.log(new Date() + ' --- 面诊取消站内消息推送 --- 用户"' + itemO.patientName + '"消息推送成功')
                       }
                     }, {upsert: true})
                   })
