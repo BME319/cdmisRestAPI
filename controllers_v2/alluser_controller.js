@@ -1060,16 +1060,16 @@ exports.login = function (req, res, next) {
           role = roles[0]
         }
       }
-      if (password !== item.password && openIdFlag === 0) {
-        // 2017-06-07GY调试
-        // console.log('login_err_password_not_correct');
-
-        res.json({results: 1, mesg: "Alluser password isn't correct!"})
-      } else if (item.role.indexOf(role) === -1) {
+      if (item.role.indexOf(role) === -1) {
         // 2017-06-07GY调试
         // console.log('login_err_no_authority');
 
         res.json({results: 1, mesg: 'No authority!'})
+      } else if (password !== item.password && openIdFlag === 0) {
+        // 2017-06-07GY调试
+        // console.log('login_err_password_not_correct');
+
+        res.json({results: 1, mesg: "Alluser password isn't correct!"})
       } else {
         var _lastlogindate = item.lastLogin
                 // console.log(Date())
