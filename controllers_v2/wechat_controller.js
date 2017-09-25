@@ -4,6 +4,7 @@ var moment = require('moment')
 var crypto = require('crypto')
 var fs = require('fs')
 var path = require('path')
+var async = require('async')
 
 var config = require('../config')
 var webEntry = require('../settings').webEntry
@@ -16,6 +17,10 @@ var Message = require('../models/message')
 var News = require('../models/news')
 var Counselautochangestatus = require('../models/counselautochangestatus')
 var Counsel = require('../models/counsel')
+var DictNumber = require('../models/dictNumber')
+var Numbering = require('../models/numbering')
+
+var wechatCtrl = require('../controllers_v2/wechat_controller')
 
 // appid: wx8a6a43fb9585fb7c;secret: b23a4696c3b0c9b506891209d2856ab2
 
@@ -773,7 +778,7 @@ exports.refundquery = function (req, res, next) {
 }
 
 // 扫描订单 调用微信退款查询接口 更改订单状态 2017-07-16 GY
-exports.autoRefundQuery = function (req, res) {
+exports.autoRefundQuery = function () {
   let query = {paystatus: 6}
   let orderNos = []
   let wxApiUserObject = [config.wxDeveloperConfig.ssgj, config.wxDeveloperConfig.appssgj]
@@ -806,7 +811,8 @@ exports.autoRefundQuery = function (req, res) {
         } else if (orderNosIndex < orderNos.length - 1) {
           refundQuery(++orderNosIndex, 0)
         } else {
-          console.log(new Date(), 'auto_refund_query_success')
+          let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
+          console.log(new Date(), info)
         }
       } else {
         let jsondata
@@ -831,7 +837,8 @@ exports.autoRefundQuery = function (req, res) {
             } else if (orderNosIndex < orderNos.length - 1) {
               refundQuery(++orderNosIndex, 0)
             } else {
-              console.log(new Date(), 'auto_refund_query_success')
+              let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
+              console.log(new Date(), info)
             }
           })
         } else {
@@ -843,7 +850,8 @@ exports.autoRefundQuery = function (req, res) {
           } else if (orderNosIndex < orderNos.length - 1) {
             refundQuery(++orderNosIndex, 0)
           } else {
-            console.log(new Date(), 'auto_refund_query_success')
+            let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
+            console.log(new Date(), info)
           }
         }
       }
@@ -858,7 +866,7 @@ exports.autoRefundQuery = function (req, res) {
       // console.log(orderNos)
       refundQuery(0, 0)
     } else {
-      console.log(new Date(), 'auto_refund_query_success')
+      console.log(new Date(), 'auto_refund_query_success:_no_order_need_to_query')
     }
   })
 }
@@ -996,7 +1004,7 @@ exports.autoRefundCounsel = function () {
                       }
                     }
                   } else {
-                    console.log('order_paystatus_error:_not_allowed_refund')
+                    console.log(new Date(), 'order_paystatus_error:_not_allowed_refund')
                     if (i === counselItems.length - 1) {
                       console.log(new Date(), 'auto_refund_success:_finish')
                     }
@@ -1064,6 +1072,7 @@ exports.messageTemplate = function (req, res) {
         return res.status(400).send('openId do not exist')
       }
       var messageOpenId
+      // 患者或者医生在app绑定微信，是否也需要进行模板消息推送(暂时只在微信端推送消息模板)
       if (role === 'doctor') {
         messageOpenId = item.MessageOpenId.doctorWechat
       } else if (role === 'patient') {
@@ -1615,6 +1624,233 @@ exports.deleteCustomMenu = function (req, res) {
       return res.status(500).send('Error')
     } else {
       res.json({results: body})
+    }
+  })
+}
+
+// async改写 ------ POST wechat/refund ------ 已调试 ------ 2017-09-25 YQC
+exports.wechatRefundAsync = function (params, callback) {
+  let orderNo = params.orderNo || null
+  let role = params.role || null
+  let roleList = ['patient', 'doctor', 'appPatient', 'appDoctor', 'test']
+  if (orderNo === null || role === null) {
+    let err = '请填写orderNo/role'
+    return callback(err)
+  } else if (roleList.indexOf(role) === -1) {
+    let err = 'role do not exist!'
+    return callback(err)
+  }
+  let targetDate = commonFunc.getNowFormatDate()
+  async.auto({
+    getDict9: function (callback) {
+      let query = {type: 9}
+      DictNumber.getOne(query, function (err, item) {
+        return callback(err, item)
+      })
+    },
+    getSeries9: ['getDict9', function (results, callback) {
+      let _DateFormat = results.getDict9.dateFormat
+      let _Date = null
+      if (_DateFormat === 'YYMMDD') {
+        _Date = targetDate.substring(2, 8)
+      } else if (_DateFormat === 'YYYYMMDD') {
+        _Date = targetDate
+      }
+      let _KeyDate = '99999999'
+      if ((_Date || null) !== null) {
+        _KeyDate = targetDate
+      }
+      let query = {type: 9, date: _KeyDate}
+      Numbering.updateOne(query, {$inc: {number: 1}}, function (err, item) {
+        return callback(err, item)
+      }, {upsert: true, new: true})
+    }],
+    getNo9: ['getDict9', 'getSeries9', function (results, callback) { // 获取new messageId
+      let _Initial = results.getDict9.initStr
+
+      let _Date
+      let _DateFormat = results.getDict9.dateFormat
+      if (_DateFormat === 'YYMMDD') {
+        _Date = targetDate.substring(2, 8)
+      } else if (_DateFormat === 'YYYYMMDD') {
+        _Date = targetDate
+      }
+
+      let _TrnNumberingNo
+      if (results.getSeries9 === null) {
+        _TrnNumberingNo = 0
+      } else {
+        _TrnNumberingNo = results.getSeries9.number
+      }
+      let _Seq = _TrnNumberingNo
+
+      let _SeqLength = results.getDict9.seqLength
+      let _AlphamericFlag = results.getDict9.alphamericFlag
+      if (_AlphamericFlag === 1) {
+        _Seq = commonFunc.ConvAlphameric(_Seq)
+      }
+      if (_Seq.toString().length > _SeqLength) {
+        _TrnNumberingNo = 1
+        _Seq = 1
+      }
+      // console.log(_Seq)
+      if (_Seq.toString().length < _SeqLength) {
+        let n = _SeqLength - _Seq.toString().length
+        while (n) {
+          _Seq = '0' + _Seq
+          n = n - 1
+        }
+      }
+      let _Ret = _Initial + _Date + _Seq
+      return callback(null, {newId: _Ret})
+    }],
+    checkPayStatus: function (callback) { // 查询该订单是否为“已支付”（paystatus = 2）状态
+      let query = {orderNo: orderNo, paystatus: 2}
+      Order.getOne(query, function (err, item) {
+        if (item) {
+          return callback(err, item)
+        } else {
+          let err = '不存在的订单'
+          return callback(err)
+        }
+      })
+    },
+    changeRefundStatus: ['checkPayStatus', 'getNo9', function (results, callback) { // 将订单状态修改为6 退款处理中
+      let query = {orderNo: orderNo}
+      let upObj = {
+        paystatus: 6, // 退款处理中
+        refundNo: results.getNo9.newId,
+        refundAppTime: new Date()
+      }
+      Order.updateOne(query, upObj, function (err, upOrder) {
+        if (upOrder) {
+          return callback(err, upOrder)
+        } else {
+          let err = '不存在的订单'
+          return callback(err)
+        }
+      }, {new: true})
+    }],
+    chooseAppId: function (callback) {
+      if (role === 'doctor') {
+        return callback(null, config.wxDeveloperConfig.sjkshz)
+        // req.wxApiUserObject = config.wxDeveloperConfig.sjkshz
+      } else if (role === 'patient') {
+        return callback(null, config.wxDeveloperConfig.ssgj)
+        // req.wxApiUserObject = config.wxDeveloperConfig.ssgj
+      } else if (role === 'test') {
+        return callback(null, config.wxDeveloperConfig.test)
+        // req.wxApiUserObject = config.wxDeveloperConfig.test
+      } else if (role === 'appPatient') {
+        return callback(null, config.wxDeveloperConfig.appssgj)
+        // req.wxApiUserObject = config.wxDeveloperConfig.appssgj
+      } else if (role === 'appDoctor') {
+        return callback(null, config.wxDeveloperConfig.appsjkshz)
+        // req.wxApiUserObject = config.wxDeveloperConfig.appsjkshz
+      }
+    },
+    refund: ['changeRefundStatus', 'chooseAppId', function (results, callback) {
+      let paramData = {
+        appid: results.chooseAppId.appid,   // 公众账号ID
+        mch_id: results.chooseAppId.merchantid,   // 商户号
+        nonce_str: commonFunc.randomString(32),   // 随机字符串
+        sign_type: 'MD5',
+        out_trade_no: results.changeRefundStatus.orderNo,     // 商户订单号
+        out_refund_no: results.changeRefundStatus.refundNo,
+        total_fee: results.changeRefundStatus.money,
+        refund_fee: results.changeRefundStatus.money
+      }
+
+      let signStr = commonFunc.rawSort(paramData)
+      signStr = signStr + '&key=' + results.chooseAppId.merchantkey
+
+      paramData.sign = commonFunc.convertToMD5(signStr, true)    // 签名
+      let xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
+      let xmlString = xmlBuilder.buildObject(paramData)
+
+      // 读取商户证书
+      let pfxpath = results.chooseAppId.pfxpath
+
+      request({
+        url: wxApis.refund,
+        method: 'POST',
+        body: xmlString,
+        agentOptions: {
+          pfx: fs.readFileSync(pfxpath),
+          passphrase: results.chooseAppId.merchantid
+        }
+      }, function (err, response, body) {
+        if (err) {
+          return callback(err)
+        } else {
+          xml2js.parseString(body, { explicitArray: false, ignoreAttrs: true }, function (err, result) {
+            return callback(err, result || {})
+          })
+        }
+      })
+    }],
+    refundMessage: ['refund', 'getNo9', function (results, callback) {
+      let messageData = {
+        messageId: results.getNo9.newId,
+        userId: results.changeRefundStatus.userId,
+        type: 6,
+        readOrNot: 0,
+        sendBy: 'System',
+        time: new Date(),
+        title: '退款申请成功',
+        description: '您的退款申请已成功提交，本系统有延迟，实际退款状态以微信支付通知为准'
+      }
+
+      let newMessage = new Message(messageData)
+      newMessage.save(function (err, messageInfo) {
+        return callback(err, messageInfo)
+      })
+    }],
+    refundNews: ['refundMessage', function (results, callback) {
+      let newsData = {
+        messageId: results.getNo9.newId,
+        userId: results.changeRefundStatus.userId,
+        userRole: 'patient',
+        // 以下面的为准
+        // userRole: req.session.role,
+        sendBy: 'System',
+        readOrNot: 0,
+        type: 6,
+        time: results.refundMessage.time,
+        title: results.refundMessage.title,
+        description: results.refundMessage.description
+      }
+
+      let newNews = new News(newsData)
+      newNews.save(function (err, newsInfo) {
+        return callback(err, newsInfo)
+      })
+    }]
+  }, function (err, results) {
+    return callback(err, results)
+  })
+}
+
+// async改写 调用wechatRefundAsync方式与结果处理 ------ 2017-09-25 YQC
+exports.wechatRefundAsyncTest = function (req, res) {
+  let params = {
+    orderNo: req.body.orderNo, // 退款单号
+    role: req.body.role // 退款应用角色，[默认appPatient
+  }
+  wechatCtrl.wechatRefundAsync(params, function (err, results) {
+    if (err) {
+      return res.json({msg: err, data: results, code: 1})
+    } else {
+      let refundResults = results.refund.xml || null
+      if (refundResults !== null) {
+        if (refundResults.return_code === 'SUCCESS' && refundResults.result_code === 'SUCCESS') {
+          return res.json({msg: '退款成功', data: results, code: 0})
+        } else {
+          return res.json({msg: '退款失败', data: results, code: 1})
+        }
+      } else {
+        return res.json({msg: '退款失败', data: results, code: 1})
+      }
     }
   })
 }

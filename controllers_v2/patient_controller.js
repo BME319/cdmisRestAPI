@@ -1,7 +1,7 @@
 // 代码 2017-03-29 GY
 // 修改 患者详情，只输出最新的诊断内容 2017-05-14 GY
 // 注释 2017-07-17 YQC
-
+var async = require('async')
 var docInfoForPat = {
   _id: 0,
   charge1: 1,
@@ -37,6 +37,8 @@ var DpRelation = require('../models/dpRelation')
 var commonFunc = require('../middlewares/commonFunc')
 var Counsel = require('../models/counsel')
 var VitalSign = require('../models/vitalSign')
+
+var patientCtrl = require('../controllers_v2/patient_controller')
 
 // 患者查询自身详细信息
 // 注释 承接session.userId；输出患者信息，最新体重和最新诊断
@@ -83,7 +85,7 @@ exports.getPatientDetail = function (req, res) {
         }
         if (req.session.role === 'doctor') {
           let queryDPR = {doctorId: req.session._id}
-          DpRelation.getOne(queryDPR, function(err, dpitem) {
+          DpRelation.getOne(queryDPR, function (err, dpitem) {
             if (err) {
               return res.status(500).send(err)
             } else if (dpitem === null) {
@@ -104,7 +106,7 @@ exports.getPatientDetail = function (req, res) {
               if (dpitem.patientsInCharge) {
                 if (dpitem.patientsInCharge.length) {
                   for (let i = 0; i < dpitem.patientsInCharge.length; i++) {
-                    if (JSON.stringify(dpitem.patientsInCharge[i].patientId) == JSON.stringify(item._id)) {
+                    if (JSON.stringify(dpitem.patientsInCharge[i].patientId) === JSON.stringify(item._id)) {
                       patientChargeFlag = 1
                       break
                     }
@@ -117,14 +119,14 @@ exports.getPatientDetail = function (req, res) {
                 return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'charge'})
               } else if (patientFlag && !patientChargeFlag) {
                 return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'follow'})
-              }else {
+              } else {
                 return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis, dprelation: 'error'})
               }
             }
           })
         } else {
           return res.json({results: item, weight: patientWeight, recentDiagnosis: recentDiagnosis})
-        }        
+        }
       }, optsWeight)
     }
       // res.json({results: item});
@@ -701,7 +703,6 @@ exports.editPatientDetail = function (req, res, next) {
             } else {
               return res.json({result: '修改成功', results: upPatient})
             }
-            return res.json({result: '修改成功', results: upPatient})
           })
         }
       }, opts)
@@ -865,82 +866,47 @@ exports.bindingFavoriteDoctor = function (req, res, next) {
     if (doctorId.substr(0, 1) === 'h') {  // 扫码获取医生docTDCUrl，再读取userId
       queryD['docTDCurl'] = doctorId
       // console.log('queryD', queryD)
-      Alluser.getOne(queryD, function (err, itemD) {
-        if (err) {
-          return res.status(500).send(err)
-        }
-        if (itemD == null) {
-          return res.json({result: '不存在的医生ID2!'})
-        }
-
-        let doctorObjectId = itemD._id
-        let queryP = {userId: patientId, role: 'patient'}
-        Alluser.getOne(queryP, function (err, itemP) {
-          if (err) {
-            return res.status(500).send(err)
-          }
-          let favoriteDoctorsList = itemP.doctors
-          // console.log(favoriteDoctorsList)
-          for (let i = 0; i < favoriteDoctorsList.length; i++) {
-            if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
-              return res.json({result: '已关注该医生!'})
-            }
-          }
-
-          let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0}
-          favoriteDoctorsList.push(doctorNew)
-          let upObj = {$set: {doctors: favoriteDoctorsList}}
-          Alluser.updateOne(queryP, upObj, function (err, upPatient) {
-            if (err) {
-              return res.status(500).send(err)
-            }
-            req.body.doctorObjectId = doctorObjectId
-            req.body.patientObjectId = upPatient._id
-            next()
-          })
-        })
-      })
     } else if (doctorId.substr(0, 1) === 'U') { // 点击关注按钮直接获取医生的userId
       queryD['userId'] = doctorId
-      Alluser.getOne(queryD, function (err, itemD) {
+    } else {
+      return res.json({result: '请检查doctorId输入！'})
+    }
+  }
+  Alluser.getOne(queryD, function (err, itemD) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    if (itemD == null) {
+      return res.json({result: '不存在的医生ID!'})
+    }
+
+    let doctorObjectId = itemD._id
+    let queryP = {userId: patientId, role: 'patient'}
+    Alluser.getOne(queryP, function (err, itemP) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      let favoriteDoctorsList = itemP.doctors
+      // console.log(favoriteDoctorsList)
+      for (let i = 0; i < favoriteDoctorsList.length; i++) {
+        if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
+          return res.json({result: '关注成功（已关注该医生）'})
+        }
+      }
+
+      let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0}
+      favoriteDoctorsList.push(doctorNew)
+      let upObj = {$set: {doctors: favoriteDoctorsList}}
+      Alluser.updateOne(queryP, upObj, function (err, upPatient) {
         if (err) {
           return res.status(500).send(err)
         }
-        if (itemD == null) {
-          return res.json({result: '不存在的医生ID!'})
-        }
-
-        let doctorObjectId = itemD._id
-        let queryP = {userId: patientId, role: 'patient'}
-        Alluser.getOne(queryP, function (err, itemP) {
-          if (err) {
-            return res.status(500).send(err)
-          }
-          let favoriteDoctorsList = itemP.doctors
-          // console.log(favoriteDoctorsList)
-          for (let i = 0; i < favoriteDoctorsList.length; i++) {
-            if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
-              return res.json({result: '已关注该医生!'})
-            }
-          }
-
-          let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0}
-          favoriteDoctorsList.push(doctorNew)
-          let upObj = {$set: {doctors: favoriteDoctorsList}}
-          Alluser.updateOne(queryP, upObj, function (err, upPatient) {
-            if (err) {
-              return res.status(500).send(err)
-            }
-            req.body.doctorObjectId = doctorObjectId
-            req.body.patientObjectId = upPatient._id
-            next()
-          })
-        })
+        req.body.doctorObjectId = doctorObjectId
+        req.body.patientObjectId = upPatient._id
+        next()
       })
-    } else {
-      return res.json({result: '不存在的医生ID！'})
-    }
-  }
+    })
+  })
 }
 
 // DpRelation表中医生绑定患者
@@ -962,37 +928,32 @@ exports.bindingFavoritePatient = function (req, res) {
       }
     }
   }
-  DpRelation.update(query, upObj, function (err, upRelation) {
+  DpRelation.getOne(query, function (err, itemR) {
+    let flag = 0
     if (err) {
       return res.status(422).send(err)
-    }
-    if (upRelation.n === 0) {
-      let dpRelationData = {
-        doctorId: doctorObjectId
-      }
-      // return res.json({result:dpRelationData});
-      var newDpRelation = new DpRelation(dpRelationData)
-      newDpRelation.save(function (err, dpRelationInfo) {
-        if (err) {
-          return res.status(500).send(err)
+    } else if (itemR !== null) {
+      let favoritePatientList = itemR.patients || []
+      for (let i = 0; i < favoritePatientList.length; i++) {
+        if (String(favoritePatientList[i].patientId) === String(patientObjectId)) {
+          flag = 1
+          break
         }
-        DpRelation.update(query, upObj, function (err, upRelation) {
-          if (err) {
-            return res.status(422).send(err)
-          } else if (upRelation.nModified === 0) {
-            return res.json({result: '未关注成功！请检查输入是否符合要求！'})
-          } else if (upRelation.nModified === 1) {
-            return res.json({result: '关注成功', results: upRelation})
-          }
-        }, {new: true})
-      })
-    } else if (upRelation.nModified === 0) {
-      return res.json({result: '未关注成功！请检查输入是否符合要求！'})
-    } else if (upRelation.nModified === 1) {
-      return res.json({result: '关注成功', results: upRelation})
+      }
     }
-  // res.json({results: uprelation});
-  }, {new: true})
+    if (flag) {
+      return res.json({result: '关注成功（已添加该患者）'})
+    } else {
+      DpRelation.updateOne(query, upObj, function (err, upRelation) {
+        if (err) {
+          return res.status(422).send(err)
+        } else {
+          return res.json({result: '关注成功'})
+        }
+      // res.json({results: uprelation});
+      }, {new: true, upsert: true})
+    }
+  })
 }
 
 // 解绑关注医生 在alluser表patient_info部分doctors字段添加记录
@@ -1119,10 +1080,10 @@ exports.wechatPhotoUrl = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+    let upObj = {photoUrl: newPhotoUrl}
     if (item == null) {
       return res.json({results: '不存在的患者ID'})
     } else if (!item.photoUrl) {
-      var upObj = {photoUrl: newPhotoUrl}
       Alluser.updateOne(query, upObj, function (err, upItem) {
         if (err) {
           return res.status(500).send(err.errmsg)
@@ -1131,7 +1092,6 @@ exports.wechatPhotoUrl = function (req, res) {
       })
     } else if (item.photoUrl.indexOf('wx.qlogo.cn') && (item.photoUrl !== newPhotoUrl)) {
       // 如果微信头像更新地址，相应字段也应该更新
-      var upObj = {photoUrl: newPhotoUrl}
       Alluser.updateOne(query, upObj, function (err, upItem) {
         if (err) {
           return res.status(500).send(err.errmsg)
@@ -1140,6 +1100,107 @@ exports.wechatPhotoUrl = function (req, res) {
       })
     } else {
       return res.json({results: '已存在头像，未更新'})
+    }
+  })
+}
+
+// async改写 ------ POST patient/favoriteDoctor ------ 已调试 ------ 2017-09-25 YQC
+exports.favoriteDoctorAsync = function (params, callback) {
+  let patientId = params.patientId || null
+  let doctorId = params.doctorId || null
+  let queryD = {role: 'doctor'}
+  if (doctorId === null || patientId === null) {
+    let err = '请填写doctorId/patientId!'
+    return callback(err)
+  } else {
+    if (doctorId.substr(0, 1) === 'h') {  // 扫码获取医生docTDCUrl，再读取userId
+      queryD['docTDCurl'] = doctorId
+    } else if (doctorId.substr(0, 1) === 'U') { // 点击关注按钮直接获取医生的userId
+      queryD['userId'] = doctorId
+    } else {
+      let err = '请检查doctorId输入!'
+      return callback(err)
+    }
+  }
+  let queryP = {userId: patientId, role: 'patient'}
+
+  let dpRelationTime = params.dpRelationTime || null
+  if (dpRelationTime == null) {
+    dpRelationTime = new Date()
+  } else {
+    dpRelationTime = new Date(dpRelationTime)
+  }
+
+  async.auto({
+    getDoctor: function (callback) {
+      Alluser.getOne(queryD, function (err, itemD) {
+        if (itemD) {
+          return callback(err, itemD)
+        } else {
+          let err = '不存在的医生ID!'
+          return callback(err)
+        }
+      })
+    },
+    getPatient: function (callback) {
+      Alluser.getOne(queryP, function (err, itemP) {
+        if (itemP) {
+          return callback(err, itemP)
+        } else {
+          let err = '不存在的患者ID!'
+          return callback(err)
+        }
+      })
+    },
+    updateFD: ['getDoctor', 'getPatient', function (result, callback) {
+      let doctorObjectId = result.getDoctor._id
+      let favoriteDoctorsList = result.getPatient.doctors
+      for (let i = 0; i < favoriteDoctorsList.length; i++) {
+        if (String(favoriteDoctorsList[i].doctorId) === String(doctorObjectId)) {
+          let err = '已关注该医生!'
+          return callback(err)
+        }
+      }
+      let doctorNew = {doctorId: doctorObjectId, firstTime: new Date(), invalidFlag: 0}
+      favoriteDoctorsList.push(doctorNew)
+      let upObj = {$set: {doctors: favoriteDoctorsList}}
+      Alluser.updateOne(queryP, upObj, function (err, upPatient) {
+        return callback(err, upPatient)
+      })
+    }],
+    updateFP: ['getDoctor', 'getPatient', function (result, callback) {
+      let doctorObjectId = result.getDoctor._id
+      let patientObjectId = result.getPatient._id
+      let query = {doctorId: doctorObjectId}
+      let upObj = {
+        $push: {
+          patients: {
+            patientId: patientObjectId,
+            dpRelationTime: dpRelationTime
+          }
+        }
+      }
+      DpRelation.updateOne(query, upObj, function (err, upRelation) {
+        return callback(err, upRelation)
+      }, {new: true, upsert: true})
+    }]
+  }, function (err, results) {
+    return callback(err, results)
+  })
+}
+
+// async改写 调用favoriteDoctorAsync方式与结果处理 ------ 2017-09-25 YQC
+exports.favoriteDoctorAsyncTest = function (req, res) {
+  let params = {
+    patientId: req.session.userId, // 患者userId
+    doctorId: req.body.doctorId, // 医生userId
+    dpRelationTime: req.body.dpRelationTime // 关注时间
+  }
+  patientCtrl.favoriteDoctorAsync(params, function (err, results) {
+    if (err) {
+      return res.json({msg: err, data: results, code: 1})
+    } else {
+      return res.json({msg: '关注成功', data: results, code: 0})
     }
   })
 }

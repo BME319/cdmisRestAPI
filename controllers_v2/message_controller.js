@@ -115,11 +115,11 @@ exports.changeMessageStatus = function (req, res) {
         if (err) {
           return res.status(500).send(err)
         } else if (notread.length === 0) {
-          upObj['readOrNot'] = 1
-          var opts = {
+          let upObjnews = {readOrNot: 1}
+          let optsnews = {
             'multi': true, 'new': true
           }
-          News.update(query14, upObj, function (err, upmessage) {
+          News.update(query14, upObjnews, function (err, upmessage) {
             if (err) {
               return res.status(422).send(err.message)
             }
@@ -132,7 +132,7 @@ exports.changeMessageStatus = function (req, res) {
               }
               // return res.json({result: '未全部更新！', results: upmessage})
             }
-          }, opts)
+          }, optsnews)
         } else {
           // console.log('changeNewsStatus_failed:_type14_not_all_read')
         }

@@ -249,7 +249,13 @@ exports.getAlluserAgreement = function (req, res) {
   var _userId = req.query.userId
   var query = {userId: _userId}
   var opts = ''
-  var fields = {'agreement': 1}
+  var fields = {}
+  var _role = req.body.role
+  if (_role === 'patient') {
+    fields = {'agreementPat': 1}
+  } else if (_role === 'doctor') {
+    fields = {'agreementDoc': 1}
+  }
   Alluser.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
@@ -261,7 +267,14 @@ exports.updateAlluserAgreement = function (req, res) {
   var _userId = req.body.userId
   var _agreement = req.body.agreement
   var query = {userId: _userId}
-  Alluser.updateOne(query, {$set: {agreement: _agreement}}, function (err, item1) {
+  var _role = req.body.role
+  var upObj = {}
+  if (_role === 'patient') {
+    upObj = {$set: {agreementPat: _agreement}}
+  } else if (_role === 'doctor') {
+    upObj = {$set: {agreementDoc: _agreement}}
+  }
+  Alluser.updateOne(query, upObj, function (err, item1) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
@@ -897,9 +910,17 @@ exports.checkBinding = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     if (item != null) {
-      if (item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
+      // 修改 nurseWechat暂时共用doctorWechat字段 2017-09-21 lgf
+      // if (item.MessageOpenId != null && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
+      if (item.MessageOpenId != null) {
         // openId 存在
-        var query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test}
+        var query = {}
+        if (role === 'patient' && (item.MessageOpenId.patientWechat != null || item.MessageOpenId.test != null)) {
+          query = {patientOpenId: item.MessageOpenId.patientWechat || item.MessageOpenId.test}
+        }
+        if (role === 'nurse' && (item.MessageOpenId.doctorWechat != null || item.MessageOpenId.test != null)) {
+          query = {patientOpenId: item.MessageOpenId.doctorWechat || item.MessageOpenId.test}
+        }
         // console.log(query);
         OpenIdTmp.getOne(query, function (err, item1) {
           if (err) {
@@ -922,7 +943,7 @@ exports.checkBinding = function (req, res) {
             let _url = ''
             if (role === 'patient') {
               // binding doctor
-              _url = 'http://' + webEntry.domain + '/api/v2/patient/favoriteDoctor' + '?token=' + req.query.token || req.body.token
+              _url = 'http://' + webEntry.domain + '/api/v2/patient/favoriteDoctor' + '?token=' + req.token
               jsondata = {
                 patientId: item.userId,
                 doctorId: item1.doctorUserId,
@@ -930,7 +951,7 @@ exports.checkBinding = function (req, res) {
               }
             } else if (role === 'nurse') {
               // binding patient
-              _url = 'http://' + webEntry.domain + '/api/v2/nurse/bindingPatient' + '?token=' + req.query.token || req.body.token
+              _url = 'http://' + webEntry.domain + '/api/v2/nurse/bindingPatient' + '?token=' + req.token
               jsondata = {
                 patientId: item1.doctorUserId,
                 nurseObjectId: item._id,
@@ -1039,16 +1060,16 @@ exports.login = function (req, res, next) {
           role = roles[0]
         }
       }
-      if (password !== item.password && openIdFlag === 0) {
-        // 2017-06-07GY调试
-        // console.log('login_err_password_not_correct');
-
-        res.json({results: 1, mesg: "Alluser password isn't correct!"})
-      } else if (item.role.indexOf(role) === -1) {
+      if (item.role.indexOf(role) === -1) {
         // 2017-06-07GY调试
         // console.log('login_err_no_authority');
 
         res.json({results: 1, mesg: 'No authority!'})
+      } else if (password !== item.password && openIdFlag === 0) {
+        // 2017-06-07GY调试
+        // console.log('login_err_password_not_correct');
+
+        res.json({results: 1, mesg: "Alluser password isn't correct!"})
       } else {
         var _lastlogindate = item.lastLogin
                 // console.log(Date())
@@ -1088,7 +1109,7 @@ exports.login = function (req, res, next) {
                     //  console.log(Date.now());
                     // console.log( Date.now() + 60 * 3 * 1000);
           var token = jwt.sign(userPayload, config.tokenSecret, {algorithm: 'HS256'}, {expiresIn: config.TOKEN_EXPIRATION})
-
+          req.token = token
           var sha1 = crypto.createHash('sha1')
           var refreshToken = sha1.update(token).digest('hex')
 
@@ -1930,10 +1951,14 @@ exports.serviceMessage = function (req, res, next) {
         } else if (Number(req.body.rejectFlag) === 1) {
           return res.json({results: 0, mesg: 'Reject Success and Message Sent!'})
         } else if (Number(req.body.successFlag) === 1) {
-          console.log({results: 0, mesg: 'Booking Success and Message Sent!'})
+          console.log(new Date() + ' --- 面诊预约短信发送 --- ' + mobile + ' Booking Success and Message Sent!')
         }
       } else {
-        return res.json({results: 1, mesg: {'ErrorCode': code}})
+        if (Number(req.body.successFlag) === 1) {
+          console.log(new Date() + ' --- 面诊预约短信发送 --- ' + mobile + ' Booking Success and Message Error! ErrorCode: \n' + code)
+        } else {
+          return res.json({results: 1, mesg: {'ErrorCode': code}})
+        }
       }
     })
   })

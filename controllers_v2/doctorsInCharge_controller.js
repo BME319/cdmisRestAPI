@@ -190,13 +190,13 @@ exports.updateDoctorInCharge = function (req, res, next) {
                   return res.status(500).send(err)
                 } else if ((responseR.body.results || null) === null) {
                   // return res.json({msg: '审核成功，已拒绝患者但退款失败，微信接口调用失败，请联系管理员', data: upDIC, code: 1})
-                  console.log('微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                  console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                 } else if (responseR.body.results.xml.return_code === 'SUCCESS' && responseR.body.results.xml.return_msg === 'OK') {
                   // return res.json({msg: '审核成功，已拒绝患者并退款', data: upDIC, code: 0})
-                  console.log('用户"' + itemO.patientName + '"退款成功')
+                  console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"退款成功')
                 } else {
                   // return res.json({msg: '审核成功，已拒绝患者但退款失败，请联系管理员', data: upDIC, code: 1})
-                  console.log('用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                  console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
                 }
                 if ((upDIC.patientId || null) !== null) {
                   if ((upDIC.patientId.phoneNo || null) !== null) {
@@ -217,9 +217,9 @@ exports.updateDoctorInCharge = function (req, res, next) {
                       if (err) {
                         return res.status(500).send(err)
                       } else if (Number(responseM.body.results) === 0) {
-                        console.log('用户"' + itemO.patientName + '"短信发送成功')
+                        console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"短信发送成功')
                       } else {
-                        console.log('用户"' + itemO.patientName + '"短信发送失败')
+                        console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"短信发送失败,接口返回err:' + responseM.body.mesg)
                       }
                     })
                   }
@@ -501,7 +501,7 @@ exports.relation = function (req, res) {
 过期取消主管关系
 */
 exports.autoRelease = function () {
-  console.log('主管服务过期自动取消 ' + new Date())
+  console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + '"主管服务过期自动取消"进程开始 ---')
   let today = new Date(new Date().toLocaleDateString())
   let endOfToday = new Date(today)
   endOfToday.setHours(today.getHours() + 24)
@@ -513,7 +513,7 @@ exports.autoRelease = function () {
     {path: 'patientId', select: {'_id': 1, 'name': 1}},
     {path: 'doctorId', select: {'_id': 1, 'name': 1}}
   ]
-  let autoRelease = function (item, callback) {
+  let autoReleaseFun = function (item, callback) {
     async.parallel({
       updateDIC: function (callback) {
         DoctorsInCharge.updateOne({_id: item._id}, upObj, function (err, upDIC) {
@@ -532,14 +532,14 @@ exports.autoRelease = function () {
             callback(err)
           })
         } else {
-          console.log('The DIC entry ' + item._id + ' has ERROR!')
+          console.log(new Date() + ' --- 主管服务过期自动取消 --- ' + 'The DIC entry ' + item._id + ' has ERROR!')
         }
       }
     }, function (err) {
       if (err) {
-        console.log(new Date() + ' ' + item.doctorId.name + '医生与' + item.patientId.name + '患者主管服务到期取消失败，原因为：\n' + err)
+        console.log(new Date() + ' --- 主管服务过期自动取消 --- ' + item.doctorId.name + '医生与' + item.patientId.name + '患者主管服务到期取消失败，原因为：\n' + err)
       } else {
-        console.log(new Date() + ' ' + item.doctorId.name + '医生与' + item.patientId.name + '患者主管服务到期取消成功')
+        console.log(new Date() + ' --- 主管服务过期自动取消 --- ' + item.doctorId.name + '医生与' + item.patientId.name + '患者主管服务到期取消成功')
       }
       callback(err)
     })
@@ -547,17 +547,17 @@ exports.autoRelease = function () {
 
   DoctorsInCharge.getSome(query, function (err, items) { // 获取需要自动核销的PD
     if (err) {
-      console.log(err)
+      console.log(new Date() + ' --- 主管服务过期自动取消 --- ' + err)
     } else if (items.length > 0) {
-      async.each(items, autoRelease, function (err) {
+      async.each(items, autoReleaseFun, function (err) {
         if (err) {
-          console.log(new Date() + ' ' + new Date().toLocaleDateString() + ' 主管服务过期自动取消未完成，原因为：\n' + err)
+          console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + '"主管服务过期自动取消"进程结束，任务未全部完成，原因为：\n' + err)
         } else {
-          console.log(new Date() + ' ' + new Date().toLocaleDateString() + ' 主管服务过期自动取消完成')
+          console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + '"主管服务过期自动取消"进程结束，任务全部完成 ---')
         }
       })
     } else {
-      console.log(new Date().toLocaleDateString() + ' 无主管服务过期')
+      console.log(new Date() + ' --- ' + new Date().toLocaleDateString() + '无主管服务过期,"主管服务过期自动取消"进程结束 ---')
     }
   }, opts, fields, populate)
 }

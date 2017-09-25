@@ -22,12 +22,22 @@ exports.getAdvice = function (req, res) {
       query = {}
     }
     // 调用建议获取函数Advice.getSome，不出错则返回相应建议内容
+    let opts = ''
+    let skip = req.query.skip || null
+    let limit = req.query.limit || null
+    if (limit !== null && skip !== null) {
+      opts = {limit: Number(limit), skip: Number(skip), sort: '_id'}
+    } else if (limit === null && skip === null) {
+      opts = {sort: '_id'}
+    } else {
+      return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
+    }
     Advice.getSome(query, function (err, items) {
       if (err) {
         return res.status(500).send(err)
       }
       res.json({results: items})
-    })
+    }, opts)
   })
 }
 
