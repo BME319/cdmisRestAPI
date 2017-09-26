@@ -1127,6 +1127,7 @@ exports.cancelMyPD = function (req, res, next) {
             return res.status(304).json({msg: 'Not Modified', code: 1})
           } else {
             return res.status(201).json({msg: 'Cancel Request Received', code: 1, data: upItem})
+            // 待短信发送 cancelRefund
           }
         }, {new: true})
       } else { // 直接退款
@@ -1192,6 +1193,7 @@ exports.updatePDCapacityUp = function (req, res) {
                 return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
               }
             })
+            // 待短信发送 cancelRequest
           } else {
             return res.json({msg: '取消成功', data: req.body.PDInfo, code: 0})
           }
@@ -1429,6 +1431,7 @@ exports.manualRefundAndNotice = function (req, res) {
                 return res.json({msg: '同意患者退款，退款失败，请联系管理员', code: 1})
               }
             })
+            // 待短信发送 cancelRefund
           }
         }
       })

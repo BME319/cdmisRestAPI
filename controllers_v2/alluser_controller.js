@@ -1979,7 +1979,7 @@ exports.serviceMessage = function (req, res, next) {
 // async改写------ POST services/message ------ 2017-09-25 YQC
 exports.servicesMessageAsync = function (params, callback) {
   let type = params.type || null
-  if (['success', 'cancel', 'reject'].indexOf(type) === -1) {
+  if (['success', 'cancel', 'reject', 'cancelRequest', 'cancelRefund'].indexOf(type) === -1) {
     let err = 'Wrong Input of type'
     return callback(err)
   }
@@ -1995,7 +1995,7 @@ exports.servicesMessageAsync = function (params, callback) {
   }
   let param = null
   let PDTime = null
-  if (type === 'cancel' || type === 'success') {
+  if (type === 'cancel' || type === 'success' || type === 'cancelRequest' || type === 'cancelRefund') {
     if (((params.bookingDay || null) !== null) && ((params.bookingTime || null) !== null)) {
       let bookingDay = new Date(new Date(params.bookingDay).toLocaleDateString())
       if (params.bookingTime === 'Morning') {
@@ -2049,6 +2049,28 @@ exports.servicesMessageAsync = function (params, callback) {
       param = doctorName + ',' + reason + ',' + Number(orderMoney) / 100 + ',' + orderNo
     }
   }
+  if (type === 'cancelRequest') {
+    templateId = '160864'
+    let doctorName = params.doctorName || ''
+    if (doctorName === null || PDTime === null) {
+      let err = 'Please Check the Input of doctorName/PDTime'
+      return callback(err)
+    } else {
+      param = doctorName + ',' + PDTime
+    }
+  }
+  if (type === 'cancelRefund') {
+    templateId = '160866'
+    let doctorName = params.doctorName || ''
+    let orderMoney = params.orderMoney || 0
+    let orderNo = params.orderNo || null
+    if (doctorName === null || PDTime === null || orderMoney === null || orderNo === null) {
+      let err = 'Please Check the Input of doctorName/PDTime/orderMoney/orderNo'
+      return callback(err)
+    } else {
+      param = doctorName + ',' + PDTime + ',' + Number(orderMoney) / 100 + ',' + orderNo
+    }
+  }
 
   let JSONData = '{"templateSMS":{"appId":"' + appId + '","param":"' + param + '","templateId":"' + templateId + '","to":"' + mobile + '"}}'
   let timestamp = now.getFullYear() + commonFunc.paddNum(now.getMonth() + 1) + commonFunc.paddNum(now.getDate()) + now.getHours() + now.getMinutes() + now.getSeconds()
@@ -2083,6 +2105,12 @@ exports.servicesMessageAsync = function (params, callback) {
         if (type === 'success') {
           return callback(null, 'Booking Message Sent!')
         }
+        if (type === 'cancelRequest') {
+          return callback(null, 'Cancel Request Message Sent!')
+        }
+        if (type === 'cancelRefund') {
+          return callback(null, 'Cancel Refund Message Sent!')
+        }
       } else {
         let err = 'Error Code: ' + code
         return callback(err)
@@ -2101,13 +2129,13 @@ exports.servicesMessageAsync = function (params, callback) {
 exports.servicesMessageAsyncTest = function (req, res) {
   let params = {
     // --- cancel ---
-    type: 'cancel',
-    phoneNo: '15868870012',
-    bookingDay: '2017-9-13',
-    bookingTime: 'Morning',
-    doctorName: '叶',
-    orderNo: 'O2017091300001', // 退款订单号
-    orderMoney: '10' // 退款金额订单
+    // type: 'cancel',
+    // phoneNo: '15868870012',
+    // bookingDay: '2017-9-13',
+    // bookingTime: 'Morning',
+    // doctorName: '叶',
+    // orderNo: 'O2017091300001', // 退款订单号
+    // orderMoney: '10' // 退款金额订单
     // --- success ---
     // type: 'success',
     // phoneNo: '15868870012',
@@ -2123,6 +2151,20 @@ exports.servicesMessageAsyncTest = function (req, res) {
     // orderNo: 'O2017091300001', // 退款订单号
     // orderMoney: '10', // 退款金额订单
     // reason: '嘿嘿嘿'
+    // --- cancelRequest ---
+    // type: 'cancelRequest',
+    // phoneNo: '15868870012',
+    // bookingDay: '2017-9-13',
+    // bookingTime: 'Morning',
+    // doctorName: '叶'
+    // --- cancelRefund ---
+    // type: 'cancelRefund',
+    // phoneNo: '15868870012',
+    // bookingDay: '2017-9-13',
+    // bookingTime: 'Morning',
+    // doctorName: '叶',
+    // orderNo: 'O2017091300001', // 退款订单号
+    // orderMoney: '10' // 退款金额订单
   }
   alluserCtrl.servicesMessageAsync(params, function (err, results) {
     if (err) {
