@@ -335,7 +335,7 @@ exports.updateOrder = function (req, res) {
               return res.status(500).send(err)
             }
             if (upaccount.nModified === 0) {
-              return res.json({result: '请获取账户信息确认是否修改成功'})
+              return res.json({result: '请获取账户信息确认是否修改成功', results: req.body.counselInfo})
             } else if (upaccount.nModified !== 0) {
               return res.json({result: '修改成功', updateResult: upaccount, results: req.body.counselInfo})
             }
