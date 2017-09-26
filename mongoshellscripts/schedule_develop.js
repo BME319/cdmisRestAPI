@@ -32,34 +32,36 @@ function schedule () {
   for (let i = 0; i < counselItem.length; i++) {
     let lastTime = now - counselItem[i].time
 
-    if (counselItem[i].type === 6 && lastTime > (1000 * 60 * 60 * 2)) {
-      db.counsels.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now}})
+    let deadLine = 1000 * 60 * 60 * 24  // 咨询超时为24小时
+    if (counselItem[i].type === 6 || counselItem[i].type === 7) {
+      // db.counsels.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now}})
+      deadLine = 1000 * 60 * 60 * 2     // 加急咨询超时为2小时
     }
 
-        // if (lastTime > (1000*60*60*24)) {
-    if (lastTime > (1000 * 60 * 60 * 24)) {
-            // 插入超时未回复表
+    // if (lastTime > (1000*60*60*24)) {
+    if (lastTime > deadLine) {
+      // 插入超时未回复表
       db.counselautochangestatuses.insert(counselItem[i])
-            // 查询相关科室信息
+      // 查询相关科室信息
       let departmentItem = db.departments.find({doctors: counselItem[i].doctorId}).toArray()
       // 查询医生回复次数
       let cmudoc = db.allusers.find({_id: counselItem[i].doctorId}).toArray()[0].userId
       let cmupat = db.allusers.find({_id: counselItem[i].patientId}).toArray()[0].userId
       let count_of_reply = db.communications.find({sendBy:cmudoc, receiver:cmupat, sendDateTime:{$gt:counselItem[i].time}}).toArray().length
-            // 插入科主任、结束时间、超时类型、更改状态为0
+      // 插入科主任、结束时间、超时类型、更改状态为0
       if (departmentItem.length === 0) { // 若该医生不存在科室
         db.counselautochangestatuses.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now, timeouttype: 1, reply: count_of_reply}})
       } else {
         db.counselautochangestatuses.update({counselId: counselItem[i].counselId}, {$set: {departLeader: departmentItem[0].departLeader, status: 0, endTime: now, timeouttype: 1, reply: count_of_reply}})
       }
-            // 更改counsel表的状态为0，插入结束时间
+      // 更改counsel表的状态为0，插入结束时间
       db.counsels.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now}})
-            // 更改consultation表状态
+      // 更改consultation表状态
       db.consultations.update({diseaseInfo: counselItem[i]._id}, {$set: {status: 0}}, {multi: true})
       printjson({'result': 'change_status_success', 'counselId': counselItem[i].counselId})
-            // 存消息
-            // 查找患者与医生的ID
-            // 二期代码应该是alluser
+      // 存消息
+      // 查找患者与医生的ID
+      // 二期代码应该是alluser
       // let messagedoc = db.doctors.find({_id: counselItem[i].doctorId}).toArray()
       let messagedoc = db.allusers.find({_id: counselItem[i].doctorId}).toArray()
       print(counselItem[i].doctorId)
@@ -87,7 +89,7 @@ function schedule () {
           counseltype: 2,
           counselId: counselItem[i].counselId
         }
-      } else if (counselItem[i].type === 6) {
+      } else if (counselItem[i].type === 6 || counselItem[i].type === 7) {
         endlMsg = {
           type: 'endl',
           info: '已满2小时，加急咨询自动结束',
@@ -112,9 +114,9 @@ function schedule () {
         targetRole: 'patient',
         content: endlMsg
       }
-            // printjson({msgJson: msgJson})
+      // printjson({msgJson: msgJson})
       let messageNo = 'END' + nowstr + i
-            // printjson({messageNo:messageNo, i:i})
+      // printjson({messageNo:messageNo, i:i})
       let messageType = 1
       let sendBy = messagedoc[0].userId
       let receiver = messagepat[0].userId
@@ -130,12 +132,12 @@ function schedule () {
         newsType: '11',
         content: msgJson
       }
-            // printjson({communicationItem:communicationItem})
+      // printjson({communicationItem:communicationItem})
       db.communications.insert(communicationItem)
     }
   }
   printjson({'result': 'runbat_success', 'dbUrl': dbUrl, 'time': now})
-    // schedule();
+  // schedule();
 }
 
 schedule()
