@@ -12,33 +12,40 @@ var Advice = require('../models/advice')
 exports.getAdvice = function (req, res) {
   // 参数设置 若请求中advisorId存在则写入query，查询该用户提出的建议；不填写则query为空，查询所有用户建议
   let advisorId = req.query.advisorId || null
-  let query = {userId: advisorId}
-  Alluser.getOne(query, function (err, item) {
-    if (err) {
-      return res.status(500).send(err)
-    } else if (item == null && advisorId != null) {
-      return res.json({result: '不存在的用户!'})
-    } else if (item == null && advisorId == null) {
-      query = {}
-    }
-    // 调用建议获取函数Advice.getSome，不出错则返回相应建议内容
-    let opts = ''
-    let skip = req.query.skip || null
-    let limit = req.query.limit || null
-    if (limit !== null && skip !== null) {
-      opts = {limit: Number(limit), skip: Number(skip), sort: '_id'}
-    } else if (limit === null && skip === null) {
-      opts = {sort: '_id'}
-    } else {
-      return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
-    }
-    Advice.getSome(query, function (err, items) {
+  let opts = ''
+  let skip = req.query.skip || null
+  let limit = req.query.limit || null
+  if (limit !== null && skip !== null) {
+    opts = {limit: Number(limit), skip: Number(skip), sort: '_id'}
+  } else if (limit === null && skip === null) {
+    opts = {sort: '_id'}
+  } else {
+    return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
+  }
+  if (advisorId === null) {
+    Advice.getSome({}, function (err, items) {
       if (err) {
         return res.status(500).send(err)
       }
-      res.json({results: items})
+      return res.json({results: items})
     }, opts)
-  })
+  } else {
+    let query = {userId: advisorId}
+    Alluser.getOne(query, function (err, item) {
+      if (err) {
+        return res.status(500).send(err)
+      } else if (item === null) {
+        return res.json({result: '不存在的用户!'})
+      } else {
+        Advice.getSome(query, function (err, items) {
+          if (err) {
+            return res.status(500).send(err)
+          }
+          return res.json({results: items})
+        }, opts)
+      }
+    })
+  }
 }
 
 // 用户创建建议
