@@ -5292,7 +5292,7 @@ module.exports = function (app, webEntry, acl) {
    *       412:
    *         description: "Please Check Input of diagId"
    */
-  app.post(version + '/services/cancelMyPD', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.cancelMyPD, personalDiagCtrl.updatePDCapacityUp)
+  app.post(version + '/services/cancelMyPD', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.cancelMyPD)
   // 患者端 我的面诊服务列表 还未添加分页显示
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者
    * @swagger

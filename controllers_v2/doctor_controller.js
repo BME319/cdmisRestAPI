@@ -885,6 +885,10 @@ function sortVIPpinyin (a, b) {
     flag = 1
   } else if (b.patientId.groupTime - a.patientId.groupTime < 0) {
     flag = -1
+  } else if (b.dpRelationTime - a.dpRelationTime > 0) {
+    flag = 1
+  } else if (b.dpRelationTime - a.dpRelationTime < 0) {
+    flag = -1
   } else {
     flag = pinyin.compare(a.patientId.name, b.patientId.name)
   }

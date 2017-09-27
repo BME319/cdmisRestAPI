@@ -1113,108 +1113,195 @@ exports.cancelMyPD = function (req, res, next) {
   if (diagId === null) {
     return res.status(412).json({msg: 'Please Check Input of diagId', code: 1})
   }
-  let query = {diagId: diagId, status: 0}
-  PersonalDiag.getOne(query, function (err, item) {
-    if (err) {
-      return res.status(500).send(err)
-    } else {
-      let bookingDay = new Date(item.bookingDay)
+  let query = {diagId: diagId, status: 0, patientId: req.session._id}
+  let now = new Date()
+  async.auto({
+    getPD: function (callback) {
+      PersonalDiag.getOne(query, function (err, item) {
+        if (item !== null) {
+          return callback(err, item)
+        } else {
+          let err = '不存在的PD'
+          return callback(err, item)
+        }
+      })
+    },
+    updatePD: ['getPD', function (results, callback) {
+      let bookingDay = new Date(results.getPD.bookingDay)
       let sixInBD = new Date(bookingDay)
       sixInBD.setHours(sixInBD.getHours() + 6)
+      let upObj = {}
       if (new Date() >= sixInBD) { // 申请退款
-        // return res.status(406).send('Exceeds the Time Limit')
-        let upObj = {$set: {status: 5}}
-        PersonalDiag.updateOne(query, upObj, function (err, upItem) {
-          if (err) {
-            return res.status(500).send(err)
-          } else if (upItem.nModified === 0) {
-            return res.status(304).json({msg: 'Not Modified', code: 1})
-          } else {
-            // return res.status(201).json({msg: 'Cancel Request Received', code: 0, data: upItem})
-            // 待短信发送 cancelRequest
-            req.body.PDInfo = upItem
-            req.body.refundFlag = 0
-            next()
-          }
-        }, {new: true})
+        upObj = {$set: {status: 5}}
       } else { // 直接退款
-        let upObj = {$set: {status: 3}}
-        PersonalDiag.updateOne(query, upObj, function (err, upItem) {
-          if (err) {
-            return res.status(500).send(err)
-          } else if (upItem.nModified === 0) {
-            return res.status(304).json({msg: 'Not Modified', code: 1})
-          } else {
-            // return res.json({results: '取消成功'})
-            req.body.PDInfo = upItem
-            req.body.refundFlag = 1
-            next()
-          }
-        }, {new: true})
+        upObj = {$set: {status: 3}}
       }
+      let populate = [
+        {path: 'doctorId', select: {_id: 0, name: 1, userId: 1}},
+        {path: 'patientId', select: {_id: 0, phoneNo: 1, userId: 1}}
+      ]
+      PersonalDiag.updateOne(query, upObj, function (err, upItem) {
+        return callback(err, upItem)
+      }, {new: true}, populate)
+    }],
+    updateAvailablePD: ['getPD', function (results, callback) {
+      let doctorObjectId = results.getPD.doctorId
+      let bookingDay = results.getPD.bookingDay
+      let bookingTime = results.getPD.bookingTime
+      let queryD = {_id: doctorObjectId, availablePDs: {$elemMatch: {$and: [{availableDay: bookingDay}, {availableTime: bookingTime}]}}}
+      let upDoc = {$inc: {'availablePDs.$.count': -1}}
+      let opts = {fields: {_id: 0, availablePDs: 1}, new: true}
+      Alluser.updateOne(queryD, upDoc, function (err, upDoctor) {
+        return callback(err, upDoctor)
+      }, opts)
+    }],
+    getOrder: ['updatePD', function (results, callback) {
+      if ((results.updatePD || null) !== null) {
+        if ((results.updatePD.patientId || null) !== null && (results.updatePD.doctorId || null) !== null) {
+          let queryO = {perDiagObject: results.updatePD._id}
+          Order.getOne(queryO, function (err, itemO) {
+            if (itemO === null) {
+              let err = '无法查询订单'
+              return callback(err)
+            } else {
+              return callback(err, itemO)
+            }
+          })
+        } else {
+          let err = 'PD数据错误，无法查询医生或患者'
+          return callback(err)
+        }
+      } else {
+        let err = '数据错误'
+        return callback(err)
+      }
+    }],
+    refund: ['getOrder', 'updateAvailablePD', function (results, callback) {
+      if (Number(results.updatePD.status) === 3) {
+        let money = results.getOrder.money || null
+        if (Number(money) !== 0) {
+          let params = {
+            orderNo: results.getOrder.orderNo, // 退款单号
+            role: 'appPatient'
+          }
+          wechatCtrl.wechatRefundAsync(params, function (err, result) {
+            let refundResults = result.refund.xml || null
+            if (refundResults !== null) {
+              if (refundResults.return_code === 'SUCCESS' && refundResults.result_code === 'SUCCESS') {
+                return callback(err, {msg: '退款成功', data: result, code: 0})
+              } else {
+                return callback(err, {msg: '退款失败', data: result, code: 1})
+              }
+            } else {
+              return callback(err, {msg: '退款失败', data: result, code: 1})
+            }
+          })
+        } else {
+          return callback(null, {msg: '金额为零，无需退款', code: 0})
+        }
+      } else if (Number(results.updatePD.status) === 5) {
+        return callback(null, '申请退款')
+      } else {
+        let err = '数据更新错误'
+        return callback(err)
+      }
+    }],
+    textMessage: ['refund', function (results, callback) {
+      let params
+      if (Number(results.updatePD.status) === 5) { // 申请退款 cancelRequest
+        params = {
+          type: 'cancelRequest',
+          phoneNo: results.updatePD.patientId.phoneNo,
+          bookingDay: new Date(results.updatePD.bookingDay).toLocaleDateString(),
+          bookingTime: results.updatePD.bookingTime,
+          doctorName: results.updatePD.doctorId.name
+        }
+      } else if (Number(results.updatePD.status) === 3) { // 直接退款 cancelRefund
+        params = {
+          type: 'cancelRefund',
+          phoneNo: results.updatePD.patientId.phoneNo,
+          bookingDay: new Date(results.updatePD.bookingDay).toLocaleDateString(),
+          bookingTime: results.updatePD.bookingTime,
+          doctorName: results.updatePD.doctorId.name,
+          orderNo: results.getOrder.orderNo, // 退款订单号
+          orderMoney: results.getOrder.money || 0 // 退款金额订单
+        }
+      } else {
+        let err = '数据错误，请检查输入'
+        return callback(err)
+      }
+      alluserCtrl.servicesMessageAsync(params, function (err, result) {
+        if (err) {
+          return callback(null, {data: result, code: 1})
+        } else {
+          return callback(null, {data: result, code: 0})
+        }
+      })
+    }],
+    messageAndNews: ['refund', function (results, callback) {
+      let bookingDay = new Date(new Date(results.updatePD.bookingDay).toLocaleDateString())
+      let PDTime
+      if (results.updatePD.bookingTime === 'Morning') {
+        PDTime = Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日上午'
+      } else if (results.updatePD.bookingTime === 'Afternoon') {
+        PDTime = Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日下午'
+      }
+      let newData = {
+        userId: results.updatePD.patientId.userId,
+        sendBy: results.updatePD.doctorId.userId,
+        type: 7,
+        messageId: 'M' + results.updatePD.diagId + 'CANCEL',
+        readOrNot: 0,
+        time: now,
+        title: PDTime + ',' + results.updatePD.doctorId.name + '医生面诊服务停诊'
+      }
+      if (Number(results.updatePD.status) === 5) {
+        newData['description'] = '尊敬的用户，您已提交“' + results.updatePD.doctorId.name + '医生，' + PDTime + '时段”的面诊取消申请，专员会尽快进行审核。您可登录肾事管家预约更多面诊服务，感谢您的支持。'
+      }
+      if (Number(results.updatePD.status) === 3) {
+        newData['description'] = '尊敬的用户，您已成功取消“' + results.updatePD.doctorId.name + '医生，' + PDTime + '时段”的面诊服务，所付款项' + Number(results.getOrder.money || 0) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + results.getOrder.orderNo + '。'
+      }
+      let newmessage = new Message(newData)
+      newmessage.save(function (err, newInfo) {
+        if (err) {
+          return callback(err)
+        }
+        let query = {userId: results.updatePD.patientId.userId, sendBy: results.updatePD.doctorId.userId}
+        let obj = {
+          $set: {
+            messageId: 'M' + results.updatePD.diagId + 'CANCEL',
+            readOrNot: 0,
+            userRole: 'patient',
+            type: 7,
+            time: now,
+            title: PDTime + ',' + results.updatePD.doctorId.name + '面诊停诊'
+          }
+        }
+        if (Number(results.updatePD.status) === 5) {
+          obj['$set']['description'] = '尊敬的用户，您已提交“' + results.updatePD.doctorId.name + '医生，' + PDTime + '时段”的面诊取消申请，专员会尽快进行审核。您可登录肾事管家预约更多面诊服务，感谢您的支持。'
+        }
+        if (Number(results.updatePD.status) === 3) {
+          obj['$set']['description'] = '尊敬的用户，您已成功取消“' + results.updatePD.doctorId.name + '医生，' + PDTime + '时段”的面诊服务，所付款项' + Number(results.getOrder.money || 0) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + results.getOrder.orderNo + '。'
+        }
+        News.updateOne(query, obj, function (err, upnews) {
+          return callback(err, upnews)
+        }, {upsert: true})
+      })
+    }]
+  }, function (err, results) {
+    if (err) {
+      return res.json({err: err, code: 1, data: results})
+    } else {
+      let msg = []
+      if (Number(results.refund.code) === 1) {
+        msg.push('退款失败')
+      }
+      if (Number(results.textMessage.code) === 1) {
+        msg.push('短信发送失败')
+      }
+      return res.json({code: 0, msg: msg, data: results})
     }
   })
-}
-
-exports.updatePDCapacityUp = function (req, res) {
-  let doctorObjectId = req.body.PDInfo.doctorId
-  let bookingDay = req.body.PDInfo.bookingDay
-  let bookingTime = req.body.PDInfo.bookingTime
-
-  let queryD = {_id: doctorObjectId, availablePDs: {$elemMatch: {$and: [{availableDay: bookingDay}, {availableTime: bookingTime}]}}}
-  let upDoc = {
-    $inc: {
-      'availablePDs.$.count': -1
-    }
-  }
-  let opts = {fields: {_id: 0, availablePDs: 1}}
-  Alluser.update(queryD, upDoc, function (err, upDoctor) {
-    if (err) {
-      return res.status(500).send(err)
-    } else if (upDoctor.nModified === 0) {
-      return res.status(304).json({msg: 'Not Modified', code: 1})
-    } else if (upDoctor.nModified !== 0) {
-      // return res.status(201).send('Cancel Success')
-      // 调用退款接口
-      // return res.json({msg: '测试中，待退款', code: 0})
-      if (Number(req.body.refundFlag) === 1) {
-        let queryO = {perDiagObject: req.body.PDInfo._id}
-        Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
-          if (err) {
-            return res.status(500).send(err)
-          } else if (itemO !== null) {
-            let orderNo = itemO.orderNo
-            let money = itemO.money || null
-            if (Number(money) !== 0) {
-              request({ // 调用微信退款接口
-                url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
-                method: 'POST',
-                body: {'role': 'appPatient', 'orderNo': orderNo, 'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token)},
-                json: true
-              }, function (err, response) {
-                if (err) {
-                  return res.status(500).send(err)
-                } else if ((response.body.results || null) === null) {
-                  return res.json({msg: '取消成功，微信退款接口调用失败，请联系管理员', data: req.body.PDInfo, code: 1})
-                } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
-                  return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
-                } else {
-                  return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
-                }
-              })
-              // 待短信发送 cancelRefund
-            } else {
-              return res.json({msg: '取消成功', data: req.body.PDInfo, code: 0})
-            }
-          } else {
-            return res.json({msg: '取消成功，退款失败，无法查询订单号', data: req.body.PDInfo, code: 0})
-          }
-        })
-      } else {
-        return res.json({msg: 'Cancel Request Received', code: 0, data: req.body.PDInfo})
-      }
-    }
-  }, opts)
 }
 
 /**
@@ -1389,7 +1476,7 @@ exports.manualRefundAndNoticeList = function (req, res) {
   })
 }
 
-// // 人工处理面诊退款
+// 人工处理面诊退款/停诊通知
 exports.manualRefundAndNotice = function (req, res) {
   let diagId = req.body.diagId || null
   if (diagId === null) {
@@ -1417,6 +1504,7 @@ exports.manualRefundAndNotice = function (req, res) {
     {path: 'doctorId', select: {_id: 0, name: 1, userId: 1}},
     {path: 'patientId', select: {_id: 0, phoneNo: 1, userId: 1}}
   ]
+  let now = new Date()
   async.auto({
     updatePD: function (callback) {
       PersonalDiag.updateOne(queryPD, upObj, function (err, upPD) {
@@ -1507,7 +1595,6 @@ exports.manualRefundAndNotice = function (req, res) {
       })
     }],
     messageAndNews: ['refund', function (results, callback) {
-      let now = new Date()
       let bookingDay = new Date(new Date(results.updatePD.bookingDay).toLocaleDateString())
       let PDTime
       if (results.updatePD.bookingTime === 'Morning') {
@@ -1519,16 +1606,18 @@ exports.manualRefundAndNotice = function (req, res) {
         userId: results.updatePD.patientId.userId,
         sendBy: results.updatePD.doctorId.userId,
         type: 7,
-        messageId: 'M' + results.updatePD.diagId,
+        messageId: 'M' + results.updatePD.diagId + 'REVIEW',
         readOrNot: 0,
         time: now,
         title: PDTime + ',' + results.updatePD.doctorId.name + '医生面诊服务停诊'
       }
       if (Number(results.updatePD.status) === 7) {
         newData['description'] = '尊敬的用户，您提交“' + results.updatePD.doctorId.name + '医生，' + PDTime + '时段”的面诊取消申请未通过审核，如有疑问请联系客服，附订单号' + results.getOrder.orderNo + '。'
-      } else if (Number(results.updatePD.status) === 8) {
+      }
+      if (Number(results.updatePD.status) === 8) {
         newData['description'] = '尊敬的用户，您已成功取消“' + results.updatePD.doctorId.name + '医生，' + PDTime + '时段”的面诊服务，所付款项' + Number(results.getOrder.money || 0) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + results.getOrder.orderNo + '。'
-      } else if (Number(results.updatePD.status) === 9) {
+      }
+      if (Number(results.updatePD.status) === 9) {
         return callback(null, '通知患者状态更新完毕')
       } 
       let newmessage = new Message(newData)
@@ -1539,7 +1628,7 @@ exports.manualRefundAndNotice = function (req, res) {
         let query = {userId: results.updatePD.patientId.userId, sendBy: results.updatePD.doctorId.userId}
         let obj = {
           $set: {
-            messageId: 'M' + results.updatePD.diagId,
+            messageId: 'M' + results.updatePD.diagId + 'REVIEW',
             readOrNot: 0,
             userRole: 'patient',
             type: 7,
@@ -1563,13 +1652,13 @@ exports.manualRefundAndNotice = function (req, res) {
       return res.json({err: err, code: 1, data: results})
     } else {
       let msg = []
-      if (results.refund.code = 1) {
+      if (Number(results.refund.code) === 1) {
         msg.push('退款失败')
       }
-      if (results.textMessage.code = 1) {
+      if (Number(results.textMessage.code) === 1) {
         msg.push('短信发送失败')
       }
-      return res.json({code: 0，msg: msg})
+      return res.json({code: 0, msg: msg, data: results})
     }
   })
 }
