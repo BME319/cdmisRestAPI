@@ -25,7 +25,9 @@ var docInfoForPat = {
   workUnit: 1,
   description: 1,
   major: 1,
-  photoUrl: 1
+  photoUrl: 1, 
+  schedules: 1, 
+  suspendTime: 1
 }
 // var config = require('../config')
 var webEntry = require('../settings').webEntry
