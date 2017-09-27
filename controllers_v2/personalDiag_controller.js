@@ -8,6 +8,10 @@ var webEntry = require('../settings').webEntry
 var Message = require('../models/message')
 var News = require('../models/news')
 
+var async = require('async')
+var wechatCtrl = require('../controllers_v2/wechat_controller')
+var alluserCtrl = require('../controllers_v2/alluser_controller')
+
 var getToken = function (headers) {
   if (headers && headers.authorization) {
     var authorization = headers.authorization
@@ -1126,8 +1130,11 @@ exports.cancelMyPD = function (req, res, next) {
           } else if (upItem.nModified === 0) {
             return res.status(304).json({msg: 'Not Modified', code: 1})
           } else {
-            return res.status(201).json({msg: 'Cancel Request Received', code: 1, data: upItem})
-            // 待短信发送 cancelRefund
+            // return res.status(201).json({msg: 'Cancel Request Received', code: 0, data: upItem})
+            // 待短信发送 cancelRequest
+            req.body.PDInfo = upItem
+            req.body.refundFlag = 0
+            next()
           }
         }, {new: true})
       } else { // 直接退款
@@ -1140,6 +1147,7 @@ exports.cancelMyPD = function (req, res, next) {
           } else {
             // return res.json({results: '取消成功'})
             req.body.PDInfo = upItem
+            req.body.refundFlag = 1
             next()
           }
         }, {new: true})
@@ -1169,38 +1177,42 @@ exports.updatePDCapacityUp = function (req, res) {
       // return res.status(201).send('Cancel Success')
       // 调用退款接口
       // return res.json({msg: '测试中，待退款', code: 0})
-      let queryO = {perDiagObject: req.body.PDInfo._id}
-      Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
-        if (err) {
-          return res.status(500).send(err)
-        } else if (itemO !== null) {
-          let orderNo = itemO.orderNo
-          let money = itemO.money || null
-          if (Number(money) !== 0) {
-            request({ // 调用微信退款接口
-              url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
-              method: 'POST',
-              body: {'role': 'appPatient', 'orderNo': orderNo, 'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token)},
-              json: true
-            }, function (err, response) {
-              if (err) {
-                return res.status(500).send(err)
-              } else if ((response.body.results || null) === null) {
-                return res.json({msg: '取消成功，微信退款接口调用失败，请联系管理员', data: req.body.PDInfo, code: 1})
-              } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
-                return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
-              } else {
-                return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
-              }
-            })
-            // 待短信发送 cancelRequest
+      if (Number(req.body.refundFlag) === 1) {
+        let queryO = {perDiagObject: req.body.PDInfo._id}
+        Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
+          if (err) {
+            return res.status(500).send(err)
+          } else if (itemO !== null) {
+            let orderNo = itemO.orderNo
+            let money = itemO.money || null
+            if (Number(money) !== 0) {
+              request({ // 调用微信退款接口
+                url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
+                method: 'POST',
+                body: {'role': 'appPatient', 'orderNo': orderNo, 'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token)},
+                json: true
+              }, function (err, response) {
+                if (err) {
+                  return res.status(500).send(err)
+                } else if ((response.body.results || null) === null) {
+                  return res.json({msg: '取消成功，微信退款接口调用失败，请联系管理员', data: req.body.PDInfo, code: 1})
+                } else if (response.body.results.xml.return_code === 'SUCCESS' && response.body.results.xml.return_msg === 'OK') {
+                  return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
+                } else {
+                  return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
+                }
+              })
+              // 待短信发送 cancelRefund
+            } else {
+              return res.json({msg: '取消成功', data: req.body.PDInfo, code: 0})
+            }
           } else {
-            return res.json({msg: '取消成功', data: req.body.PDInfo, code: 0})
+            return res.json({msg: '取消成功，退款失败，无法查询订单号', data: req.body.PDInfo, code: 0})
           }
-        } else {
-          return res.json({msg: '取消成功，退款失败，无法查询订单号', data: req.body.PDInfo, code: 0})
-        }
-      })
+        })
+      } else {
+        return res.json({msg: 'Cancel Request Received', code: 0, data: req.body.PDInfo})
+      }
     }
   }, opts)
 }
@@ -1401,46 +1413,163 @@ exports.manualRefundAndNotice = function (req, res) {
   } else {
     return res.json({code: 1, msg: '请检查reviewResult的输入'})
   }
-  PersonalDiag.updateOne(queryPD, upObj, function (err, upPD) {
-    if (err) {
-      return res.status(500).send(err)
-    } else if (upPD === null) {
-      return res.json({msg: '数据错误，请检查输入', code: 1})
-    } else if (Number(upPD.status) === 8) {
-      let queryO = {perDiagObject: upPD._id}
-      Order.getOne(queryO, function (err, itemO) {
-        if (err) {
-          return res.status(500).send(err)
-        } else if (itemO !== null) {
-          let orderNo = itemO.orderNo
-          let money = itemO.money || null
-          if (Number(money) !== 0) {
-            request({ // 调用微信退款接口
-              url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
-              method: 'POST',
-              body: {'role': 'appPatient', 'orderNo': orderNo, 'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token)},
-              json: true
-            }, function (err, responseR) {
-              if (err) {
-                return res.status(500).send(err)
-              } else if ((responseR.body.results || null) === null) {
-                return res.json({msg: '同意患者退款，退款失败，微信接口调用失败，请联系管理员', code: 1})
-              } else if (responseR.body.results.xml.return_code === 'SUCCESS' && responseR.body.results.xml.return_msg === 'OK') {
-                return res.json({msg: '同意患者退款，退款成功', code: 0})
-              } else {
-                return res.json({msg: '同意患者退款，退款失败，请联系管理员', code: 1})
-              }
-            })
-            // 待短信发送 cancelRefund
+  let populate = [
+    {path: 'doctorId', select: {_id: 0, name: 1, userId: 1}},
+    {path: 'patientId', select: {_id: 0, phoneNo: 1, userId: 1}}
+  ]
+  async.auto({
+    updatePD: function (callback) {
+      PersonalDiag.updateOne(queryPD, upObj, function (err, upPD) {
+        return callback(err, upPD)
+      }, {new: true}, populate)
+    },
+    getOrder: ['updatePD', function (results, callback) {
+      if ((results.updatePD || null) !== null) {
+        if ((results.updatePD.patientId || null) !== null && (results.updatePD.doctorId || null) !== null) {
+          let queryO = {perDiagObject: results.updatePD._id}
+          Order.getOne(queryO, function (err, itemO) {
+            if (itemO === null) {
+              let err = '无法查询订单'
+              return callback(err)
+            } else {
+              return callback(err, itemO)
+            }
+          })
+        } else {
+          let err = 'PD数据错误，无法查询医生或患者'
+          return callback(err)
+        }
+      } else {
+        let err = '数据错误，请检查输入'
+        return callback(err)
+      }
+    }],
+    refund: ['getOrder', function (results, callback) {
+      if (Number(results.updatePD.status) === 8) {
+        let money = results.getOrder.money || null
+        if (Number(money) !== 0) {
+          let params = {
+            orderNo: results.getOrder.orderNo, // 退款单号
+            role: 'appPatient'
           }
+          wechatCtrl.wechatRefundAsync(params, function (err, result) {
+            let refundResults = result.refund.xml || null
+            if (refundResults !== null) {
+              if (refundResults.return_code === 'SUCCESS' && refundResults.result_code === 'SUCCESS') {
+                return callback(err, {msg: '退款成功', data: result, code: 0})
+              } else {
+                return callback(err, {msg: '退款失败', data: result, code: 1})
+              }
+            } else {
+              return callback(err, {msg: '退款失败', data: result, code: 1})
+            }
+          })
+        } else {
+          return callback(null, {msg: '金额为零，无需退款', code: 0})
+        }
+      } else {
+        return callback(null, {msg: '无需退款', code: 0})
+      }
+    }],
+    textMessage: ['refund', function (results, callback) {
+      let params
+      if (Number(results.updatePD.status) === 7) { // 拒绝退款 cancelReject
+        params = {
+          type: 'cancelReject',
+          phoneNo: results.updatePD.patientId.phoneNo,
+          bookingDay: new Date(results.updatePD.bookingDay).toLocaleDateString(),
+          bookingTime: results.updatePD.bookingTime,
+          doctorName: results.updatePD.doctorId.name,
+          orderNo: results.getOrder.orderNo // 订单号
+        }
+      } else if (Number(results.updatePD.status) === 8) { // 同意退款 cancelRefund
+        params = {
+          type: 'cancelRefund',
+          phoneNo: results.updatePD.patientId.phoneNo,
+          bookingDay: new Date(results.updatePD.bookingDay).toLocaleDateString(),
+          bookingTime: results.updatePD.bookingTime,
+          doctorName: results.updatePD.doctorId.name,
+          orderNo: results.getOrder.orderNo, // 退款订单号
+          orderMoney: results.getOrder.money || 0 // 退款金额订单
+        }
+      } else if (Number(results.updatePD.status) === 9) { // 通知停诊
+        return callback(null, '通知患者状态更新完毕')
+      } else {
+        let err = '数据错误，请检查输入'
+        return callback(err)
+      }
+      alluserCtrl.servicesMessageAsync(params, function (err, result) {
+        if (err) {
+          return callback(null, {data: result, code: 1})
+        } else {
+          return callback(null, {data: result, code: 0})
         }
       })
-    } else if (Number(upPD.status) === 7) {
-      return res.json({msg: '拒绝患者退款，请联系患者表明拒绝理由', code: 0})
-    } else if (Number(upPD.status) === 9) {
-      return res.json({msg: '通知患者完毕', code: 0})
+    }],
+    messageAndNews: ['refund', function (results, callback) {
+      let now = new Date()
+      let bookingDay = new Date(new Date(results.updatePD.bookingDay).toLocaleDateString())
+      let PDTime
+      if (results.updatePD.bookingTime === 'Morning') {
+        PDTime = Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日上午'
+      } else if (results.updatePD.bookingTime === 'Afternoon') {
+        PDTime = Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日下午'
+      }
+      let newData = {
+        userId: results.updatePD.patientId.userId,
+        sendBy: results.updatePD.doctorId.userId,
+        type: 7,
+        messageId: 'M' + results.updatePD.diagId,
+        readOrNot: 0,
+        time: now,
+        title: PDTime + ',' + results.updatePD.doctorId.name + '医生面诊服务停诊'
+      }
+      if (Number(results.updatePD.status) === 7) {
+        newData['description'] = '尊敬的用户，您提交“' + results.updatePD.doctorId.name + '医生，' + PDTime + '时段”的面诊取消申请未通过审核，如有疑问请联系客服，附订单号' + results.getOrder.orderNo + '。'
+      } else if (Number(results.updatePD.status) === 8) {
+        newData['description'] = '尊敬的用户，您已成功取消“' + results.updatePD.doctorId.name + '医生，' + PDTime + '时段”的面诊服务，所付款项' + Number(results.getOrder.money || 0) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + results.getOrder.orderNo + '。'
+      } else if (Number(results.updatePD.status) === 9) {
+        return callback(null, '通知患者状态更新完毕')
+      } 
+      let newmessage = new Message(newData)
+      newmessage.save(function (err, newInfo) {
+        if (err) {
+          return callback(err)
+        }
+        let query = {userId: results.updatePD.patientId.userId, sendBy: results.updatePD.doctorId.userId}
+        let obj = {
+          $set: {
+            messageId: 'M' + results.updatePD.diagId,
+            readOrNot: 0,
+            userRole: 'patient',
+            type: 7,
+            time: now,
+            title: PDTime + ',' + results.updatePD.doctorId.name + '面诊停诊'
+          }
+        }
+        if (Number(results.updatePD.status) === 7) {
+          obj['$set']['description'] = '尊敬的用户，您提交“' + results.updatePD.doctorId.name + '医生，' + PDTime + '时段”的面诊取消申请未通过审核，如有疑问请联系客服，附订单号' + results.getOrder.orderNo + '。'
+        }
+        if (Number(results.updatePD.status) === 8) {
+          obj['$set']['description'] = '尊敬的用户，您已成功取消“' + results.updatePD.doctorId.name + '医生，' + PDTime + '时段”的面诊服务，所付款项' + Number(results.getOrder.money || 0) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + results.getOrder.orderNo + '。'
+        }
+        News.updateOne(query, obj, function (err, upnews) {
+          return callback(err, upnews)
+        }, {upsert: true})
+      })
+    }]
+  }, function (err, results) {
+    if (err) {
+      return res.json({err: err, code: 1, data: results})
     } else {
-      return res.json({msg: '数据错误，请检查输入', code: 1})
+      let msg = []
+      if (results.refund.code = 1) {
+        msg.push('退款失败')
+      }
+      if (results.textMessage.code = 1) {
+        msg.push('短信发送失败')
+      }
+      return res.json({code: 0，msg: msg})
     }
-  }, {new: true})
+  })
 }

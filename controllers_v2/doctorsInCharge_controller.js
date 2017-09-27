@@ -169,6 +169,7 @@ exports.updateDoctorInCharge = function (req, res, next) {
       // return res.json({results: '审核完成'})
       if (Number(upDIC.invalidFlag) === 1) { // 审核结果为通过，给医生账户充钱
         req.body.docInChaObject = upDIC
+        // 待短信发送 consent
         next()
       } else if (Number(upDIC.invalidFlag) === 3) { // 审核结果为拒绝，调用退款接口
         // return res.json({msg: '测试中，待退款', code: 0})
@@ -328,6 +329,7 @@ exports.addPatientInCharge = function (req, res, next) {
             return res.json({result: '未申请成功！请检查输入是否符合要求！'})
           } else if (upRelation2.nModified === 1) {
             // return res.json({result: '申请成功，请等待审核！', results: upRelation2})
+            // 待短信发送 request
             next()
           }
         })
@@ -336,6 +338,7 @@ exports.addPatientInCharge = function (req, res, next) {
       return res.json({result: '未申请成功！请检查输入是否符合要求！'})
     } else if (upRelation1.nModified === 1) {
       // return res.json({result: '申请成功，请等待审核！', results: upRelation1})
+      // 待短信发送 request
       next()
     }
   }, {new: true})
