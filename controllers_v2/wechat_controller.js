@@ -921,92 +921,94 @@ exports.autoRefundCounsel = function () {
               // 注意order表里字段名：conselObject不是counselObject
               let queryOrder = {conselObject: CounselItem._id}
               // 根据counsels表中的_id查询需要进行退款的orderNo
-              Order.getOne(queryOrder, function (err, orderItem) {
+              Order.getSome(queryOrder, function (err, orderItems) {
                 if (err) {
                   console.log(new Date(), err)
                   if (i === counselItems.length - 1) {
                     console.log(new Date(), 'auto_refund_success:_finish')
                   }
-                } else if (orderItem === null) {
+                } else if (orderItems.length === 0) {
                   console.log(new Date(), 'counsel_id_' + CounselItem._id + '_not_found')
                   if (i === counselItems.length - 1) {
                     console.log(new Date(), 'auto_refund_success:_finish')
                   }
                 } else {
-                  // 验证订单支付状态
-                  if (orderItem.paystatus === 2) {
-                    // 生成退款单号
-                    let refundNo = 'Rauto' + y + add0(m) + add0(d) + add0(h) + add00(i)
-                    // 尝试在所有商户提交退款请求
-                    for (let value in config.wxDeveloperConfig) {
-                      if (config.wxDeveloperConfig[value].pfxpath) {
-                        // 请求参数
-                        let paramData = {
-                          appid: config.wxDeveloperConfig[value].appid,   // 公众账号ID
-                          mch_id: config.wxDeveloperConfig[value].merchantid,   // 商户号
-                          nonce_str: commonFunc.randomString(32),   // 随机字符串
-                          sign_type: 'MD5',
-                          out_trade_no: orderItem.orderNo,     // 商户订单号
-                          out_refund_no: refundNo,
-                          total_fee: orderItem.money,
-                          refund_fee: orderItem.money
-                        }
-
-                        let signStr = commonFunc.rawSort(paramData)
-                        signStr = signStr + '&key=' + config.wxDeveloperConfig[value].merchantkey
-
-                        paramData.sign = commonFunc.convertToMD5(signStr, true)    // 签名
-                        let xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
-                        let xmlString = xmlBuilder.buildObject(paramData)
-
-                        // 读取商户证书
-                        let pfxpath = config.wxDeveloperConfig[value].pfxpath
-
-                        // console.log(wxApis.refund);
-                        // console.log(xmlString);
-                        // console.log(pfxpath);
-                        // console.log(req.wxApiUserObject.merchantid);
-                        // return res.json({result: 'finish'});
-
-                        request({
-                          url: wxApis.refund,
-                          method: 'POST',
-                          body: xmlString,
-                          agentOptions: {
-                            pfx: fs.readFileSync(pfxpath),
-                            passphrase: config.wxDeveloperConfig[value].merchantid
+                  for (let i = 0; i < orderItems.length; i++) {
+                    // 验证订单支付状态
+                    if (orderItems[i].paystatus === 2 && orderItems[i].freeFlag === 0) {
+                      // 生成退款单号
+                      let refundNo = 'Rauto' + y + add0(m) + add0(d) + add0(h) + add00(i)
+                      // 尝试在所有商户提交退款请求
+                      for (let value in config.wxDeveloperConfig) {
+                        if (config.wxDeveloperConfig[value].pfxpath) {
+                          // 请求参数
+                          let paramData = {
+                            appid: config.wxDeveloperConfig[value].appid,   // 公众账号ID
+                            mch_id: config.wxDeveloperConfig[value].merchantid,   // 商户号
+                            nonce_str: commonFunc.randomString(32),   // 随机字符串
+                            sign_type: 'MD5',
+                            out_trade_no: orderItems[i].orderNo,     // 商户订单号
+                            out_refund_no: refundNo,
+                            total_fee: orderItems[i].money,
+                            refund_fee: orderItems[i].money
                           }
-                        }, function (err, response, body) {
-                          if (err) {
-                            console.log(new Date(), err)
-                          } else {
-                            // return res.json({results: body});
-                            var jsondata
-                            xml2js.parseString(body, { explicitArray: false, ignoreAttrs: true }, function (err, result) {
-                              jsondata = result || {}
-                            })
-                            // return res.json({results: jsondata})
-                            console.log(new Date(), jsondata)
-                            // console.log(value)
-                            if (i === counselItems.length - 1 && value === 'appsjkshz') {
-                              console.log(new Date(), 'auto_refund_success:_finish')
+
+                          let signStr = commonFunc.rawSort(paramData)
+                          signStr = signStr + '&key=' + config.wxDeveloperConfig[value].merchantkey
+
+                          paramData.sign = commonFunc.convertToMD5(signStr, true)    // 签名
+                          let xmlBuilder = new xml2js.Builder({rootName: 'xml', headless: true})
+                          let xmlString = xmlBuilder.buildObject(paramData)
+
+                          // 读取商户证书
+                          let pfxpath = config.wxDeveloperConfig[value].pfxpath
+
+                          // console.log(wxApis.refund);
+                          // console.log(xmlString);
+                          // console.log(pfxpath);
+                          // console.log(req.wxApiUserObject.merchantid);
+                          // return res.json({result: 'finish'});
+
+                          request({
+                            url: wxApis.refund,
+                            method: 'POST',
+                            body: xmlString,
+                            agentOptions: {
+                              pfx: fs.readFileSync(pfxpath),
+                              passphrase: config.wxDeveloperConfig[value].merchantid
                             }
-                            // if (jsondata.xml.result_code === 'SUCCESS') {
-                            //   break
-                            // }
+                          }, function (err, response, body) {
+                            if (err) {
+                              console.log(new Date(), err)
+                            } else {
+                              // return res.json({results: body});
+                              var jsondata
+                              xml2js.parseString(body, { explicitArray: false, ignoreAttrs: true }, function (err, result) {
+                                jsondata = result || {}
+                              })
+                              // return res.json({results: jsondata})
+                              console.log(new Date(), 'orderNo:_' + orderItems[i].orderNo, jsondata)
+                              // console.log(value)
+                              if (i === counselItems.length - 1 && value === 'appsjkshz') {
+                                console.log(new Date(), 'auto_refund_success:_finish')
+                              }
+                              // if (jsondata.xml.result_code === 'SUCCESS') {
+                              //   break
+                              // }
+                            }
+                          })
+                        } else {
+                          // console.log(value)
+                          if (i === counselItems.length - 1 && value === 'appsjkshz') {
+                            console.log(new Date(), 'auto_refund_success:_finish')
                           }
-                        })
-                      } else {
-                        // console.log(value)
-                        if (i === counselItems.length - 1 && value === 'appsjkshz') {
-                          console.log(new Date(), 'auto_refund_success:_finish')
                         }
                       }
-                    }
-                  } else {
-                    console.log(new Date(), 'order_paystatus_error:_not_allowed_refund')
-                    if (i === counselItems.length - 1) {
-                      console.log(new Date(), 'auto_refund_success:_finish')
+                    } else {
+                      console.log(new Date(), 'orderNo:_' + orderItems[i].orderNo + '_order_paystatus_or_freeFlag_error:_not_allowed_refund')
+                      if (i === counselItems.length - 1) {
+                        console.log(new Date(), 'auto_refund_success:_finish')
+                      }
                     }
                   }
                 }
