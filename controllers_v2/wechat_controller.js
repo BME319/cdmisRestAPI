@@ -812,7 +812,7 @@ exports.autoRefundQuery = function () {
           refundQuery(++orderNosIndex, 0)
         } else {
           let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
-          console.log(new Date(), info)
+          console.log(new Date(), info, orderNos)
         }
       } else {
         let jsondata
@@ -838,7 +838,7 @@ exports.autoRefundQuery = function () {
               refundQuery(++orderNosIndex, 0)
             } else {
               let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
-              console.log(new Date(), info)
+              console.log(new Date(), info, orderNos)
             }
           })
         } else {
@@ -851,7 +851,7 @@ exports.autoRefundQuery = function () {
             refundQuery(++orderNosIndex, 0)
           } else {
             let info = 'auto_refund_query_success:_' + orderNos.length + '_orders_query_success'
-            console.log(new Date(), info)
+            console.log(new Date(), info, orderNos)
           }
         }
       }
