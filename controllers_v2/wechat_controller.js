@@ -1846,12 +1846,12 @@ exports.wechatRefundAsyncTest = function (req, res) {
       let refundResults = results.refund.xml || null
       if (refundResults !== null) {
         if (refundResults.return_code === 'SUCCESS' && refundResults.result_code === 'SUCCESS') {
-          return res.json({msg: '退款成功', data: results, code: 0})
+          return res.json({msg: '退款成功', code: 0})
         } else {
-          return res.json({msg: '退款失败', data: results, code: 1})
+          return res.json({msg: '退款失败', data: refundResults, code: 1})
         }
       } else {
-        return res.json({msg: '退款失败', data: results, code: 1})
+        return res.json({msg: '退款失败', data: refundResults, code: 1})
       }
     }
   })
