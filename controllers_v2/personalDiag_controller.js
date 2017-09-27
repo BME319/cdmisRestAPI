@@ -1569,7 +1569,7 @@ exports.manualRefundAndNotice = function (req, res) {
       if (results.textMessage.code = 1) {
         msg.push('短信发送失败')
       }
-      return res.json({code: 0，msg: msg})
+      return res.json({code: 0, msg: msg})
     }
   })
 }
