@@ -988,6 +988,14 @@ exports.autoRefundCounsel = function () {
                               })
                               // return res.json({results: jsondata})
                               console.log(new Date(), 'orderNo:_' + orderItems[i].orderNo, jsondata)
+                              // 修改订单状态
+                              if (jsondata.xml.result_code === 'SUCCESS'){
+                                Order.updateOne({orderNo:orderItems[i].orderNo}, {paystatus:6}, function (err, item) {
+                                  if (err) {
+                                    console.log(new Date(), 'order_update_err:', err)
+                                  } 
+                                })
+                              }
                               // console.log(value)
                               if (i === counselItems.length - 1 && value === 'appsjkshz') {
                                 console.log(new Date(), 'auto_refund_success:_finish')
