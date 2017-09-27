@@ -886,7 +886,7 @@ exports.autoRefundCounsel = function () {
   let h = now.getHours()
 
   let start_zone = now - 60 * 60 * 1000 - 2 * 60 * 1000
-  // let start_zone = now - 24 * 60 * 60 * 1000
+  // let start_zone = now - 48 * 60 * 60 * 1000
   let queryCounselId = {
     endTime: {$gt: start_zone, $lt: now},
     reply: 0
@@ -988,6 +988,21 @@ exports.autoRefundCounsel = function () {
                               })
                               // return res.json({results: jsondata})
                               console.log(new Date(), 'orderNo:_' + orderItems[i].orderNo, jsondata)
+                              // 修改订单状态
+                              if (jsondata.xml.result_code === 'SUCCESS'){
+                                Order.updateOne({orderNo:orderItems[i].orderNo}, {paystatus:6}, function (err, item) {
+                                  if (err) {
+                                    console.log(new Date(), 'order_update_err:', err)
+                                  } 
+                                })
+                              }
+                              if (jsondata.xml.err_code_des === '订单已全额退款'){
+                                Order.updateOne({orderNo:orderItems[i].orderNo}, {paystatus:9}, function (err, item) {
+                                  if (err) {
+                                    console.log(new Date(), 'order_update_err:', err)
+                                  } 
+                                })
+                              }
                               // console.log(value)
                               if (i === counselItems.length - 1 && value === 'appsjkshz') {
                                 console.log(new Date(), 'auto_refund_success:_finish')
