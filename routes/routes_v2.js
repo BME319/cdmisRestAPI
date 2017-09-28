@@ -1986,7 +1986,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSchedule, personalDiagCtrl.getDaysToUpdate, personalDiagCtrl.updateAvailablePD1, personalDiagCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, personalDiagCtrl.cancelBookedPdsStep1, personalDiagCtrl.cancelBookedPdsStep2)
+  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSchedule, personalDiagCtrl.getDaysToUpdate, personalDiagCtrl.updateAvailablePD1, personalDiagCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, personalDiagCtrl.cancelBookedPds)
   // YQC 2017-07-29 医生设置面诊停诊 将可预约面诊和已预约面诊取消 已预约的取消未实现通知患者
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
    * @swagger
@@ -2022,7 +2022,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/setSuspend', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, personalDiagCtrl.setServiceSuspend, personalDiagCtrl.suspendAvailablePds, personalDiagCtrl.cancelBookedPdsStep1, personalDiagCtrl.cancelBookedPdsStep2)
+  app.post(version + '/services/setSuspend', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, personalDiagCtrl.setServiceSuspend, personalDiagCtrl.suspendAvailablePds, personalDiagCtrl.cancelBookedPds)
   /** YQC annotation 2017-08-04 - acl 2017-08-03 医生
    * @swagger
    * /services/deleteSuspend:
