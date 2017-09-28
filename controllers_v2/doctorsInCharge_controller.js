@@ -6,6 +6,8 @@ var webEntry = require('../settings').webEntry
 var Order = require('../models/order')
 var async = require('async')
 
+var alluserCtrl = require('../controllers_v2/alluser_controller')
+
 var getToken = function (headers) {
   if (headers && headers.authorization) {
     var authorization = headers.authorization
@@ -249,7 +251,7 @@ exports.addDoctorInCharge = function (req, res, next) {
   let doctorObjectId = req.body.doctorObject._id
   let patientObjectId = req.body.patientObject._id
   let chargeDuration = req.body.chargeDuration || null
-  if (chargeDuration == null) {
+  if (chargeDuration === null) {
     return res.json({result: '请填写chargeDuration!'})
   }
   let queryDIC = {doctorId: doctorObjectId, patientId: patientObjectId}
@@ -309,39 +311,25 @@ exports.addPatientInCharge = function (req, res, next) {
       }
     }
   }
-  DpRelation.update(query, upObj, function (err, upRelation1) {
+  DpRelation.updateOne(query, upObj, function (err, upRelation1) {
     if (err) {
       return res.status(422).send(err)
-    } else if (upRelation1.n === 0) {
-      let dpRelationData = {
-        doctorId: doctorObjectId
-      }
-      // return res.json({result:dpRelationData});
-      var newDpRelation = new DpRelation(dpRelationData)
-      newDpRelation.save(function (err, dpRelationInfo) {
-        if (err) {
-          return res.status(500).send(err)
-        }
-        DpRelation.update(query, upObj, function (err, upRelation2) {
-          if (err) {
-            return res.status(422).send(err)
-          } else if (upRelation2.nModified === 0) {
-            return res.json({result: '未申请成功！请检查输入是否符合要求！'})
-          } else if (upRelation2.nModified === 1) {
-            // return res.json({result: '申请成功，请等待审核！', results: upRelation2})
-            // 待短信发送 request
-            next()
-          }
-        })
-      })
-    } else if (upRelation1.nModified === 0) {
-      return res.json({result: '未申请成功！请检查输入是否符合要求！'})
-    } else if (upRelation1.nModified === 1) {
-      // return res.json({result: '申请成功，请等待审核！', results: upRelation1})
+    } else {
       // 待短信发送 request
-      next()
+      let params = {
+        type: 'request',
+        phoneNo: req.body.patientObject.phoneNo,
+        doctorName: req.body.doctorObject.name,
+        duration: req.body.chargeDuration + '个月' // 服务时长
+      }
+      alluserCtrl.servicesMessageAsync(params, function (err, results) {
+        if (err) {
+          console.log({msg: err, data: results, code: 1})
+        }
+        next()
+      })
     }
-  }, {new: true})
+  }, {new: true, upsert: true})
 }
 
 // 2017-07-20 YQC
