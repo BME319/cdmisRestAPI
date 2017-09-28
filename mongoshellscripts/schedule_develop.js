@@ -134,6 +134,20 @@ function schedule () {
       }
       // printjson({communicationItem:communicationItem})
       db.communications.insert(communicationItem)
+      // news表插入数据
+      let newsItem = {
+        messageId: communicationItem.messageNo,
+        userId: communicationItem.receiver,
+        userRole: communicationItem.receiverRole,
+        sendBy: communicationItem.sendBy,
+        readOrNot: 0,
+        type: '11',
+        time: communicationItem.sendDateTime,
+        title: endlMsg.info,
+        description: endlMsg.info, 
+        url: JSON.stringify(communicationItem.content)
+      }
+      db.news.insert(newsItem)
     }
   }
   printjson({'result': 'runbat_success', 'dbUrl': dbUrl, 'time': now})
