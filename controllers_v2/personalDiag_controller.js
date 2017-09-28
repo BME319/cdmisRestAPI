@@ -3,8 +3,8 @@ var Alluser = require('../models/alluser')
 // var commonFunc = require('../middlewares/commonFunc')
 var Order = require('../models/order')
 var Account = require('../models/account')
-var request = require('request')
-var webEntry = require('../settings').webEntry
+// var request = require('request')
+// var webEntry = require('../settings').webEntry
 var Message = require('../models/message')
 var News = require('../models/news')
 
@@ -12,20 +12,20 @@ var async = require('async')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 var alluserCtrl = require('../controllers_v2/alluser_controller')
 
-var getToken = function (headers) {
-  if (headers && headers.authorization) {
-    var authorization = headers.authorization
-    var part = authorization.split(' ')
-    if (part.length === 2) {
-      var token = part[1]
-      return token
-    } else {
-      return null
-    }
-  } else {
-    return null
-  }
-}
+// var getToken = function (headers) {
+//   if (headers && headers.authorization) {
+//     var authorization = headers.authorization
+//     var part = authorization.split(' ')
+//     if (part.length === 2) {
+//       var token = part[1]
+//       return token
+//     } else {
+//       return null
+//     }
+//   } else {
+//     return null
+//   }
+// }
 
 /**
 医生端
@@ -416,11 +416,28 @@ exports.suspendAvailablePds = function (req, res, next) {
 }
 
 // 已预约面诊取消
-exports.cancelBookedPdsStep1 = function (req, res, next) {
+exports.cancelBookedPds = function (req, res, next) {
   let doctorObjectId = req.body.doctorObject._id
   let now = new Date()
-  let query = {}
-  let queryU = {}
+  let query = {} // 需退款
+  let opts = ''
+  let fields = {_id: 1, doctorId: 1, patientId: 1, bookingDay: 1, bookingTime: 1, diagId: 1}
+  let populate = [
+    {path: 'doctorId', select: {_id: 0, name: 1, userId: 1}},
+    {path: 'patientId', select: {_id: 0, phoneNo: 1, userId: 1}}
+  ]
+  let fieldsO = {_id: 0, money: 1, orderNo: 1, perDiagObject: 1, paystatus: 1}
+  let populateO = {
+    path: 'perDiagObject',
+    select: {_id: 1, doctorId: 1, patientId: 1, bookingDay: 1, bookingTime: 1, diagId: 1},
+    populate: [
+      {path: 'doctorId', select: {_id: 0, name: 1, userId: 1}},
+      {path: 'patientId', select: {_id: 0, phoneNo: 1, userId: 1}}
+    ]
+  }
+  let queryU = {} // 需退款，无需人工通知
+  let upObj = {$set: {status: 4}}
+  let queryPD = null // 需退款，需人工通知
   let upObjPD = {$set: {status: 6}}
   if (req.body.suspendFlag) { // 设置停诊取消面诊
     let startOfStart = req.body.startOfStart
@@ -432,243 +449,202 @@ exports.cancelBookedPdsStep1 = function (req, res, next) {
     endOfTomorrow.setMilliseconds(endOfTomorrow.getMilliseconds() + 999)
     query = {
       doctorId: doctorObjectId,
-      status: {$in: [0, 6]},
-      $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
-    }
-    queryU = {
-      doctorId: doctorObjectId,
       status: 0,
       $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
     }
     if (new Date(startOfStart) - now > 86400000) {
-      req.body.query = query
-      req.body.queryU = queryU
-      return next()
-      // query = {
-      //   doctorId: doctorObjectId,
-      //   status: 0,
-      //   $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
-      // }
+      queryU = {
+        doctorId: doctorObjectId,
+        status: 0,
+        $and: [{bookingDay: {$gte: startOfStart}}, {bookingDay: {$lt: endOfEnd}}]
+      }
     } else { // 停诊时间紧迫
-      // query = {
-      //   doctorId: doctorObjectId,
-      //   status: 0,
-      //   $and: [{bookingDay: {$gte: endOfTomorrow}}, {bookingDay: {$lt: endOfEnd}}]
-      // }
-      let queryPD = {$and: [{bookingDay: {$gte: today}}, {bookingDay: {$lte: endOfTomorrow}}], doctorId: doctorObjectId, status: 0}
-      PersonalDiag.update(queryPD, upObjPD, function (err, upItemsPD) { // 一天内停诊人工处理
-        if (err) {
-          return res.status(500).send(err)
-        } else {
-          if (upItemsPD.n !== upItemsPD.nModified) {
-            return res.json({result: '停诊时间添加失败', results: upItemsPD})
-          } else {
-            req.body.query = query
-            req.body.queryU = queryU
-            return next()
-          }
-        }
-      }, {multi: true})
+      queryU = {
+        doctorId: doctorObjectId,
+        status: 0,
+        $and: [{bookingDay: {$gte: endOfTomorrow}}, {bookingDay: {$lt: endOfEnd}}]
+      }
+      queryPD = {
+        $and: [{bookingDay: {$gte: today}}, {bookingDay: {$lte: endOfTomorrow}}],
+        doctorId: doctorObjectId,
+        status: 0
+      }
     }
   } else { // 删除排班取消面诊
     query = {
-      doctorId: doctorObjectId,
-      status: {$in: [0, 6]},
-      $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
-      bookingTime: req.body.time
-    }
-    queryU = {
       doctorId: doctorObjectId,
       status: 0,
       $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
       bookingTime: req.body.time
     }
     if (new Date(req.body.nmd) - now > 86400000) {
-      req.body.query = query
-      req.body.queryU = queryU
-      return next()
-      // query = {
-      //   doctorId: doctorObjectId,
-      //   status: 0,
-      //   $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
-      //   bookingTime: req.body.time
-      // }
+      queryU = {
+        doctorId: doctorObjectId,
+        status: 0,
+        $or: [{bookingDay: new Date(req.body.nmd)}, {bookingDay: new Date(req.body.nnmd)}],
+        bookingTime: req.body.time
+      }
     } else { // 排班取消时间紧迫
-      // query = {
-      //   doctorId: doctorObjectId,
-      //   status: 0,
-      //   bookingDay: new Date(req.body.nnmd),
-      //   bookingTime: req.body.time
-      // }
-      let queryPD = {
+      queryU = {
+        doctorId: doctorObjectId,
+        status: 0,
+        bookingDay: new Date(req.body.nnmd),
+        bookingTime: req.body.time
+      }
+      queryPD = {
         doctorId: doctorObjectId,
         status: 0,
         bookingDay: new Date(req.body.nmd),
         bookingTime: req.body.time
       }
-      PersonalDiag.update(queryPD, upObjPD, function (err, upItemsPD) { // 一天内排班取消人工处理
-        if (err) {
-          return res.status(500).send(err)
-        } else {
-          if (upItemsPD.n !== upItemsPD.nModified) {
-            return res.json({result: '取消面诊添加失败', results: upItemsPD})
-          } else {
-            req.body.query = query
-            req.body.queryU = queryU
-            return next()
-          }
-        }
-      }, {multi: true})
     }
   }
-}
-
-exports.cancelBookedPdsStep2 = function (req, res) {
-  let upObj = {$set: {status: 4}}
-  let opts = ''
-  let fields = {_id: 1, doctorId: 1, patientId: 1, bookingDay: 1, bookingTime: 1, diagId: 1}
-  let populate = [
-    {path: 'doctorId', select: {_id: 0, name: 1, userId: 1}},
-    {path: 'patientId', select: {_id: 0, phoneNo: 1, userId: 1}}
-  ]
-  PersonalDiag.getSome(req.body.query, function (err, items) {
-    if (err) {
-      return res.status(500).send(err)
-    } else if (items.length === 0) {
-      if (req.body.suspendFlag) {
-        return res.json({msg: '停诊时间添加成功', code: 0})
-      } else {
-        return res.json({msg: '面诊排班删除成功', code: 0})
+  async.auto({
+    getPDs: function (callback) {
+      PersonalDiag.getSome(query, function (err, items) {
+        return callback(err, items)
+      }, opts, fields, populate)
+    },
+    getOrders: ['getPDs', function (results, callback) {
+      let getOrder = function (itemPD, icallback) {
+        let queryO = {perDiagObject: itemPD._id, paystatus: 2}
+        Order.getOne(queryO, function (err, itemO) {
+          return icallback(err, itemO)
+        }, opts, fieldsO, populateO)
       }
-    } else {
-      PersonalDiag.update(req.body.queryU, upObj, function (err, upItems) {
-        if (err) {
-          return res.status(500).send(err)
-        } else {
-          let now = new Date()
-          let nowstr = now.getFullYear() + add0(now.getMonth() + 1) + add0(now.getDate()) + add0(now.getHours()) + add0(now.getMinutes()) + add0(now.getSeconds())
-          // return res.json({msg: '测试中，待退款', code: 0, data: items})
-          for (let item in items) {
-            let toRefund = items[item]
-            // 调用退款接口
-            let queryO = {perDiagObject: toRefund._id, paystatus: 2}
-            Order.getOne(queryO, function (err, itemO) { // 获取相应订单的订单号
-              if (err) {
-                return res.status(500).send(err)
-              } else if (itemO !== null) {
-                let orderNo = itemO.orderNo
-                let money = itemO.money || null
-                if (Number(money) !== 0) {
-                  request({ // 调用微信退款接口
-                    url: 'http://' + webEntry.domain + '/api/v2/wechat/refund',
-                    method: 'POST',
-                    body: {'role': 'appPatient', 'orderNo': orderNo, 'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token)},
-                    json: true
-                  }, function (err, responseR) {
-                    if (err) {
-                      console.log(new Date() + ' --- 面诊取消退款 --- "' + itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
-                      console.log(err)
-                    } else if ((responseR.body.results || null) === null) {
-                      console.log(new Date() + ' --- 面诊取消退款 --- "' + itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败（微信接口调用失败），订单号为"' + itemO.orderNo + '"')
-                    } else if (responseR.body.results.xml.return_code === 'SUCCESS' && responseR.body.results.xml.return_msg === 'OK') {
-                      // return res.json({msg: '取消成功，请等待退款通知', data: req.body.PDInfo, code: 0})
-                      console.log(new Date() + ' --- 面诊取消退款 --- "' + itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款成功')
-                    } else {
-                      // return res.json({msg: '取消成功，退款失败，请联系管理员', data: req.body.PDInfo, code: 1})
-                      console.log(new Date() + ' --- 面诊取消退款 --- "' + itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
-                    }
-                  })
+      async.concat(results.getPDs, getOrder, function (err, items) {
+        return callback(err, items)
+      })
+    // }]
+    }],
+    refund: ['getOrders', function (results, callback) {
+      let refund = function (itemO, icallback) {
+        if ((itemO || null) !== null) {
+          let money = itemO.money || null
+          if (Number(money) !== 0) {
+            let params = {
+              orderNo: itemO.orderNo, // 退款单号
+              role: 'appPatient'
+            }
+            wechatCtrl.wechatRefundAsync(params, function (err, result) {
+              let refundResults = result.refund.xml || null
+              if (refundResults !== null) {
+                if (refundResults.return_code === 'SUCCESS' && refundResults.result_code === 'SUCCESS') {
+                  return icallback(err, {msg: itemO.orderNo + '退款成功', data: refundResults, code: 0})
                 } else {
-                  console.log(new Date() + ' --- 面诊取消退款 --- "' + itemO.doctorName + '医生取消面诊，用户"' + itemO.patientName + '"订单免费，无需退款')
-                }
-                if ((toRefund.patientId || null) !== null) {
-                  if ((toRefund.patientId.phoneNo || null) !== null) {
-                    request({ // 调用短信发送接口
-                      url: 'http://' + webEntry.domain + '/api/v2/services/message',
-                      method: 'POST',
-                      body: {
-                        'phoneNo': toRefund.patientId.phoneNo,
-                        'doctorName': toRefund.doctorId.name,
-                        'day': new Date(toRefund.bookingDay).toLocaleDateString(),
-                        'time': toRefund.bookingTime,
-                        'orderMoney': Number(money),
-                        'orderNo': orderNo,
-                        'token': (req.body && req.body.token) || getToken(req.headers) || (req.query && req.query.token),
-                        'cancelFlag': 1
-                      },
-                      json: true
-                    }, function (err, responseM) {
-                      if (err) {
-                        console.log(new Date() + ' --- 面诊取消短信发送 --- 用户"' + itemO.patientName + '"短信发送失败,服务器err')
-                        console.log(err)
-                      } else if (Number(responseM.body.results) === 0) {
-                        console.log(new Date() + ' --- 面诊取消短信发送 --- 用户"' + itemO.patientName + '"短信发送成功')
-                      } else {
-                        console.log(new Date() + ' --- 面诊取消短信发送 --- 用户"' + itemO.patientName + '"短信发送失败,接口返回err:' + responseM.body.mesg)
-                      }
-                    })
-                  }
-                  let bookingDay = new Date(new Date(toRefund.bookingDay).toLocaleDateString())
-                  let PDTime
-                  if (toRefund.bookingTime === 'Morning') {
-                    PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日上午'
-                  } else if (toRefund.bookingTime === 'Afternoon') {
-                    PDTime = bookingDay.getFullYear() + '年' + Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日下午'
-                  }
-                  let newData = {
-                    userId: toRefund.patientId.userId,
-                    sendBy: toRefund.doctorId.userId,
-                    type: 7,
-                    messageId: 'M' + nowstr + item,
-                    readOrNot: 0,
-                    time: now,
-                    title: new Date(toRefund.bookingDay).toLocaleDateString() + ',' + toRefund.doctorId.name + '医生面诊服务停诊',
-                    description: '您预约' + toRefund.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + orderNo + '。'
-                  }
-                  let newmessage = new Message(newData)
-                  newmessage.save(function (err, newInfo) {
-                    if (err) {
-                      console.log(err)
-                    }
-                    let query = {userId: toRefund.patientId.userId, sendBy: toRefund.doctorId.userId}
-                    let obj = {
-                      $set: {
-                        messageId: 'M' + nowstr + item,
-                        readOrNot: 0,
-                        userRole: 'patient',
-                        type: 7,
-                        time: now,
-                        title: new Date(toRefund.bookingDay).toLocaleDateString() + ',' + toRefund.doctorId.name + '面诊停诊',
-                        description: '您预约' + toRefund.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + orderNo + '。'
-                      }
-                    }
-                    News.updateOne(query, obj, function (err, upnews) {
-                      if (err) {
-                        console.log(new Date() + ' --- 面诊取消站内消息推送 --- 用户"' + itemO.patientName + '"消息推送失败')
-                        console.log(err)
-                      } else {
-                        console.log(new Date() + ' --- 面诊取消站内消息推送 --- 用户"' + itemO.patientName + '"消息推送成功')
-                      }
-                    }, {upsert: true})
-                  })
+                  return icallback(err, {msg: itemO.orderNo + '退款失败', data: refundResults, code: 1})
                 }
               } else {
-                // console.log('order for ' + toRefund.diagId + ' no need to refund')
+                return icallback(err, {msg: itemO.orderNo + '退款失败', data: refundResults, code: 1})
               }
             })
-          }
-          if (req.body.suspendFlag) {
-            // console.log('停诊时间添加成功')
-            return res.json({result: '停诊时间添加成功', code: 0})
           } else {
-            // console.log('面诊排班删除成功')
-            return res.json({result: '面诊排班删除成功', code: 0})
+            return icallback(null, {msg: itemO.orderNo + '金额为零，无需退款', code: 0})
           }
         }
+      }
+      async.concat(results.getOrders, refund, function (err, items) {
+        return callback(err, items)
+      })
+    }],
+    textMessage: ['refund', function (results, callback) {
+      let text = function (itemO, icallback) {
+        let params = {
+          type: 'cancel',
+          phoneNo: itemO.perDiagObject.patientId.phoneNo,
+          bookingDay: new Date(itemO.perDiagObject.bookingDay).toLocaleDateString(),
+          bookingTime: itemO.perDiagObject.bookingTime,
+          doctorName: itemO.perDiagObject.doctorId.name,
+          orderNo: itemO.orderNo, // 订单号
+          orderMoney: itemO.money
+        }
+        alluserCtrl.servicesMessageAsync(params, function (err, result) {
+          if (err) {
+            return icallback(null, {err: err, code: 1})
+          } else {
+            return icallback(null, {data: result, code: 0})
+          }
+        })
+      }
+      async.concat(results.getOrders, text, function (err, items) {
+        return callback(err, items)
+      })
+    }],
+    messageAndNews: ['refund', function (results, callback) {
+      let message = function (itemO, icallback) {
+        let bookingDay = new Date(new Date(itemO.perDiagObject.bookingDay).toLocaleDateString())
+        let PDTime
+        if (itemO.perDiagObject.bookingTime === 'Morning') {
+          PDTime = Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日上午'
+        } else if (itemO.perDiagObject.bookingTime === 'Afternoon') {
+          PDTime = Number(bookingDay.getMonth() + 1) + '月' + bookingDay.getDate() + '日下午'
+        }
+        let newData = {
+          userId: itemO.perDiagObject.patientId.userId,
+          sendBy: itemO.perDiagObject.doctorId.userId,
+          type: 7,
+          messageId: 'M' + itemO.perDiagObject.diagId + 'CANCEL',
+          readOrNot: 0,
+          time: now,
+          title: PDTime + ',' + itemO.perDiagObject.doctorId.name + '医生面诊服务停诊',
+          description: '您预约' + itemO.perDiagObject.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(itemO.money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + itemO.orderNo + '。'
+        }
+        let newmessage = new Message(newData)
+        newmessage.save(function (err, newInfo) {
+          if (err) {
+            return icallback(err)
+          }
+          let query = {userId: itemO.perDiagObject.patientId.userId, sendBy: itemO.perDiagObject.doctorId.userId}
+          let obj = {
+            $set: {
+              messageId: 'M' + itemO.perDiagObject.diagId + 'CANCEL',
+              readOrNot: 0,
+              userRole: 'patient',
+              type: 7,
+              time: now,
+              title: PDTime + ',' + itemO.perDiagObject.doctorId.name + '面诊停诊',
+              description: '您预约' + itemO.perDiagObject.doctorId.name + '医生的' + PDTime + '时段的面诊服务因医生停诊取消，所付款项' + Number(itemO.money) / 100 + '元将在7个工作日内退回，请注意查收。如有疑问请联系客服，附订单号' + itemO.orderNo + '。'
+            }
+          }
+          News.updateOne(query, obj, function (err, upnews) {
+            return icallback(err, upnews)
+          }, {upsert: true})
+        })
+      }
+      async.concat(results.getOrders, message, function (err, items) {
+        return callback(err, items)
+      })
+    }],
+    updatePDs1: ['refund', function (results, callback) {
+      PersonalDiag.update(queryU, upObj, function (err, upPDs) {
+        return callback(err, upPDs)
       }, {multi: true})
+    }],
+    updatePDs2: ['refund', function (results, callback) {
+      if (queryPD !== null) {
+        PersonalDiag.update(queryPD, upObjPD, function (err, upPDs) {
+          return callback(err, upPDs)
+        }, {multi: true})
+      } else {
+        return callback(null, '无需紧急通知')
+      }
+    }]
+  }, function (err, results) {
+    if (err) {
+      return res.json({err: err, code: 1, data: results})
+    } else {
+      let msg = []
+      if (Number(results.refund.code) === 1) {
+        msg.push('退款失败')
+      }
+      if (Number(results.textMessage.code) === 1) {
+        msg.push('短信发送失败')
+      }
+      return res.json({code: 0, msg: msg, data: results})
     }
-  }, opts, fields, populate)
+  })
 }
+
 function add0 (m) {
   return m < 10 ? '0' + m : m
 }
@@ -1232,7 +1208,7 @@ exports.cancelMyPD = function (req, res, next) {
       }
       alluserCtrl.servicesMessageAsync(params, function (err, result) {
         if (err) {
-          return callback(null, {data: result, code: 1})
+          return callback(null, {err: err, code: 1})
         } else {
           return callback(null, {data: result, code: 0})
         }
@@ -1544,12 +1520,12 @@ exports.manualRefundAndNotice = function (req, res) {
             let refundResults = result.refund.xml || null
             if (refundResults !== null) {
               if (refundResults.return_code === 'SUCCESS' && refundResults.result_code === 'SUCCESS') {
-                return callback(err, {msg: '退款成功', data: result, code: 0})
+                return callback(err, {msg: '退款成功', data: refundResults, code: 0})
               } else {
-                return callback(err, {msg: '退款失败', data: result, code: 1})
+                return callback(err, {msg: '退款失败', data: refundResults, code: 1})
               }
             } else {
-              return callback(err, {msg: '退款失败', data: result, code: 1})
+              return callback(err, {msg: '退款失败', data: refundResults, code: 1})
             }
           })
         } else {
@@ -1588,7 +1564,7 @@ exports.manualRefundAndNotice = function (req, res) {
       }
       alluserCtrl.servicesMessageAsync(params, function (err, result) {
         if (err) {
-          return callback(null, {data: result, code: 1})
+          return callback(null, {err: err, code: 1})
         } else {
           return callback(null, {data: result, code: 0})
         }
@@ -1619,7 +1595,7 @@ exports.manualRefundAndNotice = function (req, res) {
       }
       if (Number(results.updatePD.status) === 9) {
         return callback(null, '通知患者状态更新完毕')
-      } 
+      }
       let newmessage = new Message(newData)
       newmessage.save(function (err, newInfo) {
         if (err) {

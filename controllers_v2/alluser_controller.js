@@ -2131,6 +2131,7 @@ exports.servicesMessageAsync = function (params, callback) {
       let json = evil(resdata)
       code = json.resp.respCode
       if (code === '000000') {
+        console.log(new Date() + '--- 短信发送 --- ' + mobile + ' Succeeds.')
         if (type === 'success') {
           return callback(null, 'Booking Message Sent!')
         }
@@ -2156,6 +2157,7 @@ exports.servicesMessageAsync = function (params, callback) {
           return callback(null, 'Cancel Refund Message Sent!')
         }
       } else {
+        console.log(new Date() + '--- 短信发送 --- ' + mobile + ' Error Code: ' + code + ' .')
         let err = 'Error Code: ' + code
         return callback(err)
       }
