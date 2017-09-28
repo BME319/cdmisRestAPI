@@ -1,28 +1,28 @@
 var DoctorsInCharge = require('../models/doctorsInCharge')
 var Alluser = require('../models/alluser')
 var DpRelation = require('../models/dpRelation')
-var request = require('request')
-var webEntry = require('../settings').webEntry
+// var request = require('request')
+// var webEntry = require('../settings').webEntry
 var Order = require('../models/order')
 var async = require('async')
 
 var alluserCtrl = require('../controllers_v2/alluser_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 
-var getToken = function (headers) {
-  if (headers && headers.authorization) {
-    var authorization = headers.authorization
-    var part = authorization.split(' ')
-    if (part.length === 2) {
-      var token = part[1]
-      return token
-    } else {
-      return null
-    }
-  } else {
-    return null
-  }
-}
+// var getToken = function (headers) {
+//   if (headers && headers.authorization) {
+//     var authorization = headers.authorization
+//     var part = authorization.split(' ')
+//     if (part.length === 2) {
+//       var token = part[1]
+//       return token
+//     } else {
+//       return null
+//     }
+//   } else {
+//     return null
+//   }
+// }
 
 /**
 医生端
@@ -203,15 +203,19 @@ exports.updateDoctorInCharge = function (req, res, next) {
                 role: 'appPatient'
               }
               wechatCtrl.wechatRefundAsync(params, function (err, result) {
-                let refundResults = result.refund.xml || null
-                if (refundResults !== null) {
-                  if (refundResults.return_code === 'SUCCESS' && refundResults.result_code === 'SUCCESS') {
-                    console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"退款成功')
-                  } else {
-                    console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
-                  }
+                if (err) {
+                  console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- ERROR: ' + err)
                 } else {
-                  console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                  let refundResults = result.refund.xml || null
+                  if (refundResults !== null) {
+                    if (refundResults.return_code === 'SUCCESS' && refundResults.result_code === 'SUCCESS') {
+                      console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"退款成功')
+                    } else {
+                      console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                    }
+                  } else {
+                    console.log(new Date() + ' --- 主管医生审核拒绝，短信发送 --- 微信接口调用失败，用户"' + itemO.patientName + '"退款失败，订单号为"' + itemO.orderNo + '"')
+                  }
                 }
                 if ((upDIC.patientId || null) !== null) {
                   if ((upDIC.patientId.phoneNo || null) !== null) {

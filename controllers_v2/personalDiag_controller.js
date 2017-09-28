@@ -4,7 +4,7 @@ var Alluser = require('../models/alluser')
 var Order = require('../models/order')
 var Account = require('../models/account')
 // var request = require('request')
-var webEntry = require('../settings').webEntry
+// var webEntry = require('../settings').webEntry
 var Message = require('../models/message')
 var News = require('../models/news')
 
@@ -12,20 +12,20 @@ var async = require('async')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 var alluserCtrl = require('../controllers_v2/alluser_controller')
 
-var getToken = function (headers) {
-  if (headers && headers.authorization) {
-    var authorization = headers.authorization
-    var part = authorization.split(' ')
-    if (part.length === 2) {
-      var token = part[1]
-      return token
-    } else {
-      return null
-    }
-  } else {
-    return null
-  }
-}
+// var getToken = function (headers) {
+//   if (headers && headers.authorization) {
+//     var authorization = headers.authorization
+//     var part = authorization.split(' ')
+//     if (part.length === 2) {
+//       var token = part[1]
+//       return token
+//     } else {
+//       return null
+//     }
+//   } else {
+//     return null
+//   }
+// }
 
 /**
 医生端
@@ -501,7 +501,7 @@ exports.cancelBookedPds = function (req, res, next) {
   }
   async.auto({
     getPDs: function (callback) {
-      PersonalDiag.getSome(query, function (err, items){
+      PersonalDiag.getSome(query, function (err, items) {
         return callback(err, items)
       }, opts, fields, populate)
     },
@@ -512,7 +512,7 @@ exports.cancelBookedPds = function (req, res, next) {
           return icallback(err, itemO)
         }, opts, fieldsO, populateO)
       }
-      async.concat(results.getPDs, getOrder, function(err, items) {
+      async.concat(results.getPDs, getOrder, function (err, items) {
         return callback(err, items)
       })
     // }]
@@ -543,7 +543,7 @@ exports.cancelBookedPds = function (req, res, next) {
           }
         }
       }
-      async.concat(results.getOrders, refund, function(err, items) {
+      async.concat(results.getOrders, refund, function (err, items) {
         return callback(err, items)
       })
     }],
@@ -566,7 +566,7 @@ exports.cancelBookedPds = function (req, res, next) {
           }
         })
       }
-      async.concat(results.getOrders, text, function(err, items) {
+      async.concat(results.getOrders, text, function (err, items) {
         return callback(err, items)
       })
     }],
@@ -611,7 +611,7 @@ exports.cancelBookedPds = function (req, res, next) {
           }, {upsert: true})
         })
       }
-      async.concat(results.getOrders, message, function(err, items) {
+      async.concat(results.getOrders, message, function (err, items) {
         return callback(err, items)
       })
     }],
@@ -1595,7 +1595,7 @@ exports.manualRefundAndNotice = function (req, res) {
       }
       if (Number(results.updatePD.status) === 9) {
         return callback(null, '通知患者状态更新完毕')
-      } 
+      }
       let newmessage = new Message(newData)
       newmessage.save(function (err, newInfo) {
         if (err) {
