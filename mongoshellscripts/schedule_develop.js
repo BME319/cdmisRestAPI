@@ -72,7 +72,8 @@ function schedule () {
         type: '',
         info: '',
         docId: '',
-        counselType: 0
+        counselType: 0, 
+        counselId: counselItem[i].counselId
       }
       if (counselItem[i].type === 1) {
         endlMsg = {
