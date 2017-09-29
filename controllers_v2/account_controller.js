@@ -868,18 +868,16 @@ exports.getCountsRespective = function (req, res) {
       // return res.json({result: {count1: count1, count2: count2}})
 
       // 修改 从counsel表获取未完成咨询数 2017-09-29 lgf
-      query = {patientId: req.session._id}
+      query = {patientId: req.session._id, status: 1}
       Counsel.getSome(query, function (err, counsels) {
         if (err) {
           return res.status(500).send(err.errmsg)
         }
         for (let i = 0; i < counsels.length; i++) {
-          if (counsels[i].status === 1) {
-            if (counsels[i].type === 1 || counsels[i].type === 6 || counsels[i].type === 7) {
-              count1++
-            } else if (counsels[i].type === 2 || counsels[i].type === 3) {
-              count2++
-            }
+          if (counsels[i].type === 1 || counsels[i].type === 6 || counsels[i].type === 7) {
+            count1++
+          } else if (counsels[i].type === 2 || counsels[i].type === 3) {
+            count2++
           }
         }
         return res.json({result: {count1: count1, count2: count2}})
