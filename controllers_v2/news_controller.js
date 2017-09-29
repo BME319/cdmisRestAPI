@@ -311,8 +311,8 @@ exports.getAllNotReadNews = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     } else {
-      let allNews = {type1: results.type1, type3: results.type3, type5: results.type5, type6: results.type6, type7: results.type7, type8: results.type8}
-      return res.json({results: allNews})
+      // let allNews = {type1: results.type1, type3: results.type3, type5: results.type5, type6: results.type6, type7: results.type7, type8: results.type8}
+      return res.json({results: [results.type1, results.type3, results.type5, results.type6, results.type7, results.type8]})
     }
   })
 }
