@@ -1979,7 +1979,7 @@ exports.serviceMessage = function (req, res, next) {
 // async改写------ POST services/message ------ 2017-09-25 YQC
 exports.servicesMessageAsync = function (params, callback) {
   let type = params.type || null
-  if (['success', 'cancel', 'reject', 'cancelRequest', 'cancelRefund'].indexOf(type) === -1) {
+  if (['success', 'cancel', 'reject', 'cancelRequest', 'cancelRefund', 'cancelReject', 'request', 'consent'].indexOf(type) === -1) {
     let err = 'Wrong Input of type'
     return callback(err)
   }
@@ -1995,7 +1995,7 @@ exports.servicesMessageAsync = function (params, callback) {
   }
   let param = null
   let PDTime = null
-  if (type === 'cancel' || type === 'success' || type === 'cancelRequest' || type === 'cancelRefund') {
+  if (type === 'cancel' || type === 'success' || type === 'cancelRequest' || type === 'cancelRefund' || type === 'cancelReject') {
     if (((params.bookingDay || null) !== null) && ((params.bookingTime || null) !== null)) {
       let bookingDay = new Date(new Date(params.bookingDay).toLocaleDateString())
       if (params.bookingTime === 'Morning') {
@@ -2036,6 +2036,30 @@ exports.servicesMessageAsync = function (params, callback) {
       param = doctorName + ',' + PDTime + ',' + PDPlace + ',' + confirmCode
     }
   }
+  if (type === 'request') {
+    templateId = '162129'
+    let doctorName = params.doctorName || ''
+    let duration = params.duration || null
+    if (doctorName === null || duration === null) {
+      let err = 'Please Check the Input of doctorName/duration'
+      return callback(err)
+    } else {
+      param = doctorName + ',' + duration
+    }
+  }
+  if (type === 'consent') {
+    templateId = '162136'
+    let doctorName = params.doctorName || ''
+    let start = params.start || null
+    let end = params.end || null
+    let orderNo = params.orderNo || null
+    if (doctorName === null || start === null || end === null || orderNo === null) {
+      let err = 'Please Check the Input of doctorName/start/end/orderNo'
+      return callback(err)
+    } else {
+      param = doctorName + ',' + start + ',' + end + ',' + orderNo
+    }
+  }
   if (type === 'reject') {
     templateId = '149559'
     let doctorName = params.doctorName || ''
@@ -2071,6 +2095,17 @@ exports.servicesMessageAsync = function (params, callback) {
       param = doctorName + ',' + PDTime + ',' + Number(orderMoney) / 100 + ',' + orderNo
     }
   }
+  if (type === 'cancelReject') {
+    templateId = '162145'
+    let doctorName = params.doctorName || ''
+    let orderNo = params.orderNo || null
+    if (doctorName === null || PDTime === null || orderNo === null) {
+      let err = 'Please Check the Input of doctorName/PDTime/orderNo'
+      return callback(err)
+    } else {
+      param = doctorName + ',' + PDTime + ',' + orderNo
+    }
+  }
 
   let JSONData = '{"templateSMS":{"appId":"' + appId + '","param":"' + param + '","templateId":"' + templateId + '","to":"' + mobile + '"}}'
   let timestamp = now.getFullYear() + commonFunc.paddNum(now.getMonth() + 1) + commonFunc.paddNum(now.getDate()) + now.getHours() + now.getMinutes() + now.getSeconds()
@@ -2096,22 +2131,33 @@ exports.servicesMessageAsync = function (params, callback) {
       let json = evil(resdata)
       code = json.resp.respCode
       if (code === '000000') {
+        console.log(new Date() + '--- 短信发送 --- ' + mobile + ' Succeeds.')
+        if (type === 'success') {
+          return callback(null, 'Booking Message Sent!')
+        }
         if (type === 'cancel') {
           return callback(null, 'Cancel Message Sent!')
+        }
+        if (type === 'request') {
+          return callback(null, 'Request Message Sent!')
         }
         if (type === 'reject') {
           return callback(null, 'Reject Message Sent!')
         }
-        if (type === 'success') {
-          return callback(null, 'Booking Message Sent!')
+        if (type === 'consent') {
+          return callback(null, 'Consent Message Sent!')
         }
         if (type === 'cancelRequest') {
           return callback(null, 'Cancel Request Message Sent!')
+        }
+        if (type === 'cancelReject') {
+          return callback(null, 'Cancel Reject Message Sent!')
         }
         if (type === 'cancelRefund') {
           return callback(null, 'Cancel Refund Message Sent!')
         }
       } else {
+        console.log(new Date() + '--- 短信发送 --- ' + mobile + ' Error Code: ' + code + ' .')
         let err = 'Error Code: ' + code
         return callback(err)
       }
@@ -2144,6 +2190,18 @@ exports.servicesMessageAsyncTest = function (req, res) {
     // doctorName: '叶',
     // place: '浙一医院',
     // code: '123456'
+    // --- request ---
+    // type: 'request',
+    // phoneNo: '15868870012',
+    // doctorName: '叶',
+    // duration: '2' // 服务时长
+    // --- consent ---
+    // type: 'consent',
+    // phoneNo: '15868870012',
+    // doctorName: '叶',
+    // start: '2017-09-27',
+    // end: '2017-11-27',
+    // orderNo: 'O2017091300001' // 退款订单号
     // --- reject ---
     // type: 'reject',
     // phoneNo: '15868870012',
@@ -2165,12 +2223,19 @@ exports.servicesMessageAsyncTest = function (req, res) {
     // doctorName: '叶',
     // orderNo: 'O2017091300001', // 退款订单号
     // orderMoney: '10' // 退款金额订单
+    // --- cancelReject ---
+    // type: 'cancelReject',
+    // phoneNo: '15868870012',
+    // bookingDay: '2017-9-13',
+    // bookingTime: 'Morning',
+    // doctorName: '叶',
+    // orderNo: 'O2017091300001' // 订单号
   }
   alluserCtrl.servicesMessageAsync(params, function (err, results) {
     if (err) {
       return res.json({msg: err, data: results, code: 1})
     } else {
-      return res.json({msg: '发送成功', data: results, code: 1})
+      return res.json({msg: '发送成功', data: results, code: 0})
     }
   })
 }

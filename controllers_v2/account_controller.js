@@ -3,6 +3,7 @@ var Account = require('../models/account')
 // var Patient = require('../models/patient')
 // var Doctor = require('../models/doctor')
 var Alluser = require('../models/alluser')
+var Counsel = require('../models/counsel')
 
 // 根据doctorId查询相关评价 2017-03-30 GY
 // 查询账户信息与消费及充值记录
@@ -854,17 +855,33 @@ exports.getCountsRespective = function (req, res) {
       var count2 = 0 // 问诊
 
       // 2017-08-10 debug
-      if (item.times.constructor === Array && item.times.length) {
-        for (var i = item.times.length - 1; i >= 0; i--) {
-          // item.times[i]
-          if (item.times[i].count === 999) {
-            count2 += 1
-          } else if (item.times[i].count > 0 && item.times[i].count < 4) {
-            count1 += 1
+      // if (item.times.constructor === Array && item.times.length) {
+      //   for (var i = item.times.length - 1; i >= 0; i--) {
+      //     // item.times[i]
+      //     if (item.times[i].count === 999) {
+      //       count2 += 1
+      //     } else if (item.times[i].count > 0 && item.times[i].count < 4) {
+      //       count1 += 1
+      //     }
+      //   }
+      // }
+      // return res.json({result: {count1: count1, count2: count2}})
+
+      // 修改 从counsel表获取未完成咨询数 2017-09-29 lgf
+      query = {patientId: req.session._id, status: 1}
+      Counsel.getSome(query, function (err, counsels) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        for (let i = 0; i < counsels.length; i++) {
+          if (counsels[i].type === 1 || counsels[i].type === 6 || counsels[i].type === 7) {
+            count1++
+          } else if (counsels[i].type === 2 || counsels[i].type === 3) {
+            count2++
           }
         }
-      }
-      return res.json({result: {count1: count1, count2: count2}})
+        return res.json({result: {count1: count1, count2: count2}})
+      })
     }
   })
 }

@@ -19,8 +19,6 @@
 
 // ------ POST new/teamNews(temp) ------
 
-// ------ POST services/message ------
-
 // ------ POST communication/communication ------
 
 // ------ GET communication/team ------ 本来就没必要request我觉得
@@ -32,3 +30,4 @@
 // ------ POST nurse/bindingPatient ------ 已调试 见'../controllers_v2/nurseInsuranceWork_controller' ------ 2017-09-25 YQC
 // ------ POST wechat/refund ------ 已调试 见'../controllers_v2/wechat_controller' ------ 2017-09-25 YQC
 // ------ POST patient/favoriteDoctor ------ 已调试 见'../controllers_v2/patient_controller' ------ 2017-09-25 YQC
+// ------ POST services/message ------ 已调试 见'../controllers_v2/alluser_controller' ------ 2017-09-27 YQC

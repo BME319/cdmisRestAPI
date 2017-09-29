@@ -1041,7 +1041,7 @@ exports.getMassTargets = function (req, res, next) {
         return res.status(404).json({results: '无有效群发目标'})
       } else {
         req.massTarget = targets
-        console.log(targets)
+        // console.log(targets)
         next()
       }
     }

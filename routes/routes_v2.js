@@ -1986,7 +1986,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSchedule, personalDiagCtrl.getDaysToUpdate, personalDiagCtrl.updateAvailablePD1, personalDiagCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, personalDiagCtrl.cancelBookedPdsStep1, personalDiagCtrl.cancelBookedPdsStep2)
+  app.post(version + '/services/deleteSchedule', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.deleteServiceSchedule, personalDiagCtrl.getDaysToUpdate, personalDiagCtrl.updateAvailablePD1, personalDiagCtrl.updateAvailablePD2, serviceCtrl.getSessionObject, personalDiagCtrl.cancelBookedPds)
   // YQC 2017-07-29 医生设置面诊停诊 将可预约面诊和已预约面诊取消 已预约的取消未实现通知患者
   /** YQC annotation 2017-07-29 - acl 2017-07-29 医生
    * @swagger
@@ -2022,7 +2022,7 @@ module.exports = function (app, webEntry, acl) {
    *      200:
    *         description: "Operation success."
    */
-  app.post(version + '/services/setSuspend', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, personalDiagCtrl.setServiceSuspend, personalDiagCtrl.suspendAvailablePds, personalDiagCtrl.cancelBookedPdsStep1, personalDiagCtrl.cancelBookedPdsStep2)
+  app.post(version + '/services/setSuspend', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), serviceCtrl.getSessionObject, personalDiagCtrl.setServiceSuspend, personalDiagCtrl.suspendAvailablePds, personalDiagCtrl.cancelBookedPds)
   /** YQC annotation 2017-08-04 - acl 2017-08-03 医生
    * @swagger
    * /services/deleteSuspend:
@@ -5292,7 +5292,7 @@ module.exports = function (app, webEntry, acl) {
    *       412:
    *         description: "Please Check Input of diagId"
    */
-  app.post(version + '/services/cancelMyPD', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.cancelMyPD, personalDiagCtrl.updatePDCapacityUp)
+  app.post(version + '/services/cancelMyPD', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.cancelMyPD)
   // 患者端 我的面诊服务列表 还未添加分页显示
   /** YQC annotation 2017-07-28 - acl 2017-07-28 患者
    * @swagger
@@ -7078,6 +7078,8 @@ module.exports = function (app, webEntry, acl) {
    */
   // 获取消息 权限 医生/患者
   app.get(version + '/new/news', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.getNews)
+  // 获取所有type的未读消息和历史记录情况 权限 患者/医生
+  app.get(version + '/new/allNotReadNews', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.getAllNotReadNews)
   /**
    * @swagger
    * /new/newsByReadOrNot:
