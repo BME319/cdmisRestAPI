@@ -1014,7 +1014,7 @@ exports.getMassTargets = function (req, res, next) {
           break
         case 'INCHARGE':
           for (let i = 0; i < doctorItem.patientsInCharge.length; i++) {
-            if (doctorItem.patientsInCharge[i].patientId !== null) {
+            if (doctorItem.patientsInCharge[i].patientId !== null && doctorItem.patientsInCharge[i].invalidFlag === 1) {
               targets.push(doctorItem.patientsInCharge[i].patientId)
             }
           }
@@ -1027,7 +1027,7 @@ exports.getMassTargets = function (req, res, next) {
             }
           }
           for (let j = 0; j < doctorItem.patientsInCharge.length; j++) {
-            if (doctorItem.patientsInCharge[j].patientId) {
+            if (doctorItem.patientsInCharge[j].patientId && doctorItem.patientsInCharge[j].invalidFlag === 1) {
               if (targetsUserId.indexOf(doctorItem.patientsInCharge[j].patientId.userId) === -1) {
                 targets.push(doctorItem.patientsInCharge[j].patientId)
               }
