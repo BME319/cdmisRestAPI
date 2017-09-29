@@ -145,7 +145,7 @@ function schedule () {
         userRole: communicationItem.receiverRole,
         sendBy: communicationItem.sendBy,
         readOrNot: 0,
-        type: '11',
+        type: 11,
         time: communicationItem.sendDateTime,
         title: endlMsg.info,
         description: endlMsg.info, 
