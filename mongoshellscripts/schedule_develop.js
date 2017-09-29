@@ -58,6 +58,9 @@ function schedule () {
       db.counsels.update({counselId: counselItem[i].counselId}, {$set: {status: 0, endTime: now}})
       // 更改consultation表状态
       db.consultations.update({diseaseInfo: counselItem[i]._id}, {$set: {status: 0}}, {multi: true})
+      // 更改account表times.count
+      db.accounts.update({userId:cumpat}, {$pull:{times:{doctorId:cmudoc}}})
+      db.accounts.update({userId:cumpat}, {$push:{times:{doctorId:cmudoc, count:0}}})
       printjson({'result': 'change_status_success', 'counselId': counselItem[i].counselId})
       // 存消息
       // 查找患者与医生的ID
