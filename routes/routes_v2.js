@@ -2881,6 +2881,7 @@ module.exports = function (app, webEntry, acl) {
    *                     $ref: '#/definitions/TeamMember'
    */
   app.get(version + '/communication/team', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), communicationCtrl.getTeam)
+  app.get(version + '/communication/teamtemp', errorHandler.error, communicationCtrl.getTeam)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
    * /communication/consultation:
@@ -7078,6 +7079,8 @@ module.exports = function (app, webEntry, acl) {
    */
   // 获取消息 权限 医生/患者
   app.get(version + '/new/news', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.getNews)
+  // 获取所有type的未读消息和历史记录情况 权限 患者/医生
+  app.get(version + '/new/allNotReadNews', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.getAllNotReadNews)
   /**
    * @swagger
    * /new/newsByReadOrNot:
