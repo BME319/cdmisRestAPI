@@ -142,7 +142,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
       userAppServer[receiver].emit('getMsg', {msg: data.msg})
       var gotmsgid = data.msg.messageId + receiver
       if (!waitingForGotMsg[gotmsgid])waitingForGotMsg[gotmsgid] = {msg: data.msg, id: receiver}
-      console.log('2', waitingForGotMsg)
+      // console.log('2', waitingForGotMsg)
       setTimeout(function () { sendSingleMsg(data.msg, receiver, targetRole) }, 15000)
     }
     if (userWechatServer.hasOwnProperty(receiver)) {
@@ -157,8 +157,8 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
             // socket.emit("err",{msg:"对方已经下线或者断开连接"})
     }
   } else {           // 群聊
-    console.log(receiver)
-    console.log(data.msg.teamId)
+    // console.log(receiver)
+    // console.log(data.msg.teamId)
     request({
             // url: 'http://' + webEntry.domain + ':4060/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
       url: 'http://' + webEntry.domain + '/api/v2/communication/teamtemp?teamId=' + data.msg.teamId,
@@ -169,15 +169,15 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
                 // do-something
                 // console.log(err.errmsg);
       } else {
-        console.log(response.body)
+        // console.log(response.body)
         if (!response.body.results) {
-          console.log('noperson')
+          // console.log('noperson')
         } else {
           var sponsorId = response.body.results.sponsorId
           var members = response.body.results.members
           members.push({'userId': sponsorId})
-          console.log(members)
-          console.log(members.length)
+          // console.log(members)
+          // console.log(members.length)
 
           for (var idx in members) {
            // var online = false
@@ -188,7 +188,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
               // console.log(idx)
                           // console.log(member.userId);
               if (members[idx].userId !== sendBy) {
-                console.log(members[idx].userId)
+                // console.log(members[idx].userId)
                 userAppServer[members[idx].userId].emit('getMsg', {msg: data.msg})
                 var gotmsgid = data.msg.messageId + members[idx].userId
                 if (!waitingForGotMsg[gotmsgid])waitingForGotMsg[gotmsgid] = {msg: data.msg, id: members[idx].userId}
@@ -294,8 +294,8 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
 function sendSingleMsg (msg, user_id, targetRole) {
   // 查看是否还处于待发送队列
   var tempgotmsgid = msg.messageId + user_id
-  console.log('1', tempgotmsgid)
-  console.log('5', waitingForGotMsg)
+  // console.log('1', tempgotmsgid)
+  // console.log('5', waitingForGotMsg)
   if (waitingForGotMsg[tempgotmsgid]) { // 还在
     // 先查看是否在线
     var online = false
@@ -376,7 +376,7 @@ exports.chat = function (io, socket) {
       userWechatPatientServer[userId] = socket
       userWechatPatientList[userId] = nickname
     } else {
-      console.log('newUser not match')
+      // console.log('newUser not match')
       // console.log(data)
             // do
     }
@@ -466,9 +466,9 @@ exports.chat = function (io, socket) {
 
   socket.on('gotMsg', function (data) {
     var temptempgotmsgid = data.msg.messageId + data.userId // 剔除
-    console.log('3', temptempgotmsgid)
+    // console.log('3', temptempgotmsgid)
     delete waitingForGotMsg[temptempgotmsgid]
-    console.log('4', waitingForGotMsg)
+    // console.log('4', waitingForGotMsg)
   })
     // socket.on('sendImg',function(data){
     //     if(userAppServer.hasOwnProperty(data.to)){
