@@ -2881,6 +2881,7 @@ module.exports = function (app, webEntry, acl) {
    *                     $ref: '#/definitions/TeamMember'
    */
   app.get(version + '/communication/team', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), communicationCtrl.getTeam)
+  app.get(version + '/communication/teamtemp', errorHandler.error, communicationCtrl.getTeam)
   /** YQC annotation 2017-08-11 - acl 2017-08-11 医生
    * @swagger
    * /communication/consultation:
