@@ -151,7 +151,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
         // console.log(receiver);
     request({
             // url: 'http://' + webEntry.domain + ':4060/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
-      url: 'http://' + webEntry.domain + '/api/v2/communication/team?teamId=' + data.msg.teamId,
+      url: 'http://' + webEntry.domain + '/api/v2/communication/teamtemp?teamId=' + data.msg.teamId,
       method: 'GET',
       json: true
     }, function (err, response) {
