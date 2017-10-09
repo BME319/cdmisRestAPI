@@ -1735,9 +1735,11 @@ exports.wechatRefundAsync = function (params, callback) {
     changeRefundStatus: ['checkPayStatus', 'getNo9', function (results, callback) { // 将订单状态修改为6 退款处理中
       let query = {orderNo: orderNo}
       let upObj = {
-        paystatus: 6, // 退款处理中
-        refundNo: results.getNo9.newId,
-        refundAppTime: new Date()
+        $set: {
+          paystatus: 6, // 退款处理中
+          refundNo: results.getNo9.newId,
+          refundAppTime: new Date()
+        }
       }
       Order.updateOne(query, upObj, function (err, upOrder) {
         if (upOrder) {
