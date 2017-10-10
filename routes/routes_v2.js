@@ -5460,10 +5460,89 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/PDConfirmation', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.confirmPD, serviceCtrl.recharge)
   // 获取需要人工处理退款与／或通知的面诊列表 - acl 2017-09-21 admin
+  /** YQC annotation 2017-10-10
+   * @swagger
+   * /services/manualRefundList:
+   *   get:
+   *     tags:
+   *     - "services"
+   *     summary: "获取需要进行人工处理退款与医生停诊的患者通知标记的列表"
+   *     description: ""
+   *     operationId: "manualRefundList"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - name: "token"
+   *       in: "query"
+   *       description: "Token of the user."
+   *       required: true
+   *       type: "string"
+   *     - name: "skip"
+   *       in: "query"
+   *       description: "跳过显示."
+   *       required: false
+   *       type: "number"
+   *     - name: "limit"
+   *       in: "query"
+   *       description: "限制显示."
+   *       required: false
+   *       type: "number"
+   *     responses:
+   *       200:
+   *         description: "Operation success."
+   *         schema:
+   *           type: object
+   *           properties:
+   *             results:
+   *               type: array
+   *               items:
+   *                 $ref: '#/definitions/OrderManual'
+   *             code:
+   *               type: string
+   */
   app.get(version + '/services/manualRefundList', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.manualRefundAndNoticeList)
   // 人工处理面诊退款与通知 - acl 2017-09-21 admin
+  /** YQC annotation 2017-10-10
+   * @swagger
+   * /services/manualRefund:
+   *   post:
+   *     tags:
+   *     - "services"
+   *     summary: "人工处理退款与医生停诊的患者通知标记"
+   *     description: ""
+   *     operationId: "manualRefund"
+   *     produces:
+   *     - "application/json"
+   *     parameters:
+   *     - in: "body"
+   *       name: "body"
+   *       required: true
+   *       schema:
+   *         type: object
+   *         required:
+   *           - "token"
+   *           - "diagId"
+   *           - "code"
+   *         properties:
+   *           token:
+   *             type: "string"
+   *             description: "管理员的token"
+   *           diagId:
+   *             type: "string"
+   *             description: "要确认的面诊ID"
+   *           reviewResult:
+   *             type: "string"
+   *             description: "处理结果"
+   *             enum:
+   *               - "consent"
+   *               - "reject"
+   *               - "notice"
+   *     responses:
+   *       200:
+   *         description: "Operation Success"
+   */
   app.post(version + '/services/manualRefund', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.manualRefundAndNotice)
-  // 服务相关短信测试
+  // 服务相关短信测试 - 非前端调用
   app.post(version + '/services/message', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), alluserCtrl.serviceMessage)
   // app.post(version + '/services/message', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), alluserCtrl.servicesMessageAsyncTest)
 
@@ -9810,6 +9889,56 @@ module.exports = function (app, webEntry, acl) {
    *         type: object
    *       newsType:
    *         type: string
+   *   OrderManual:
+   *     type: object
+   *     properties:
+   *       orderNo:
+   *         type: string
+   *       money:
+   *         type: number
+   *       paystatus:
+   *         type: number
+   *       perDiagObject:
+   *         type: object
+   *         $ref: '#/definitions/PerDiagObject'
+   *   PerDiagObject:
+   *     type: object
+   *     properties:
+   *       diagId:
+   *         type: string
+   *       bookingDay:
+   *         type: string
+   *         format: date-time
+   *       bookingTime:
+   *         type: string
+   *       place:
+   *         type: string
+   *       creatTime:
+   *         type: string
+   *         format: date-time
+   *       endTime:
+   *         type: string
+   *         format: date-time
+   *       time:
+   *         type: string
+   *         format: date-time
+   *       status:
+   *         type: number
+   *       doctorId:
+   *         type: object
+   *         $ref: '#/definitions/UserForManual'
+   *       patientId:
+   *         type: object
+   *         $ref: '#/definitions/UserForManual'
+   *   UserForManual:
+   *     type: object
+   *     properties:
+   *       name:
+   *         type: string
+   *       phoneNo:
+   *         type: string
+   *       gender:
+   *         type: number
    */
 
   app.get(version + '/dict/typeTwoTest', errorHandler.error, dictTypeTwoCtrl.getCategoryTest)
