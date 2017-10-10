@@ -345,6 +345,8 @@ exports.updateOrder = function (req, res) {
     } else {
       if (req.body.counselInfo) {
         return res.json({result: '新建成功', results: req.body.counselInfo})
+      } else if (req.body.PDinfo) {
+        return res.json({result: '新建成功', results: req.body.PDinfo})
       } else {
         res.json({results: item, msg: 'success!'})
       }
