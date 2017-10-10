@@ -916,6 +916,7 @@ exports.newPersonalDiag = function (req, res, next) {
           req.body.code = code
           req.body.smsType = 5
           req.body.successFlag = 1
+          req.body.PDinfo = pDInfo
           next()
         }
       })
