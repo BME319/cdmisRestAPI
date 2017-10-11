@@ -156,6 +156,7 @@ exports.getchangeOrderNo = function (req, res, next) {
 }
 
 exports.insertOrder = function (req, res, next) {
+  let isIncharge = req.isIncharge
   // var money = req.body.money || null
   var money = req.body.money
   if (money === null || money === '') {
@@ -212,6 +213,14 @@ exports.insertOrder = function (req, res, next) {
       } else {
         return res.status(403).send('服务类型不存在!')
       }
+      if (isIncharge) {
+        if (req.body.class === '01' || req.body.class === '02' || req.body.class === '03') {
+          trueMoney = 0
+          money = 0
+          freeFlag = 1
+        }
+      }
+      
       if (money !== trueMoney) {
         return res.status(403).send('服务费用不匹配!')
       } else {
@@ -257,7 +266,9 @@ exports.insertOrder = function (req, res, next) {
             return res.status(500).send(err.errmsg)
           }
                     // res.json({results: item});
-          if (trueMoney === 0) {
+          if (req.isIncharge) {
+            return res.json({results: {status: 1, msg: '该医生为您的主管医生，无需支付'}})
+          } else if (trueMoney === 0) {
             return res.json({results: {status: 1, msg: '支付金额为0，无需进行支付'}})
           } else if (freeFlag === 1) {
             // 有免费次数
@@ -345,6 +356,8 @@ exports.updateOrder = function (req, res) {
     } else {
       if (req.body.counselInfo) {
         return res.json({result: '新建成功', results: req.body.counselInfo})
+      } else if (req.body.PDinfo) {
+        return res.json({result: '新建成功', results: req.body.PDinfo})
       } else {
         res.json({results: item, msg: 'success!'})
       }

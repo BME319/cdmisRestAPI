@@ -1,6 +1,7 @@
 var config = require('../config')
 var Alluser = require('../models/alluser')
 var DpRelation = require('../models/dpRelation')
+var DoctorsInCharge = require('../models/doctorsInCharge')
 var OpenIdTmp = require('../models/openId')
 // var DictNumber = require('../models/dictNumber')
 // var Numbering = require('../models/numbering')
@@ -1873,6 +1874,40 @@ exports.getDoctorObject = function (req, res, next) {
     }
     req.doctorObject = doctor
     next()
+  })
+}
+
+// 用于下单，检测患者付款对象是否是其主管医生 GY 2017-10-11
+exports.checkIncharge = function(req, res, next) {
+  let query = {
+    patientId: req.userObject._id, 
+    doctorId: req.doctorObject._id, 
+    invalidFlag: 1
+  }
+  DoctorsInCharge.getSome(query, function(err, items) {
+    if (err) {
+      console.log(err)
+      next()
+    } else if (items.length === 0) {
+      req.isIncharge = false
+      next()
+    } else {
+      let now = new Date()
+      let count = 0
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].start < now && items[i].end > now) {
+          req.isIncharge = true
+          break
+        }
+        count++
+      }
+      if (count === items.length) {
+        req.isIncharge = false
+      }
+      next()
+    }
+    // console.log(req.isIncharge)
+    // next()
   })
 }
 
