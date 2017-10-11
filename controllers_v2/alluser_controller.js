@@ -566,7 +566,7 @@ exports.updateAlluserList = function (req, res) {
     upObj['name'] = _name
   }
   if (_gender !== null && _gender !== undefined && _gender !== '') {
-    if (_gender === 1 || _gender === 2) {
+    if (_gender === 1 || _gender === 2 || _gender === '1' || _gender === '2') {
       upObj['gender'] = Number(_gender)
     } else {
       return res.json({status: 1, results: 'gender must be 1(male) or 2(female)!'})
@@ -1602,7 +1602,8 @@ exports.setMessageOpenId = function (req, res) {
 
 exports.getMessageOpenId = function (req, res) {
   var _type = req.query.type || null
-  var userId = req.query.userId
+  // var userId = req.query.userId
+  var userId = req.session.userId
   if (_type === null) {
     return res.json({result: 1, msg: 'plz input type'})
   } else {

@@ -57,7 +57,7 @@ exports.checkPatient = function (req, res, next) {
   } else if (req.session.role === 'doctor') {
     // req.doctorId = req.session.userId
     if (!req.query.patientId && !req.body.patientId) {
-        return res.status(412).json({result: '请填写patientId!'})
+      return res.status(412).json({result: '请填写patientId!'})
     } else if (req.body.patientId) {
       req.patientId = req.body.patientId
     } else {
