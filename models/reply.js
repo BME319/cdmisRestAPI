@@ -10,7 +10,7 @@ var replySchema = new mongoose.Schema({
   time: Date,
   depth: {type: Number, enum: [1, 2]}, // 回复层级
   content: String,
-  status: Number,
+  status: {type: Number, enum: [1, 0]},
   replies: [
     {
       replyId: String,
