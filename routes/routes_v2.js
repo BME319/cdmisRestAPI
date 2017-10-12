@@ -8023,7 +8023,7 @@ module.exports = function (app, webEntry, acl) {
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
 
   // 输入：微信用户授权的code 商户系统生成的订单号, aclChecking.Checking(acl, 2)
-  app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), errorHandler.error, alluserCtrl.checkDoctor, getNoMid.getNo(7), alluserCtrl.getAlluserObject, alluserCtrl.getDoctorObject, orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
+  app.post(version + '/wechat/addOrder', tokenManager.verifyToken(), errorHandler.error, alluserCtrl.checkDoctor, getNoMid.getNo(7), alluserCtrl.getAlluserObject, alluserCtrl.getDoctorObject, alluserCtrl.checkIncharge, orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder, wechatCtrl.getPaySign)
 
   // 输入：微信用户授权的code 商户系统生成的订单号
 

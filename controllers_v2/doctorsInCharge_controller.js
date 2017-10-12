@@ -388,6 +388,7 @@ exports.getDoctorsInCharge = function (req, res, next) {
             req.body.type = 2
             req.body.title = '警戒值提醒'
             req.body.description = req.body.patientObject.name + '患者的' + req.itemType + '项目不达标,测量值为' + req.measureData + ',该项正常值为' + req.recommend
+            req.body.url = req.session.userId
             // console.log('req.body.description', req.body.description)
             return next()
           } else {
