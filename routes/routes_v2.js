@@ -6977,6 +6977,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: string
    *     responses:
    *       200:
+   *         description: 上传成功
    *         schema:
    *           type: object
    *           required:
@@ -6991,7 +6992,7 @@ module.exports = function (app, webEntry, acl) {
    *             path_resized:
    *               type: string
    *       500:
-   *         description: Server internal error
+   *         description: 服务器错误
    */
   // 上传图片 权限 医生/患者
   app.post(version + '/upload', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 1), loadCtrl.uploadphoto(), loadCtrl.upload)
@@ -7024,6 +7025,18 @@ module.exports = function (app, webEntry, acl) {
    *         type: string
    *       url:
    *         type: string
+   *   NewsItem:
+   *     type: object
+   *     properties:
+   *       type:
+   *         type: number
+   *       readOrNot:
+   *         type: number
+   *       history:
+   *         type: number
+   *       items:
+   *         type: array
+   *         $ref: '#/definitions/News'
    */
   /**
    * @swagger
@@ -7038,26 +7051,52 @@ module.exports = function (app, webEntry, acl) {
    *       - application/json
    *     parameters:
    *       - name: token
-   *         description: authorization message
+   *         description: 授权信息
    *         in: query
    *         required: true
    *         type: string
    *       - name: type
-   *         description: newsType (Optional Item)
+   *         description: 消息类型
    *         in: query
    *         required: false
    *         type: number
    *     responses:
    *       200:
-   *         description: list of news
+   *         description: 获取成功
    *         schema:
    *           type: array
    *           $ref: '#/definitions/News'
    *       500:
-   *         description: Server internal error
+   *         description: 服务器错误
    */
   // 获取消息 权限 医生/患者
   app.get(version + '/new/news', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.getNews)
+  /**
+   * @swagger
+   * /new/allNotReadNews:
+   *   get:
+   *     operationId: getallNotReadNews
+   *     tags:
+   *       - News
+   *     summary: 获取消息
+   *     description: Get allNotReadNews
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: 授权信息
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 获取成功
+   *         schema:
+   *           type: array
+   *           $ref: '#/definitions/NewsItem'
+   *       500:
+   *         description: 服务器错误
+   */
   // 获取所有type的未读消息和历史记录情况 权限 患者/医生
   app.get(version + '/new/allNotReadNews', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.getAllNotReadNews)
   /**
@@ -7073,31 +7112,81 @@ module.exports = function (app, webEntry, acl) {
    *       - application/json
    *     parameters:
    *       - name: token
-   *         description: authorization message
+   *         description: 授权信息
    *         in: query
    *         required: true
    *         type: string
    *       - name: type
-   *         description: newsType (Optional Item)
+   *         description: 消息类型
    *         in: query
    *         required: false
    *         type: number
    *       - name: readOrNot
-   *         description: news readOrNot flag 1:read 0:not
+   *         description: 消息状态标志 1:read 0:not
    *         in: query
    *         required: true
    *         type: number
    *     responses:
    *       200:
-   *         description: list of news
+   *         description: 获取成功
    *         schema:
    *           type: array
    *           $ref: '#/definitions/News'
    *       500:
-   *         description: Server internal error
+   *         description: 服务器错误
    */
   // 通过消息状态获取消息 权限 医生/患者
   app.get(version + '/new/newsByReadOrNot', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.getNewsByReadOrNot)
+  /**
+   * @swagger
+   * /new/newsStatus:
+   *   post:
+   *     operationId: changeNewsStatus
+   *     tags:
+   *       - News
+   *     summary: 修改某种类型消息的已读和未读状态
+   *     description: changeNewsStatus
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           required:
+   *             - token
+   *             - type
+   *           properties:
+   *             token:
+   *               type: string
+   *             type:
+   *               type: number
+   *             sendBy:
+   *               type: string
+   *             messageId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 更新成功
+   *         schema:
+   *           type: object
+   *           required:
+   *             - n
+   *             - nModified
+   *             - ok
+   *           properties:
+   *             n:
+   *               type: number
+   *             nModified:
+   *               type: number
+   *             ok:
+   *               type: number
+   *       422:
+   *         description: 更新失败
+   *       500:
+   *         description: 服务器错误
+   */
   // 修改某种类型消息的已读和未读状态 权限 医生/患者
   app.post(version + '/new/newsStatus', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.changeNewsStatus)
   /**
@@ -7148,7 +7237,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: string
    *     responses:
    *       200:
-   *         description: success
+   *         description: 插入成功
    *         schema:
    *           type: object
    *           required:
@@ -7163,9 +7252,9 @@ module.exports = function (app, webEntry, acl) {
    *             ok:
    *               type: number
    *       422:
-   *         description: Unsuccessfully modified
+   *         description: 插入失败
    *       500:
-   *         description: Server internal error
+   *         description: 服务器错误
    */
   // 插入news 权限 医生/患者
   app.post(version + '/new/news', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.insertNews)
@@ -7214,7 +7303,7 @@ module.exports = function (app, webEntry, acl) {
    *               type: string
    *     responses:
    *       200:
-   *         description: success
+   *         description: 插入成功
    *         schema:
    *           type: object
    *           required:
@@ -7229,9 +7318,9 @@ module.exports = function (app, webEntry, acl) {
    *             ok:
    *               type: number
    *       422:
-   *         description: Unsuccessfully modified
+   *         description: 插入失败
    *       500:
-   *         description: Server internal error
+   *         description: 服务器错误
    */
   // 插入TeamNews 权限 医生
   app.post(version + '/new/teamNews', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), newsCtrl.insertTeamNews)
