@@ -7411,7 +7411,7 @@ module.exports = function (app, webEntry, acl) {
    *     parameters:
    *       - name: token
    *         in: body
-   *         description: token
+   *         description: 授权信息
    *         required: true
    *         properties:
    *             token:
@@ -7424,7 +7424,7 @@ module.exports = function (app, webEntry, acl) {
    *       202:
    *         description: 已绑定过该患者!
    *       500:
-   *         description: Server internal error
+   *         description: 服务器错误
    */
   // 护士端微信扫码绑定患者 权限 护士
   app.post(version + '/nurse/bindingPatient', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), alluserCtrl.getPatientObject, nurseInsuranceWorkCtrl.bindingPatient)
@@ -7442,18 +7442,18 @@ module.exports = function (app, webEntry, acl) {
    *       - application/json
    *     parameters:
    *       - name: token
-   *         description: token
+   *         description: 授权信息
    *         in: query
    *         required: true
    *         type: string
    *     responses:
    *       200:
-   *         description: 返回相应患者列表
+   *         description: 获取成功
    *         schema:
    *           type: object
    *           $ref: '#/definitions/Data'
    *       500:
-   *         description: Server internal error
+   *         description: 服务器错误
    */
   // 获取护士推送保险信息的患者列表 权限 护士
   app.get(version + '/nurse/patientsList', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), alluserCtrl.getAlluserObject, nurseInsuranceWorkCtrl.getInsurancePatientsList)
