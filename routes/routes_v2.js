@@ -71,23 +71,442 @@ module.exports = function (app, webEntry, acl) {
   // });
 
   // csq
+  /**
+   * @swagger
+   * /acl/userRoles:
+   *   post:
+   *     tags:
+   *       - acl
+   *     summary: 给用户添加角色
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             userId:
+   *               type: string
+   *             roles:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回修改成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/userRoles', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
+  /**
+   * @swagger
+   * /acl/removeUserRoles:
+   *   post:
+   *     tags:
+   *       - acl
+   *     summary: 给用户删除角色
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             userId:
+   *               type: string
+   *             roles:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回删除成功信息
+   *       500:
+   *         description: 返回错误信息
+   */ 
   app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
+  /**
+   * @swagger
+   * /acl/userRoles:
+   *   get:
+   *     tags:
+   *       - acl
+   *     summary: 获取用户所有角色
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: userId
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回用户角色信息
+   *       500:
+   *         description: 返回错误信息
+   */ 
   app.get(version + '/acl/userRoles', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.userRoles(acl))
+  /**
+   * @swagger
+   * /acl/userRole:
+   *   get:
+   *     tags:
+   *       - acl
+   *     summary: 判断用户是否具有某角色
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: userId
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: rolename
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回用户角色信息
+   *       500:
+   *         description: 返回错误信息
+   */ 
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.hasRole(acl))
-
+  /**
+   * @swagger
+   * /acl/roleUsers:
+   *   get:
+   *     tags:
+   *       - acl
+   *     summary: 查询具有某角色的所有用户
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: rolename
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回用户信息
+   *       500:
+   *         description: 返回错误信息
+   */ 
   app.get(version + '/acl/roleUsers', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.roleUsers(acl))
+  /**
+   * @swagger
+   * /acl/roleParents:
+   *   post:
+   *     tags:
+   *       - acl
+   *     summary: 给角色增加新的角色集合
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             parents:
+   *               type: string
+   *             role:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/roleParents', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.addRoleParents(acl))
+  /**
+   * @swagger
+   * /acl/removeRoleParents:
+   *   post:
+   *     tags:
+   *       - acl
+   *     summary: 给角色移除角色集合
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             parents:
+   *               type: string
+   *             role:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/removeRoleParents', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeRoleParents(acl))
+  /**
+   * @swagger
+   * /acl/removeRole:
+   *   post:
+   *     tags:
+   *       - acl
+   *     summary: 从系统中移除一个角色
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             role:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/removeRole', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeRole(acl))
 
+  /**
+   * @swagger
+   * /acl/allow:
+   *   post:
+   *     tags:
+   *       - acl
+   *     summary: 给指定的角色增加对某资源的操作权限
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             roles:
+   *               type: string
+   *             resources:
+   *               type: string
+   *             permissions:
+   *               type：string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/allow', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.allow(acl))
+  /**
+   * @swagger
+   * /acl/removeAllow:
+   *   post:
+   *     tags:
+   *       - acl
+   *     summary: 给指定的角色删除对某资源的操作权限
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             roles:
+   *               type: string
+   *             resources:
+   *               type: string
+   *             permissions:
+   *               type：string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/removeAllow', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeAllow(acl))
+  /**
+   * @swagger
+   * /acl/allow:
+   *   get:
+   *     tags:
+   *       - acl
+   *     summary: 获取用户对某一资源的操作权限
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: userId
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: resources
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回权限信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.get(version + '/acl/allow', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.allowedPermissions(acl))
+  /**
+   * @swagger
+   * /acl/isAllowed:
+   *   get:
+   *     tags:
+   *       - acl
+   *     summary: 判断某用户对某资源是否具有某一种操作权限
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: userId
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: resources
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: permissions
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回权限信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.get(version + '/acl/isAllowed', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.isAllowed(acl))
 
+  /**
+   * @swagger
+   * /acl/removeResource:
+   *   post:
+   *     tags:
+   *       - acl
+   *     summary: 从系统中删除某一资源
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             resource:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/removeResource', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeResource(acl))
+  /**
+   * @swagger
+   * /acl/areAnyRolesAllowed:
+   *   get:
+   *     tags:
+   *       - acl
+   *     summary: 判断某一角色是否具有对某一资源的某种操作权限
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: roles
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: resources
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: permissions
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回权限信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.areAnyRolesAllowed(acl))
+  /**
+   * @swagger
+   * /acl/resources:
+   *   get:
+   *     tags:
+   *       - acl
+   *     summary: 获取某一角色具有某种操作权限的所有资源
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: roles
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: permissions
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回权限信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.get(version + '/acl/resources', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.whatResources(acl))
 
   // wf
@@ -1487,7 +1906,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "Change status of certain service"
+   *     summary: "修改服务开启状态"
    *     description: ""
    *     operationId: "status"
    *     produces:
@@ -1579,7 +1998,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "Set/Change the charge of certain service"
+   *     summary: "设置服务收费"
    *     description: ""
    *     operationId: "charge"
    *     produces:
@@ -1673,7 +2092,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "Set/Change the relayTarget of a doctor"
+   *     summary: "设置自动转发团队"
    *     description: ""
    *     operationId: "relayTarget"
    *     produces:
@@ -1754,7 +2173,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "For a doctor, set a Personal Diagnosis service schedule"
+   *     summary: "设置面诊排班"
    *     description: ""
    *     operationId: "setSchedule"
    *     produces:
@@ -1801,7 +2220,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "For a doctor, delete a Personal Diagnosis service schedule"
+   *     summary: "删除面诊排班"
    *     description: ""
    *     operationId: "deleteSchedule"
    *     produces:
@@ -1846,7 +2265,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "For a doctor, set a Personal Diagnosis service suspension"
+   *     summary: "设置面诊停诊"
    *     description: ""
    *     operationId: "setSuspend"
    *     produces:
@@ -1881,7 +2300,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "For a doctor, delete a Personal Diagnosis service suspension"
+   *     summary: "撤回面诊停诊"
    *     description: ""
    *     operationId: "deleteSuspend"
    *     produces:
@@ -1922,7 +2341,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "comment"
-   *     summary: "Finds comments by doctor ID"
+   *     summary: "获取医生评价列表"
    *     description: ""
    *     operationId: "commentsByDoc"
    *     produces:
@@ -1958,7 +2377,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "comment"
-   *     summary: "Finds comments by counsel ID"
+   *     summary: "根据咨询ID获取医生评价"
    *     description: ""
    *     operationId: "commentsByCounsel"
    *     produces:
@@ -1995,7 +2414,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "advice"
-   *     summary: "Finds advices by advisorId"
+   *     summary: "根据用户Id获取建议"
    *     description: ""
    *     operationId: "advices"
    *     produces:
@@ -2031,7 +2450,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "advice"
-   *     summary: "Post an advice to the developer"
+   *     summary: "提建议"
    *     description: ""
    *     operationId: "advice"
    *     produces:
@@ -2072,7 +2491,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "compliance"
-   *     summary: "Finds compliances by userId"
+   *     summary: "获取某用户（某日）的任务执行情况"
    *     description: ""
    *     operationId: "compliances"
    *     produces:
@@ -2118,7 +2537,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "compliance"
-   *     summary: "update an compliance status"
+   *     summary: "新建／更新任务执行情况"
    *     description: ""
    *     operationId: "compliance"
    *     produces:
@@ -2158,7 +2577,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "vitalSign"
-   *     summary: "Finds vitalSigns by userId of certain patient"
+   *     summary: "获取某一体征测量记录"
    *     description: ""
    *     operationId: "vitalSigns"
    *     produces:
@@ -2198,7 +2617,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "vitalSign"
-   *     summary: "Post/Update an vitalSign status"
+   *     summary: "插入某一体征测量数据"
    *     description: ""
    *     operationId: "vitalSigns"
    *     produces:
@@ -3469,7 +3888,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "tasks"
-   *     summary: "Update the content of a task for a patient"
+   *     summary: "更新用户任务"
    *     description: ""
    *     operationId: "task"
    *     produces:
@@ -3584,78 +4003,6 @@ module.exports = function (app, webEntry, acl) {
    *                       type: "string"
    */
   app.get(version + '/patient/detail', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), patientCtrl.getPatientDetail)
-  /** YQC annotation 2017-07-26 - acl 2017-07-26 患者 弃用
-   * @swagger
-   * /patient/detail:
-   *   post:
-   *     tags:
-   *     - "patient"
-   *     summary: "Post a new personal file details of a patient"
-   *     description: ""
-   *     operationId: "detail"
-   *     produces:
-   *     - "application/json"
-   *     parameters:
-   *     - in: "body"
-   *       name: "body"
-   *       required: true
-   *       schema:
-   *         type: object
-   *         required:
-   *           - "token"
-   *         properties:
-   *           token:
-   *             type: "string"
-   *           name:
-   *             type: "string"
-   *           photoUrl:
-   *             type: "string"
-   *           birthday:
-   *             type: "string"
-   *             format: date-time
-   *           gender:
-   *             type: "number"
-   *           IDNo:
-   *             type: "string"
-   *           height:
-   *             type: "number"
-   *           weight:
-   *             type: "number"
-   *           occupation:
-   *             type: "string"
-   *           bloodType:
-   *             type: "string"
-   *           nation:
-   *             type: "string"
-   *           province:
-   *             type: "string"
-   *           city:
-   *             type: "string"
-   *           class:
-   *             type: "string"
-   *           class_info:
-   *             type: "string"
-   *           operationTime:
-   *             type: "string"
-   *             format: date-time
-   *           hypertension:
-   *             type: "number"
-   *           allergic:
-   *             type: "string"
-   *           lastVisit:
-   *             type: object
-   *             properties:
-   *               time:
-   *                 type: "string"
-   *                 format: date-time
-   *               hospital:
-   *                 type: "string"
-   *               diagnosis:
-   *                 type: "string"
-   *     responses:
-   *      200:
-   *         description: "Operation success."
-   */
   // app.post(version + '/patient/detail', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), patientCtrl.newPatientDetail)
   /** YQC annotation 2017-07-26 - acl 2017-07-26 患者
    * @swagger
@@ -3832,7 +4179,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "patient"
-   *     summary: "Post a diagnosis of a patient"
+   *     summary: "添加诊断信息"
    *     description: ""
    *     operationId: "diagnosis"
    *     produces:
@@ -3879,7 +4226,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "patient"
-   *     summary: "Change the VIP status of a patient"
+   *     summary: "修改患者VIP状态"
    *     description: ""
    *     operationId: "changeVIP"
    *     produces:
@@ -3943,7 +4290,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Post a basic file of a doctor"
+   *     summary: "新建医生个人信息"
    *     description: ""
    *     operationId: "detail"
    *     produces:
@@ -4222,7 +4569,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Edit a basic file of a doctor"
+   *     summary: "修改医生信息"
    *     description: ""
    *     operationId: "editDetail"
    *     produces:
@@ -4318,7 +4665,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Post/Update a schedule of a doctor"
+   *     summary: "设置排班信息"
    *     description: ""
    *     operationId: "schedule"
    *     produces:
@@ -4364,7 +4711,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Delete a schedule of a doctor"
+   *     summary: "撤回排班信息"
    *     description: ""
    *     operationId: "deleteSchedule"
    *     produces:
@@ -4412,7 +4759,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Post/Update a suspend time of a doctor"
+   *     summary: "设置面诊停诊"
    *     description: ""
    *     operationId: "suspendTime"
    *     produces:
@@ -4447,7 +4794,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Delete a suspend time of a doctor"
+   *     summary: "撤回面诊停诊"
    *     description: ""
    *     operationId: "deleteSuspendTime"
    *     produces:
@@ -4482,7 +4829,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "doctor"
-   *     summary: "Finds suspendTimes of certain doctor"
+   *     summary: "获取停诊信息（包括工作排班停诊与面诊排班停诊）"
    *     description: ""
    *     operationId: "suspendTime"
    *     produces:
@@ -4527,7 +4874,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "doctor"
-   *     summary: "Finds the total number of registered doctors"
+   *     summary: "获取注册医生数量"
    *     description: ""
    *     operationId: "numbers"
    *     produces:
@@ -4554,7 +4901,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "doctor"
-   *     summary: "Finds AliPayAccount by userId of certain doctor"
+   *     summary: "根据userId查询医生的支付宝账户"
    *     description: ""
    *     operationId: "AliPayAccount"
    *     produces:
@@ -4588,7 +4935,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Post/Update an AliPayAccount of a doctor"
+   *     summary: "添加医生的支付宝账户"
    *     description: ""
    *     operationId: "AliPayAccount"
    *     produces:
@@ -4618,7 +4965,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "groupPatient"
+   *     summary: "患者入组"
    *     description: ""
    *     operationId: "groupPatient"
    *     produces:
@@ -4655,7 +5002,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "patient"
-   *     summary: "Follow a Doctor."
+   *     summary: "关注医生"
    *     description: ""
    *     operationId: "favoriteDoctor"
    *     produces:
@@ -4687,7 +5034,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "patient"
-   *     summary: "Unfollow a certain Favorite Doctor."
+   *     summary: "取关医生"
    *     description: ""
    *     operationId: "unfollowFavoriteDoctor"
    *     produces:
@@ -4718,7 +5065,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "patient"
-   *     summary: "Finds the list of FavoriteDoctors, with the function of skip and limit."
+   *     summary: "获取关注医生列表"
    *     description: ""
    *     operationId: "myFavoriteDoctors"
    *     produces:
@@ -4763,7 +5110,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "patient"
-   *     summary: "Post(with deleting current doctor-in-charge) a request to a doctor for service of doctor-in-charge"
+   *     summary: "申请主管医生服务"
    *     description: ""
    *     operationId: "doctorInCharge"
    *     produces:
@@ -4798,7 +5145,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "patient"
-   *     summary: "Finds the doctor-in-charge status, if there's any, of a patient."
+   *     summary: "获取主管医生服务状态"
    *     description: ""
    *     operationId: "myDoctorsInCharge"
    *     produces:
@@ -4826,7 +5173,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "patient"
-   *     summary: "Cancel the service of Doctor-In-Charge"
+   *     summary: "取消主管医生服务"
    *     description: ""
    *     operationId: "cancelDoctorInCharge"
    *     produces:
@@ -4854,7 +5201,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "services"
-   *     summary: "Finds the relaton between a patient and a doctor"
+   *     summary: "获取与某医生的（关注／主管）关系"
    *     description: "Define whether they are favorate doctor/patient or doctor/patient in charge"
    *     operationId: "relation"
    *     produces:
@@ -4897,7 +5244,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "doctor"
-   *     summary: "Finds all patients demanding the service of supervising doctor from the doctor"
+   *     summary: "获取需审核主管医生服务的患者列表"
    *     description: ""
    *     operationId: "myPatientsToReview"
    *     produces:
@@ -4929,7 +5276,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "doctor"
-   *     summary: "Review the application from a patient demanding the service of supervising doctor"
+   *     summary: "审核患者提出的主管医生服务"
    *     description: ""
    *     operationId: "PatientInCharge"
    *     produces:
@@ -4968,7 +5315,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "services"
-   *     summary: "Finds schedules of certain doctor"
+   *     summary: "获取排班信息（包括工作排班与面诊排班）"
    *     description: ""
    *     operationId: "mySchedules"
    *     produces:
@@ -5009,7 +5356,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "services"
-   *     summary: "Finds infos of available personalDiag within 2 weeks"
+   *     summary: "获取医生可预约面诊列表"
    *     description: ""
    *     operationId: "availablePD"
    *     produces:
@@ -5069,7 +5416,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "Book a personal Diagnosis service of a doctor"
+   *     summary: "预约面诊"
    *     description: ""
    *     operationId: "personalDiagnosis"
    *     produces:
@@ -5106,13 +5453,13 @@ module.exports = function (app, webEntry, acl) {
   // 患者端 取消面诊服务
   /** YQC annotation 2017-07-27 - acl 2017-07-27 患者
    * @swagger
-   * /services/personalDiagnosis:
+   * /services/cancelMyPD:
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "Cancel a personal Diagnosis service for a patient"
+   *     summary: "取消面诊"
    *     description: ""
-   *     operationId: "personalDiagnosis"
+   *     operationId: "cancelMyPD"
    *     produces:
    *     - "application/json"
    *     parameters:
@@ -5153,7 +5500,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "services"
-   *     summary: "Finds infos of already booked personalDiag for a patient"
+   *     summary: "获取预约面诊记录"
    *     description: ""
    *     operationId: "myPD"
    *     produces:
@@ -5212,7 +5559,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *     - "services"
-   *     summary: "Finds booked personalDiag List for a doctor"
+   *     summary: "获取预约面诊的患者列表"
    *     description: ""
    *     operationId: "myPDpatients"
    *     produces:
@@ -5271,7 +5618,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *     - "services"
-   *     summary: "For a doctor, confirm a Personal Diagnosis service with a code from a patient"
+   *     summary: "确认面诊服务"
    *     description: ""
    *     operationId: "PDConfirmation"
    *     produces:
@@ -7571,6 +7918,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - token refresh
+   *     summary: 刷新token
    *     produces:
    *       - application/json
    *     parameters:
@@ -7596,6 +7944,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - dictionary
+   *     summary: 获取（疾病进程／体征／types）类型
    *     produces:
    *       - application/json
    *     parameters:
@@ -7662,6 +8011,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - dictionary
+   *     summary: 获取（量词／时间）单位
    *     produces:
    *       - application/json
    *     parameters:
@@ -7728,6 +8078,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - dictionary
+   *     summary: 获取（消息／健康消息）类别
    *     produces:
    *       - application/json
    *     parameters:
@@ -7782,6 +8133,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - dictionary
+   *     summary: 获取（所有省／所有市／所有区县／某区县）地区信息
    *     produces:
    *       - application/json
    *     parameters:
@@ -7843,6 +8195,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - dictionary
+   *     summary: 获取（所有／某地区／某医院）医院信息
    *     produces:
    *       - application/json
    *     parameters:
@@ -7906,7 +8259,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - BPDevice
-   *     description: 绑定血压计
+   *     summary: 绑定血压计
    *     produces:
    *       - application/json
    *     parameters:
@@ -7976,7 +8329,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - BPDevice
-   *     description: 解绑血压计
+   *     summary: 解绑血压计
    *     produces:
    *       - application/json
    *     parameters:
@@ -8060,7 +8413,7 @@ module.exports = function (app, webEntry, acl) {
    *  get:
    *    tags:
    *      - version
-   *    description: 获取版本信息
+   *    summary: 获取版本信息
    *    produces:
    *      - application/json
    *    parameters:
@@ -8090,7 +8443,7 @@ module.exports = function (app, webEntry, acl) {
    *  post:
    *    tags:
    *      - version
-   *    description: 插入版本信息
+   *    summary: 插入版本信息
    *    produces:
    *      - application/json
    *    parameters:
@@ -8139,7 +8492,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - niaodaifu
-   *     description: 获取登录参数
+   *     summary: 获取登录参数
    *     produces:
    *       - application/json
    *     parameters:
@@ -8165,7 +8518,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - niaodaifu
-   *     description: 接收检测数据
+   *     summary: 接收检测数据
    *     produces:
    *       - application/json
    *     parameters:
@@ -8230,7 +8583,7 @@ module.exports = function (app, webEntry, acl) {
   app.get('/devicedata/niaodaifu/loginparam', errorHandler.error, niaodaifuCtrl.getLoginParam)
   app.post('/devicedata/niaodaifu/data', errorHandler.error, getNoMid.getNo(11), niaodaifuCtrl.receiveData)
 
-  // swagger未调试
+  // swagger
   // department
   /** JYF 2017-08-16
    * @swagger
@@ -8238,7 +8591,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - department
-   *     description: 获取地区信息
+   *     summary: 获取地区信息
    *     produces:
    *       - application/json
    *     parameters:
@@ -8282,7 +8635,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - department
-   *     description: 获取科室信息
+   *     summary: 获取科室信息
    *     produces:
    *       - application/json
    *     parameters:
@@ -8346,7 +8699,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - department
-   *     description: 获取医生列表
+   *     summary: 获取医生列表
    *     produces:
    *       - application/json
    *     parameters:
@@ -8398,7 +8751,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - department
-   *     description: 更新地区信息
+   *     summary: 更新地区信息
    *     produces:
    *       - application/json
    *     parameters:
@@ -8428,7 +8781,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - department
-   *     description: 更新科室信息
+   *     summary: 更新科室信息
    *     produces:
    *       - application/json
    *     parameters:
@@ -8464,7 +8817,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - department
-   *     description: 删除记录
+   *     summary: 删除记录
    *     produces:
    *       - application/json
    *     parameters:
@@ -8493,7 +8846,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - doctormonitor
-   *     description: 获取医生分布
+   *     summary: 获取医生分布
    *     produces:
    *       - application/json
    *     parameters:
@@ -8535,7 +8888,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - doctormonitor
-   *     description: 获取折线图数据
+   *     summary: 获取折线图数据
    *     produces:
    *       - application/json
    *     parameters:
@@ -8577,7 +8930,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - doctormonitor
-   *     description: 医生工作量
+   *     summary: 医生工作量
    *     produces:
    *       - application/json
    *     parameters:
@@ -8616,7 +8969,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - doctormonitor
-   *     description: 超时回复
+   *     summary: 超时回复
    *     produces:
    *       - application/json
    *     parameters:
@@ -8652,7 +9005,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - doctormonitor
-   *     description: 评分
+   *     summary: 评分
    *     produces:
    *       - application/json
    *     parameters:
@@ -8682,7 +9035,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - doctormonitor
-   *     description: 评价详情
+   *     summary: 评价详情
    *     produces:
    *       - application/json
    *     parameters:
@@ -8709,7 +9062,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - doctormonitor
-   *     description: 收入统计
+   *     summary: 收入统计
    *     produces:
    *       - application/json
    *     parameters:
@@ -8747,7 +9100,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - patientmonitor
-   *     description: 获取患者分布
+   *     summary: 获取患者分布
    *     produces:
    *       - application/json
    *     parameters:
@@ -8789,7 +9142,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - patientmonitor
-   *     description: 获取折线图数据
+   *     summary: 获取折线图数据
    *     produces:
    *       - application/json
    *     parameters:
@@ -8831,7 +9184,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - patientmonitor
-   *     description: 保险意向
+   *     summary: 保险意向
    *     produces:
    *       - application/json
    *     parameters:
@@ -8867,7 +9220,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - patientmonitor
-   *     description: 分类查询患者
+   *     summary: 分类查询患者
    *     produces:
    *       - application/json
    *     parameters:
@@ -8896,7 +9249,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - departmentcounsel
-   *     description: 科室超时未回复查询
+   *     summary: 科室超时未回复查询
    *     produces:
    *       - application/json
    *     parameters:
@@ -8919,7 +9272,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - forum
-   *     description: 获取全部帖子
+   *     summary: 获取全部帖子
    *     produces:
    *       - application/json
    *     parameters:
@@ -8973,7 +9326,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - forum
-   *     description: 获取我的收藏
+   *     summary: 获取我的收藏
    *     produces:
    *       - application/json
    *     parameters:
@@ -9023,7 +9376,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - forum
-   *     description: 获取我的帖子
+   *     summary: 获取我的帖子
    *     produces:
    *       - application/json
    *     parameters:
@@ -9073,7 +9426,7 @@ module.exports = function (app, webEntry, acl) {
    *   get:
    *     tags:
    *       - forum
-   *     description: 获取帖子详情
+   *     summary: 获取帖子详情
    *     produces:
    *       - application/json
    *     parameters:
@@ -9124,7 +9477,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - forum
-   *     description: 发新帖
+   *     summary: 发新帖
    *     produces:
    *       - application/json
    *     parameters:
@@ -9155,7 +9508,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - forum
-   *     description: 评论帖
+   *     summary: 评论帖
    *     produces:
    *       - application/json
    *     parameters:
@@ -9184,7 +9537,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - forum
-   *     description: 回复评论
+   *     summary: 回复评论
    *     produces:
    *       - application/json
    *     parameters:
@@ -9217,7 +9570,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - forum
-   *     description: 收藏帖子
+   *     summary: 收藏帖子
    *     produces:
    *       - application/json
    *     parameters:
@@ -9242,7 +9595,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - forum
-   *     description: 删除帖子
+   *     summary: 删除帖子
    *     produces:
    *       - application/json
    *     parameters:
@@ -9267,7 +9620,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - forum
-   *     description: 删除帖子评论
+   *     summary: 删除帖子评论
    *     produces:
    *       - application/json
    *     parameters:
@@ -9296,7 +9649,7 @@ module.exports = function (app, webEntry, acl) {
    *   post:
    *     tags:
    *       - forum
-   *     description: 取消收藏
+   *     summary: 取消收藏
    *     produces:
    *       - application/json
    *     parameters:
@@ -9317,16 +9670,407 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/forum/deletefavorite', tokenManager.verifyToken(), errorHandler.error, forumCtrl.deleteFavorite)
 
   // 患者论坛
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/allposts:
+   *   get:
+   *     tags:
+   *       - forump
+   *     summary: 获取全部帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: title
+   *         description: 标题
+   *         in: query
+   *         type: string
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回全部帖子或相应标题的帖子
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   favoritesstatus:
+   *                     type: integer
+   */
   app.get(version + '/forump/allposts', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getAllposts)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/mycollection:
+   *   get:
+   *     tags:
+   *       - forump
+   *     summary: 获取我的收藏
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回我的收藏
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   avatar:
+   *                     type: string
+   */
   app.get(version + '/forump/mycollection', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getMycollection)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/myposts:
+   *   get:
+   *     tags:
+   *       - forump
+   *     summary: 获取我的帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回我的帖子
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   avatar:
+   *                     type: string
+   */
   app.get(version + '/forump/myposts', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getMyposts)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/postcontent:
+   *   get:
+   *     tags:
+   *       - forump
+   *     summary: 获取帖子详情
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: postId
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回帖子详情
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   avatar:
+   *                     type: string
+   *                   content:
+   *                     type: array
+   *                   replies:
+   *                     type: array
+   */
   app.get(version + '/forump/postcontent', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getPostContent)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/posting:
+   *   post:
+   *     tags:
+   *       - forump
+   *     summary: 发新帖
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *             token:
+   *               type: string
+   *             title:
+   *               type: string
+   *             anonymous:
+   *               type: integer
+   *             content:
+   *               type: array
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/posting', tokenManager.verifyToken(), errorHandler.error, getNoMid.getNo(13), forumpCtrl.forumpPosting)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/comment:
+   *   post:
+   *     tags:
+   *       - forump
+   *     summary: 评论帖
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *             content:
+   *               type: array
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/comment', tokenManager.verifyToken(), errorHandler.error, getNoMid.getNo(14), forumpCtrl.forumpComment)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/reply:
+   *   post:
+   *     tags:
+   *       - forump
+   *     summary: 回复评论
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *             content:
+   *               type: array
+   *             commentId:
+   *               type: string
+   *             at:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/reply', tokenManager.verifyToken(), errorHandler.error, getNoMid.getNo(15), forumpCtrl.forumpReply)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/favorite:
+   *   post:
+   *     tags:
+   *       - forump
+   *     summary: 收藏帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/favorite', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.forumpFavorite)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/deletepost:
+   *   post:
+   *     tags:
+   *       - forump
+   *     summary: 删除帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/deletepost', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deletePost)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/deletecomment:
+   *   post:
+   *     tags:
+   *       - forump
+   *     summary: 删除帖子评论
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *             commentId:
+   *               type: string
+   *             replyId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/deletecomment', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deleteComment)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/deletefavorite:
+   *   post:
+   *     tags:
+   *       - forump
+   *     summary: 取消收藏
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/deletefavorite', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deleteFavorite)
 
   // 科主任报告

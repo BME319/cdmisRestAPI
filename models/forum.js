@@ -5,7 +5,7 @@ var forumSchema = new mongoose.Schema({
   postId: String,
   // type: Number,
   // board: Number,
-  status: Number,
+  status: {type: Number, enum: [0, 1]},
   sponsorId: {
     type: String,
     ref: 'alluser'
