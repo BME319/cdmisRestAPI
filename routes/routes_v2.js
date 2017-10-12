@@ -71,23 +71,442 @@ module.exports = function (app, webEntry, acl) {
   // });
 
   // csq
+  /**
+   * @swagger
+   * /acl/userRoles:
+   *   post:
+   *     tags:
+   *       - acl
+   *     description: 给用户添加角色
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             userId:
+   *               type: string
+   *             roles:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回修改成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/userRoles', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.addUserRoles(acl), alluserCtrl.changerole)
+  /**
+   * @swagger
+   * /acl/removeUserRoles:
+   *   post:
+   *     tags:
+   *       - acl
+   *     description: 给用户删除角色
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             userId:
+   *               type: string
+   *             roles:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回删除成功信息
+   *       500:
+   *         description: 返回错误信息
+   */ 
   app.post(version + '/acl/removeUserRoles', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeUserRoles(acl), alluserCtrl.changerole)
+  /**
+   * @swagger
+   * /acl/userRoles:
+   *   get:
+   *     tags:
+   *       - acl
+   *     description: 获取用户所有角色
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: userId
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回用户角色信息
+   *       500:
+   *         description: 返回错误信息
+   */ 
   app.get(version + '/acl/userRoles', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.userRoles(acl))
+  /**
+   * @swagger
+   * /acl/userRole:
+   *   get:
+   *     tags:
+   *       - acl
+   *     description: 判断用户是否具有某角色
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: userId
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: rolename
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回用户角色信息
+   *       500:
+   *         description: 返回错误信息
+   */ 
   app.get(version + '/acl/userRole', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.hasRole(acl))
-
+  /**
+   * @swagger
+   * /acl/roleUsers:
+   *   get:
+   *     tags:
+   *       - acl
+   *     description: 查询具有某角色的所有用户
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: rolename
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回用户信息
+   *       500:
+   *         description: 返回错误信息
+   */ 
   app.get(version + '/acl/roleUsers', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.roleUsers(acl))
+  /**
+   * @swagger
+   * /acl/roleParents:
+   *   post:
+   *     tags:
+   *       - acl
+   *     description: 给角色增加新的角色集合
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             parents:
+   *               type: string
+   *             role:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/roleParents', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.addRoleParents(acl))
+  /**
+   * @swagger
+   * /acl/removeRoleParents:
+   *   post:
+   *     tags:
+   *       - acl
+   *     description: 给角色移除角色集合
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             parents:
+   *               type: string
+   *             role:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/removeRoleParents', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeRoleParents(acl))
+  /**
+   * @swagger
+   * /acl/removeRole:
+   *   post:
+   *     tags:
+   *       - acl
+   *     description: 从系统中移除一个角色
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             role:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/removeRole', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeRole(acl))
 
+  /**
+   * @swagger
+   * /acl/allow:
+   *   post:
+   *     tags:
+   *       - acl
+   *     description: 给指定的角色增加对某资源的操作权限
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             roles:
+   *               type: string
+   *             resources:
+   *               type: string
+   *             permissions:
+   *               type：string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/allow', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.allow(acl))
+  /**
+   * @swagger
+   * /acl/removeAllow:
+   *   post:
+   *     tags:
+   *       - acl
+   *     description: 给指定的角色删除对某资源的操作权限
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             roles:
+   *               type: string
+   *             resources:
+   *               type: string
+   *             permissions:
+   *               type：string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/removeAllow', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeAllow(acl))
+  /**
+   * @swagger
+   * /acl/allow:
+   *   get:
+   *     tags:
+   *       - acl
+   *     description: 获取用户对某一资源的操作权限
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: userId
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: resources
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回权限信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.get(version + '/acl/allow', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.allowedPermissions(acl))
+  /**
+   * @swagger
+   * /acl/isAllowed:
+   *   get:
+   *     tags:
+   *       - acl
+   *     description: 判断某用户对某资源是否具有某一种操作权限
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: userId
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: resources
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: permissions
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回权限信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.get(version + '/acl/isAllowed', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.isAllowed(acl))
 
+  /**
+   * @swagger
+   * /acl/removeResource:
+   *   post:
+   *     tags:
+   *       - acl
+   *     description: 从系统中删除某一资源
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             resource:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.post(version + '/acl/removeResource', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.removeResource(acl))
+  /**
+   * @swagger
+   * /acl/areAnyRolesAllowed:
+   *   get:
+   *     tags:
+   *       - acl
+   *     description: 判断某一角色是否具有对某一资源的某种操作权限
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: roles
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: resources
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: permissions
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回权限信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.get(version + '/acl/areAnyRolesAllowed', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.areAnyRolesAllowed(acl))
+  /**
+   * @swagger
+   * /acl/resources:
+   *   get:
+   *     tags:
+   *       - acl
+   *     description: 获取某一角色具有某种操作权限的所有资源
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: roles
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: permissions
+   *         in: query
+   *         required: true
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回权限信息
+   *       500:
+   *         description: 返回错误信息
+   */
   app.get(version + '/acl/resources', tokenManager.verifyToken(), errorHandler.error, aclsettingCtrl.whatResources(acl))
 
   // wf
@@ -9244,16 +9663,407 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/forum/deletefavorite', tokenManager.verifyToken(), errorHandler.error, forumCtrl.deleteFavorite)
 
   // 患者论坛
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/allposts:
+   *   get:
+   *     tags:
+   *       - forump
+   *     description: 获取全部帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: title
+   *         description: 标题
+   *         in: query
+   *         type: string
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回全部帖子或相应标题的帖子
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   favoritesstatus:
+   *                     type: integer
+   */
   app.get(version + '/forump/allposts', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getAllposts)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/mycollection:
+   *   get:
+   *     tags:
+   *       - forump
+   *     description: 获取我的收藏
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回我的收藏
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   avatar:
+   *                     type: string
+   */
   app.get(version + '/forump/mycollection', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getMycollection)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/myposts:
+   *   get:
+   *     tags:
+   *       - forump
+   *     description: 获取我的帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: skip
+   *         in: query
+   *         type: integer
+   *       - name: limit
+   *         in: query
+   *         type: integer
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回我的帖子
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   avatar:
+   *                     type: string
+   */
   app.get(version + '/forump/myposts', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getMyposts)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/postcontent:
+   *   get:
+   *     tags:
+   *       - forump
+   *     description: 获取帖子详情
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: postId
+   *         in: query
+   *         type: string
+   *       - name: token
+   *         in: query
+   *         type: string
+   *     responses:
+   *       200:
+   *         description: 返回帖子详情
+   *         schema:
+   *           type: object
+   *           properties:
+   *             data:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   postId:
+   *                     type: string
+   *                   sponsorId:
+   *                     type: string
+   *                   sponsorName:
+   *                     type: string
+   *                   title:
+   *                     type: string
+   *                   time:
+   *                     type: string
+   *                   replyCount:
+   *                     type: integer
+   *                   favoritesNum:
+   *                     type: integer
+   *                   anonymous:
+   *                     type: integer
+   *                   avatar:
+   *                     type: string
+   *                   content:
+   *                     type: array
+   *                   replies:
+   *                     type: array
+   */
   app.get(version + '/forump/postcontent', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.getPostContent)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/posting:
+   *   post:
+   *     tags:
+   *       - forump
+   *     description: 发新帖
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *             token:
+   *               type: string
+   *             title:
+   *               type: string
+   *             anonymous:
+   *               type: integer
+   *             content:
+   *               type: array
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/posting', tokenManager.verifyToken(), errorHandler.error, getNoMid.getNo(13), forumpCtrl.forumpPosting)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/comment:
+   *   post:
+   *     tags:
+   *       - forump
+   *     description: 评论帖
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *             content:
+   *               type: array
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/comment', tokenManager.verifyToken(), errorHandler.error, getNoMid.getNo(14), forumpCtrl.forumpComment)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/reply:
+   *   post:
+   *     tags:
+   *       - forump
+   *     description: 回复评论
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             time:
+   *               type: string
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *             content:
+   *               type: array
+   *             commentId:
+   *               type: string
+   *             at:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/reply', tokenManager.verifyToken(), errorHandler.error, getNoMid.getNo(15), forumpCtrl.forumpReply)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/favorite:
+   *   post:
+   *     tags:
+   *       - forump
+   *     description: 收藏帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/favorite', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.forumpFavorite)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/deletepost:
+   *   post:
+   *     tags:
+   *       - forump
+   *     description: 删除帖子
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/deletepost', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deletePost)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/deletecomment:
+   *   post:
+   *     tags:
+   *       - forump
+   *     description: 删除帖子评论
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *             commentId:
+   *               type: string
+   *             replyId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/deletecomment', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deleteComment)
+  /** JYF 2017-10-10
+   * @swagger
+   * /forump/deletefavorite:
+   *   post:
+   *     tags:
+   *       - forump
+   *     description: 取消收藏
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: body
+   *         in: body
+   *         required: true
+   *         schema:
+   *           type: object
+   *           properties:
+   *             token:
+   *               type: string
+   *             postId:
+   *               type: string
+   *     responses:
+   *       200:
+   *         description: 返回成功消息
+   */
   app.post(version + '/forump/deletefavorite', tokenManager.verifyToken(), errorHandler.error, forumpCtrl.deleteFavorite)
 
   // 科主任报告
