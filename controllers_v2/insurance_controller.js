@@ -25,8 +25,11 @@ exports.updateInsuranceMsg = function (req, res, next) {
   req.body.type = 5
  // return res.json({result: req.body})
 
+  var insDescription
   if (req.body.insDescription === null || req.body.insDescription === '' || req.body.insDescription === undefined) {
-    var insDescription = ''
+    insDescription = ''
+  } else {
+    insDescription = req.body.insDescription
   }
   var time
   if (req.body.time === null || req.body.time === '' || req.body.time === undefined) {

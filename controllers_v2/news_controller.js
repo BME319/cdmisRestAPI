@@ -350,8 +350,8 @@ exports.changeNewsStatus = function (req, res) {
   // edit by GY@2017-09-23 --type of 14 new need
   let upObj = {}
   if (type === 14) {
-    query['readOrNot'] = 0 //查找未读
-    Message.getSome(query, function(err, messages) {
+    query['readOrNot'] = 0 // 查找未读
+    Message.getSome(query, function (err, messages) {
       if (err) {
         res.status(500).send(err)
       } else if (messages.length === 0) {
@@ -359,12 +359,12 @@ exports.changeNewsStatus = function (req, res) {
         var opts = {
           'multi': true, 'new': true
         }
-      
+
         News.update(query, upObj, function (err, upmessage) {
           if (err) {
             return res.status(422).send(err.message)
           }
-      
+
           if (upmessage.n !== 0 && upmessage.nModified === 0) {
             return res.json({result: '未修改！请检查修改目标是否与原来一致！', results: upmessage})
           }
@@ -377,7 +377,7 @@ exports.changeNewsStatus = function (req, res) {
         }, opts)
       } else {
         console.log('changeNewsStatus_failed:_type14_not_all_read')
-        return res.status(200).json({result:'全部更新成功', results:'changeNewsStatus_failed:_type14_not_all_read'})
+        return res.status(200).json({result: '全部更新成功', results: 'changeNewsStatus_failed:_type14_not_all_read'})
       }
     })
   } else {
