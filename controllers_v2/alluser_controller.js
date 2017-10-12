@@ -980,7 +980,66 @@ exports.checkBinding = function (req, res) {
                 if (err) {
                   return res.status(500).send(err.errmsg)
                 }
+                // 微信模板消息 2017-10-12 lgf
+                if (role === 'doctor') {
+                  let queryD = {userId: item1.doctorUserId, role: 'doctor'}
+                  Alluser.getOne(queryD, function (err, doctor) {
+                    if (err) {
+                      return res.status(500).send(err.errmsg)
+                    } else if (doctor === null) {
+                      return res.status(422).send('不存在的医生ID!')
+                    } else {
+                      let name = doctor.name
+                      let title = doctor.title
+                      let workUnit = doctor.workUnit
 
+                      let templatePat = {
+                        'userId': item.userId,
+                        'role': 'patient',
+                        'postdata': {
+                          // 'touser': patient_openId,
+                          'template_id': '43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg',
+                          'url': '',
+                          'data': {
+                            'first': {
+                              'value': '您现在已经关注' + name + '医生。', // 医生姓名
+                              'color': '#173177'
+                            },
+                            'keyword1': {
+                              'value': name,    // 医生姓名
+                              'color': '#173177'
+                            },
+                            'keyword2': {
+                              'value': title,   // 医生职称
+                              'color': '#173177'
+                            },
+                            'keyword3': {
+                              'value': workUnit, // 所在医院
+                              'color': '#173177'
+                            },
+
+                            'remark': {
+                              'value': '点击底栏【肾事管家】按钮进行注册，注册登录后可查看主管医生详情，并进行咨询问诊。',
+                              'color': '#173177'
+                            }
+                          }
+                        }
+                      }
+                      request({
+                        url: 'http://' + webEntry.domain + ':4060/api/v2/wechat/messageTemplate' + '?token=' + req.token,
+                        method: 'POST',
+                        body: templatePat,
+                        json: true
+                      }, function (err, response) {
+                        if (err) {
+                          return res.status(500).send(err.errmsg)
+                        } else {
+                          return res.json({results: req.results})
+                        }
+                      })
+                    }
+                  })
+                }
                 // 2017-06-07GY调试
                 // console.log('checkBinding_out');
 

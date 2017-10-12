@@ -671,6 +671,7 @@ exports.postCommunication = function (req, res) {
 
       // res.json({result:'新建成功', newResults: communicationInfo});
   })
+  // 微信模板消息
 }
 
 // exports.postCommunication = function(req, res) {
