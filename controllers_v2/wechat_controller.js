@@ -1220,9 +1220,9 @@ exports.receiveTextMessage = function (req, res) {
     // console.log(jsondata);
     // console.log((jsondata.xml.EventKey[0] == '' || jsondata.xml.EventKey[0] == null));
     // 事件推送
-    if (MsgType === 'event') {
+    if (MsgType[0] === 'event') {
       // 扫描带参数二维码事件    用户未关注时，进行关注后的事件推送 || 用户已关注时的事件推送
-      if (jsondata.xml.Event === 'subscribe' || jsondata.xml.Event === 'SCAN') {
+      if (jsondata.xml.Event[0] === 'subscribe' || jsondata.xml.Event[0] === 'SCAN') {
         // do something
         // console.log("*************************** inin ********************************");
         // console.log("inin");
@@ -1233,12 +1233,12 @@ exports.receiveTextMessage = function (req, res) {
 
           var patientType
 
-          if (jsondata.xml.Event === 'subscribe') {
+          if (jsondata.xml.Event[0] === 'subscribe') {
             doctor_userId = jsondata.xml.EventKey[0].split('_')[1]
             // 未注册
             patientType = 0
           }
-          if (jsondata.xml.Event === 'SCAN') {
+          if (jsondata.xml.Event[0] === 'SCAN') {
             doctor_userId = jsondata.xml.EventKey
             // 已注册
             patientType = 1
@@ -1343,8 +1343,11 @@ exports.receiveTextMessage = function (req, res) {
               //   });
               // });
 
-              if (jsondata.xml.Event === 'SCAN') {
+              if (jsondata.xml.Event[0] === 'SCAN') {
                 results = 'success'
+                res.statusCode = 200
+                res.write(results)
+                res.end()
               } else {
                 // 扫码关注
                 // console.log("*************************** jsondata ********************************");
