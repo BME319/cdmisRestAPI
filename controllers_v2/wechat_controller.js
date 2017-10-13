@@ -19,6 +19,7 @@ var Counselautochangestatus = require('../models/counselautochangestatus')
 var Counsel = require('../models/counsel')
 var DictNumber = require('../models/dictNumber')
 var Numbering = require('../models/numbering')
+var Wechat = require('../models/wechat')
 
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 
@@ -1870,6 +1871,211 @@ exports.wechatRefundAsyncTest = function (req, res) {
       } else {
         return res.json({msg: '退款失败', data: refundResults, code: 1})
       }
+    }
+  })
+}
+
+// async改写 wechat/messageTemplate 2017-10-13 lgf
+exports.wechatMessageTemplate = function (params, callback) {
+  let userId = params.userId
+  let role = params.role || null
+  let roleList = ['patient', 'doctor', 'appPatient', 'appDoctor', 'test']
+  if (role === null) {
+    let err = '请填写role'
+    return callback(err)
+  } else if (roleList.indexOf(role) === -1) {
+    let err = 'role do not exist!'
+    return callback(err)
+  }
+  async.auto({
+    chooseAppId: function (callback) {
+      if (role === 'doctor') {
+        return callback(null, config.wxDeveloperConfig.sjkshz)
+        // req.wxApiUserObject = config.wxDeveloperConfig.sjkshz
+      } else if (role === 'patient') {
+        return callback(null, config.wxDeveloperConfig.ssgj)
+        // req.wxApiUserObject = config.wxDeveloperConfig.ssgj
+      } else if (role === 'test') {
+        return callback(null, config.wxDeveloperConfig.test)
+        // req.wxApiUserObject = config.wxDeveloperConfig.test
+      } else if (role === 'appPatient') {
+        return callback(null, config.wxDeveloperConfig.appssgj)
+        // req.wxApiUserObject = config.wxDeveloperConfig.appssgj
+      } else if (role === 'appDoctor') {
+        return callback(null, config.wxDeveloperConfig.appsjkshz)
+        // req.wxApiUserObject = config.wxDeveloperConfig.appsjkshz
+      }
+    },
+    baseTokenManager: ['chooseAppId', function (results, callback) {
+      let query = {type: 'access_token', role: role}
+      let appid = results.chooseAppId.appid
+      let secret = results.chooseAppId.appsecret
+      Wechat.getOne(query, function (err, tokenObject) {
+        if (err) {
+          return callback(err)
+        }
+        if (tokenObject) {
+          return callback(null, tokenObject)
+        } else {
+          request.get({
+            url: 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential' +
+            '&appid=' + appid +
+            '&secret=' + secret,
+            json: true
+          }, function (err1, response1, body1) {
+            // console.log(body1);
+            if (err1) {
+              let err = '微信令牌获取失败!'
+              return callback(err)
+            }
+            request.get({
+              url: 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?' +
+              'access_token=' + body1.access_token +
+              '&type=jsapi',
+              json: true
+            }, function (err2, response2, body2) {
+              // console.log(body2);
+              if (err2) {
+                let err = '微信js票据获取失败!'
+                return callback(err)
+              }
+              let wechatData = {
+                token: body1.access_token,
+                expires_in: body1.expires_in,
+                jsapi_ticket: body2.ticket,
+                api_ticket: 'body3.ticket',
+                type: 'access_token',
+                role: role
+              }
+              let newWechat = new Wechat(wechatData)
+              newWechat.save(function (err, wechatInfo) {
+                if (err) {
+                  return callback(err)
+                } else {
+                  return callback(null, wechatInfo)
+                }
+              })
+            })
+          })
+        }
+      })
+    }],
+    messageTemplate: ['baseTokenManager', function (results, callback) {
+      let tokenObject = results.baseTokenManager || {}
+      let token = tokenObject.token
+
+      if (userId !== '') {
+        let query = {userId: userId}
+
+        Alluser.getOne(query, function (err, item) {
+          if (err) {
+            return callback(err)
+          }
+          if (item === null) {
+            let err = 'user do not exist'
+            return callback(err)
+          }
+          if (item.MessageOpenId === null) {
+            let err = 'openId do not exist'
+            return callback(err)
+          }
+          var messageOpenId
+          // 患者或者医生在app绑定微信，是否也需要进行模板消息推送(暂时只在微信端推送消息模板)
+          if (role === 'doctor') {
+            messageOpenId = item.MessageOpenId.doctorWechat
+          } else if (role === 'patient') {
+            messageOpenId = item.MessageOpenId.patientWechat
+          } else if (role === 'test') {
+            messageOpenId = item.MessageOpenId.test
+          }
+
+          if (messageOpenId === null) {
+            let err = 'openId do not exist'
+            return callback(err)
+          } else {
+            var jsondata = {}
+            jsondata = params.postdata
+            jsondata.touser = messageOpenId
+
+            request({
+              url: wxApis.messageTemplate + '?access_token=' + token,
+              method: 'POST',
+              body: jsondata,
+              json: true
+            }, function (err, response, body) {
+              if (!err && response.statusCode === 200) {
+                return callback(null, body)
+              } else {
+                let err = 'Error'
+                return callback(err)
+              }
+            })
+          }
+        })
+      } else if (userId === '') {
+        if (params.postdata.touser !== '') {
+          request({
+            url: wxApis.messageTemplate + '?access_token=' + token,
+            method: 'POST',
+            body: params.postdata,
+            json: true
+          }, function (err, response, body) {
+            if (!err && response.statusCode === 200 && body.errcode === 0) {
+              return callback(null, body)
+            } else {
+              let err = body.errmsg
+              return callback(err)
+            }
+          })
+        }
+      }
+    }]
+  }, function (err, results) {
+    return callback(err, results)
+  })
+}
+
+exports.wechatMessageTemplateTest = function (req, res) {
+  let templatePat = {
+    'userId': '',
+    'role': 'patient',
+    'postdata': {
+      'touser': 'ouaOPv0fkFjxCEL70lR-yTCp-cJM',
+      'template_id': config.wxTemplateIdConfig.bindDocMsgToPat, // '43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg',
+      'url': '',
+      'data': {
+        'first': {
+          'value': '您现在已经关注' + 'name' + '医生。', // 医生姓名
+          'color': '#173177'
+        },
+        'keyword1': {
+          'value': 'name',    // 医生姓名
+          'color': '#173177'
+        },
+        'keyword2': {
+          'value': 'title',   // 医生职称
+          'color': '#173177'
+        },
+        'keyword3': {
+          'value': 'workUnit', // 所在医院
+          'color': '#173177'
+        },
+
+        'remark': {
+          'value': '点击底栏【肾事管家】按钮进行注册，注册登录后可查看医生详情，并进行咨询问诊。',
+          'color': '#173177'
+        }
+      }
+    }
+  }
+  let params = templatePat
+  wechatCtrl.wechatMessageTemplate(params, function (err, results) {
+    if (err) {
+      console.log(new Date(), 'auto_send_messageTemplate_fail')
+      return res.json({data: err})
+    } else {
+      console.log(new Date(), 'auto_send_messageTemplate_success')
+      return res.json({data: results})
     }
   })
 }

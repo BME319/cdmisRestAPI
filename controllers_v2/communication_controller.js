@@ -1,6 +1,6 @@
 // 注释 2017-07-14 YQC
 
-// var config = require('../config')
+var config = require('../config')
 var webEntry = require('../settings').webEntry
 var Communication = require('../models/communication')
 var Counsel = require('../models/counsel')
@@ -14,6 +14,7 @@ var Message = require('../models/message')
 // var commonFunc = require('../middlewares/commonFunc')
 var request = require('request')
 var Alluser = require('../models/alluser')
+var commonFunc = require('../middlewares/commonFunc')
 
 // 根据counselId获取counsel表除messages外的信息 2017-03-31 GY
 // 注释 输入，counselId；输出，问诊信息
@@ -672,6 +673,104 @@ exports.postCommunication = function (req, res) {
       // res.json({result:'新建成功', newResults: communicationInfo});
   })
   // 微信模板消息
+  if (req.body.newsType === '11') {
+    if (commmunicationData.receiverRole === 'doctor') {
+      let counselId = ''
+      if (req.body.content.contentType === 'custom') {
+        counselId = commmunicationData.content.content.counselId
+      }
+      var templateDoc = {
+        'userId': req.body.content.targetID,
+        'role': 'doctor',
+        'postdata': {
+          'template_id': config.wxTemplateIdConfig.newCounselToDocOrTeam,
+          'url': '',                                  // 跳转路径需要添加
+          'data': {
+            'first': {
+              'value': '您的患者有新的提问，请及时处理',
+              'color': '#173177'
+            },
+            'keyword1': {
+              'value': counselId,                     // 咨询ID,custom以外的聊天记录貌似获取不到。。
+              'color': '#173177'
+            },
+            'keyword2': {
+              'value': req.body.content.fromName,     // 患者信息（姓名，性别，年龄）
+              'color': '#173177'
+            },
+            'keyword3': {
+              'value': req.body.content.content.text, // 问题描述
+              'color': '#173177'
+            },
+            'keyword4': {
+              'value': commonFunc.getNowFormatSecondMinus(new Date(req.body.content.sendDateTime)), // 提交时间
+              'color': '#173177'
+            },
+
+            'remark': {
+              'value': '感谢您的使用！',
+              'color': '#173177'
+            }
+          }
+        }
+      }
+      request({
+        url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
+        method: 'POST',
+        body: templateDoc,
+        json: true
+      }, function (err, response) {
+        if (err) {
+          console.log(new Date(), 'auto_send_messageTemplate_fail_' + commmunicationData.messageNo)
+        }
+      })
+    } else if (commmunicationData.receiverRole === 'patient') {
+      if (req.body.content.contentType === 'text') {
+        let help = ''
+        var templatePat = {
+          'userId': req.body.content.targetID,
+          'role': 'patient',
+          'postdata': {
+            'template_id': config.wxTemplateIdConfig.docReply,
+            'url': '',
+            'data': {
+              'first': {
+                'value': '您的咨询已被回复，请点击此处查看详情。',
+                'color': '#173177'
+              },
+              'keyword1': {
+                'value': help,                          // 咨询内容,貌似获取不到。。
+                'color': '#173177'
+              },
+              'keyword2': {
+                'value': req.body.content.content.text, // 回复内容
+                'color': '#173177'
+              },
+              'keyword3': {
+                'value': req.body.content.fromName,     // 医生姓名
+                'color': '#173177'
+              },
+
+              'remark': {
+                'value': '感谢您的使用！',
+                'color': '#173177'
+              }
+            }
+          }
+        }
+        request({
+          url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
+          method: 'POST',
+          body: templatePat,
+          json: true
+        }, function (err, response) {
+          if (err) {
+            console.log(new Date(), 'auto_send_messageTemplate_fail_' + commmunicationData.messageNo)
+          }
+        })
+      }
+    }
+  }
 }
 
 // exports.postCommunication = function(req, res) {

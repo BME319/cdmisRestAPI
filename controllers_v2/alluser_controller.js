@@ -998,7 +998,7 @@ exports.checkBinding = function (req, res) {
                         'role': 'patient',
                         'postdata': {
                           // 'touser': patient_openId,
-                          'template_id': '43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg',
+                          'template_id': config.wxTemplateIdConfig.bindDocMsgToPat, // '43kP7uwMZmr52j7Ptk8GLwBl5iImvmqmBbFNND_tDEg',
                           'url': '',
                           'data': {
                             'first': {
@@ -1019,14 +1019,14 @@ exports.checkBinding = function (req, res) {
                             },
 
                             'remark': {
-                              'value': '点击底栏【肾事管家】按钮进行注册，注册登录后可查看主管医生详情，并进行咨询问诊。',
+                              'value': '点击底栏【肾事管家】按钮进行注册，注册登录后可查看医生详情，并进行咨询问诊。',
                               'color': '#173177'
                             }
                           }
                         }
                       }
                       request({
-                        url: 'http://' + webEntry.domain + ':4060/api/v2/wechat/messageTemplate' + '?token=' + req.token,
+                        url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
                         method: 'POST',
                         body: templatePat,
                         json: true
@@ -1034,7 +1034,44 @@ exports.checkBinding = function (req, res) {
                         if (err) {
                           return res.status(500).send(err.errmsg)
                         } else {
-                          return res.json({results: req.results})
+                          let templateDoc = {
+                            'userId': doctor.userId,
+                            'role': 'doctor',
+                            'postdata': {
+                              'template_id': config.wxTemplateIdConfig.bindDocMsgToDoc, // 'F5UpddU9v4m4zWX8_NA9t3PU_9Yraj2kUxU07CVIT-M',
+                              'url': '', // 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=newsufferer&#wechat_redirect',
+                              'data': {
+                                'first': {
+                                  'value': '您好，有一位新患者关注了您。',
+                                  'color': '#173177'
+                                },
+                                'keyword1': {
+                                  'value': item.name,                            // 患者姓名
+                                  'color': '#173177'
+                                },
+                                'keyword2': {
+                                  'value': commonFunc.getNowFormatSecondMinus(), // 添加的时间
+                                  'color': '#173177'
+                                },
+                                'remark': {
+                                  'value': '点击查看',
+                                  'color': '#173177'
+                                }
+                              }
+                            }
+                          }
+                          request({
+                            url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
+                            method: 'POST',
+                            body: templateDoc,
+                            json: true
+                          }, function (err, response) {
+                            if (err) {
+                              return res.status(500).send(err.errmsg)
+                            } else {
+                              return res.json({results: req.results})
+                            }
+                          })
                         }
                       })
                     }

@@ -2,7 +2,6 @@
 // 功能 getDoctorObject-getCounsels获取咨询问诊信息 getPatientObject,getDoctorObject,getNoMid.getNo(2),saveQuestionaire,counselAutoRelay问卷
 // 注释 2017-07-14 YQC
 
-// var config = require('../config')
 var Counsel = require('../models/counsel')
 // var Doctor = require('../models/doctor')
 var Alluser = require('../models/alluser')
@@ -16,6 +15,8 @@ var webEntry = require('../settings').webEntry
 var request = require('request')
 var commonFunc = require('../middlewares/commonFunc')
 var config = require('../config')
+
+var wechatCtrl = require('../controllers_v2/wechat_controller')
 
 // 获取医生ID对象，并添加自动转发标记 2017-07-15 GY
 // 注释 输入，doctorId；输出，相应的doctorObject
@@ -724,18 +725,26 @@ exports.counselAutoEndMsg = function () {
             }
           }
         }
-        request({
-          url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
-          method: 'POST',
-          body: templateDoc,
-          json: true
-        }, function (err, response) {
-          if (!err && response.statusCode === 200) {
-            console.log(new Date(), 'auto_send_messageTemplate_success')
+        let params = templateDoc
+        wechatCtrl.wechatMessageTemplate(params, function (err, results) {
+          if (err) {
+            console.log(new Date(), 'auto_send_messageTemplate_fail_' + timeoutCounsels[i].counselId)
           } else {
-            console.log(new Date(), 'auto_send_messageTemplate_fail')
+            console.log(new Date(), 'auto_send_messageTemplate_success_' + timeoutCounsels[i].counselId)
           }
         })
+        // request({
+        //   url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
+        //   method: 'POST',
+        //   body: templateDoc,
+        //   json: true
+        // }, function (err, response) {
+        //   if (!err && response.statusCode === 200) {
+        //     console.log(new Date(), 'auto_send_messageTemplate_success')
+        //   } else {
+        //     console.log(new Date(), 'auto_send_messageTemplate_fail')
+        //   }
+        // })
 
         let valueTmp2 = '您好，您的咨询已结束。'
         if (timeoutCounsels[i].type === 6 || timeoutCounsels[i].type === 7) {
@@ -768,18 +777,26 @@ exports.counselAutoEndMsg = function () {
             }
           }
         }
-        request({
-          url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
-          method: 'POST',
-          body: templatePat,
-          json: true
-        }, function (err, response) {
-          if (!err && response.statusCode === 200) {
-            console.log(new Date(), 'auto_send_messageTemplate_success')
+        params = templateDoc
+        wechatCtrl.wechatMessageTemplate(params, function (err, results) {
+          if (err) {
+            console.log(new Date(), 'auto_send_messageTemplate_fail_' + timeoutCounsels[i].counselId)
           } else {
-            console.log(new Date(), 'auto_send_messageTemplate_fail')
+            console.log(new Date(), 'auto_send_messageTemplate_success_' + timeoutCounsels[i].counselId)
           }
         })
+        // request({
+        //   url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
+        //   method: 'POST',
+        //   body: templatePat,
+        //   json: true
+        // }, function (err, response) {
+        //   if (!err && response.statusCode === 200) {
+        //     console.log(new Date(), 'auto_send_messageTemplate_success')
+        //   } else {
+        //     console.log(new Date(), 'auto_send_messageTemplate_fail')
+        //   }
+        // })
       }
     }
   }, opts, fields, populate)
