@@ -8363,7 +8363,7 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/devicedata/devices', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 1), devicedataCtrl.getDeviceInfo)
 
   // wechat
-  app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.settingConfig)
+  app.get(version + '/wechat/settingConfig', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.settingConfig)
   // 获取用户基本信息
   app.get(version + '/wechat/getUserInfo', errorHandler.error, wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.getuserinfo)
   app.get(version + '/wechat/gettokenbycode', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl), wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken)
