@@ -2,7 +2,6 @@
 // 功能 getDoctorObject-getCounsels获取咨询问诊信息 getPatientObject,getDoctorObject,getNoMid.getNo(2),saveQuestionaire,counselAutoRelay问卷
 // 注释 2017-07-14 YQC
 
-// var config = require('../config')
 var Counsel = require('../models/counsel')
 // var Doctor = require('../models/doctor')
 var Alluser = require('../models/alluser')
@@ -16,6 +15,8 @@ var webEntry = require('../settings').webEntry
 var request = require('request')
 var commonFunc = require('../middlewares/commonFunc')
 var config = require('../config')
+
+var wechatCtrl = require('../controllers_v2/wechat_controller')
 
 // 获取医生ID对象，并添加自动转发标记 2017-07-15 GY
 // 注释 输入，doctorId；输出，相应的doctorObject
@@ -681,6 +682,14 @@ exports.counselAutoEndMsg = function () {
       for (let i = 0; i < 1; i++) {
         // let doctorOpenId = timeoutCounsels[i].doctorId.openId
         // let patientOpenId = timeoutCounsels[i].patientId.openId
+        let valueTmp1 = '您好，患者咨询已结束。'
+        if (timeoutCounsels[i].type === 6 || timeoutCounsels[i].type === 7) {
+          valueTmp1 = '您好，患者加急咨询已结束。'
+        }
+        let endReason = '24小时未处理'
+        if (timeoutCounsels[i].type === 6 || timeoutCounsels[i].type === 7) {
+          endReason = '2小时未处理'
+        }
         var templateDoc = {
           'userId': timeoutCounsels[i].doctorId.userId,
           'role': 'doctor',
@@ -689,18 +698,22 @@ exports.counselAutoEndMsg = function () {
             'url': '',                                      // 跳转路径需要添加
             'data': {
               'first': {
-                'value': '您好，患者咨询已结束。',
+                'value': valueTmp1,
                 'color': '#173177'
               },
               'keyword1': {
-                'value': timeoutCounsels[i].patientId.name, // 患者姓名
+                'value': endReason,                         // 结束原因
                 'color': '#173177'
               },
               'keyword2': {
-                'value': timeoutCounsels[i].help,           // 咨询内容
+                'value': timeoutCounsels[i].patientId.name, // 患者姓名
                 'color': '#173177'
               },
               'keyword3': {
+                'value': timeoutCounsels[i].help,           // 咨询内容
+                'color': '#173177'
+              },
+              'keyword4': {
                 'value': commonFunc.getNowFormatSecond(),   // 提交时间
                 'color': '#173177'
               },
@@ -712,19 +725,35 @@ exports.counselAutoEndMsg = function () {
             }
           }
         }
+        let params = templateDoc
+        wechatCtrl.wechatMessageTemplate(params, function (err, results) {
+          if (err) {
+            console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + timeoutCounsels[i].counselId)
+          } else {
+            if (results.messageTemplate.errcode === 0) {
+              console.log(new Date(), 'auto_send_messageTemplate_toDoc_success_' + timeoutCounsels[i].counselId)
+            } else {
+              console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + timeoutCounsels[i].counselId)
+            }
+          }
+        })
         // request({
-        //   url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+        //   url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
         //   method: 'POST',
         //   body: templateDoc,
         //   json: true
         // }, function (err, response) {
         //   if (!err && response.statusCode === 200) {
-        //     res.json({results: 'success!'})
+        //     console.log(new Date(), 'auto_send_messageTemplate_success')
         //   } else {
-        //     res.status(500).send('Error')
+        //     console.log(new Date(), 'auto_send_messageTemplate_fail')
         //   }
         // })
 
+        let valueTmp2 = '您好，您的咨询已结束。'
+        if (timeoutCounsels[i].type === 6 || timeoutCounsels[i].type === 7) {
+          valueTmp2 = '您好，您的加急咨询已结束。'
+        }
         var templatePat = {
           'userId': timeoutCounsels[i].patientId.userId,
           'role': 'patient',
@@ -733,7 +762,7 @@ exports.counselAutoEndMsg = function () {
             'url': '',
             'data': {
               'first': {
-                'value': '您好，您的咨询已结束。',
+                'value': valueTmp2,
                 'color': '#173177'
               },
               'keyword1': {
@@ -752,16 +781,28 @@ exports.counselAutoEndMsg = function () {
             }
           }
         }
+        params = templatePat
+        wechatCtrl.wechatMessageTemplate(params, function (err, results) {
+          if (err) {
+            console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + timeoutCounsels[i].counselId)
+          } else {
+            if (results.messageTemplate.errcode === 0) {
+              console.log(new Date(), 'auto_send_messageTemplate_toPat_success_' + timeoutCounsels[i].counselId)
+            } else {
+              console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + timeoutCounsels[i].counselId)
+            }
+          }
+        })
         // request({
-        //   url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+        //   url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
         //   method: 'POST',
         //   body: templatePat,
         //   json: true
         // }, function (err, response) {
         //   if (!err && response.statusCode === 200) {
-        //     res.json({results: 'success!'})
+        //     console.log(new Date(), 'auto_send_messageTemplate_success')
         //   } else {
-        //     res.status(500).send('Error')
+        //     console.log(new Date(), 'auto_send_messageTemplate_fail')
         //   }
         // })
       }
