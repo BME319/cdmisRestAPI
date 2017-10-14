@@ -266,7 +266,7 @@ exports.insertMessage = function (req, res) {
         time: new Date(),
         title: req.body.title,
         description: req.body.description,
-        url: ''
+        url: req.body.url
       }
       News.update(queryN, upNews, function (err, upNewsRes) {
         if (err) {

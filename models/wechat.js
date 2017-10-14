@@ -26,7 +26,7 @@ var wechatSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['doctor', 'patient']
+    enum: ['doctor', 'patient', 'test']
   },
   createAt: {
     type: Date,
@@ -52,6 +52,22 @@ Wechat.prototype.save = function (callback) {
     }
     callback(null, newToken)
   })
+}
+
+Wechat.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
+
+  wechatModel
+    .findOne(query, _fields, options)
+    .populate(_populate)
+    .exec(function (err, wechatInfo) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, wechatInfo)
+    })
 }
 
 // base-access-token

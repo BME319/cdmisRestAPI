@@ -22,7 +22,7 @@ var counselSchema = new mongoose.Schema({
   symptomPhotoUrl: [String],
   descirption: String, // 好像并不在用
   help: String,
-  comment: String, // 好像并不在用
+  comment: String,
   messages: [ // 好像并不在用
     {
       sender: String,

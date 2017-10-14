@@ -595,15 +595,15 @@ exports.editPatientDetail = function (req, res, next) {
   if (req.body.IDNo !== null && req.body.IDNo !== '' && req.body.IDNo !== undefined) {
     upObj['IDNo'] = req.body.IDNo
   }
-  if (req.body.height !== null && req.body.height !== '' && req.body.height !== undefined) {
-    upObj['height'] = req.body.height
-  } else {
+  if (req.body.height === '') {
     upObj['height'] = undefined
+  } else if (req.body.height !== null && req.body.height !== '' && req.body.height !== undefined) {
+    upObj['height'] = req.body.height
   }
-  if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
-    upObj['weight'] = req.body.weight
-  } else {
+  if (req.body.weight === '') {
     upObj['weight'] = undefined
+  } else if (req.body.weight !== null && req.body.weight !== '' && req.body.weight !== undefined) {
+    upObj['weight'] = req.body.weight
   }
   if (req.body.occupation !== null && req.body.occupation !== '' && req.body.occupation !== undefined) {
     upObj['occupation'] = req.body.occupation
@@ -626,10 +626,10 @@ exports.editPatientDetail = function (req, res, next) {
   if (req.body.class_info !== null && req.body.class_info !== '' && req.body.class_info !== undefined) {
     upObj['class_info'] = req.body.class_info
   }
-  if (req.body.operationTime !== null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
-    upObj['operationTime'] = new Date(req.body.operationTime)
-  } else {
+  if (req.body.operationTime === '') {
     upObj['operationTime'] = undefined
+  } else if (req.body.operationTime !== null && req.body.operationTime !== '' && req.body.operationTime !== undefined) {
+    upObj['operationTime'] = new Date(req.body.operationTime)
   }
   if (req.body.hypertension !== null && req.body.hypertension !== '' && req.body.hypertension !== undefined) {
     upObj['hypertension'] = req.body.hypertension
@@ -638,25 +638,21 @@ exports.editPatientDetail = function (req, res, next) {
     upObj['allergic'] = req.body.allergic
   }
   if (req.body.lastVisit !== null && req.body.lastVisit !== '' && req.body.lastVisit !== undefined) {
-    if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
-      upObj['lastVisit.time'] = new Date(req.body.lastVisit.time)
-    } else {
+    if (req.body.lastVisit.time === '') {
       upObj['lastVisit.time'] = undefined
+    } else if (req.body.lastVisit.time !== null && req.body.lastVisit.time !== '' && req.body.lastVisit.time !== undefined) {
+      upObj['lastVisit.time'] = new Date(req.body.lastVisit.time)
     }
-    if (req.body.lastVisit.hospital !== null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
-      upObj['lastVisit.hospital'] = req.body.lastVisit.hospital
-    } else {
+    if (req.body.lastVisit.hospital === '') {
       upObj['lastVisit.hospital'] = undefined
+    } else if (req.body.lastVisit.hospital !== null && req.body.lastVisit.hospital !== '' && req.body.lastVisit.hospital !== undefined) {
+      upObj['lastVisit.hospital'] = req.body.lastVisit.hospital
     }
-    if (req.body.lastVisit.diagnosis !== null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
-      upObj['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
-    } else {
+    if (req.body.lastVisit.diagnosis === '') {
       upObj['lastVisit.diagnosis'] = undefined
+    } else if (req.body.lastVisit.diagnosis !== null && req.body.lastVisit.diagnosis !== '' && req.body.lastVisit.diagnosis !== undefined) {
+      upObj['lastVisit.diagnosis'] = req.body.lastVisit.diagnosis
     }
-  } else {
-    upObj['lastVisit.time'] = undefined
-    upObj['lastVisit.hospital'] = undefined
-    upObj['lastVisit.diagnosis'] = undefined
   }
 
   // return res.json({query: query, upObj: upObj});
