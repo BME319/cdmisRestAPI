@@ -36,7 +36,16 @@ exports.getCommentsByDoc = function (req, res) {
   let query = {doctorId: doctorObject._id}
   let skip = req.query.skip || null
   let limit = req.query.limit || null
-  let opts = {skip: Number(skip), limit: Number(limit)}
+  let fullFlag = 0
+  if (limit !== null && skip !== null) {
+    limit = Number(limit)
+    skip = Number(skip)
+  } else if (limit === null && skip === null) { // limit skip 未输入，返回计数
+    fullFlag = 1
+  } else {
+    return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
+  }
+  let opts = ''
   let fields = {'_id': 0, 'time': 1, 'totalScore': 1, 'patientId': 1}
   let populate = {path: 'patientId', select: {'_id': 0, 'phoneNo': 1}}
 
@@ -58,7 +67,11 @@ exports.getCommentsByDoc = function (req, res) {
           returns.push(items[item])
         }
       }
-      return res.json({results: returns, num: returns.length, code: 0})
+      if (fullFlag) {
+        return res.json({results: returns, num: returns.length, code: 0})
+      } else {
+        return res.json({results: returns.slice(skip, skip + limit), num: returns.length, code: 0})
+      }
     }
   }, opts, fields, populate)
 }
