@@ -728,9 +728,9 @@ exports.counselAutoEndMsg = function () {
         let params = templateDoc
         wechatCtrl.wechatMessageTemplate(params, function (err, results) {
           if (err) {
-            console.log(new Date(), 'auto_send_messageTemplate_fail_' + timeoutCounsels[i].counselId)
+            console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + timeoutCounsels[i].counselId)
           } else {
-            console.log(new Date(), 'auto_send_messageTemplate_success_' + timeoutCounsels[i].counselId)
+            console.log(new Date(), 'auto_send_messageTemplate_toDoc_success_' + timeoutCounsels[i].counselId)
           }
         })
         // request({
@@ -777,12 +777,12 @@ exports.counselAutoEndMsg = function () {
             }
           }
         }
-        params = templateDoc
+        params = templatePat
         wechatCtrl.wechatMessageTemplate(params, function (err, results) {
           if (err) {
-            console.log(new Date(), 'auto_send_messageTemplate_fail_' + timeoutCounsels[i].counselId)
+            console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + timeoutCounsels[i].counselId)
           } else {
-            console.log(new Date(), 'auto_send_messageTemplate_success_' + timeoutCounsels[i].counselId)
+            console.log(new Date(), 'auto_send_messageTemplate_toPat_success_' + timeoutCounsels[i].counselId)
           }
         })
         // request({
