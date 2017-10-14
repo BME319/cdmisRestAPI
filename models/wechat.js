@@ -26,7 +26,7 @@ var wechatSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['doctor', 'patient']
+    enum: ['doctor', 'patient', 'test']
   },
   createAt: {
     type: Date,
