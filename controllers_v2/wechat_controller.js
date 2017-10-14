@@ -2023,10 +2023,10 @@ exports.wechatMessageTemplate = function (params, callback) {
             body: params.postdata,
             json: true
           }, function (err, response, body) {
-            if (!err && response.statusCode === 200 && body.errcode === 0) {
+            if (!err && response.statusCode === 200) {
               return callback(null, body)
             } else {
-              let err = body.errmsg
+              let err = 'Error'
               return callback(err)
             }
           })
@@ -2077,8 +2077,12 @@ exports.wechatMessageTemplateTest = function (req, res) {
       console.log(new Date(), 'auto_send_messageTemplate_fail')
       return res.json({data: err})
     } else {
-      console.log(new Date(), 'auto_send_messageTemplate_success')
-      return res.json({data: results})
+      if (results.messageTemplate.errcode === 0) {
+        console.log(new Date(), 'auto_send_messageTemplate_success')
+      } else {
+        console.log(new Date(), 'auto_send_messageTemplate_fail')
+        return res.json({data: results.messageTemplate.errmsg})
+      }
     }
   })
 }
