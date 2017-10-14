@@ -36,37 +36,44 @@ exports.getCommentsByDoc = function (req, res) {
   let query = {doctorId: doctorObject._id}
   let skip = req.query.skip || null
   let limit = req.query.limit || null
-  let opts = {skip: Number(skip), limit: Number(limit)}
+  let fullFlag = 0
+  if (limit !== null && skip !== null) {
+    limit = Number(limit)
+    skip = Number(skip)
+  } else if (limit === null && skip === null) { // limit skip 未输入，返回计数
+    fullFlag = 1
+  } else {
+    return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
+  }
+  let opts = ''
   let fields = {'_id': 0, 'time': 1, 'totalScore': 1, 'patientId': 1}
   let populate = {path: 'patientId', select: {'_id': 0, 'phoneNo': 1}}
 
-  Comment.count(query, function (err, numC) {
+  Comment.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
     } else {
-      Comment.getSome(query, function (err, items) {
-        if (err) {
-          return res.status(500).send(err)
+      let returns = []
+      for (let item in items) {
+        if ((items[item].patientId || null) === null) {
+          // 09-19 YQC 前端要求patient不存在时不显示该条评价
+          // let temp = {}
+          // temp.patientId = {phoneNo: '***********'}
+          // temp.time = items[item].time
+          // temp.totalScore = items[item].totalScore
+          // returns.push(temp)
         } else {
-          let returns = []
-          for (let item in items) {
-            if ((items[item].patientId || null) === null) {
-              // 09-19 YQC 前端要求patient不存在时不显示该条评价
-              // let temp = {}
-              // temp.patientId = {phoneNo: '***********'}
-              // temp.time = items[item].time
-              // temp.totalScore = items[item].totalScore
-              // returns.push(temp)
-            } else {
-              items[item].patientId.phoneNo = items[item].patientId.phoneNo.slice(0, 3) + '*******' + items[item].patientId.phoneNo.slice(-1)
-              returns.push(items[item])
-            }
-          }
-          return res.json({results: returns, num: numC, code: 0})
+          items[item].patientId.phoneNo = items[item].patientId.phoneNo.slice(0, 3) + '*******' + items[item].patientId.phoneNo.slice(-1)
+          returns.push(items[item])
         }
-      }, opts, fields, populate)
+      }
+      if (fullFlag) {
+        return res.json({results: returns, num: returns.length, code: 0})
+      } else {
+        return res.json({results: returns.slice(skip, skip + limit), num: returns.length, code: 0})
+      }
     }
-  })
+  }, opts, fields, populate)
 }
 
 // 注释 输入，counselId；输出，相应评价条目
