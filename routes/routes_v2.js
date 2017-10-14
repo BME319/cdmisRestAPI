@@ -8393,6 +8393,7 @@ module.exports = function (app, webEntry, acl) {
   app.post(version + '/wechat/messageTemplate', errorHandler.error, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.messageTemplate)
   // 下载
   app.get(version + '/wechat/download', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.download)
+  app.get(version + '/wechat/downloadsocket', errorHandler.error, wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.download)
   // 创建永久二维码
   app.post(version + '/wechat/createTDCticket', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), wechatCtrl.chooseAppId, Wechat.baseTokenManager('access_token'), wechatCtrl.createTDCticket, alluserCtrl.setTDCticket)
 
