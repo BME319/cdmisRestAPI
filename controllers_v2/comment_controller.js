@@ -40,33 +40,27 @@ exports.getCommentsByDoc = function (req, res) {
   let fields = {'_id': 0, 'time': 1, 'totalScore': 1, 'patientId': 1}
   let populate = {path: 'patientId', select: {'_id': 0, 'phoneNo': 1}}
 
-  Comment.count(query, function (err, numC) {
+  Comment.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
     } else {
-      Comment.getSome(query, function (err, items) {
-        if (err) {
-          return res.status(500).send(err)
+      let returns = []
+      for (let item in items) {
+        if ((items[item].patientId || null) === null) {
+          // 09-19 YQC 前端要求patient不存在时不显示该条评价
+          // let temp = {}
+          // temp.patientId = {phoneNo: '***********'}
+          // temp.time = items[item].time
+          // temp.totalScore = items[item].totalScore
+          // returns.push(temp)
         } else {
-          let returns = []
-          for (let item in items) {
-            if ((items[item].patientId || null) === null) {
-              // 09-19 YQC 前端要求patient不存在时不显示该条评价
-              // let temp = {}
-              // temp.patientId = {phoneNo: '***********'}
-              // temp.time = items[item].time
-              // temp.totalScore = items[item].totalScore
-              // returns.push(temp)
-            } else {
-              items[item].patientId.phoneNo = items[item].patientId.phoneNo.slice(0, 3) + '*******' + items[item].patientId.phoneNo.slice(-1)
-              returns.push(items[item])
-            }
-          }
-          return res.json({results: returns, num: numC, code: 0})
+          items[item].patientId.phoneNo = items[item].patientId.phoneNo.slice(0, 3) + '*******' + items[item].patientId.phoneNo.slice(-1)
+          returns.push(items[item])
         }
-      }, opts, fields, populate)
+      }
+      return res.json({results: returns, num: returns.length, code: 0})
     }
-  })
+  }, opts, fields, populate)
 }
 
 // 注释 输入，counselId；输出，相应评价条目
