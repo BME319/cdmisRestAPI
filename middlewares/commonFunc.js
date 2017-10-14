@@ -45,7 +45,7 @@ var commonFunc = {
     if (strDate >= 0 && strDate <= 9) {
       strDate = '0' + strDate
     }
-    var currentdate = date.getFullYear() + month + strDate
+    var currentdate = date.getFullYear() + string(month) + strDate
     return currentdate
   // YYYYMMDD
   },
