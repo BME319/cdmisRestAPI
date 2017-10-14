@@ -730,7 +730,11 @@ exports.counselAutoEndMsg = function () {
           if (err) {
             console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + timeoutCounsels[i].counselId)
           } else {
-            console.log(new Date(), 'auto_send_messageTemplate_toDoc_success_' + timeoutCounsels[i].counselId)
+            if (results.messageTemplate.errcode === 0) {
+              console.log(new Date(), 'auto_send_messageTemplate_toDoc_success_' + timeoutCounsels[i].counselId)
+            } else {
+              console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + timeoutCounsels[i].counselId)
+            }
           }
         })
         // request({
@@ -782,7 +786,11 @@ exports.counselAutoEndMsg = function () {
           if (err) {
             console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + timeoutCounsels[i].counselId)
           } else {
-            console.log(new Date(), 'auto_send_messageTemplate_toPat_success_' + timeoutCounsels[i].counselId)
+            if (results.messageTemplate.errcode === 0) {
+              console.log(new Date(), 'auto_send_messageTemplate_toPat_success_' + timeoutCounsels[i].counselId)
+            } else {
+              console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + timeoutCounsels[i].counselId)
+            }
           }
         })
         // request({
