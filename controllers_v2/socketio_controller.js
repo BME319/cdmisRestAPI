@@ -433,7 +433,7 @@ exports.chat = function (io, socket) {
     var role = data.role
         // var toUserId = data.to;
 
-    var url = 'http://' + webEntry.domain + '/api/v2/wechat/download'
+    var url = 'http://' + webEntry.domain + '/api/v2/wechat/downloadsocket'
 
     if (clientType !== 'doctor' && clientType !== 'patient' && (contentType === 'image' || contentType === 'voice')) {           // image voice
       var mediaId = data.msg.content.mediaId
