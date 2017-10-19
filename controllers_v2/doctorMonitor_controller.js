@@ -117,6 +117,8 @@ exports.getWorkload = function (req, res) {
   let endTime = req.query.endTime || ''
   let province = req.query.province || ''
   let city = req.query.city || ''
+  let hospital = req.query.hospital || ''
+  let doctor = req.query.doctor || ''
   let date = req.query.date || ''
   let startdate = new Date(date)
   let enddate = new Date((startdate / 1000 + 86400) * 1000)
@@ -542,21 +544,10 @@ exports.getWorkload = function (req, res) {
           doctorsinchargetoday: {$size: '$doctorsinchargetoday'}
         }
       },
-      {$sort: {count: -1}}
-      // {$skip: skip},
-      // {$limit: limit}
+      // {$sort: {count: -1}},
+      // {$skip: Number(skip)},
+      // {$limit: Number(limit)}
     ]
-
-    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-    //   limit = Number(limit)
-    //   skip = Number(skip)
-    //   console.log(limit, skip)
-    //   array.push(
-    //     {$sort: {count: -1}},
-    //     {$skip: skip},
-    //     {$limit: limit}
-    //   )
-    // }
 
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
@@ -564,14 +555,42 @@ exports.getWorkload = function (req, res) {
       array.push({$match: {province: province, city: city}})
     }
 
+    if (hospital !== '') {
+      array.splice(
+        0,
+        0,
+        {$match: {workUnit: {$regex: hospital}}}
+      )
+    }
+
+    if (doctor !== '') {
+      array.splice(
+        0,
+        0,
+        {$match: {name: {$regex: doctor}}}
+      )
+    }
+
+    if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+      limit = Number(limit)
+      skip = Number(skip)
+      console.log(limit, skip)
+      array.push(
+        {$sort: {count: -1}},
+        {$skip: skip},
+        {$limit: limit}
+      )
+    }
+
     Alluser.aggregate(array, function (err, results) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
       // console.log(results)
-      limit = Number(limit)
-      skip = Number(skip)
-      res.json({results: results.slice(skip, limit + skip)})
+      // limit = Number(limit)
+      // skip = Number(skip)
+      // res.json({results: results.slice(skip, limit + skip)})
+      res.json({results: results})
     })
   }
 }
@@ -581,6 +600,8 @@ exports.getCounseltimeout = function (req, res) {
   let endTime = req.query.endTime || ''
   let province = req.query.province || ''
   let city = req.query.city || ''
+  let hospital = req.query.hospital || ''
+  let doctor = req.query.doctor || ''
   let limit = req.query.limit
   let skip = req.query.skip
   // let date = req.query.date || ''
@@ -660,15 +681,7 @@ exports.getCounseltimeout = function (req, res) {
       // {$limit: limit}
     ]
 
-    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-    //   limit = Number(limit)
-    //   skip = Number(skip)
-    //   array.push(
-    //     {$sort: {count: -1}},
-    //     {$skip: skip},
-    //     {$limit: limit}
-    //   )
-    // }
+
 
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
@@ -676,12 +689,31 @@ exports.getCounseltimeout = function (req, res) {
       array.push({$match: {province: province, city: city}})
     }
 
+    if (hospital !== '') {
+      array.push(
+        {$match: {hospital: {$regex: hospital}}}
+      )
+    }
+  
+    if (doctor !== '') {
+      array.push(
+        {$match: {doctorname: {$regex: doctor}}}
+      )
+    }
+
+    if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+      limit = Number(limit)
+      skip = Number(skip)
+      array.push(
+        {$skip: skip},
+        {$limit: limit}
+      )
+    }
+
     Counselautochangestatus.aggregate(array, function (err, results) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      limit = Number(limit)
-      skip = Number(skip)
       res.json({results: results.slice(skip, limit + skip)})
     })
   }
@@ -690,6 +722,8 @@ exports.getCounseltimeout = function (req, res) {
 exports.getScore = function (req, res) {
   let province = req.query.province || ''
   let city = req.query.city || ''
+  let hospital = req.query.hospital || ''
+  let doctor = req.query.doctor || ''
   let limit = req.query.limit
   let skip = req.query.skip
   // let startTime = req.query.startTime || ''
@@ -736,45 +770,43 @@ exports.getScore = function (req, res) {
         //   }
         // }
       }
-    }
-    // {
-    //   $project: {
-    //     'doctorId': 1,
-    //     'doctorname': 1,
-    //     'province': 1,
-    //     'city': 1,
-    //     'hospital': 1,
-    //     'score': 1,
-    //     'phoneNo': 1,
-    //     'userId': 1,
-    //     'comments.totalScore': 1,
-    //     'comments.content': 1,
-    //     'comments.time': 1,
-    //     'comments.patientId': 1
-    //   }
-    // },
-    // {
-    //   $lookup: {
-    //     from: 'allusers',
-    //     localField: 'comments.patientId',
-    //     foreignField: '_id',
-    //     as: 'patientinfo'
-    //   }
-    // }
+    },
+    // {$sort: {score: -1}},
+    // {$skip: Number(skip)},
+    // {$limit: Number(limit)}
   ]
-  // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-  //   limit = Number(limit)
-  //   skip = Number(skip)
-  //   array.push(
-  //     {$sort: {count: -1}},
-  //     {$skip: skip},
-  //     {$limit: limit}
-  //   )
-  // }
+
+
+  
   if (province !== '' && city === '') {
     array.push({$match: {province: province}})
   } else if (province !== '' && city !== '') {
     array.push({$match: {province: province, city: city}})
+  }
+
+  if (hospital !== '') {
+    array.splice(
+      0,
+      0,
+      {$match: {workUnit: {$regex: hospital}}}
+    )
+  }
+
+  if (doctor !== '') {
+    array.splice(
+      0,
+      0,
+      {$match: {name: {$regex: doctor}}}
+    )
+  }
+  if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+    limit = Number(limit)
+    skip = Number(skip)
+    array.push(
+      {$sort: {score: -1}},
+      {$skip: skip},
+      {$limit: limit}
+    )
   }
 
   Alluser.aggregate(array, function (err, results) {
@@ -782,9 +814,8 @@ exports.getScore = function (req, res) {
       res.status(500).send(err.errmsg)
     }
     // console.log(results)
-    limit = Number(limit)
-    skip = Number(skip)
-    res.json({results: results.slice(skip, limit + skip)})
+    // res.json({results: results.slice(skip, limit + skip)})
+    res.json({results: results})
   })
   // }
 }
@@ -854,6 +885,8 @@ exports.getComment = function (req, res) {
 exports.getOrder = function (req, res) {
   let province = req.query.province || ''
   let city = req.query.city || ''
+  let hospital = req.query.hospital || ''
+  let doctor = req.query.doctor || ''
   let startTime = req.query.startTime || ''
   let endTime = req.query.endTime || ''
   let limit = req.query.limit
@@ -913,15 +946,6 @@ exports.getOrder = function (req, res) {
       }
     ]
 
-    // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-    //   limit = Number(limit)
-    //   skip = Number(skip)
-    //   array.push(
-    //     {$sort: {count: -1}},
-    //     {$skip: skip},
-    //     {$limit: limit}
-    //   )
-    // }
 
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
@@ -929,13 +953,33 @@ exports.getOrder = function (req, res) {
       array.push({$match: {province: province, city: city}})
     }
 
+    if (hospital !== '') {
+      array.push(
+        {$match: {hospital: {$regex: hospital}}}
+      )
+    }
+  
+    if (doctor !== '') {
+      array.push(
+        {$match: {doctorname: {$regex: doctor}}}
+      )
+    }
+
+    if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+      limit = Number(limit)
+      skip = Number(skip)
+      array.push(
+        // {$sort: {count: -1}},
+        {$skip: skip},
+        {$limit: limit}
+      )
+    }
+
     Order.aggregate(array, function (err, results) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      limit = Number(limit)
-      skip = Number(skip)
-      res.json({results: results.slice(skip, limit + skip)})
+      res.json({results: results})
     })
   }
 }
