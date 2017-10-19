@@ -1,5 +1,5 @@
 var Department = require('../models/department')
-// var Alluser = require('../models/alluser')
+var Alluser = require('../models/alluser')
 
 // 返回地区、地区负责人
 exports.getDistrict = function (req, res) {
@@ -13,9 +13,6 @@ exports.getDistrict = function (req, res) {
   if (district !== '') {
     query['district'] = {$regex: district}
   }
-  if (portleader !== '') {
-    query['portleader'] = portleader
-  }
   let fields = {district: 1, portleader: 1}
   let populate = [
     {
@@ -23,13 +20,32 @@ exports.getDistrict = function (req, res) {
       select: {'name': 1, 'userId': 1}
     }
   ]
-  Department.getSome(query, fields, function (err, Info) {
-    if (err) {
-      res.status(500).send(err.errmsg)
-    }
-    Info = distinct(Info)
-    res.json({results: Info})
-  }, populate, opts)
+  if (portleader !== '') {
+    Alluser.getSome({name: {$regex: portleader}}, function (err, alluserInfo) {
+      if (err) {
+        return res.status(500).send(err.errmsg)
+      }
+      let portleader_id = []
+      for (let i = 0; i < alluserInfo.length; i++){
+        portleader_id.push(alluserInfo[i]._id)
+      }
+      query['portleader'] = {$in: portleader_id}
+      Department.getSome(query, fields, function (err, Info) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        return res.json({results: Info})
+      }, populate, opts)
+    }, {}, {_id: 1})
+  } else {
+    Department.getSome(query, fields, function (err, Info) {
+      if (err) {
+        res.status(500).send(err.errmsg)
+      }
+      Info = distinct(Info)
+      res.json({results: Info})
+    }, populate, opts)
+  }
 }
 
 // 返回地区、地区负责人、科室、医院、科室负责人
@@ -47,9 +63,6 @@ exports.getDepartment = function (req, res) {
   if (district !== '') {
     query['district'] = {$regex: district}
   }
-  if (portleader !== '') {
-    query['portleader'] = portleader
-  }
   if (department !== '') {
     query['department'] = {$regex: department}
   } else {
@@ -58,20 +71,85 @@ exports.getDepartment = function (req, res) {
   if (hospital !== '') {
     query['hospital'] = {$regex: hospital}
   }
-  if (departLeader !== '') {
-    query['departLeader'] = departLeader
-  }
   let fields = {district: 1, portleader: 1, department: 1, hospital: 1, departLeader: 1}
   let populate = {
     path: 'portleader departLeader',
     select: {'name': 1, 'userId': 1}
   }
-  Department.getSome(query, fields, function (err, Info) {
-    if (err) {
-      res.status(500).send(err.errmsg)
+  if (portleader !== '') {
+    if (departLeader !== '') {
+      Alluser.getSome({name: {$regex: portleader}}, function (err, alluserInfo) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        let portleader_id = []
+        for (let i = 0; i < alluserInfo.length; i++){
+          portleader_id.push(alluserInfo[i]._id)
+        }
+        query['portleader'] = {$in: portleader_id}
+        Alluser.getSome({name: {$regex: departLeader}}, function (err, alluserInfo) {
+          if (err) {
+            return res.status(500).send(err.errmsg)
+          }
+          let departLeader_id = []
+          for (let i = 0; i < alluserInfo.length; i++){
+            departLeader_id.push(alluserInfo[i]._id)
+          }
+          query['departLeader'] = {$in: departLeader_id}
+          Department.getSome(query, fields, function (err, Info) {
+            if (err) {
+              return res.status(500).send(err.errmsg)
+            }
+            return res.json({results: Info})
+          }, populate, opts)
+        }, {}, {_id: 1})
+      }, {}, {_id: 1})
+    } else {
+      Alluser.getSome({name: {$regex: portleader}}, function (err, alluserInfo) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        let portleader_id = []
+        for (let i = 0; i < alluserInfo.length; i++){
+          portleader_id.push(alluserInfo[i]._id)
+        }
+        query['portleader'] = {$in: portleader_id}
+        Department.getSome(query, fields, function (err, Info) {
+          if (err) {
+            return res.status(500).send(err.errmsg)
+          }
+          return res.json({results: Info})
+        }, populate, opts)
+      }, {}, {_id: 1})
+    }   
+  } else {
+    if (departLeader !== '') {
+      Alluser.getSome({name: {$regex: departLeader}}, function (err, alluserInfo) {
+        if (err) {
+          return res.status(500).send(err.errmsg)
+        }
+        let departLeader_id = []
+        for (let i = 0; i < alluserInfo.length; i++){
+          departLeader_id.push(alluserInfo[i]._id)
+        }
+        query['departLeader'] = {$in: departLeader_id}
+        Department.getSome(query, fields, function (err, Info) {
+          if (err) {
+            return res.status(500).send(err.errmsg)
+          }
+          return res.json({results: Info})
+        }, populate, opts)
+      }, {}, {_id: 1})
+    } else {
+      Department.getSome(query, fields, function (err, Info) {
+        if (err) {
+          res.status(500).send(err.errmsg)
+        }
+        return res.json({results: Info})
+      }, populate, opts)
     }
-    res.json({results: Info})
-  }, populate, opts)
+  }
+
 }
 
 // 输入地区、科室、医院，获取医生列表
