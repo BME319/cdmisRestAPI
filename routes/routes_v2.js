@@ -1818,6 +1818,8 @@ module.exports = function (app, webEntry, acl) {
   app.get(version + '/labtestImport/photoByLabtest', tokenManager.verifyToken(), errorHandler.error, labtestImportCtrl.photoByLabtest)
   app.post(version + '/labtestImport/labelphoto', tokenManager.verifyToken(), errorHandler.error, labtestImportCtrl.pullurl, labtestImportCtrl.pushurl, labtestImportCtrl.checkImportStatus, labtestImportCtrl.updateUserLatest)
   app.get(version + '/labtestImport/countByStatus', tokenManager.verifyToken(), errorHandler.error, labtestImportCtrl.countByStatus)
+  // 权限-管理员
+  app.get(version + '/paitent/doctorsById', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), patientCtrl.doctorsByPatient)
 
   // doctor_services
   /** YQC annotation 2017-08-04 - acl 2017-08-04 医生

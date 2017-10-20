@@ -39,6 +39,7 @@ var DpRelation = require('../models/dpRelation')
 var commonFunc = require('../middlewares/commonFunc')
 var Counsel = require('../models/counsel')
 var VitalSign = require('../models/vitalSign')
+var DoctorsInCharge = require('../models/doctorsInCharge')
 
 var patientCtrl = require('../controllers_v2/patient_controller')
 
@@ -1201,4 +1202,61 @@ exports.favoriteDoctorAsyncTest = function (req, res) {
       return res.json({msg: '关注成功', data: results, code: 0})
     }
   })
+}
+
+// 管理员获取患者主管关注医生 2017-10-20 GY
+exports.doctorsByPatient = function (req, res) {
+  let userId = req.query.userId || null
+  if (userId === null) {
+    return res.status(412).json({msg: 'userId_needed', code: 1})
+  }
+  let query = {userId: userId}
+  let opts = ''
+  let fields = {_id: 1, userId: 1, name:1, doctors: 1}
+  let populate = {path: 'doctors.doctorId', select: {userId: 1, name: 1}}
+  Alluser.getOne(query, function (err, item) {
+    if (err) {
+      return res.status(500).send(err)
+    } else if (item === null) {
+      return res.status(404).json({
+        msg: 'id_not_found', 
+        code: 1
+      })
+    } else {
+      let FD = []
+      for (let i = 0; i < item.doctors.length; i++) {
+        if (item.doctors[i].invalidFlag === 1) {
+          FD.push(item.doctors[i])
+        }
+      }
+      let patientId = item._id
+      let queryDIC = {patientId: patientId, invalidFlag: 1}
+      let optsDIC = ''
+      let fieldsDIC = {_id: 1, patientId: 1, doctorId: 1, invalidFlag: 1}
+      let populateDIC = {path: 'doctorId', select: {userId: 1, name: 1, phoneNo: 1}}
+      DoctorsInCharge.getOne(queryDIC, function (err, itemDIC) {
+        if (err) {
+          return res.status(500).send(err)
+        } else if (itemDIC === null) {
+          return res.json({
+            msg: 'success', 
+            code: 0, 
+            data: {
+              FD: FD, 
+              DIC: 'NULL'
+            }
+          })
+        } else {
+          return res.json({
+            msg: 'success', 
+            code: 0, 
+            data: {
+              FD: FD, 
+              DIC: itemDIC
+            }
+          })
+        }
+      }, optsDIC, fieldsDIC, populateDIC)
+    }
+  }, opts, fields, populate)
 }
