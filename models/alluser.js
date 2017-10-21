@@ -159,6 +159,7 @@ var alluserSchema = new mongoose.Schema({
       invalidFlag: {type: Number, default: 0, enum: [0, 1]}
     }
   ],
+  // PC端需求：存储当前主管医生_id
   doctorInCharge: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
   // 主管医生字段 改用doctorsInCharge表
   // doctorsInCharge: [

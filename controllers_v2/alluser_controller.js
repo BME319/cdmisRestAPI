@@ -305,6 +305,7 @@ exports.getAlluserList = function (role) {
   return function (req, res) {
     var query = {'invalidFlag': 0}
     var fields = {'_id': 1}//, 'revisionInfo':0
+    var populate = {}
 
     var limit = Number(req.query.limit)
     var skip = Number(req.query.skip)
@@ -388,6 +389,12 @@ exports.getAlluserList = function (role) {
       fields['class_info'] = 1
       fields['birthday'] = 1
       fields['allergic'] = 1
+
+      fields['doctorInCharge'] = 1
+      populate['path'] = 'doctorInCharge'
+      populate['select'] = {
+        userId: 1, name: 1, phoneNo: 1
+      }
     }
     if (_role === 3) {
       if (_province !== null && _province !== undefined && _province !== '') {
@@ -432,7 +439,7 @@ exports.getAlluserList = function (role) {
         return res.status(500).send(err.errmsg)
       }
       res.json({results: userlist})
-    }, opts, fields)
+    }, opts, fields, populate)
   }
 }
 exports.countAlluserList = function (req, res) {
