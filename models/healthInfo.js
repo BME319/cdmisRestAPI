@@ -139,4 +139,15 @@ HealthInfo.removeOne = function (query, callback, opts) {
     })
 }
 
+HealthInfo.countSome = function (query, callback) {
+  healthInfoModel
+    .count(query)
+    .exec(function (err, healthInfos) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, healthInfos)
+    })
+}
+
 module.exports = HealthInfo

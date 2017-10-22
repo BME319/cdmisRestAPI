@@ -6731,6 +6731,45 @@ module.exports = function (app, webEntry, acl) {
    */
   // 删除患者某条健康信息 权限 医生/患者
   app.post(version + '/healthInfo/deleteHealthDetail', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), healthInfoCtrl.deleteHealthDetail)
+  /**
+   * @swagger
+   * /healthInfo/allHealthInfos:
+   *   get:
+   *     operationId: getAllHealthInfos
+   *     tags:
+   *       - HealthInfo
+   *     summary: 获取所有患者的全部健康信息
+   *     description: Get All HealthInfos
+   *     produces:
+   *       - application/json
+   *     parameters:
+   *       - name: token
+   *         description: 授权信息
+   *         in: query
+   *         required: true
+   *         type: string
+   *       - name: limit
+   *         in: query
+   *         required: false
+   *         description: 分页参数
+   *         type: number
+   *       - name: skip
+   *         in: query
+   *         required: false
+   *         description: 分页参数
+   *         type: number
+   *     responses:
+   *       200:
+   *         description: 获取成功
+   *         schema:
+   *           type: array
+   *           items:
+   *             $ref: '#/definitions/HealthInfo'
+   *       500:
+   *         description: 服务器错误
+   */
+  // 获取所有患者的全部健康信息 权限 admin
+  app.get(version + '/healthInfo/allHealthInfos', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), healthInfoCtrl.getAllHealthInfos)
 
   // insurance
   /**
