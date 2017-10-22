@@ -13,7 +13,7 @@ exports.getAllHealthInfos = function (req, res) {
   } else if (limit === null && skip === null) {
     opts = {sort: '-_id'}
   } else {
-    return res.json({msg: '请确认skip,limit的输入是否正确', code: 0})
+    return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
   }
   HealthInfo.countSome('', function (err, healthinfoCount) {
     if (err) {
@@ -23,7 +23,7 @@ exports.getAllHealthInfos = function (req, res) {
       if (err) {
         return res.status(500).send(err)
       }
-      return res.json({code: 1, msg: 'success', data: {count: healthinfoCount, healthInfoList: items}})
+      return res.json({code: 0, msg: 'success', data: {count: healthinfoCount, healthInfoList: items}})
     }, opts)
   })
 }
