@@ -254,7 +254,7 @@ exports.getAlluserAgreement = function (req, res) {
   var query = {userId: _userId}
   var opts = ''
   var fields = {}
-  var _role = req.body.role
+  var _role = req.query.role
   if (_role === 'patient') {
     fields = {'agreementPat': 1}
   } else if (_role === 'doctor') {
