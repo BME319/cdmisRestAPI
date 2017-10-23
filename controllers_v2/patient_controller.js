@@ -27,7 +27,9 @@ var docInfoForPat = {
   major: 1,
   photoUrl: 1, 
   schedules: 1, 
-  suspendTime: 1
+  suspendTime: 1,
+  province: 1,
+  city: 1
 }
 // var config = require('../config')
 var webEntry = require('../settings').webEntry
