@@ -27,9 +27,7 @@ var docInfoForPat = {
   major: 1,
   photoUrl: 1, 
   schedules: 1, 
-  suspendTime: 1,
-  province: 1,
-  city: 1
+  suspendTime: 1
 }
 // var config = require('../config')
 var webEntry = require('../settings').webEntry
@@ -234,15 +232,16 @@ exports.getDoctorLists = function (req, res) {
   if (req.query.doctorId !== null && req.query.doctorId !== undefined && req.query.doctorId !== '') {
     query = {userId: req.query.doctorId, role: 'doctor', reviewStatus: 1}
     option = ''
-    fields = docInfoForPat
   }
-
+  if (req.session.role === 'admin' || req.session.role.indexOf('admin') !== -1) {
+    fields = {_id: 1, province: 1, city: 1, workUnit: 1, title: 1, department: 1}
+  }
   Alluser.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
+    } else {
+      res.json({results: items, nexturl: nexturl})
     }
-
-    res.json({results: items, nexturl: nexturl})
   }, option, fields, populate)
 }
 
