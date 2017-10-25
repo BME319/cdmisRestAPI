@@ -1226,7 +1226,7 @@ exports.doctorsByPatient = function (req, res) {
     } else {
       let FD = []
       for (let i = 0; i < item.doctors.length; i++) {
-        if (item.doctors[i].invalidFlag === 1) {
+        if (item.doctors[i].invalidFlag === 0) {
           FD.push(item.doctors[i])
         }
       }
