@@ -266,7 +266,7 @@ exports.insertOrder = function (req, res, next) {
             return res.status(500).send(err.errmsg)
           }
                     // res.json({results: item});
-          if (req.isIncharge) {
+          if (req.isIncharge && (req.body.class === '01' || req.body.class === '02' || req.body.class === '03')) {
             return res.json({results: {status: 1, msg: '该医生为您的主管医生，无需支付'}})
           } else if (trueMoney === 0) {
             return res.json({results: {status: 1, msg: '支付金额为0，无需进行支付'}})
