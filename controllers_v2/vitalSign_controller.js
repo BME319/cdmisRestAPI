@@ -240,6 +240,10 @@ exports.outOfRange = function (req, res, next) {
         let recommendValue2 = 140
         let recommendValue3 = 60
         let recommendValue4 = 90
+        let recommendValueDefault1 = 90  // 警戒默认值
+        let recommendValueDefault2 = 180
+        let recommendValueDefault3 = 40
+        let recommendValueDefault4 = 120
         if (reports.length !== 0) {
           let _recommendValue1 = reports[0].recommendValue1 || null
           let _recommendValue2 = reports[0].recommendValue2 || null
@@ -250,7 +254,8 @@ exports.outOfRange = function (req, res, next) {
           if (_recommendValue1 !== null) { recommendValue3 = _recommendValue3 }
           if (_recommendValue1 !== null) { recommendValue4 = _recommendValue4 }
         }
-        if (req.body.datavalue < recommendValue1 || req.body.datavalue > recommendValue2 || req.body.datavalue2 < recommendValue3 || req.body.datavalue2 > recommendValue4) {
+        // if (req.body.datavalue < recommendValue1 || req.body.datavalue > recommendValue2 || req.body.datavalue2 < recommendValue3 || req.body.datavalue2 > recommendValue4) {
+        if (req.body.datavalue < recommendValueDefault1 || req.body.datavalue > recommendValueDefault2 || req.body.datavalue2 < recommendValueDefault3 || req.body.datavalue2 > recommendValueDefault4) {
           req.isOutOfRange = 1
           req.measureData = req.body.datavalue + '/' + req.body.datavalue2
           req.recommend = String(recommendValue1) + '-' + String(recommendValue2) + '/' + String(recommendValue3) + '-' + String(recommendValue4)
@@ -260,26 +265,26 @@ exports.outOfRange = function (req, res, next) {
         }
       }, opts)
       break
-    case '尿量':
-      queryR['itemType'] = 'Vol'
-      // console.log('queryR', queryR)
-      Report.getSome(queryR, function (err, reports) {
-        if (err) {
-          return res.status(422).send(err.message)
-        }
-        let recommendValue1 = 500  // 默认值
-        if (req.body.datavalue < recommendValue1) {
-          req.isOutOfRange = 1
-          req.measureData = req.body.datavalue
-          req.recommend = 500
-          // console.log('req.measureData', req.measureData)
-          // console.log('req.recommend', req.recommend)
-          return next()
-        } else {
-          return res.json({result: '新建或修改成功', results: req.result})
-        }
-      }, opts)
-      break
+    // case '尿量':
+    //   queryR['itemType'] = 'Vol'
+    //   // console.log('queryR', queryR)
+    //   Report.getSome(queryR, function (err, reports) {
+    //     if (err) {
+    //       return res.status(422).send(err.message)
+    //     }
+    //     let recommendValue1 = 500  // 默认值
+    //     if (req.body.datavalue < recommendValue1) {
+    //       req.isOutOfRange = 1
+    //       req.measureData = req.body.datavalue
+    //       req.recommend = 500
+    //       // console.log('req.measureData', req.measureData)
+    //       // console.log('req.recommend', req.recommend)
+    //       return next()
+    //     } else {
+    //       return res.json({result: '新建或修改成功', results: req.result})
+    //     }
+    //   }, opts)
+    //   break
     case '体温':
       queryR['itemType'] = 'Temperature'
       // console.log('queryR', queryR)
@@ -288,7 +293,10 @@ exports.outOfRange = function (req, res, next) {
           return res.status(422).send(err.message)
         }
         let recommendValue1 = 37.3  // 默认值
-        if (req.body.datavalue > recommendValue1) {
+        let recommendValueDefault1 = 35.5  // 警戒默认值
+        let recommendValueDefault2 = 39
+        // if (req.body.datavalue > recommendValue1) {
+        if (req.body.datavalue < recommendValueDefault1 || req.body.datavalue > recommendValueDefault2) {
           req.isOutOfRange = 1
           req.measureData = req.body.datavalue
           req.recommend = 37.3
@@ -307,13 +315,16 @@ exports.outOfRange = function (req, res, next) {
         }
         let recommendValue1 = 60  // 默认值
         let recommendValue2 = 100
+        let recommendValueDefault1 = 50  // 警戒默认值
+        let recommendValueDefault2 = 150
         if (reports.length !== 0) {
           let _recommendValue1 = reports[0].recommendValue1 || null
           let _recommendValue2 = reports[0].recommendValue2 || null
           if (_recommendValue1 !== null) { recommendValue1 = _recommendValue1 }
           if (_recommendValue1 !== null) { recommendValue2 = _recommendValue2 }
         }
-        if (req.body.datavalue < recommendValue1 || req.body.datavalue > recommendValue2) {
+        // if (req.body.datavalue < recommendValue1 || req.body.datavalue > recommendValue2) {
+        if (req.body.datavalue < recommendValueDefault1 || req.body.datavalue > recommendValueDefault2) {
           req.isOutOfRange = 1
           req.measureData = req.body.datavalue
           req.recommend = String(recommendValue1) + '-' + String(recommendValue2)
