@@ -3,6 +3,31 @@
 var Alluser = require('../models/alluser')
 var HealthInfo = require('../models/healthInfo')
 
+// 获得所有患者的所有健康信息 PC端 2017-10-22 lgf
+exports.getAllHealthInfos = function (req, res) {
+  let opts = ''
+  let skip = req.query.skip || null
+  let limit = req.query.limit || null
+  if (limit !== null && skip !== null) {
+    opts = {limit: Number(limit), skip: Number(skip), sort: '-_id'}
+  } else if (limit === null && skip === null) {
+    opts = {sort: '-_id'}
+  } else {
+    return res.json({msg: '请确认skip,limit的输入是否正确', code: 1})
+  }
+  HealthInfo.countSome('', function (err, healthinfoCount) {
+    if (err) {
+      return res.status(500).send(err)
+    }
+    HealthInfo.getSome('', function (err, items) {
+      if (err) {
+        return res.status(500).send(err)
+      }
+      return res.json({code: 0, msg: 'success', data: {count: healthinfoCount, healthInfoList: items}})
+    }, opts)
+  })
+}
+
 // 获得患者所有的健康信息 修改为医生端和患者端共用 2017-08-09 lgf
 exports.getAllHealthInfo = function (req, res) {
   // var _userId = req.query.userId

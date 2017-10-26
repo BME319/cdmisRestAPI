@@ -255,7 +255,7 @@ exports.getAlluserAgreement = function (req, res) {
   var query = {userId: _userId}
   var opts = ''
   var fields = {}
-  var _role = req.body.role
+  var _role = req.query.role
   if (_role === 'patient') {
     fields = {'agreementPat': 1}
   } else if (_role === 'doctor') {
@@ -306,7 +306,7 @@ exports.getAlluserList = function (role) {
   return function (req, res) {
     var query = {'invalidFlag': 0}
     var fields = {'_id': 1}//, 'revisionInfo':0
-    var populate = {}
+    var populate = {'path':''}
 
     var limit = Number(req.query.limit)
     var skip = Number(req.query.skip)
@@ -435,6 +435,7 @@ exports.getAlluserList = function (role) {
         // 通过子表查询主表，定义主表查询路径及输出内容
         // var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
     // console.log(query)
+    // console.log(populate)
     Alluser.getSome(query, function (err, userlist) {
       if (err) {
         return res.status(500).send(err.errmsg)
