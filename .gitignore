@@ -11,6 +11,7 @@ logs/
 certs/
 node_modules/  
 mongoscriptslogs/
+client/
 
 #过滤deploy相关文件
 deploy.sh
