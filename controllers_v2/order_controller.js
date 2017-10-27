@@ -143,16 +143,16 @@ exports.getchangeOrderNo = function (req, res, next) {
     return res.json({result: 1, msg: '请输入doctorId、patientId'})
   }
   var query = {userId: patientId, doctorId: doctorId, paystatus: paystatus, type: type}
-  Order.getOne(query, function (err, item) {
+  Order.getSome(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
-    } else if (item === null) {
+    } else if (item.length === 0) {
       return res.status(404).json({result: '更新订单错误：无法查询到订单请重新尝试或联系管理员'})
     } else {
-      req.body.orderNo = item.orderNo
+      req.body.orderNo = item[0].orderNo
       next()
     }
-  })
+  }, {sort: {_id: -1}})
 }
 
 exports.insertOrder = function (req, res, next) {
