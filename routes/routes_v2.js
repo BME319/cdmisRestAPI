@@ -5744,8 +5744,9 @@ module.exports = function (app, webEntry, acl) {
    */
   app.post(version + '/services/manualRefund', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), personalDiagCtrl.manualRefundAndNotice)
   // 服务相关短信测试 - 非前端调用
-  app.post(version + '/services/message', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), alluserCtrl.serviceMessage)
-  // app.post(version + '/services/message', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), alluserCtrl.servicesMessageAsyncTest)
+  // app.post(version + '/services/message', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), alluserCtrl.serviceMessage)
+  // app.post(version + '/services/message', alluserCtrl.servicesMessageAsyncTest)
+  // app.post(version + '/services/messageLSM', alluserCtrl.serviceMessageLSM)
 
   // PC端保险管理
   // 获取患者 权限insuranceC/insuranceA/admin
