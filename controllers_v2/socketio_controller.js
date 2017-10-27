@@ -248,7 +248,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
                       'color': '#173177'
                     },
                     'keyword4': {
-                      'value': commonFunc.getNowFormatSecondMinus(new Date(time)), // 提交时间
+                      'value': commonFunc.getNowFormatSecond(new Date(time)), // 提交时间
                       'color': '#173177'
                     },
 
