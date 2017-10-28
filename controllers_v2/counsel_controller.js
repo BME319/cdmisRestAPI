@@ -135,6 +135,9 @@ exports.getCounsels = function (req, res) {
         }
       }
     }
+    for (var i = item1.length - 1; i >= 0; i--) {
+      item1[i].patientId.photoUrl = commonFunc.adaptPrefix(item1[i].patientId.photoUrl)
+    }
     res.json({results: item1, count: item1.length})
   }, opts, fields, populate)
 }

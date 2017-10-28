@@ -2,7 +2,7 @@
 var Alluser = require('../models/alluser')
 var OpenIdTmp = require('../models/openId')
 var DpRelation = require('../models/dpRelation')
-
+var commonFunc = require('../middlewares/commonFunc')
 var nurseInsuranceWorkCtrl = require('../controllers_v2/nurseInsuranceWork_controller')
 
 var async = require('async')
@@ -39,6 +39,11 @@ exports.getInsurancePatientsList = function (req, res) {
       rows.sort(function (a, b) {
         return Date.parse(b.dpRelationTime) - Date.parse(a.dpRelationTime) // 时间降序
       })
+      for (var i = rows.length - 1; i >= 0; i--) {
+        if ((rows[i].patientId || null) !== null) {
+          rows[i].patientId.photoUrl = commonFunc.adaptPrefix(rows[i].patientId.photoUrl)
+        }
+      }
       return res.json({data: rows, msg: '获取患者列表成功！', code: 1})
     }
   }, opts, fields, populate)

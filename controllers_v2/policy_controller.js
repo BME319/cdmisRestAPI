@@ -97,7 +97,6 @@ exports.getPatients = function (req, res) {
   if ((status !== null) && Number(status) !== 9) { // 输入9返回所有患者列表
     query['status'] = Number(status)
   }
-
   let opts = ''
   let skip = req.query.skip || null
   let limit = req.query.limit || null
@@ -137,16 +136,16 @@ exports.getPatients = function (req, res) {
       return res.status(500).send(err)
     } else {
       let returns = []
-      for (let item in items) {
+      for (let item = 0; item < items.length; item++) {
         if (items[item].patientId !== null && items[item].currentAgent !== null) {
           let itemTemp = {}
           let followUps = items[item].followUps
           let latestFollowUp = followUps[followUps.length - 1]
+          latestFollowUp.photos = commonFunc.adaptPrefixs(latestFollowUp.photos)
           itemTemp['latestFollowUp'] = latestFollowUp
           itemTemp['patientId'] = items[item].patientId
           itemTemp['currentAgent'] = items[item].currentAgent
           itemTemp['status'] = items[item].status
-          // console.log(itemTemp)
           returns.push(itemTemp)
         }
       }
@@ -183,12 +182,21 @@ exports.getHistory = function (req, res) {
   Policy.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err)
-    } else if ((req.session.role === 'insuranceA' || (iAOS !== null && iCOS === null)) && String(item.currentAgent) !== String(iAOS._id)) {
-      res.json({msg: '非负责该用户的保险专员', code: 1}) // 专员只能获取自己负责的患者跟踪记录
-    } else if (countFlag === 1) {
-      res.json({data: item.followUps.length, code: 0})
+    }
+    if (item === null) {
+      return res.json({msg: '该患者无跟踪详情', code: 1})
     } else {
-      res.json({data: item.followUps.reverse().slice(skip, skip + limit), code: 0})
+      if ((req.session.role === 'insuranceA' || (iAOS !== null && iCOS === null)) && String(item.currentAgent) !== String(iAOS._id)) {
+        return res.json({msg: '非负责该用户的保险专员', code: 1}) // 专员只能获取自己负责的患者跟踪记录
+      } else if (countFlag === 1) {
+        return res.json({data: item.followUps.length, code: 0})
+      } else {
+        let followUps = item.followUps.reverse().slice(skip, skip + limit)
+        for (let followUp = 0; followUp < followUps.length; followUp++) {
+          followUps[followUp].photos = commonFunc.adaptPrefixs(followUps[followUp].photos)
+        }
+        return res.json({data: followUps, code: 0})
+      }
     }
   }, opts, fields, populate)
 }
@@ -236,7 +244,6 @@ exports.getAgents = function (req, res, next) {
             itemTemp['userId'] = agent.userId
             itemTemp['gender'] = agent.gender
             itemTemp['currentPatientNo'] = num
-            // console.log(itemTemp)
             returns.push(itemTemp)
             req.returns = returns
             if (req.returns.length === items.length) {
@@ -382,7 +389,8 @@ exports.insertFollowUp = function (req, res) {
   if (content === null) {
     return res.json({code: 1, msg: '请输入content'})
   }
-  let photoUrls = req.body.photoUrls || []
+  let photoUrls = commonFunc.removePrefixs(req.body.photoUrls || [])
+
   let now = new Date()
   let dayTemp = commonFunc.convertToFormatDate(new Date(now))
   let todayFormat = dayTemp.slice(0, 4) + '年' + dayTemp.slice(4, 6) + '月' + dayTemp.slice(6, 8) + '日'
@@ -432,7 +440,8 @@ exports.insertPolicy = function (req, res) {
   if (content === null) {
     return res.json({code: 1, msg: '请输入content'})
   }
-  let photoUrls = req.body.photoUrls || []
+  let photoUrls = commonFunc.removePrefixs(req.body.photoUrls || [])
+
   let now = new Date()
   let dayTemp = commonFunc.convertToFormatDate(new Date(now))
   let todayFormat = dayTemp.slice(0, 4) + '年' + dayTemp.slice(4, 6) + '月' + dayTemp.slice(6, 8) + '日'
@@ -495,6 +504,9 @@ exports.getPolicy = function (req, res) {
     } else if ((req.session.role === 'insuranceA' || (iAOS !== null && iCOS === null)) && String(item.currentAgent) !== String(iAOS._id)) {
       res.json({msg: '非负责该用户的保险专员', code: 1}) // 专员只能获取自己负责的患者的保单信息
     } else {
+      if (item !== null) {
+        item.photos = commonFunc.adaptPrefixs(item.photos)
+      }
       res.json({data: item, code: 0})
     }
   }, opts, fields)

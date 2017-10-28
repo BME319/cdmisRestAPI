@@ -1,6 +1,6 @@
 var PersonalDiag = require('../models/personalDiag')
 var Alluser = require('../models/alluser')
-// var commonFunc = require('../middlewares/commonFunc')
+var commonFunc = require('../middlewares/commonFunc')
 var Order = require('../models/order')
 var Account = require('../models/account')
 // var request = require('request')
@@ -757,6 +757,11 @@ exports.getPDPatients = function (req, res) {
     if (err) {
       return res.status(500).send(err)
     } else {
+      for (var i = items.length - 1; i >= 0; i--) {
+        if ((items[i].patientId || null) !== null) {
+          items[i].patientId.photoUrl = commonFunc.adaptPrefix(items[i].patientId.photoUrl)
+        }
+      }
       return res.status(200).json({results: items})
     }
   }, opts, fields, populate)
@@ -1079,6 +1084,11 @@ exports.getMyPDs = function (req, res) {
     } else if (items.length === 0) {
       return res.status(404).send('PDs Not Found')
     } else {
+      for (var i = items.length - 1; i >= 0; i--) {
+        if ((items[i].doctorId || null) !== null) {
+          items[i].doctorId.photoUrl = commonFunc.adaptPrefix(items[i].doctorId.photoUrl)
+        }
+      }
       return res.status(200).json({results: items})
     }
   }, opts, fields, populate)

@@ -25,8 +25,8 @@ var docInfoForPat = {
   workUnit: 1,
   description: 1,
   major: 1,
-  photoUrl: 1, 
-  schedules: 1, 
+  photoUrl: 1,
+  schedules: 1,
   suspendTime: 1
 }
 // var config = require('../config')
@@ -64,6 +64,7 @@ exports.getPatientDetail = function (req, res) {
     // } else if (item.IDNo === undefined) {
     //   return res.json({results: '没有填写个人信息'})
     } else {
+      item.photoUrl = commonFunc.adaptPrefix(item.photoUrl)
       // 输出最新的诊断内容
       let recentDiagnosis = []
       if (item.diagnosisInfo.length !== 0) {
@@ -240,6 +241,9 @@ exports.getDoctorLists = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     } else {
+      for (let i = items.length - 1; i >= 0; i--) {
+        items[i].photoUrl = commonFunc.adaptPrefix(items[i].photoUrl)
+      }
       res.json({results: items, nexturl: nexturl})
     }
   }, option, fields, populate)
@@ -337,41 +341,13 @@ exports.getMyFavoriteDoctors = function (req, res) {
     if (item.doctors.length === 0) {
       return res.json({results: '未关注任何医生！'})
     }
-    res.json({results: item.doctors.slice(skip, limit + skip), nexturl: nexturl})
-  }, opts, fields, populate)
-}
-
-// 获取患者的所有医生 2017-03-30 GY
-// 2017-04-05 GY 修改：按照要求更换查询表
-exports.getMyDoctor = function (req, res) {
-  // 查询条件
-  // var patientObject = req.body.patientObject;
-  let _patientId = req.session.userId
-  let query = {userId: _patientId}
-
-  let opts = ''
-  let fields = {'_id': 0, 'doctorsInCharge': 1}
-  // 通过子表查询主表，定义主表查询路径及输出内容
-  let populate = {path: 'doctorsInCharge.doctorId', select: docInfoForPat}
-
-  Alluser.getOne(query, function (err, item) {
-    if (err) {
-      return res.status(500).send(err.errmsg)
-    }
-    // console.log(item.doctors.length)
-    let doctorsInChargeList = item.doctorsInCharge || []
-    let currentDocInCharge
-    for (let i = 0; i < doctorsInChargeList.length; i++) {
-      if (doctorsInChargeList[i].invalidFlag === 1) {
-        currentDocInCharge = doctorsInChargeList[i]
-        break
+    let doctors = item.doctors
+    for (let i = doctors.length - 1; i >= 0; i--) {
+      if (doctors[i].doctorId !== null) {
+        doctors[i].doctorId.photoUrl = commonFunc.adaptPrefix(doctors[i].doctorId.photoUrl)
       }
     }
-    if (currentDocInCharge === undefined) {
-      return res.json({results: '当前无主管医生'})
-    } else {
-      res.json({results: currentDocInCharge})
-    }
+    res.json({results: doctors.slice(skip, limit + skip), nexturl: nexturl})
   }, opts, fields, populate)
 }
 
@@ -390,36 +366,41 @@ exports.getCounselRecords = function (req, res) {
     if (err) {
       return res.status(500).send(err)
     }
-    if (items.length) {
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].symptomPhotoUrl.constructor === Array) {
-          if (items[i].symptomPhotoUrl.length) {
-            for (let j = 0; j < items[i].symptomPhotoUrl.length; j++) {
-              if (typeof(items[i].symptomPhotoUrl[j]) === 'string') {
-                let re = items[i].symptomPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
-                // console.log(re)
-                if (re) {
-                  items[i].symptomPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
-                }
-              }
-            }
-          }
-        }
-        if (items[i].diagnosisPhotoUrl.constructor === Array) {
-          if (items[i].diagnosisPhotoUrl.length) {
-            for (let j = 0; j < items[i].diagnosisPhotoUrl.length; j++) {
-              if (typeof(items[i].diagnosisPhotoUrl[j]) === 'string') {
-                let re = items[i].diagnosisPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
-                // console.log(re)
-                if (re) {
-                  items[i].diagnosisPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
-                }
-              }
-            }
-          }
-        }
+    for (let i = items.length - 1; i >= 0; i--) {
+      if (items[i].doctorId !== null) {
+        items[i].doctorId.photoUrl = commonFunc.adaptPrefix(items[i].doctorId.photoUrl)
       }
     }
+    // if (items.length) {
+    //   for (let i = 0; i < items.length; i++) {
+    //     if (items[i].symptomPhotoUrl.constructor === Array) {
+    //       if (items[i].symptomPhotoUrl.length) {
+    //         for (let j = 0; j < items[i].symptomPhotoUrl.length; j++) {
+    //           if (typeof(items[i].symptomPhotoUrl[j]) === 'string') {
+    //             let re = items[i].symptomPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+    //             // console.log(re)
+    //             if (re) {
+    //               items[i].symptomPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //     if (items[i].diagnosisPhotoUrl.constructor === Array) {
+    //       if (items[i].diagnosisPhotoUrl.length) {
+    //         for (let j = 0; j < items[i].diagnosisPhotoUrl.length; j++) {
+    //           if (typeof(items[i].diagnosisPhotoUrl[j]) === 'string') {
+    //             let re = items[i].diagnosisPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+    //             // console.log(re)
+    //             if (re) {
+    //               items[i].diagnosisPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
     res.json({results: items})
   }, opts, fields, populate)
 }
@@ -616,7 +597,7 @@ exports.editPatientDetail = function (req, res, next) {
     upObj['name'] = req.body.name
   }
   if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
-    upObj['photoUrl'] = req.body.photoUrl
+    upObj['photoUrl'] = commonFunc.removePrefix(req.body.photoUrl)
   }
   if (req.body.birthday !== null && req.body.birthday !== '' && req.body.birthday !== undefined) {
     upObj['birthday'] = new Date(req.body.birthday)
@@ -695,6 +676,7 @@ exports.editPatientDetail = function (req, res, next) {
     if (upPatient == null) {
       return res.json({result: '修改失败，不存在的患者ID！'})
     }
+    upPatient.photoUrl = commonFunc.adaptPrefix(upPatient.photoUrl)
     let date = req.body.date || null   // 区别是通过vitalSign插入体重信息，还是通过修改个人信息插入体重信息
 
     let dataTime = req.body.datatime || null

@@ -20,215 +20,215 @@ var Errorlog = require('../models/errorlog')
 
 var alluserCtrl = require('../controllers_v2/alluser_controller')
 
-var Base64 = {
-    // 转码表
-  table: [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-    'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-    'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-    'w', 'x', 'y', 'z', '0', '1', '2', '3',
-    '4', '5', '6', '7', '8', '9', '+', '/'
-  ],
-  UTF16ToUTF8: function (str) {
-    var res = []
-    var len = str.length
-    for (var i = 0; i < len; i++) {
-      var code = str.charCodeAt(i)
-      var byte1
-      var byte2
-      if (code > 0x0000 && code <= 0x007F) {
-                // 单字节，这里并不考虑0x0000，因为它是空字节
-                // U+00000000 – U+0000007F  0xxxxxxx
-        res.push(str.charAt(i))
-      } else if (code >= 0x0080 && code <= 0x07FF) {
-                // 双字节
-                // U+00000080 – U+000007FF  110xxxxx 10xxxxxx
-                // 110xxxxx
-        byte1 = 0xC0 | ((code >> 6) & 0x1F)
-                // 10xxxxxx
-        byte2 = 0x80 | (code & 0x3F)
-        res.push(
-                    String.fromCharCode(byte1),
-                    String.fromCharCode(byte2)
-                )
-      } else if (code >= 0x0800 && code <= 0xFFFF) {
-                // 三字节
-                // U+00000800 – U+0000FFFF  1110xxxx 10xxxxxx 10xxxxxx
-                // 1110xxxx
-        byte1 = 0xE0 | ((code >> 12) & 0x0F)
-                // 10xxxxxx
-        byte2 = 0x80 | ((code >> 6) & 0x3F)
-                // 10xxxxxx
-        var byte3 = 0x80 | (code & 0x3F)
-        res.push(
-                    String.fromCharCode(byte1),
-                    String.fromCharCode(byte2),
-                    String.fromCharCode(byte3)
-                )
-      } else if (code >= 0x00010000 && code <= 0x001FFFFF) {
-                // 四字节
-                // U+00010000 – U+001FFFFF  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-      } else if (code >= 0x00200000 && code <= 0x03FFFFFF) {
-                // 五字节
-                // U+00200000 – U+03FFFFFF  111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-      } else /** if (code >= 0x04000000 && code <= 0x7FFFFFFF) */ {
-                // 六字节
-                // U+04000000 – U+7FFFFFFF  1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-      }
-    }
+// var Base64 = {
+//     // 转码表
+//   table: [
+//     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+//     'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+//     'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+//     'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+//     'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+//     'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+//     'w', 'x', 'y', 'z', '0', '1', '2', '3',
+//     '4', '5', '6', '7', '8', '9', '+', '/'
+//   ],
+//   UTF16ToUTF8: function (str) {
+//     var res = []
+//     var len = str.length
+//     for (var i = 0; i < len; i++) {
+//       var code = str.charCodeAt(i)
+//       var byte1
+//       var byte2
+//       if (code > 0x0000 && code <= 0x007F) {
+//                 // 单字节，这里并不考虑0x0000，因为它是空字节
+//                 // U+00000000 – U+0000007F  0xxxxxxx
+//         res.push(str.charAt(i))
+//       } else if (code >= 0x0080 && code <= 0x07FF) {
+//                 // 双字节
+//                 // U+00000080 – U+000007FF  110xxxxx 10xxxxxx
+//                 // 110xxxxx
+//         byte1 = 0xC0 | ((code >> 6) & 0x1F)
+//                 // 10xxxxxx
+//         byte2 = 0x80 | (code & 0x3F)
+//         res.push(
+//                     String.fromCharCode(byte1),
+//                     String.fromCharCode(byte2)
+//                 )
+//       } else if (code >= 0x0800 && code <= 0xFFFF) {
+//                 // 三字节
+//                 // U+00000800 – U+0000FFFF  1110xxxx 10xxxxxx 10xxxxxx
+//                 // 1110xxxx
+//         byte1 = 0xE0 | ((code >> 12) & 0x0F)
+//                 // 10xxxxxx
+//         byte2 = 0x80 | ((code >> 6) & 0x3F)
+//                 // 10xxxxxx
+//         var byte3 = 0x80 | (code & 0x3F)
+//         res.push(
+//                     String.fromCharCode(byte1),
+//                     String.fromCharCode(byte2),
+//                     String.fromCharCode(byte3)
+//                 )
+//       } else if (code >= 0x00010000 && code <= 0x001FFFFF) {
+//                 // 四字节
+//                 // U+00010000 – U+001FFFFF  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+//       } else if (code >= 0x00200000 && code <= 0x03FFFFFF) {
+//                 // 五字节
+//                 // U+00200000 – U+03FFFFFF  111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+//       } else /** if (code >= 0x04000000 && code <= 0x7FFFFFFF) */ {
+//                 // 六字节
+//                 // U+04000000 – U+7FFFFFFF  1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+//       }
+//     }
 
-    return res.join('')
-  },
-  UTF8ToUTF16: function (str) {
-    var res = []
-    var len = str.length
-    var i = 0
-    for (i = 0; i < len; i++) {
-      var code = str.charCodeAt(i)
-      var code2
-      var code3
-      var byte1
-      var byte2
-      var utf16
-            // 对第一个字节进行判断
-      if (((code >> 7) & 0xFF) === 0x0) {
-                // 单字节
-                // 0xxxxxxx
-        res.push(str.charAt(i))
-      } else if (((code >> 5) & 0xFF) === 0x6) {
-                // 双字节
-                // 110xxxxx 10xxxxxx
-        code2 = str.charCodeAt(++i)
-        byte1 = (code & 0x1F) << 6
-        byte2 = code2 & 0x3F
-        utf16 = byte1 | byte2
-        res.push(String.fromCharCode(utf16))
-      } else if (((code >> 4) & 0xFF) === 0xE) {
-                // 三字节
-                // 1110xxxx 10xxxxxx 10xxxxxx
-        code2 = str.charCodeAt(++i)
-        code3 = str.charCodeAt(++i)
-        byte1 = (code << 4) | ((code2 >> 2) & 0x0F)
-        byte2 = ((code2 & 0x03) << 6) | (code3 & 0x3F)
-        utf16 = ((byte1 & 0x00FF) << 8) | byte2
-        res.push(String.fromCharCode(utf16))
-      } else if (((code >> 3) & 0xFF) === 0x1E) {
-                // 四字节
-                // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-      } else if (((code >> 2) & 0xFF) === 0x3E) {
-                // 五字节
-                // 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-      } else /** if (((code >> 1) & 0xFF) === 0x7E) */ {
-                // 六字节
-                // 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-      }
-    }
+//     return res.join('')
+//   },
+//   UTF8ToUTF16: function (str) {
+//     var res = []
+//     var len = str.length
+//     var i = 0
+//     for (i = 0; i < len; i++) {
+//       var code = str.charCodeAt(i)
+//       var code2
+//       var code3
+//       var byte1
+//       var byte2
+//       var utf16
+//             // 对第一个字节进行判断
+//       if (((code >> 7) & 0xFF) === 0x0) {
+//                 // 单字节
+//                 // 0xxxxxxx
+//         res.push(str.charAt(i))
+//       } else if (((code >> 5) & 0xFF) === 0x6) {
+//                 // 双字节
+//                 // 110xxxxx 10xxxxxx
+//         code2 = str.charCodeAt(++i)
+//         byte1 = (code & 0x1F) << 6
+//         byte2 = code2 & 0x3F
+//         utf16 = byte1 | byte2
+//         res.push(String.fromCharCode(utf16))
+//       } else if (((code >> 4) & 0xFF) === 0xE) {
+//                 // 三字节
+//                 // 1110xxxx 10xxxxxx 10xxxxxx
+//         code2 = str.charCodeAt(++i)
+//         code3 = str.charCodeAt(++i)
+//         byte1 = (code << 4) | ((code2 >> 2) & 0x0F)
+//         byte2 = ((code2 & 0x03) << 6) | (code3 & 0x3F)
+//         utf16 = ((byte1 & 0x00FF) << 8) | byte2
+//         res.push(String.fromCharCode(utf16))
+//       } else if (((code >> 3) & 0xFF) === 0x1E) {
+//                 // 四字节
+//                 // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+//       } else if (((code >> 2) & 0xFF) === 0x3E) {
+//                 // 五字节
+//                 // 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+//       } else /** if (((code >> 1) & 0xFF) === 0x7E) */ {
+//                 // 六字节
+//                 // 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+//       }
+//     }
 
-    return res.join('')
-  },
-  encode: function (str) {
-    if (!str) {
-      return ''
-    }
-    var utf8 = this.UTF16ToUTF8(str) // 转成UTF8
-    var i = 0 // 遍历索引
-    var len = utf8.length
-    var res = []
-    while (i < len) {
-      var c1 = utf8.charCodeAt(i++) & 0xFF
-      res.push(this.table[c1 >> 2])
-            // 需要补2个=
-      if (i === len) {
-        res.push(this.table[(c1 & 0x3) << 4])
-        res.push('==')
-        break
-      }
-      var c2 = utf8.charCodeAt(i++)
-            // 需要补1个=
-      if (i === len) {
-        res.push(this.table[((c1 & 0x3) << 4) | ((c2 >> 4) & 0x0F)])
-        res.push(this.table[(c2 & 0x0F) << 2])
-        res.push('=')
-        break
-      }
-      var c3 = utf8.charCodeAt(i++)
-      res.push(this.table[((c1 & 0x3) << 4) | ((c2 >> 4) & 0x0F)])
-      res.push(this.table[((c2 & 0x0F) << 2) | ((c3 & 0xC0) >> 6)])
-      res.push(this.table[c3 & 0x3F])
-    }
+//     return res.join('')
+//   },
+//   encode: function (str) {
+//     if (!str) {
+//       return ''
+//     }
+//     var utf8 = this.UTF16ToUTF8(str) // 转成UTF8
+//     var i = 0 // 遍历索引
+//     var len = utf8.length
+//     var res = []
+//     while (i < len) {
+//       var c1 = utf8.charCodeAt(i++) & 0xFF
+//       res.push(this.table[c1 >> 2])
+//             // 需要补2个=
+//       if (i === len) {
+//         res.push(this.table[(c1 & 0x3) << 4])
+//         res.push('==')
+//         break
+//       }
+//       var c2 = utf8.charCodeAt(i++)
+//             // 需要补1个=
+//       if (i === len) {
+//         res.push(this.table[((c1 & 0x3) << 4) | ((c2 >> 4) & 0x0F)])
+//         res.push(this.table[(c2 & 0x0F) << 2])
+//         res.push('=')
+//         break
+//       }
+//       var c3 = utf8.charCodeAt(i++)
+//       res.push(this.table[((c1 & 0x3) << 4) | ((c2 >> 4) & 0x0F)])
+//       res.push(this.table[((c2 & 0x0F) << 2) | ((c3 & 0xC0) >> 6)])
+//       res.push(this.table[c3 & 0x3F])
+//     }
 
-    return res.join('')
-  },
-  decode: function (str) {
-    if (!str) {
-      return ''
-    }
+//     return res.join('')
+//   },
+//   decode: function (str) {
+//     if (!str) {
+//       return ''
+//     }
 
-    var len = str.length
-    var i = 0
-    var res = []
-    var code1
-    var code2
-    var code3
-    var code4
-    var c1
-    var c2
-    var c3
+//     var len = str.length
+//     var i = 0
+//     var res = []
+//     var code1
+//     var code2
+//     var code3
+//     var code4
+//     var c1
+//     var c2
+//     var c3
 
-    while (i < len) {
-      code1 = this.table.indexOf(str.charAt(i++))
-      code2 = this.table.indexOf(str.charAt(i++))
-      code3 = this.table.indexOf(str.charAt(i++))
-      code4 = this.table.indexOf(str.charAt(i++))
+//     while (i < len) {
+//       code1 = this.table.indexOf(str.charAt(i++))
+//       code2 = this.table.indexOf(str.charAt(i++))
+//       code3 = this.table.indexOf(str.charAt(i++))
+//       code4 = this.table.indexOf(str.charAt(i++))
 
-      c1 = (code1 << 2) | (code2 >> 4)
-      c2 = ((code2 & 0xF) << 4) | (code3 >> 2)
-      c3 = ((code3 & 0x3) << 6) | code4
+//       c1 = (code1 << 2) | (code2 >> 4)
+//       c2 = ((code2 & 0xF) << 4) | (code3 >> 2)
+//       c3 = ((code3 & 0x3) << 6) | code4
 
-      res.push(String.fromCharCode(c1))
+//       res.push(String.fromCharCode(c1))
 
-      if (code3 !== 64) {
-        res.push(String.fromCharCode(c2))
-      }
-      if (code4 !== 64) {
-        res.push(String.fromCharCode(c3))
-      }
-    }
+//       if (code3 !== 64) {
+//         res.push(String.fromCharCode(c2))
+//       }
+//       if (code4 !== 64) {
+//         res.push(String.fromCharCode(c3))
+//       }
+//     }
 
-    return this.UTF8ToUTF16(res.join(''))
-  }
-}
-function evil (fn) {
-  var Fn = Function
-  // 一个变量指向Function，防止有些前端编译工具报错
-  return new Fn('return ' + fn)()
-}
-exports.getAlluser = function (req, res) {
-    // var _userId = req.query.userId
-    // var query = {userId:_userId};
-  var username = req.query.username
-  if (username === '' || username === null) {
-        // return res.status(422).send('username字段请输入AlluserId或openId或手机号!');
-    return res.status(422).send('username字段请输入openId!')
-  }
-    // var query = {openId:username};
-  var query = {
-    $or: [
-            {userId: username},
-            {openId: username},
-            {phoneNo: username}
-    ]
-  }
-  Alluser.getOne(query, function (err, item) {
-    if (err) {
-      return res.status(500).send(err.errmsg)
-    }
-    res.json({results: item})
-  })
-}
+//     return this.UTF8ToUTF16(res.join(''))
+//   }
+// }
+// function evil (fn) {
+//   var Fn = Function
+//   // 一个变量指向Function，防止有些前端编译工具报错
+//   return new Fn('return ' + fn)()
+// }
+// exports.getAlluser = function (req, res) {
+//     // var _userId = req.query.userId
+//     // var query = {userId:_userId};
+//   var username = req.query.username
+//   if (username === '' || username === null) {
+//         // return res.status(422).send('username字段请输入AlluserId或openId或手机号!');
+//     return res.status(422).send('username字段请输入openId!')
+//   }
+//     // var query = {openId:username};
+//   var query = {
+//     $or: [
+//             {userId: username},
+//             {openId: username},
+//             {phoneNo: username}
+//     ]
+//   }
+//   Alluser.getOne(query, function (err, item) {
+//     if (err) {
+//       return res.status(500).send(err.errmsg)
+//     }
+//     res.json({results: item})
+//   })
+// }
 
 // exports.getAlluserTDCticket = function(req, res) {
 //     var username = req.query.username;
@@ -306,7 +306,7 @@ exports.getAlluserList = function (role) {
   return function (req, res) {
     var query = {'invalidFlag': 0}
     var fields = {'_id': 1}//, 'revisionInfo':0
-    var populate = {'path':''}
+    var populate = {'path': ''}
 
     var limit = Number(req.query.limit)
     var skip = Number(req.query.skip)
@@ -626,38 +626,40 @@ exports.updateAlluserList = function (req, res) {
 //  console.log(ret);
 //  return ret;
 // }
-exports.insertAlluser = function (req, res) {
-  var userData = {
-    userId: 'whoareyou',
-    userName: 'chi',
-    openId: 'qwe',
-    phoneNo: '135',
-    password: '123456',
-    photoUrl: 'url',
-    role: ['pt'],
-    loginStatus: 1,
-    lastLogin: new Date(),
-    jpush: {
-      registrationID: 'reg',
-      alias: 'String',
-      tags: ['String']
-    },
-    revisionInfo: {
-      operationTime: new Date(),
-      userId: 'a123',
-      userName: 'chi',
-      terminalIP: '1234'
-    }
-  }
 
-  var newAlluser = new Alluser(userData)
-  newAlluser.save(function (err, userInfo) {
-    if (err) {
-      return res.status(500).send(err.errmsg)
-    }
-    res.json({results: userInfo})
-  })
-}
+// exports.insertAlluser = function (req, res) {
+//   var userData = {
+//     userId: 'whoareyou',
+//     userName: 'chi',
+//     openId: 'qwe',
+//     phoneNo: '135',
+//     password: '123456',
+//     photoUrl: 'url',
+//     role: ['pt'],
+//     loginStatus: 1,
+//     lastLogin: new Date(),
+//     jpush: {
+//       registrationID: 'reg',
+//       alias: 'String',
+//       tags: ['String']
+//     },
+//     revisionInfo: {
+//       operationTime: new Date(),
+//       userId: 'a123',
+//       userName: 'chi',
+//       terminalIP: '1234'
+//     }
+//   }
+
+//   var newAlluser = new Alluser(userData)
+//   newAlluser.save(function (err, userInfo) {
+//     if (err) {
+//       return res.status(500).send(err.errmsg)
+//     }
+//     res.json({results: userInfo})
+//   })
+// }
+
 exports.registerTest = function (acl) {
   return function (req, res, next) {
     var _phoneNo = req.body.phoneNo
@@ -1240,7 +1242,7 @@ exports.login = function (req, res, next) {
               userId: item.userId,
               userName: item.name || '',
               lastlogin: _lastlogindate,
-              PhotoUrl: item.photoUrl,
+              PhotoUrl: commonFunc.adaptPrefix(item.photoUrl),
               mesg: 'login success!',
               token: token,
               refreshToken: refreshToken,
