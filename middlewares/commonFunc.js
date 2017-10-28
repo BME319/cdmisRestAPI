@@ -245,7 +245,7 @@ var commonFunc = {
     if ((photoUrl || null) !== null && Object.prototype.toString.call(photoUrl) === '[object String]') {
       if (photoUrl.indexOf('/uploads/photos') !== -1) {
         photoUrl = photoUrl.split('/')
-        photoUrl = 'http://' + webEntry.photo_domain + '/' + photoUrl.slice(photoUrl.indexOf('uploads')).join('/')
+        photoUrl = 'https://' + webEntry.photo_domain + '/' + photoUrl.slice(photoUrl.indexOf('uploads')).join('/')
       }
     }
     return photoUrl || null
@@ -267,7 +267,7 @@ var commonFunc = {
   addPrefix: function (photoUrl) {
     if ((photoUrl || null) !== null && Object.prototype.toString.call(photoUrl) === '[object String]') {
       if (photoUrl.indexOf('/uploads/photos') === 0) {
-        photoUrl = 'http://' + webEntry.photo_domain + '/' + photoUrl
+        photoUrl = 'https://' + webEntry.photo_domain + '/' + photoUrl
       }
     }
     return photoUrl || null
