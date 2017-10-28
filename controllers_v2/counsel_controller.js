@@ -100,7 +100,7 @@ exports.getCounsels = function (req, res) {
               let re = item[i].symptomPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
               // console.log(re)
               if (re) {
-                item[i].symptomPhotoUrl[j] = 'http://' + webEntry.domain + re[0]
+                item[i].symptomPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
               }
             }
           }
@@ -113,7 +113,7 @@ exports.getCounsels = function (req, res) {
               let re = item[i].diagnosisPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
               // console.log(re)
               if (re) {
-                item[i].diagnosisPhotoUrl[j] = 'http://' + webEntry.domain + re[0]
+                item[i].diagnosisPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
               }
             }
           }

@@ -50,7 +50,7 @@ exports.getAllHealthInfo = function (req, res) {
           if (typeof(photourl) === 'string') {
             let re = photourl.match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
             if (re) {
-              photourl = 'http://' + webEntry.domain + re[0]
+              photourl = 'https://' + webEntry.photo_domain + re[0]
             }
           }
 
@@ -110,7 +110,7 @@ exports.getHealthDetail = function (req, res) {
         if (typeof(photourl) === 'string') {
           let re = photourl.match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
           if (re) {
-            photourl = 'http://' + webEntry.domain + re[0]
+            photourl = 'https://' + webEntry.photo_domain + re[0]
           }
         }
 

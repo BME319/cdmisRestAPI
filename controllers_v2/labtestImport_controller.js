@@ -145,7 +145,7 @@ exports.photoList = function (req, res) {
             if (typeof(photourl) === 'string') {
               let re = photourl.match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
               if (re) {
-                items[i].url[j].photo = 'http://' + webEntry.domain + re[0]
+                items[i].url[j].photo = 'https://' + webEntry.photo_domain + re[0]
               }
             }
             urls[k] = items[i].url[j]
@@ -321,7 +321,7 @@ exports.photoByLabtest = function (req, res) {
               if (typeof(photourl) === 'string') {
                 let re = photourl.match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
                 if (re) {
-                  photoitem.url[i].photo = 'http://' + webEntry.domain + re[0]
+                  photoitem.url[i].photo = 'https://' + webEntry.photo_domain + re[0]
                 }
               }
               var returnphoto = photoitem.url[i]

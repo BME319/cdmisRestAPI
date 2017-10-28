@@ -398,7 +398,7 @@ exports.getCounselRecords = function (req, res) {
                 let re = items[i].symptomPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
                 // console.log(re)
                 if (re) {
-                  items[i].symptomPhotoUrl[j] = 'http://' + webEntry.domain + re[0]
+                  items[i].symptomPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
                 }
               }
             }
@@ -411,7 +411,7 @@ exports.getCounselRecords = function (req, res) {
                 let re = items[i].diagnosisPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
                 // console.log(re)
                 if (re) {
-                  items[i].diagnosisPhotoUrl[j] = 'http://' + webEntry.domain + re[0]
+                  items[i].diagnosisPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
                 }
               }
             }

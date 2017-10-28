@@ -42,7 +42,7 @@ exports.getCounselReport = function (req, res) {
             let re = item.symptomPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
             // console.log(re)
             if (re) {
-              item.symptomPhotoUrl[j] = 'http://' + webEntry.domain + re[0]
+              item.symptomPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
             }
           }
         }
@@ -55,7 +55,7 @@ exports.getCounselReport = function (req, res) {
             let re = item.diagnosisPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
             // console.log(re)
             if (re) {
-              item.diagnosisPhotoUrl[j] = 'http://' + webEntry.domain + re[0]
+              item.diagnosisPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
             }
           }
         }
@@ -188,7 +188,7 @@ exports.checkCounsel = function (req, res, next) {
             let re = counsel.symptomPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
             // console.log(re)
             if (re) {
-              counsel.symptomPhotoUrl[j] = 'http://' + webEntry.domain + re[0]
+              counsel.symptomPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
             }
           }
         }
@@ -201,7 +201,7 @@ exports.checkCounsel = function (req, res, next) {
             let re = counsel.diagnosisPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
             // console.log(re)
             if (re) {
-              counsel.diagnosisPhotoUrl[j] = 'http://' + webEntry.domain + re[0]
+              counsel.diagnosisPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
             }
           }
         }
