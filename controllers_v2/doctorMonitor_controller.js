@@ -558,7 +558,8 @@ exports.getWorkload = function (req, res) {
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
     } else if (province !== '' && city !== '') {
-      array.push({$match: {province: province, city: city}})
+      // array.push({$match: {province: province, city: city}})
+      array.push({$match: {city: city}})
     }
 
     if (hospital !== '') {
