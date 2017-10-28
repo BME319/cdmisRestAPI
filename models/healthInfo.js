@@ -27,7 +27,7 @@ var healthInfoSchema = new mongoose.Schema({
       // ]
     }
   ],
-  label: {type: String, enum: ['检查', '化验', '用药', '病例']}, // 这个字段和type不是重复了嘛。。。
+  label: {type: String, enum: ['检查', '化验', '用药', '病历']}, // 这个字段和type不是重复了嘛。。。
   description: String,
   comments: String,
   // resultId: {type: mongoose.Schema.Types.ObjectId, ref:'labtestResult'},

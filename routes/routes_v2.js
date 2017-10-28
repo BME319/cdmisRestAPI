@@ -8881,6 +8881,7 @@ module.exports = function (app, webEntry, acl) {
    *         description: 返回成功消息
    */
   app.post(version + '/department/delete', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 1), departmentCtrl.deleteRecord)
+  app.get(version + '/department/getinfo', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 2), departmentCtrl.getInfobyId)
 
   // 医生数据监控
   /** JYF 2017-08-16
