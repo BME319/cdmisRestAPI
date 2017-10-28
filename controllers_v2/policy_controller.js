@@ -141,7 +141,7 @@ exports.getPatients = function (req, res) {
           let itemTemp = {}
           let followUps = items[item].followUps
           let latestFollowUp = followUps[followUps.length - 1]
-          latestFollowUp.photos = commonFunc.addPrefixs(latestFollowUp.photos)
+          latestFollowUp.photos = commonFunc.adaptPrefixs(latestFollowUp.photos)
           itemTemp['latestFollowUp'] = latestFollowUp
           itemTemp['patientId'] = items[item].patientId
           itemTemp['currentAgent'] = items[item].currentAgent
@@ -193,7 +193,7 @@ exports.getHistory = function (req, res) {
       } else {
         let followUps = item.followUps.reverse().slice(skip, skip + limit)
         for (let followUp = 0; followUp < followUps.length; followUp++) {
-          followUps[followUp].photos = commonFunc.addPrefixs(followUps[followUp].photos)
+          followUps[followUp].photos = commonFunc.adaptPrefixs(followUps[followUp].photos)
         }
         return res.json({data: followUps, code: 0})
       }
@@ -505,7 +505,7 @@ exports.getPolicy = function (req, res) {
       res.json({msg: '非负责该用户的保险专员', code: 1}) // 专员只能获取自己负责的患者的保单信息
     } else {
       if (item !== null) {
-        item.photos = commonFunc.addPrefixs(item.photos)
+        item.photos = commonFunc.adaptPrefixs(item.photos)
       }
       res.json({data: item, code: 0})
     }

@@ -5,7 +5,7 @@ var DpRelation = require('../models/dpRelation')
 // var webEntry = require('../settings').webEntry
 var Order = require('../models/order')
 var async = require('async')
-
+var commonFunc = require('../middlewares/commonFunc')
 var alluserCtrl = require('../controllers_v2/alluser_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 
@@ -61,6 +61,9 @@ exports.getPatientsToReview = function (req, res) {
         if (patientsList.length === 0) {
           return res.json({results: '无主管医生服务待审核的患者！', numberToReview: patientsList.length})
         } else {
+          for (var i = patientsList.length - 1; i >= 0; i--) {
+            patientsList[i].photoUrl = commonFunc.adaptPrefix(patientsList[i].photoUrl)
+          }
           res.json({results: patientsList, numberToReview: patientsList.length})
         }
       }
@@ -401,6 +404,7 @@ exports.getDoctorsInCharge = function (req, res, next) {
             // console.log('req.body.description', req.body.description)
             return next()
           } else {
+            itemsDIC[i].doctorId.photoUrl = commonFunc.adaptPrefix(itemsDIC[i].doctorId.photoUrl)
             return res.json({message: '当前已有主管医生!', results: itemsDIC[i]})
           }
         }

@@ -134,6 +134,8 @@ exports.getCertificate = function (req, res) {
     } else if (item.role.indexOf('doctor') === -1 && item.role.indexOf('guest') === -1) {
       return res.status(404).json({results: 'userId存在但角色不是doctor'})
     } else {
+      item.certificatePhotoUrl = commonFunc.adaptPrefix(item.certificatePhotoUrl)
+      item.practisingPhotoUrl = commonFunc.adaptPrefix(item.practisingPhotoUrl)
       return res.json({results: item})
     }
   }, opts, fields)

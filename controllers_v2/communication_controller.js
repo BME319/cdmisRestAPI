@@ -58,10 +58,10 @@ exports.getTeam = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     if (item !== null) {
-      item.sponsorPhoto = commonFunc.addPrefix(item.sponsorPhoto)
-      item.photoAddress = commonFunc.addPrefix(item.photoAddress)
+      item.sponsorPhoto = commonFunc.adaptPrefix(item.sponsorPhoto)
+      item.photoAddress = commonFunc.adaptPrefix(item.photoAddress)
       for (var i = item.members.length - 1; i >= 0; i--) {
-        item.members[i].photoUrl = commonFunc.addPrefix(item.members[i].photoUrl)
+        item.members[i].photoUrl = commonFunc.adaptPrefix(item.members[i].photoUrl)
       }
     }
     res.json({results: item})
@@ -107,8 +107,11 @@ exports.newTeam = function (req, res) {
   newTeam.save(function (err, teamInfo) {
     if (err) {
       return res.status(500).send(err.errmsg)
+    } else {
+      teamInfo.sponsorPhoto = commonFunc.adaptPrefix(teamInfo.sponsorPhoto)
+      teamInfo.photoAddress = commonFunc.adaptPrefix(teamInfo.photoAddress)
+      res.json({result: '新建成功', newResults: teamInfo})
     }
-    res.json({result: '新建成功', newResults: teamInfo})
   })
 }
 
@@ -275,10 +278,17 @@ exports.getConsultation = function (req, res) {
     if (err) {
       return res.status(422).send(err.message)
     }
-    if (item == null) {
+    if (item === null) {
       return res.json({result: '不存在的consultationId!'})
+    } else {
+      if (item.patientId !== null) {
+        item.patientId.photoUrl = commonFunc.adaptPrefix(item.patientId.photoUrl)
+      }
+      if (item.sponsorId !== null) {
+        item.sponsorId.photoUrl = commonFunc.adaptPrefix(item.sponsorId.photoUrl)
+      }
+      res.json({result: item})
     }
-    res.json({result: item})
   }, fields, opts, populate)
 }
 
@@ -377,6 +387,10 @@ exports.updateNumber = function (req, res) {
       if (err) {
         return res.status(422).send(err.message)
       } else {
+        upteam.members = upteam.members || []
+        for (var i = upteam.members.length - 1; i >= 0; i--) {
+          upteam.members[i].photoUrl = commonFunc.adaptPrefix(upteam.members[i].photoUrl)
+        }
         return res.json({result: '更新成员成功', results: upteam})
       }
     }, {new: true})

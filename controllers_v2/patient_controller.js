@@ -64,6 +64,7 @@ exports.getPatientDetail = function (req, res) {
     // } else if (item.IDNo === undefined) {
     //   return res.json({results: '没有填写个人信息'})
     } else {
+      item.photoUrl = commonFunc.adaptPrefix(item.photoUrl)
       // 输出最新的诊断内容
       let recentDiagnosis = []
       if (item.diagnosisInfo.length !== 0) {
@@ -241,7 +242,7 @@ exports.getDoctorLists = function (req, res) {
       return res.status(500).send(err.errmsg)
     } else {
       for (let i = items.length - 1; i >= 0; i--) {
-        items[i].photoUrl = commonFunc.addPrefix(items[i].photoUrl)
+        items[i].photoUrl = commonFunc.adaptPrefix(items[i].photoUrl)
       }
       res.json({results: items, nexturl: nexturl})
     }
@@ -343,7 +344,7 @@ exports.getMyFavoriteDoctors = function (req, res) {
     let doctors = item.doctors
     for (let i = doctors.length - 1; i >= 0; i--) {
       if (doctors[i].doctorId !== null) {
-        doctors[i].doctorId.photoUrl = commonFunc.addPrefix(doctors[i].doctorId.photoUrl)
+        doctors[i].doctorId.photoUrl = commonFunc.adaptPrefix(doctors[i].doctorId.photoUrl)
       }
     }
     res.json({results: doctors.slice(skip, limit + skip), nexturl: nexturl})
@@ -367,7 +368,7 @@ exports.getCounselRecords = function (req, res) {
     }
     for (let i = items.length - 1; i >= 0; i--) {
       if (items[i].doctorId !== null) {
-        items[i].doctorId.photoUrl = commonFunc.addPrefix(items[i].doctorId.photoUrl)
+        items[i].doctorId.photoUrl = commonFunc.adaptPrefix(items[i].doctorId.photoUrl)
       }
     }
     res.json({results: items})
@@ -645,6 +646,7 @@ exports.editPatientDetail = function (req, res, next) {
     if (upPatient == null) {
       return res.json({result: '修改失败，不存在的患者ID！'})
     }
+    upPatient.photoUrl = commonFunc.adaptPrefix(upPatient.photoUrl)
     let date = req.body.date || null   // 区别是通过vitalSign插入体重信息，还是通过修改个人信息插入体重信息
 
     let dataTime = req.body.datatime || null

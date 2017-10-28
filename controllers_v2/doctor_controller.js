@@ -127,6 +127,9 @@ exports.insertDocBasic = function (req, res) {
     if (upDoctor == null) {
       return res.json({result: '修改失败，不存在的医生ID！'})
     } else {
+      upDoctor.certificatePhotoUrl = commonFunc.adaptPrefix(upDoctor.certificatePhotoUrl)
+      upDoctor.practisingPhotoUrl = commonFunc.adaptPrefix(upDoctor.practisingPhotoUrl)
+      upDoctor.photoUrl = commonFunc.adaptPrefix(upDoctor.photoUrl)
       return res.json({result: '修改成功', editResults: upDoctor})
     }
   }, {new: true})
@@ -149,9 +152,10 @@ exports.getTeams = function (req, res) {
       return res.status(500).send(err.errmsg)
     }
     for (var i = items.length - 1; i >= 0; i--) {
-      items[i].sponsorPhoto = commonFunc.addPrefix(items[i].sponsorPhoto)
+      items[i].sponsorPhoto = commonFunc.adaptPrefix(items[i].sponsorPhoto)
+      items[i].photoAddress = commonFunc.adaptPrefix(items[i].photoAddress)
       for (var j = items[i].members.length - 1; j >= 0; j--) {
-        items[i].members[j].photoUrl = commonFunc.addPrefix(items[i].members[j].photoUrl)
+        items[i].members[j].photoUrl = commonFunc.adaptPrefix(items[i].members[j].photoUrl)
       }
     }
     res.json({results: items})
@@ -246,7 +250,7 @@ exports.getGroupPatientList = function (req, res) {
     }
     for (let i = items.length - 1; i >= 0; i--) {
       if ((items[i].patientId || null) !== null) {
-        items[i].patientId.photoUrl = commonFunc.addPrefix(items[i].patientId.photoUrl)
+        items[i].patientId.photoUrl = commonFunc.adaptPrefix(items[i].patientId.photoUrl)
       }
     }
     res.json({results: items})
@@ -377,7 +381,7 @@ exports.getComments = function (req, res, next) {
     } else {
       for (let i = items.length - 1; i >= 0; i--) {
         if ((items[i].patientId || null) !== null) {
-          items[i].patientId.photoUrl = commonFunc.addPrefix(items[i].patientId.photoUrl)
+          items[i].patientId.photoUrl = commonFunc.adaptPrefix(items[i].patientId.photoUrl)
         }
       }
       req.body.comments = items
@@ -438,9 +442,9 @@ exports.getDoctorInfo = function (req, res) {
   // console.log(DocInfo.TDCticket);
   // console.log(DocInfo);
     if ((upDoctor || null) !== null) {
-      upDoctor.photoUrl = commonFunc.addPrefix(upDoctor.photoUrl)
-      upDoctor.certificatePhotoUrl = commonFunc.addPrefix(upDoctor.certificatePhotoUrl)
-      upDoctor.practisingPhotoUrl = commonFunc.addPrefix(upDoctor.practisingPhotoUrl)
+      upDoctor.photoUrl = commonFunc.adaptPrefix(upDoctor.photoUrl)
+      upDoctor.certificatePhotoUrl = commonFunc.adaptPrefix(upDoctor.certificatePhotoUrl)
+      upDoctor.practisingPhotoUrl = commonFunc.adaptPrefix(upDoctor.practisingPhotoUrl)
     }
     res.json({results: upDoctor, TDCticket: req.body.TDCticket, comments: comments, nexturl: req.body.nexturl})
   }, {new: true})
@@ -471,10 +475,10 @@ exports.editDoctorDetail = function (req, res, next) {
   }
 
   if (req.body.certificatePhotoUrl !== null && req.body.certificatePhotoUrl !== '' && req.body.certificatePhotoUrl !== undefined) {
-    upObj['certificatePhotoUrl'] = req.body.certificatePhotoUrl
+    upObj['certificatePhotoUrl'] = commonFunc.removePrefix(req.body.certificatePhotoUrl)
   }
   if (req.body.practisingPhotoUrl !== null && req.body.practisingPhotoUrl !== '' && req.body.practisingPhotoUrl !== undefined) {
-    upObj['practisingPhotoUrl'] = req.body.practisingPhotoUrl
+    upObj['practisingPhotoUrl'] = commonFunc.removePrefix(req.body.practisingPhotoUrl)
   }
   if (req.body.name !== null && req.body.name !== '' && req.body.name !== undefined) {
     upObj['name'] = req.body.name
@@ -530,9 +534,12 @@ exports.editDoctorDetail = function (req, res, next) {
     if (err) {
       return res.status(422).send(err.message)
     }
-    if (upDoctor == null) {
+    if (upDoctor === null) {
       return res.json({result: '修改失败，不存在的医生ID！'})
     } else {
+      upDoctor.photoUrl = commonFunc.adaptPrefix(upDoctor.photoUrl)
+      upDoctor.certificatePhotoUrl = commonFunc.adaptPrefix(upDoctor.certificatePhotoUrl)
+      upDoctor.practisingPhotoUrl = commonFunc.adaptPrefix(upDoctor.practisingPhotoUrl)
       if (upObj.name !== null || upObj.photoUrl !== null) {
         req.body.editResults = upDoctor
         next()
@@ -610,7 +617,7 @@ exports.updateTeamMember = function (req, res) {
         members: {
           userId: req.body.editResults.userId,
           name: req.body.editResults.name,
-          photoUrl: req.body.editResults.photoUrl
+          photoUrl: commonFunc.removePrefix(req.body.editResults.photoUrl)
         }
       }
     }
@@ -655,9 +662,9 @@ exports.getRecentDoctorList = function (req, res) {
     } else {
       for (var i = item.doctors.length - 1; i >= 0; i--) {
         if ((item.doctors[i].doctorId || null) !== null) {
-          item.doctors[i].doctorId.photoUrl = commonFunc.addPrefix(item.doctors[i].doctorId.photoUrl)
-          item.doctors[i].doctorId.certificatePhotoUrl = commonFunc.addPrefix(item.doctors[i].doctorId.certificatePhotoUrl)
-          item.doctors[i].doctorId.practisingPhotoUrl = commonFunc.addPrefix(item.doctors[i].doctorId.practisingPhotoUrl)
+          item.doctors[i].doctorId.photoUrl = commonFunc.adaptPrefix(item.doctors[i].doctorId.photoUrl)
+          item.doctors[i].doctorId.certificatePhotoUrl = commonFunc.adaptPrefix(item.doctors[i].doctorId.certificatePhotoUrl)
+          item.doctors[i].doctorId.practisingPhotoUrl = commonFunc.adaptPrefix(item.doctors[i].doctorId.practisingPhotoUrl)
         }
       }
       return res.json({results: item.doctors.sort(sortTime)})
@@ -1080,7 +1087,7 @@ exports.getPatientsList = function (req, res) {
         }
       }
       for (let k = returns.length - 1; k >= 0; k--) {
-        returns[k].patientId.photoUrl = commonFunc.addPrefix(returns[k].patientId.photoUrl)
+        returns[k].patientId.photoUrl = commonFunc.adaptPrefix(returns[k].patientId.photoUrl)
       }
       if (limit === 0) {
         return res.json({results: returns.slice(skip)})
@@ -1424,7 +1431,7 @@ exports.getDoctor = function (req, res) {
         return res.status(500).send(err)
       }
       if (alluserinfo !== null) {
-        alluserinfo.photoUrl = commonFunc.addPrefix(alluserinfo.photoUrl)
+        alluserinfo.photoUrl = commonFunc.adaptPrefix(alluserinfo.photoUrl)
       }
       return res.json({results: alluserinfo})
     }, '', fields)
