@@ -390,6 +390,36 @@ exports.getCounselRecords = function (req, res) {
     if (err) {
       return res.status(500).send(err)
     }
+    if (items.length) {
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].symptomPhotoUrl.constructor === Array) {
+          if (items[i].symptomPhotoUrl.length) {
+            for (let j = 0; j < items[i].symptomPhotoUrl.length; j++) {
+              if (typeof(items[i].symptomPhotoUrl[j]) === 'string') {
+                let re = items[i].symptomPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+                // console.log(re)
+                if (re) {
+                  items[i].symptomPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
+                }
+              }
+            }
+          }
+        }
+        if (items[i].diagnosisPhotoUrl.constructor === Array) {
+          if (items[i].diagnosisPhotoUrl.length) {
+            for (let j = 0; j < items[i].diagnosisPhotoUrl.length; j++) {
+              if (typeof(items[i].diagnosisPhotoUrl[j]) === 'string') {
+                let re = items[i].diagnosisPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+                // console.log(re)
+                if (re) {
+                  items[i].diagnosisPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
     res.json({results: items})
   }, opts, fields, populate)
 }

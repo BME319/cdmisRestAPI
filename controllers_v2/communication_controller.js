@@ -35,6 +35,32 @@ exports.getCounselReport = function (req, res) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+    if (item.symptomPhotoUrl.constructor === Array) {
+      if (item.symptomPhotoUrl.length) {
+        for (let j = 0; j < item.symptomPhotoUrl.length; j++) {
+          if (typeof(item.symptomPhotoUrl[j]) === 'string') {
+            let re = item.symptomPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+            // console.log(re)
+            if (re) {
+              item.symptomPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
+            }
+          }
+        }
+      }
+    }
+    if (item.diagnosisPhotoUrl.constructor === Array) {
+      if (item.diagnosisPhotoUrl.length) {
+        for (let j = 0; j < item.diagnosisPhotoUrl.length; j++) {
+          if (typeof(item.diagnosisPhotoUrl[j]) === 'string') {
+            let re = item.diagnosisPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+            // console.log(re)
+            if (re) {
+              item.diagnosisPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
+            }
+          }
+        }
+      }
+    }
     res.json({results: item})
   }, opts, fields, populate)
 }
@@ -154,6 +180,32 @@ exports.checkCounsel = function (req, res, next) {
     }
     if (counsel == null) {
       return res.json({result: '不存在的counselID！'})
+    }
+    if (counsel.symptomPhotoUrl.constructor === Array) {
+      if (counsel.symptomPhotoUrl.length) {
+        for (let j = 0; j < counsel.symptomPhotoUrl.length; j++) {
+          if (typeof(counsel.symptomPhotoUrl[j]) === 'string') {
+            let re = counsel.symptomPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+            // console.log(re)
+            if (re) {
+              counsel.symptomPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
+            }
+          }
+        }
+      }
+    }
+    if (counsel.diagnosisPhotoUrl.constructor === Array) {
+      if (counsel.diagnosisPhotoUrl.length) {
+        for (let j = 0; j < counsel.diagnosisPhotoUrl.length; j++) {
+          if (typeof(counsel.diagnosisPhotoUrl[j]) === 'string') {
+            let re = counsel.diagnosisPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+            // console.log(re)
+            if (re) {
+              counsel.diagnosisPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
+            }
+          }
+        }
+      }
     }
     req.body.diseaseInfo = counsel
     next()
