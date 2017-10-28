@@ -275,7 +275,8 @@ exports.getInsurance = function (req, res) {
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
     } else if (province !== '' && city !== '') {
-      // array.push({$match: {province: province, city: city}})
+      array.push({$match: {province: province, city: city}})
+    } else if (province === '' && city !== '') {
       array.push({$match: {city: city}})
     }
     InsuranceMsg.aggregate(array, function (err, results) {
