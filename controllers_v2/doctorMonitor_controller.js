@@ -558,7 +558,8 @@ exports.getWorkload = function (req, res) {
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
     } else if (province !== '' && city !== '') {
-      // array.push({$match: {province: province, city: city}})
+      array.push({$match: {province: province, city: city}})
+    } else if (province === '' && city !== '') {
       array.push({$match: {city: city}})
     }
 
@@ -693,7 +694,8 @@ exports.getCounseltimeout = function (req, res) {
     if (province !== '' && city === '') {
       array.push({$match: {province: province}})
     } else if (province !== '' && city !== '') {
-      // array.push({$match: {province: province, city: city}})
+      array.push({$match: {province: province, city: city}})
+    } else if (province === '' && city !== '') {
       array.push({$match: {city: city}})
     }
 
@@ -789,7 +791,8 @@ exports.getScore = function (req, res) {
   if (province !== '' && city === '') {
     array.push({$match: {province: province}})
   } else if (province !== '' && city !== '') {
-    // array.push({$match: {province: province, city: city}})
+    array.push({$match: {province: province, city: city}})
+  } else if (province === '' && city !== '') {
     array.push({$match: {city: city}})
   }
 
