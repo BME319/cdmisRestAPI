@@ -11,10 +11,10 @@ var Consultation = require('../models/consultation')
 var DpRelation = require('../models/dpRelation')
 var News = require('../models/news')
 var Message = require('../models/message')
-// var commonFunc = require('../middlewares/commonFunc')
+var commonFunc = require('../middlewares/commonFunc')
 var request = require('request')
 var Alluser = require('../models/alluser')
-var commonFunc = require('../middlewares/commonFunc')
+// var commonFunc = require('../middlewares/commonFunc')
 
 // 根据counselId获取counsel表除messages外的信息 2017-03-31 GY
 // 注释 输入，counselId；输出，问诊信息
@@ -52,14 +52,20 @@ exports.getTeam = function (req, res) {
   // 设置参数
   var opts = ''
   var fields = {'_id': 0, 'revisionInfo': 0}
-  var populate = ''
 
   Team.getOne(query, function (err, item) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
+    if (item !== null) {
+      item.sponsorPhoto = commonFunc.addPrefix(item.sponsorPhoto)
+      item.photoAddress = commonFunc.addPrefix(item.photoAddress)
+      for (var i = item.members.length - 1; i >= 0; i--) {
+        item.members[i].photoUrl = commonFunc.addPrefix(item.members[i].photoUrl)
+      }
+    }
     res.json({results: item})
-  }, opts, fields, populate)
+  }, opts, fields)
 }
 
 // 新建组 2017-04-06 GY
@@ -71,8 +77,8 @@ exports.newTeam = function (req, res) {
     name: req.body.name,
     sponsorId: req.body.sponsorId,
     sponsorName: req.body.sponsorName,
-    sponsorPhoto: req.body.sponsorPhoto,
-    photoAddress: req.body.photoAddress,
+    sponsorPhoto: commonFunc.removePrefix(req.body.sponsorPhoto),
+    photoAddress: commonFunc.removePrefix(req.body.photoAddress),
     // members: [
     //  {
     //    userId: String,
@@ -322,11 +328,15 @@ exports.insertMember = function (req, res, next) {
   var query = {
     teamId: req.body.teamId
   }
+  let members = req.body.members || []
+  for (var i = members.length - 1; i >= 0; i--) {
+    members[i].photoUrl = commonFunc.removePrefix(members[i].photoUrl)
+  }
 
   var upObj = {
     $addToSet: {
       members: {
-        $each: req.body.members
+        $each: members
       }
     }
   }

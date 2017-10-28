@@ -1240,7 +1240,7 @@ exports.login = function (req, res, next) {
               userId: item.userId,
               userName: item.name || '',
               lastlogin: _lastlogindate,
-              PhotoUrl: item.photoUrl,
+              PhotoUrl: commonFunc.addPrefix(item.photoUrl),
               mesg: 'login success!',
               token: token,
               refreshToken: refreshToken,

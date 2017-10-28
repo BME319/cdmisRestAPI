@@ -10,7 +10,6 @@ var Comment = require('../models/comment')
 var Alluser = require('../models/alluser')
 var commonFunc = require('../middlewares/commonFunc')
 var pinyin = require('pinyin')
-var DoctorsInCharge = require('../models/doctorsInCharge')
 
 // //根据userId查询医生信息 2017-03-28 GY
 // exports.getDoctor = function(req, res) {
@@ -66,16 +65,16 @@ exports.insertDocBasic = function (req, res) {
 
   let upObj = {}
   if (req.body.certificatePhotoUrl !== null && req.body.certificatePhotoUrl !== '' && req.body.certificatePhotoUrl !== undefined) {
-    upObj['certificatePhotoUrl'] = req.body.certificatePhotoUrl
+    upObj['certificatePhotoUrl'] = commonFunc.removePrefix(req.body.certificatePhotoUrl)
   }
   if (req.body.practisingPhotoUrl !== null && req.body.practisingPhotoUrl !== '' && req.body.practisingPhotoUrl !== undefined) {
-    upObj['practisingPhotoUrl'] = req.body.practisingPhotoUrl
+    upObj['practisingPhotoUrl'] = commonFunc.removePrefix(req.body.practisingPhotoUrl)
   }
   if (req.body.name !== null && req.body.name !== '' && req.body.name !== undefined) {
     upObj['name'] = req.body.name
   }
   if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
-    upObj['photoUrl'] = req.body.photoUrl
+    upObj['photoUrl'] = commonFunc.removePrefix(req.body.photoUrl)
   }
   if (req.body.birthday !== null && req.body.birthday !== '' && req.body.birthday !== undefined) {
     upObj['birthday'] = new Date(req.body.birthday)
@@ -145,11 +144,17 @@ exports.getTeams = function (req, res) {
   let opts = ''
   let fields = {'_id': 0, 'revisionInfo': 0}
 
-  Team.getSome(query, function (err, item) {
+  Team.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err.errmsg)
     }
-    res.json({results: item})
+    for (var i = items.length - 1; i >= 0; i--) {
+      items[i].sponsorPhoto = commonFunc.addPrefix(items[i].sponsorPhoto)
+      for (var j = items[i].members.length - 1; j >= 0; j--) {
+        items[i].members[j].photoUrl = commonFunc.addPrefix(items[i].members[j].photoUrl)
+      }
+    }
+    res.json({results: items})
   }, opts, fields)
 }
 
@@ -235,11 +240,16 @@ exports.getGroupPatientList = function (req, res) {
     }
   }
 
-  Consultation.getSome(query, function (err, item) {
+  Consultation.getSome(query, function (err, items) {
     if (err) {
       return res.status(500).send(err)
     }
-    res.json({results: item})
+    for (let i = items.length - 1; i >= 0; i--) {
+      if ((items[i].patientId || null) !== null) {
+        items[i].patientId.photoUrl = commonFunc.addPrefix(items[i].patientId.photoUrl)
+      }
+    }
+    res.json({results: items})
   }, opts, fields, populate)
 }
 
@@ -365,6 +375,11 @@ exports.getComments = function (req, res, next) {
     if (err) {
       return res.status(500).send(err.errmsg)
     } else {
+      for (let i = items.length - 1; i >= 0; i--) {
+        if ((items[i].patientId || null) !== null) {
+          items[i].patientId.photoUrl = commonFunc.addPrefix(items[i].patientId.photoUrl)
+        }
+      }
       req.body.comments = items
     }
     next()
@@ -422,7 +437,11 @@ exports.getDoctorInfo = function (req, res) {
   // DocInfo['TDCticket'] = req.body.TDCticket;
   // console.log(DocInfo.TDCticket);
   // console.log(DocInfo);
-
+    if ((upDoctor || null) !== null) {
+      upDoctor.photoUrl = commonFunc.addPrefix(upDoctor.photoUrl)
+      upDoctor.certificatePhotoUrl = commonFunc.addPrefix(upDoctor.certificatePhotoUrl)
+      upDoctor.practisingPhotoUrl = commonFunc.addPrefix(upDoctor.practisingPhotoUrl)
+    }
     res.json({results: upDoctor, TDCticket: req.body.TDCticket, comments: comments, nexturl: req.body.nexturl})
   }, {new: true})
 }
@@ -461,7 +480,7 @@ exports.editDoctorDetail = function (req, res, next) {
     upObj['name'] = req.body.name
   }
   if (req.body.photoUrl !== null && req.body.photoUrl !== '' && req.body.photoUrl !== undefined) {
-    upObj['photoUrl'] = req.body.photoUrl
+    upObj['photoUrl'] = commonFunc.removePrefix(req.body.photoUrl)
   }
   if (req.body.birthday !== null && req.body.birthday !== '' && req.body.birthday !== undefined) {
     upObj['birthday'] = new Date(req.body.birthday)
@@ -533,7 +552,7 @@ exports.updateTeamSponsor = function (req, res, next) {
     upObj['sponsorName'] = req.body.name
   }
   if (req.body.photoUrl !== null) {
-    upObj['sponsorPhoto'] = req.body.photoUrl
+    upObj['sponsorPhoto'] = commonFunc.removePrefix(req.body.photoUrl)
   }
 
   var querys = {sponsorId: _userId}
@@ -634,6 +653,13 @@ exports.getRecentDoctorList = function (req, res) {
     if (item == null) {
       return res.json({results: {doctors: []}})
     } else {
+      for (var i = item.doctors.length - 1; i >= 0; i--) {
+        if ((item.doctors[i].doctorId || null) !== null) {
+          item.doctors[i].doctorId.photoUrl = commonFunc.addPrefix(item.doctors[i].doctorId.photoUrl)
+          item.doctors[i].doctorId.certificatePhotoUrl = commonFunc.addPrefix(item.doctors[i].doctorId.certificatePhotoUrl)
+          item.doctors[i].doctorId.practisingPhotoUrl = commonFunc.addPrefix(item.doctors[i].doctorId.practisingPhotoUrl)
+        }
+      }
       return res.json({results: item.doctors.sort(sortTime)})
     }
   }, opts, fields, populate)
@@ -1053,7 +1079,9 @@ exports.getPatientsList = function (req, res) {
           })
         }
       }
-
+      for (let k = returns.length - 1; k >= 0; k--) {
+        returns[k].patientId.photoUrl = commonFunc.addPrefix(returns[k].patientId.photoUrl)
+      }
       if (limit === 0) {
         return res.json({results: returns.slice(skip)})
       } else {
@@ -1395,7 +1423,10 @@ exports.getDoctor = function (req, res) {
       if (err) {
         return res.status(500).send(err)
       }
+      if (alluserinfo !== null) {
+        alluserinfo.photoUrl = commonFunc.addPrefix(alluserinfo.photoUrl)
+      }
       return res.json({results: alluserinfo})
-    },'',fields)
+    }, '', fields)
   }
 }
