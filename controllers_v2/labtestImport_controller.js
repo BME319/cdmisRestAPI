@@ -141,6 +141,13 @@ exports.photoList = function (req, res) {
       for (let i = 0; i < items.length; i++) {
         for (let j = 0; j < items[i].url.length; j++) {
           if (items[i].url[j].status === 0) {
+            let photourl = items[i].url[j].photo || ''
+            if (typeof(photourl) === 'string') {
+              let re = photourl.match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+              if (re) {
+                items[i].url[j].photo = 'http://' + webEntry.domain + re[0]
+              }
+            }
             urls[k] = items[i].url[j]
             k++
           }
@@ -289,7 +296,7 @@ exports.getLabtest = function (req, res) {
 // 根据化验信息获取对应图片 2017-07-07 GY
 exports.photoByLabtest = function (req, res) {
   if (req.query.labtestId === null || req.query.labtestId === '' || req.query.labtestId === undefined) {
-    return res.status(412).json({results: '请填写patientId'})
+    return res.status(412).json({results: '请填写labtestId'})
   }
   var querylabtest = {labtestId: req.query.labtestId}
   LabtestImport.getOne(querylabtest, function (err, item) {
@@ -309,6 +316,14 @@ exports.photoByLabtest = function (req, res) {
         } else {
           for (let i = 0; i < photoitem.url.length; i++) {
             if (photoitem.url[i].photoId === item.photoId) {
+              // 图片链接处理 GY 2017-10-28
+              let photourl = photoitem.url[i].photo
+              if (typeof(photourl) === 'string') {
+                let re = photourl.match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+                if (re) {
+                  photoitem.url[i].photo = 'http://' + webEntry.domain + re[0]
+                }
+              }
               var returnphoto = photoitem.url[i]
               break
             }
