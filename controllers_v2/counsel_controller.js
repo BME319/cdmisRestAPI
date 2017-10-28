@@ -92,6 +92,34 @@ exports.getCounsels = function (req, res) {
     }
     let item1 = []
     for (let i = 0; i < item.length; i++) {
+      // photo_url拼接 GY 2017-10-27
+      if (item[i].symptomPhotoUrl.constructor === Array) {
+        if (item[i].symptomPhotoUrl.length) {
+          for (let j = 0; j < item[i].symptomPhotoUrl.length; j++) {
+            if (typeof(item[i].symptomPhotoUrl[j]) === 'string') {
+              let re = item[i].symptomPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+              // console.log(re)
+              if (re) {
+                item[i].symptomPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
+              }
+            }
+          }
+        }
+      }
+      if (item[i].diagnosisPhotoUrl.constructor === Array) {
+        if (item[i].diagnosisPhotoUrl.length) {
+          for (let j = 0; j < item[i].diagnosisPhotoUrl.length; j++) {
+            if (typeof(item[i].diagnosisPhotoUrl[j]) === 'string') {
+              let re = item[i].diagnosisPhotoUrl[j].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+              // console.log(re)
+              if (re) {
+                item[i].diagnosisPhotoUrl[j] = 'https://' + webEntry.photo_domain + re[0]
+              }
+            }
+          }
+        }
+      }
+
       if (item[i].patientId != null) {
         if (_skip > 0) {
           _skip--
@@ -166,6 +194,43 @@ exports.saveQuestionaire = function (req, res, next) {
     return res.json({result: '请填写type,咨询=1,问诊=2,加急咨询=6'})
   }
 
+  // photo_url拆分 gy 2017-10-27
+  let symptomPhotoUrl = []
+  if (req.body.symptomPhotoUrl) {
+    if (req.body.symptomPhotoUrl.constructor === Array) {
+      symptomPhotoUrl = req.body.symptomPhotoUrl
+    }
+    if (symptomPhotoUrl.length) {
+      for (let i = 0; i < symptomPhotoUrl.length; i++) {
+        if (typeof(symptomPhotoUrl[i]) === 'string') {
+          let re = symptomPhotoUrl[i].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+          // console.log(re)
+          if (re) {
+            symptomPhotoUrl[i] = re[0]
+          }
+        }
+      }
+    }
+  }
+  // console.log(symptomPhotoUrl)
+  let diagnosisPhotoUrl = []
+  if (req.body.diagnosisPhotoUrl) {
+    if (req.body.diagnosisPhotoUrl.constructor === Array) {
+      diagnosisPhotoUrl = req.body.diagnosisPhotoUrl
+    }
+    if (diagnosisPhotoUrl.length) {
+      for (let i = 0; i < diagnosisPhotoUrl.length; i++) {
+        if (typeof(diagnosisPhotoUrl[i]) === 'string') {
+          let re = diagnosisPhotoUrl[i].match(/\/uploads(\S*)(jpg|png|jpeg|gif|bmp|raw|webp)/)
+          // console.log(re)
+          if (re) {
+            diagnosisPhotoUrl[i] = re[0]
+          }
+        }
+      }
+    }
+  }
+
   var counselData = {
     counselId: req.newId,
     patientId: req.session._id,
@@ -179,7 +244,7 @@ exports.saveQuestionaire = function (req, res, next) {
     sickTime: req.body.sickTime,
     // visited: req.body.visited,
     symptom: req.body.symptom,
-    symptomPhotoUrl: req.body.symptomPhotoUrl,
+    symptomPhotoUrl: symptomPhotoUrl,
     // description: req.body.description,
     // drugs: req.body.drugs,
     // history: req.body.history,
@@ -196,7 +261,7 @@ exports.saveQuestionaire = function (req, res, next) {
   let hospital = req.body.hospital || null
   let visitDate = req.body.visitDate || null
   let diagnosis = req.body.diagnosis || null
-  let diagnosisPhotoUrl = req.body.diagnosisPhotoUrl || null
+  // let diagnosisPhotoUrl = req.body.diagnosisPhotoUrl || null
   if (hospital !== null) {
     counselData['hospital'] = hospital
   }
@@ -206,7 +271,7 @@ exports.saveQuestionaire = function (req, res, next) {
   if (diagnosis !== null) {
     counselData['diagnosis'] = diagnosis
   }
-  if (diagnosisPhotoUrl !== null) {
+  if (diagnosisPhotoUrl) {
     counselData['diagnosisPhotoUrl'] = diagnosisPhotoUrl
   }
 
