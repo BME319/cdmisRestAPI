@@ -300,6 +300,36 @@ exports.deleteRecord = function (req, res) {
     res.json('删除成功')
   })
 }
+
+exports.getInfobyId = function (req, res) {
+  let portleader = req.query.portleaderId || ''
+  let departLeader = req.query.departLeaderId || ''
+  let query = {}
+  if (portleader !== '') {
+    query['portleader'] = portleader
+    let fields = {district: 1}
+    Department.getSome(query, fields, function (err, Info) {
+      if (err) {
+        res.status(500).send(err.errmsg)
+      }
+      Info = distinct(Info)
+      res.json({results: Info})
+    })
+  } else if (departLeader !== '') {
+    query['departLeader'] = departLeader
+    let fields = {district: 1, hospital: 1}
+    Department.getSome(query, fields, function (err, Info) {
+      if (err) {
+        res.status(500).send(err.errmsg)
+      }
+      Info = distinct(Info)
+      res.json({results: Info})
+    })
+  } else {
+    res.status(500).send('请输入Id')
+  }
+}
+
 function distinct (data) {
   let arr = []
   let arrCompare = []
