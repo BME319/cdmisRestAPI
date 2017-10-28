@@ -1245,7 +1245,8 @@ exports.login = function (req, res, next) {
               token: token,
               refreshToken: refreshToken,
               reviewStatus: item.reviewStatus,
-              role: item.role
+              role: item.role,
+              _id: item._id
             }
 
                         // 2017-06-07GY调试
