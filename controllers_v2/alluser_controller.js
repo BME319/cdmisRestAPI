@@ -19,6 +19,7 @@ var commonFunc = require('../middlewares/commonFunc')
 var Errorlog = require('../models/errorlog')
 
 var alluserCtrl = require('../controllers_v2/alluser_controller')
+var wechatCtrl = require('../controllers_v2/wechat_controller')
 
 // var Base64 = {
 //     // 转码表
