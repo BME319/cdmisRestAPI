@@ -804,7 +804,7 @@ exports.sendMsgTemplate = function (req, res) {
               'role': 'doctor',
               'postdata': {
                 'template_id': config.wxTemplateIdConfig.newCounselToDocOrTeam,
-                'url': actionUrl,                                  // 跳转路径需要添加
+                // 'url': actionUrl,                                  // 跳转路径需要添加
                 'data': {
                   'first': {
                     'value': '您的患者有新的提问，请及时处理',
@@ -869,7 +869,7 @@ exports.sendMsgTemplate = function (req, res) {
               var templatePat = {
                 'userId': req.body.content.targetID,
                 'role': 'patient',
-                'url': actionUrl,
+                // 'url': actionUrl,
                 'postdata': {
                   'template_id': config.wxTemplateIdConfig.docReply,
                   'url': '',
