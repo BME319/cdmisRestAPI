@@ -273,7 +273,7 @@ exports.insertOrder = function (req, res, next) {
           } else if (freeFlag === 1) {
             // 有免费次数
             return res.json({results: {status: 1, msg: '本次服务免费'}})
-          } else if (currentDate <= new Date('2017-09-01')) {
+          } else if (currentDate <= new Date('2018-01-01')) {
             return res.json({results: {status: 1, msg: '现在为免费体验期，不收取任何费用'}})
           } else {
             req.orderObject = item

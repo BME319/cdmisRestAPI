@@ -798,12 +798,13 @@ exports.sendMsgTemplate = function (req, res) {
             if (req.body.content.contentType === 'custom') {
               counselId = req.commmunicationData.content.content.counselId
             }
+            let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=patient_11_1_' + req.body.content.targetID + '_' + counselId + '&#wechat_redirect'
             var templateDoc = {
               'userId': req.body.content.targetID,
               'role': 'doctor',
               'postdata': {
                 'template_id': config.wxTemplateIdConfig.newCounselToDocOrTeam,
-                'url': '',                                  // 跳转路径需要添加
+                'url': actionUrl,                                  // 跳转路径需要添加
                 'data': {
                   'first': {
                     'value': '您的患者有新的提问，请及时处理',
@@ -864,9 +865,11 @@ exports.sendMsgTemplate = function (req, res) {
               counsels = items.sort(sortTime)
               let counselId = counsels[0].counselId
               let help = counsels[0].help
+              let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=doctor_11_1_' + req.body.content.targetID + '_' + counselId + '&#wechat_redirect'
               var templatePat = {
                 'userId': req.body.content.targetID,
                 'role': 'patient',
+                'url': actionUrl,
                 'postdata': {
                   'template_id': config.wxTemplateIdConfig.docReply,
                   'url': '',
