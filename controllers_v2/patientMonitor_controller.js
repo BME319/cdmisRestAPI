@@ -162,7 +162,7 @@ exports.getLinegraph = function (req, res) {
         }
       }
     ]
-    if (province === '' && city !== '') {
+    if (province === '' && city === '') {
       array.push(
         {
           $group: {
