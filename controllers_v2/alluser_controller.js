@@ -2292,6 +2292,48 @@ exports.serviceMessage = function (req, res, next) {
 
   requestTest.write(content)
   requestTest.end()
+
+  let template = {
+    'userId': req.session.userId,
+    'role': 'patient',
+    'postdata': {
+      'template_id': config.wxTemplateIdConfig.myPDSuccess,
+      'url': '',
+      'data': {
+        'first': {
+          'value': '您好，您的面诊预约已成功！',
+          'color': '#173177'
+        },
+        'keyword1': {
+          'value': doctorName,
+          'color': '#173177'
+        },
+        'keyword2': {
+          'value': PDTime,
+          'color': '#173177'
+        },
+        'keyword3': {
+          'value': PDPlace,
+          'color': '#173177'
+        },
+        'remark': {
+          'value': '届时请出示验证码' + confirmCode + '。您可登录应用进行查看相关详细信息。',
+          'color': '#173177'
+        }
+      }
+    }
+  }
+  wechatCtrl.wechatMessageTemplate(template, function (err, results) {
+    if (err) {
+      console.log(new Date(), 'send_messageTemplate_toPIC_err_' + req.session.name)
+    } else {
+      if (results.messageTemplate.errcode === 0) {
+        console.log(new Date(), 'send_messageTemplate_toPIC_success_' + req.session.name)
+      } else {
+        console.log(new Date(), 'send_messageTemplate_toPIC_fail_' + req.session.name + results.messageTemplate.errcode)
+      }
+    }
+  })
   next()
 }
 
