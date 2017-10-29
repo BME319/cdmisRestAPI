@@ -62,7 +62,7 @@ exports.getPatientsToReview = function (req, res) {
           return res.json({results: '无主管医生服务待审核的患者！', numberToReview: patientsList.length})
         } else {
           for (var i = patientsList.length - 1; i >= 0; i--) {
-            patientsList[i].photoUrl = commonFunc.adaptPrefix(patientsList[i].photoUrl)
+            patientsList[i].patientId.photoUrl = commonFunc.adaptPrefix(patientsList[i].patientId.photoUrl)
           }
           res.json({results: patientsList, numberToReview: patientsList.length})
         }

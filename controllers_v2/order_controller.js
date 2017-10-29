@@ -406,9 +406,11 @@ exports.refundChangeStatus = function (status) {
     var upObj
     if (_status === 'refundApplication') {
       upObj = {
-        paystatus: 6, // 退款处理中
-        refundNo: req.newId,
-        refundAppTime: new Date()
+        $set: {
+          paystatus: 6, // 退款处理中
+          refundNo: req.newId,
+          refundAppTime: new Date()
+        }
       }
     } else if (_status === 'REFUNDCLOSE') {
       upObj = {
