@@ -8,6 +8,7 @@ var async = require('async')
 var commonFunc = require('../middlewares/commonFunc')
 var alluserCtrl = require('../controllers_v2/alluser_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
+var config = require('../config')
 
 // var getToken = function (headers) {
 //   if (headers && headers.authorization) {
@@ -163,7 +164,7 @@ exports.updateDoctorInCharge = function (req, res, next) {
     }
   }
   let populate = [
-    {path: 'doctorId', select: {_id: 0, name: 1}},
+    {path: 'doctorId', select: {_id: 0, name: 1, title: 1, workUnit: 1}},
     {path: 'patientId', select: {_id: 0, phoneNo: 1}}
   ]
   DoctorsInCharge.updateOne(query, upObj, function (err, upDIC) {
@@ -203,6 +204,47 @@ exports.updateDoctorInCharge = function (req, res, next) {
                     })
                   }
                 }
+                let template = {
+                  'userId': req.body.patientId,
+                  'role': 'patient',
+                  'postdata': {
+                    'template_id': config.wxTemplateIdConfig.bindDocMsgToPat,
+                    'url': '',
+                    'data': {
+                      'first': {
+                        'value': '您好，您申请的主管医生服务已由医生通过。',
+                        'color': '#173177'
+                      },
+                      'keyword1': {
+                        'value': req.session.name,
+                        'color': '#173177'
+                      },
+                      'keyword2': {
+                        'value': upDIC.doctorId.title,
+                        'color': '#173177'
+                      },
+                      'keyword3': {
+                        'value': upDIC.doctorId.workUnit,
+                        'color': '#173177'
+                      },
+                      'remark': {
+                        'value': '您可登录应用进行查看。',
+                        'color': '#173177'
+                      }
+                    }
+                  }
+                }
+                wechatCtrl.wechatMessageTemplate(template, function (err, results) {
+                  if (err) {
+                    console.log(new Date(), 'send_messageTemplate_toPIC_err_' + req.session.name)
+                  } else {
+                    if (results.messageTemplate.errcode === 0) {
+                      console.log(new Date(), 'send_messageTemplate_toPIC_success_' + req.session.name)
+                    } else {
+                      console.log(new Date(), 'send_messageTemplate_toPIC_fail_' + req.session.name + results.messageTemplate.errcode)
+                    }
+                  }
+                })
                 return next()
               }
             })
@@ -344,7 +386,44 @@ exports.addPatientInCharge = function (req, res, next) {
         if (err) {
           console.log({msg: err, data: results, code: 1})
         }
-        next()
+        let template = {
+          'userId': req.body.doctorId,
+          'role': 'doctor',
+          'postdata': {
+            'template_id': config.wxTemplateIdConfig.bindDocMsgToDoc,
+            'url': '',
+            'data': {
+              'first': {
+                'value': '您好，有一位患者申请您的主管医生服务。',
+                'color': '#173177'
+              },
+              'keyword1': {
+                'value': req.session.name,
+                'color': '#173177'
+              },
+              'keyword2': {
+                'value': new Date().getFullYear() + '年' + String(new Date().getMonth() + 1) + '月' + new Date().getDate() + '日',
+                'color': '#173177'
+              },
+              'remark': {
+                'value': '请及时登录应用审核。',
+                'color': '#173177'
+              }
+            }
+          }
+        }
+        wechatCtrl.wechatMessageTemplate(template, function (err, results) {
+          if (err) {
+            console.log(new Date(), 'send_messageTemplate_toDIC_err_' + req.session.name)
+          } else {
+            if (results.messageTemplate.errcode === 0) {
+              console.log(new Date(), 'send_messageTemplate_toDIC_success_' + req.session.name)
+            } else {
+              console.log(new Date(), 'send_messageTemplate_toDIC_fail_' + req.session.name + results.messageTemplate.errcode)
+            }
+            return next()
+          }
+        })
       })
     }
   }, {new: true, upsert: true})
