@@ -14,6 +14,8 @@ var Message = require('../models/message')
 var commonFunc = require('../middlewares/commonFunc')
 var request = require('request')
 var Alluser = require('../models/alluser')
+var wechatCtrl = require('../controllers_v2/wechat_controller')
+var async = require('async')
 // var commonFunc = require('../middlewares/commonFunc')
 
 // 根据counselId获取counsel表除messages外的信息 2017-03-31 GY
@@ -682,7 +684,7 @@ exports.updateLastTalkTime = function (req, res) {
 
 // 根据ID及type存储交流记录 2017-04-21 GY
 // 注释 承接communication类型newId；输入messageType，sendBy，receiver，content.createTimeInMillis/newsType；输出，交流记录存储
-exports.postCommunication = function (req, res) {
+exports.postCommunication = function (req, res, next) {
   var commmunicationData = {
     messageNo: req.newId,
     messageType: req.body.messageType,
@@ -702,7 +704,8 @@ exports.postCommunication = function (req, res) {
     sendByRole = 'patient'
   }
   commmunicationData['sendByRole'] = sendByRole
-
+  req.commmunicationData = commmunicationData
+  console.log('commmunicationData', commmunicationData)
   var newCommunication = new Communication(commmunicationData)
   newCommunication.save(function (err, communicationInfo) {
     if (err) {
@@ -710,6 +713,7 @@ exports.postCommunication = function (req, res) {
     }
 
     var msg = communicationInfo.content
+    req.communicationInfo = communicationInfo
         // do not save into news
 
     // 用户咨询记录
@@ -727,7 +731,8 @@ exports.postCommunication = function (req, res) {
         json: true
       }, function (err, response) {
         if (err) return res.status(500).send(err)
-        return res.json({result: '新建成功', newResults: communicationInfo})
+        // return res.json({result: '新建成功', newResults: communicationInfo})
+        return next()
       })
     } else { // team群发记录
       request({
@@ -748,105 +753,270 @@ exports.postCommunication = function (req, res) {
 
       // res.json({result:'新建成功', newResults: communicationInfo});
   })
+}
+
+exports.sendMsgTemplate = function (req, res) {
+  // 设置排序规则函数，时间降序
+  function sortTime (a, b) {
+    return b.time - a.time
+  }
   // 微信模板消息
-  if (req.body.newsType === '11') {
-    if (commmunicationData.receiverRole === 'doctor') {
-      let counselId = ''
-      if (req.body.content.contentType === 'custom') {
-        counselId = commmunicationData.content.content.counselId
-      }
-      var templateDoc = {
-        'userId': req.body.content.targetID,
-        'role': 'doctor',
-        'postdata': {
-          'template_id': config.wxTemplateIdConfig.newCounselToDocOrTeam,
-          'url': '',                                  // 跳转路径需要添加
-          'data': {
-            'first': {
-              'value': '您的患者有新的提问，请及时处理',
-              'color': '#173177'
-            },
-            'keyword1': {
-              'value': counselId,                     // 咨询ID,custom以外的聊天记录貌似获取不到。。
-              'color': '#173177'
-            },
-            'keyword2': {
-              'value': req.body.content.fromName,     // 患者信息（姓名，性别，年龄）
-              'color': '#173177'
-            },
-            'keyword3': {
-              'value': req.body.content.content.text, // 问题描述
-              'color': '#173177'
-            },
-            'keyword4': {
-              'value': commonFunc.getNowFormatSecondMinus(new Date(req.body.content.sendDateTime)), // 提交时间
-              'color': '#173177'
-            },
-
-            'remark': {
-              'value': '感谢您的使用！',
-              'color': '#173177'
-            }
-          }
-        }
-      }
-      request({
-        url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
-        method: 'POST',
-        body: templateDoc,
-        json: true
-      }, function (err, response) {
-        if (err) {
-          console.log(new Date(), 'auto_send_messageTemplate_fail_' + commmunicationData.messageNo)
-        }
+  async.parallel({
+    receiver: function (callback) {
+      Alluser.getOne({userId: req.body.content.targetID, role: req.commmunicationData.receiverRole}, function (err, item1) {
+        callback(err, item1)
       })
-    } else if (commmunicationData.receiverRole === 'patient') {
-      if (req.body.content.contentType === 'text') {
-        let help = ''
-        var templatePat = {
-          'userId': req.body.content.targetID,
-          'role': 'patient',
-          'postdata': {
-            'template_id': config.wxTemplateIdConfig.docReply,
-            'url': '',
-            'data': {
-              'first': {
-                'value': '您的咨询已被回复，请点击此处查看详情。',
-                'color': '#173177'
-              },
-              'keyword1': {
-                'value': help,                          // 咨询内容,貌似获取不到。。
-                'color': '#173177'
-              },
-              'keyword2': {
-                'value': req.body.content.content.text, // 回复内容
-                'color': '#173177'
-              },
-              'keyword3': {
-                'value': req.body.content.fromName,     // 医生姓名
-                'color': '#173177'
-              },
+    },
+    send: function (callback) {
+      Alluser.getOne({userId: req.body.content.fromID, role: req.commmunicationData.sendByRole}, function (err, item2) {
+        callback(err, item2)
+      })
+    }
+  }, function (err, results) {
+    if (err) {
+      console.log(err.errmsg)
+    }
+    if (results.receiver !== null && results.send !== null) {
+      let query = {status: 1}
+      if (req.commmunicationData.receiverRole === 'doctor') {
+        query = {
+          patientId: results.send._id,
+          doctorId: results.receiver._id
+        }
+        Counsel.getSome(query, function (err, items) {
+          if (err) {
+            console.log(err.errmsg)
+          }
+          if (items.length === 0) {
+            return res.json({result: '新建成功', newResults: req.communicationInfo})
+          } else {
+            var counsels = []
+            counsels = items.sort(sortTime)
+            let counselId = counsels[0].counselId
+            console.log(counselId)
+            let help = counsels[0].help
+            if (req.body.content.contentType === 'custom') {
+              counselId = req.commmunicationData.content.content.counselId
+            }
+            let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=patient_11_1_' + req.body.content.targetID + '_' + counselId + '&#wechat_redirect'
+            var templateDoc = {
+              'userId': req.body.content.targetID,
+              'role': 'doctor',
+              'postdata': {
+                'template_id': config.wxTemplateIdConfig.newCounselToDocOrTeam,
+                'url': actionUrl,                                  // 跳转路径需要添加
+                'data': {
+                  'first': {
+                    'value': '您的患者有新的提问，请及时处理',
+                    'color': '#173177'
+                  },
+                  'keyword1': {
+                    'value': counselId,                     // 咨询ID,custom以外的聊天记录貌似获取不到。。
+                    'color': '#173177'
+                  },
+                  'keyword2': {
+                    'value': req.body.content.fromName,     // 患者信息（姓名，性别，年龄）
+                    'color': '#173177'
+                  },
+                  'keyword3': {
+                    'value': req.body.content.content.text, // 问题描述
+                    'color': '#173177'
+                  },
+                  'keyword4': {
+                    'value': commonFunc.getNowFormatSecond(), // 提交时间
+                    'color': '#173177'
+                  },
 
-              'remark': {
-                'value': '感谢您的使用！',
-                'color': '#173177'
+                  'remark': {
+                    'value': '感谢您的使用！',
+                    'color': '#173177'
+                  }
+                }
               }
             }
-          }
-        }
-        request({
-          url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
-          method: 'POST',
-          body: templatePat,
-          json: true
-        }, function (err, response) {
-          if (err) {
-            console.log(new Date(), 'auto_send_messageTemplate_fail_' + commmunicationData.messageNo)
+            let params = templateDoc
+            wechatCtrl.wechatMessageTemplate(params, function (err, results) {
+              if (err) {
+                console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + req.commmunicationData.messageNo)
+              } else {
+                if (results.messageTemplate.errcode === 0) {
+                  return res.json({result: '新建成功', newResults: req.communicationInfo})
+                } else {
+                  return res.json({result: '新建成功', newResults: req.communicationInfo})
+                }
+              }
+            })
           }
         })
+      } else if (req.commmunicationData.receiverRole === 'patient') {
+        if (req.body.content.contentType === 'text') {
+          query = {
+            patientId: results.receiver._id,
+            doctorId: results.send._id
+          }
+          Counsel.getSome(query, function (err, items) {
+            if (err) {
+              console.log(err.errmsg)
+            }
+            if (items.length === 0) {
+              return res.json({result: '新建成功', newResults: req.communicationInfo})
+            } else {
+              var counsels = []
+              counsels = items.sort(sortTime)
+              let counselId = counsels[0].counselId
+              let help = counsels[0].help
+              let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=doctor_11_1_' + req.body.content.targetID + '_' + counselId + '&#wechat_redirect'
+              var templatePat = {
+                'userId': req.body.content.targetID,
+                'role': 'patient',
+                'url': actionUrl,
+                'postdata': {
+                  'template_id': config.wxTemplateIdConfig.docReply,
+                  'url': '',
+                  'data': {
+                    'first': {
+                      'value': '您的咨询已被回复，请点击此处查看详情。',
+                      'color': '#173177'
+                    },
+                    'keyword1': {
+                      'value': help,                          // 咨询内容,貌似获取不到。。
+                      'color': '#173177'
+                    },
+                    'keyword2': {
+                      'value': req.body.content.content.text, // 回复内容
+                      'color': '#173177'
+                    },
+                    'keyword3': {
+                      'value': req.body.content.fromName,     // 医生姓名
+                      'color': '#173177'
+                    },
+
+                    'remark': {
+                      'value': '感谢您的使用！',
+                      'color': '#173177'
+                    }
+                  }
+                }
+              }
+              let params = templatePat
+              wechatCtrl.wechatMessageTemplate(params, function (err, results) {
+                if (err) {
+                  console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + commmunicationData.messageNo)
+                } else {
+                  if (results.messageTemplate.errcode === 0) {
+                    return res.json({result: '新建成功', newResults: req.communicationInfo})
+                  } else {
+                    return res.json({result: '新建成功', newResults: req.communicationInfo})
+                  }
+                }
+              })
+            }
+          })
+        }
       }
     }
-  }
+  })
+
+  // if (commmunicationData.receiverRole === 'doctor') {
+  //   let counselId = ''
+  //   if (req.body.content.contentType === 'custom') {
+  //     counselId = commmunicationData.content.content.counselId
+  //   }
+  //   var templateDoc = {
+  //     'userId': req.body.content.targetID,
+  //     'role': 'doctor',
+  //     'postdata': {
+  //       'template_id': config.wxTemplateIdConfig.newCounselToDocOrTeam,
+  //       'url': '',                                  // 跳转路径需要添加
+  //       'data': {
+  //         'first': {
+  //           'value': '您的患者有新的提问，请及时处理',
+  //           'color': '#173177'
+  //         },
+  //         'keyword1': {
+  //           'value': counselId,                     // 咨询ID,custom以外的聊天记录貌似获取不到。。
+  //           'color': '#173177'
+  //         },
+  //         'keyword2': {
+  //           'value': req.body.content.fromName,     // 患者信息（姓名，性别，年龄）
+  //           'color': '#173177'
+  //         },
+  //         'keyword3': {
+  //           'value': req.body.content.content.text, // 问题描述
+  //           'color': '#173177'
+  //         },
+  //         'keyword4': {
+  //           'value': commonFunc.getNowFormatSecond(), // 提交时间
+  //           'color': '#173177'
+  //         },
+
+  //         'remark': {
+  //           'value': '感谢您的使用！',
+  //           'color': '#173177'
+  //         }
+  //       }
+  //     }
+  //   }
+  //   let params = templateDoc
+  //   wechatCtrl.wechatMessageTemplate(params, function (err, results) {
+  //     if (err) {
+  //       console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + commmunicationData.messageNo)
+  //     } else {
+  //       if (results.messageTemplate.errcode === 0) {
+  //         console.log(new Date(), 'auto_send_messageTemplate_toDoc_success_' + commmunicationData.messageNo)
+  //       } else {
+  //         console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + commmunicationData.messageNo)
+  //       }
+  //     }
+  //   })
+  // } else if (commmunicationData.receiverRole === 'patient') {
+  //   if (req.body.content.contentType === 'text') {
+  //     let help = ''
+  //     var templatePat = {
+  //       'userId': req.body.content.targetID,
+  //       'role': 'patient',
+  //       'postdata': {
+  //         'template_id': config.wxTemplateIdConfig.docReply,
+  //         'url': '',
+  //         'data': {
+  //           'first': {
+  //             'value': '您的咨询已被回复，请点击此处查看详情。',
+  //             'color': '#173177'
+  //           },
+  //           'keyword1': {
+  //             'value': help,                          // 咨询内容,貌似获取不到。。
+  //             'color': '#173177'
+  //           },
+  //           'keyword2': {
+  //             'value': req.body.content.content.text, // 回复内容
+  //             'color': '#173177'
+  //           },
+  //           'keyword3': {
+  //             'value': req.body.content.fromName,     // 医生姓名
+  //             'color': '#173177'
+  //           },
+
+  //           'remark': {
+  //             'value': '感谢您的使用！',
+  //             'color': '#173177'
+  //           }
+  //         }
+  //       }
+  //     }
+  //     let params = templatePat
+  //     wechatCtrl.wechatMessageTemplate(params, function (err, results) {
+  //       if (err) {
+  //         console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + commmunicationData.messageNo)
+  //       } else {
+  //         if (results.messageTemplate.errcode === 0) {
+  //           console.log(new Date(), 'auto_send_messageTemplate_toPat_success_' + commmunicationData.messageNo)
+  //         } else {
+  //           console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + commmunicationData.messageNo)
+  //         }
+  //       }
+  //     })
+  //   }
+  // }
 }
 
 // exports.postCommunication = function(req, res) {

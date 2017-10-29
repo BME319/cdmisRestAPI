@@ -62,14 +62,14 @@ exports.getDistribution = function (req, res) {
         }
       }
     ]
-    if (province === '') {
+    if (province === '' && city === '') {
       array.push({
         $group: {
           _id: '$province',
           count: {$sum: 1}
         }
       })
-    } else if (city === '') {
+    } else if (city === '' && province !== '') {
       array.push(
         {$match: {province: province}},
         {
@@ -81,7 +81,7 @@ exports.getDistribution = function (req, res) {
       )
     } else {
       array.push(
-        {$match: {province: province}},
+        // {$match: {province: province}},
         {$match: {city: city}},
         {
           $group: {
@@ -162,7 +162,7 @@ exports.getLinegraph = function (req, res) {
         }
       }
     ]
-    if (province === '') {
+    if (province === '' && city === '') {
       array.push(
         {
           $group: {
@@ -170,7 +170,7 @@ exports.getLinegraph = function (req, res) {
             count: {$sum: 1}
           }
         })
-    } else if (city === '') {
+    } else if (province !== '' && city === '') {
       array.push(
         {$match: {province: province}},
         {
@@ -182,7 +182,7 @@ exports.getLinegraph = function (req, res) {
       )
     } else {
       array.push(
-        {$match: {province: province}},
+        // {$match: {province: province}},
         {$match: {city: city}},
         {
           $group: {
@@ -276,6 +276,8 @@ exports.getInsurance = function (req, res) {
       array.push({$match: {province: province}})
     } else if (province !== '' && city !== '') {
       array.push({$match: {province: province, city: city}})
+    } else if (province === '' && city !== '') {
+      array.push({$match: {city: city}})
     }
     InsuranceMsg.aggregate(array, function (err, results) {
       if (err) {

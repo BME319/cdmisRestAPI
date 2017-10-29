@@ -322,7 +322,7 @@ exports.getInfobyId = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      Info = distinct(Info)
+      // Info = distinct(Info)
       res.json({results: Info})
     })
   } else {

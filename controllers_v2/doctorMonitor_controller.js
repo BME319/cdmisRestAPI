@@ -20,14 +20,14 @@ exports.getDistribution = function (req, res) {
       {$match: {role: 'doctor'}},
       {$match: {creationTime: {$gte: startTime, $lt: endTime}}}
     ]
-    if (province === '') {
+    if (province === '' && city === '') {
       array.push({
         $group: {
           _id: '$province',
           count: {$sum: 1}
         }
       })
-    } else if (city === '') {
+    } else if (city === '' && province !== '') {
       array.push(
         {$match: {province: province}},
         {
@@ -39,7 +39,7 @@ exports.getDistribution = function (req, res) {
       )
     } else {
       array.push(
-        {$match: {province: province}},
+        // {$match: {province: province}},
         {$match: {city: city}},
         {
           $group: {
@@ -98,6 +98,12 @@ exports.getLinegraph = function (req, res) {
         0,
         0,
         {$match: {province: province}},
+        {$match: {city: city}}
+      )
+    } else if (city !== '') {
+      array.splice(
+        0,
+        0,
         {$match: {city: city}}
       )
     }
@@ -553,6 +559,8 @@ exports.getWorkload = function (req, res) {
       array.push({$match: {province: province}})
     } else if (province !== '' && city !== '') {
       array.push({$match: {province: province, city: city}})
+    } else if (province === '' && city !== '') {
+      array.push({$match: {city: city}})
     }
 
     if (hospital !== '') {
@@ -687,6 +695,8 @@ exports.getCounseltimeout = function (req, res) {
       array.push({$match: {province: province}})
     } else if (province !== '' && city !== '') {
       array.push({$match: {province: province, city: city}})
+    } else if (province === '' && city !== '') {
+      array.push({$match: {city: city}})
     }
 
     if (hospital !== '') {
@@ -782,6 +792,8 @@ exports.getScore = function (req, res) {
     array.push({$match: {province: province}})
   } else if (province !== '' && city !== '') {
     array.push({$match: {province: province, city: city}})
+  } else if (province === '' && city !== '') {
+    array.push({$match: {city: city}})
   }
 
   if (hospital !== '') {
@@ -951,6 +963,8 @@ exports.getOrder = function (req, res) {
       array.push({$match: {province: province}})
     } else if (province !== '' && city !== '') {
       array.push({$match: {province: province, city: city}})
+    } else if (province === '' && city !== '') {
+      array.push({$match: {city: city}})
     }
 
     if (hospital !== '') {

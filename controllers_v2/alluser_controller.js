@@ -993,7 +993,7 @@ exports.checkBinding = function (req, res) {
                   return res.status(500).send(err.errmsg)
                 }
                 // 微信模板消息 2017-10-12 lgf
-                if (role === 'doctor') {
+                if (role === 'patient') {
                   let queryD = {userId: item1.doctorUserId, role: 'doctor'}
                   Alluser.getOne(queryD, function (err, doctor) {
                     if (err) {
@@ -1062,7 +1062,7 @@ exports.checkBinding = function (req, res) {
                                   'color': '#173177'
                                 },
                                 'keyword2': {
-                                  'value': commonFunc.getNowFormatSecondMinus(), // 添加的时间
+                                  'value': commonFunc.getNowFormatSecond(),     // 添加的时间
                                   'color': '#173177'
                                 },
                                 'remark': {
@@ -1088,11 +1088,12 @@ exports.checkBinding = function (req, res) {
                       })
                     }
                   })
-                }
-                // 2017-06-07GY调试
-                // console.log('checkBinding_out');
+                } else {
+                  // 2017-06-07GY调试
+                  // console.log('checkBinding_out');
 
-                return res.json({results: req.results})
+                  return res.json({results: req.results})
+                }
               })
             })
           } else {
