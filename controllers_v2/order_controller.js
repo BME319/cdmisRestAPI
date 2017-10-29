@@ -231,7 +231,7 @@ exports.insertOrder = function (req, res, next) {
           paystatus = 0
         }
         var currentDate = new Date()
-        if (currentDate <= new Date('2017-09-01')) {
+        if (currentDate <= new Date('2018-01-01')) {
           paystatus = 2
           // return res.json({ results: {
           //   status: 0,
