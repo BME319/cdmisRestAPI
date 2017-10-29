@@ -1036,6 +1036,8 @@ exports.checkBinding = function (req, res) {
                           }
                         }
                       }
+                      console.log(templatePat)
+                      console.log('http://' + webEntry.domain + '/api/v2/wechat/messageTemplate')
                       request({
                         url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
                         method: 'POST',
