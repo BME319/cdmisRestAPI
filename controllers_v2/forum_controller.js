@@ -3,6 +3,7 @@ var Alluser = require('../models/alluser')
 var Forumuserinfo = require('../models/forumuserinfo')
 var webEntry = require('../settings').webEntry
 var Reply = require('../models/reply')
+var commonFunc = require('../middlewares/commonFunc')
 
 exports.forumPosting = function (req, res) {
   let userId = req.session.userId || ''
@@ -169,6 +170,9 @@ exports.getAllposts = function (req, res) {
       res.status(500).json({code: 1, msg: err.errmsg})
     }
     // console.log(results)
+    for (var i = results.length - 1; i >= 0; i--) {
+      results[i].avatar = commonFunc.adaptPrefix(results[i].avatar)
+    }
     res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
   })
 }
@@ -265,6 +269,9 @@ exports.getMycollection = function (req, res) {
   Forumuserinfo.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
+    }
+    for (var i = results.length - 1; i >= 0; i--) {
+      results[i].avatar = commonFunc.adaptPrefix(results[i].avatar)
     }
     res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
   })
@@ -378,6 +385,9 @@ exports.getMyposts = function (req, res) {
   Forumuserinfo.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).json({code: 1, msg: err.errmsg})
+    }
+    for (var i = results.length - 1; i >= 0; i--) {
+      results[i].avatar = commonFunc.adaptPrefix(results[i].avatar)
     }
     // console.log(results)
     res.json({data: {results: results, nexturl: nexturl}, code: 0, msg: 'success'})
@@ -514,7 +524,19 @@ exports.getPostContent = function (req, res) {
         if (err) {
           res.status(500).json({code: 1, msg: err.errmsg})
         }
+        for (let i = results.length - 1; i >= 0; i--) {
+          results[i].avatar = commonFunc.adaptPrefix(results[i].avatar)
+        }
         result1['replies'] = results
+        result1.avatar = commonFunc.adaptPrefix(result1.avatar)
+        if (Object.prototype.toString.call(result1.content) === '[object Array]') {
+          for (let item = result1.content.length - 1; item >= 0; item--) {
+            for (let attribute in result1.content[item]) {
+              result1.content[item][attribute] = commonFunc.adaptPrefix(result1.content[item][attribute])
+              result1.content[item][attribute] = commonFunc.adaptPrefixs(result1.content[item][attribute])
+            }
+          }
+        }
         res.json({data: result1, code: 0, msg: 'success'})
         // res.json({data: extend({}, result1[0], results[0]), code: 0, msg: 'success'})
       })
