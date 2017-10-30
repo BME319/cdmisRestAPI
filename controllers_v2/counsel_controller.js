@@ -452,6 +452,111 @@ exports.counselAutoRelay = function (req, res, next) {
                 newsErrFlag = 1
                 console.log(new Date(), 'newsErr', err)
               }
+              request({
+                      // url: 'http://' + webEntry.domain + ':4060/api/v1/communication/getTeam?teamId=' + data.msg.teamId + '?token=' + req.query.token || req.body.token,
+                url: 'http://' + webEntry.domain + '/api/v2/communication/teamtemp?teamId=' + teamitem.teamId,
+                method: 'GET',
+                json: true
+              }, function (err, response) {
+                if (err) {
+                          // do-something
+                          // console.log(err.errmsg);
+                } else {
+                  // console.log(response.body)
+                  if (!response.body.results) {
+                    // console.log('noperson')
+                  } else {
+                    var sponsorId = response.body.results.sponsorId
+                    var members = response.body.results.members
+                    members.push({'userId': sponsorId})
+                    // console.log(members)
+                    // console.log(members.length)
+
+                    for (var idx in members) {
+                     // var online = false
+                      // console.log(members[idx])
+                      // custom card 群发
+                      // if (data.msg.contentType === 'custom' && data.msg.content.type === 'card' || (data.msg.contentType === 'text' || data.msg.contentType === 'image' || data.msg.contentType === 'voice')) {
+                      var actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_' + data.msg.content.consultationId + '_' + data.msg.teamId + '&#wechat_redirect'
+                      var help
+                      var time
+                      if (msgContent !== null) {
+                        var counsel = msgContent.counsel || null
+                        if (counsel !== null) {
+                          help = counsel.help
+                          time = counsel.time || new Date()
+                        }
+                      }
+                      let y = time.getFullYear()
+                      let m = time.getMonth() + 1
+                      let d = time.getDate()
+                      let h = time.getHours()
+                      let mm = time.getMinutes()
+                      let s = time.getSeconds()
+                      let formatSecond = y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s)
+                      var template = {
+                        'userId': members[idx].userId,          // data.msg.content.doctorId, //医生的UID
+                        'role': 'doctor',
+                        'postdata': {
+                          'template_id': config.wxTemplateIdConfig.newCounselToDocOrTeam, // 'cVLIgOb_JvtFGQUA2KvwAmbT5B3ZB79cRsAM4ZKKK0k',
+                          'url': actionUrl,
+                          'data': {
+                            'first': {
+                              'value': '您的团队有一个新的咨询（问诊）消息，请及时处理',
+                              'color': '#173177'
+                            },
+                            'keyword1': {
+                              'value': msgContent.counselId, // 咨询ID
+                              'color': '#173177'
+                            },
+                            'keyword2': {
+                              'value': msgContent.patientName, // 患者信息（姓名，性别，年龄）
+                              'color': '#173177'
+                            },
+                            'keyword3': {
+                              'value': help, // 问题描述
+                              'color': '#173177'
+                            },
+                            'keyword4': {
+                              'value': formatSecond, // 提交时间
+                              'color': '#173177'
+                            },
+
+                            'remark': {
+                              'value': '感谢您的使用！',
+                              'color': '#173177'
+                            }
+                          }
+                        }
+                      }
+                      // console.log(idx)
+
+                                      // groupSend(data);
+                      request({
+                                          // url: 'http://'+ webEntry.domain +':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
+                        url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
+                        method: 'POST',
+                        body: template,
+                        json: true
+
+                      }, function (err, response, body) {
+                                          // console.log(idx + 'done')
+                        // console.log(body)
+
+                                          // if (!err && response.statusCode == 200) {
+                                          //     res.json({results:body});
+                                          // }
+                                          // else{
+                                          //     return res.status(500).send('Error');
+                                          // }
+                      })
+
+                                    // others: no process
+                      // }
+                    }
+                  }
+                }
+              })
               if (index < teamIds.length - 1) {
                 relayOne(++index)
               } else {
