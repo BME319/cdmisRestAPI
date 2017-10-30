@@ -469,15 +469,8 @@ exports.counselAutoRelay = function (req, res, next) {
                     var sponsorId = response.body.results.sponsorId
                     var members = response.body.results.members
                     members.push({'userId': sponsorId})
-                    // console.log(members)
-                    // console.log(members.length)
-
                     for (var idx in members) {
-                     // var online = false
-                      // console.log(members[idx])
-                      // custom card 群发
-                      // if (data.msg.contentType === 'custom' && data.msg.content.type === 'card' || (data.msg.contentType === 'text' || data.msg.contentType === 'image' || data.msg.contentType === 'voice')) {
-                      var actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_' + data.msg.content.consultationId + '_' + data.msg.teamId + '&#wechat_redirect'
+                      var actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_' + msgContent.consultationId + '_' + teamitem.teamId + '&#wechat_redirect'
                       var help
                       var time
                       if (msgContent !== null) {
@@ -529,9 +522,7 @@ exports.counselAutoRelay = function (req, res, next) {
                           }
                         }
                       }
-                      // console.log(idx)
-
-                                      // groupSend(data);
+                      // console.log(template)
                       request({
                                           // url: 'http://'+ webEntry.domain +':4060/api/v1/wechat/messageTemplate' + '?token=' + req.query.token || req.body.token,
                         url: 'http://' + webEntry.domain + '/api/v2/wechat/messageTemplate',
@@ -540,19 +531,8 @@ exports.counselAutoRelay = function (req, res, next) {
                         json: true
 
                       }, function (err, response, body) {
-                                          // console.log(idx + 'done')
-                        // console.log(body)
-
-                                          // if (!err && response.statusCode == 200) {
-                                          //     res.json({results:body});
-                                          // }
-                                          // else{
-                                          //     return res.status(500).send('Error');
-                                          // }
+                        // console.log(response)
                       })
-
-                                    // others: no process
-                      // }
                     }
                   }
                 }
