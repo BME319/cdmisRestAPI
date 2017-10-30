@@ -705,7 +705,7 @@ exports.postCommunication = function (req, res, next) {
   }
   commmunicationData['sendByRole'] = sendByRole
   req.commmunicationData = commmunicationData
-  console.log('commmunicationData', commmunicationData)
+  // console.log('commmunicationData', commmunicationData)
   var newCommunication = new Communication(commmunicationData)
   newCommunication.save(function (err, communicationInfo) {
     if (err) {
