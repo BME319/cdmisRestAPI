@@ -755,6 +755,10 @@ exports.postCommunication = function (req, res, next) {
   })
 }
 
+function add0 (m) {
+  return m < 10 ? '0' + m : m
+}
+
 exports.sendMsgTemplate = function (req, res) {
   // 设置排序规则函数，时间降序
   function sortTime (a, b) {
@@ -793,18 +797,26 @@ exports.sendMsgTemplate = function (req, res) {
             var counsels = []
             counsels = items.sort(sortTime)
             let counselId = counsels[0].counselId
-            console.log(counselId)
+            // console.log(counselId)
             let help = counsels[0].help
             if (req.body.content.contentType === 'custom') {
               counselId = req.commmunicationData.content.content.counselId
             }
-            let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=doctor_11_1_' + req.body.content.targetID + '_' + counselId + '&#wechat_redirect'
+            let date = new Date()
+            let y = date.getFullYear()
+            let m = date.getMonth() + 1
+            let d = date.getDate()
+            let h = date.getHours()
+            let mm = date.getMinutes()
+            let s = date.getSeconds()
+            let formatSecond = y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s)
+            let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=doctor_11_1_' + req.body.content.fromID + '_' + counselId + '&#wechat_redirect'
             var templateDoc = {
               'userId': req.body.content.targetID,
               'role': 'doctor',
               'postdata': {
                 'template_id': config.wxTemplateIdConfig.newCounselToDocOrTeam,
-                // 'url': actionUrl,                                  // 跳转路径需要添加
+                'url': actionUrl,                                  // 跳转路径需要添加
                 'data': {
                   'first': {
                     'value': '您的患者有新的提问，请及时处理',
@@ -823,7 +835,7 @@ exports.sendMsgTemplate = function (req, res) {
                     'color': '#173177'
                   },
                   'keyword4': {
-                    'value': commonFunc.getNowFormatSecond(), // 提交时间
+                    'value': formatSecond, // 提交时间
                     'color': '#173177'
                   },
 
@@ -865,11 +877,11 @@ exports.sendMsgTemplate = function (req, res) {
               counsels = items.sort(sortTime)
               let counselId = counsels[0].counselId
               let help = counsels[0].help
-              let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=patient_11_1_' + req.body.content.targetID + '_' + counselId + '&#wechat_redirect'
+              let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=patient_11_1_' + req.body.content.fromID + '_' + counselId + '&#wechat_redirect'
               var templatePat = {
                 'userId': req.body.content.targetID,
                 'role': 'patient',
-                // 'url': actionUrl,
+                'url': actionUrl,
                 'postdata': {
                   'template_id': config.wxTemplateIdConfig.docReply,
                   'url': '',
@@ -901,7 +913,7 @@ exports.sendMsgTemplate = function (req, res) {
               let params = templatePat
               wechatCtrl.wechatMessageTemplate(params, function (err, results) {
                 if (err) {
-                  console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + commmunicationData.messageNo)
+                  console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + req.commmunicationData.messageNo)
                 } else {
                   if (results.messageTemplate.errcode === 0) {
                     return res.json({result: '新建成功', newResults: req.communicationInfo})

@@ -904,6 +904,11 @@ exports.openIdLoginTest = function (req, res, next) {
     next()
   })
 }
+
+function add0 (m) {
+  return m < 10 ? '0' + m : m
+}
+
 exports.checkBinding = function (req, res) {
   // 2017-06-07GY调试
   // console.log('checkBinding_in');
@@ -1048,6 +1053,14 @@ exports.checkBinding = function (req, res) {
                         if (err) {
                           return res.status(500).send(err.errmsg)
                         } else {
+                          let date = new Date()
+                          let y = date.getFullYear()
+                          let m = date.getMonth() + 1
+                          let d = date.getDate()
+                          let h = date.getHours()
+                          let mm = date.getMinutes()
+                          let s = date.getSeconds()
+                          let formatSecond = y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s)
                           let templateDoc = {
                             'userId': doctor.userId,
                             'role': 'doctor',
@@ -1064,11 +1077,11 @@ exports.checkBinding = function (req, res) {
                                   'color': '#173177'
                                 },
                                 'keyword2': {
-                                  'value': commonFunc.getNowFormatSecond(),     // 添加的时间
+                                  'value': formatSecond,     // 添加的时间
                                   'color': '#173177'
                                 },
                                 'remark': {
-                                  'value': '点击查看',
+                                  'value': '点击底栏【工作站】按钮进行注册，登录后可查看患者详情',
                                   'color': '#173177'
                                 }
                               }
