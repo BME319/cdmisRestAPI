@@ -215,7 +215,7 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
               // if (data.msg.contentType === 'custom' && data.msg.content.type === 'card' || (data.msg.contentType === 'text' || data.msg.contentType === 'image' || data.msg.contentType === 'voice')) {
             if (data.msg.contentType === 'custom' && data.msg.content.type === 'card') {
                               // console.log(idx + ' 用户不在线');
-              var actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=http://proxy.haihonghospitalmanagement.com/go&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_' + data.msg.content.consultationId + '_' + data.msg.teamId + '&#wechat_redirect'
+              var actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=doctor_13_1_' + data.msg.content.consultationId + '_' + data.msg.teamId + '&#wechat_redirect'
               var help
               var time
               if (data.msg.content !== null) {

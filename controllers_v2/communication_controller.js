@@ -801,6 +801,10 @@ exports.sendMsgTemplate = function (req, res) {
             let help = counsels[0].help
             if (req.body.content.contentType === 'custom') {
               counselId = req.commmunicationData.content.content.counselId
+            } else if (req.body.content.contentType === 'image') {
+              help = '[图片]'
+            } else if (req.body.content.contentType === 'text') {
+              help = req.body.content.content.text
             }
             let date = new Date()
             let y = date.getFullYear()
@@ -831,7 +835,7 @@ exports.sendMsgTemplate = function (req, res) {
                     'color': '#173177'
                   },
                   'keyword3': {
-                    'value': req.body.content.content.text, // 问题描述
+                    'value': help, // 问题描述
                     'color': '#173177'
                   },
                   'keyword4': {
