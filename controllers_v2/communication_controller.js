@@ -853,7 +853,8 @@ exports.sendMsgTemplate = function (req, res) {
             let params = templateDoc
             wechatCtrl.wechatMessageTemplate(params, function (err, results) {
               if (err) {
-                return res.status(500).send(err.errmsg)
+                console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + req.commmunicationData.messageNo)
+ +              return res.json({result: '新建成功', newResults: req.communicationInfo})
               } else {
                 if (results.messageTemplate.errcode === 0) {
                   return res.json({result: '新建成功', newResults: req.communicationInfo})
