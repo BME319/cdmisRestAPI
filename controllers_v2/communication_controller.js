@@ -854,6 +854,7 @@ exports.sendMsgTemplate = function (req, res) {
             wechatCtrl.wechatMessageTemplate(params, function (err, results) {
               if (err) {
                 console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + req.commmunicationData.messageNo)
+                return res.json({result: '新建成功', newResults: req.communicationInfo})
               } else {
                 if (results.messageTemplate.errcode === 0) {
                   return res.json({result: '新建成功', newResults: req.communicationInfo})
@@ -865,69 +866,76 @@ exports.sendMsgTemplate = function (req, res) {
           }
         })
       } else if (req.commmunicationData.receiverRole === 'patient') {
+        let answer = ''
         if (req.body.content.contentType === 'text') {
-          query = {
-            patientId: results.receiver._id,
-            doctorId: results.send._id
+          answer = req.body.content.content.text
+        } else if (req.body.content.contentType === 'image') {
+          answer = '[图片]'
+        }
+        query = {
+          patientId: results.receiver._id,
+          doctorId: results.send._id
+        }
+        Counsel.getSome(query, function (err, items) {
+          if (err) {
+            console.log(err.errmsg)
           }
-          Counsel.getSome(query, function (err, items) {
-            if (err) {
-              console.log(err.errmsg)
-            }
-            if (items.length === 0) {
-              return res.json({result: '新建成功', newResults: req.communicationInfo})
-            } else {
-              var counsels = []
-              counsels = items.sort(sortTime)
-              let counselId = counsels[0].counselId
-              let help = counsels[0].help
-              let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=patient_11_1_' + req.body.content.fromID + '_' + counselId + '&#wechat_redirect'
-              var templatePat = {
-                'userId': req.body.content.targetID,
-                'role': 'patient',
-                'postdata': {
-                  'template_id': config.wxTemplateIdConfig.docReply,
-                  'url': actionUrl,
-                  'data': {
-                    'first': {
-                      'value': '您的咨询已被回复，请点击此处查看详情。',
-                      'color': '#173177'
-                    },
-                    'keyword1': {
-                      'value': help,                          // 咨询内容,貌似获取不到。。
-                      'color': '#173177'
-                    },
-                    'keyword2': {
-                      'value': req.body.content.content.text, // 回复内容
-                      'color': '#173177'
-                    },
-                    'keyword3': {
-                      'value': req.body.content.fromName,     // 医生姓名
-                      'color': '#173177'
-                    },
+          if (items.length === 0) {
+            return res.json({result: '新建成功', newResults: req.communicationInfo})
+          } else {
+            var counsels = []
+            counsels = items.sort(sortTime)
+            let counselId = counsels[0].counselId
+            let help = counsels[0].help
+            let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=patient_11_1_' + req.body.content.fromID + '_' + counselId + '&#wechat_redirect'
+            var templatePat = {
+              'userId': req.body.content.targetID,
+              'role': 'patient',
+              'postdata': {
+                'template_id': config.wxTemplateIdConfig.docReply,
+                'url': actionUrl,
+                'data': {
+                  'first': {
+                    'value': '您的咨询已被回复，请点击此处查看详情。',
+                    'color': '#173177'
+                  },
+                  'keyword1': {
+                    'value': help,                          // 咨询内容,貌似获取不到。。
+                    'color': '#173177'
+                  },
+                  'keyword2': {
+                    'value': answer,                        // 回复内容
+                    'color': '#173177'
+                  },
+                  'keyword3': {
+                    'value': req.body.content.fromName,     // 医生姓名
+                    'color': '#173177'
+                  },
 
-                    'remark': {
-                      'value': '感谢您的使用！',
-                      'color': '#173177'
-                    }
+                  'remark': {
+                    'value': '感谢您的使用！',
+                    'color': '#173177'
                   }
                 }
               }
-              let params = templatePat
-              wechatCtrl.wechatMessageTemplate(params, function (err, results) {
-                if (err) {
-                  console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + req.commmunicationData.messageNo)
-                } else {
-                  if (results.messageTemplate.errcode === 0) {
-                    return res.json({result: '新建成功', newResults: req.communicationInfo})
-                  } else {
-                    return res.json({result: '新建成功', newResults: req.communicationInfo})
-                  }
-                }
-              })
             }
-          })
-        }
+            let params = templatePat
+            wechatCtrl.wechatMessageTemplate(params, function (err, results) {
+              if (err) {
+                console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + req.commmunicationData.messageNo)
+                return res.json({result: '新建成功', newResults: req.communicationInfo})
+              } else {
+                if (results.messageTemplate.errcode === 0) {
+                  return res.json({result: '新建成功', newResults: req.communicationInfo})
+                } else {
+                  return res.json({result: '新建成功', newResults: req.communicationInfo})
+                }
+              }
+            })
+          }
+        })
+      } else {
+        return res.json({result: '新建成功', newResults: req.communicationInfo})
       }
     }
   })
