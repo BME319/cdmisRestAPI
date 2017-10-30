@@ -881,10 +881,9 @@ exports.sendMsgTemplate = function (req, res) {
               var templatePat = {
                 'userId': req.body.content.targetID,
                 'role': 'patient',
-                'url': actionUrl,
                 'postdata': {
                   'template_id': config.wxTemplateIdConfig.docReply,
-                  'url': '',
+                  'url': actionUrl,
                   'data': {
                     'first': {
                       'value': '您的咨询已被回复，请点击此处查看详情。',
