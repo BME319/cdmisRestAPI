@@ -817,6 +817,9 @@ exports.counselAutoEndMsg = function () {
   let endTime = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), '08', '00', '00')
   // console.log('startTime', startTime)
   // console.log('endTime', endTime)
+  function add0 (m) {
+    return m < 10 ? '0' + m : m
+  }
   let query = {
     'endTime': {$gte: startTime, $lt: endTime} // >= <
   }
@@ -832,7 +835,7 @@ exports.counselAutoEndMsg = function () {
     } else {
       // console.log(timeoutCounsels[0])
       // console.log(timeoutCounsels.length)
-      for (let i = 0; i < 1; i++) {
+      for (let i = 0; i < timeoutCounsels.length; i++) {
         // let doctorOpenId = timeoutCounsels[i].doctorId.openId
         // let patientOpenId = timeoutCounsels[i].patientId.openId
         let valueTmp1 = '您好，患者咨询已结束。'
@@ -843,12 +846,20 @@ exports.counselAutoEndMsg = function () {
         if (timeoutCounsels[i].type === 6 || timeoutCounsels[i].type === 7) {
           endReason = '2小时未处理'
         }
+        let time = timeoutCounsels[i].time
+        let y = time.getFullYear()
+        let m = time.getMonth() + 1
+        let d = time.getDate()
+        let h = time.getHours()
+        let mm = time.getMinutes()
+        let s = time.getSeconds()
+        let formatSecond = y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s)
         var templateDoc = {
           'userId': timeoutCounsels[i].doctorId.userId,
           'role': 'doctor',
           'postdata': {
             'template_id': config.wxTemplateIdConfig.counselAutoEndDoc,
-            'url': '',                                      // 跳转路径需要添加
+            // 'url': '',                                      // 跳转路径需要添加
             'data': {
               'first': {
                 'value': valueTmp1,
@@ -867,7 +878,7 @@ exports.counselAutoEndMsg = function () {
                 'color': '#173177'
               },
               'keyword4': {
-                'value': commonFunc.getNowFormatSecond(),   // 提交时间
+                'value': formatSecond,                      // 提交时间
                 'color': '#173177'
               },
 
@@ -912,7 +923,7 @@ exports.counselAutoEndMsg = function () {
           'role': 'patient',
           'postdata': {
             'template_id': config.wxTemplateIdConfig.counselAutoEndPat,
-            'url': '',
+            // 'url': '',
             'data': {
               'first': {
                 'value': valueTmp2,
