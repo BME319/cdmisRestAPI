@@ -1081,7 +1081,7 @@ exports.checkBinding = function (req, res) {
                                   'color': '#173177'
                                 },
                                 'remark': {
-                                  'value': '点击底栏【工作站】按钮，登录后可查看患者详情',
+                                  'value': '点击底栏【工作站】按钮进行注册，登录后可查看患者详情',
                                   'color': '#173177'
                                 }
                               }
