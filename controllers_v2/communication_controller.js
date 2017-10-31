@@ -1439,7 +1439,7 @@ exports.massCommunication = function (req, res, next) {
 
   let doctorname = req.session.name
   let title = '医生 ' + doctorname + ' 给您发来一条消息'
-  let description = '您的关注/主管医生 ' + doctorname + ' 给您发来一条群体教育消息：' + content
+  let description = '您的关注/主管医生 ' + doctorname + ' 给您发来一条群体消息：' + content
 
   for (let i = 0; i < req.massTarget.length; i++) {
     let massId = 'MAM' + req.session.userId + y + add0(m) + add0(d) + add0(h) + add0(mm) + add00(s) + add00(i)
