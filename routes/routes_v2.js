@@ -8401,7 +8401,7 @@ module.exports = function (app, webEntry, acl) {
   /**
    *
    */
-  app.post(version + '/devicedata/BPDevice/data', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 1), devicedataCtrl.receiveBloodPressure)
+  app.post(version + '/devicedata/BPDevice/data', errorHandler.error, devicedataCtrl.receiveBloodPressure)
   app.get(version + '/devicedata/devices', tokenManager.verifyToken(), errorHandler.error, aclChecking.Checking(acl, 1), devicedataCtrl.getDeviceInfo)
 
   // wechat
