@@ -76,7 +76,7 @@ Compliance.update = function (query, obj, callback, opts, populate) {
   var options = opts || {}
   var populate = populate || ''
 
-  complianceModel
+  ComplianceModel
     .update(query, obj, options)
     .populate(populate)
     .exec(function (err, upcompliance) {
