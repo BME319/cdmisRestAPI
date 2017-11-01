@@ -249,7 +249,7 @@ function saveBPdata (patient, req, results, res) {
     }
     if (updata.nModified == 0) {
     console.log('err3');
-    res.json(results);
+    // res.json(results);
     }
     else if (updata.nModified == 1) {
     results.code = 1;
