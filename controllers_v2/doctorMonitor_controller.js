@@ -626,12 +626,6 @@ exports.getCounseltimeout = function (req, res) {
     endTime = new Date((endTime / 1000 + 86400) * 1000)
     let array = [
       {$match: {endTime: {$gte: startTime, $lt: endTime}}},
-      // {
-      //   $group: {
-      //     _id: '$doctorId',
-      //     count: {$sum: 1}
-      //   }
-      // },
       {
         $lookup: {
           from: 'allusers',
@@ -685,8 +679,6 @@ exports.getCounseltimeout = function (req, res) {
         }
       },
       {$sort: {time: 1}}
-      // {$skip: skip},
-      // {$limit: limit}
     ]
 
 
@@ -724,7 +716,8 @@ exports.getCounseltimeout = function (req, res) {
       if (err) {
         res.status(500).send(err.errmsg)
       }
-      res.json({results: results.slice(skip, limit + skip)})
+      // res.json({results: results.slice(skip, limit + skip)})
+      res.json({results: results})
     })
   }
 }
