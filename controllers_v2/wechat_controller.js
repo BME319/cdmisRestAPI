@@ -20,6 +20,7 @@ var Counsel = require('../models/counsel')
 var DictNumber = require('../models/dictNumber')
 var Numbering = require('../models/numbering')
 var Wechat = require('../models/wechat')
+var MsgTemplate = require('../models/msgTemplate')
 
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 
@@ -1113,6 +1114,20 @@ exports.messageTemplate = function (req, res) {
           json: true
         }, function (err, response, body) {
           if (!err && response.statusCode === 200) {
+            let msgTemplateData = {
+              userId: req.body.userId,
+              templateId: req.body.postdata.template_id,
+              time: new Date(),
+              errcode: body.errcode,
+              errmsg: body.errmsg
+            }
+            // console.log('msgTemplateData', msgTemplateData)
+            var newMsgTemplate = new MsgTemplate(msgTemplateData)
+            newMsgTemplate.save(function (err, msgTemplateInfo) {
+              if (err) {
+                return res.status(500).send(err.errmsg)
+              }
+            })
             res.json({results: body})
           } else {
             return res.status(500).send('Error')
@@ -1129,6 +1144,19 @@ exports.messageTemplate = function (req, res) {
         json: true
       }, function (err, response, body) {
         if (!err && response.statusCode === 200) {
+          let msgTemplateData = {
+            userId: req.body.userId,
+            templateId: req.body.postdata.template_id,
+            time: new Date(),
+            errcode: body.errcode,
+            errmsg: body.errmsg
+          }
+          var newMsgTemplate = new MsgTemplate(msgTemplateData)
+          newMsgTemplate.save(function (err, msgTemplateInfo) {
+            if (err) {
+              return res.status(500).send(err.errmsg)
+            }
+          })
           res.json({results: body})
         } else {
           return res.status(500).send('Error')

@@ -16,6 +16,7 @@ var request = require('request')
 var Alluser = require('../models/alluser')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 var async = require('async')
+var MsgTemplate = require('../models/msgTemplate')
 // var commonFunc = require('../middlewares/commonFunc')
 
 // 根据counselId获取counsel表除messages外的信息 2017-03-31 GY
@@ -779,6 +780,7 @@ exports.sendMsgTemplate = function (req, res) {
   }, function (err, results) {
     if (err) {
       console.log(err.errmsg)
+      return res.json({result: '新建成功', newResults: req.communicationInfo})
     }
     if (results.receiver !== null && results.send !== null) {
       let query = {status: 1}
@@ -790,6 +792,7 @@ exports.sendMsgTemplate = function (req, res) {
         Counsel.getSome(query, function (err, items) {
           if (err) {
             console.log(err.errmsg)
+            return res.json({result: '新建成功', newResults: req.communicationInfo})
           }
           if (items.length === 0) {
             return res.json({result: '新建成功', newResults: req.communicationInfo})
@@ -857,8 +860,36 @@ exports.sendMsgTemplate = function (req, res) {
                 return res.json({result: '新建成功', newResults: req.communicationInfo})
               } else {
                 if (results.messageTemplate.errcode === 0) {
+                  let msgTemplateData = {
+                    userId: templateDoc.userId,
+                    templateId: templateDoc.postdata.template_id,
+                    time: new Date(),
+                    errcode: results.messageTemplate.errcode,
+                    errmsg: results.messageTemplate.errmsg
+                  }
+                  let newMsgTemplate = new MsgTemplate(msgTemplateData)
+                  newMsgTemplate.save(function (err, msgTemplateInfo) {
+                    if (err) {
+                      return res.status(500).send(err.errmsg)
+                    }
+                  })
+                  console.log(new Date(), 'auto_send_messageTemplate_success_' + req.commmunicationData.messageNo)
                   return res.json({result: '新建成功', newResults: req.communicationInfo})
                 } else {
+                  let msgTemplateData = {
+                    userId: templateDoc.userId,
+                    templateId: templateDoc.postdata.template_id,
+                    time: new Date(),
+                    errcode: results.messageTemplate.errcode,
+                    errmsg: results.messageTemplate.errmsg
+                  }
+                  let newMsgTemplate = new MsgTemplate(msgTemplateData)
+                  newMsgTemplate.save(function (err, msgTemplateInfo) {
+                    if (err) {
+                      return res.status(500).send(err.errmsg)
+                    }
+                  })
+                  console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + req.commmunicationData.messageNo)
                   return res.json({result: '新建成功', newResults: req.communicationInfo})
                 }
               }
@@ -926,8 +957,38 @@ exports.sendMsgTemplate = function (req, res) {
                 return res.json({result: '新建成功', newResults: req.communicationInfo})
               } else {
                 if (results.messageTemplate.errcode === 0) {
+                  let msgTemplateData = {
+                    userId: templatePat.userId,
+                    templateId: templatePat.postdata.template_id,
+                    time: new Date(),
+                    errcode: results.messageTemplate.errcode,
+                    errmsg: results.messageTemplate.errmsg
+                  }
+                  let newMsgTemplate = new MsgTemplate(msgTemplateData)
+                  newMsgTemplate.save(function (err, msgTemplateInfo) {
+                    if (err) {
+                      console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + req.commmunicationData.messageNo)
+                      return res.json({result: '新建成功', newResults: req.communicationInfo})
+                    }
+                  })
+                  console.log(new Date(), 'auto_send_messageTemplate_success_' + req.commmunicationData.messageNo)
                   return res.json({result: '新建成功', newResults: req.communicationInfo})
                 } else {
+                  let msgTemplateData = {
+                    userId: templatePat.userId,
+                    templateId: templatePat.postdata.template_id,
+                    time: new Date(),
+                    errcode: results.messageTemplate.errcode,
+                    errmsg: results.messageTemplate.errmsg
+                  }
+                  let newMsgTemplate = new MsgTemplate(msgTemplateData)
+                  newMsgTemplate.save(function (err, msgTemplateInfo) {
+                    if (err) {
+                      console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + req.commmunicationData.messageNo)
+                      return res.json({result: '新建成功', newResults: req.communicationInfo})
+                    }
+                  })
+                  console.log(new Date(), 'auto_send_messageTemplate_fail_' + req.commmunicationData.messageNo)
                   return res.json({result: '新建成功', newResults: req.communicationInfo})
                 }
               }

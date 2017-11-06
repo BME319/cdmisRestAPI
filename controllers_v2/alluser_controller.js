@@ -20,6 +20,7 @@ var Errorlog = require('../models/errorlog')
 
 var alluserCtrl = require('../controllers_v2/alluser_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
+var MsgTemplate = require('../models/msgTemplate')
 
 // var Base64 = {
 //     // 转码表
@@ -2344,8 +2345,34 @@ exports.serviceMessage = function (req, res, next) {
       console.log(new Date(), 'send_messageTemplate_toPIC_err_' + req.session.name)
     } else {
       if (results.messageTemplate.errcode === 0) {
+        let msgTemplateData = {
+          userId: template.userId,
+          templateId: template.postdata.template_id,
+          time: new Date(),
+          errcode: results.messageTemplate.errcode,
+          errmsg: results.messageTemplate.errmsg
+        }
+        let newMsgTemplate = new MsgTemplate(msgTemplateData)
+        newMsgTemplate.save(function (err, msgTemplateInfo) {
+          if (err) {
+            console.log(new Date(), 'send_messageTemplate_toPIC_err_' + req.session.name)
+          }
+        })
         console.log(new Date(), 'send_messageTemplate_toPIC_success_' + req.session.name)
       } else {
+        let msgTemplateData = {
+          userId: template.userId,
+          templateId: template.postdata.template_id,
+          time: new Date(),
+          errcode: results.messageTemplate.errcode,
+          errmsg: results.messageTemplate.errmsg
+        }
+        let newMsgTemplate = new MsgTemplate(msgTemplateData)
+        newMsgTemplate.save(function (err, msgTemplateInfo) {
+          if (err) {
+            console.log(new Date(), 'send_messageTemplate_toPIC_err_' + req.session.name)
+          }
+        })
         console.log(new Date(), 'send_messageTemplate_toPIC_fail_' + req.session.name + results.messageTemplate.errcode)
       }
     }

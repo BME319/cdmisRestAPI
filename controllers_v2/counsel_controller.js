@@ -15,6 +15,7 @@ var webEntry = require('../settings').webEntry
 var request = require('request')
 var commonFunc = require('../middlewares/commonFunc')
 var config = require('../config')
+var MsgTemplate = require('../models/msgTemplate')
 
 var wechatCtrl = require('../controllers_v2/wechat_controller')
 
@@ -895,8 +896,34 @@ exports.counselAutoEndMsg = function () {
             console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + timeoutCounsels[i].counselId)
           } else {
             if (results.messageTemplate.errcode === 0) {
+              let msgTemplateData = {
+                userId: templateDoc.userId,
+                templateId: templateDoc.postdata.template_id,
+                time: new Date(),
+                errcode: results.messageTemplate.errcode,
+                errmsg: results.messageTemplate.errmsg
+              }
+              let newMsgTemplate = new MsgTemplate(msgTemplateData)
+              newMsgTemplate.save(function (err, msgTemplateInfo) {
+                if (err) {
+                  console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + timeoutCounsels[i].counselId)
+                }
+              })
               console.log(new Date(), 'auto_send_messageTemplate_toDoc_success_' + timeoutCounsels[i].counselId)
             } else {
+              let msgTemplateData = {
+                userId: templateDoc.userId,
+                templateId: templateDoc.postdata.template_id,
+                time: new Date(),
+                errcode: results.messageTemplate.errcode,
+                errmsg: results.messageTemplate.errmsg
+              }
+              let newMsgTemplate = new MsgTemplate(msgTemplateData)
+              newMsgTemplate.save(function (err, msgTemplateInfo) {
+                if (err) {
+                  console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + timeoutCounsels[i].counselId)
+                }
+              })
               console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + timeoutCounsels[i].counselId)
             }
           }
@@ -951,8 +978,34 @@ exports.counselAutoEndMsg = function () {
             console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + timeoutCounsels[i].counselId)
           } else {
             if (results.messageTemplate.errcode === 0) {
+              let msgTemplateData = {
+                userId: templatePat.userId,
+                templateId: templatePat.postdata.template_id,
+                time: new Date(),
+                errcode: results.messageTemplate.errcode,
+                errmsg: results.messageTemplate.errmsg
+              }
+              let newMsgTemplate = new MsgTemplate(msgTemplateData)
+              newMsgTemplate.save(function (err, msgTemplateInfo) {
+                if (err) {
+                  console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + timeoutCounsels[i].counselId)
+                }
+              })
               console.log(new Date(), 'auto_send_messageTemplate_toPat_success_' + timeoutCounsels[i].counselId)
             } else {
+              let msgTemplateData = {
+                userId: templatePat.userId,
+                templateId: templatePat.postdata.template_id,
+                time: new Date(),
+                errcode: results.messageTemplate.errcode,
+                errmsg: results.messageTemplate.errmsg
+              }
+              let newMsgTemplate = new MsgTemplate(msgTemplateData)
+              newMsgTemplate.save(function (err, msgTemplateInfo) {
+                if (err) {
+                  console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + timeoutCounsels[i].counselId)
+                }
+              })
               console.log(new Date(), 'auto_send_messageTemplate_toPat_fail_' + timeoutCounsels[i].counselId)
             }
           }
