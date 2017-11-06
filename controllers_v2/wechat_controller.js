@@ -2035,6 +2035,20 @@ exports.wechatMessageTemplate = function (params, callback) {
               json: true
             }, function (err, response, body) {
               if (!err && response.statusCode === 200) {
+                let msgTemplateData = {
+                  userId: params.userId,
+                  templateId: params.postdata.template_id,
+                  time: new Date(),
+                  errcode: body.errcode,
+                  errmsg: body.errmsg
+                }
+                var newMsgTemplate = new MsgTemplate(msgTemplateData)
+                newMsgTemplate.save(function (err, msgTemplateInfo) {
+                  if (err) {
+                    let err = 'Error'
+                    return callback(err)
+                  }
+                })
                 return callback(null, body)
               } else {
                 let err = 'Error'
