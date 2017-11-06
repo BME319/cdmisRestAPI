@@ -265,6 +265,9 @@ exports.insertHealthInfo = function (req, res) {
   if (req.body.comments !== null && req.body.comments !== '' && req.body.comments !== undefined) {
     healthInfoData['comments'] = req.body.comments
   }
+  if (healthInfoData.url === []) {
+    healthInfoData['importStatus'] = 1
+  }
   // console.log('healthInfoData', healthInfoData)
   var newHealthInfo = new HealthInfo(healthInfoData)
   newHealthInfo.save(function (err, healthInfo) {

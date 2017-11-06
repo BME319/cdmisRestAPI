@@ -1,6 +1,6 @@
 var request = require('request')
 var config = require('../config')
-var Patient = require('../models/patient')
+var Alluser = require('../models/alluser')
 var VitalSign = require('../models/vitalSign')
 var Compliance = require('../models/compliance')
 var Device = require('../models/device')
@@ -56,13 +56,13 @@ exports.bindingDevice = function (req, res) {
               }
               if (item) {
                 // 获取对应患者信息
-                Patient.getOne({userId: item.userId}, function (err, patient) {
+                Alluser.getOne({userId: item.userId}, function (err, alluserInfo) {
                   if (err) {
                     return res.status(500).send(err.errmsg)
                   }
                   // 若患者存在，则发送患者姓名；否则发送'患者不存在'
-                  if (patient) {
-                    res.json({results: patient.name})
+                  if (alluserInfo) {
+                    res.json({results: alluserInfo.name})
                   } else {
                     res.json({results: '患者不存在'})
                   }
@@ -170,18 +170,19 @@ exports.receiveBloodPressure = function (req, res) {
         userId: userId
       }
       // 获取患者信息
-      Patient.getOne(querypatient, function (err, patient) {
+      Alluser.getOne(querypatient, function (err, alluserInfo) {
         if (err) {
         // return res.status(500).send(err.errmsg);
           console.log('err2')
           res.json(results)
         }
-        if (patient == null) {
+        if (alluserInfo == null) {
         // return res.status(400).send('user not exist');
           console.log('null2')
           res.json(results)
         } else {
           // 若患者存在，保存血压和心率数据到数据库
+          let patient = alluserInfo
           saveBPdata(patient, req, results, res)
         }
       })
@@ -246,18 +247,17 @@ function saveBPdata (patient, req, results, res) {
       // return res.status(422).send(err.message);
       res.json(results)
     }
-    // console.log(updata)
-    // if (updata.nModified == 0) {
-    // console.log('err3');
+    if (updata.nModified == 0) {
+    console.log('err3');
     // res.json(results);
-    // }
-    // else if (updata.nModified == 1) {
-    // results.code = 1;
-    // results.status = 'success';
-    // results.msg = '提交成功';
-    // console.log('err4');
+    }
+    else if (updata.nModified == 1) {
+    results.code = 1;
+    results.status = 'success';
+    results.msg = '提交成功';
+    console.log('err4');
     // res.json(results);
-    // }
+    }
     var query = {
       patientId: patient._id,
       type: '心率',
@@ -279,13 +279,6 @@ function saveBPdata (patient, req, results, res) {
         // return res.status(422).send(err.message);
         res.json(results)
       }
-      // console.log(updata)
-
-      // if (err) {
-      //   // return res.status(422).send(err.message);
-      //   res.json(results)
-      // }
-
       var complianceQuery1 = {
         userId: patient.userId,
         type: 'Measure',
