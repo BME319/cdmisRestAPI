@@ -779,6 +779,7 @@ exports.sendMsgTemplate = function (req, res) {
   }, function (err, results) {
     if (err) {
       console.log(err.errmsg)
+      return res.json({result: '新建成功', newResults: req.communicationInfo})
     }
     if (results.receiver !== null && results.send !== null) {
       let query = {status: 1}
@@ -790,6 +791,7 @@ exports.sendMsgTemplate = function (req, res) {
         Counsel.getSome(query, function (err, items) {
           if (err) {
             console.log(err.errmsg)
+            return res.json({result: '新建成功', newResults: req.communicationInfo})
           }
           if (items.length === 0) {
             return res.json({result: '新建成功', newResults: req.communicationInfo})
@@ -857,8 +859,10 @@ exports.sendMsgTemplate = function (req, res) {
                 return res.json({result: '新建成功', newResults: req.communicationInfo})
               } else {
                 if (results.messageTemplate.errcode === 0) {
+                  console.log(new Date(), 'auto_send_messageTemplate_success_' + req.commmunicationData.messageNo)
                   return res.json({result: '新建成功', newResults: req.communicationInfo})
                 } else {
+                  console.log(new Date(), 'auto_send_messageTemplate_toDoc_fail_' + req.commmunicationData.messageNo)
                   return res.json({result: '新建成功', newResults: req.communicationInfo})
                 }
               }
@@ -926,8 +930,10 @@ exports.sendMsgTemplate = function (req, res) {
                 return res.json({result: '新建成功', newResults: req.communicationInfo})
               } else {
                 if (results.messageTemplate.errcode === 0) {
+                  console.log(new Date(), 'auto_send_messageTemplate_success_' + req.commmunicationData.messageNo)
                   return res.json({result: '新建成功', newResults: req.communicationInfo})
                 } else {
+                  console.log(new Date(), 'auto_send_messageTemplate_fail_' + req.commmunicationData.messageNo)
                   return res.json({result: '新建成功', newResults: req.communicationInfo})
                 }
               }
