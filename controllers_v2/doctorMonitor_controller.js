@@ -550,6 +550,79 @@ exports.getWorkload = function (req, res) {
           doctorsinchargetoday: {$size: '$doctorsinchargetoday'}
         }
       },
+      {
+        $lookup: {
+          from: 'counselautochangestatuses',
+          localField: '_id',
+          foreignField: 'doctorId',
+          as: 'counselout'
+        }        
+      },
+      {
+        $project: {
+          _id: '$_id',
+          'name': 1,
+          'province': 1,
+          'city': 1,
+          'hospital': 1,
+          userId: '$userId',
+          count: '$count',
+          counttoday: '$counttoday',
+          open: '$open',
+          opentoday: '$opentoday',
+          'consultation': 1,
+          'consultationtoday': 1,
+          'communication': 1,
+          'communicationtoday': 1,
+          'c2c': 1,
+          'c2ctoday': 1,
+          'urgentcon': 1,
+          'urgentcontoday': 1,
+          'personaldiag': 1,
+          'personaldiagtoday': 1,
+          'doctorsincharge': 1,
+          'doctorsinchargetoday': 1,
+          counselout: {
+            $filter: {
+              input: '$counselout',
+              as: 'counselout',
+              cond: {
+                $and: [
+                  {$gte: ['$$counselout.endTime', startTime]},
+                  {$lt: ['$$counselout.endTime', endTime]}
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: '$_id',
+          'name': 1,
+          'province': 1,
+          'city': 1,
+          'hospital': 1,
+          userId: '$userId',
+          count: '$count',
+          counttoday: '$counttoday',
+          open: '$open',
+          opentoday: '$opentoday',
+          'consultation': 1,
+          'consultationtoday': 1,
+          'communication': 1,
+          'communicationtoday': 1,
+          'c2c': 1,
+          'c2ctoday': 1,
+          'urgentcon': 1,
+          'urgentcontoday': 1,
+          'personaldiag': 1,
+          'personaldiagtoday': 1,
+          'doctorsincharge': 1,
+          'doctorsinchargetoday': 1,
+          counselout: {$size: '$counselout'}
+        }
+      }
       // {$sort: {count: -1}},
       // {$skip: Number(skip)},
       // {$limit: Number(limit)}
