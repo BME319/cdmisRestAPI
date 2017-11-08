@@ -842,9 +842,14 @@ exports.counselAutoEndMsg = function () {
         if (timeoutCounsels[i].type === 6 || timeoutCounsels[i].type === 7) {
           valueTmp1 = '您好，患者加急咨询已结束。'
         }
-        let endReason = '24小时未处理'
-        if (timeoutCounsels[i].type === 6 || timeoutCounsels[i].type === 7) {
-          endReason = '2小时未处理'
+        let endReason = '咨询自动结束'
+        let advise = '感谢您的使用！'
+        if (timeoutCounsels[i].reply === 0) {
+          endReason = '24小时未处理'
+          advise = '后期咨询请注意及时回复。'
+          if (timeoutCounsels[i].type === 6 || timeoutCounsels[i].type === 7) {
+            endReason = '2小时未处理'
+          }
         }
         let time = timeoutCounsels[i].time
         let y = time.getFullYear()
@@ -854,12 +859,13 @@ exports.counselAutoEndMsg = function () {
         let mm = time.getMinutes()
         let s = time.getSeconds()
         let formatSecond = y + '-' + add0(m) + '-' + add0(d) + ' ' + add0(h) + ':' + add0(mm) + ':' + add0(s)
+        let actionUrl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxfa2216ac422fb747&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=doctor_11_1_' + timeoutCounsels[i].patientId.userId + '_' + timeoutCounsels[i].counselId + '&#wechat_redirect'
         var templateDoc = {
           'userId': timeoutCounsels[i].doctorId.userId,
           'role': 'doctor',
           'postdata': {
             'template_id': config.wxTemplateIdConfig.counselAutoEndDoc,
-            // 'url': '',                                      // 跳转路径需要添加
+            'url': actionUrl,                               // 跳转路径需要添加
             'data': {
               'first': {
                 'value': valueTmp1,
@@ -883,7 +889,7 @@ exports.counselAutoEndMsg = function () {
               },
 
               'remark': {
-                'value': '后期咨询请注意及时回复。',
+                'value': advise,
                 'color': '#173177'
               }
             }
@@ -918,12 +924,19 @@ exports.counselAutoEndMsg = function () {
         if (timeoutCounsels[i].type === 6 || timeoutCounsels[i].type === 7) {
           valueTmp2 = '您好，您的加急咨询已结束。'
         }
+        let endReasonToPat = '咨询自动结束'
+        let adviseToPat = '感谢您的使用！'
+        if (timeoutCounsels[i].reply === 0) {
+          endReasonToPat = '医生超时未回复'
+          advise = '我们会提醒医生在后期咨询中及时回复您的问题。'
+        }
+        let actionUrlPat = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb830b12dc0fa74e5&redirect_uri=https://media.haihonghospitalmanagement.com/proxy&response_type=code&scope=snsapi_userinfo&state=patient_11_1_' + timeoutCounsels[i].doctorId.userId + '_' + timeoutCounsels[i].counselId + '&#wechat_redirect'
         var templatePat = {
           'userId': timeoutCounsels[i].patientId.userId,
           'role': 'patient',
           'postdata': {
             'template_id': config.wxTemplateIdConfig.counselAutoEndPat,
-            // 'url': '',
+            'url': actionUrlPat,
             'data': {
               'first': {
                 'value': valueTmp2,
@@ -934,12 +947,12 @@ exports.counselAutoEndMsg = function () {
                 'color': '#173177'
               },
               'keyword2': {
-                'value': '医生超时未回复',                   // 结束原因
+                'value': endReasonToPat,                    // 结束原因
                 'color': '#173177'
               },
 
               'remark': {
-                'value': '我们会提醒医生在后期咨询中及时回复您的问题。',
+                'value': adviseToPat,
                 'color': '#173177'
               }
             }
