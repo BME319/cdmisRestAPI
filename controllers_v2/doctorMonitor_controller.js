@@ -589,7 +589,8 @@ exports.getWorkload = function (req, res) {
               cond: {
                 $and: [
                   {$gte: ['$$counselout.endTime', startTime]},
-                  {$lt: ['$$counselout.endTime', endTime]}
+                  {$lt: ['$$counselout.endTime', endTime]},
+                  {$eq: ['$$counselout.reply', 0]}
                 ]
               }
             }
@@ -698,7 +699,7 @@ exports.getCounseltimeout = function (req, res) {
     endTime = new Date(endTime)
     endTime = new Date((endTime / 1000 + 86400) * 1000)
     let array = [
-      {$match: {endTime: {$gte: startTime, $lt: endTime}}},
+      {$match: {endTime: {$gte: startTime, $lt: endTime}, reply: 0}},
       {
         $lookup: {
           from: 'allusers',
