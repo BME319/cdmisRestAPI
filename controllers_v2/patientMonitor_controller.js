@@ -367,15 +367,7 @@ exports.getPatientsByClass = function (req, res) {
     }
   ]
 
-  // if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
-  //   limit = Number(limit)
-  //   skip = Number(skip)
-  //   array.push(
-  //     {$sort: {count: -1}},
-  //     {$skip: skip},
-  //     {$limit: limit}
-  //   )
-  // }
+
   if (classNo !== '') {
     array.splice(
       0,
@@ -383,12 +375,19 @@ exports.getPatientsByClass = function (req, res) {
       {$match: {class: classNo}}
     )
   }
+  if (limit !== '' && skip !== '' && limit !== undefined && skip !== undefined) {
+    limit = Number(limit)
+    skip = Number(skip)
+    array.push(
+      {$sort: {creationTime: -1}},
+      {$skip: skip},
+      {$limit: limit}
+    )
+  }
   Alluser.aggregate(array, function (err, results) {
     if (err) {
       res.status(500).send(err.errmsg)
     }
-    limit = Number(limit)
-    skip = Number(skip)
-    res.json({results: results.slice(skip, limit + skip)})
+    res.json({results: results})
   })
 }
