@@ -391,6 +391,7 @@ exports.getAlluserList = function (role) {
       fields['class_info'] = 1
       fields['birthday'] = 1
       fields['allergic'] = 1
+      fields['creationTime'] = 1
 
       fields['doctorInCharge'] = 1
       populate['path'] = 'doctorInCharge'
