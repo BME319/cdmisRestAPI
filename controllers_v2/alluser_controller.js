@@ -311,8 +311,18 @@ exports.getAlluserList = function (role) {
 
     var limit = Number(req.query.limit)
     var skip = Number(req.query.skip)
-    var opts = {limit: limit, skip: skip, sort: '_id'}
-
+    // var opts = {limit: limit, skip: skip, sort: '_id'}
+    // 排序规则 GY 2017-11-20
+    var opts = {limit: limit, skip: skip}
+    let sortTime = req.body.sortTime || null
+    if (sortTime === 'true') {
+      opts['sort'] = 'creationTime'
+    } else if (sortTime === 'false') {
+      opts['sort'] = '-creationTime'
+    } else {
+      opts['sort'] = '_id'
+    }
+    
     var _uid = req.query.userId
     var _role = role
     var _r = req.query.role
