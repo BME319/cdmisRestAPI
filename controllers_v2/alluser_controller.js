@@ -314,7 +314,7 @@ exports.getAlluserList = function (role) {
     // var opts = {limit: limit, skip: skip, sort: '_id'}
     // 排序规则 GY 2017-11-20
     var opts = {limit: limit, skip: skip}
-    let sortTime = req.body.sortTime || null
+    let sortTime = req.query.sortTime || null
     if (sortTime === 'true') {
       opts['sort'] = 'creationTime'
     } else if (sortTime === 'false') {
