@@ -1,81 +1,90 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 var complianceSchema = new mongoose.Schema({
-	userId: String,						
-	type: String, 
-	code: String, 
-	date: Date, 
-	status: Number, 
-	description: String
-	
-});
+  userId: String,
+  type: String,
+  code: String,
+  date: Date,
+  status: Number,
+  description: String
+})
 
+var ComplianceModel = mongoose.model('compliance', complianceSchema)
 
-var complianceModel = mongoose.model('compliance', complianceSchema);
-
-function Compliance(compliance) {
-	this.compliance = compliance;
+function Compliance (compliance) {
+  this.compliance = compliance
 }
 
-Compliance.prototype.save = function(callback) {
-	var compliance = this.compliance;
-	var newCompliance = new complianceModel(compliance);
-	newCompliance.save(function(err, complianceItem) {
-		if (err) {
-			return callback(err);
-		}
-		callback(null, complianceItem);
-	});
+Compliance.prototype.save = function (callback) {
+  var compliance = this.compliance
+  var newCompliance = new ComplianceModel(compliance)
+  newCompliance.save(function (err, complianceItem) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, complianceItem)
+  })
 }
 
-Compliance.getOne = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
+Compliance.getOne = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
 
-	complianceModel
-		.findOne(query, fields, opts)
-		.populate(populate)
-		.exec(function(err, complianceInfo) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, complianceInfo);
-		});
-};
+  ComplianceModel
+  .findOne(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, complianceInfo) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, complianceInfo)
+  })
+}
 
+Compliance.getSome = function (query, callback, opts, fields, populate) {
+  var options = opts || {}
+  var _fields = fields || null
+  var _populate = populate || ''
+  ComplianceModel
+  .find(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, compliances) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, compliances)
+  })
+}
 
-Compliance.getSome = function(query, callback, opts, fields, populate) {
-	var options = opts || {};
-	var fields = fields || null;
-	var populate = populate || '';
-	complianceModel
-		.find(query, fields, options)
-		.populate(populate)
-		.exec(function(err, compliances) {
-			if(err) {
-				return callback(err);
-			}
-			callback(null, compliances);
-		});
-};
+Compliance.updateOne = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var _populate = populate || ''
 
-Compliance.updateOne = function(query, obj, callback, opts, populate) {
-	var options = opts || {};
-	var populate = populate || '';
+  ComplianceModel
+  .findOneAndUpdate(query, obj, options)
+  .populate(_populate)
+  .exec(function (err, upCompliance) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, upCompliance)
+  })
+}
 
-	complianceModel
-		.findOneAndUpdate(query, obj, options)
-		.populate(populate)
-		.exec(function(err, upcompliance) {
-			if(err){
-				return callback(err);
-			}
-			callback(null, upcompliance);
-		});
-};
+Compliance.update = function (query, obj, callback, opts, populate) {
+  var options = opts || {}
+  var populate = populate || ''
 
+  ComplianceModel
+    .update(query, obj, options)
+    .populate(populate)
+    .exec(function (err, upcompliance) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, upcompliance)
+    })
+}
 
-
-
-module.exports = Compliance;
+module.exports = Compliance

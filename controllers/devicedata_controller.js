@@ -7,8 +7,7 @@ var	request = require('request'),
 	Device = require('../models/device');
 
 exports.bindingDevice = function(req, res){
-    console.log("in 111");
-	var userId = req.body.userId || null;
+	var userId = req.session.userId || null;
 	var appId = req.body.appId || null;
 	var twoDimensionalCode = req.body.twoDimensionalCode || null;
 
@@ -94,7 +93,7 @@ exports.bindingDevice = function(req, res){
 }
 
 exports.debindingDevice = function(req, res){
-	var userId = req.body.userId || null;
+	var userId = req.session.userId || null;
 	var appId = req.body.appId || null;
 	var sn = req.body.sn || null;
     var imei = req.body.imei || null;
@@ -201,7 +200,7 @@ exports.receiveBloodPressure = function(req, res){
 }
 
 exports.getDeviceInfo = function(req, res){
-	var userId = req.query.userId || null;
+	var userId = req.session.userId || null;
 	var deviceType = req.query.deviceType || null;
 
 	if(userId === null || userId === '' ){

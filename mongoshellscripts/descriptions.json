@@ -1,0 +1,19 @@
+[
+  {
+    "name": "schedule_develop.js",
+    "descriptions": "咨询自动结束"
+
+  },
+  // {
+  //   "name": "allstopcounsel.js",
+  //   "descriptions": "获取所有结束的咨询信息"
+  // },
+  {
+    "name": "insertReport.js",
+    "descriptions": "生成患者报表信息"
+  },
+  {
+    "name": "deleteUserInfo.js",
+    "descriptions": "删除用户所有相关信息"
+  }
+]

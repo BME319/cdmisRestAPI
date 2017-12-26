@@ -282,7 +282,6 @@ function sendToReceiver (messageType, receiver, sendBy, userAppServer, userWecha
               method: 'POST',
               body: template,
               json: true
-
             }, function (err, response, body) {
                                 // console.log(idx + 'done')
               console.log(body)

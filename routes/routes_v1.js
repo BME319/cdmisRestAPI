@@ -1,17 +1,14 @@
 
-
 // global var
-var version = '/api/v1';
-
+var version = '/api/v1'
 
 // 3rd packages
 
-
 // self-defined configurations
-var config = require('../config');
+var config = require('../config')
 
 // models
-var Wechat = require('../models/wechat');
+var Wechat = require('../models/wechat')
 
 // middlewares
 var getNoMid = require('../middlewares/getNoMid'),
@@ -22,53 +19,51 @@ var errorHandler = require('../middlewares/errorHandler')
 // controllers
 var dictTypeTwoCtrl = require('../controllers/dictTypeTwo_controller'),
 
-    userCtrl = require('../controllers/user_controller'),
-    healthInfoCtrl = require('../controllers/healthInfo_controller'),
-    dictNumberCtrl = require('../controllers/dictNumber_controller'),
-    loadCtrl = require('../controllers/load_controller');
+  userCtrl = require('../controllers/user_controller'),
+  healthInfoCtrl = require('../controllers/healthInfo_controller'),
+  dictNumberCtrl = require('../controllers/dictNumber_controller'),
+  loadCtrl = require('../controllers/load_controller')
 
-  
-    dictTypeOneCtrl = require('../controllers/dictTypeOne_controller'),
-    dictDistrictCtrl = require('../controllers/dictDistrict_controller'),
-    dictHospitalCtrl = require('../controllers/dictHospital_controller'),
-    taskCtrl = require('../controllers/task_controller'),
-    orderCtrl = require('../controllers/order_controller'),
-    complianceCtrl = require('../controllers/compliance_controller'),
-    jpushCtrl = require('../controllers/jpush_controller'),
-    devicedataCtrl = require('../controllers/devicedata_controller'),
-    aclsettingCtrl = require('../controllers/aclsetting_controller'),
-    versionCtrl = require('../controllers/version_controller');
+var dictTypeOneCtrl = require('../controllers/dictTypeOne_controller'),
+  dictDistrictCtrl = require('../controllers/dictDistrict_controller'),
+  dictHospitalCtrl = require('../controllers/dictHospital_controller'),
+  taskCtrl = require('../controllers/task_controller'),
+  orderCtrl = require('../controllers/order_controller'),
+  complianceCtrl = require('../controllers/compliance_controller'),
+  jpushCtrl = require('../controllers/jpush_controller'),
+  devicedataCtrl = require('../controllers/devicedata_controller'),
+    // aclsettingCtrl = require('../controllers/aclsetting_controller'),
+  versionCtrl = require('../controllers/version_controller')
 
+// controllers updated by GY
+var doctorCtrl = require('../controllers/doctor_controller'),
+  counselCtrl = require('../controllers/counsel_controller'),
+  patientCtrl = require('../controllers/patient_controller'),
+  commentCtrl = require('../controllers/comment_controller'),
+  vitalSignCtrl = require('../controllers/vitalSign_controller'),
+  accountCtrl = require('../controllers/account_controller'),
+  adviceCtrl = require('../controllers/advice_controller'),
+  expenseCtrl = require('../controllers/expense_controller'),
+  communicationCtrl = require('../controllers/communication_controller'),
+  messageCtrl = require('../controllers/message_controller'),
+  newsCtrl = require('../controllers/news_controller'),
+  reviewCtrl = require('../controllers/review_controller'),
+  insuranceCtrl = require('../controllers/insurance_controller')
+var getQRcodeCtrl = require('../controllers/getQRcode')
+var labtestResultCtrl = require('../controllers/labtestResult_controller')
 
-// controllers updated by GY 
-var doctorCtrl = require('../controllers/doctor_controller'), 
-    counselCtrl = require('../controllers/counsel_controller'), 
-    patientCtrl = require('../controllers/patient_controller'), 
-    commentCtrl = require('../controllers/comment_controller'), 
-    vitalSignCtrl = require('../controllers/vitalSign_controller'), 
-    accountCtrl = require('../controllers/account_controller'), 
-    adviceCtrl = require('../controllers/advice_controller'), 
-    expenseCtrl = require('../controllers/expense_controller'), 
-    communicationCtrl = require('../controllers/communication_controller'), 
-    messageCtrl = require('../controllers/message_controller'), 
-    newsCtrl = require('../controllers/news_controller'), 
-    insuranceCtrl = require('../controllers/insurance_controller');
-var getQRcodeCtrl = require('../controllers/getQRcode');
-var labtestResultCtrl = require('../controllers/labtestResult_controller');
+var wechatCtrl = require('../controllers/wechat_controller')
 
-var wechatCtrl = require('../controllers/wechat_controller');
-
-module.exports = function(app,webEntry, acl) {
-
-  //app.use('/static', express.static( './static')).
+module.exports = function (app, webEntry, acl) {
+  // app.use('/static', express.static( './static')).
   //    use('/images', express.static( '../images')).
   //    use('/lib', express.static( '../lib')
-  //);
-  app.get('/', function(req, res){
-    //console.log("Connected successfully to server and response");
-    //res.render('rich_ui');
-    res.send("Server Root");
-  });
+  // );
+  app.get('/', function (req, res) {
+    // console.log("Connected successfully to server and response");
+    // res.render('rich_ui');
+    res.send('Server Root')
+  })
 // tokenManager.verifyToken(),
 
   app.post('/test', accountCtrl.test);
@@ -90,8 +85,8 @@ module.exports = function(app,webEntry, acl) {
 
   // app.post(version + '/compliance', complianceCtrl.insertOne);
   app.get(version + '/compliance', errorHandler.error,  complianceCtrl.getComplianceByDay);
-
   // wf
+
   // -------------------------------------------- 注册时如何验证用户 ------------------------------------------------------
   app.post(version + '/user/register', errorHandler.error, userCtrl.registerTest,getNoMid.getNo(1), userCtrl.register);
   // -------------------------------------------------------------------------------------------------------------------
@@ -127,6 +122,11 @@ module.exports = function(app,webEntry, acl) {
   app.post(version + '/upload', errorHandler.error,  loadCtrl.uploadphoto(), loadCtrl.upload);
   // app.get(version + '/download',loadCtrl.download);
 
+  // routes updated by GY
+  // 说明：测试需要，post方法返回的均为post内容，测试通过需要修改为成功或失败
+  // doctor_Info
+  app.post(version + '/doctor/detail', doctorCtrl.insertDocBasic)
+  // 需要查询class字典表（待定）
 
   //routes updated by GY
   //说明：测试需要，post方法返回的均为post内容，测试通过需要修改为成功或失败
@@ -191,6 +191,7 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/vitalSign/vitalSigns',  errorHandler.error, patientCtrl.getPatientObject, vitalSignCtrl.getVitalSigns);
   app.post(version + '/vitalSign/vitalSign', errorHandler.error, vitalSignCtrl.getPatientObject, vitalSignCtrl.getVitalSign, vitalSignCtrl.insertData);
 
+  app.get(version + '/expense/docRecords', doctorCtrl.checkDoctor, expenseCtrl.getDocRecords)
 
   //account_Info
   //需要和user表连接
@@ -239,7 +240,14 @@ module.exports = function(app,webEntry, acl) {
   // 临时接口：给原数据写入newsType字段
   // app.get(version + '/communication/updateNewsType', communicationCtrl.addnewsType);
 
-  //task
+  // task
+
+  app.post(version + '/tasks/taskModel', taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel)
+  app.get(version + '/tasks/task', taskCtrl.getUserTask)
+  app.post(version + '/tasks/task', taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent)
+
+  // compliance
+  app.post(version + '/compliance', complianceCtrl.getCompliance, complianceCtrl.updateCompliance)
 
   app.post(version + '/tasks/taskModel', errorHandler.error,  taskCtrl.removeOldTask, taskCtrl.getTaskModel, taskCtrl.insertTaskModel);
   app.get(version + '/tasks/task', errorHandler.error,  taskCtrl.getUserTask);
@@ -277,20 +285,21 @@ module.exports = function(app,webEntry, acl) {
   // // 获取用户基本信息
   // app.get(version + '/wechat/getUserInfo', wechatCtrl.gettokenbycode,wechatCtrl.getuserinfo);
   // // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
-  // // 输入：微信用户授权的code 商户系统生成的订单号 
+  // // 输入：微信用户授权的code 商户系统生成的订单号
   // app.get(version + '/wechat/addOrder', wechatCtrl.gettokenbycode, wechatCtrl.getPaymentOrder, wechatCtrl.addOrder,wechatCtrl.getPaySign);
   // // app.post(version + '/wechat/notif',wechatCtrl.register);
 
-
   // weixin wechatCtrl
+
   app.get(version + '/wechat/settingConfig', errorHandler.error, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.settingConfig);
 
   // 获取用户基本信息
   app.get(version + '/wechat/getUserInfo', errorHandler.error, wechatCtrl.chooseAppId,wechatCtrl.gettokenbycode,wechatCtrl.getuserinfo);
   app.get(version + '/wechat/gettokenbycode', errorHandler.error, wechatCtrl.chooseAppId, wechatCtrl.gettokenbycode, wechatCtrl.returntoken);
   // 统一下单  根据code获取access_token，openid   获取数据库中的订单信息   获取微信统一下单的接口数据 prepay_id   生成微信PaySign
-  // 输入：微信用户授权的code 商户系统生成的订单号 
+  // 输入：微信用户授权的code 商户系统生成的订单号
   // app.get(version + '/wechat/addOrder', wechatCtrl.gettokenbycode, wechatCtrl.getPaymentOrder, wechatCtrl.addOrder,wechatCtrl.getPaySign);
+
   app.post(version + '/wechat/addOrder', errorHandler.error,  getNoMid.getNo(7), orderCtrl.insertOrder, wechatCtrl.chooseAppId, wechatCtrl.addOrder,wechatCtrl.getPaySign);
  
   // app.post(version + '/order/insertOrder', getNoMid.getNo(7), orderCtrl.insertOrder);
@@ -330,7 +339,7 @@ module.exports = function(app,webEntry, acl) {
   app.get(version + '/wechat/getCustomMenu', errorHandler.error, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.getCustomMenu);
   app.get(version + '/wechat/deleteCustomMenu', errorHandler.error, wechatCtrl.chooseAppId, Wechat.baseTokenManager("access_token"), wechatCtrl.deleteCustomMenu);
 
-  //获取二维码相关方法
+  // 获取二维码相关方法
   // app.get(version + '/getAllDoctors', tokenManager.verifyToken(), getQRcodeCtrl.getAllDoctors);
   // app.post(version + '/saveAllTDCticket', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket);
   // app.post(version + '/saveAllTDCticket', getQRcodeCtrl.saveAllTDCticket);
@@ -338,11 +347,11 @@ module.exports = function(app,webEntry, acl) {
   // app.post(version + '/getAllQRcodes', getQRcodeCtrl.getAllDoctors, getQRcodeCtrl.saveAllTDCticket, getQRcodeCtrl.downloadImages);
   // app.post(version + '/downloadImages', getQRcodeCtrl.downloadImages);
 
-  //app.get(version + '/find',function(req, res){
+  // app.get(version + '/find',function(req, res){
   //  var url_parts = url.parse(req.url, true);
   //  var query = url_parts.query;
   //  res.send('Finding Book: Author: ' + query.author + ' Title: ' + query.title);
-  //});
+  // });
   // app.get(version + '/user/:userid', function(req, res){
   //   res.send("Get User: " + req.param("userid"));
   // });
@@ -378,4 +387,3 @@ module.exports = function(app,webEntry, acl) {
 
 
 };
-

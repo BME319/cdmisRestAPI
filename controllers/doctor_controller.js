@@ -24,12 +24,41 @@ var	config = require('../config'),
 // 	});
 // }
 
+//WF 20170626
+// 获取医生列表（或者详细信息）
+// 输入：无/用户ID，角色
+// 输出：用户ID，姓名，性别，手机号码，医院，科室，职称，咨询量，问诊量，评分；
+
+exports.getDoctors = function (req, res) {
+	
+    var query = {}; 
+    if (req.query.userId !== null && req.query.userId !== ''&& req.query.userId !== undefined) {
+        query["userId"]= req.query.userId;
+    };
+    var opts = '';
+	var fields = {'_id':0, 'patients':1};
+	//通过子表查询主表，定义主表查询路径及输出内容
+	var populate = {path: 'patients.patientId', select: {'_id':0, 'revisionInfo':0}};
+    Doctor.getSome(query, function (err, doctor) {
+        if (err) {
+            console.log(err);
+            return res.status(500).send('服务器错误, 用户查询失败!');
+        }
+        if (doctor == null) {
+        	return res.json({result:'不存在的医生ID！'});
+        }
+        return res.json({doctors:doctor});
+        
+    }, opts, fields, populate);
+};
+
 //新建医生基本信息 2017-04-01 GY
 exports.insertDocBasic = function(req, res) {
 	if (req.body.userId == null || req.body.userId == '') {
 		return res.json({result:'请填写userId!'});
 	}
 	var doctorData = {
+		registerTime: commonFunc.getNowFormatSecond()
 		// revisionInfo:{
 		// 	operationTime:commonFunc.getNowFormatSecond(),
 		// 	userId:"gy",

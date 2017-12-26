@@ -3,15 +3,15 @@ var mongoose = require('mongoose')
 
 var counselSchema = new mongoose.Schema({
   counselId: {type: String, unique: true},
-  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'doctor'},
-  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'patient'},
-  type: Number,
+  doctorId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  patientId: {type: mongoose.Schema.Types.ObjectId, ref: 'alluser'},
+  type: {type: Number, enum: [1, 2, 3, 6, 7]}, // 咨询=1,问诊=2,咨询升级问诊=3,加急咨询=6,咨询升级加急咨询=7
   time: Date,
-  status: Number,
+  status: {type: Number, enum: [1, 0]}, // 进行中／关闭
   endTime: Date,
-  topic: String,
-  content: String,
-  title: String,
+  topic: String, // 好像并不在用
+  content: String, // 好像并不在用
+  title: String, // 好像并不在用
   sickTime: String,
   visited: Number,
   hospital: String,
@@ -20,10 +20,10 @@ var counselSchema = new mongoose.Schema({
   diagnosisPhotoUrl: [String],
   symptom: String,
   symptomPhotoUrl: [String],
-  descirption: String,
+  descirption: String, // 好像并不在用
   help: String,
   comment: String,
-  messages: [
+  messages: [ // 好像并不在用
     {
       sender: String,
       receiver: String,
@@ -39,7 +39,7 @@ var counselSchema = new mongoose.Schema({
   }
 })
 
-var counselModel = mongoose.model('counsel', counselSchema)
+var CounselModel = mongoose.model('counsel', counselSchema)
 
 function Counsel (counsel) {
   this.counsel = counsel
@@ -47,7 +47,7 @@ function Counsel (counsel) {
 
 Counsel.prototype.save = function (callback) {
   var counsel = this.counsel
-  var newCounsel = new counselModel(counsel)
+  var newCounsel = new CounselModel(counsel)
   newCounsel.save(function (err, counselItem) {
     if (err) {
       return callback(err)
@@ -58,48 +58,48 @@ Counsel.prototype.save = function (callback) {
 
 Counsel.getOne = function (query, callback, opts, fields, populate) {
   var options = opts || {}
-  var fields = fields || null
-  var populate = populate || ''
+  var _fields = fields || null
+  var _populate = populate || ''
 
-  counselModel
-    .findOne(query, fields, opts)
-    .populate(populate)
-    .exec(function (err, counselInfo) {
-  if (err) {
-    return callback(err)
-  }
-  callback(null, counselInfo)
-})
+  CounselModel
+  .findOne(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, counselInfo) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, counselInfo)
+  })
 }
 
 Counsel.getSome = function (query, callback, opts, fields, populate) {
   var options = opts || {}
-  var fields = fields || null
-  var populate = populate || ''
-  counselModel
-    .find(query, fields, options)
-    .populate(populate)
-    .exec(function (err, counsels) {
-  if (err) {
-    return callback(err)
-  }
-  callback(null, counsels)
-})
+  var _fields = fields || null
+  var _populate = populate || ''
+  CounselModel
+  .find(query, _fields, options)
+  .populate(_populate)
+  .exec(function (err, counsels) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, counsels)
+  })
 }
 
 Counsel.updateOne = function (query, obj, callback, opts, populate) {
   var options = opts || {}
-  var populate = populate || ''
+  var _populate = populate || ''
 
-  counselModel
-    .findOneAndUpdate(query, obj, options)
-    .populate(populate)
-    .exec(function (err, upcounsel) {
-  if (err) {
-    return callback(err)
-  }
-  callback(null, upcounsel)
-})
+  CounselModel
+  .findOneAndUpdate(query, obj, options)
+  .populate(_populate)
+  .exec(function (err, upcounsel) {
+    if (err) {
+      return callback(err)
+    }
+    callback(null, upcounsel)
+  })
 }
 
 module.exports = Counsel
