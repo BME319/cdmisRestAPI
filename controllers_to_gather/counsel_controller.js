@@ -21,7 +21,7 @@ exports.insertCommentScore = function (req, res) {
           patientId: results.getPatient._id,
           doctorId: results.getDoctor._id,
           time: new Date(),
-          totalScore: req.body.totalScore,
+          totalScore: req.body.totalScore * 2, // 0-5转换为0-10
           content: req.body.content // ,
           // counselId: req.body.counselId
         }
