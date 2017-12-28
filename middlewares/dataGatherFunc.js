@@ -77,7 +77,6 @@ var dataGatherFunc = {
       params: params,
       outputs: outputs
     }
-    console.log(traceData)
     let newTrace = new Trace(traceData)
     newTrace.save(function (err, traceInfo) {
       let result
