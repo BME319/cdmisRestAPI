@@ -1,7 +1,7 @@
 
 // global var
 var version = '/api/v2'
-
+var versionGather = '/api/gather'
 // 3rd packages
 
 // self-defined configurations
@@ -65,7 +65,13 @@ var districtMonitorCtrl = require('../controllers_v2/districtMonitor_controller'
 var departmentReportTempCtrl = require('../controllers_v2/departmentReportTemp_controller')
 // var testCtrl = require('../controllers_v2/convert_to_async')
 
+// gather controllers
+var counselCtrlG = require('../controllers_to_gather/counsel_controller')
+
 module.exports = function (app, webEntry, acl) {
+  // gather interfaces
+  app.post(versionGather + '/counsel/commentScore', counselCtrlG.insertCommentScore)
+
   // app.get('/', function(req, res){
   //   res.send("Server Root");
   // });
