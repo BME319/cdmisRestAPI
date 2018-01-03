@@ -69,9 +69,6 @@ var departmentReportTempCtrl = require('../controllers_v2/departmentReportTemp_c
 var counselCtrlG = require('../controllers_to_gather/counsel_controller')
 
 module.exports = function (app, webEntry, acl) {
-  // gather interfaces
-  app.post(versionGather + '/counsel/commentScore', counselCtrlG.insertCommentScore)
-
   // app.get('/', function(req, res){
   //   res.send("Server Root");
   // });
