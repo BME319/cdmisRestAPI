@@ -1,6 +1,6 @@
 var DoctorsInCharge = require('../models/doctorsInCharge')
 var DpRelation = require('../models/dpRelation')
-var Order = require('../models/order')
+// var Order = require('../models/order')
 var async = require('async')
 var dataGatherFunc = require('../middlewares/dataGatherFunc')
 var Alluser = require('../models/alluser')
@@ -10,7 +10,7 @@ exports.addDIC = function (req, res) {
   let doctorPhoneNo = req.body.doctorPhoneNo || null
   let startTime = req.body.startTime || null
   let stopTime = req.body.stopTime || null
-  if (patientPhoneNo === null || doctorPhoneNo  === null || startTime  === null || stopTime  === null) {
+  if (patientPhoneNo === null || doctorPhoneNo === null || startTime === null || stopTime === null) {
     return res.json({msg: '请检查输入,phoneNo/doctorPhoneNo/startTime/stopTime', status: 1})
   }
   async.auto({
@@ -173,7 +173,7 @@ exports.favoriteDoctor = function (req, res) {
   let patientPhoneNo = req.body.patientPhoneNo || null
   let doctorPhoneNo = req.body.doctorPhoneNo || null
   let Time = req.body.Time || null
-  if (patientPhoneNo === null || doctorPhoneNo  === null || Time  === null) {
+  if (patientPhoneNo === null || doctorPhoneNo === null || Time === null) {
     return res.json({msg: '请检查输入,patientPhoneNo/doctorPhoneNo/Time', status: 1})
   }
   async.auto({
@@ -257,7 +257,7 @@ exports.unfollowFavoriteDoctor = function (req, res) {
   let patientPhoneNo = req.body.patientPhoneNo || null
   let doctorPhoneNo = req.body.doctorPhoneNo || null
   let Time = req.body.Time || null
-  if (patientPhoneNo === null || doctorPhoneNo  === null || Time  === null) {
+  if (patientPhoneNo === null || doctorPhoneNo === null || Time === null) {
     return res.json({msg: '请检查输入,patientPhoneNo/doctorPhoneNo/Time', status: 1})
   }
   async.auto({
