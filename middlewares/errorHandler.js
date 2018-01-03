@@ -2,6 +2,8 @@ var domain = require('domain')
 var fs = require('fs')
 var bunyan = require('bunyan')
 var commonFunc = require('../middlewares/commonFunc')
+var Trace = require('../models/trace')
+var util = require('util')
 
 var log = bunyan.createLogger({
   name: 'kidney',
@@ -65,6 +67,67 @@ exports.error = function (req, res, next) {
   d.add(req)
   d.add(res)
   d.run(next)
+}
+
+exports.allError = function (req, res, next) {
+  var d = domain.create()
+  log.info(req.method + ' ' + req.url)
+  // 监听domain的错误事件
+  d.on('error', function (err) {
+    // logger.error(err)
+    res.statusCode = 500
+    // res.json({sucess: false, messag: '服务器异常'})
+    console.log('test domain')
+    // console.log(err)
+    // console.log(req)
+    log.error('= ------------------------------------------------------------')
+    log.error(err)
+    log.error(req.method + ' ' + req.url)
+    log.error(req.query || req.body)
+  })
+
+  d.add(req)
+  d.add(res)
+  d.run(next)
+}
+
+exports.makeError = function (numPathComponents, outputs) {
+  function HttpError (errorCode, msg) {
+    this.errorCode = errorCode
+    this.message = msg
+    this.name = this.constructor.name
+
+    Error.captureStackTrace(this, this.constructor)
+    this.constructor.prototype.__proto__ = Error.prototype
+  }
+
+  return function (req, res, next) {
+    console.log('checkError')
+    let resource
+    let url = req.originalUrl.split('?')[0]
+
+    if (!numPathComponents) {
+      resource = url
+    } else {
+      resource = url.split('/').slice(3, numPathComponents + 3).join('/')
+    }
+    let traceData = {
+      phoneNo: req.body.phoneNo,
+      apiName: resource,
+      time: new Date(),
+      params: req.body,
+      outputs: outputs
+    }
+    let newTrace = new Trace(traceData)
+    newTrace.save(function (err, traceInfo) {
+      if (err) {
+        // res.json({status: 1, msg: '操作失败!'})
+        next(new HttpError(403, 'api saving error'))
+      } else {
+        return res.json({status: 0, msg: '操作成功!'})
+      }
+    })
+  }
 }
 
 exports.insertLog = function (req, res) {
