@@ -29,8 +29,10 @@ exports.insertLabtest = function (req, res) {
               callback(null, {status: 0, msg: 'labtestImport接收成功'})
             }
           }, {upsert: true}) 
+        } else if (results.getUser.status === -1) {
+          callback(null, {status: 1, msg: '用户不存在，请检查phoneNo'})
         } else {
-          callback(null, {status: 1, msg: '系统错误,接收失败'})
+          callback(null, {status: 1, msg: '系统错误'})
         }
       }],
       traceRecord: ['insertLab', function (results, callback) {
@@ -76,8 +78,10 @@ exports.editLabtest = function (req, res) {
               callback(null, {status: 0, msg: 'labtestImport/edit接收成功'})
             }
           }, {upsert: true}) 
+        } else if (results.getUser.status === -1) {
+          callback(null, {status: 1, msg: '用户不存在，请检查phoneNo'})
         } else {
-          callback(null, {status: 1, msg: '系统错误,接收失败'})
+          callback(null, {status: 1, msg: '系统错误'})
         }
       }],
       traceRecord: ['editLab', function (results, callback) {
