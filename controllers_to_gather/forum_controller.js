@@ -76,8 +76,10 @@ exports.forumPosting = function (req, res) {
               }                
           }, {upsert: true})
           }        
+      } else if (results.getUser.status === -1) {
+        callback(null, {status: 1, msg: '用户不存在，请检查phoneNo'})
       } else {
-        callback(null, {status: 1, msg: '系统错误,接收失败'})
+        callback(null, {status: 1, msg: '系统错误'})
       }
     }],
     traceRecord: ['Posting', function (results, callback) {
@@ -164,8 +166,10 @@ exports.deletePost = function (req, res) {
             }
           })
         }
+      } else if (results.getUser.status === -1) {
+        callback(null, {status: 1, msg: '用户不存在，请检查phoneNo'})
       } else {
-        callback(null, {status: 1, msg: '系统错误,接收失败'})
+        callback(null, {status: 1, msg: '系统错误'})
       }
     }],
     traceRecord: ['deleteP', function (results, callback) {
@@ -272,8 +276,10 @@ exports.forumFavorite = function (req, res) {
             }
           })
         }
+      } else if (results.getUser.status === -1) {
+        callback(null, {status: 1, msg: '用户不存在，请检查phoneNo'})
       } else {
-        callback(null, {status: 1, msg: '系统错误,接收失败'})
+        callback(null, {status: 1, msg: '系统错误'})
       }
     }],
     traceRecord: ['favorite', function (results, callback) {
@@ -378,8 +384,10 @@ exports.deleteFavorite = function (req, res) {
             }
           })
         }
+      } else if (results.getUser.status === -1) {
+        callback(null, {status: 1, msg: '用户不存在，请检查phoneNo'})
       } else {
-        callback(null, {status: 1, msg: '系统错误,接收失败'})
+        callback(null, {status: 1, msg: '系统错误'})
       }
     }],
     traceRecord: ['deleteF', function (results, callback) {
@@ -484,8 +492,10 @@ exports.forumComment = function (req, res) {
             }
           }
         })
+      } else if (results.getUser.status === -1) {
+        callback(null, {status: 1, msg: '用户不存在，请检查phoneNo'})
       } else {
-        callback(null, {status: 1, msg: '系统错误,接收失败'})
+        callback(null, {status: 1, msg: '系统错误'})
       }
     }],
     traceRecord: ['comment', function (results, callback) {
