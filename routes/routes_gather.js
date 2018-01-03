@@ -6,9 +6,8 @@ var traceRecord = require('../middlewares/traceRecord')
 var errorHandler = require('../middlewares/errorHandler')
 
 // controllers
+
 var alluserCtrl = require('../controllers_to_gather/alluser_controller')
-var taskCtrl = require('../controllers_to_gather/task_controller')
-var complianceCtrl = require('../controllers_to_gather/compliance_controller')
 var counselCtrl = require('../controllers_to_gather/counsel_controller')
 var serviceCtrl = require('../controllers_to_gather/service_controller')
 var forumCtrl = require('../controllers_to_gather/forum_controller')
@@ -17,6 +16,8 @@ var labtestCtrl = require('../controllers_to_gather/labtestImport_controller')
 var vitalSignCtrl = require('../controllers_to_gather/vitalSign_controller')
 var communicationCtrl = require('../controllers_to_gather/communication_controller')
 var patientCtrl = require('../controllers_to_gather/patient_controller')
+var taskCtrl = require('../controllers_to_gather/task_controller')
+var complianceCtrl = require('../controllers_to_gather/compliance_controller')
 
 module.exports = function (app, webEntry, acl) {
   // YQC

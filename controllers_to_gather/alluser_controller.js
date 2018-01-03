@@ -1,4 +1,3 @@
-
 var Alluser = require('../models/alluser')
 var DpRelation = require('../models/dpRelation')
 var async = require('async')
@@ -61,6 +60,7 @@ exports.dprelation = function (type) {
     }
   }
 }
+
 exports.updateAlluser = function (acl) {
   return function (req, res) {
     let phoneNo = req.body.phoneNo || null
