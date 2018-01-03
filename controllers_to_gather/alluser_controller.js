@@ -232,7 +232,7 @@ exports.updateAlluser = function (acl) {
     // })
     // // 4.保存trace
     // // 5.返回
-    let outputs = {status: 0, msg: '已接收未写入'}
+    let outputs = {status: 0, msg: 'alluser/alluser已接收未写入'}
     async.auto({
       traceRecord: function (callback) {
         let params = req.body
