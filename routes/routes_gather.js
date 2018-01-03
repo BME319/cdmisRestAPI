@@ -6,21 +6,30 @@ var traceRecord = require('../middlewares/traceRecord')
 var errorHandler = require('../middlewares/errorHandler')
 
 // controllers
-var taskCtrl = require('../controllers_to_gather/task_controller')
-var complianceCtrl = require('../controllers_to_gather/compliance_controller')
+
+var alluserCtrl = require('../controllers_to_gather/alluser_controller')
 var counselCtrl = require('../controllers_to_gather/counsel_controller')
+var serviceCtrl = require('../controllers_to_gather/service_controller')
 var forumCtrl = require('../controllers_to_gather/forum_controller')
 var healthInfoCtrl = require('../controllers_to_gather/healthInfo_controller')
 var labtestCtrl = require('../controllers_to_gather/labtestImport_controller')
 var vitalSignCtrl = require('../controllers_to_gather/vitalSign_controller')
 var communicationCtrl = require('../controllers_to_gather/communication_controller')
 var patientCtrl = require('../controllers_to_gather/patient_controller')
-var alluserCtrl = require('../controllers_to_gather/alluser_controller')
+var taskCtrl = require('../controllers_to_gather/task_controller')
+var complianceCtrl = require('../controllers_to_gather/compliance_controller')
 
 module.exports = function (app, webEntry, acl) {
+  // YQC
+  app.post(version + '/alluser/alluser', alluserCtrl.updateAlluser(acl))
+  app.post(version + '/counsel/questionnaire', counselCtrl.saveQuestionnaire)
   app.post(version + '/counsel/commentScore', counselCtrl.insertCommentScore)
+  app.post(version + '/patient/doctorInCharge', serviceCtrl.addDIC)
+  app.post(version + '/patient/cancelDoctorInCharge', serviceCtrl.cancelDIC)
+  app.post(version + '/patient/favoriteDoctor', serviceCtrl.favoriteDoctor)
+  app.post(version + '/patient/unfollowFavoriteDoctor', serviceCtrl.unfollowFavoriteDoctor)
 
-  //JYF
+  // JYF
   app.post(version + '/forum/posting', forumCtrl.forumPosting)
   app.post(version + '/forum/deletepost', forumCtrl.deletePost)
   app.post(version + '/forum/favorite', forumCtrl.forumFavorite)
