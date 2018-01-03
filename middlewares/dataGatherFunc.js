@@ -17,7 +17,7 @@ var dataGatherFunc = {
           } else if (item === null) {
             result = {status: -1, msg: 'User not Exists!'}
           } else {
-            result = {status: 0, userId: item.userId, _id: item._id, msg: 'UserId Got!'}
+            result = {status: 0, userId: item.userId, _id: item._id, name: item.name, msg: 'UserId Got!'}
           }
           return callback(err, result)
         })
