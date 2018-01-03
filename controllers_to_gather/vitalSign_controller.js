@@ -28,8 +28,10 @@ exports.insertvitalSign = function (req, res) {
               callback(null, {status: 0, msg: 'vitalSign/vitalSign接收成功'})
             }
           }, {upsert: true}) 
+        } else if (results.getUser.status === -1) {
+          callback(null, {status: 1, msg: '用户不存在，请检查phoneNo'})
         } else {
-          callback(null, {status: 1, msg: '系统错误,接收失败'})
+          callback(null, {status: 1, msg: '系统错误'})
         }
       }],
       traceRecord: ['insertvital', function (results, callback) {
