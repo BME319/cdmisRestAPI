@@ -1,7 +1,6 @@
 var Task = require('../models/task')
 var Alluser = require('../models/alluser')
 var errorHandler = require('../middlewares/errorHandler')
-var traceRecord = require('../middlewares/traceRecord')
 
 exports.dpUserIDbyPhone = function (req, res, next) {
   let phoneNo = req.body.phoneNo || null
@@ -39,6 +38,20 @@ exports.dpUserIDbyPhone = function (req, res, next) {
           }
         })
       }
+    }
+  })
+}
+
+exports.pUserIDbyPhone = function (req, res, next) {
+  let query = {phoneNo: req.body.phoneNo, role: 'patient'}
+  Alluser.getOne(query, function (err, patientItem) {
+    if (err) {
+      return res.json({status: 1, msg: '操作失败!'})
+    } else if (patientItem === null) {
+      return res.json({status: 1, msg: '不存在该患者!'})
+    } else {
+      req.patientItem = patientItem
+      return next()
     }
   })
 }
