@@ -58,6 +58,8 @@ exports.dprelation = function (type) {
       // 患者本身也有权限
       next()
     }
+  }
+}
 
 exports.updateAlluser = function (acl) {
   return function (req, res) {
