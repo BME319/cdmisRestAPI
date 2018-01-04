@@ -7,7 +7,12 @@ var commonFunc = require('../middlewares/commonFunc')
 
 var dataGatherFunc = {
   userIDbyPhone: function (phoneNo, role, callback) {
-    let query = {phoneNo: phoneNo, role: role}
+    let query = {}
+    if ((role || null) !== null) {
+      query = {phoneNo: phoneNo, role: role}
+    } else {
+      query = {phoneNo: phoneNo}
+    }
     let result
     Alluser.getOne(query, function (err, item) {
       if (err) {
@@ -15,7 +20,7 @@ var dataGatherFunc = {
       } else if (item === null) {
         result = {status: -1, msg: 'User not Exists!'}
       } else {
-        result = {status: 0, userId: item.userId, _id: item._id, msg: 'UserId Got!'}
+        result = {status: 0, userId: item.userId, _id: item._id, role: item.role, item: item, msg: 'UserId Got!'}
       }
       return callback(err, result)
     })
