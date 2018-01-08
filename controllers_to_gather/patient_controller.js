@@ -27,45 +27,59 @@ var docInfoForPat = {
   suspendTime: 1
 }
 // var config = require('../config')
-var webEntry = require('../settings').webEntry
+// var webEntry = require('../settings').webEntry
 var Alluser = require('../models/alluser')
 // var Patient = require('../models/patient')
 // var Doctor = require('../models/doctor')
-var DpRelation = require('../models/dpRelation')
+// var DpRelation = require('../models/dpRelation')
 // var User = require('../models/user')
 var commonFunc = require('../middlewares/commonFunc')
-var Counsel = require('../models/counsel')
+// var Counsel = require('../models/counsel')
 var VitalSign = require('../models/vitalSign')
-var DoctorsInCharge = require('../models/doctorsInCharge')
+// var DoctorsInCharge = require('../models/doctorsInCharge')
+var errorHandler = require('../middlewares/errorHandler')
 
 exports.dpUserIDbyPhone = function (req, res, next) {
   let phoneNo = req.body.phoneNo || null
   let doctorPhoneNo = req.body.doctorPhoneNo || null
   let query1 = {phoneNo: phoneNo, role: 'patient'}
   let query2 = {phoneNo: doctorPhoneNo, role: 'doctor'}
-  Alluser.getOne(query1, function (err, patientItem) {
-    if (err) {
-      return res.json({status: 1, msg: '操作失败!'})
-    } else if (patientItem === null) {
-      return res.json({status: 1, msg: '不存在该患者!'})
-    } else {
-      req.patientItem = patientItem
-      if (doctorPhoneNo === null) {
-        req.doctorItem = null
+  if (phoneNo === null) {
+    req.outputs = {status: 1, msg: '请输入phoneNo!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
+  } else {
+    Alluser.getOne(query1, function (err, patientItem) {
+      if (err) {
+        // return res.json({status: 1, msg: '操作失败!'})
+        req.outputs = {status: 1, msg: err}
+        errorHandler.makeError(2, req.outputs)(req, res, next)
+      } else if (patientItem === null) {
+        // return res.json({status: 1, msg: '不存在该患者!'})
+        req.outputs = {status: 1, msg: '不存在该患者!'}
+        errorHandler.makeError(2, req.outputs)(req, res, next)
       } else {
-        Alluser.getOne(query2, function (err, doctorItem) {
-          if (err) {
-            return res.json({status: 1, msg: '操作失败!'})
-          } else if (doctorItem === null) {
-            return res.json({status: 1, msg: '不存在该医生!'})
-          } else {
-            req.doctorItem = doctorItem
-            return next()
-          }
-        })
+        req.patientItem = patientItem
+        if (doctorPhoneNo === null) {
+          req.doctorItem = null
+        } else {
+          Alluser.getOne(query2, function (err, doctorItem) {
+            if (err) {
+              // return res.json({status: 1, msg: '操作失败!'})
+              req.outputs = {status: 1, msg: err}
+              errorHandler.makeError(2, req.outputs)(req, res, next)
+            } else if (doctorItem === null) {
+              // return res.json({status: 1, msg: '不存在该医生!'})
+              req.outputs = {status: 1, msg: '不存在该医生!'}
+              errorHandler.makeError(2, req.outputs)(req, res, next)
+            } else {
+              req.doctorItem = doctorItem
+              return next()
+            }
+          })
+        }
       }
-    }
-  })
+    })
+  }
 }
 
 exports.insertDiagnosis = function (req, res, next) {
@@ -115,10 +129,14 @@ exports.insertDiagnosis = function (req, res, next) {
 
   Alluser.update(query, upObj, function (err, updiag) {
     if (err) {
-      return res.status(422).json({status: 1, msg: err.message})
+      // return res.status(422).json({status: 1, msg: err.message})
+      req.outputs = {status: 1, msg: err}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
     if (updiag.nModified === 0) {
-      return res.json({status: 1, msg: '未成功修改！请检查输入是否符合要求！'})
+      // return res.json({status: 1, msg: '未成功修改！请检查输入是否符合要求！'})
+      req.outputs = {status: 1, msg: '未成功修改！请检查输入是否符合要求！'}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
     req.body.userId = req.patientItem.userId
     req.body.class = diagName
@@ -225,7 +243,9 @@ exports.editPatientDetail = function (req, res, next) {
 
   Alluser.updateOne(query, upObj, function (err, upPatient) {
     if (err) {
-      return res.status(422).json({status: 1, msg: err.message})
+      // return res.status(422).json({status: 1, msg: err.message})
+      req.outputs = {status: 1, msg: err}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
     if (upPatient == null) {
       return res.json({status: 1, msg: '修改失败，不存在的患者ID！'})

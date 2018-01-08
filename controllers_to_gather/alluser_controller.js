@@ -2,6 +2,7 @@ var Alluser = require('../models/alluser')
 var DpRelation = require('../models/dpRelation')
 var async = require('async')
 var dataGatherFunc = require('../middlewares/dataGatherFunc')
+var errorHandler = require('../middlewares/errorHandler')
 
 // 验证主管、关注患者
 exports.dprelation = function (type) {
@@ -10,16 +11,24 @@ exports.dprelation = function (type) {
       let query = {doctorId: req.doctorItem._id}
       DpRelation.getOne(query, function (err, dpitem) {
         if (err) {
-          return res.status(500).json({status: 1, msg: err})
+          // return res.status(500).json({status: 1, msg: err})
+          req.outputs = {status: 1, msg: err}
+          errorHandler.makeError(2, req.outputs)(req, res, next)
         } else if (dpitem === null) {
-          return res.status(401).json({status: 1, msg: '与患者无任何联系没有操作权限'})
+          // return res.status(401).json({status: 1, msg: '与患者无任何联系没有操作权限'})
+          req.outputs = {status: 1, msg: '与患者无任何联系没有操作权限'}
+          errorHandler.makeError(2, req.outputs)(req, res, next)
         } else {
           let patientId = req.patientItem.userId
           Alluser.getOne({userId: patientId}, function (err, item) {
             if (err) {
-              return res.status(500).json({status: 1, msg: err})
+              // return res.status(500).json({status: 1, msg: err})
+              req.outputs = {status: 1, msg: err}
+              errorHandler.makeError(2, req.outputs)(req, res, next)
             } else if (item === null) {
-              return res.status(500).json({status: 1, msg: 'not_found!'})
+              // return res.status(500).json({status: 1, msg: 'not_found!'})
+              req.outputs = {status: 1, msg: 'not_found!'}
+              errorHandler.makeError(2, req.outputs)(req, res, next)
             } else {
               let patientFlag = 0
               let patientChargeFlag = 0
@@ -48,7 +57,9 @@ exports.dprelation = function (type) {
               } else if ((type.indexOf('follow') + 1) && patientFlag) {
                 next()
               } else {
-                return res.status(401).json({status: 1, msg: '权限不足'})
+                // return res.status(401).json({status: 1, msg: '权限不足'})
+                req.outputs = {status: 1, msg: '权限不足'}
+                errorHandler.makeError(2, req.outputs)(req, res, next)
               }
             }
           })

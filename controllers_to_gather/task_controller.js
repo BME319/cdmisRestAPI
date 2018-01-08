@@ -43,42 +43,69 @@ exports.dpUserIDbyPhone = function (req, res, next) {
 }
 
 exports.pUserIDbyPhone = function (req, res, next) {
-  let query = {phoneNo: req.body.phoneNo, role: 'patient'}
-  Alluser.getOne(query, function (err, patientItem) {
-    if (err) {
-      return res.json({status: 1, msg: '操作失败!'})
-    } else if (patientItem === null) {
-      return res.json({status: 1, msg: '不存在该患者!'})
-    } else {
-      req.patientItem = patientItem
-      return next()
-    }
-  })
+  let phoneNo = req.body.phoneNo || null
+  if (phoneNo === null) {
+    // console.log('HttpError')
+    req.outputs = {status: 1, msg: '请输入phoneNo!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
+    // req.status = 1
+    // req.msg = '请输入phoneNo!'
+    // next(traceRecord.traceRecord('tasks/task')(req, res))
+  } else {
+    let query = {phoneNo: req.body.phoneNo, role: 'patient'}
+    Alluser.getOne(query, function (err, patientItem) {
+      if (err) {
+        // return res.json({status: 1, msg: '操作失败!'})
+        req.outputs = {status: 1, msg: err}
+        errorHandler.makeError(2, req.outputs)(req, res, next)
+      } else if (patientItem === null) {
+        // return res.json({status: 1, msg: '不存在该患者!'})
+        req.outputs = {status: 1, msg: '不存在该患者!'}
+        errorHandler.makeError(2, req.outputs)(req, res, next)
+      } else {
+        req.patientItem = patientItem
+        return next()
+      }
+    })
+  }
 }
 
 // 1. 保存需要修改内容的对应type元素
 exports.getContent = function (req, res, next) {
   if (req.patientItem.userId === 'Admin') {
-    return res.json({status: 1, msg: '不允许修改的管理员模板！'})
+    // return res.json({status: 1, msg: '不允许修改的管理员模板！'})
+    req.outputs = {status: 1, msg: '不允许修改的管理员模板！'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
   }
   // if (req.patientItem.userId == null || req.patientItem.userId === '') {
   //   return res.json({status: 1, msg: '请输入userId!'})
   // }
-  if (req.body.type == null || req.body.type === '') {
-    return res.json({status: 1, msg: '请输入type!'})
+
+  let type = req.body.type || null
+  let code = req.body.code || null
+  if (type === null) {
+    // return res.json({status: 1, msg: '请输入type!'})
+    req.outputs = {status: 1, msg: '请输入type!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
   }
-  if (req.body.code == null || req.body.code === '') {
-    return res.json({status: 1, msg: '请输入code!'})
+  if (code === null) {
+    // return res.json({status: 1, msg: '请输入code!'})
+    req.outputs = {status: 1, msg: '请输入code!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
   }
 
   var query = {userId: req.patientItem.userId}
 
   Task.getOne(query, function (err, task) {
     if (err) {
-      return res.status(500).json({status: 1, msg: err.errmsg})
+      // return res.status(500).json({status: 1, msg: err.errmsg})
+      req.outputs = {status: 1, msg: err}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
     if (task == null) {
-      return res.json({status: 1, msg: '请检查是否存在userId或该user是否已有模板!'})
+      // return res.json({status: 1, msg: '请检查是否存在userId或该user是否已有模板!'})
+      req.outputs = {status: 1, msg: '请检查是否存在userId或该user是否已有模板!'}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
     var taskDetail = task.task
     var taskTypeDetail = null
@@ -88,11 +115,12 @@ exports.getContent = function (req, res, next) {
       }
     }
     if (taskTypeDetail == null) {
-      return res.json({status: 1, msg: '请检查type是否符合要求!'})
+      // return res.json({status: 1, msg: '请检查type是否符合要求!'})
+      req.outputs = {status: 1, msg: '请检查type是否符合要求!'}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
 
     req.body.taskTypeDetail = taskTypeDetail
-    // return res.json({result: taskTypeDetail});
 
     next()
   })
@@ -114,7 +142,9 @@ exports.removeContent = function (req, res, next) {
   // return res.json({query: query, upObj: upObj});
   Task.update(query, upObj, function (err, uptask) {
     if (err) {
-      return res.status(422).json({status: 1, msg: err.message})
+      // return res.status(422).json({status: 1, msg: err.message})
+      req.outputs = {status: 1, msg: err}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
 
     if (uptask.n !== 0 && uptask.nModified === 1) {
@@ -158,9 +188,10 @@ exports.updateContent = function (req, res, next) {
     }
   }
   if (j === typeNew.length) {
-    return res.json({status: 1, msg: '请检查code是否正确!'})
+    // return res.json({status: 1, msg: '请检查code是否正确!'})
+    req.outputs = {status: 1, msg: '请检查code是否正确!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
   }
-  // return res.json({result: '修改成功!', results:typeNew});
 
   var query = {
     userId: req.patientItem.userId
@@ -177,10 +208,12 @@ exports.updateContent = function (req, res, next) {
       date: new Date()
     }
   }
-  // return res.json({query: query, upObj: upObj});
+
   Task.update(query, upObj, function (err, uptask) {
     if (err) {
-      return res.status(422).json({status: 1, msg: err.message})
+      // return res.status(422).json({status: 1, msg: err.message})
+      req.outputs = {status: 1, msg: err}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
 
     if (uptask.n !== 0 && uptask.nModified === 1) {

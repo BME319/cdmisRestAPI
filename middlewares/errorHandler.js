@@ -3,7 +3,6 @@ var fs = require('fs')
 var bunyan = require('bunyan')
 var commonFunc = require('../middlewares/commonFunc')
 var Trace = require('../models/trace')
-var util = require('util')
 
 var log = bunyan.createLogger({
   name: 'kidney',
@@ -102,7 +101,7 @@ exports.makeError = function (numPathComponents, outputs) {
   }
 
   return function (req, res, next) {
-    console.log('checkError')
+    // console.log('checkError')
     let resource
     let url = req.originalUrl.split('?')[0]
 
@@ -124,7 +123,7 @@ exports.makeError = function (numPathComponents, outputs) {
         // res.json({status: 1, msg: '操作失败!'})
         next(new HttpError(403, 'api saving error'))
       } else {
-        return res.json({status: 0, msg: '操作成功!'})
+        return res.json({status: 1, msg: '操作失败!'})
       }
     })
   }
