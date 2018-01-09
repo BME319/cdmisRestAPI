@@ -1,19 +1,30 @@
 var Compliance = require('../models/compliance')
 var Alluser = require('../models/alluser')
 var Trace = require('../models/trace')
+var errorHandler = require('../middlewares/errorHandler')
 
 exports.pUserIDbyPhone = function (req, res, next) {
-  let query = {phoneNo: req.body.phoneNo, role: 'patient'}
-  Alluser.getOne(query, function (err, item) {
-    if (err) {
-      return res.json({status: 1, msg: '操作失败!'})
-    } else if (item === null) {
-      return res.json({status: 1, msg: '不存在该患者!'})
-    } else {
-      req.item = item
-      return next()
-    }
-  })
+  let phoneNo = req.body.phoneNo || null
+  if (phoneNo === null) {
+    req.outputs = {status: 1, msg: '请输入phoneNo!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
+  } else {
+    let query = {phoneNo: req.body.phoneNo, role: 'patient'}
+    Alluser.getOne(query, function (err, item) {
+      if (err) {
+        // return res.json({status: 1, msg: '操作失败!'})
+        req.outputs = {status: 1, msg: err}
+        errorHandler.makeError(2, req.outputs)(req, res, next)
+      } else if (item === null) {
+        // return res.json({status: 1, msg: '不存在该患者!'})
+        req.outputs = {status: 1, msg: '不存在该患者!'}
+        errorHandler.makeError(2, req.outputs)(req, res, next)
+      } else {
+        req.item = item
+        return next()
+      }
+    })
+  }
 }
 
 // 获取任务执行情况
@@ -26,16 +37,24 @@ exports.getCompliance = function (req, res, next) {
   let code = req.body.code || null
   // 判断参数输入，无输入则提示
   if (type == null) {
-    return res.json({status: 1, msg: '请填写type!'})
+    // return res.json({status: 1, msg: '请填写type!'})
+    req.outputs = {status: 1, msg: '请填写type!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
   }
   if (code == null) {
-    return res.json({status: 1, msg: '请填写code!'})
+    // return res.json({status: 1, msg: '请填写code!'})
+    req.outputs = {status: 1, msg: '请填写code!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
   }
   if (userId == null) {
-    return res.json({status: 1, msg: '请填写userId!'})
+    // return res.json({status: 1, msg: '请填写userId!'})
+    req.outputs = {status: 1, msg: '请填写userId!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
   }
   if (date == null) {
-    return res.json({status: 1, msg: '请填写date!'})
+    // return res.json({status: 1, msg: '请填写date!'})
+    req.outputs = {status: 1, msg: '请填写date!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
   }
   // return res.json({result:req.body});
   // 查询compliance表中是否存在已有对应日期的条目
@@ -48,26 +67,27 @@ exports.getCompliance = function (req, res, next) {
   // 调用任务执行情况获取函数Compliance.getOne获取一条任务执行条目
   Compliance.getOne(query, function (err, complianceItem) {
     if (err) {
-      console.log(err)
-      return res.status(500).json({status: 1, msg: '查询失败'})
+      // console.log(err)
+      // return res.status(500).json({status: 1, msg: '查询失败'})
+      req.outputs = {status: 1, msg: err}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
 
     // 查询不到已有条目则新建一个条目，查询到存在条目则进入updateCompliance
     if (complianceItem == null) {
-        // return res.json({result:req.body});
-        // return res.status(200).send('查询不到');
       let complianceData = {
         type: type,
         code: code,
         userId: userId,
         date: new Date(date)
       }
-        // return res.json({result:complianceData});
       // 新建compliance条目，调用save函数保存信息
       let newCompliance = new Compliance(complianceData)
       newCompliance.save(function (err, complianceInfo) {
         if (err) {
-          return res.status(500).json({status: 1, msg: err.errmsg})
+          // return res.status(500).json({status: 1, msg: err.errmsg})
+          req.outputs = {status: 1, msg: err}
+          errorHandler.makeError(2, req.outputs)(req, res, next)
         }
         next()
       })
@@ -99,36 +119,18 @@ exports.updateCompliance = function (req, res, next) {
   // 调用Compliance.updateOne函数更新数据
   Compliance.updateOne(query, upObj, function (err, upCompliance) {
     if (err) {
-      return res.status(422).json({status: 1, msg: err.errmsg})
+      // return res.status(422).json({status: 1, msg: err.errmsg})
+      req.outputs = {status: 1, msg: err}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
     if (upCompliance == null) {
-      return res.json({status: 1, msg: '修改失败！'})
+      // return res.json({status: 1, msg: '修改失败！'})
+      req.outputs = {status: 1, msg: '修改失败！'}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
     }
     // return res.json({status: 0, msg: '修改成功！'})
     req.status = 0
     req.msg = '修改成功！'
     return next()
   }, {new: true})
-}
-
-// 记录调用历史
-exports.traceRecord = function (apiName) {
-  return function (req, res) {
-    let outputs = {status: req.status, msg: req.msg}
-    let traceData = {
-      phoneNo: req.body.phoneNo,
-      apiName: apiName,
-      time: new Date(),
-      params: req.body,
-      outputs: outputs
-    }
-    let newTrace = new Trace(traceData)
-    newTrace.save(function (err, traceInfo) {
-      if (err) {
-        return res.json({status: 1, msg: '操作失败!'})
-      } else {
-        return res.json({status: 0, msg: '操作成功!'})
-      }
-    })
-  }
 }

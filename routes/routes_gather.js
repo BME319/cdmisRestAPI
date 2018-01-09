@@ -44,19 +44,19 @@ module.exports = function (app, webEntry, acl) {
 
   // lgf
   // 新建/更新用户任务
-  app.post(version + '/tasks/task', taskCtrl.pUserIDbyPhone, alluserCtrl.dprelation(['charge']), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent, traceRecord.traceRecord('tasks/task'))
+  app.post(version + '/tasks/task', errorHandler.allError, taskCtrl.pUserIDbyPhone, alluserCtrl.dprelation(['charge']), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent, traceRecord.traceRecord('tasks/task'))
   // 新建/更新任务执行情况
-  app.post(version + '/compliance/compliance', complianceCtrl.pUserIDbyPhone, complianceCtrl.getCompliance, complianceCtrl.updateCompliance, traceRecord.traceRecord('compliance/compliance'))
+  app.post(version + '/compliance/compliance', errorHandler.allError, complianceCtrl.pUserIDbyPhone, complianceCtrl.getCompliance, complianceCtrl.updateCompliance, traceRecord.traceRecord('compliance/compliance'))
   // 新建团队
-  app.post(version + '/communication/team', communicationCtrl.dUserIDbyPhone, communicationCtrl.newTeam, traceRecord.traceRecord('communication/team'))
+  app.post(version + '/communication/team', errorHandler.allError, communicationCtrl.dUserIDbyPhone, communicationCtrl.newTeam, traceRecord.traceRecord('communication/team'))
   // 添加团队成员
-  app.post(version + '/communication/insertMember', communicationCtrl.dUserIDbyPhone, communicationCtrl.insertMember, communicationCtrl.updateNumber, traceRecord.traceRecord('communication/insertMember'))
+  app.post(version + '/communication/insertMember', errorHandler.allError, communicationCtrl.dUserIDbyPhone, communicationCtrl.insertMember, communicationCtrl.updateNumber, traceRecord.traceRecord('communication/insertMember'))
   // 移除团队成员
-  app.post(version + '/communication/removeMember', communicationCtrl.dUserIDbyPhone, communicationCtrl.removeMember, communicationCtrl.updateNumber, traceRecord.traceRecord('communication/removeMember'))
+  app.post(version + '/communication/removeMember', errorHandler.allError, communicationCtrl.dUserIDbyPhone, communicationCtrl.removeMember, communicationCtrl.updateNumber, traceRecord.traceRecord('communication/removeMember'))
   // 根据ID及type存储交流记录
-  app.post(version + '/communication/communication', communicationCtrl.userIDbyPhone, communicationCtrl.receiverIDbyPhone, getNoMid.getNo(8), communicationCtrl.postCommunication, traceRecord.traceRecord('communication/communication'))
+  app.post(version + '/communication/communication', errorHandler.allError, communicationCtrl.userIDbyPhone, communicationCtrl.receiverIDbyPhone, getNoMid.getNo(8), communicationCtrl.postCommunication, traceRecord.traceRecord('communication/communication'))
   // 医生群发患者消息
-  app.post(version + '/communication/massToPatient', communicationCtrl.dUserIDbyPhone, communicationCtrl.getMassTargets, communicationCtrl.massCommunication, traceRecord.traceRecord('communication/massToPatient'))
+  app.post(version + '/communication/massToPatient', errorHandler.allError, communicationCtrl.dUserIDbyPhone, communicationCtrl.getMassTargets, communicationCtrl.massCommunication, traceRecord.traceRecord('communication/massToPatient'))
   // 添加诊断信息
-  app.post(version + '/patient/diagnosis', patientCtrl.dpUserIDbyPhone, alluserCtrl.dprelation(['charge', 'follow']), patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail, traceRecord.traceRecord('patient/diagnosis'))
+  app.post(version + '/patient/diagnosis', errorHandler.allError, patientCtrl.dpUserIDbyPhone, alluserCtrl.dprelation(['charge', 'follow']), patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail, traceRecord.traceRecord('patient/diagnosis'))
 }
