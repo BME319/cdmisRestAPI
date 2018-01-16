@@ -85,28 +85,32 @@ exports.updateAlluser = function (acl) {
       getUser: function (callback) {
         // 检查是否需要新建用户
         dataGatherFunc.userIDbyPhone(phoneNo, role, function (err, item) {
-          if (role !== null && item.status === -1) { // 需要新建用户
-            async.auto({
-              getNo: function (callback) {
-                dataGatherFunc.getSeriesNo(1, function (err, num) {
-                  callback(err, num)
-                })
-              },
-              newUser: ['getNo', function (results, callback) {
-                let query = {phoneNo: phoneNo, role: role}
-                let upUser = {userId: results.getNo}
-                Alluser.updateOne(query, upUser, function (err, info) {
-                  callback(err, info)
-                }, {upsert: true, new: true})
-              }],
-              aclAdd: ['getNo', function (results, callback) {
-                acl.addUserRoles(results.getNo, role, function (err) {
-                  callback(err)
-                })
-              }]
-            }, function (err, results) {
-              return callback(err, {status: 0, userId: results.newUser.userId, _id: results.newUser._id, role: results.newUser.role, item: results.newUser, msg: 'UserId Created!'})
-            })
+          if (item.status === -1) { // 需要新建用户
+            if (role !== null) {
+              async.auto({
+                getNo: function (callback) {
+                  dataGatherFunc.getSeriesNo(1, function (err, num) {
+                    callback(err, num)
+                  })
+                },
+                newUser: ['getNo', function (results, callback) {
+                  let query = {phoneNo: phoneNo, role: role}
+                  let upUser = {userId: results.getNo}
+                  Alluser.updateOne(query, upUser, function (err, info) {
+                    callback(err, info)
+                  }, {upsert: true, new: true})
+                }],
+                aclAdd: ['getNo', function (results, callback) {
+                  acl.addUserRoles(results.getNo, role, function (err) {
+                    callback(err)
+                  })
+                }]
+              }, function (err, results) {
+                return callback(err, {status: 0, userId: results.newUser.userId, _id: results.newUser._id, role: results.newUser.role, item: results.newUser, msg: 'UserId Created!'})
+              })
+            } else {
+              return res.json({msg: '请检查输入,role', status: 1})
+            }
           } else { // 不需要新建用户
             return callback(err, item)
           }
