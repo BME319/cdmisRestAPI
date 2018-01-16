@@ -123,7 +123,9 @@ exports.makeError = function (numPathComponents, outputs) {
         // res.json({status: 1, msg: '操作失败!'})
         next(new HttpError(403, 'api saving error'))
       } else {
-        return res.json({status: 1, msg: '操作失败!'})
+        // return res.json({status: 1, msg: '操作失败!'})
+        // console.log('outputs', outputs)
+        return res.json({status: outputs.status, msg: outputs.msg})
       }
     })
   }
