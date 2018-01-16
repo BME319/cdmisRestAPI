@@ -61,6 +61,7 @@ exports.dpUserIDbyPhone = function (req, res, next) {
         req.patientItem = patientItem
         if (doctorPhoneNo === null) {
           req.doctorItem = null
+          return next()
         } else {
           Alluser.getOne(query2, function (err, doctorItem) {
             if (err) {
@@ -96,34 +97,48 @@ exports.insertDiagnosis = function (req, res, next) {
   let diagOperationTime
   let diagHypertension
 
-  if (req.body.diagtime == null || req.body.diagtime === '' || req.body.diagtime === undefined) {
+  if (req.body.diagTime == null || req.body.diagTime === '' || req.body.diagTime === undefined) {
     diagTime = new Date()
   } else {
-    diagTime = new Date(req.body.diagtime)
+    diagTime = new Date(req.body.diagTime)
   }
   if (req.body.diagoperationTime == null || req.body.diagoperationTime === '' || req.body.diagoperationTime === undefined) {
     diagOperationTime = new Date('1900-01-01')
   } else {
     diagOperationTime = new Date(req.body.diagoperationTime)
   }
-  if (req.body.diaghypertension == null || req.body.diaghypertension === '' || req.body.diaghypertension === undefined) {
+  if (req.body.diagHypertension == null || req.body.diagHypertension === '' || req.body.diagHypertension === undefined) {
   // 前端定义默认高血压否为2
     diagHypertension = 2
   } else {
-    diagHypertension = req.body.diaghypertension
+    diagHypertension = req.body.diagHypertension
+  }
+
+  let diagnosisInfo = {
+    name: diagName,
+    time: diagTime,
+    hypertension: diagHypertension,
+    progress: diagProgress,
+    operationTime: diagOperationTime,
+    content: diagContent
+  }
+
+  if (req.doctorItem) {
+    diagnosisInfo['doctor'] = req.doctorItem._id
   }
 
   var upObj = {
     $push: {
-      diagnosisInfo: {
-        name: diagName,
-        time: diagTime,
-        hypertension: diagHypertension,
-        progress: diagProgress,
-        operationTime: diagOperationTime,
-        content: diagContent,
-        doctor: req.doctorItem._id // req.body.doctorObject._id
-      }
+      diagnosisInfo
+      // diagnosisInfo: {
+      //   name: diagName,
+      //   time: diagTime,
+      //   hypertension: diagHypertension,
+      //   progress: diagProgress,
+      //   operationTime: diagOperationTime,
+      //   content: diagContent,
+      //   doctor: req.doctorItem._id // req.body.doctorObject._id
+      // }
     }
   }
 
