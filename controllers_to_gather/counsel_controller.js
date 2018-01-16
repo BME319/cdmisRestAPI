@@ -7,7 +7,7 @@ exports.insertCommentScore = function (req, res) {
   let doctorPhoneNo = req.body.doctorPhoneNo || null
   let totalScore = req.body.totalScore || null
   let content = req.body.content || null
-  if (patientPhoneNo === null || doctorPhoneNo  === null || totalScore  === null || content  === null || typeof totalScore !== 'number') {
+  if (patientPhoneNo === null || doctorPhoneNo === null || totalScore === null || content === null || typeof totalScore !== 'number') {
     return res.json({msg: '请检查输入,phoneNo/doctorPhoneNo/totalScore/content', status: 1})
   }
   async.auto({
@@ -76,7 +76,7 @@ exports.saveQuestionnaire = function (req, res) {
   let doctorPhoneNo = req.body.doctorPhoneNo || null
   let type = req.body.type || null
   let help = req.body.help || null
-  if (patientPhoneNo === null || doctorPhoneNo  === null || type  === null) {
+  if (patientPhoneNo === null || doctorPhoneNo === null || type === null) {
     return res.json({msg: '请检查输入,phoneNo/doctorPhoneNo/type/help', status: 1})
   }
   async.auto({
