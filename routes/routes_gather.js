@@ -44,7 +44,7 @@ module.exports = function (app, webEntry, acl) {
 
   // lgf
   // 新建/更新用户任务
-  app.post(version + '/tasks/task', errorHandler.allError, taskCtrl.pUserIDbyPhone, alluserCtrl.dprelation(['charge']), taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent, traceRecord.traceRecord('tasks/task'))
+  app.post(version + '/tasks/task', errorHandler.allError, taskCtrl.pUserIDbyPhone, taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent, traceRecord.traceRecord('tasks/task'))
   // 新建/更新任务执行情况
   app.post(version + '/compliance/compliance', errorHandler.allError, complianceCtrl.pUserIDbyPhone, complianceCtrl.getCompliance, complianceCtrl.updateCompliance, traceRecord.traceRecord('compliance/compliance'))
   // 新建团队
@@ -58,5 +58,5 @@ module.exports = function (app, webEntry, acl) {
   // 医生群发患者消息
   app.post(version + '/communication/massToPatient', errorHandler.allError, communicationCtrl.dUserIDbyPhone, communicationCtrl.getMassTargets, communicationCtrl.massCommunication, traceRecord.traceRecord('communication/massToPatient'))
   // 添加诊断信息
-  app.post(version + '/patient/diagnosis', errorHandler.allError, patientCtrl.dpUserIDbyPhone, alluserCtrl.dprelation(['charge', 'follow']), patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail, traceRecord.traceRecord('patient/diagnosis'))
+  app.post(version + '/patient/diagnosis', errorHandler.allError, patientCtrl.dpUserIDbyPhone, patientCtrl.insertDiagnosis, patientCtrl.editPatientDetail, traceRecord.traceRecord('patient/diagnosis'))
 }
