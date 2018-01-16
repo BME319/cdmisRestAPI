@@ -13,9 +13,11 @@ exports.traceRecord = function (apiName) {
     let newTrace = new Trace(traceData)
     newTrace.save(function (err, traceInfo) {
       if (err) {
-        return res.json({status: 1, msg: '操作失败!'})
+        // return res.json({status: 1, msg: '操作失败!'})
+        return res.json({status: 1, msg: err})
       } else {
-        return res.json({status: 0, msg: '操作成功!'})
+        // return res.json({status: 0, msg: '操作成功!'})
+        return res.json({status: outputs.status, msg: outputs.msg})
       }
     })
   }

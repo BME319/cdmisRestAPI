@@ -17,6 +17,7 @@ exports.dprelation = function (type) {
         } else if (dpitem === null) {
           // return res.status(401).json({status: 1, msg: '与患者无任何联系没有操作权限'})
           req.outputs = {status: 1, msg: '与患者无任何联系没有操作权限'}
+          // console.log('req.outputs', req.outputs)
           errorHandler.makeError(2, req.outputs)(req, res, next)
         } else {
           let patientId = req.patientItem.userId
