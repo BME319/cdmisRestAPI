@@ -172,9 +172,9 @@ exports.cancelDIC = function (req, res) {
 exports.favoriteDoctor = function (req, res) {
   let patientPhoneNo = req.body.patientPhoneNo || null
   let doctorPhoneNo = req.body.doctorPhoneNo || null
-  let Time = req.body.Time || null
-  if (patientPhoneNo === null || doctorPhoneNo === null || Time === null) {
-    return res.json({msg: '请检查输入,patientPhoneNo/doctorPhoneNo/Time', status: 1})
+  let time = req.body.time || null
+  if (patientPhoneNo === null || doctorPhoneNo === null || time === null) {
+    return res.json({msg: '请检查输入,patientPhoneNo/doctorPhoneNo/time', status: 1})
   }
   async.auto({
     getPatient: function (callback) {
@@ -198,7 +198,7 @@ exports.favoriteDoctor = function (req, res) {
               $push: {
                 patients: {
                   patientId: patientObjectId,
-                  dpRelationTime: new Date(Time)
+                  dpRelationTime: new Date(time)
                 }
               }
             }
@@ -212,7 +212,7 @@ exports.favoriteDoctor = function (req, res) {
               $push: {
                 doctors: {
                   doctorId: doctorObjectId,
-                  firstTime: new Date(Time)
+                  firstTime: new Date(time)
                 }
               }
             }
@@ -256,9 +256,9 @@ exports.favoriteDoctor = function (req, res) {
 exports.unfollowFavoriteDoctor = function (req, res) {
   let patientPhoneNo = req.body.patientPhoneNo || null
   let doctorPhoneNo = req.body.doctorPhoneNo || null
-  let Time = req.body.Time || null
-  if (patientPhoneNo === null || doctorPhoneNo === null || Time === null) {
-    return res.json({msg: '请检查输入,patientPhoneNo/doctorPhoneNo/Time', status: 1})
+  let time = req.body.time || null
+  if (patientPhoneNo === null || doctorPhoneNo === null || time === null) {
+    return res.json({msg: '请检查输入,patientPhoneNo/doctorPhoneNo/time', status: 1})
   }
   async.auto({
     getPatient: function (callback) {
@@ -282,7 +282,7 @@ exports.unfollowFavoriteDoctor = function (req, res) {
               $pull: {
                 patients: {
                   patientId: patientObjectId,
-                  dpRelationTime: new Date(Time)
+                  dpRelationTime: new Date(time)
                 }
               }
             }
@@ -296,7 +296,7 @@ exports.unfollowFavoriteDoctor = function (req, res) {
               $pull: {
                 doctors: {
                   doctorId: doctorObjectId,
-                  firstTime: new Date(Time)
+                  firstTime: new Date(time)
                 }
               }
             }
