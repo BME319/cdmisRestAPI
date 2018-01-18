@@ -12,7 +12,7 @@ exports.insertLabtest = function (req, res) {
       },
       insertLab: ['getUser', function (results, callback) {
         if (results.getUser.status === 0) {
-          let labtestId = req.body.Id
+          let labtestId = req.body.id
           let userId = results.getUser.userId
           let time = req.body.time
           time = new Date(time)
@@ -62,7 +62,7 @@ exports.editLabtest = function (req, res) {
       },
       editLab: ['getUser', function (results, callback) {
         if (results.getUser.status === 0) {
-          let labtestId = req.body.Id
+          let labtestId = req.body.id
           let userId = results.getUser.userId
           let time = req.body.time
           time = new Date(time)
