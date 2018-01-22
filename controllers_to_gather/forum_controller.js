@@ -1,6 +1,7 @@
 var Forum = require('../models/forum')
 var Forump = require('../models/forump')
 var Reply = require('../models/reply')
+var Alluser = require('../models/alluser')
 var Forumuserinfo = require('../models/forumuserinfo')
 var Forumpuserinfo = require('../models/forumpuserinfo')
 var dataGatherFunc = require('../middlewares/dataGatherFunc')
@@ -102,80 +103,97 @@ exports.forumPosting = function (req, res) {
 
 exports.deletePost = function (req, res) {
   async.auto({
-    getUser: function (callback) {
-      dataGatherFunc.userIDbyPhone(req.body.phoneNo, req.body.board, function (err, item) {
-        return callback(err, item)
-      })
-    },
-    deleteP: ['getUser', function (results, callback) {
-      if (results.getUser.status === 0) {
+    deleteP: function (callback) {
         if (req.body.board === 'doctor') {
-          let userId = results.getUser.userId
           let postId = req.body.postId
-          let query = {postId: postId, sponsorId: userId}
+          let query = {postId: postId}
           let obj = {
             $set: {status: 1}
           }
+          let phoneNo = ''
           Forum.updateOne(query, obj, function (err, results) {
             if (err) {
               callback(null, {status: 1, msg: err})
             } else {
-              let query2 = {userId: userId}
-              let obj2 = {
-                $pull: {
-                  posts: {
-                    postId: postId
-                  }
-                }
-              }
-              Forumuserinfo.updateOne(query2, obj2, function (err, upforum) {
+              Forum.getOne(query, function (err, info) {
                 if (err) {
                   callback(null, {status: 1, msg: err})
                 } else {
-                  callback(null, {status: 0, msg: 'forum/deletepost接收成功'})
+                  let userId = info.sponsorId
+                  Alluser.getOne({userId: userId}, function (err, userinfo) {
+                    if (err) {
+                      callback(null, {status: 1, msg: err})
+                    } else {
+                      phoneNo = userinfo.phoneNo
+                      let query2 = {userId: info.sponsorId}
+                      let obj2 = {
+                        $pull: {
+                          posts: {
+                          postId: postId
+                        } 
+                      }
+                    }
+                  Forumuserinfo.updateOne(query2, obj2, function (err, upforum) {
+                    if (err) {
+                      callback(null, {status: 1, msg: err})
+                    } else {
+                      callback(null, {status: 0, msg: 'forum/deletepost接收成功'})
+                    }
+                  })
+                    }
+                  })
                 }
               })
             }
           })
         } else if (req.body.board === 'patient') {
-          let userId = results.getUser.userId
           let postId = req.body.postId
-          let query = {postId: postId, sponsorId: userId}
+          let query = {postId: postId}
           let obj = {
             $set: {status: 1}
           }
+          let phoneNo = ''
           Forump.updateOne(query, obj, function (err, results) {
             if (err) {
               callback(null, {status: 1, msg: err})
             } else {
-              let query2 = {userId: userId}
-              let obj2 = {
-                $pull: {
-                  posts: {
-                    postId: postId
-                  }
-                }
-              }
-              Forumpuserinfo.updateOne(query2, obj2, function (err, upforum) {
+              Forump.getOne(query, function (err, info) {
                 if (err) {
                   callback(null, {status: 1, msg: err})
                 } else {
-                  callback(null, {status: 0, msg: 'forum/deletepost接收成功'})
+                  let userId = info.sponsorId
+                  Alluser.getOne({userId: userId}, function (err, userinfo) {
+                    if (err) {
+                      callback(null, {status: 1, msg: err})
+                    } else {
+                      phoneNo = userinfo.phoneNo
+                      let query2 = {userId: info.sponsorId}
+                      let obj2 = {
+                        $pull: {
+                          posts: {
+                          postId: postId
+                        } 
+                      }
+                    }
+                  Forumpuserinfo.updateOne(query2, obj2, function (err, upforum) {
+                    if (err) {
+                      callback(null, {status: 1, msg: err})
+                    } else {
+                      callback(null, {status: 0, msg: 'forum/deletepost接收成功'})
+                    }
+                  })
+                    }
+                  })
                 }
               })
             }
           })
         }
-      } else if (results.getUser.status === -1) {
-        callback(null, {status: 1, msg: '用户不存在，请检查phoneNo'})
-      } else {
-        callback(null, {status: 1, msg: '系统错误'})
-      }
-    }],
+    },
     traceRecord: ['deleteP', function (results, callback) {
       let params = req.body
       let outputs = {status: results.deleteP.status, msg: results.deleteP.msg}
-      dataGatherFunc.traceRecord(req.body.phoneNo, 'forum/deletepost', params, outputs, function (err, item) {
+      dataGatherFunc.traceRecord(results.deleteP.phoneNo, 'forum/deletepost', params, outputs, function (err, item) {
         return callback(err, item)
       })
     }]

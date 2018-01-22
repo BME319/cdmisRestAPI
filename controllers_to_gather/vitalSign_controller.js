@@ -15,12 +15,19 @@ exports.insertvitalSign = function (req, res) {
           let date = req.body.date
           date = new Date(date)
           let datatime = req.body.datatime
+          datatime = new Date(datatime)
           let type = req.body.type
           let datavalue = req.body.datavalue
           let code = req.body.code
           let unit = req.body.unit
           let query = {date: date, patientId: patientId}
-          let obj = {$set:{type: type, datavalue: datavalue, code: code, unit: unit}}
+          let obj = {}
+          if (code === '血压'){
+            let datavalue2 = req.body.datavalue2
+            obj = {$set:{type: type, code: code, unit: unit}, $push:{data: {time: datatime, value1: datavalue, value2: datavalue2}}}
+          } else {
+            obj = {$set:{type: type, code: code, unit: unit}, $push:{data: {time: datatime, value: datavalue}}}
+          }
           VitalSign.updateOne(query, obj, function (err, upforum) {
             if (err) {
               callback(null, {status: 1, msg: err})
