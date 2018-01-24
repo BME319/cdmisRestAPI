@@ -79,15 +79,15 @@ exports.updateAlluser = function (acl) {
     if (phoneNo === null) {
       return res.json({msg: '请检查输入,phoneNo', status: 1})
     }
-    let role = req.body.role || null
+    let _role = req.body.role || null
     // let queryD = {phoneNo: phoneNo, role: 'doctor'}
     // let queryP = {phoneNo: phoneNo, role: 'patient'}
     async.auto({
-      getUser: function (callback) {
+      getUser: function (cb) {
         // 检查是否需要新建用户
-        dataGatherFunc.userIDbyPhone(phoneNo, role, function (err, item) {
+        dataGatherFunc.userIDbyPhone(phoneNo, null, function (err, item) {
           if (item.status === -1) { // 需要新建用户
-            if (role !== null) {
+            if (_role !== null) {
               async.auto({
                 getNo: function (callback) {
                   dataGatherFunc.getSeriesNo(1, function (err, num) {
@@ -95,31 +95,48 @@ exports.updateAlluser = function (acl) {
                   })
                 },
                 newUser: ['getNo', function (results, callback) {
-                  let query = {phoneNo: phoneNo, role: role}
-                  let upUser = {userId: results.getNo}
+                  let query = {phoneNo: phoneNo}
+                  let upUser = {userId: results.getNo, $push: {role: _role}}
                   Alluser.updateOne(query, upUser, function (err, info) {
                     callback(err, info)
                   }, {upsert: true, new: true})
                 }],
                 aclAdd: ['getNo', function (results, callback) {
-                  acl.addUserRoles(results.getNo, role, function (err) {
+                  acl.addUserRoles(results.getNo, _role, function (err) {
                     callback(err)
                   })
                 }]
               }, function (err, results) {
-                return callback(err, {status: 0, userId: results.newUser.userId, _id: results.newUser._id, role: results.newUser.role, item: results.newUser, msg: 'UserId Created!'})
+                return cb(err, {status: 0, userId: results.newUser.userId, _id: results.newUser._id, role: results.newUser.role, item: results.newUser, msg: 'UserId Created!'})
               })
             } else {
               return res.json({msg: '请检查输入,role', status: 1})
             }
+          } else if (item.status === 0 && _role !== null && item.role.indexOf(_role) === -1) { // 需要添加用户角色
+            async.auto({
+              newUser: function (results, callback) {
+                let query = {phoneNo: phoneNo}
+                let upUser = {$push: {role: _role}}
+                Alluser.updateOne(query, upUser, function (err, info) {
+                  callback(err, info)
+                }, {upsert: true, new: true})
+              },
+              aclAdd: function (results, callback) {
+                acl.addUserRoles(item.userId, _role, function (err) {
+                  callback(err)
+                })
+              }
+            }, function (err, results) {
+              return cb(err, {status: 0, userId: results.newUser.userId, _id: results.newUser._id, role: results.newUser.role, item: results.newUser, msg: 'UserId Created!'})
+            })
           } else { // 不需要新建用户
-            return callback(err, item)
+            return cb(err, item)
           }
         })
       },
       getKeywords: ['getUser', function (results, callback) {
         let upObj = {}
-        let role = results.getUser.role
+        let role = _role || results.getUser.role
         // 2.确定需要修改的字段
         let name = req.body.name || null
         if (name !== null) {
@@ -213,46 +230,46 @@ exports.updateAlluser = function (acl) {
         // 需要考虑角色不同放置于不同字段
         let openIdWechat = req.body.openIdWechat || null
         if (openIdWechat !== null) {
-          if (role === 'patient') {
+          if (role === 'patient' || role.indexOf('patient') !== -1) {
             upObj['MessageOpenId.patientWechat'] = openIdWechat
-          } else if (role === 'doctor') {
+          } else if (role === 'doctor' || role.indexOf('doctor') !== -1) {
             upObj['MessageOpenId.doctorWechat'] = openIdWechat
           }
         }
         let openIdApp = req.body.openIdApp || null
         if (openIdApp !== null) {
-          if (role === 'patient') {
+          if (role === 'patient' || role.indexOf('patient') !== -1) {
             upObj['MessageOpenId.patientApp'] = openIdApp
-          } else if (role === 'doctor') {
+          } else if (role === 'doctor' || role.indexOf('doctor') !== -1) {
             upObj['MessageOpenId.doctorApp'] = openIdApp
           }
         }
         let nation = req.body.nation || null
         if (nation !== null) {
-          if (role === 'patient') {
+          if (role === 'patient' || role.indexOf('patient') !== -1) {
             upObj['address.nation'] = nation
           }
         }
         let province = req.body.province || null
         if (province !== null) {
-          if (role === 'patient') {
+          if (role === 'patient' || role.indexOf('patient') !== -1) {
             upObj['address.province'] = province
-          } else if (role === 'doctor') {
+          } else if (role === 'doctor' || role.indexOf('doctor') !== -1) {
             upObj['province'] = province
           }
         }
         let city = req.body.city || null
         if (city !== null) {
-          if (role === 'patient') {
+          if (role === 'patient' || role.indexOf('patient') !== -1) {
             upObj['address.city'] = city
-          } else if (role === 'doctor') {
+          } else if (role === 'doctor' || role.indexOf('doctor') !== -1) {
             upObj['city'] = city
           }
         }
         // 需要考虑角色不同放置于不同字段
 
         // 需要考虑是修改服务收费还是修改服务类型
-        if (role === 'doctor') {
+        if (role === 'doctor' || role.indexOf('doctor') !== -1) {
           let serviceType = req.body.serviceType || null
           let charge = req.body.charge || null
           if (charge !== null) {
@@ -306,8 +323,7 @@ exports.updateAlluser = function (acl) {
       }],
       editInfo: ['getKeywords', function (results, callback) {
         // 3.修改字段
-        let role = results.getUser.role
-        let query = {phoneNo: phoneNo, role: role}
+        let query = {phoneNo: phoneNo}
         Alluser.updateOne(query, {$set: results.getKeywords}, function (err, item1) {
           if (err) {
             callback(null, {status: 1, msg: err})
