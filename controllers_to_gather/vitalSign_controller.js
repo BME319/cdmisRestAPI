@@ -20,7 +20,7 @@ exports.insertvitalSign = function (req, res) {
           let datavalue = req.body.datavalue
           let code = req.body.code
           let unit = req.body.unit
-          let query = {date: date, patientId: patientId}
+          let query = {date: date, patientId: patientId, code: code}
           let obj = {}
           if (code === '血压'){
             let datavalue2 = req.body.datavalue2
