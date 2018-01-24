@@ -306,7 +306,8 @@ exports.updateAlluser = function (acl) {
       }],
       editInfo: ['getKeywords', function (results, callback) {
         // 3.修改字段
-        let query = {phoneNo: phoneNo}
+        let role = results.getUser.role
+        let query = {phoneNo: phoneNo, role: role}
         Alluser.updateOne(query, {$set: results.getKeywords}, function (err, item1) {
           if (err) {
             callback(null, {status: 1, msg: err})
