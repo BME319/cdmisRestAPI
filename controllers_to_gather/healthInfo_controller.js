@@ -11,7 +11,7 @@ exports.insertHealthInfo = function (req, res) {
     },
     insertHealth: ['getUser', function (results, callback) {
       if (results.getUser.status === 0) {
-        let Id = req.body.Id
+        let Id = req.body.id
         let userId = results.getUser.userId
         let time = req.body.time
         time = new Date(time)
@@ -61,7 +61,7 @@ exports.deleteHealthInfo = function (req, res) {
       },
       deleteHealth: ['getUser', function (results, callback) {
         if (results.getUser.status === 0) {
-          let Id = req.body.Id
+          let Id = req.body.id
           let userId = results.getUser.userId
           let query = {Id: Id, userId: userId}
           HealthInfo.removeOne(query, function (err, item1) {

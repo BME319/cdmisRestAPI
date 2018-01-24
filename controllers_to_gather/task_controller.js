@@ -104,25 +104,76 @@ exports.getContent = function (req, res, next) {
     }
     if (task == null) {
       // return res.json({status: 1, msg: '请检查是否存在userId或该user是否已有模板!'})
-      req.outputs = {status: 1, msg: '请检查是否存在userId或该user是否已有模板!'}
-      errorHandler.makeError(2, req.outputs)(req, res, next)
-    }
-    var taskDetail = task.task
-    var taskTypeDetail = null
-    for (var i = 0; i < taskDetail.length; i++) {
-      if (taskDetail[i].type === req.body.type) {
-        taskTypeDetail = taskDetail[i].details
+      // req.outputs = {status: 1, msg: '请检查是否存在userId或该user是否已有模板!'}
+      // errorHandler.makeError(2, req.outputs)(req, res, next)
+
+      let newTaskDetail = [{
+        type: 'Measure',
+        details: [
+          {
+            code: 'Temperature'
+          }, {
+            code: 'Weight'
+          }, {
+            code: 'BloodPressure'
+          }, {
+            code: 'Vol'
+          }, {
+            code: 'HeartRate'
+          }, {
+            code: 'PeritonealDialysis'
+          }
+        ]
+      }]
+
+      let taskData = {
+        userId: req.patientItem.userId,
+        description: '',
+        invalidFlag: 0,
+        date: new Date(),
+        task: newTaskDetail
       }
-    }
-    if (taskTypeDetail == null) {
-      // return res.json({status: 1, msg: '请检查type是否符合要求!'})
-      req.outputs = {status: 1, msg: '请检查type是否符合要求!'}
-      errorHandler.makeError(2, req.outputs)(req, res, next)
-    }
 
-    req.body.taskTypeDetail = taskTypeDetail
+      var newTask = new Task(taskData)
+      newTask.save(function (err, taskInfo) {
+        if (err) {
+          req.outputs = {status: 1, msg: err}
+          errorHandler.makeError(2, req.outputs)(req, res, next)
+        }
+        // console.log('taskInfo', taskInfo.task[0].details)
+        let taskDetail = taskInfo.task
+        let taskTypeDetail = null
+        for (let i = 0; i < taskDetail.length; i++) {
+          if (taskDetail[i].type === req.body.type) {
+            taskTypeDetail = taskDetail[i].details
+          }
+        }
+        if (taskTypeDetail == null) {
+          req.outputs = {status: 1, msg: '请检查type是否符合要求!'}
+          errorHandler.makeError(2, req.outputs)(req, res, next)
+        }
 
-    next()
+        req.body.taskTypeDetail = taskTypeDetail
+        next()
+      })
+    } else {
+      let taskDetail = task.task
+      let taskTypeDetail = null
+      for (let i = 0; i < taskDetail.length; i++) {
+        if (taskDetail[i].type === req.body.type) {
+          taskTypeDetail = taskDetail[i].details
+        }
+      }
+      if (taskTypeDetail == null) {
+        // return res.json({status: 1, msg: '请检查type是否符合要求!'})
+        req.outputs = {status: 1, msg: '请检查type是否符合要求!'}
+        errorHandler.makeError(2, req.outputs)(req, res, next)
+      }
+
+      req.body.taskTypeDetail = taskTypeDetail
+
+      next()
+    }
   })
 }
 
