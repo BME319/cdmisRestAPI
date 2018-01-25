@@ -134,6 +134,7 @@ exports.getContent = function (req, res, next) {
         task: newTaskDetail
       }
 
+      console.log('taskData1', taskData)
       var newTask = new Task(taskData)
       newTask.save(function (err, taskInfo) {
         if (err) {
@@ -148,11 +149,12 @@ exports.getContent = function (req, res, next) {
             taskTypeDetail = taskDetail[i].details
           }
         }
+        console.log('taskTypeDetail1', taskTypeDetail)
         if (taskTypeDetail == null) {
           req.outputs = {status: 1, msg: '请检查type是否符合要求!'}
           errorHandler.makeError(2, req.outputs)(req, res, next)
         }
-
+        console.log('req.body.taskTypeDetail1', req.body.taskTypeDetail)
         req.body.taskTypeDetail = taskTypeDetail
         next()
       })
@@ -164,12 +166,13 @@ exports.getContent = function (req, res, next) {
           taskTypeDetail = taskDetail[i].details
         }
       }
+      console.log('taskTypeDetail2', taskTypeDetail)
       if (taskTypeDetail == null) {
         // return res.json({status: 1, msg: '请检查type是否符合要求!'})
         req.outputs = {status: 1, msg: '请检查type是否符合要求!'}
         errorHandler.makeError(2, req.outputs)(req, res, next)
       }
-
+      console.log('req.body.taskTypeDetail2', req.body.taskTypeDetail)
       req.body.taskTypeDetail = taskTypeDetail
 
       next()
