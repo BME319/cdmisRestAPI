@@ -5,7 +5,7 @@ var async = require('async')
 exports.insertvitalSign = function (req, res) {
     async.auto({
       getUser: function (callback) {
-          dataGatherFunc.userIDbyPhone(req.body.phoneNo, req.body.board, function (err, item) {
+          dataGatherFunc.userIDbyPhone(req.body.phoneNo, 'patient', function (err, item) {
           return callback(err, item)
           })
       },

@@ -2,7 +2,7 @@
 var mongoose = require('mongoose')
 
 var healthInfoSchema = new mongoose.Schema({
-  Id: String,
+  id: String,
   userId: String,
   // 'Health_001'为检查,'Health_002'为化验,'Health_003'为用药,'Health_004'为病例
   type: {type: String, enum: ['Health_001', 'Health_002', 'Health_003', 'Health_004']},

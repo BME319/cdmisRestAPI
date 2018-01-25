@@ -5,13 +5,13 @@ var async = require('async')
 exports.insertHealthInfo = function (req, res) {
   async.auto({
     getUser: function (callback) {
-        dataGatherFunc.userIDbyPhone(req.body.phoneNo, req.body.board, function (err, item) {
+        dataGatherFunc.userIDbyPhone(req.body.phoneNo, 'patient', function (err, item) {
         return callback(err, item)
         })
     },
     insertHealth: ['getUser', function (results, callback) {
       if (results.getUser.status === 0) {
-        let Id = req.body.id
+        let id = req.body.id
         let userId = results.getUser.userId
         let time = req.body.time
         time = new Date(time)
@@ -19,8 +19,8 @@ exports.insertHealthInfo = function (req, res) {
         let label = req.body.label
         let url = req.body.url
         let description = req.body.description
-        let query = {Id: Id}
-        let obj = {userId: userId, time: time, type: type, label: label, url: url, description: description}
+        let query = {id: id}
+        let obj = {$set:{userId: userId, time: time, type: type, label: label, description: description}, $push:{url:{photo: url}}}
         HealthInfo.updateOne(query, obj, {upsert: true}, function (err, upforum) {
           if (err) {
             callback(null, {status: 1, msg: err})
