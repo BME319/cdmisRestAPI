@@ -61,9 +61,9 @@ exports.deleteHealthInfo = function (req, res) {
       },
       deleteHealth: ['getUser', function (results, callback) {
         if (results.getUser.status === 0) {
-          let Id = req.body.id
+          let id = req.body.id
           let userId = results.getUser.userId
-          let query = {Id: Id, userId: userId}
+          let query = {id: Id, userId: userId}
           HealthInfo.removeOne(query, function (err, item1) {
             if (err) {
               callback(null, {status: 1, msg: err})
