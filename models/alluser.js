@@ -148,6 +148,13 @@ var alluserSchema = new mongoose.Schema({
   // 入组相关
   group: {type: Number, default: 0, enum: [0, 1]},
   groupTime: Date,
+  labels: [
+    {
+      _id: 0,
+      label: String,
+      time: Date
+    }
+  ],
   hypertension: Number,
   allergic: String,
   // 关注医生字段
