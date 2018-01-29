@@ -70,6 +70,117 @@ exports.pUserIDbyPhone = function (req, res, next) {
   }
 }
 
+exports.checkTask = function (req, res, next) {
+  let type = req.body.type || null
+  let code = req.body.code || null  
+  if (type === null) {
+    req.outputs = {status: 1, msg: '请输入type!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
+  }
+  if (code === null) {
+    req.outputs = {status: 1, msg: '请输入code!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
+  }
+  var query = {userId: req.patientItem.userId}
+  Task.getOne(query, function (err, task) {
+    if (err) {
+      req.outputs = {status: 1, msg: err}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
+    }
+    if (task === null) {
+      let newTaskDetail = [{
+        type: 'Measure',
+        details: []
+      }]
+
+      let taskData = {
+        userId: req.patientItem.userId,
+        description: '',
+        invalidFlag: 0,
+        date: new Date(),
+        task: newTaskDetail
+      }
+
+      var newTask = new Task(taskData)
+      newTask.save(function (err, taskInfo) {
+        if (err) {
+          req.outputs = {status: 1, msg: err}
+          errorHandler.makeError(2, req.outputs)(req, res, next)
+        }
+        console.log('taskInfo', taskInfo)
+        return next()
+      })
+    } else {
+      return next()
+    }
+  })
+}
+
+exports.updateTask = function (req, res, next) {
+  var typeNew = req.body.taskTypeDetail
+
+  for (var j = 0; j < typeNew.length; j++) {
+    if (typeNew[j].code === req.body.code) {
+      if (req.body.instruction != null && req.body.instruction !== '') {
+        typeNew[j].instruction = req.body.instruction
+      }
+      if (req.body.content != null && req.body.content !== '') {
+        typeNew[j].content = req.body.content
+      }
+      if (req.body.startTime != null && req.body.startTime !== '') {
+        typeNew[j].startTime = new Date(req.body.startTime)
+      }
+      if (req.body.endTime != null && req.body.endTime !== '') {
+        typeNew[j].endTime = new Date(req.body.endTime)
+      }
+      if (req.body.times != null && req.body.times !== '') {
+        typeNew[j].times = req.body.times
+      }
+      if (req.body.timesUnits != null && req.body.timesUnits !== '') {
+        typeNew[j].timesUnits = req.body.timesUnits
+      }
+      if (req.body.frequencyTimes != null && req.body.frequencyTimes !== '') {
+        typeNew[j].frequencyTimes = req.body.frequencyTimes
+      }
+      if (req.body.frequencyUnits != null && req.body.frequencyUnits !== '') {
+        typeNew[j].frequencyUnits = req.body.frequencyUnits
+      }
+      break
+    }
+  }
+  if (j === typeNew.length) {
+    // return res.json({status: 1, msg: '请检查code是否正确!'})
+    req.outputs = {status: 1, msg: '请检查code是否正确!'}
+    errorHandler.makeError(2, req.outputs)(req, res, next)
+  }
+
+  var query = {
+    userId: req.patientItem.userId,
+    task: {$elemMatch: {type: 'Measure'}}
+  }
+
+  var upObj = {
+    $set: {
+      'task.$': typeNew
+    }
+  }
+
+  Task.update(query, upObj, function (err, uptask) {
+    if (err) {
+      // return res.status(422).json({status: 1, msg: err.message})
+      req.outputs = {status: 1, msg: err}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
+    }
+
+    if (uptask.n !== 0 && uptask.nModified === 1) {
+      // return res.json({status: 0, msg: '更新成功'})
+      req.status = 0
+      req.msg = '操作成功！'
+      return next()
+    }
+  }, {new: true})
+}
+
 // 1. 保存需要修改内容的对应type元素
 exports.getContent = function (req, res, next) {
   if (req.patientItem.userId === 'Admin') {
@@ -102,6 +213,7 @@ exports.getContent = function (req, res, next) {
       req.outputs = {status: 1, msg: err}
       errorHandler.makeError(2, req.outputs)(req, res, next)
     }
+    console.log('task', task)
     if (task == null) {
       // return res.json({status: 1, msg: '请检查是否存在userId或该user是否已有模板!'})
       // req.outputs = {status: 1, msg: '请检查是否存在userId或该user是否已有模板!'}
@@ -134,7 +246,7 @@ exports.getContent = function (req, res, next) {
         task: newTaskDetail
       }
 
-      console.log('taskData1', taskData)
+      // console.log('taskData1', taskData)
       var newTask = new Task(taskData)
       newTask.save(function (err, taskInfo) {
         if (err) {
@@ -149,13 +261,13 @@ exports.getContent = function (req, res, next) {
             taskTypeDetail = taskDetail[i].details
           }
         }
-        console.log('taskTypeDetail1', taskTypeDetail)
+        // console.log('taskTypeDetail1', taskTypeDetail)
         if (taskTypeDetail == null) {
           req.outputs = {status: 1, msg: '请检查type是否符合要求!'}
           errorHandler.makeError(2, req.outputs)(req, res, next)
         }
-        console.log('req.body.taskTypeDetail1', req.body.taskTypeDetail)
         req.body.taskTypeDetail = taskTypeDetail
+        console.log('req.body.taskTypeDetail1', req.body.taskTypeDetail)
         next()
       })
     } else {
@@ -166,15 +278,14 @@ exports.getContent = function (req, res, next) {
           taskTypeDetail = taskDetail[i].details
         }
       }
-      console.log('taskTypeDetail2', taskTypeDetail)
+      // console.log('taskTypeDetail2', taskTypeDetail)
       if (taskTypeDetail == null) {
         // return res.json({status: 1, msg: '请检查type是否符合要求!'})
         req.outputs = {status: 1, msg: '请检查type是否符合要求!'}
         errorHandler.makeError(2, req.outputs)(req, res, next)
       }
-      console.log('req.body.taskTypeDetail2', req.body.taskTypeDetail)
       req.body.taskTypeDetail = taskTypeDetail
-
+      console.log('req.body.taskTypeDetail2', req.body.taskTypeDetail)
       next()
     }
   })
