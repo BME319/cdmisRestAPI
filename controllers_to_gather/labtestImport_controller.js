@@ -21,7 +21,7 @@ exports.insertLabtest = function (req, res) {
           let url = req.body.url
           let unit = req.body.unit
           let query = {labtestId: labtestId}
-          let obj = {userId: userId, time: time, type: type, value: value, url: url, unit: unit}
+          let obj = {$set:{userId: userId, time: time, type: type, value: value, photoId: url, unit: unit}}
           LabtestImport.updateOne(query, obj, function (err, upforum) {
             if (err) {
               callback(null, {status: 1, msg: err})
