@@ -352,3 +352,71 @@ exports.updateAlluser = function (acl) {
     })
   }
 }
+
+exports.groupPatient = function (req, res) {
+  let phoneNo = req.body.phoneNo || null
+  let label = req.body.label || null
+  let time = req.body.time || null
+  // if (phoneNo === null || label === null) {
+  //   return res.json({msg: '请检查输入,phoneNo/label', status: 1})
+  // }
+  let flag = req.body.flag || null
+  if (phoneNo === null || label === null || flag === null) {
+    return res.json({msg: '请检查输入,phoneNo/label/flag', status: 1})
+  }
+  let upObj = {}
+  if (label === 'VIP') {
+    // upObj = {VIP: 1}
+    if (flag === 1) {
+      upObj = {VIP: 1}
+    } else {
+      upObj = {VIP: 0}
+    }
+  } else {
+    // upObj = {$push: {labels: {label: label, time: new Date(time || new Date())}}}
+    if (flag === 1) {
+      upObj = {$push: {labels: {label: label, time: new Date(time || new Date())}}}
+    } else {
+      upObj = {$pull: {labels: {label: label}}}
+    }
+  }
+  async.auto({
+    getPatient: function (callback) {
+      dataGatherFunc.userIDbyPhone(phoneNo, 'patient', function (err, item) {
+        return callback(err, item)
+      })
+    },
+    group: ['getPatient', function (results, callback) {
+      if (results.getPatient.status === 0) {
+        let query = {_id: results.getPatient._id}
+        Alluser.updateOne(query, upObj, function (err, item) {
+          if (err) {
+            callback(null, {status: 1, msg: err})
+          } else {
+            callback(null, {status: 0, msg: 'doctor/groupPatient接收成功'})
+          }
+        })
+      } else if (results.getPatient.status === -1) {
+        callback(null, {status: 1, msg: '用户（患者）不存在，请检查phoneNo'})
+      } else {
+        callback(null, {status: 1, msg: '系统错误'})
+      }
+    }],
+    traceRecord: ['group', function (results, callback) {
+      let params = req.body
+      let outputs = results.group
+      dataGatherFunc.traceRecord(req.body.phoneNo, 'doctor/groupPatient', params, outputs, function (err, item) {
+        return callback(err, item)
+      })
+    }]
+  }, function (err, results) {
+    // 5.返回
+    if (err) {
+      return res.json({msg: err, status: 1})
+    } else if (results.traceRecord.status === 0) {
+      return res.json(results.group)
+    } else {
+      return res.json({msg: 'Server Error!', status: 1})
+    }
+  })
+}

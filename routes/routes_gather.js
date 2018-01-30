@@ -21,6 +21,7 @@ var complianceCtrl = require('../controllers_to_gather/compliance_controller')
 
 module.exports = function (app, webEntry, acl) {
   // YQC
+  app.post(version + '/doctor/groupPatient', alluserCtrl.groupPatient)
   app.post(version + '/alluser/alluser', alluserCtrl.updateAlluser(acl))
   app.post(version + '/counsel/questionnaire', counselCtrl.saveQuestionnaire)
   app.post(version + '/counsel/commentScore', counselCtrl.insertCommentScore)
