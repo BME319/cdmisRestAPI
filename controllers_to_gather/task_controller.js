@@ -118,7 +118,6 @@ exports.checkTask = function (req, res, next) {
 
 exports.updateTask = function (req, res, next) {
   var typeNew = req.body.taskTypeDetail
-
   for (var j = 0; j < typeNew.length; j++) {
     if (typeNew[j].code === req.body.code) {
       if (req.body.instruction != null && req.body.instruction !== '') {
@@ -153,7 +152,7 @@ exports.updateTask = function (req, res, next) {
     req.outputs = {status: 1, msg: '请检查code是否正确!'}
     errorHandler.makeError(2, req.outputs)(req, res, next)
   }
-
+  console.log('typeNew', typeNew)
   var query = {
     userId: req.patientItem.userId,
     task: {$elemMatch: {type: 'Measure'}}
@@ -161,7 +160,7 @@ exports.updateTask = function (req, res, next) {
 
   var upObj = {
     $set: {
-      'task.$': typeNew
+      'task.$': {type: 'Measure', details: typeNew}
     }
   }
 
@@ -178,7 +177,7 @@ exports.updateTask = function (req, res, next) {
       req.msg = '操作成功！'
       return next()
     }
-  }, {new: true})
+  }, {new: true, upsert: true})
 }
 
 // 1. 保存需要修改内容的对应type元素
