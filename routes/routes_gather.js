@@ -45,7 +45,7 @@ module.exports = function (app, webEntry, acl) {
 
   // lgf
   // 新建/更新用户任务
-  app.post(version + '/tasks/task', errorHandler.allError, taskCtrl.pUserIDbyPhone, taskCtrl.getContent, taskCtrl.removeContent, taskCtrl.updateContent, traceRecord.traceRecord('tasks/task'))
+  app.post(version + '/tasks/task', errorHandler.allError, taskCtrl.pUserIDbyPhone, taskCtrl.getContent, taskCtrl.updateTask, traceRecord.traceRecord('tasks/task'))
   // 新建/更新任务执行情况
   app.post(version + '/compliance/compliance', errorHandler.allError, complianceCtrl.pUserIDbyPhone, complianceCtrl.getCompliance, complianceCtrl.updateCompliance, traceRecord.traceRecord('compliance/compliance'))
   // 新建团队
