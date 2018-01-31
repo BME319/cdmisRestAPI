@@ -71,16 +71,6 @@ exports.pUserIDbyPhone = function (req, res, next) {
 }
 
 exports.checkTask = function (req, res, next) {
-  let type = req.body.type || null
-  let code = req.body.code || null  
-  if (type === null) {
-    req.outputs = {status: 1, msg: '请输入type!'}
-    errorHandler.makeError(2, req.outputs)(req, res, next)
-  }
-  if (code === null) {
-    req.outputs = {status: 1, msg: '请输入code!'}
-    errorHandler.makeError(2, req.outputs)(req, res, next)
-  }
   var query = {userId: req.patientItem.userId}
   Task.getOne(query, function (err, task) {
     if (err) {
@@ -107,60 +97,114 @@ exports.checkTask = function (req, res, next) {
           req.outputs = {status: 1, msg: err}
           errorHandler.makeError(2, req.outputs)(req, res, next)
         }
-        console.log('taskInfo', taskInfo)
+        // console.log('taskInfo', taskInfo)
+        req.body.taskDetail = taskInfo.task
         return next()
       })
     } else {
+      req.body.taskDetail = task.task
       return next()
     }
   })
 }
 
 exports.updateTask = function (req, res, next) {
-  var typeNew = req.body.taskTypeDetail
-  for (var j = 0; j < typeNew.length; j++) {
-    if (typeNew[j].code === req.body.code) {
-      if (req.body.instruction != null && req.body.instruction !== '') {
-        typeNew[j].instruction = req.body.instruction
-      }
-      if (req.body.content != null && req.body.content !== '') {
-        typeNew[j].content = req.body.content
-      }
-      if (req.body.startTime != null && req.body.startTime !== '') {
-        typeNew[j].startTime = new Date(req.body.startTime)
-      }
-      if (req.body.endTime != null && req.body.endTime !== '') {
-        typeNew[j].endTime = new Date(req.body.endTime)
-      }
-      if (req.body.times != null && req.body.times !== '') {
-        typeNew[j].times = req.body.times
-      }
-      if (req.body.timesUnits != null && req.body.timesUnits !== '') {
-        typeNew[j].timesUnits = req.body.timesUnits
-      }
-      if (req.body.frequencyTimes != null && req.body.frequencyTimes !== '') {
-        typeNew[j].frequencyTimes = req.body.frequencyTimes
-      }
-      if (req.body.frequencyUnits != null && req.body.frequencyUnits !== '') {
-        typeNew[j].frequencyUnits = req.body.frequencyUnits
-      }
-      break
+  var typeNew = req.body.taskDetail
+  let taskNew = req.body.tasks
+
+  let measureList = []
+  let returnVisitList = []
+  let labTestList = []
+  let specialEvaluateList = []
+
+  // console.log('taskNew', taskNew)
+  for (let k = 0; k < taskNew.length; k++) {
+    let type = taskNew[k].type || null
+    let code = taskNew[k].code || null
+
+    if (type === null) {
+      req.outputs = {status: 1, msg: '请输入type!'}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
+    }
+    if (code === null) {
+      req.outputs = {status: 1, msg: '请输入code!'}
+      errorHandler.makeError(2, req.outputs)(req, res, next)
+    }
+
+    if (type === 'Measure') {
+      measureList.push(taskNew[k])
+    }
+    if (type === 'ReturnVisit') {
+      returnVisitList.push(taskNew[k])
+    }
+    if (type === 'LabTest') {
+      labTestList.push(taskNew[k])
+    }
+    if (type === 'SpecialEvaluate') {
+      specialEvaluateList.push(taskNew[k])
     }
   }
-  if (j === typeNew.length) {
-    // return res.json({status: 1, msg: '请检查code是否正确!'})
-    req.outputs = {status: 1, msg: '请检查code是否正确!'}
-    errorHandler.makeError(2, req.outputs)(req, res, next)
-  }
-  console.log('typeNew', typeNew)
+
+  let taskList = [
+    {
+      type: 'Measure',
+      details: measureList
+    },{
+      type: 'ReturnVisit',
+      details: returnVisitList
+    },{
+      type: 'LabTest',
+      details: labTestList
+    },{
+      type: 'SpecialEvaluate',
+      details: specialEvaluateList
+    }
+  ]
+
+console.log('taskList', taskList)
+  // for (var j = 0; j < typeNew.length; j++) {
+  //   if (typeNew[j].code === req.body.code) {
+  //     if (req.body.instruction != null && req.body.instruction !== '') {
+  //       typeNew[j].instruction = req.body.instruction
+  //     }
+  //     if (req.body.content != null && req.body.content !== '') {
+  //       typeNew[j].content = req.body.content
+  //     }
+  //     if (req.body.startTime != null && req.body.startTime !== '') {
+  //       typeNew[j].startTime = new Date(req.body.startTime)
+  //     }
+  //     if (req.body.endTime != null && req.body.endTime !== '') {
+  //       typeNew[j].endTime = new Date(req.body.endTime)
+  //     }
+  //     if (req.body.times != null && req.body.times !== '') {
+  //       typeNew[j].times = req.body.times
+  //     }
+  //     if (req.body.timesUnits != null && req.body.timesUnits !== '') {
+  //       typeNew[j].timesUnits = req.body.timesUnits
+  //     }
+  //     if (req.body.frequencyTimes != null && req.body.frequencyTimes !== '') {
+  //       typeNew[j].frequencyTimes = req.body.frequencyTimes
+  //     }
+  //     if (req.body.frequencyUnits != null && req.body.frequencyUnits !== '') {
+  //       typeNew[j].frequencyUnits = req.body.frequencyUnits
+  //     }
+  //     break
+  //   }
+  // }
+  // if (j === typeNew.length) {
+  //   // return res.json({status: 1, msg: '请检查code是否正确!'})
+  //   req.outputs = {status: 1, msg: '请检查code是否正确!'}
+  //   errorHandler.makeError(2, req.outputs)(req, res, next)
+  // }
+
   var query = {
     userId: req.patientItem.userId,
     task: {$elemMatch: {type: 'Measure'}}
   }
 
   var upObj = {
-    $set: {
-      'task.$': {type: 'Measure', details: typeNew}
+    $set:{
+      'task.$': {type: 'Measure', details: measureList}
     }
   }
 
@@ -170,11 +214,15 @@ exports.updateTask = function (req, res, next) {
       req.outputs = {status: 1, msg: err}
       errorHandler.makeError(2, req.outputs)(req, res, next)
     }
-
+    console.log('uptask', uptask)
     if (uptask.n !== 0 && uptask.nModified === 1) {
       // return res.json({status: 0, msg: '更新成功'})
       req.status = 0
       req.msg = '操作成功！'
+      return next()
+    } else {
+      req.status = 0
+      req.msg = '未成功修改！'
       return next()
     }
   }, {new: true, upsert: true})
@@ -192,17 +240,17 @@ exports.getContent = function (req, res, next) {
   // }
 
   let type = req.body.type || null
-  let code = req.body.code || null
+  // let code = req.body.code || null
   if (type === null) {
     // return res.json({status: 1, msg: '请输入type!'})
     req.outputs = {status: 1, msg: '请输入type!'}
     errorHandler.makeError(2, req.outputs)(req, res, next)
   }
-  if (code === null) {
-    // return res.json({status: 1, msg: '请输入code!'})
-    req.outputs = {status: 1, msg: '请输入code!'}
-    errorHandler.makeError(2, req.outputs)(req, res, next)
-  }
+  // if (code === null) {
+  //   // return res.json({status: 1, msg: '请输入code!'})
+  //   req.outputs = {status: 1, msg: '请输入code!'}
+  //   errorHandler.makeError(2, req.outputs)(req, res, next)
+  // }
 
   var query = {userId: req.patientItem.userId}
 
@@ -212,7 +260,7 @@ exports.getContent = function (req, res, next) {
       req.outputs = {status: 1, msg: err}
       errorHandler.makeError(2, req.outputs)(req, res, next)
     }
-    console.log('task', task)
+    // console.log('task', task)
     if (task == null) {
       // return res.json({status: 1, msg: '请检查是否存在userId或该user是否已有模板!'})
       // req.outputs = {status: 1, msg: '请检查是否存在userId或该user是否已有模板!'}
@@ -266,7 +314,7 @@ exports.getContent = function (req, res, next) {
           errorHandler.makeError(2, req.outputs)(req, res, next)
         }
         req.body.taskTypeDetail = taskTypeDetail
-        console.log('req.body.taskTypeDetail1', req.body.taskTypeDetail)
+        // console.log('req.body.taskTypeDetail1', req.body.taskTypeDetail)
         next()
       })
     } else {
@@ -284,7 +332,7 @@ exports.getContent = function (req, res, next) {
         errorHandler.makeError(2, req.outputs)(req, res, next)
       }
       req.body.taskTypeDetail = taskTypeDetail
-      console.log('req.body.taskTypeDetail2', req.body.taskTypeDetail)
+      // console.log('req.body.taskTypeDetail2', req.body.taskTypeDetail)
       next()
     }
   })
