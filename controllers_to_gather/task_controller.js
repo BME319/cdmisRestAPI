@@ -98,18 +98,18 @@ exports.checkTask = function (req, res, next) {
           errorHandler.makeError(2, req.outputs)(req, res, next)
         }
         // console.log('taskInfo', taskInfo)
-        req.body.taskDetail = taskInfo.task
+        // req.body.taskDetail = taskInfo.task
         return next()
       })
     } else {
-      req.body.taskDetail = task.task
+      // req.body.taskDetail = task.task
       return next()
     }
   })
 }
 
 exports.updateTask = function (req, res, next) {
-  var typeNew = req.body.taskDetail
+  // var typeNew = req.body.taskDetail
   let taskNew = req.body.tasks
 
   let measureList = []
@@ -149,53 +149,19 @@ exports.updateTask = function (req, res, next) {
     {
       type: 'Measure',
       details: measureList
-    },{
+    }, {
       type: 'ReturnVisit',
       details: returnVisitList
-    },{
+    }, {
       type: 'LabTest',
       details: labTestList
-    },{
+    }, {
       type: 'SpecialEvaluate',
       details: specialEvaluateList
     }
   ]
 
-console.log('taskList', taskList)
-  // for (var j = 0; j < typeNew.length; j++) {
-  //   if (typeNew[j].code === req.body.code) {
-  //     if (req.body.instruction != null && req.body.instruction !== '') {
-  //       typeNew[j].instruction = req.body.instruction
-  //     }
-  //     if (req.body.content != null && req.body.content !== '') {
-  //       typeNew[j].content = req.body.content
-  //     }
-  //     if (req.body.startTime != null && req.body.startTime !== '') {
-  //       typeNew[j].startTime = new Date(req.body.startTime)
-  //     }
-  //     if (req.body.endTime != null && req.body.endTime !== '') {
-  //       typeNew[j].endTime = new Date(req.body.endTime)
-  //     }
-  //     if (req.body.times != null && req.body.times !== '') {
-  //       typeNew[j].times = req.body.times
-  //     }
-  //     if (req.body.timesUnits != null && req.body.timesUnits !== '') {
-  //       typeNew[j].timesUnits = req.body.timesUnits
-  //     }
-  //     if (req.body.frequencyTimes != null && req.body.frequencyTimes !== '') {
-  //       typeNew[j].frequencyTimes = req.body.frequencyTimes
-  //     }
-  //     if (req.body.frequencyUnits != null && req.body.frequencyUnits !== '') {
-  //       typeNew[j].frequencyUnits = req.body.frequencyUnits
-  //     }
-  //     break
-  //   }
-  // }
-  // if (j === typeNew.length) {
-  //   // return res.json({status: 1, msg: '请检查code是否正确!'})
-  //   req.outputs = {status: 1, msg: '请检查code是否正确!'}
-  //   errorHandler.makeError(2, req.outputs)(req, res, next)
-  // }
+  // console.log('taskList', taskList)
 
   var query = {
     userId: req.patientItem.userId,
@@ -203,8 +169,11 @@ console.log('taskList', taskList)
   }
 
   var upObj = {
-    $set:{
-      'task.$': {type: 'Measure', details: measureList}
+    // $set:{
+    //   'task.$': {type: 'Measure', details: measureList}
+    // }
+    $set: {
+      'task': taskList
     }
   }
 
@@ -214,15 +183,15 @@ console.log('taskList', taskList)
       req.outputs = {status: 1, msg: err}
       errorHandler.makeError(2, req.outputs)(req, res, next)
     }
-    console.log('uptask', uptask)
+    // console.log('uptask', uptask)
     if (uptask.n !== 0 && uptask.nModified === 1) {
       // return res.json({status: 0, msg: '更新成功'})
       req.status = 0
       req.msg = '操作成功！'
       return next()
     } else {
-      req.status = 0
-      req.msg = '未成功修改！'
+      req.status = 1
+      req.msg = '未成功修改，请检查修改内容！'
       return next()
     }
   }, {new: true, upsert: true})
