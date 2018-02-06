@@ -229,21 +229,25 @@ exports.updateAlluser = function (acl) {
 
         // 需要考虑角色不同放置于不同字段
         let openIdWechat = req.body.openIdWechat || null
+        let openIdApp = req.body.openIdApp || null
+        if (openIdWechat !== null || openIdApp !== null) {
+          upObj['MessageOpenId'] = {}
+        }
         if (openIdWechat !== null) {
           if (role === 'patient' || role.indexOf('patient') !== -1) {
-            upObj['MessageOpenId.patientWechat'] = openIdWechat
+            upObj['MessageOpenId']['patientWechat'] = openIdWechat
           } else if (role === 'doctor' || role.indexOf('doctor') !== -1) {
-            upObj['MessageOpenId.doctorWechat'] = openIdWechat
+            upObj['MessageOpenId']['doctorWechat'] = openIdWechat
           }
         }
-        let openIdApp = req.body.openIdApp || null
         if (openIdApp !== null) {
           if (role === 'patient' || role.indexOf('patient') !== -1) {
-            upObj['MessageOpenId.patientApp'] = openIdApp
+            upObj['MessageOpenId']['patientApp'] = openIdApp
           } else if (role === 'doctor' || role.indexOf('doctor') !== -1) {
-            upObj['MessageOpenId.doctorApp'] = openIdApp
+            upObj['MessageOpenId']['doctorApp'] = openIdApp
           }
         }
+        console.log(upObj)
         let nation = req.body.nation || null
         if (nation !== null) {
           if (role === 'patient' || role.indexOf('patient') !== -1) {
