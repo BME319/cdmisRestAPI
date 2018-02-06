@@ -247,7 +247,6 @@ exports.updateAlluser = function (acl) {
             upObj['MessageOpenId']['doctorApp'] = openIdApp
           }
         }
-        console.log(upObj)
         let nation = req.body.nation || null
         if (nation !== null) {
           if (role === 'patient' || role.indexOf('patient') !== -1) {
