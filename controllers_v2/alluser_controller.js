@@ -20,6 +20,7 @@ var Errorlog = require('../models/errorlog')
 
 var alluserCtrl = require('../controllers_v2/alluser_controller')
 var wechatCtrl = require('../controllers_v2/wechat_controller')
+var md5 = require('md5')
 
 // var Base64 = {
 //     // 转码表
@@ -1199,12 +1200,14 @@ exports.login = function (req, res, next) {
           role = roles[0]
         }
       }
+      let _password = md5(password)
       if (item.role.indexOf(role) === -1) {
         // 2017-06-07GY调试
         // console.log('login_err_no_authority');
 
         res.json({results: 1, mesg: 'No authority!'})
-      } else if (password !== item.password && openIdFlag === 0) {
+      } else if (_password !== item.password && openIdFlag === 0) {
+      // } else if (password !== item.password && openIdFlag === 0) {
         // 2017-06-07GY调试
         // console.log('login_err_password_not_correct');
 
